@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_ui_policy_action">
+    <sys_ui_policy_action action="INSERT_OR_UPDATE">
+        <cleared>false</cleared>
+        <disabled>ignore</disabled>
+        <field>action_taken</field>
+        <field_message/>
+        <field_message_type>none</field_message_type>
+        <mandatory>ignore</mandatory>
+        <sys_class_name>sys_ui_policy_action</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-18 16:21:46</sys_created_on>
+        <sys_id>a9ccda9389d743107f44172f27a0ce7c</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>action_taken</sys_name>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name>sys_ui_policy_action_a9ccda9389d743107f44172f27a0ce7c</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-18 16:21:46</sys_updated_on>
+        <table>x_snc_campus360_student_notification</table>
+        <ui_policy display_value="SN-02 - Hide Action Taken When Not Required">579c569389d743107f44172f27a0cef5</ui_policy>
+        <value/>
+        <value_action>ignore</value_action>
+        <visible>false</visible>
+    </sys_ui_policy_action>
+    <sys_translated_text action="delete_multiple" query="documentkey=a9ccda9389d743107f44172f27a0ce7c"/>
+</record_update>

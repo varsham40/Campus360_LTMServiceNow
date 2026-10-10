@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?><database>
+    <element attributes="enforce_dot_walk_cross_scope_access=true" db_object_id="b027dadae49703107f44d305db800e82" label="Placement Outcome" max_length="40" name="x_snc_campus360_placement_outcome" type="collection">
+        <element label="Opportunity" max_length="32" name="opportunity" reference="x_snc_campus360_placement_opportunity" type="reference"/>
+        <element choice="3" default="Selected" label="Outcome Type" max_length="30" name="outcome_type" type="choice">
+            <choice>
+                <element inactive_on_update="false" label="Rejected" sequence="1" value="rejected"/>
+                <element inactive_on_update="false" label="Offer Declined" sequence="4" value="offer_declined"/>
+                <element inactive_on_update="false" label="Waitlisted" sequence="3" value="waitlisted"/>
+                <element inactive_on_update="false" label="Selected" sequence="0" value="selected"/>
+                <element inactive_on_update="false" label="Withdrawn" sequence="2" value="withdrawn"/>
+            </choice>
+        </element>
+        <element label="Joining Date" max_length="40" name="joining_date" type="glide_date"/>
+        <element choice="3" default="On&#10;Campus" label="Placement Type" max_length="30" name="placement_type" type="choice">
+            <choice>
+                <element inactive_on_update="false" label="On Campus" sequence="0" value="on_campus"/>
+                <element inactive_on_update="false" label="Off Campus" sequence="1" value="off_campus"/>
+            </choice>
+        </element>
+        <element label="CTC" max_length="40" name="ctc" type="string"/>
+        <element label="Student" max_length="32" name="student" reference="x_snc_campus360_student_master" type="reference"/>
+        <element label="Verified By" max_length="100" name="verified_by" type="string"/>
+        <element label="Offer Date" max_length="40" name="offer_date" type="glide_date"/>
+        <element choice="3" default="Pending" label="Verification Status" max_length="20" name="verification_status" type="choice">
+            <choice>
+                <element inactive_on_update="false" label="Under Review" sequence="3" value="under_review"/>
+                <element inactive_on_update="false" label="Pending" sequence="0" value="pending"/>
+                <element inactive_on_update="false" label="Rejected" sequence="2" value="rejected"/>
+                <element inactive_on_update="false" label="Verified" sequence="1" value="verified"/>
+            </choice>
+        </element>
+        <element display="true" label="Outcome ID" max_length="20" name="outcome_id" type="string"/>
+        <element label="Company" max_length="32" name="company" reference="x_snc_campus360_company_master" type="reference"/>
+        <index name="index">
+            <element name="student"/>
+        </index>
+        <index name="index2">
+            <element name="opportunity"/>
+        </index>
+        <index name="index3">
+            <element name="company"/>
+        </index>
+    </element>
+</database>

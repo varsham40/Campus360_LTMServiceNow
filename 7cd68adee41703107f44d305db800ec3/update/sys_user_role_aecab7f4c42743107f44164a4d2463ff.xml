@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_user_role">
+    <sys_user_role action="INSERT_OR_UPDATE">
+        <assignable_by/>
+        <can_delegate>true</can_delegate>
+        <description/>
+        <elevated_privilege>false</elevated_privilege>
+        <federated_id>NeQg7mxymwVqIeZzQ+mDlY/DrkFM9rERffjuT0HGmAY=</federated_id>
+        <grantable>true</grantable>
+        <includes_roles/>
+        <name>x_snc_campus360.assignment_submission_user</name>
+        <scoped_admin>false</scoped_admin>
+        <suffix>assignment_submission_user</suffix>
+        <sys_class_name>sys_user_role</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-23 15:03:12</sys_created_on>
+        <sys_id>aecab7f4c42743107f44164a4d2463ff</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>x_snc_campus360.assignment_submission_user</sys_name>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name>sys_user_role_aecab7f4c42743107f44164a4d2463ff</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-23 15:03:12</sys_updated_on>
+    </sys_user_role>
+</record_update>

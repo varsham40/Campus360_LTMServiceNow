@@ -1,0 +1,1081 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update sys_domain="global" table="sys_hub_flow">
+    <sys_hub_flow action="DELETE">
+        <access>public</access>
+        <acls/>
+        <active>false</active>
+        <allow_high_security_roles>false</allow_high_security_roles>
+        <annotation/>
+        <attributes>browserActivatedIn=chrome,integrationActivatedIn=standalone,labelCacheCleanUpExecuted=true,timeFromCreateToActivate=40354000,viewActivatedIn=naturalLanguage</attributes>
+        <authored_on_release_version>29000</authored_on_release_version>
+        <callable_by_client_api>false</callable_by_client_api>
+        <category/>
+        <copied_from/>
+        <copied_from_name/>
+        <description>Automatically generates a unique QR payload for scheduled mock interviews.</description>
+        <display_name_after_preview/>
+        <flow_priority>MEDIUM</flow_priority>
+        <generation_source/>
+        <internal_name>campus360__mock_interview_qr_generation</internal_name>
+        <label_cache>[{"name":"Created or Updated_1.current.sys_id","label":"Trigger - Record Created or Updated➛Mock Interview Record➛Sys ID","reference":"","reference_display":"Sys ID","type":"GUID","base_type":"GUID","parent_table_name":"x_snc_campus360_mock_interview","column_name":"sys_id","usedInstances":{"74fdb1b3-ccbc-470b-aaec-299e592ecad9":["qr_url","record"],"d42aa0d6-e853-4ec7-8922-e69830a249ac":["qr_code"]}},{"name":"Created or Updated_1.table_name","label":"Trigger - Record Created or Updated➛Mock Interview Table","reference":"x_snc_campus360_mock_interview","reference_display":"Mock Interview","type":"table_name","base_type":"table_name","choices":[{"order":0.0}],"usedInstances":{"74fdb1b3-ccbc-470b-aaec-299e592ecad9":["table_name"]},"attributes":{"test_input_hidden":"true"}},{"name":"Created or Updated_1.current","label":"Trigger - Record Created or Updated➛Mock Interview Record","reference":"x_snc_campus360_mock_interview","reference_display":"Mock Interview","type":"reference","base_type":"reference","usedInstances":{"74fdb1b3-ccbc-470b-aaec-299e592ecad9":["record"],"d42aa0d6-e853-4ec7-8922-e69830a249ac":["record"]},"attributes":{}}]</label_cache>
+        <master_snapshot>d98697eba85743107f44321b8bcb56b7</master_snapshot>
+        <master_snapshot_digest/>
+        <name>Campus360 - Mock Interview QR Generation</name>
+        <natlang/>
+        <outputs/>
+        <pre_compiled>false</pre_compiled>
+        <remote_trigger_id>39b1c3e3a8d343107f44321b8bcb563d</remote_trigger_id>
+        <run_as>user</run_as>
+        <run_with_roles/>
+        <sc_callable>false</sc_callable>
+        <show_draft_actions>false</show_draft_actions>
+        <show_triggered_flows>false</show_triggered_flows>
+        <status>published</status>
+        <substatus/>
+        <sys_class_name>sys_hub_flow</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 15:03:52</sys_created_on>
+        <sys_domain>global</sys_domain>
+        <sys_domain_path>/</sys_domain_path>
+        <sys_id>0594d7e7a85743107f44321b8bcb568e</sys_id>
+        <sys_mod_count>15</sys_mod_count>
+        <sys_name>Campus360 - Mock Interview QR Generation</sys_name>
+        <sys_overrides/>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name>sys_hub_flow_0594d7e7a85743107f44321b8bcb568e</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-20 11:12:20</sys_updated_on>
+        <type>flow</type>
+        <updation_source/>
+        <version>2</version>
+        <version_record>968ee9f79d5303107f4456802862a708</version_record>
+    </sys_hub_flow>
+    <sys_translated_text action="DELETE" query="documentkey=0594d7e7a85743107f44321b8bcb568e"/>
+    <sys_variable_value action="DELETE" query="document_key=0594d7e7a85743107f44321b8bcb568e"/>
+    <sys_flow_record_trigger action="DELETE">
+        <active>true</active>
+        <condition table="x_snc_campus360_mock_interview">interview_status=scheduled<item display_value="Scheduled" endquery="false" field="interview_status" goto="false" newquery="false" operator="=" or="false" value="scheduled"/>
+        </condition>
+        <name/>
+        <on_delete>false</on_delete>
+        <on_insert>true</on_insert>
+        <on_update>true</on_update>
+        <published_version/>
+        <run_flow_in>background</run_flow_in>
+        <run_on_extended>false</run_on_extended>
+        <run_when_setting>both</run_when_setting>
+        <run_when_user_list/>
+        <run_when_user_setting>any</run_when_user_setting>
+        <sys_class_name>sys_flow_record_trigger</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 13:41:27</sys_created_on>
+        <sys_domain>global</sys_domain>
+        <sys_domain_path>/</sys_domain_path>
+        <sys_id>39b1c3e3a8d343107f44321b8bcb563d</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_overrides/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:41:27</sys_updated_on>
+        <table>x_snc_campus360_mock_interview</table>
+        <trigger_definition/>
+    </sys_flow_record_trigger>
+    <sys_trigger_runner_mapping action="DELETE">
+        <active>true</active>
+        <data>{"run_flow_in":"background","run_when_user_list":[],"run_when_setting":"both","run_when_user_setting":"any","run_on_extended":"false"}</data>
+        <identifier>0594d7e7a85743107f44321b8bcb568e</identifier>
+        <identifier_type>flow</identifier_type>
+        <runner>FDTriggerRunner</runner>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-20 02:16:29</sys_created_on>
+        <sys_id>7d8ea9f79d5303107f4456802862a7ca</sys_id>
+        <sys_mod_count>1</sys_mod_count>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-20 02:16:29</sys_updated_on>
+        <trigger display_value="">39b1c3e3a8d343107f44321b8bcb563d</trigger>
+    </sys_trigger_runner_mapping>
+    <sys_trigger_runner_mapping action="DELETE" query="identifier=0594d7e7a85743107f44321b8bcb568e^sys_idNOT IN7d8ea9f79d5303107f4456802862a7ca"/>
+    <sys_hub_flow_stage action="DELETE" query="flow=0594d7e7a85743107f44321b8bcb568e"/>
+    <sys_flow_cat_variable_model action="DELETE" query="id=0594d7e7a85743107f44321b8bcb568e^sys_idNOT IN8194d7e7a85743107f44321b8bcb568f"/>
+    <sys_flow_cat_variable_model action="DELETE">
+        <id>0594d7e7a85743107f44321b8bcb568e</id>
+        <name>Campus360 - Mock Interview QR Generation</name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 15:03:52</sys_created_on>
+        <sys_id>8194d7e7a85743107f44321b8bcb568f</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_scope/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 15:03:52</sys_updated_on>
+    </sys_flow_cat_variable_model>
+    <sys_flow_cat_variable action="DELETE" query="flow_catalog_model=8194d7e7a85743107f44321b8bcb568f"/>
+    <sys_hub_flow_input action="DELETE" query="model=0594d7e7a85743107f44321b8bcb568e^sys_idNOT IN45c4532ba85743107f44321b8bcb56e3,85c4532ba85743107f44321b8bcb5684,cdc4532ba85743107f44321b8bcb56d8"/>
+    <sys_hub_flow_input action="DELETE">
+        <active>true</active>
+        <array>false</array>
+        <array_denormalized>false</array_denormalized>
+        <attributes>child_label=FDChangeDetails,child_name=FDChangeDetails,child_type=object,child_type_label=Object,co_type_name=FDCollection,element_mapping_provider=com.glide.flow_design.action.data.FlowDesignVariableMapper,pwd2droppable=true,uiType=array.object,uiTypeLabel=Array.Object</attributes>
+        <audit>false</audit>
+        <calculation><![CDATA[(function calculatedFieldValue(current) {
+
+	// Add your code here
+	return '';  // return the calculated value
+
+})(current);]]></calculation>
+        <choice/>
+        <choice_field/>
+        <choice_table/>
+        <column_label/>
+        <comments/>
+        <create_roles/>
+        <default_value/>
+        <defaultsort/>
+        <delete_roles/>
+        <dependent/>
+        <dependent_on_field/>
+        <display>false</display>
+        <dynamic_creation>false</dynamic_creation>
+        <dynamic_creation_script/>
+        <dynamic_default_value/>
+        <dynamic_ref_qual/>
+        <element>changed_fields</element>
+        <element_reference>false</element_reference>
+        <foreign_database/>
+        <formula/>
+        <function_definition/>
+        <function_field>false</function_field>
+        <help/>
+        <hint/>
+        <internal_type display_value="String">string</internal_type>
+        <label>Changed Fields</label>
+        <mandatory>false</mandatory>
+        <max_length>4000</max_length>
+        <model display_value="Campus360 - Mock Interview QR Generation">0594d7e7a85743107f44321b8bcb568e</model>
+        <model_id>0594d7e7a85743107f44321b8bcb568e</model_id>
+        <model_table>sys_hub_flow</model_table>
+        <name>var__m_sys_hub_flow_input_0594d7e7a85743107f44321b8bcb568e</name>
+        <next_element/>
+        <order>100</order>
+        <primary>false</primary>
+        <read_only>false</read_only>
+        <read_only_option/>
+        <read_roles/>
+        <reference/>
+        <reference_cascade_rule/>
+        <reference_floats>false</reference_floats>
+        <reference_key/>
+        <reference_qual/>
+        <reference_qual_condition/>
+        <reference_type/>
+        <sizeclass/>
+        <spell_check>false</spell_check>
+        <staged>false</staged>
+        <sys_class_name>sys_hub_flow_input</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 15:04:42</sys_created_on>
+        <sys_id>45c4532ba85743107f44321b8bcb56e3</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name/>
+        <sys_package/>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 15:04:42</sys_updated_on>
+        <table_reference>false</table_reference>
+        <text_index>false</text_index>
+        <unique>false</unique>
+        <use_dependent_field>false</use_dependent_field>
+        <use_dynamic_default>false</use_dynamic_default>
+        <use_reference_qualifier>simple</use_reference_qualifier>
+        <virtual>false</virtual>
+        <virtual_type>script</virtual_type>
+        <widget/>
+        <write_roles/>
+        <xml_view>false</xml_view>
+    </sys_hub_flow_input>
+    <sys_hub_action_input_action_instance action="DELETE" query="action_input=45c4532ba85743107f44321b8bcb56e3"/>
+    <sys_hub_flow_input action="DELETE">
+        <active>true</active>
+        <array>false</array>
+        <array_denormalized>false</array_denormalized>
+        <attributes>element_mapping_provider=com.glide.flow_design.action.data.FlowDesignVariableMapper,test_input_hidden=true,uiType=table_name,uiTypeLabel=Table Name</attributes>
+        <audit>false</audit>
+        <calculation><![CDATA[(function calculatedFieldValue(current) {
+
+	// Add your code here
+	return '';  // return the calculated value
+
+})(current);]]></calculation>
+        <choice/>
+        <choice_field/>
+        <choice_table/>
+        <column_label/>
+        <comments/>
+        <create_roles/>
+        <default_value/>
+        <defaultsort/>
+        <delete_roles/>
+        <dependent/>
+        <dependent_on_field/>
+        <display>false</display>
+        <dynamic_creation>false</dynamic_creation>
+        <dynamic_creation_script/>
+        <dynamic_default_value/>
+        <dynamic_ref_qual/>
+        <element>table_name</element>
+        <element_reference>false</element_reference>
+        <foreign_database/>
+        <formula/>
+        <function_definition/>
+        <function_field>false</function_field>
+        <help/>
+        <hint/>
+        <internal_type display_value="">table_name</internal_type>
+        <label>Table Name</label>
+        <mandatory>false</mandatory>
+        <max_length>200</max_length>
+        <model display_value="Campus360 - Mock Interview QR Generation">0594d7e7a85743107f44321b8bcb568e</model>
+        <model_id>0594d7e7a85743107f44321b8bcb568e</model_id>
+        <model_table>sys_hub_flow</model_table>
+        <name>var__m_sys_hub_flow_input_0594d7e7a85743107f44321b8bcb568e</name>
+        <next_element/>
+        <order>101</order>
+        <primary>false</primary>
+        <read_only>false</read_only>
+        <read_only_option/>
+        <read_roles/>
+        <reference/>
+        <reference_cascade_rule/>
+        <reference_floats>false</reference_floats>
+        <reference_key/>
+        <reference_qual/>
+        <reference_qual_condition/>
+        <reference_type/>
+        <sizeclass/>
+        <spell_check>false</spell_check>
+        <staged>false</staged>
+        <sys_class_name>sys_hub_flow_input</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 15:04:41</sys_created_on>
+        <sys_id>85c4532ba85743107f44321b8bcb5684</sys_id>
+        <sys_mod_count>1</sys_mod_count>
+        <sys_name/>
+        <sys_package/>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 15:12:20</sys_updated_on>
+        <table_reference>false</table_reference>
+        <text_index>false</text_index>
+        <unique>false</unique>
+        <use_dependent_field>false</use_dependent_field>
+        <use_dynamic_default>false</use_dynamic_default>
+        <use_reference_qualifier>simple</use_reference_qualifier>
+        <virtual>false</virtual>
+        <virtual_type>script</virtual_type>
+        <widget/>
+        <write_roles/>
+        <xml_view>false</xml_view>
+    </sys_hub_flow_input>
+    <sys_hub_action_input_action_instance action="DELETE" query="action_input=85c4532ba85743107f44321b8bcb5684"/>
+    <sys_hub_flow_input action="DELETE">
+        <active>true</active>
+        <array>false</array>
+        <array_denormalized>false</array_denormalized>
+        <attributes>element_mapping_provider=com.glide.flow_design.action.data.FlowDesignVariableMapper,uiType=document_id,uiTypeLabel=Document ID</attributes>
+        <audit>false</audit>
+        <calculation><![CDATA[(function calculatedFieldValue(current) {
+
+	// Add your code here
+	return '';  // return the calculated value
+
+})(current);]]></calculation>
+        <choice/>
+        <choice_field/>
+        <choice_table/>
+        <column_label/>
+        <comments/>
+        <create_roles/>
+        <default_value/>
+        <defaultsort/>
+        <delete_roles/>
+        <dependent>table_name</dependent>
+        <dependent_on_field>table_name</dependent_on_field>
+        <display>false</display>
+        <dynamic_creation>false</dynamic_creation>
+        <dynamic_creation_script/>
+        <dynamic_default_value/>
+        <dynamic_ref_qual/>
+        <element>current</element>
+        <element_reference>false</element_reference>
+        <foreign_database/>
+        <formula/>
+        <function_definition/>
+        <function_field>false</function_field>
+        <help/>
+        <hint/>
+        <internal_type display_value="">document_id</internal_type>
+        <label>Record</label>
+        <mandatory>true</mandatory>
+        <max_length>200</max_length>
+        <model display_value="Campus360 - Mock Interview QR Generation">0594d7e7a85743107f44321b8bcb568e</model>
+        <model_id>0594d7e7a85743107f44321b8bcb568e</model_id>
+        <model_table>sys_hub_flow</model_table>
+        <name>var__m_sys_hub_flow_input_0594d7e7a85743107f44321b8bcb568e</name>
+        <next_element/>
+        <order>100</order>
+        <primary>false</primary>
+        <read_only>false</read_only>
+        <read_only_option/>
+        <read_roles/>
+        <reference/>
+        <reference_cascade_rule/>
+        <reference_floats>false</reference_floats>
+        <reference_key/>
+        <reference_qual/>
+        <reference_qual_condition/>
+        <reference_type/>
+        <sizeclass/>
+        <spell_check>false</spell_check>
+        <staged>false</staged>
+        <sys_class_name>sys_hub_flow_input</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 15:04:41</sys_created_on>
+        <sys_id>cdc4532ba85743107f44321b8bcb56d8</sys_id>
+        <sys_mod_count>1</sys_mod_count>
+        <sys_name/>
+        <sys_package/>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 15:12:20</sys_updated_on>
+        <table_reference>false</table_reference>
+        <text_index>false</text_index>
+        <unique>false</unique>
+        <use_dependent_field>true</use_dependent_field>
+        <use_dynamic_default>false</use_dynamic_default>
+        <use_reference_qualifier>simple</use_reference_qualifier>
+        <virtual>false</virtual>
+        <virtual_type>script</virtual_type>
+        <widget/>
+        <write_roles/>
+        <xml_view>false</xml_view>
+    </sys_hub_flow_input>
+    <sys_hub_action_input_action_instance action="DELETE" query="action_input=cdc4532ba85743107f44321b8bcb56d8"/>
+    <sys_hub_flow_output action="DELETE" query="model=0594d7e7a85743107f44321b8bcb568e"/>
+    <sys_hub_alias_mapping action="DELETE" query="source_id=0594d7e7a85743107f44321b8bcb568e"/>
+    <sys_hub_trigger_instance_v2 action="DELETE" query="flow=0594d7e7a85743107f44321b8bcb568e^sys_idNOT INf0c4532ba85743107f44321b8bcb567d"/>
+    <sys_hub_trigger_instance_v2 action="DELETE">
+        <comment/>
+        <display_text/>
+        <flow display_value="Campus360 - Mock Interview QR Generation">0594d7e7a85743107f44321b8bcb568e</flow>
+        <generation_source/>
+        <name>Created or Updated</name>
+        <published_version/>
+        <remote_sys_id/>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 15:04:40</sys_created_on>
+        <sys_id>f0c4532ba85743107f44321b8bcb567d</sys_id>
+        <sys_mod_count>3</sys_mod_count>
+        <sys_scope/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-20 02:16:26</sys_updated_on>
+        <trigger_definition display_value="Created or Updated">a45d9180c32222002841b63b12d3aea7</trigger_definition>
+        <trigger_inputs>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</trigger_inputs>
+        <trigger_outputs/>
+        <trigger_type>record_create_or_update</trigger_type>
+        <updation_source/>
+    </sys_hub_trigger_instance_v2>
+    <sys_hub_action_instance_v2 action="DELETE" query="flow=0594d7e7a85743107f44321b8bcb568e^sys_idNOT INaea5132ba85743107f44321b8bcb5607,5586e5379d1303107f4456802862a790"/>
+    <sys_hub_action_instance_v2 action="DELETE">
+        <action_type display_value="Update Record">f9d01dd2c31332002841b63b12d3aea1</action_type>
+        <action_type_parent display_value="Update Record">baf174c8c3c232002841b63b12d3aee4</action_type_parent>
+        <attributes/>
+        <comment/>
+        <compiled_snapshot>f9d01dd2c31332002841b63b12d3aea1</compiled_snapshot>
+        <display_text/>
+        <flow display_value="Campus360 - Mock Interview QR Generation">0594d7e7a85743107f44321b8bcb568e</flow>
+        <generation_source/>
+        <order>1</order>
+        <parent_ui_id/>
+        <sys_class_name>sys_hub_action_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 15:08:36</sys_created_on>
+        <sys_id>aea5132ba85743107f44321b8bcb5607</sys_id>
+        <sys_mod_count>6</sys_mod_count>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-20 02:19:33</sys_updated_on>
+        <ui_id>d42aa0d6-e853-4ec7-8922-e69830a249ac</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/+VVTU/jMBD9K5XPbUgaKNDLakWFhMSHBLtcWNZy7Wlr4TjBdlq6Vf/7jhMnRIBYkLhU21M9X3nveWZ8tyFSkDHZBxEnx8mIp0maDuN4eLSfTEfpNBmKlAEkpE80ywAjDfDcCDwvmSq9YbM5McAciF5uej8L4f/SJOKlMaDddouhQtpCsfVtyEALX0gl0E/Gd/d9UjCDxR0YMt68cH0UnWJTUBh63cB7CdetC38WOS8zxEVlYzwPmZPg6Z1N0INJHk4S9wk8OdACEMiMKQt9kjGNLHOzJmNnSjQgf3Gl1bqNWEjtaqIZe7LyD355P/ZxM0BmPIjQHmkQqDbPJsyxG6zMXWlavXLJwdaaCJixUrmTrq0OuCqczHWd4thUNdm5KjN9WStC2gKd+ygtgoDC8/TIa1qzm0W+um5AnkpdSRIoqpwz1Z6Yc0ZOS+fhbAgoqDTOWFFIPaeFyZeySkYoWTRXeIhmKl/hN62c64hxjztCVVl0ivZJZb5lRnoSF1gGk7d9Ytf2RDFrn6mghvSx9EhqYoECrVSoJKBVJ/hkbmThvuOnlhCAb/uh/6cH73UYP35uqE7N5xl4olZzyllWlDYdxTTL+QPFHgCzlLB6PQEX6O+ddfyfm4cPoG3m4UfVBW+jDyPxynbeze1d1o4wEAdfNhBHuzQQgcbOT8S/5iAevrtpO51Utb7tzMCjoTwX8KuM41QsnCvseG9PuWyw4A+D4dHhaIDlDiNszMj6vucw0PkqQvp7tvgmRZ2IVVA5hMxQYG8ajto5ok3Q+09OhJpg6Hb7G4tZx1xp67Q5aDA+9vVA7hb4z22LD9xpsy1OJShh37jkZlVAhqo5oPWlv1gXwdm7Dc72Df2ynZGM4uq3Q5vjv3lK7/8CxY5dM0wKAAA=</values>
+    </sys_hub_action_instance_v2>
+    <sys_hub_alias_mapping action="DELETE" query="source_id=aea5132ba85743107f44321b8bcb5607"/>
+    <sys_hub_action_instance_v2 action="DELETE">
+        <action_type display_value="Update Record">f9d01dd2c31332002841b63b12d3aea1</action_type>
+        <action_type_parent/>
+        <attributes/>
+        <comment/>
+        <compiled_snapshot>f9d01dd2c31332002841b63b12d3aea1</compiled_snapshot>
+        <display_text/>
+        <flow display_value="Campus360 - Mock Interview QR Generation">0594d7e7a85743107f44321b8bcb568e</flow>
+        <generation_source/>
+        <order>2</order>
+        <parent_ui_id/>
+        <sys_class_name>sys_hub_action_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-20 01:41:29</sys_created_on>
+        <sys_id>5586e5379d1303107f4456802862a790</sys_id>
+        <sys_mod_count>3</sys_mod_count>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-20 02:19:33</sys_updated_on>
+        <ui_id>74fdb1b3-ccbc-470b-aaec-299e592ecad9</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/+1T2W7aQBT9FWueLcvGBCW8VSCkSFmkJM1LGo2GmQuMOl4yC0sR/95rewyUUkSqPDRSefJd55zDPS9rIgXpky6IOLlKejxN0rQTx53LbjLupeOkI1IGkJCQ5CwD7NTACy0wnjPlqsR6PdDALIig0MHXUlSfNIm40xpyu9lgq5CmVGz17Ccww2dSCayT/strSEqmcbkFTfrrg9K56BQbg8LWhxbeIVy7KqtYFNxliIvKNnnjJ4e+ElwPsYJDFZwkDgksLeQCEMiEKQMhyViOLAu9In2rHSaQv7jP1WrbMZO5bYhmbGnkD3y5G1d9E0Bm3IuwDakXqElPhsyyR9zMrdNbvQrJwTSaCJgwp+xgP9c03JdWFnkzYtlYtdOFcll+1yhCtgv2/g9nEASUFc8KeUNr8jgrFg8tyJHMa0k8RVVwprYRs1bLsbMVnDUBBbXGGStLmU9pqYu5rIcRShZNFQbRRBULfNPIaR4xXuGOUFUWjTA/rNPPTMuKxC2uweFNSMzKDBQzZkcFNaRvrkLSEPMUaK1CLQGtL6Ea5lqW9gs+NQcPfBP6+487Jy8MdgdVn73Zu/83TZ1W31wcp+K0FyKEj3d3zBJ/t+R9LjqDY+uikQQlzBHS3kUWMkRvgTYi/GqkJ18Mnn1x66UPM1PSi+vff0v9u5YaX5w6N361u669nTtbLanJOeUsK51JezHNCv6d4iWAnktY/O6gW6wH13v195njDLStOZ7qKziOvvXHYe5mfza4awreFxcfZovLz2QIT+PTO+JPPnj9CUFAd2hcCQAA</values>
+    </sys_hub_action_instance_v2>
+    <sys_hub_alias_mapping action="DELETE" query="source_id=5586e5379d1303107f4456802862a790"/>
+    <sys_hub_sub_flow_instance_v2 action="DELETE" query="flow=0594d7e7a85743107f44321b8bcb568e"/>
+    <sys_hub_flow_logic_instance_v2 action="DELETE" query="flow=0594d7e7a85743107f44321b8bcb568e"/>
+    <sys_hub_pill_compound action="DELETE" query="attached_to=0594d7e7a85743107f44321b8bcb568e"/>
+    <sys_hub_flow_variable action="DELETE" query="model=0594d7e7a85743107f44321b8bcb568e"/>
+    <sys_documentation action="DELETE">
+        <element>changed_fields</element>
+        <help/>
+        <hint/>
+        <label>Changed Fields</label>
+        <language>en</language>
+        <name>var__m_sys_hub_flow_input_0594d7e7a85743107f44321b8bcb568e</name>
+        <plural/>
+        <sys_class_name>sys_documentation</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 15:04:42</sys_created_on>
+        <sys_id>1dc4532ba85743107f44321b8bcb56e9</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name/>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 15:04:42</sys_updated_on>
+        <url/>
+        <url_target/>
+    </sys_documentation>
+    <sys_documentation action="DELETE">
+        <element>table_name</element>
+        <help/>
+        <hint/>
+        <label>Table Name</label>
+        <language>en</language>
+        <name>var__m_sys_hub_flow_input_0594d7e7a85743107f44321b8bcb568e</name>
+        <plural/>
+        <sys_class_name>sys_documentation</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 15:04:41</sys_created_on>
+        <sys_id>c1c4532ba85743107f44321b8bcb56d4</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name/>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 15:04:41</sys_updated_on>
+        <url/>
+        <url_target/>
+    </sys_documentation>
+    <sys_documentation action="DELETE">
+        <element>current</element>
+        <help/>
+        <hint/>
+        <label>Record</label>
+        <language>en</language>
+        <name>var__m_sys_hub_flow_input_0594d7e7a85743107f44321b8bcb568e</name>
+        <plural/>
+        <sys_class_name>sys_documentation</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 15:04:42</sys_created_on>
+        <sys_id>cdc4532ba85743107f44321b8bcb56de</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name/>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 15:04:42</sys_updated_on>
+        <url/>
+        <url_target/>
+    </sys_documentation>
+    <sys_choice action="DELETE" query="name=var__m_sys_hub_flow_input_0594d7e7a85743107f44321b8bcb568e"/>
+    <sys_choice action="DELETE" query="name=var__m_sys_hub_flow_output_0594d7e7a85743107f44321b8bcb568e"/>
+    <sys_hub_flow_snapshot action="DELETE">
+        <access>public</access>
+        <acls/>
+        <active>true</active>
+        <allow_high_security_roles>false</allow_high_security_roles>
+        <annotation/>
+        <attributes>browserActivatedIn=chrome,integrationActivatedIn=standalone,labelCacheCleanUpExecuted=true,viewActivatedIn=naturalLanguage</attributes>
+        <authored_on_release_version>29000</authored_on_release_version>
+        <callable_by_client_api>false</callable_by_client_api>
+        <category/>
+        <copied_from/>
+        <copied_from_name/>
+        <description>Automatically generates a unique QR payload for scheduled mock interviews.</description>
+        <flow_priority>MEDIUM</flow_priority>
+        <internal_name>campus360__mock_interview_qr_generation</internal_name>
+        <label_cache>[{"name":"Created or Updated_1.current.sys_id","label":"Trigger - Record Created or Updated➛Mock Interview Record➛Sys ID","reference":"","reference_display":"Sys ID","type":"GUID","base_type":"GUID","parent_table_name":"x_snc_campus360_mock_interview","column_name":"sys_id","usedInstances":{"74fdb1b3-ccbc-470b-aaec-299e592ecad9":["qr_url","record"],"d42aa0d6-e853-4ec7-8922-e69830a249ac":["qr_code"]}},{"name":"Created or Updated_1.table_name","label":"Trigger - Record Created or Updated➛Mock Interview Table","reference":"x_snc_campus360_mock_interview","reference_display":"Mock Interview","type":"table_name","base_type":"table_name","choices":[{"order":0.0}],"usedInstances":{"74fdb1b3-ccbc-470b-aaec-299e592ecad9":["table_name"]},"attributes":{"test_input_hidden":"true"}},{"name":"Created or Updated_1.current","label":"Trigger - Record Created or Updated➛Mock Interview Record","reference":"x_snc_campus360_mock_interview","reference_display":"Mock Interview","type":"reference","base_type":"reference","usedInstances":{"74fdb1b3-ccbc-470b-aaec-299e592ecad9":["record"],"d42aa0d6-e853-4ec7-8922-e69830a249ac":["record"]},"attributes":{}}]</label_cache>
+        <master>true</master>
+        <name>Campus360 - Mock Interview QR Generation</name>
+        <natlang/>
+        <outputs/>
+        <parent_flow display_value="Campus360 - Mock Interview QR Generation">0594d7e7a85743107f44321b8bcb568e</parent_flow>
+        <remote_trigger_id/>
+        <run_as>user</run_as>
+        <run_with_roles/>
+        <sc_callable>false</sc_callable>
+        <status>published</status>
+        <sys_class_name>sys_hub_flow_snapshot</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 15:12:21</sys_created_on>
+        <sys_domain>global</sys_domain>
+        <sys_domain_path>/</sys_domain_path>
+        <sys_id>d98697eba85743107f44321b8bcb56b7</sys_id>
+        <sys_mod_count>1</sys_mod_count>
+        <sys_name/>
+        <sys_overrides/>
+        <sys_package/>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-20 02:16:28</sys_updated_on>
+        <type>flow</type>
+        <version>2</version>
+    </sys_hub_flow_snapshot>
+    <sys_translated_text action="DELETE" query="documentkey=d98697eba85743107f44321b8bcb56b7"/>
+    <sys_variable_value action="DELETE" query="document_key=d98697eba85743107f44321b8bcb56b7"/>
+    <sys_hub_flow_stage action="DELETE" query="flow=d98697eba85743107f44321b8bcb56b7"/>
+    <sys_flow_cat_variable_model action="DELETE" query="id=d98697eba85743107f44321b8bcb56b7^sys_idNOT INd98697eba85743107f44321b8bcb56b8"/>
+    <sys_flow_cat_variable_model action="DELETE">
+        <id>d98697eba85743107f44321b8bcb56b7</id>
+        <name>Campus360 - Mock Interview QR Generation</name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 15:12:21</sys_created_on>
+        <sys_id>d98697eba85743107f44321b8bcb56b8</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_scope/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 15:12:21</sys_updated_on>
+    </sys_flow_cat_variable_model>
+    <sys_flow_cat_variable action="DELETE" query="flow_catalog_model=d98697eba85743107f44321b8bcb56b8"/>
+    <sys_hub_flow_input action="DELETE" query="model=d98697eba85743107f44321b8bcb56b7^sys_idNOT IN9d8697eba85743107f44321b8bcb56c9,a98697eba85743107f44321b8bcb56d4,dd8697eba85743107f44321b8bcb56b9"/>
+    <sys_hub_flow_input action="DELETE">
+        <active>true</active>
+        <array>false</array>
+        <array_denormalized>false</array_denormalized>
+        <attributes>child_label=FDChangeDetails,child_name=FDChangeDetails,child_type=object,child_type_label=Object,co_type_name=FDCollection,element_mapping_provider=com.glide.flow_design.action.data.FlowDesignVariableMapper,pwd2droppable=true,uiType=array.object,uiTypeLabel=Array.Object</attributes>
+        <audit>false</audit>
+        <calculation><![CDATA[(function calculatedFieldValue(current) {
+
+	// Add your code here
+	return '';  // return the calculated value
+
+})(current);]]></calculation>
+        <choice/>
+        <choice_field/>
+        <choice_table/>
+        <column_label/>
+        <comments/>
+        <create_roles/>
+        <default_value/>
+        <defaultsort/>
+        <delete_roles/>
+        <dependent/>
+        <dependent_on_field/>
+        <display>false</display>
+        <dynamic_creation>false</dynamic_creation>
+        <dynamic_creation_script/>
+        <dynamic_default_value/>
+        <dynamic_ref_qual/>
+        <element>changed_fields</element>
+        <element_reference>false</element_reference>
+        <foreign_database/>
+        <formula/>
+        <function_definition/>
+        <function_field>false</function_field>
+        <help/>
+        <hint/>
+        <internal_type display_value="String">string</internal_type>
+        <label>Changed Fields</label>
+        <mandatory>false</mandatory>
+        <max_length>4000</max_length>
+        <model display_value="Campus360 - Mock Interview QR Generation">d98697eba85743107f44321b8bcb56b7</model>
+        <model_id>d98697eba85743107f44321b8bcb56b7</model_id>
+        <model_table>sys_hub_flow_snapshot</model_table>
+        <name>var__m_sys_hub_flow_input_d98697eba85743107f44321b8bcb56b7</name>
+        <next_element/>
+        <order>100</order>
+        <primary>false</primary>
+        <read_only>false</read_only>
+        <read_only_option/>
+        <read_roles/>
+        <reference/>
+        <reference_cascade_rule/>
+        <reference_floats>false</reference_floats>
+        <reference_key/>
+        <reference_qual/>
+        <reference_qual_condition/>
+        <reference_type/>
+        <sizeclass/>
+        <spell_check>false</spell_check>
+        <staged>false</staged>
+        <sys_class_name>sys_hub_flow_input</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 15:12:21</sys_created_on>
+        <sys_id>9d8697eba85743107f44321b8bcb56c9</sys_id>
+        <sys_mod_count>1</sys_mod_count>
+        <sys_name/>
+        <sys_package/>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-20 02:16:28</sys_updated_on>
+        <table_reference>false</table_reference>
+        <text_index>false</text_index>
+        <unique>false</unique>
+        <use_dependent_field>false</use_dependent_field>
+        <use_dynamic_default>false</use_dynamic_default>
+        <use_reference_qualifier>simple</use_reference_qualifier>
+        <virtual>false</virtual>
+        <virtual_type>script</virtual_type>
+        <widget/>
+        <write_roles/>
+        <xml_view>false</xml_view>
+    </sys_hub_flow_input>
+    <sys_hub_action_input_action_instance action="DELETE" query="action_input=9d8697eba85743107f44321b8bcb56c9"/>
+    <sys_hub_flow_input action="DELETE">
+        <active>true</active>
+        <array>false</array>
+        <array_denormalized>false</array_denormalized>
+        <attributes>element_mapping_provider=com.glide.flow_design.action.data.FlowDesignVariableMapper,test_input_hidden=true,uiType=table_name</attributes>
+        <audit>false</audit>
+        <calculation><![CDATA[(function calculatedFieldValue(current) {
+
+	// Add your code here
+	return '';  // return the calculated value
+
+})(current);]]></calculation>
+        <choice/>
+        <choice_field/>
+        <choice_table/>
+        <column_label/>
+        <comments/>
+        <create_roles/>
+        <default_value/>
+        <defaultsort/>
+        <delete_roles/>
+        <dependent/>
+        <dependent_on_field/>
+        <display>false</display>
+        <dynamic_creation>false</dynamic_creation>
+        <dynamic_creation_script/>
+        <dynamic_default_value/>
+        <dynamic_ref_qual/>
+        <element>table_name</element>
+        <element_reference>false</element_reference>
+        <foreign_database/>
+        <formula/>
+        <function_definition/>
+        <function_field>false</function_field>
+        <help/>
+        <hint/>
+        <internal_type display_value="">table_name</internal_type>
+        <label>Table Name</label>
+        <mandatory>false</mandatory>
+        <max_length>200</max_length>
+        <model display_value="Campus360 - Mock Interview QR Generation">d98697eba85743107f44321b8bcb56b7</model>
+        <model_id>d98697eba85743107f44321b8bcb56b7</model_id>
+        <model_table>sys_hub_flow_snapshot</model_table>
+        <name>var__m_sys_hub_flow_input_d98697eba85743107f44321b8bcb56b7</name>
+        <next_element/>
+        <order>101</order>
+        <primary>false</primary>
+        <read_only>false</read_only>
+        <read_only_option/>
+        <read_roles/>
+        <reference/>
+        <reference_cascade_rule/>
+        <reference_floats>false</reference_floats>
+        <reference_key/>
+        <reference_qual/>
+        <reference_qual_condition/>
+        <reference_type/>
+        <sizeclass/>
+        <spell_check>false</spell_check>
+        <staged>false</staged>
+        <sys_class_name>sys_hub_flow_input</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 15:12:21</sys_created_on>
+        <sys_id>a98697eba85743107f44321b8bcb56d4</sys_id>
+        <sys_mod_count>1</sys_mod_count>
+        <sys_name/>
+        <sys_package/>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-20 02:16:28</sys_updated_on>
+        <table_reference>false</table_reference>
+        <text_index>false</text_index>
+        <unique>false</unique>
+        <use_dependent_field>false</use_dependent_field>
+        <use_dynamic_default>false</use_dynamic_default>
+        <use_reference_qualifier>simple</use_reference_qualifier>
+        <virtual>false</virtual>
+        <virtual_type>script</virtual_type>
+        <widget/>
+        <write_roles/>
+        <xml_view>false</xml_view>
+    </sys_hub_flow_input>
+    <sys_hub_action_input_action_instance action="DELETE" query="action_input=a98697eba85743107f44321b8bcb56d4"/>
+    <sys_hub_flow_input action="DELETE">
+        <active>true</active>
+        <array>false</array>
+        <array_denormalized>false</array_denormalized>
+        <attributes>element_mapping_provider=com.glide.flow_design.action.data.FlowDesignVariableMapper,uiType=document_id</attributes>
+        <audit>false</audit>
+        <calculation><![CDATA[(function calculatedFieldValue(current) {
+
+	// Add your code here
+	return '';  // return the calculated value
+
+})(current);]]></calculation>
+        <choice/>
+        <choice_field/>
+        <choice_table/>
+        <column_label/>
+        <comments/>
+        <create_roles/>
+        <default_value/>
+        <defaultsort/>
+        <delete_roles/>
+        <dependent>table_name</dependent>
+        <dependent_on_field>table_name</dependent_on_field>
+        <display>false</display>
+        <dynamic_creation>false</dynamic_creation>
+        <dynamic_creation_script/>
+        <dynamic_default_value/>
+        <dynamic_ref_qual/>
+        <element>current</element>
+        <element_reference>false</element_reference>
+        <foreign_database/>
+        <formula/>
+        <function_definition/>
+        <function_field>false</function_field>
+        <help/>
+        <hint/>
+        <internal_type display_value="">document_id</internal_type>
+        <label>Record</label>
+        <mandatory>true</mandatory>
+        <max_length>200</max_length>
+        <model display_value="Campus360 - Mock Interview QR Generation">d98697eba85743107f44321b8bcb56b7</model>
+        <model_id>d98697eba85743107f44321b8bcb56b7</model_id>
+        <model_table>sys_hub_flow_snapshot</model_table>
+        <name>var__m_sys_hub_flow_input_d98697eba85743107f44321b8bcb56b7</name>
+        <next_element/>
+        <order>100</order>
+        <primary>false</primary>
+        <read_only>false</read_only>
+        <read_only_option/>
+        <read_roles/>
+        <reference/>
+        <reference_cascade_rule/>
+        <reference_floats>false</reference_floats>
+        <reference_key/>
+        <reference_qual/>
+        <reference_qual_condition/>
+        <reference_type/>
+        <sizeclass/>
+        <spell_check>false</spell_check>
+        <staged>false</staged>
+        <sys_class_name>sys_hub_flow_input</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 15:12:21</sys_created_on>
+        <sys_id>dd8697eba85743107f44321b8bcb56b9</sys_id>
+        <sys_mod_count>1</sys_mod_count>
+        <sys_name/>
+        <sys_package/>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-20 02:16:28</sys_updated_on>
+        <table_reference>false</table_reference>
+        <text_index>false</text_index>
+        <unique>false</unique>
+        <use_dependent_field>true</use_dependent_field>
+        <use_dynamic_default>false</use_dynamic_default>
+        <use_reference_qualifier>simple</use_reference_qualifier>
+        <virtual>false</virtual>
+        <virtual_type>script</virtual_type>
+        <widget/>
+        <write_roles/>
+        <xml_view>false</xml_view>
+    </sys_hub_flow_input>
+    <sys_hub_action_input_action_instance action="DELETE" query="action_input=dd8697eba85743107f44321b8bcb56b9"/>
+    <sys_hub_flow_output action="DELETE" query="model=d98697eba85743107f44321b8bcb56b7"/>
+    <sys_hub_alias_mapping action="DELETE" query="source_id=d98697eba85743107f44321b8bcb56b7"/>
+    <sys_hub_trigger_instance_v2 action="DELETE" query="flow=d98697eba85743107f44321b8bcb56b7^sys_idNOT INe18697eba85743107f44321b8bcb56e6"/>
+    <sys_hub_trigger_instance_v2 action="DELETE">
+        <comment/>
+        <display_text/>
+        <flow display_value="Campus360 - Mock Interview QR Generation">d98697eba85743107f44321b8bcb56b7</flow>
+        <generation_source/>
+        <name>Created or Updated</name>
+        <published_version/>
+        <remote_sys_id/>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 15:12:22</sys_created_on>
+        <sys_id>e18697eba85743107f44321b8bcb56e6</sys_id>
+        <sys_mod_count>1</sys_mod_count>
+        <sys_scope/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-20 02:16:28</sys_updated_on>
+        <trigger_definition display_value="Created or Updated">a45d9180c32222002841b63b12d3aea7</trigger_definition>
+        <trigger_inputs>H4sIAAAAAAAA/9VZ2W7bOBT9FUFPM4A70GJbceYpk2UaoG0Ax+08dAqBIimbqEy5IqXUU/Tf51KLLWuLHcutm4ckJiny3MtzzyGtj9/0AHk00C/1GfICqg90xiWNOApm6xWFZqmaXY6Wqm+JOEEyjNb6pYxiOtD9KFzO6HIVIAmDfRQIaAwjQiP90hzoCQpi+rgW9wRmgufTafI59bwbPn91BccuRstVLOyx4S5D/NlNcSSMPsFAwgQssf6Qj38L/dp9qR8vWEAiyvXLj58G+gpFsI5UGL5VupgCgn2TmpMLA9sW/BiGdTE0vbHtmRaxEUUGTFhNSgW4bMjNNmr6VVJOKNkkpJa2iCLywIN1acRXwf6DOS8M1etTQIxplrTNRzdPQ9aMFyHD9GElWcizlgxd1hkG8ZK/y1CrBFIfxYEsEggtsYD56EoB5XKDw39chE/TYsE7xtOY8s4gxCjYfEJSRsyLJRUqzT4LIOFulhERxlGKfnp7/TC9cf+5ml2/vp2609vH2fT+enZ7o39P43K/xGrGDGGOxc3C+b7Z9TtGA7VtG0K4sIsDXeCIreQVliwpqPd9sKXzdcgJS3NTozQuusQupYscdHHaMFpZjUsrFszeYhYSyVj8GxuGTQReUBIHlBxMXcdwCDHbqIu9EnXLCWhAKBtyUQ6yi8R5SzuLh4bxk3icy9JLabwMCQ1uttPp0DmfA7EZX8VS5ajIixuuaKTyAc/pH67eXL++evf37eOf+d+76cPb4v/ZAzz3hLgUrgxdRIhbyrpaAmJ5rh6ynNSL4vlCiGIOU7ib/ayXQ7oBm514wwQE/hFK+pF+ibPtewWq5hdJT1eA4f6bfIVpzLUQeAC/NBxHkHOpFUrp3y/RPN8qmDCgWJY45b8X5U9vmRCMz0tBtGFIc1aDsFkdqKoVAWdQxJFYPvWpFPUtSSq5rRjewTph4qFl2N7YcJRKmPCvbxqOMUI+sQ3DuyjpRB1MK0pZIUyPenGYWoiUoMEe/KsmNodslCtkL/Iku8wrQlfEyEXpuh9oZk/QLAWtIq72Qeq6IWPWfLPLya7Qej5cIJIgeILsK5ZqwB6q6AchnCWaDggHKqKH8Od5FMacVDVJLaExrm1HaL/l6fz9dOrohxHtxrM74px0cbspBa0RX/egiJZtUmc8HBsghLbSwNFk4mFk+b4zdqhpVhRxC6MR2xkr4TOUS5o426aKjXRJmlh2gB4eAbCmjQcDPF4Vczo2amLW92uo39OCchegRm6g9K0mgvOAEVr09VvjtaWTbVUfW+fYm5DRyHGwA7cjqHN/SD1kDq0Rmjhjm/qVOq9B6YIpGzJzwjuTWIt0+RYNeJ91ndf3AKckq6BSKus52q85HGvTKVC2Zskk1d5oqbKEkfYu5K/ut+O0Rwrel96eT2Tc+4BS2679UFReKBe1gwQg+Qvad5Co42lLzs7u/lVhVLIb67EqhCwLTUy7RYWccZMKbcG0wzzTc8eeVZO01l/TAWRf1ieNxdN6YngBcSvkKB8lOs46fSXF7D0p1umSYh99vioqsPXS+RKwv5DLpQeOHq1OQaBu6JcV/CbUoEODNTXma/l3nJRo3lqTCwoZDuBcDetrCsyx0t3hLHVkG37/VFzZOb5meNCs5Qey8/OyCm/6vT1TYuMJafOzodN6qm43tUr3mTrbwZWSNBVep70dNm91zkaDKxF1lwd7WlevUTf713FRNzrYc1Ef701dd/8GFOfvOgr0LNuG470m5LhybcEnfAUUcwbtLl4gPs9e7xTr3sEuUIQXWjZEy4ac0C2CJ7QWetXFgOGqiPLvxqEByolnYnciIDSh0bqWCdWoxSuijOUHG5fVYVzFm1UhI3hyvt6pdtzHSzDLm0Cpjgxsm6Zde1k+Kr8s362DdoQtLmW91KUWLH3LXFo+3y/JljTVxM2rYm2JJF5QMdBgU9MXL6lkskjIdPQfeo/XOUzr29FkYq2llrRVaaspdJRLUi20Jhdo4HpSqYuyD3Re3DrCN3sJ3+ojfPtl4Q+PtsGiPht9MM9ev973Uqv79D+Yc8a74SYAAA==</trigger_inputs>
+        <trigger_outputs/>
+        <trigger_type>record_create_or_update</trigger_type>
+        <updation_source/>
+    </sys_hub_trigger_instance_v2>
+    <sys_hub_action_instance_v2 action="DELETE" query="flow=d98697eba85743107f44321b8bcb56b7^sys_idNOT IN6d8ea9f79d5303107f4456802862a77d,ed8697eba85743107f44321b8bcb56e4"/>
+    <sys_hub_action_instance_v2 action="DELETE">
+        <action_type display_value="Update Record">f9d01dd2c31332002841b63b12d3aea1</action_type>
+        <action_type_parent display_value="Update Record">baf174c8c3c232002841b63b12d3aee4</action_type_parent>
+        <attributes/>
+        <comment/>
+        <compiled_snapshot>f9d01dd2c31332002841b63b12d3aea1</compiled_snapshot>
+        <display_text/>
+        <flow display_value="Campus360 - Mock Interview QR Generation">d98697eba85743107f44321b8bcb56b7</flow>
+        <generation_source/>
+        <order>2</order>
+        <parent_ui_id/>
+        <sys_class_name>sys_hub_action_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-20 02:16:28</sys_created_on>
+        <sys_id>6d8ea9f79d5303107f4456802862a77d</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-20 02:16:28</sys_updated_on>
+        <ui_id>74fdb1b3-ccbc-470b-aaec-299e592ecad9</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/+1T2W7aQBT9FWueLcvGBCW8VSCkSFmkJM1LGo2GmQuMOl4yC0sR/95rewyUUkSqPDRSefJd55zDPS9rIgXpky6IOLlKejxN0rQTx53LbjLupeOkI1IGkJCQ5CwD7NTACy0wnjPlqsR6PdDALIig0MHXUlSfNIm40xpyu9lgq5CmVGz17Ccww2dSCayT/strSEqmcbkFTfrrg9K56BQbg8LWhxbeIVy7KqtYFNxliIvKNnnjJ4e+ElwPsYJDFZwkDgksLeQCEMiEKQMhyViOLAu9In2rHSaQv7jP1WrbMZO5bYhmbGnkD3y5G1d9E0Bm3IuwDakXqElPhsyyR9zMrdNbvQrJwTSaCJgwp+xgP9c03JdWFnkzYtlYtdOFcll+1yhCtgv2/g9nEASUFc8KeUNr8jgrFg8tyJHMa0k8RVVwprYRs1bLsbMVnDUBBbXGGStLmU9pqYu5rIcRShZNFQbRRBULfNPIaR4xXuGOUFUWjTA/rNPPTMuKxC2uweFNSMzKDBQzZkcFNaRvrkLSEPMUaK1CLQGtL6Ea5lqW9gs+NQcPfBP6+487Jy8MdgdVn73Zu/83TZ1W31wcp+K0FyKEj3d3zBJ/t+R9LjqDY+uikQQlzBHS3kUWMkRvgTYi/GqkJ18Mnn1x66UPM1PSi+vff0v9u5YaX5w6N361u669nTtbLanJOeUsK51JezHNCv6d4iWAnktY/O6gW6wH13v195njDLStOZ7qKziOvvXHYe5mfza4awreFxcfZovLz2QIT+PTO+JPPnj9CUFAd2hcCQAA</values>
+    </sys_hub_action_instance_v2>
+    <sys_hub_alias_mapping action="DELETE" query="source_id=6d8ea9f79d5303107f4456802862a77d"/>
+    <sys_hub_action_instance_v2 action="DELETE">
+        <action_type display_value="Update Record">f9d01dd2c31332002841b63b12d3aea1</action_type>
+        <action_type_parent display_value="Update Record">baf174c8c3c232002841b63b12d3aee4</action_type_parent>
+        <attributes/>
+        <comment/>
+        <compiled_snapshot>f9d01dd2c31332002841b63b12d3aea1</compiled_snapshot>
+        <display_text/>
+        <flow display_value="Campus360 - Mock Interview QR Generation">d98697eba85743107f44321b8bcb56b7</flow>
+        <generation_source/>
+        <order>1</order>
+        <parent_ui_id/>
+        <sys_class_name>sys_hub_action_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 15:12:22</sys_created_on>
+        <sys_id>ed8697eba85743107f44321b8bcb56e4</sys_id>
+        <sys_mod_count>1</sys_mod_count>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-20 02:16:28</sys_updated_on>
+        <ui_id>d42aa0d6-e853-4ec7-8922-e69830a249ac</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/+VVTU/jMBD9K5XPbUgaKNDLakWFhMSHBLtcWNZy7Wlr4TjBdlq6Vf/7jhMnRIBYkLhU21M9X3nveWZ8tyFSkDHZBxEnx8mIp0maDuN4eLSfTEfpNBmKlAEkpE80ywAjDfDcCDwvmSq9YbM5McAciF5uej8L4f/SJOKlMaDddouhQtpCsfVtyEALX0gl0E/Gd/d9UjCDxR0YMt68cH0UnWJTUBh63cB7CdetC38WOS8zxEVlYzwPmZPg6Z1N0INJHk4S9wk8OdACEMiMKQt9kjGNLHOzJmNnSjQgf3Gl1bqNWEjtaqIZe7LyD355P/ZxM0BmPIjQHmkQqDbPJsyxG6zMXWlavXLJwdaaCJixUrmTrq0OuCqczHWd4thUNdm5KjN9WStC2gKd+ygtgoDC8/TIa1qzm0W+um5AnkpdSRIoqpwz1Z6Yc0ZOS+fhbAgoqDTOWFFIPaeFyZeySkYoWTRXeIhmKl/hN62c64hxjztCVVl0ivZJZb5lRnoSF1gGk7d9Ytf2RDFrn6mghvSx9EhqYoECrVSoJKBVJ/hkbmThvuOnlhCAb/uh/6cH73UYP35uqE7N5xl4olZzyllWlDYdxTTL+QPFHgCzlLB6PQEX6O+ddfyfm4cPoG3m4UfVBW+jDyPxynbeze1d1o4wEAdfNhBHuzQQgcbOT8S/5iAevrtpO51Utb7tzMCjoTwX8KuM41QsnCvseG9PuWyw4A+D4dHhaIDlDiNszMj6vucw0PkqQvp7tvgmRZ2IVVA5hMxQYG8ajto5ok3Q+09OhJpg6Hb7G4tZx1xp67Q5aDA+9vVA7hb4z22LD9xpsy1OJShh37jkZlVAhqo5oPWlv1gXwdm7Dc72Df2ynZGM4uq3Q5vjv3lK7/8CxY5dM0wKAAA=</values>
+    </sys_hub_action_instance_v2>
+    <sys_hub_alias_mapping action="DELETE" query="source_id=ed8697eba85743107f44321b8bcb56e4"/>
+    <sys_hub_sub_flow_instance_v2 action="DELETE" query="flow=d98697eba85743107f44321b8bcb56b7"/>
+    <sys_hub_flow_logic_instance_v2 action="DELETE" query="flow=d98697eba85743107f44321b8bcb56b7"/>
+    <sys_hub_pill_compound action="DELETE" query="attached_to=d98697eba85743107f44321b8bcb56b7"/>
+    <sys_hub_flow_variable action="DELETE" query="model=d98697eba85743107f44321b8bcb56b7"/>
+    <sys_documentation action="DELETE">
+        <element>changed_fields</element>
+        <help/>
+        <hint/>
+        <label>Changed Fields</label>
+        <language>en</language>
+        <name>var__m_sys_hub_flow_input_d98697eba85743107f44321b8bcb56b7</name>
+        <plural/>
+        <sys_class_name>sys_documentation</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 15:12:21</sys_created_on>
+        <sys_id>158697eba85743107f44321b8bcb56d0</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name/>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 15:12:21</sys_updated_on>
+        <url/>
+        <url_target/>
+    </sys_documentation>
+    <sys_documentation action="DELETE">
+        <element>current</element>
+        <help/>
+        <hint/>
+        <label>Record</label>
+        <language>en</language>
+        <name>var__m_sys_hub_flow_input_d98697eba85743107f44321b8bcb56b7</name>
+        <plural/>
+        <sys_class_name>sys_documentation</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 15:12:21</sys_created_on>
+        <sys_id>198697eba85743107f44321b8bcb56c5</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name/>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 15:12:21</sys_updated_on>
+        <url/>
+        <url_target/>
+    </sys_documentation>
+    <sys_documentation action="DELETE">
+        <element>table_name</element>
+        <help/>
+        <hint/>
+        <label>Table Name</label>
+        <language>en</language>
+        <name>var__m_sys_hub_flow_input_d98697eba85743107f44321b8bcb56b7</name>
+        <plural/>
+        <sys_class_name>sys_documentation</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 15:12:22</sys_created_on>
+        <sys_id>2d8697eba85743107f44321b8bcb56da</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name/>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 15:12:22</sys_updated_on>
+        <url/>
+        <url_target/>
+    </sys_documentation>
+    <sys_choice action="DELETE" query="name=var__m_sys_hub_flow_input_d98697eba85743107f44321b8bcb56b7"/>
+    <sys_choice action="DELETE" query="name=var__m_sys_hub_flow_output_d98697eba85743107f44321b8bcb56b7"/>
+    <sys_hub_flow action="DELETE">
+        <sys_id>0594d7e7a85743107f44321b8bcb568e</sys_id>
+        <latest_snapshot>d98697eba85743107f44321b8bcb56b7</latest_snapshot>
+        <compiler_build>glide-australia-02-11-2026__patch3-hotfix1-06-18-2026_06-19-2026_0938.zip</compiler_build>
+        <version_record/>
+    </sys_hub_flow>
+    <sys_flow_trigger_plan action="DELETE" query="plan_id=0594d7e7a85743107f44321b8bcb568e^sys_idNOT IN6186d7eba85743107f44321b8bcb5621"/>
+    <sys_flow_trigger_plan action="DELETE">
+        <binding_strategy>com.snc.process_flow.engine.binding.OncePerRecord</binding_strategy>
+        <plan>{"@class":"com.snc.process_flow.engine.serialization.plan_data.ChunkingPlanData","chunk_data":{"table":"sys_flow_trigger_plan","id":"6186d7eba85743107f44321b8bcb5621","name":"plan","plan_signature":null},"plan_data":"CHUNKING_PLAN"}</plan>
+        <plan_id>0594d7e7a85743107f44321b8bcb568e</plan_id>
+        <snapshot>763f697b9d5303107f4456802862a789</snapshot>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 15:12:22</sys_created_on>
+        <sys_domain>global</sys_domain>
+        <sys_domain_path>/</sys_domain_path>
+        <sys_id>6186d7eba85743107f44321b8bcb5621</sys_id>
+        <sys_mod_count>1</sys_mod_count>
+        <sys_overrides/>
+        <sys_scope/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-20 02:16:29</sys_updated_on>
+        <trigger display_value="">39b1c3e3a8d343107f44321b8bcb563d</trigger>
+    </sys_flow_trigger_plan>
+    <sys_flow_subflow_plan action="DELETE" query="plan_id=0594d7e7a85743107f44321b8bcb568e"/>
+    <sys_update_version action="INSERT_OR_UPDATE">
+        <action>DELETE</action>
+        <application display_value="Campus360">7cd68adee41703107f44d305db800ec3</application>
+        <file_path/>
+        <instance_id>82d18dc7c38fcf94a03197af0501316c</instance_id>
+        <instance_name>ltm-hck-2876-0027</instance_name>
+        <name>sys_hub_flow_0594d7e7a85743107f44321b8bcb568e</name>
+        <payload>&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;record_update sys_domain="global" table="sys_hub_flow"&gt;&lt;sys_hub_flow action="INSERT_OR_UPDATE"&gt;&lt;access&gt;public&lt;/access&gt;&lt;acls/&gt;&lt;active&gt;false&lt;/active&gt;&lt;allow_high_security_roles&gt;false&lt;/allow_high_security_roles&gt;&lt;annotation/&gt;&lt;attributes&gt;browserActivatedIn=chrome,integrationActivatedIn=standalone,labelCacheCleanUpExecuted=true,timeFromCreateToActivate=40354000,viewActivatedIn=naturalLanguage&lt;/attributes&gt;&lt;authored_on_release_version&gt;29000&lt;/authored_on_release_version&gt;&lt;callable_by_client_api&gt;false&lt;/callable_by_client_api&gt;&lt;category/&gt;&lt;copied_from/&gt;&lt;copied_from_name/&gt;&lt;description&gt;Automatically generates a unique QR payload for scheduled mock interviews.&lt;/description&gt;&lt;display_name_after_preview/&gt;&lt;flow_priority&gt;MEDIUM&lt;/flow_priority&gt;&lt;generation_source/&gt;&lt;internal_name&gt;campus360__mock_interview_qr_generation&lt;/internal_name&gt;&lt;label_cache&gt;[{"name":"Created or Updated_1.current.sys_id","label":"Trigger - Record Created or Updated➛Mock Interview Record➛Sys ID","reference":"","reference_display":"Sys ID","type":"GUID","base_type":"GUID","parent_table_name":"x_snc_campus360_mock_interview","column_name":"sys_id","usedInstances":{"74fdb1b3-ccbc-470b-aaec-299e592ecad9":["qr_url","record"],"d42aa0d6-e853-4ec7-8922-e69830a249ac":["qr_code"]}},{"name":"Created or Updated_1.table_name","label":"Trigger - Record Created or Updated➛Mock Interview Table","reference":"x_snc_campus360_mock_interview","reference_display":"Mock Interview","type":"table_name","base_type":"table_name","choices":[{"order":0.0}],"usedInstances":{"74fdb1b3-ccbc-470b-aaec-299e592ecad9":["table_name"]},"attributes":{"test_input_hidden":"true"}},{"name":"Created or Updated_1.current","label":"Trigger - Record Created or Updated➛Mock Interview Record","reference":"x_snc_campus360_mock_interview","reference_display":"Mock Interview","type":"reference","base_type":"reference","usedInstances":{"74fdb1b3-ccbc-470b-aaec-299e592ecad9":["record"],"d42aa0d6-e853-4ec7-8922-e69830a249ac":["record"]},"attributes":{}}]&lt;/label_cache&gt;&lt;master_snapshot&gt;d98697eba85743107f44321b8bcb56b7&lt;/master_snapshot&gt;&lt;master_snapshot_digest/&gt;&lt;name&gt;Campus360 - Mock Interview QR Generation&lt;/name&gt;&lt;natlang/&gt;&lt;outputs/&gt;&lt;pre_compiled&gt;false&lt;/pre_compiled&gt;&lt;remote_trigger_id&gt;39b1c3e3a8d343107f44321b8bcb563d&lt;/remote_trigger_id&gt;&lt;run_as&gt;user&lt;/run_as&gt;&lt;run_with_roles/&gt;&lt;sc_callable&gt;false&lt;/sc_callable&gt;&lt;show_draft_actions&gt;false&lt;/show_draft_actions&gt;&lt;show_triggered_flows&gt;false&lt;/show_triggered_flows&gt;&lt;status&gt;published&lt;/status&gt;&lt;substatus/&gt;&lt;sys_class_name&gt;sys_hub_flow&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-19 15:03:52&lt;/sys_created_on&gt;&lt;sys_domain&gt;global&lt;/sys_domain&gt;&lt;sys_domain_path&gt;/&lt;/sys_domain_path&gt;&lt;sys_id&gt;0594d7e7a85743107f44321b8bcb568e&lt;/sys_id&gt;&lt;sys_mod_count&gt;15&lt;/sys_mod_count&gt;&lt;sys_name&gt;Campus360 - Mock Interview QR Generation&lt;/sys_name&gt;&lt;sys_overrides/&gt;&lt;sys_package display_value="Campus360" source="x_snc_campus360"&gt;7cd68adee41703107f44d305db800ec3&lt;/sys_package&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="Campus360"&gt;7cd68adee41703107f44d305db800ec3&lt;/sys_scope&gt;&lt;sys_update_name&gt;sys_hub_flow_0594d7e7a85743107f44321b8bcb568e&lt;/sys_update_name&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-20 11:12:20&lt;/sys_updated_on&gt;&lt;type&gt;flow&lt;/type&gt;&lt;updation_source/&gt;&lt;version&gt;2&lt;/version&gt;&lt;version_record&gt;968ee9f79d5303107f4456802862a708&lt;/version_record&gt;&lt;/sys_hub_flow&gt;&lt;sys_translated_text action="delete_multiple" query="documentkey=0594d7e7a85743107f44321b8bcb568e"/&gt;&lt;sys_variable_value action="delete_multiple" query="document_key=0594d7e7a85743107f44321b8bcb568e"/&gt;&lt;sys_flow_record_trigger action="INSERT_OR_UPDATE"&gt;&lt;active&gt;true&lt;/active&gt;&lt;condition table="x_snc_campus360_mock_interview"&gt;interview_status=scheduled&lt;item display_value="Scheduled" endquery="false" field="interview_status" goto="false" newquery="false" operator="=" or="false" value="scheduled"/&gt;&lt;/condition&gt;&lt;name/&gt;&lt;on_delete&gt;false&lt;/on_delete&gt;&lt;on_insert&gt;true&lt;/on_insert&gt;&lt;on_update&gt;true&lt;/on_update&gt;&lt;published_version/&gt;&lt;run_flow_in&gt;background&lt;/run_flow_in&gt;&lt;run_on_extended&gt;false&lt;/run_on_extended&gt;&lt;run_when_setting&gt;both&lt;/run_when_setting&gt;&lt;run_when_user_list/&gt;&lt;run_when_user_setting&gt;any&lt;/run_when_user_setting&gt;&lt;sys_class_name&gt;sys_flow_record_trigger&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-19 13:41:27&lt;/sys_created_on&gt;&lt;sys_domain&gt;global&lt;/sys_domain&gt;&lt;sys_domain_path&gt;/&lt;/sys_domain_path&gt;&lt;sys_id&gt;39b1c3e3a8d343107f44321b8bcb563d&lt;/sys_id&gt;&lt;sys_mod_count&gt;0&lt;/sys_mod_count&gt;&lt;sys_overrides/&gt;&lt;sys_scope display_value="Campus360"&gt;7cd68adee41703107f44d305db800ec3&lt;/sys_scope&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-19 13:41:27&lt;/sys_updated_on&gt;&lt;table&gt;x_snc_campus360_mock_interview&lt;/table&gt;&lt;trigger_definition/&gt;&lt;/sys_flow_record_trigger&gt;&lt;sys_trigger_runner_mapping action="INSERT_OR_UPDATE"&gt;&lt;active&gt;true&lt;/active&gt;&lt;data&gt;{"run_flow_in":"background","run_when_user_list":[],"run_when_setting":"both","run_when_user_setting":"any","run_on_extended":"false"}&lt;/data&gt;&lt;identifier&gt;0594d7e7a85743107f44321b8bcb568e&lt;/identifier&gt;&lt;identifier_type&gt;flow&lt;/identifier_type&gt;&lt;runner&gt;FDTriggerRunner&lt;/runner&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-20 02:16:29&lt;/sys_created_on&gt;&lt;sys_id&gt;7d8ea9f79d5303107f4456802862a7ca&lt;/sys_id&gt;&lt;sys_mod_count&gt;1&lt;/sys_mod_count&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-20 02:16:29&lt;/sys_updated_on&gt;&lt;trigger display_value=""&gt;39b1c3e3a8d343107f44321b8bcb563d&lt;/trigger&gt;&lt;/sys_trigger_runner_mapping&gt;&lt;sys_trigger_runner_mapping action="delete_multiple" query="identifier=0594d7e7a85743107f44321b8bcb568e^sys_idNOT IN7d8ea9f79d5303107f4456802862a7ca"/&gt;&lt;sys_hub_flow_stage action="delete_multiple" query="flow=0594d7e7a85743107f44321b8bcb568e"/&gt;&lt;sys_flow_cat_variable_model action="delete_multiple" query="id=0594d7e7a85743107f44321b8bcb568e^sys_idNOT IN8194d7e7a85743107f44321b8bcb568f"/&gt;&lt;sys_flow_cat_variable_model action="INSERT_OR_UPDATE"&gt;&lt;id&gt;0594d7e7a85743107f44321b8bcb568e&lt;/id&gt;&lt;name&gt;Campus360 - Mock Interview QR Generation&lt;/name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-19 15:03:52&lt;/sys_created_on&gt;&lt;sys_id&gt;8194d7e7a85743107f44321b8bcb568f&lt;/sys_id&gt;&lt;sys_mod_count&gt;0&lt;/sys_mod_count&gt;&lt;sys_scope/&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-19 15:03:52&lt;/sys_updated_on&gt;&lt;/sys_flow_cat_variable_model&gt;&lt;sys_flow_cat_variable action="delete_multiple" query="flow_catalog_model=8194d7e7a85743107f44321b8bcb568f"/&gt;&lt;sys_hub_flow_input action="delete_multiple" query="model=0594d7e7a85743107f44321b8bcb568e^sys_idNOT IN45c4532ba85743107f44321b8bcb56e3,85c4532ba85743107f44321b8bcb5684,cdc4532ba85743107f44321b8bcb56d8"/&gt;&lt;sys_hub_flow_input action="INSERT_OR_UPDATE"&gt;&lt;active&gt;true&lt;/active&gt;&lt;array&gt;false&lt;/array&gt;&lt;array_denormalized&gt;false&lt;/array_denormalized&gt;&lt;attributes&gt;child_label=FDChangeDetails,child_name=FDChangeDetails,child_type=object,child_type_label=Object,co_type_name=FDCollection,element_mapping_provider=com.glide.flow_design.action.data.FlowDesignVariableMapper,pwd2droppable=true,uiType=array.object,uiTypeLabel=Array.Object&lt;/attributes&gt;&lt;audit&gt;false&lt;/audit&gt;&lt;calculation&gt;&lt;![CDATA[(function calculatedFieldValue(current) {
+
+	// Add your code here
+	return '';  // return the calculated value
+
+})(current);]]&gt;&lt;/calculation&gt;&lt;choice/&gt;&lt;choice_field/&gt;&lt;choice_table/&gt;&lt;column_label/&gt;&lt;comments/&gt;&lt;create_roles/&gt;&lt;default_value/&gt;&lt;defaultsort/&gt;&lt;delete_roles/&gt;&lt;dependent/&gt;&lt;dependent_on_field/&gt;&lt;display&gt;false&lt;/display&gt;&lt;dynamic_creation&gt;false&lt;/dynamic_creation&gt;&lt;dynamic_creation_script/&gt;&lt;dynamic_default_value/&gt;&lt;dynamic_ref_qual/&gt;&lt;element&gt;changed_fields&lt;/element&gt;&lt;element_reference&gt;false&lt;/element_reference&gt;&lt;foreign_database/&gt;&lt;formula/&gt;&lt;function_definition/&gt;&lt;function_field&gt;false&lt;/function_field&gt;&lt;help/&gt;&lt;hint/&gt;&lt;internal_type display_value="String"&gt;string&lt;/internal_type&gt;&lt;label&gt;Changed Fields&lt;/label&gt;&lt;mandatory&gt;false&lt;/mandatory&gt;&lt;max_length&gt;4000&lt;/max_length&gt;&lt;model display_value="Campus360 - Mock Interview QR Generation"&gt;0594d7e7a85743107f44321b8bcb568e&lt;/model&gt;&lt;model_id&gt;0594d7e7a85743107f44321b8bcb568e&lt;/model_id&gt;&lt;model_table&gt;sys_hub_flow&lt;/model_table&gt;&lt;name&gt;var__m_sys_hub_flow_input_0594d7e7a85743107f44321b8bcb568e&lt;/name&gt;&lt;next_element/&gt;&lt;order&gt;100&lt;/order&gt;&lt;primary&gt;false&lt;/primary&gt;&lt;read_only&gt;false&lt;/read_only&gt;&lt;read_only_option/&gt;&lt;read_roles/&gt;&lt;reference/&gt;&lt;reference_cascade_rule/&gt;&lt;reference_floats&gt;false&lt;/reference_floats&gt;&lt;reference_key/&gt;&lt;reference_qual/&gt;&lt;reference_qual_condition/&gt;&lt;reference_type/&gt;&lt;sizeclass/&gt;&lt;spell_check&gt;false&lt;/spell_check&gt;&lt;staged&gt;false&lt;/staged&gt;&lt;sys_class_name&gt;sys_hub_flow_input&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-19 15:04:42&lt;/sys_created_on&gt;&lt;sys_id&gt;45c4532ba85743107f44321b8bcb56e3&lt;/sys_id&gt;&lt;sys_mod_count&gt;0&lt;/sys_mod_count&gt;&lt;sys_name/&gt;&lt;sys_package/&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="Campus360"&gt;7cd68adee41703107f44d305db800ec3&lt;/sys_scope&gt;&lt;sys_update_name/&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-19 15:04:42&lt;/sys_updated_on&gt;&lt;table_reference&gt;false&lt;/table_reference&gt;&lt;text_index&gt;false&lt;/text_index&gt;&lt;unique&gt;false&lt;/unique&gt;&lt;use_dependent_field&gt;false&lt;/use_dependent_field&gt;&lt;use_dynamic_default&gt;false&lt;/use_dynamic_default&gt;&lt;use_reference_qualifier&gt;simple&lt;/use_reference_qualifier&gt;&lt;virtual&gt;false&lt;/virtual&gt;&lt;virtual_type&gt;script&lt;/virtual_type&gt;&lt;widget/&gt;&lt;write_roles/&gt;&lt;xml_view&gt;false&lt;/xml_view&gt;&lt;/sys_hub_flow_input&gt;&lt;sys_hub_action_input_action_instance action="delete_multiple" query="action_input=45c4532ba85743107f44321b8bcb56e3"/&gt;&lt;sys_hub_flow_input action="INSERT_OR_UPDATE"&gt;&lt;active&gt;true&lt;/active&gt;&lt;array&gt;false&lt;/array&gt;&lt;array_denormalized&gt;false&lt;/array_denormalized&gt;&lt;attributes&gt;element_mapping_provider=com.glide.flow_design.action.data.FlowDesignVariableMapper,test_input_hidden=true,uiType=table_name,uiTypeLabel=Table Name&lt;/attributes&gt;&lt;audit&gt;false&lt;/audit&gt;&lt;calculation&gt;&lt;![CDATA[(function calculatedFieldValue(current) {
+
+	// Add your code here
+	return '';  // return the calculated value
+
+})(current);]]&gt;&lt;/calculation&gt;&lt;choice/&gt;&lt;choice_field/&gt;&lt;choice_table/&gt;&lt;column_label/&gt;&lt;comments/&gt;&lt;create_roles/&gt;&lt;default_value/&gt;&lt;defaultsort/&gt;&lt;delete_roles/&gt;&lt;dependent/&gt;&lt;dependent_on_field/&gt;&lt;display&gt;false&lt;/display&gt;&lt;dynamic_creation&gt;false&lt;/dynamic_creation&gt;&lt;dynamic_creation_script/&gt;&lt;dynamic_default_value/&gt;&lt;dynamic_ref_qual/&gt;&lt;element&gt;table_name&lt;/element&gt;&lt;element_reference&gt;false&lt;/element_reference&gt;&lt;foreign_database/&gt;&lt;formula/&gt;&lt;function_definition/&gt;&lt;function_field&gt;false&lt;/function_field&gt;&lt;help/&gt;&lt;hint/&gt;&lt;internal_type display_value=""&gt;table_name&lt;/internal_type&gt;&lt;label&gt;Table Name&lt;/label&gt;&lt;mandatory&gt;false&lt;/mandatory&gt;&lt;max_length&gt;200&lt;/max_length&gt;&lt;model display_value="Campus360 - Mock Interview QR Generation"&gt;0594d7e7a85743107f44321b8bcb568e&lt;/model&gt;&lt;model_id&gt;0594d7e7a85743107f44321b8bcb568e&lt;/model_id&gt;&lt;model_table&gt;sys_hub_flow&lt;/model_table&gt;&lt;name&gt;var__m_sys_hub_flow_input_0594d7e7a85743107f44321b8bcb568e&lt;/name&gt;&lt;next_element/&gt;&lt;order&gt;101&lt;/order&gt;&lt;primary&gt;false&lt;/primary&gt;&lt;read_only&gt;false&lt;/read_only&gt;&lt;read_only_option/&gt;&lt;read_roles/&gt;&lt;reference/&gt;&lt;reference_cascade_rule/&gt;&lt;reference_floats&gt;false&lt;/reference_floats&gt;&lt;reference_key/&gt;&lt;reference_qual/&gt;&lt;reference_qual_condition/&gt;&lt;reference_type/&gt;&lt;sizeclass/&gt;&lt;spell_check&gt;false&lt;/spell_check&gt;&lt;staged&gt;false&lt;/staged&gt;&lt;sys_class_name&gt;sys_hub_flow_input&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-19 15:04:41&lt;/sys_created_on&gt;&lt;sys_id&gt;85c4532ba85743107f44321b8bcb5684&lt;/sys_id&gt;&lt;sys_mod_count&gt;1&lt;/sys_mod_count&gt;&lt;sys_name/&gt;&lt;sys_package/&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="Campus360"&gt;7cd68adee41703107f44d305db800ec3&lt;/sys_scope&gt;&lt;sys_update_name/&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-19 15:12:20&lt;/sys_updated_on&gt;&lt;table_reference&gt;false&lt;/table_reference&gt;&lt;text_index&gt;false&lt;/text_index&gt;&lt;unique&gt;false&lt;/unique&gt;&lt;use_dependent_field&gt;false&lt;/use_dependent_field&gt;&lt;use_dynamic_default&gt;false&lt;/use_dynamic_default&gt;&lt;use_reference_qualifier&gt;simple&lt;/use_reference_qualifier&gt;&lt;virtual&gt;false&lt;/virtual&gt;&lt;virtual_type&gt;script&lt;/virtual_type&gt;&lt;widget/&gt;&lt;write_roles/&gt;&lt;xml_view&gt;false&lt;/xml_view&gt;&lt;/sys_hub_flow_input&gt;&lt;sys_hub_action_input_action_instance action="delete_multiple" query="action_input=85c4532ba85743107f44321b8bcb5684"/&gt;&lt;sys_hub_flow_input action="INSERT_OR_UPDATE"&gt;&lt;active&gt;true&lt;/active&gt;&lt;array&gt;false&lt;/array&gt;&lt;array_denormalized&gt;false&lt;/array_denormalized&gt;&lt;attributes&gt;element_mapping_provider=com.glide.flow_design.action.data.FlowDesignVariableMapper,uiType=document_id,uiTypeLabel=Document ID&lt;/attributes&gt;&lt;audit&gt;false&lt;/audit&gt;&lt;calculation&gt;&lt;![CDATA[(function calculatedFieldValue(current) {
+
+	// Add your code here
+	return '';  // return the calculated value
+
+})(current);]]&gt;&lt;/calculation&gt;&lt;choice/&gt;&lt;choice_field/&gt;&lt;choice_table/&gt;&lt;column_label/&gt;&lt;comments/&gt;&lt;create_roles/&gt;&lt;default_value/&gt;&lt;defaultsort/&gt;&lt;delete_roles/&gt;&lt;dependent&gt;table_name&lt;/dependent&gt;&lt;dependent_on_field&gt;table_name&lt;/dependent_on_field&gt;&lt;display&gt;false&lt;/display&gt;&lt;dynamic_creation&gt;false&lt;/dynamic_creation&gt;&lt;dynamic_creation_script/&gt;&lt;dynamic_default_value/&gt;&lt;dynamic_ref_qual/&gt;&lt;element&gt;current&lt;/element&gt;&lt;element_reference&gt;false&lt;/element_reference&gt;&lt;foreign_database/&gt;&lt;formula/&gt;&lt;function_definition/&gt;&lt;function_field&gt;false&lt;/function_field&gt;&lt;help/&gt;&lt;hint/&gt;&lt;internal_type display_value=""&gt;document_id&lt;/internal_type&gt;&lt;label&gt;Record&lt;/label&gt;&lt;mandatory&gt;true&lt;/mandatory&gt;&lt;max_length&gt;200&lt;/max_length&gt;&lt;model display_value="Campus360 - Mock Interview QR Generation"&gt;0594d7e7a85743107f44321b8bcb568e&lt;/model&gt;&lt;model_id&gt;0594d7e7a85743107f44321b8bcb568e&lt;/model_id&gt;&lt;model_table&gt;sys_hub_flow&lt;/model_table&gt;&lt;name&gt;var__m_sys_hub_flow_input_0594d7e7a85743107f44321b8bcb568e&lt;/name&gt;&lt;next_element/&gt;&lt;order&gt;100&lt;/order&gt;&lt;primary&gt;false&lt;/primary&gt;&lt;read_only&gt;false&lt;/read_only&gt;&lt;read_only_option/&gt;&lt;read_roles/&gt;&lt;reference/&gt;&lt;reference_cascade_rule/&gt;&lt;reference_floats&gt;false&lt;/reference_floats&gt;&lt;reference_key/&gt;&lt;reference_qual/&gt;&lt;reference_qual_condition/&gt;&lt;reference_type/&gt;&lt;sizeclass/&gt;&lt;spell_check&gt;false&lt;/spell_check&gt;&lt;staged&gt;false&lt;/staged&gt;&lt;sys_class_name&gt;sys_hub_flow_input&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-19 15:04:41&lt;/sys_created_on&gt;&lt;sys_id&gt;cdc4532ba85743107f44321b8bcb56d8&lt;/sys_id&gt;&lt;sys_mod_count&gt;1&lt;/sys_mod_count&gt;&lt;sys_name/&gt;&lt;sys_package/&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="Campus360"&gt;7cd68adee41703107f44d305db800ec3&lt;/sys_scope&gt;&lt;sys_update_name/&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-19 15:12:20&lt;/sys_updated_on&gt;&lt;table_reference&gt;false&lt;/table_reference&gt;&lt;text_index&gt;false&lt;/text_index&gt;&lt;unique&gt;false&lt;/unique&gt;&lt;use_dependent_field&gt;true&lt;/use_dependent_field&gt;&lt;use_dynamic_default&gt;false&lt;/use_dynamic_default&gt;&lt;use_reference_qualifier&gt;simple&lt;/use_reference_qualifier&gt;&lt;virtual&gt;false&lt;/virtual&gt;&lt;virtual_type&gt;script&lt;/virtual_type&gt;&lt;widget/&gt;&lt;write_roles/&gt;&lt;xml_view&gt;false&lt;/xml_view&gt;&lt;/sys_hub_flow_input&gt;&lt;sys_hub_action_input_action_instance action="delete_multiple" query="action_input=cdc4532ba85743107f44321b8bcb56d8"/&gt;&lt;sys_hub_flow_output action="delete_multiple" query="model=0594d7e7a85743107f44321b8bcb568e"/&gt;&lt;sys_hub_alias_mapping action="delete_multiple" query="source_id=0594d7e7a85743107f44321b8bcb568e"/&gt;&lt;sys_hub_trigger_instance_v2 action="delete_multiple" query="flow=0594d7e7a85743107f44321b8bcb568e^sys_idNOT INf0c4532ba85743107f44321b8bcb567d"/&gt;&lt;sys_hub_trigger_instance_v2 action="INSERT_OR_UPDATE"&gt;&lt;comment/&gt;&lt;display_text/&gt;&lt;flow display_value="Campus360 - Mock Interview QR Generation"&gt;0594d7e7a85743107f44321b8bcb568e&lt;/flow&gt;&lt;generation_source/&gt;&lt;name&gt;Created or Updated&lt;/name&gt;&lt;published_version/&gt;&lt;remote_sys_id/&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-19 15:04:40&lt;/sys_created_on&gt;&lt;sys_id&gt;f0c4532ba85743107f44321b8bcb567d&lt;/sys_id&gt;&lt;sys_mod_count&gt;3&lt;/sys_mod_count&gt;&lt;sys_scope/&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-20 02:16:26&lt;/sys_updated_on&gt;&lt;trigger_definition display_value="Created or Updated"&gt;a45d9180c32222002841b63b12d3aea7&lt;/trigger_definition&gt;&lt;trigger_inputs&gt;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&lt;/trigger_inputs&gt;&lt;trigger_outputs/&gt;&lt;trigger_type&gt;record_create_or_update&lt;/trigger_type&gt;&lt;updation_source/&gt;&lt;/sys_hub_trigger_instance_v2&gt;&lt;sys_hub_action_instance_v2 action="delete_multiple" query="flow=0594d7e7a85743107f44321b8bcb568e^sys_idNOT INaea5132ba85743107f44321b8bcb5607,5586e5379d1303107f4456802862a790"/&gt;&lt;sys_hub_action_instance_v2 action="INSERT_OR_UPDATE"&gt;&lt;action_type display_value="Update Record"&gt;f9d01dd2c31332002841b63b12d3aea1&lt;/action_type&gt;&lt;action_type_parent display_value="Update Record"&gt;baf174c8c3c232002841b63b12d3aee4&lt;/action_type_parent&gt;&lt;attributes/&gt;&lt;comment/&gt;&lt;compiled_snapshot&gt;f9d01dd2c31332002841b63b12d3aea1&lt;/compiled_snapshot&gt;&lt;display_text/&gt;&lt;flow display_value="Campus360 - Mock Interview QR Generation"&gt;0594d7e7a85743107f44321b8bcb568e&lt;/flow&gt;&lt;generation_source/&gt;&lt;order&gt;1&lt;/order&gt;&lt;parent_ui_id/&gt;&lt;sys_class_name&gt;sys_hub_action_instance_v2&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-19 15:08:36&lt;/sys_created_on&gt;&lt;sys_id&gt;aea5132ba85743107f44321b8bcb5607&lt;/sys_id&gt;&lt;sys_mod_count&gt;6&lt;/sys_mod_count&gt;&lt;sys_scope display_value="Campus360"&gt;7cd68adee41703107f44d305db800ec3&lt;/sys_scope&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-20 02:19:33&lt;/sys_updated_on&gt;&lt;ui_id&gt;d42aa0d6-e853-4ec7-8922-e69830a249ac&lt;/ui_id&gt;&lt;updation_source/&gt;&lt;values&gt;H4sIAAAAAAAA/+VVTU/jMBD9K5XPbUgaKNDLakWFhMSHBLtcWNZy7Wlr4TjBdlq6Vf/7jhMnRIBYkLhU21M9X3nveWZ8tyFSkDHZBxEnx8mIp0maDuN4eLSfTEfpNBmKlAEkpE80ywAjDfDcCDwvmSq9YbM5McAciF5uej8L4f/SJOKlMaDddouhQtpCsfVtyEALX0gl0E/Gd/d9UjCDxR0YMt68cH0UnWJTUBh63cB7CdetC38WOS8zxEVlYzwPmZPg6Z1N0INJHk4S9wk8OdACEMiMKQt9kjGNLHOzJmNnSjQgf3Gl1bqNWEjtaqIZe7LyD355P/ZxM0BmPIjQHmkQqDbPJsyxG6zMXWlavXLJwdaaCJixUrmTrq0OuCqczHWd4thUNdm5KjN9WStC2gKd+ygtgoDC8/TIa1qzm0W+um5AnkpdSRIoqpwz1Z6Yc0ZOS+fhbAgoqDTOWFFIPaeFyZeySkYoWTRXeIhmKl/hN62c64hxjztCVVl0ivZJZb5lRnoSF1gGk7d9Ytf2RDFrn6mghvSx9EhqYoECrVSoJKBVJ/hkbmThvuOnlhCAb/uh/6cH73UYP35uqE7N5xl4olZzyllWlDYdxTTL+QPFHgCzlLB6PQEX6O+ddfyfm4cPoG3m4UfVBW+jDyPxynbeze1d1o4wEAdfNhBHuzQQgcbOT8S/5iAevrtpO51Utb7tzMCjoTwX8KuM41QsnCvseG9PuWyw4A+D4dHhaIDlDiNszMj6vucw0PkqQvp7tvgmRZ2IVVA5hMxQYG8ajto5ok3Q+09OhJpg6Hb7G4tZx1xp67Q5aDA+9vVA7hb4z22LD9xpsy1OJShh37jkZlVAhqo5oPWlv1gXwdm7Dc72Df2ynZGM4uq3Q5vjv3lK7/8CxY5dM0wKAAA=&lt;/values&gt;&lt;/sys_hub_action_instance_v2&gt;&lt;sys_hub_alias_mapping action="delete_multiple" query="source_id=aea5132ba85743107f44321b8bcb5607"/&gt;&lt;sys_hub_action_instance_v2 action="INSERT_OR_UPDATE"&gt;&lt;action_type display_value="Update Record"&gt;f9d01dd2c31332002841b63b12d3aea1&lt;/action_type&gt;&lt;action_type_parent/&gt;&lt;attributes/&gt;&lt;comment/&gt;&lt;compiled_snapshot&gt;f9d01dd2c31332002841b63b12d3aea1&lt;/compiled_snapshot&gt;&lt;display_text/&gt;&lt;flow display_value="Campus360 - Mock Interview QR Generation"&gt;0594d7e7a85743107f44321b8bcb568e&lt;/flow&gt;&lt;generation_source/&gt;&lt;order&gt;2&lt;/order&gt;&lt;parent_ui_id/&gt;&lt;sys_class_name&gt;sys_hub_action_instance_v2&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-20 01:41:29&lt;/sys_created_on&gt;&lt;sys_id&gt;5586e5379d1303107f4456802862a790&lt;/sys_id&gt;&lt;sys_mod_count&gt;3&lt;/sys_mod_count&gt;&lt;sys_scope display_value="Campus360"&gt;7cd68adee41703107f44d305db800ec3&lt;/sys_scope&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-20 02:19:33&lt;/sys_updated_on&gt;&lt;ui_id&gt;74fdb1b3-ccbc-470b-aaec-299e592ecad9&lt;/ui_id&gt;&lt;updation_source/&gt;&lt;values&gt;H4sIAAAAAAAA/+1T2W7aQBT9FWueLcvGBCW8VSCkSFmkJM1LGo2GmQuMOl4yC0sR/95rewyUUkSqPDRSefJd55zDPS9rIgXpky6IOLlKejxN0rQTx53LbjLupeOkI1IGkJCQ5CwD7NTACy0wnjPlqsR6PdDALIig0MHXUlSfNIm40xpyu9lgq5CmVGz17Ccww2dSCayT/strSEqmcbkFTfrrg9K56BQbg8LWhxbeIVy7KqtYFNxliIvKNnnjJ4e+ElwPsYJDFZwkDgksLeQCEMiEKQMhyViOLAu9In2rHSaQv7jP1WrbMZO5bYhmbGnkD3y5G1d9E0Bm3IuwDakXqElPhsyyR9zMrdNbvQrJwTSaCJgwp+xgP9c03JdWFnkzYtlYtdOFcll+1yhCtgv2/g9nEASUFc8KeUNr8jgrFg8tyJHMa0k8RVVwprYRs1bLsbMVnDUBBbXGGStLmU9pqYu5rIcRShZNFQbRRBULfNPIaR4xXuGOUFUWjTA/rNPPTMuKxC2uweFNSMzKDBQzZkcFNaRvrkLSEPMUaK1CLQGtL6Ea5lqW9gs+NQcPfBP6+487Jy8MdgdVn73Zu/83TZ1W31wcp+K0FyKEj3d3zBJ/t+R9LjqDY+uikQQlzBHS3kUWMkRvgTYi/GqkJ18Mnn1x66UPM1PSi+vff0v9u5YaX5w6N361u669nTtbLanJOeUsK51JezHNCv6d4iWAnktY/O6gW6wH13v195njDLStOZ7qKziOvvXHYe5mfza4awreFxcfZovLz2QIT+PTO+JPPnj9CUFAd2hcCQAA&lt;/values&gt;&lt;/sys_hub_action_instance_v2&gt;&lt;sys_hub_alias_mapping action="delete_multiple" query="source_id=5586e5379d1303107f4456802862a790"/&gt;&lt;sys_hub_sub_flow_instance_v2 action="delete_multiple" query="flow=0594d7e7a85743107f44321b8bcb568e"/&gt;&lt;sys_hub_flow_logic_instance_v2 action="delete_multiple" query="flow=0594d7e7a85743107f44321b8bcb568e"/&gt;&lt;sys_hub_pill_compound action="delete_multiple" query="attached_to=0594d7e7a85743107f44321b8bcb568e"/&gt;&lt;sys_hub_flow_variable action="delete_multiple" query="model=0594d7e7a85743107f44321b8bcb568e"/&gt;&lt;sys_documentation action="INSERT_OR_UPDATE"&gt;&lt;element&gt;changed_fields&lt;/element&gt;&lt;help/&gt;&lt;hint/&gt;&lt;label&gt;Changed Fields&lt;/label&gt;&lt;language&gt;en&lt;/language&gt;&lt;name&gt;var__m_sys_hub_flow_input_0594d7e7a85743107f44321b8bcb568e&lt;/name&gt;&lt;plural/&gt;&lt;sys_class_name&gt;sys_documentation&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-19 15:04:42&lt;/sys_created_on&gt;&lt;sys_id&gt;1dc4532ba85743107f44321b8bcb56e9&lt;/sys_id&gt;&lt;sys_mod_count&gt;0&lt;/sys_mod_count&gt;&lt;sys_name/&gt;&lt;sys_package display_value="Campus360" source="x_snc_campus360"&gt;7cd68adee41703107f44d305db800ec3&lt;/sys_package&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="Campus360"&gt;7cd68adee41703107f44d305db800ec3&lt;/sys_scope&gt;&lt;sys_update_name/&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-19 15:04:42&lt;/sys_updated_on&gt;&lt;url/&gt;&lt;url_target/&gt;&lt;/sys_documentation&gt;&lt;sys_documentation action="INSERT_OR_UPDATE"&gt;&lt;element&gt;table_name&lt;/element&gt;&lt;help/&gt;&lt;hint/&gt;&lt;label&gt;Table Name&lt;/label&gt;&lt;language&gt;en&lt;/language&gt;&lt;name&gt;var__m_sys_hub_flow_input_0594d7e7a85743107f44321b8bcb568e&lt;/name&gt;&lt;plural/&gt;&lt;sys_class_name&gt;sys_documentation&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-19 15:04:41&lt;/sys_created_on&gt;&lt;sys_id&gt;c1c4532ba85743107f44321b8bcb56d4&lt;/sys_id&gt;&lt;sys_mod_count&gt;0&lt;/sys_mod_count&gt;&lt;sys_name/&gt;&lt;sys_package display_value="Campus360" source="x_snc_campus360"&gt;7cd68adee41703107f44d305db800ec3&lt;/sys_package&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="Campus360"&gt;7cd68adee41703107f44d305db800ec3&lt;/sys_scope&gt;&lt;sys_update_name/&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-19 15:04:41&lt;/sys_updated_on&gt;&lt;url/&gt;&lt;url_target/&gt;&lt;/sys_documentation&gt;&lt;sys_documentation action="INSERT_OR_UPDATE"&gt;&lt;element&gt;current&lt;/element&gt;&lt;help/&gt;&lt;hint/&gt;&lt;label&gt;Record&lt;/label&gt;&lt;language&gt;en&lt;/language&gt;&lt;name&gt;var__m_sys_hub_flow_input_0594d7e7a85743107f44321b8bcb568e&lt;/name&gt;&lt;plural/&gt;&lt;sys_class_name&gt;sys_documentation&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-19 15:04:42&lt;/sys_created_on&gt;&lt;sys_id&gt;cdc4532ba85743107f44321b8bcb56de&lt;/sys_id&gt;&lt;sys_mod_count&gt;0&lt;/sys_mod_count&gt;&lt;sys_name/&gt;&lt;sys_package display_value="Campus360" source="x_snc_campus360"&gt;7cd68adee41703107f44d305db800ec3&lt;/sys_package&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="Campus360"&gt;7cd68adee41703107f44d305db800ec3&lt;/sys_scope&gt;&lt;sys_update_name/&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-19 15:04:42&lt;/sys_updated_on&gt;&lt;url/&gt;&lt;url_target/&gt;&lt;/sys_documentation&gt;&lt;sys_choice action="delete_multiple" query="name=var__m_sys_hub_flow_input_0594d7e7a85743107f44321b8bcb568e"/&gt;&lt;sys_choice action="delete_multiple" query="name=var__m_sys_hub_flow_output_0594d7e7a85743107f44321b8bcb568e"/&gt;&lt;sys_hub_flow_snapshot action="INSERT_OR_UPDATE"&gt;&lt;access&gt;public&lt;/access&gt;&lt;acls/&gt;&lt;active&gt;true&lt;/active&gt;&lt;allow_high_security_roles&gt;false&lt;/allow_high_security_roles&gt;&lt;annotation/&gt;&lt;attributes&gt;browserActivatedIn=chrome,integrationActivatedIn=standalone,labelCacheCleanUpExecuted=true,viewActivatedIn=naturalLanguage&lt;/attributes&gt;&lt;authored_on_release_version&gt;29000&lt;/authored_on_release_version&gt;&lt;callable_by_client_api&gt;false&lt;/callable_by_client_api&gt;&lt;category/&gt;&lt;copied_from/&gt;&lt;copied_from_name/&gt;&lt;description&gt;Automatically generates a unique QR payload for scheduled mock interviews.&lt;/description&gt;&lt;flow_priority&gt;MEDIUM&lt;/flow_priority&gt;&lt;internal_name&gt;campus360__mock_interview_qr_generation&lt;/internal_name&gt;&lt;label_cache&gt;[{"name":"Created or Updated_1.current.sys_id","label":"Trigger - Record Created or Updated➛Mock Interview Record➛Sys ID","reference":"","reference_display":"Sys ID","type":"GUID","base_type":"GUID","parent_table_name":"x_snc_campus360_mock_interview","column_name":"sys_id","usedInstances":{"74fdb1b3-ccbc-470b-aaec-299e592ecad9":["qr_url","record"],"d42aa0d6-e853-4ec7-8922-e69830a249ac":["qr_code"]}},{"name":"Created or Updated_1.table_name","label":"Trigger - Record Created or Updated➛Mock Interview Table","reference":"x_snc_campus360_mock_interview","reference_display":"Mock Interview","type":"table_name","base_type":"table_name","choices":[{"order":0.0}],"usedInstances":{"74fdb1b3-ccbc-470b-aaec-299e592ecad9":["table_name"]},"attributes":{"test_input_hidden":"true"}},{"name":"Created or Updated_1.current","label":"Trigger - Record Created or Updated➛Mock Interview Record","reference":"x_snc_campus360_mock_interview","reference_display":"Mock Interview","type":"reference","base_type":"reference","usedInstances":{"74fdb1b3-ccbc-470b-aaec-299e592ecad9":["record"],"d42aa0d6-e853-4ec7-8922-e69830a249ac":["record"]},"attributes":{}}]&lt;/label_cache&gt;&lt;master&gt;true&lt;/master&gt;&lt;name&gt;Campus360 - Mock Interview QR Generation&lt;/name&gt;&lt;natlang/&gt;&lt;outputs/&gt;&lt;parent_flow display_value="Campus360 - Mock Interview QR Generation"&gt;0594d7e7a85743107f44321b8bcb568e&lt;/parent_flow&gt;&lt;remote_trigger_id/&gt;&lt;run_as&gt;user&lt;/run_as&gt;&lt;run_with_roles/&gt;&lt;sc_callable&gt;false&lt;/sc_callable&gt;&lt;status&gt;published&lt;/status&gt;&lt;sys_class_name&gt;sys_hub_flow_snapshot&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-19 15:12:21&lt;/sys_created_on&gt;&lt;sys_domain&gt;global&lt;/sys_domain&gt;&lt;sys_domain_path&gt;/&lt;/sys_domain_path&gt;&lt;sys_id&gt;d98697eba85743107f44321b8bcb56b7&lt;/sys_id&gt;&lt;sys_mod_count&gt;1&lt;/sys_mod_count&gt;&lt;sys_name/&gt;&lt;sys_overrides/&gt;&lt;sys_package/&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="Campus360"&gt;7cd68adee41703107f44d305db800ec3&lt;/sys_scope&gt;&lt;sys_update_name/&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-20 02:16:28&lt;/sys_updated_on&gt;&lt;type&gt;flow&lt;/type&gt;&lt;version&gt;2&lt;/version&gt;&lt;/sys_hub_flow_snapshot&gt;&lt;sys_translated_text action="delete_multiple" query="documentkey=d98697eba85743107f44321b8bcb56b7"/&gt;&lt;sys_variable_value action="delete_multiple" query="document_key=d98697eba85743107f44321b8bcb56b7"/&gt;&lt;sys_hub_flow_stage action="delete_multiple" query="flow=d98697eba85743107f44321b8bcb56b7"/&gt;&lt;sys_flow_cat_variable_model action="delete_multiple" query="id=d98697eba85743107f44321b8bcb56b7^sys_idNOT INd98697eba85743107f44321b8bcb56b8"/&gt;&lt;sys_flow_cat_variable_model action="INSERT_OR_UPDATE"&gt;&lt;id&gt;d98697eba85743107f44321b8bcb56b7&lt;/id&gt;&lt;name&gt;Campus360 - Mock Interview QR Generation&lt;/name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-19 15:12:21&lt;/sys_created_on&gt;&lt;sys_id&gt;d98697eba85743107f44321b8bcb56b8&lt;/sys_id&gt;&lt;sys_mod_count&gt;0&lt;/sys_mod_count&gt;&lt;sys_scope/&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-19 15:12:21&lt;/sys_updated_on&gt;&lt;/sys_flow_cat_variable_model&gt;&lt;sys_flow_cat_variable action="delete_multiple" query="flow_catalog_model=d98697eba85743107f44321b8bcb56b8"/&gt;&lt;sys_hub_flow_input action="delete_multiple" query="model=d98697eba85743107f44321b8bcb56b7^sys_idNOT IN9d8697eba85743107f44321b8bcb56c9,a98697eba85743107f44321b8bcb56d4,dd8697eba85743107f44321b8bcb56b9"/&gt;&lt;sys_hub_flow_input action="INSERT_OR_UPDATE"&gt;&lt;active&gt;true&lt;/active&gt;&lt;array&gt;false&lt;/array&gt;&lt;array_denormalized&gt;false&lt;/array_denormalized&gt;&lt;attributes&gt;child_label=FDChangeDetails,child_name=FDChangeDetails,child_type=object,child_type_label=Object,co_type_name=FDCollection,element_mapping_provider=com.glide.flow_design.action.data.FlowDesignVariableMapper,pwd2droppable=true,uiType=array.object,uiTypeLabel=Array.Object&lt;/attributes&gt;&lt;audit&gt;false&lt;/audit&gt;&lt;calculation&gt;&lt;![CDATA[(function calculatedFieldValue(current) {
+
+	// Add your code here
+	return '';  // return the calculated value
+
+})(current);]]&gt;&lt;/calculation&gt;&lt;choice/&gt;&lt;choice_field/&gt;&lt;choice_table/&gt;&lt;column_label/&gt;&lt;comments/&gt;&lt;create_roles/&gt;&lt;default_value/&gt;&lt;defaultsort/&gt;&lt;delete_roles/&gt;&lt;dependent/&gt;&lt;dependent_on_field/&gt;&lt;display&gt;false&lt;/display&gt;&lt;dynamic_creation&gt;false&lt;/dynamic_creation&gt;&lt;dynamic_creation_script/&gt;&lt;dynamic_default_value/&gt;&lt;dynamic_ref_qual/&gt;&lt;element&gt;changed_fields&lt;/element&gt;&lt;element_reference&gt;false&lt;/element_reference&gt;&lt;foreign_database/&gt;&lt;formula/&gt;&lt;function_definition/&gt;&lt;function_field&gt;false&lt;/function_field&gt;&lt;help/&gt;&lt;hint/&gt;&lt;internal_type display_value="String"&gt;string&lt;/internal_type&gt;&lt;label&gt;Changed Fields&lt;/label&gt;&lt;mandatory&gt;false&lt;/mandatory&gt;&lt;max_length&gt;4000&lt;/max_length&gt;&lt;model display_value="Campus360 - Mock Interview QR Generation"&gt;d98697eba85743107f44321b8bcb56b7&lt;/model&gt;&lt;model_id&gt;d98697eba85743107f44321b8bcb56b7&lt;/model_id&gt;&lt;model_table&gt;sys_hub_flow_snapshot&lt;/model_table&gt;&lt;name&gt;var__m_sys_hub_flow_input_d98697eba85743107f44321b8bcb56b7&lt;/name&gt;&lt;next_element/&gt;&lt;order&gt;100&lt;/order&gt;&lt;primary&gt;false&lt;/primary&gt;&lt;read_only&gt;false&lt;/read_only&gt;&lt;read_only_option/&gt;&lt;read_roles/&gt;&lt;reference/&gt;&lt;reference_cascade_rule/&gt;&lt;reference_floats&gt;false&lt;/reference_floats&gt;&lt;reference_key/&gt;&lt;reference_qual/&gt;&lt;reference_qual_condition/&gt;&lt;reference_type/&gt;&lt;sizeclass/&gt;&lt;spell_check&gt;false&lt;/spell_check&gt;&lt;staged&gt;false&lt;/staged&gt;&lt;sys_class_name&gt;sys_hub_flow_input&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-19 15:12:21&lt;/sys_created_on&gt;&lt;sys_id&gt;9d8697eba85743107f44321b8bcb56c9&lt;/sys_id&gt;&lt;sys_mod_count&gt;1&lt;/sys_mod_count&gt;&lt;sys_name/&gt;&lt;sys_package/&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="Campus360"&gt;7cd68adee41703107f44d305db800ec3&lt;/sys_scope&gt;&lt;sys_update_name/&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-20 02:16:28&lt;/sys_updated_on&gt;&lt;table_reference&gt;false&lt;/table_reference&gt;&lt;text_index&gt;false&lt;/text_index&gt;&lt;unique&gt;false&lt;/unique&gt;&lt;use_dependent_field&gt;false&lt;/use_dependent_field&gt;&lt;use_dynamic_default&gt;false&lt;/use_dynamic_default&gt;&lt;use_reference_qualifier&gt;simple&lt;/use_reference_qualifier&gt;&lt;virtual&gt;false&lt;/virtual&gt;&lt;virtual_type&gt;script&lt;/virtual_type&gt;&lt;widget/&gt;&lt;write_roles/&gt;&lt;xml_view&gt;false&lt;/xml_view&gt;&lt;/sys_hub_flow_input&gt;&lt;sys_hub_action_input_action_instance action="delete_multiple" query="action_input=9d8697eba85743107f44321b8bcb56c9"/&gt;&lt;sys_hub_flow_input action="INSERT_OR_UPDATE"&gt;&lt;active&gt;true&lt;/active&gt;&lt;array&gt;false&lt;/array&gt;&lt;array_denormalized&gt;false&lt;/array_denormalized&gt;&lt;attributes&gt;element_mapping_provider=com.glide.flow_design.action.data.FlowDesignVariableMapper,test_input_hidden=true,uiType=table_name&lt;/attributes&gt;&lt;audit&gt;false&lt;/audit&gt;&lt;calculation&gt;&lt;![CDATA[(function calculatedFieldValue(current) {
+
+	// Add your code here
+	return '';  // return the calculated value
+
+})(current);]]&gt;&lt;/calculation&gt;&lt;choice/&gt;&lt;choice_field/&gt;&lt;choice_table/&gt;&lt;column_label/&gt;&lt;comments/&gt;&lt;create_roles/&gt;&lt;default_value/&gt;&lt;defaultsort/&gt;&lt;delete_roles/&gt;&lt;dependent/&gt;&lt;dependent_on_field/&gt;&lt;display&gt;false&lt;/display&gt;&lt;dynamic_creation&gt;false&lt;/dynamic_creation&gt;&lt;dynamic_creation_script/&gt;&lt;dynamic_default_value/&gt;&lt;dynamic_ref_qual/&gt;&lt;element&gt;table_name&lt;/element&gt;&lt;element_reference&gt;false&lt;/element_reference&gt;&lt;foreign_database/&gt;&lt;formula/&gt;&lt;function_definition/&gt;&lt;function_field&gt;false&lt;/function_field&gt;&lt;help/&gt;&lt;hint/&gt;&lt;internal_type display_value=""&gt;table_name&lt;/internal_type&gt;&lt;label&gt;Table Name&lt;/label&gt;&lt;mandatory&gt;false&lt;/mandatory&gt;&lt;max_length&gt;200&lt;/max_length&gt;&lt;model display_value="Campus360 - Mock Interview QR Generation"&gt;d98697eba85743107f44321b8bcb56b7&lt;/model&gt;&lt;model_id&gt;d98697eba85743107f44321b8bcb56b7&lt;/model_id&gt;&lt;model_table&gt;sys_hub_flow_snapshot&lt;/model_table&gt;&lt;name&gt;var__m_sys_hub_flow_input_d98697eba85743107f44321b8bcb56b7&lt;/name&gt;&lt;next_element/&gt;&lt;order&gt;101&lt;/order&gt;&lt;primary&gt;false&lt;/primary&gt;&lt;read_only&gt;false&lt;/read_only&gt;&lt;read_only_option/&gt;&lt;read_roles/&gt;&lt;reference/&gt;&lt;reference_cascade_rule/&gt;&lt;reference_floats&gt;false&lt;/reference_floats&gt;&lt;reference_key/&gt;&lt;reference_qual/&gt;&lt;reference_qual_condition/&gt;&lt;reference_type/&gt;&lt;sizeclass/&gt;&lt;spell_check&gt;false&lt;/spell_check&gt;&lt;staged&gt;false&lt;/staged&gt;&lt;sys_class_name&gt;sys_hub_flow_input&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-19 15:12:21&lt;/sys_created_on&gt;&lt;sys_id&gt;a98697eba85743107f44321b8bcb56d4&lt;/sys_id&gt;&lt;sys_mod_count&gt;1&lt;/sys_mod_count&gt;&lt;sys_name/&gt;&lt;sys_package/&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="Campus360"&gt;7cd68adee41703107f44d305db800ec3&lt;/sys_scope&gt;&lt;sys_update_name/&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-20 02:16:28&lt;/sys_updated_on&gt;&lt;table_reference&gt;false&lt;/table_reference&gt;&lt;text_index&gt;false&lt;/text_index&gt;&lt;unique&gt;false&lt;/unique&gt;&lt;use_dependent_field&gt;false&lt;/use_dependent_field&gt;&lt;use_dynamic_default&gt;false&lt;/use_dynamic_default&gt;&lt;use_reference_qualifier&gt;simple&lt;/use_reference_qualifier&gt;&lt;virtual&gt;false&lt;/virtual&gt;&lt;virtual_type&gt;script&lt;/virtual_type&gt;&lt;widget/&gt;&lt;write_roles/&gt;&lt;xml_view&gt;false&lt;/xml_view&gt;&lt;/sys_hub_flow_input&gt;&lt;sys_hub_action_input_action_instance action="delete_multiple" query="action_input=a98697eba85743107f44321b8bcb56d4"/&gt;&lt;sys_hub_flow_input action="INSERT_OR_UPDATE"&gt;&lt;active&gt;true&lt;/active&gt;&lt;array&gt;false&lt;/array&gt;&lt;array_denormalized&gt;false&lt;/array_denormalized&gt;&lt;attributes&gt;element_mapping_provider=com.glide.flow_design.action.data.FlowDesignVariableMapper,uiType=document_id&lt;/attributes&gt;&lt;audit&gt;false&lt;/audit&gt;&lt;calculation&gt;&lt;![CDATA[(function calculatedFieldValue(current) {
+
+	// Add your code here
+	return '';  // return the calculated value
+
+})(current);]]&gt;&lt;/calculation&gt;&lt;choice/&gt;&lt;choice_field/&gt;&lt;choice_table/&gt;&lt;column_label/&gt;&lt;comments/&gt;&lt;create_roles/&gt;&lt;default_value/&gt;&lt;defaultsort/&gt;&lt;delete_roles/&gt;&lt;dependent&gt;table_name&lt;/dependent&gt;&lt;dependent_on_field&gt;table_name&lt;/dependent_on_field&gt;&lt;display&gt;false&lt;/display&gt;&lt;dynamic_creation&gt;false&lt;/dynamic_creation&gt;&lt;dynamic_creation_script/&gt;&lt;dynamic_default_value/&gt;&lt;dynamic_ref_qual/&gt;&lt;element&gt;current&lt;/element&gt;&lt;element_reference&gt;false&lt;/element_reference&gt;&lt;foreign_database/&gt;&lt;formula/&gt;&lt;function_definition/&gt;&lt;function_field&gt;false&lt;/function_field&gt;&lt;help/&gt;&lt;hint/&gt;&lt;internal_type display_value=""&gt;document_id&lt;/internal_type&gt;&lt;label&gt;Record&lt;/label&gt;&lt;mandatory&gt;true&lt;/mandatory&gt;&lt;max_length&gt;200&lt;/max_length&gt;&lt;model display_value="Campus360 - Mock Interview QR Generation"&gt;d98697eba85743107f44321b8bcb56b7&lt;/model&gt;&lt;model_id&gt;d98697eba85743107f44321b8bcb56b7&lt;/model_id&gt;&lt;model_table&gt;sys_hub_flow_snapshot&lt;/model_table&gt;&lt;name&gt;var__m_sys_hub_flow_input_d98697eba85743107f44321b8bcb56b7&lt;/name&gt;&lt;next_element/&gt;&lt;order&gt;100&lt;/order&gt;&lt;primary&gt;false&lt;/primary&gt;&lt;read_only&gt;false&lt;/read_only&gt;&lt;read_only_option/&gt;&lt;read_roles/&gt;&lt;reference/&gt;&lt;reference_cascade_rule/&gt;&lt;reference_floats&gt;false&lt;/reference_floats&gt;&lt;reference_key/&gt;&lt;reference_qual/&gt;&lt;reference_qual_condition/&gt;&lt;reference_type/&gt;&lt;sizeclass/&gt;&lt;spell_check&gt;false&lt;/spell_check&gt;&lt;staged&gt;false&lt;/staged&gt;&lt;sys_class_name&gt;sys_hub_flow_input&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-19 15:12:21&lt;/sys_created_on&gt;&lt;sys_id&gt;dd8697eba85743107f44321b8bcb56b9&lt;/sys_id&gt;&lt;sys_mod_count&gt;1&lt;/sys_mod_count&gt;&lt;sys_name/&gt;&lt;sys_package/&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="Campus360"&gt;7cd68adee41703107f44d305db800ec3&lt;/sys_scope&gt;&lt;sys_update_name/&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-20 02:16:28&lt;/sys_updated_on&gt;&lt;table_reference&gt;false&lt;/table_reference&gt;&lt;text_index&gt;false&lt;/text_index&gt;&lt;unique&gt;false&lt;/unique&gt;&lt;use_dependent_field&gt;true&lt;/use_dependent_field&gt;&lt;use_dynamic_default&gt;false&lt;/use_dynamic_default&gt;&lt;use_reference_qualifier&gt;simple&lt;/use_reference_qualifier&gt;&lt;virtual&gt;false&lt;/virtual&gt;&lt;virtual_type&gt;script&lt;/virtual_type&gt;&lt;widget/&gt;&lt;write_roles/&gt;&lt;xml_view&gt;false&lt;/xml_view&gt;&lt;/sys_hub_flow_input&gt;&lt;sys_hub_action_input_action_instance action="delete_multiple" query="action_input=dd8697eba85743107f44321b8bcb56b9"/&gt;&lt;sys_hub_flow_output action="delete_multiple" query="model=d98697eba85743107f44321b8bcb56b7"/&gt;&lt;sys_hub_alias_mapping action="delete_multiple" query="source_id=d98697eba85743107f44321b8bcb56b7"/&gt;&lt;sys_hub_trigger_instance_v2 action="delete_multiple" query="flow=d98697eba85743107f44321b8bcb56b7^sys_idNOT INe18697eba85743107f44321b8bcb56e6"/&gt;&lt;sys_hub_trigger_instance_v2 action="INSERT_OR_UPDATE"&gt;&lt;comment/&gt;&lt;display_text/&gt;&lt;flow display_value="Campus360 - Mock Interview QR Generation"&gt;d98697eba85743107f44321b8bcb56b7&lt;/flow&gt;&lt;generation_source/&gt;&lt;name&gt;Created or Updated&lt;/name&gt;&lt;published_version/&gt;&lt;remote_sys_id/&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-19 15:12:22&lt;/sys_created_on&gt;&lt;sys_id&gt;e18697eba85743107f44321b8bcb56e6&lt;/sys_id&gt;&lt;sys_mod_count&gt;1&lt;/sys_mod_count&gt;&lt;sys_scope/&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-20 02:16:28&lt;/sys_updated_on&gt;&lt;trigger_definition display_value="Created or Updated"&gt;a45d9180c32222002841b63b12d3aea7&lt;/trigger_definition&gt;&lt;trigger_inputs&gt;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&lt;/trigger_inputs&gt;&lt;trigger_outputs/&gt;&lt;trigger_type&gt;record_create_or_update&lt;/trigger_type&gt;&lt;updation_source/&gt;&lt;/sys_hub_trigger_instance_v2&gt;&lt;sys_hub_action_instance_v2 action="delete_multiple" query="flow=d98697eba85743107f44321b8bcb56b7^sys_idNOT IN6d8ea9f79d5303107f4456802862a77d,ed8697eba85743107f44321b8bcb56e4"/&gt;&lt;sys_hub_action_instance_v2 action="INSERT_OR_UPDATE"&gt;&lt;action_type display_value="Update Record"&gt;f9d01dd2c31332002841b63b12d3aea1&lt;/action_type&gt;&lt;action_type_parent display_value="Update Record"&gt;baf174c8c3c232002841b63b12d3aee4&lt;/action_type_parent&gt;&lt;attributes/&gt;&lt;comment/&gt;&lt;compiled_snapshot&gt;f9d01dd2c31332002841b63b12d3aea1&lt;/compiled_snapshot&gt;&lt;display_text/&gt;&lt;flow display_value="Campus360 - Mock Interview QR Generation"&gt;d98697eba85743107f44321b8bcb56b7&lt;/flow&gt;&lt;generation_source/&gt;&lt;order&gt;2&lt;/order&gt;&lt;parent_ui_id/&gt;&lt;sys_class_name&gt;sys_hub_action_instance_v2&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-20 02:16:28&lt;/sys_created_on&gt;&lt;sys_id&gt;6d8ea9f79d5303107f4456802862a77d&lt;/sys_id&gt;&lt;sys_mod_count&gt;0&lt;/sys_mod_count&gt;&lt;sys_scope display_value="Campus360"&gt;7cd68adee41703107f44d305db800ec3&lt;/sys_scope&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-20 02:16:28&lt;/sys_updated_on&gt;&lt;ui_id&gt;74fdb1b3-ccbc-470b-aaec-299e592ecad9&lt;/ui_id&gt;&lt;updation_source/&gt;&lt;values&gt;H4sIAAAAAAAA/+1T2W7aQBT9FWueLcvGBCW8VSCkSFmkJM1LGo2GmQuMOl4yC0sR/95rewyUUkSqPDRSefJd55zDPS9rIgXpky6IOLlKejxN0rQTx53LbjLupeOkI1IGkJCQ5CwD7NTACy0wnjPlqsR6PdDALIig0MHXUlSfNIm40xpyu9lgq5CmVGz17Ccww2dSCayT/strSEqmcbkFTfrrg9K56BQbg8LWhxbeIVy7KqtYFNxliIvKNnnjJ4e+ElwPsYJDFZwkDgksLeQCEMiEKQMhyViOLAu9In2rHSaQv7jP1WrbMZO5bYhmbGnkD3y5G1d9E0Bm3IuwDakXqElPhsyyR9zMrdNbvQrJwTSaCJgwp+xgP9c03JdWFnkzYtlYtdOFcll+1yhCtgv2/g9nEASUFc8KeUNr8jgrFg8tyJHMa0k8RVVwprYRs1bLsbMVnDUBBbXGGStLmU9pqYu5rIcRShZNFQbRRBULfNPIaR4xXuGOUFUWjTA/rNPPTMuKxC2uweFNSMzKDBQzZkcFNaRvrkLSEPMUaK1CLQGtL6Ea5lqW9gs+NQcPfBP6+487Jy8MdgdVn73Zu/83TZ1W31wcp+K0FyKEj3d3zBJ/t+R9LjqDY+uikQQlzBHS3kUWMkRvgTYi/GqkJ18Mnn1x66UPM1PSi+vff0v9u5YaX5w6N361u669nTtbLanJOeUsK51JezHNCv6d4iWAnktY/O6gW6wH13v195njDLStOZ7qKziOvvXHYe5mfza4awreFxcfZovLz2QIT+PTO+JPPnj9CUFAd2hcCQAA&lt;/values&gt;&lt;/sys_hub_action_instance_v2&gt;&lt;sys_hub_alias_mapping action="delete_multiple" query="source_id=6d8ea9f79d5303107f4456802862a77d"/&gt;&lt;sys_hub_action_instance_v2 action="INSERT_OR_UPDATE"&gt;&lt;action_type display_value="Update Record"&gt;f9d01dd2c31332002841b63b12d3aea1&lt;/action_type&gt;&lt;action_type_parent display_value="Update Record"&gt;baf174c8c3c232002841b63b12d3aee4&lt;/action_type_parent&gt;&lt;attributes/&gt;&lt;comment/&gt;&lt;compiled_snapshot&gt;f9d01dd2c31332002841b63b12d3aea1&lt;/compiled_snapshot&gt;&lt;display_text/&gt;&lt;flow display_value="Campus360 - Mock Interview QR Generation"&gt;d98697eba85743107f44321b8bcb56b7&lt;/flow&gt;&lt;generation_source/&gt;&lt;order&gt;1&lt;/order&gt;&lt;parent_ui_id/&gt;&lt;sys_class_name&gt;sys_hub_action_instance_v2&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-19 15:12:22&lt;/sys_created_on&gt;&lt;sys_id&gt;ed8697eba85743107f44321b8bcb56e4&lt;/sys_id&gt;&lt;sys_mod_count&gt;1&lt;/sys_mod_count&gt;&lt;sys_scope display_value="Campus360"&gt;7cd68adee41703107f44d305db800ec3&lt;/sys_scope&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-20 02:16:28&lt;/sys_updated_on&gt;&lt;ui_id&gt;d42aa0d6-e853-4ec7-8922-e69830a249ac&lt;/ui_id&gt;&lt;updation_source/&gt;&lt;values&gt;H4sIAAAAAAAA/+VVTU/jMBD9K5XPbUgaKNDLakWFhMSHBLtcWNZy7Wlr4TjBdlq6Vf/7jhMnRIBYkLhU21M9X3nveWZ8tyFSkDHZBxEnx8mIp0maDuN4eLSfTEfpNBmKlAEkpE80ywAjDfDcCDwvmSq9YbM5McAciF5uej8L4f/SJOKlMaDddouhQtpCsfVtyEALX0gl0E/Gd/d9UjCDxR0YMt68cH0UnWJTUBh63cB7CdetC38WOS8zxEVlYzwPmZPg6Z1N0INJHk4S9wk8OdACEMiMKQt9kjGNLHOzJmNnSjQgf3Gl1bqNWEjtaqIZe7LyD355P/ZxM0BmPIjQHmkQqDbPJsyxG6zMXWlavXLJwdaaCJixUrmTrq0OuCqczHWd4thUNdm5KjN9WStC2gKd+ygtgoDC8/TIa1qzm0W+um5AnkpdSRIoqpwz1Z6Yc0ZOS+fhbAgoqDTOWFFIPaeFyZeySkYoWTRXeIhmKl/hN62c64hxjztCVVl0ivZJZb5lRnoSF1gGk7d9Ytf2RDFrn6mghvSx9EhqYoECrVSoJKBVJ/hkbmThvuOnlhCAb/uh/6cH73UYP35uqE7N5xl4olZzyllWlDYdxTTL+QPFHgCzlLB6PQEX6O+ddfyfm4cPoG3m4UfVBW+jDyPxynbeze1d1o4wEAdfNhBHuzQQgcbOT8S/5iAevrtpO51Utb7tzMCjoTwX8KuM41QsnCvseG9PuWyw4A+D4dHhaIDlDiNszMj6vucw0PkqQvp7tvgmRZ2IVVA5hMxQYG8ajto5ok3Q+09OhJpg6Hb7G4tZx1xp67Q5aDA+9vVA7hb4z22LD9xpsy1OJShh37jkZlVAhqo5oPWlv1gXwdm7Dc72Df2ynZGM4uq3Q5vjv3lK7/8CxY5dM0wKAAA=&lt;/values&gt;&lt;/sys_hub_action_instance_v2&gt;&lt;sys_hub_alias_mapping action="delete_multiple" query="source_id=ed8697eba85743107f44321b8bcb56e4"/&gt;&lt;sys_hub_sub_flow_instance_v2 action="delete_multiple" query="flow=d98697eba85743107f44321b8bcb56b7"/&gt;&lt;sys_hub_flow_logic_instance_v2 action="delete_multiple" query="flow=d98697eba85743107f44321b8bcb56b7"/&gt;&lt;sys_hub_pill_compound action="delete_multiple" query="attached_to=d98697eba85743107f44321b8bcb56b7"/&gt;&lt;sys_hub_flow_variable action="delete_multiple" query="model=d98697eba85743107f44321b8bcb56b7"/&gt;&lt;sys_documentation action="INSERT_OR_UPDATE"&gt;&lt;element&gt;changed_fields&lt;/element&gt;&lt;help/&gt;&lt;hint/&gt;&lt;label&gt;Changed Fields&lt;/label&gt;&lt;language&gt;en&lt;/language&gt;&lt;name&gt;var__m_sys_hub_flow_input_d98697eba85743107f44321b8bcb56b7&lt;/name&gt;&lt;plural/&gt;&lt;sys_class_name&gt;sys_documentation&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-19 15:12:21&lt;/sys_created_on&gt;&lt;sys_id&gt;158697eba85743107f44321b8bcb56d0&lt;/sys_id&gt;&lt;sys_mod_count&gt;0&lt;/sys_mod_count&gt;&lt;sys_name/&gt;&lt;sys_package display_value="Campus360" source="x_snc_campus360"&gt;7cd68adee41703107f44d305db800ec3&lt;/sys_package&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="Campus360"&gt;7cd68adee41703107f44d305db800ec3&lt;/sys_scope&gt;&lt;sys_update_name/&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-19 15:12:21&lt;/sys_updated_on&gt;&lt;url/&gt;&lt;url_target/&gt;&lt;/sys_documentation&gt;&lt;sys_documentation action="INSERT_OR_UPDATE"&gt;&lt;element&gt;current&lt;/element&gt;&lt;help/&gt;&lt;hint/&gt;&lt;label&gt;Record&lt;/label&gt;&lt;language&gt;en&lt;/language&gt;&lt;name&gt;var__m_sys_hub_flow_input_d98697eba85743107f44321b8bcb56b7&lt;/name&gt;&lt;plural/&gt;&lt;sys_class_name&gt;sys_documentation&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-19 15:12:21&lt;/sys_created_on&gt;&lt;sys_id&gt;198697eba85743107f44321b8bcb56c5&lt;/sys_id&gt;&lt;sys_mod_count&gt;0&lt;/sys_mod_count&gt;&lt;sys_name/&gt;&lt;sys_package display_value="Campus360" source="x_snc_campus360"&gt;7cd68adee41703107f44d305db800ec3&lt;/sys_package&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="Campus360"&gt;7cd68adee41703107f44d305db800ec3&lt;/sys_scope&gt;&lt;sys_update_name/&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-19 15:12:21&lt;/sys_updated_on&gt;&lt;url/&gt;&lt;url_target/&gt;&lt;/sys_documentation&gt;&lt;sys_documentation action="INSERT_OR_UPDATE"&gt;&lt;element&gt;table_name&lt;/element&gt;&lt;help/&gt;&lt;hint/&gt;&lt;label&gt;Table Name&lt;/label&gt;&lt;language&gt;en&lt;/language&gt;&lt;name&gt;var__m_sys_hub_flow_input_d98697eba85743107f44321b8bcb56b7&lt;/name&gt;&lt;plural/&gt;&lt;sys_class_name&gt;sys_documentation&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-19 15:12:22&lt;/sys_created_on&gt;&lt;sys_id&gt;2d8697eba85743107f44321b8bcb56da&lt;/sys_id&gt;&lt;sys_mod_count&gt;0&lt;/sys_mod_count&gt;&lt;sys_name/&gt;&lt;sys_package display_value="Campus360" source="x_snc_campus360"&gt;7cd68adee41703107f44d305db800ec3&lt;/sys_package&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="Campus360"&gt;7cd68adee41703107f44d305db800ec3&lt;/sys_scope&gt;&lt;sys_update_name/&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-19 15:12:22&lt;/sys_updated_on&gt;&lt;url/&gt;&lt;url_target/&gt;&lt;/sys_documentation&gt;&lt;sys_choice action="delete_multiple" query="name=var__m_sys_hub_flow_input_d98697eba85743107f44321b8bcb56b7"/&gt;&lt;sys_choice action="delete_multiple" query="name=var__m_sys_hub_flow_output_d98697eba85743107f44321b8bcb56b7"/&gt;&lt;sys_hub_flow action="UPDATE"&gt;&lt;sys_id&gt;0594d7e7a85743107f44321b8bcb568e&lt;/sys_id&gt;&lt;latest_snapshot&gt;d98697eba85743107f44321b8bcb56b7&lt;/latest_snapshot&gt;&lt;compiler_build&gt;glide-australia-02-11-2026__patch3-hotfix1-06-18-2026_06-19-2026_0938.zip&lt;/compiler_build&gt;&lt;version_record/&gt;&lt;/sys_hub_flow&gt;&lt;sys_flow_trigger_plan action="delete_multiple" query="plan_id=0594d7e7a85743107f44321b8bcb568e^sys_idNOT IN6186d7eba85743107f44321b8bcb5621"/&gt;&lt;sys_flow_trigger_plan action="INSERT_OR_UPDATE"&gt;&lt;binding_strategy&gt;com.snc.process_flow.engine.binding.OncePerRecord&lt;/binding_strategy&gt;&lt;plan&gt;{"@class":"com.snc.process_flow.engine.serialization.plan_data.ChunkingPlanData","chunk_data":{"table":"sys_flow_trigger_plan","id":"6186d7eba85743107f44321b8bcb5621","name":"plan","plan_signature":null},"plan_data":"CHUNKING_PLAN"}&lt;/plan&gt;&lt;plan_id&gt;0594d7e7a85743107f44321b8bcb568e&lt;/plan_id&gt;&lt;snapshot&gt;763f697b9d5303107f4456802862a789&lt;/snapshot&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-19 15:12:22&lt;/sys_created_on&gt;&lt;sys_domain&gt;global&lt;/sys_domain&gt;&lt;sys_domain_path&gt;/&lt;/sys_domain_path&gt;&lt;sys_id&gt;6186d7eba85743107f44321b8bcb5621&lt;/sys_id&gt;&lt;sys_mod_count&gt;1&lt;/sys_mod_count&gt;&lt;sys_overrides/&gt;&lt;sys_scope/&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-20 02:16:29&lt;/sys_updated_on&gt;&lt;trigger display_value=""&gt;39b1c3e3a8d343107f44321b8bcb563d&lt;/trigger&gt;&lt;/sys_flow_trigger_plan&gt;&lt;sys_flow_subflow_plan action="delete_multiple" query="plan_id=0594d7e7a85743107f44321b8bcb568e"/&gt;&lt;/record_update&gt;</payload>
+        <payload_hash>307471472</payload_hash>
+        <record_name>Campus360 - Mock Interview QR Generation</record_name>
+        <reverted_from/>
+        <source>70d68adee41703107f44d305db800ec8</source>
+        <source_table>sys_update_set</source_table>
+        <state>previous</state>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-20 11:12:20</sys_created_on>
+        <sys_id>db29a3bf9d5343107f4456802862a790</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_recorded_at>1a0be845ba70000001</sys_recorded_at>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-20 11:12:20</sys_updated_on>
+        <type>Flow</type>
+        <update_guid>1329a3bf83534310a905b3960bbb9290</update_guid>
+        <update_guid_history>1329a3bf83534310a905b3960bbb9290:307471472,b68ee9f7f2530310a03b58ff3e5101aa:1747480224,ce8ea9f7515303107c0bcd5d1fc8c3f6:-1238484021,918ea9f78e5303104863e0a7ad91f046:-2009224109,cdd72d7b97130310c4b6125d0c190429:364263177,6896e1f7b3130310ac7bb463247206ec:-1506243607,8786d7eb075743105d9c13155f9392e5:1412521456,a186d7eb29574310221a0b3483fc7b2e:-767982540,5d8697ebfa574310e04cf97e81420cac:1098183024,85b59f6b7d574310b6c67fbe8889ff9d:-1633256389,4765976bde5743108498b88b9a19de72:-385746988,1bc4d32be1574310686099ec2d8c7a35:1813506145,89941fe74d5743104d8def3f954b9731:1801137127</update_guid_history>
+    </sys_update_version>
+    <sys_metadata_delete action="INSERT_OR_UPDATE">
+        <sys_audit_delete/>
+        <sys_class_name>sys_metadata_delete</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-20 11:13:32</sys_created_on>
+        <sys_db_object display_value="" name="sys_hub_flow">sys_hub_flow</sys_db_object>
+        <sys_id>9e82c2eb6bc44a488c56a868135e4299</sys_id>
+        <sys_metadata>0594d7e7a85743107f44321b8bcb568e</sys_metadata>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>Campus360 - Mock Interview QR Generation</sys_name>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_parent/>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_scope_delete display_value="">1cde9626740d46978b846077c1615101</sys_scope_delete>
+        <sys_update_name>sys_hub_flow_0594d7e7a85743107f44321b8bcb568e</sys_update_name>
+        <sys_update_version display_value="sys_hub_flow_0594d7e7a85743107f44321b8bcb568e">db29a3bf9d5343107f4456802862a790</sys_update_version>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-20 11:13:32</sys_updated_on>
+    </sys_metadata_delete>
+</record_update>

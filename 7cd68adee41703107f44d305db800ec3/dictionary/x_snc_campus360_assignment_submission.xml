@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?><database>
+    <element attributes="enforce_dot_walk_cross_scope_access=true" db_object_id="bfba3fb8c42743107f44164a4d2463c3" label="Assignment Submission" max_length="40" name="x_snc_campus360_assignment_submission" type="collection">
+        <element label="Student" max_length="32" name="student" reference="x_snc_campus360_student_master" type="reference"/>
+        <element label="Submission ID" max_length="40" name="submission_id" type="string"/>
+        <element label="Evaluated By" max_length="32" name="evaluated_by" reference="x_snc_campus360_trainer_master" type="reference"/>
+        <element label="Evaluated Date" max_length="255" name="evaluated_date" type="glide_date_time"/>
+        <element label="Submitted Date" max_length="255" name="submitted_date" type="glide_date_time"/>
+        <element label="Submission Link" max_length="1024" name="submission_link" type="url"/>
+        <element default="0" label="Score" max_length="255" name="score" type="integer"/>
+        <element label="Assignment" max_length="32" name="assignment" reference="x_snc_campus360_assignment" type="reference"/>
+        <element choice="1" label="Submission Status" max_length="255" name="submission_status" type="choice">
+            <choice>
+                <element inactive_on_update="false" label="Late" sequence="4" value="Late"/>
+                <element inactive_on_update="false" label="Submitted" sequence="1" value="Submitted"/>
+                <element inactive_on_update="false" label="Under Review" sequence="2" value="Under Review"/>
+                <element inactive_on_update="false" label="Pending" sequence="0" value="Pending"/>
+                <element inactive_on_update="false" label="Evaluated" sequence="3" value="Evaluated"/>
+            </choice>
+        </element>
+        <element function_definition="1000" label="Trainer Feedback" max_length="1000" name="trainer_feedback" type="string"/>
+        <index name="index">
+            <element name="student"/>
+        </index>
+        <index name="index2">
+            <element name="assignment"/>
+        </index>
+        <index name="index3">
+            <element name="evaluated_by"/>
+        </index>
+    </element>
+</database>

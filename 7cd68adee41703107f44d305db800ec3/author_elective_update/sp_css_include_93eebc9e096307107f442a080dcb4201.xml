@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_css_include">
+    <sp_css_include action="DELETE">
+        <lazy_load>false</lazy_load>
+        <name>Campus360 Recovery CSS</name>
+        <rtl_css_file_url/>
+        <source>local</source>
+        <sp_css display_value="Campus360 Recovery Styles">fe0f70de096307107f442a080dcb4289</sp_css>
+        <sys_class_name>sp_css_include</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-27 17:14:23</sys_created_on>
+        <sys_id>93eebc9e096307107f442a080dcb4201</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>Campus360 Recovery CSS</sys_name>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name>sp_css_include_93eebc9e096307107f442a080dcb4201</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-27 17:14:23</sys_updated_on>
+        <url/>
+    </sp_css_include>
+    <sys_update_version action="INSERT_OR_UPDATE">
+        <action>DELETE</action>
+        <application display_value="Campus360">7cd68adee41703107f44d305db800ec3</application>
+        <file_path/>
+        <instance_id>82d18dc7c38fcf94a03197af0501316c</instance_id>
+        <instance_name>ltm-hck-2876-0027</instance_name>
+        <name>sp_css_include_93eebc9e096307107f442a080dcb4201</name>
+        <payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_css_include"><sp_css_include action="INSERT_OR_UPDATE"><lazy_load>false</lazy_load><name>Campus360 Recovery CSS</name><rtl_css_file_url/><source>local</source><sp_css display_value="Campus360 Recovery Styles">fe0f70de096307107f442a080dcb4289</sp_css><sys_class_name>sp_css_include</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-27 17:14:23</sys_created_on><sys_id>93eebc9e096307107f442a080dcb4201</sys_id><sys_mod_count>0</sys_mod_count><sys_name>Campus360 Recovery CSS</sys_name><sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package><sys_policy/><sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope><sys_update_name>sp_css_include_93eebc9e096307107f442a080dcb4201</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-27 17:14:23</sys_updated_on><url/></sp_css_include></record_update>]]></payload>
+        <payload_hash>-249125643</payload_hash>
+        <record_name>Campus360 Recovery CSS</record_name>
+        <reverted_from/>
+        <source>70d68adee41703107f44d305db800ec8</source>
+        <source_table>sys_update_set</source_table>
+        <state>previous</state>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-27 17:14:23</sys_created_on>
+        <sys_id>832f74de096307107f442a080dcb428c</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_recorded_at>1a0e3dc56f90000001</sys_recorded_at>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-27 17:14:23</sys_updated_on>
+        <type>CSS Include</type>
+        <update_guid>072f74de70630710aa40bdcf92eb028b</update_guid>
+        <update_guid_history>072f74de70630710aa40bdcf92eb028b:-249125643</update_guid_history>
+    </sys_update_version>
+    <sys_metadata_delete action="INSERT_OR_UPDATE">
+        <sys_audit_delete display_value="Campus360 Recovery CSS">446d451e09e307107f442a080dcb4248</sys_audit_delete>
+        <sys_class_name>sys_metadata_delete</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-27 18:16:26</sys_created_on>
+        <sys_db_object display_value="" name="sp_css_include">sp_css_include</sys_db_object>
+        <sys_id>318b18096b1b496097abb55a1bcf5309</sys_id>
+        <sys_metadata>93eebc9e096307107f442a080dcb4201</sys_metadata>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>Campus360 Recovery CSS</sys_name>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_parent/>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_scope_delete display_value="">1cde9626740d46978b846077c1615101</sys_scope_delete>
+        <sys_update_name>sp_css_include_93eebc9e096307107f442a080dcb4201</sys_update_name>
+        <sys_update_version display_value="sp_css_include_93eebc9e096307107f442a080dcb4201">832f74de096307107f442a080dcb428c</sys_update_version>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-27 18:16:26</sys_updated_on>
+    </sys_metadata_delete>
+</record_update>

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?><database>
+    <element attributes="enforce_dot_walk_cross_scope_access=true" db_object_id="85d6f7b0c42743107f44164a4d246335" label="Training Attendance" max_length="40" name="x_snc_campus360_training_attendance" type="collection">
+        <element choice="1" label="Status" max_length="255" name="status" type="choice">
+            <choice>
+                <element inactive_on_update="false" label="Absent" sequence="1" value="Absent"/>
+                <element inactive_on_update="false" label="Present" sequence="0" value="Present"/>
+                <element inactive_on_update="false" label="Late" sequence="2" value="Late"/>
+                <element inactive_on_update="false" label="Excused" sequence="3" value="Excused"/>
+            </choice>
+        </element>
+        <element label="Attendance Date" max_length="255" name="attendance_date" type="glide_date"/>
+        <element label="Trainer" max_length="32" name="trainer" reference="x_snc_campus360_trainer_master" type="reference"/>
+        <element label="Student" max_length="32" name="student" reference="x_snc_campus360_student_master" type="reference"/>
+        <element label="Attendance ID" max_length="40" name="attendance_id" type="string"/>
+        <element label="Remarks" max_length="40" name="remarks" type="string"/>
+        <element label="Training Program" max_length="32" name="training_program" reference="x_snc_campus360_training_program" type="reference"/>
+        <index name="index">
+            <element name="trainer"/>
+        </index>
+        <index name="index2">
+            <element name="student"/>
+        </index>
+        <index name="index3">
+            <element name="training_program"/>
+        </index>
+    </element>
+</database>

@@ -1,0 +1,2196 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_widget">
+    <sp_widget action="INSERT_OR_UPDATE">
+        <category>custom</category>
+        <client_script><![CDATA[api.controller = function() {
+
+    var c = this;
+
+    c.search = '';
+    c.categoryFilter = 'all';
+    c.certificationFilter = 'all';
+
+
+    /*
+     * =========================================================
+     * FILTER SKILL RECORDS
+     * =========================================================
+     */
+
+    c.getFilteredSkills = function() {
+
+        var skills = c.data.skills || [];
+        var results = [];
+
+        var searchText = String(c.search || '')
+            .toLowerCase()
+            .trim();
+
+
+        for (var i = 0; i < skills.length; i++) {
+
+            var skill = skills[i];
+
+            var matchesSearch = true;
+            var matchesCategory = true;
+            var matchesCertification = true;
+
+
+            /*
+             * SEARCH
+             */
+
+            if (searchText) {
+
+                var searchable =
+                    String(skill.student || '') + ' ' +
+                    String(skill.name || '') + ' ' +
+                    String(skill.category || '') + ' ' +
+                    String(skill.level || '');
+
+                searchable = searchable.toLowerCase();
+
+                matchesSearch =
+                    searchable.indexOf(searchText) !== -1;
+            }
+
+
+            /*
+             * CATEGORY
+             */
+
+            if (c.categoryFilter !== 'all') {
+
+                matchesCategory =
+                    String(skill.category || '') ===
+                    String(c.categoryFilter);
+            }
+
+
+            /*
+             * CERTIFICATION
+             */
+
+            if (c.certificationFilter === 'certified') {
+
+                matchesCertification =
+                    skill.certification === true;
+
+            } else if (c.certificationFilter === 'not_certified') {
+
+                matchesCertification =
+                    skill.certification !== true;
+            }
+
+
+            if (
+                matchesSearch &&
+                matchesCategory &&
+                matchesCertification
+            ) {
+
+                results.push(skill);
+
+            }
+
+        }
+
+        return results;
+    };
+
+
+    /*
+     * =========================================================
+     * REFRESH
+     * =========================================================
+     */
+
+    c.refresh = function() {
+
+        c.data.action = 'refresh';
+
+        c.server.update();
+
+    };
+
+};]]></client_script>
+        <controller_as>c</controller_as>
+        <css>/* ==========================================================================
+   ULTIMATE FULLSCREEN EDGE-TO-EDGE RESET (HIDES SERVICENOW TOP BANNER &amp; NAVBAR)
+   ========================================================================== */
+
+html, body, #sp-page, .sp-page-container, #page_content, .page, main {
+  width: 100% !important;
+  height: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  background-color: #f8fafc !important;
+}
+
+/* HIDE SERVICENOW TOP BANNER &amp; NAVBAR FOR ALL TPO PAGE ROOT CONTAINERS */
+body #sp-header,
+body .sp-header,
+body .sp-navbar,
+body #sp-nav-bar,
+body .sp-nav-bar,
+body header#sp-header,
+body header.sp-header,
+body header.navbar,
+body nav.navbar,
+body .navbar.sp-navbar,
+body .navbar.navbar-default,
+body .navbar.navbar-inverse,
+#sp-header,
+.sp-header,
+.sp-navbar,
+#responsiveNav,
+header#sp-header,
+header.sp-header,
+header.navbar,
+nav.navbar {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  min-height: 0 !important;
+  max-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* ZERO MARGIN &amp; PADDING ON SERVICENOW PAGE CONTAINERS */
+.page,
+#sp-page,
+#sp-main,
+.sp-page,
+.sp-main,
+.page-wrapper,
+.main-content,
+.container,
+.container-fluid,
+.row {
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+}
+
+/* FORCE ALL TPO APP ROOT CONTAINERS TO FULLSCREEN FIXED OVERLAY (COVERING TOP NAVBAR 100%) */
+.c360-app,
+.c360-page,
+.campus360-app,
+.campus360-company-app,
+.campus360-company-page,
+.campus360-interviews-app,
+.campus360-applications-app,
+.campus360-applications-page,
+.campus360-tpo-page,
+.campus360-opportunity-page,
+.campus360-tpo-layout,
+.campus360-tpo-app,
+.campus360-skill-page,
+.campus360-tpo-assessments,
+.campus360-skill-intel,
+.interviews-shell,
+.tpo-layout,
+.tpo-container,
+div[class*="campus360"],
+div[class*="c360"] {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  z-index: 99999 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  display: flex !important;
+  background: #f5f7fb !important;
+}
+
+/* ==========================================================================
+   SIDEBAR USER PROFILE CARD - BRIGHT WHITE TEXT FIX (CRITICAL)
+   ========================================================================== */
+
+.tpo-sidebar .sidebar-user,
+.tpo-sidebar .tpo-profile,
+.tpo-sidebar .tpo-profile-card,
+.sidebar-user,
+.tpo-profile-card {
+  margin: 14px 12px 8px !important;
+  padding: 10px 12px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  border: 1px solid #35285b !important;
+  border-radius: 14px !important;
+  background: linear-gradient(145deg, #1c1340, #21174a) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+}
+
+.tpo-sidebar .user-avatar,
+.tpo-sidebar .tpo-avatar,
+.tpo-sidebar .tpo-profile-avatar,
+.sidebar-user .user-avatar,
+.tpo-profile-card .tpo-profile-avatar {
+  width: 40px !important;
+  height: 40px !important;
+  min-width: 40px !important;
+  border-radius: 50% !important;
+  background: linear-gradient(135deg, #7540f4, #944ff5) !important;
+  color: #ffffff !important;
+  font-size: 11px !important;
+  font-weight: 950 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-shadow: 0 4px 12px rgba(117, 64, 244, 0.4) !important;
+}
+
+.tpo-sidebar .user-info,
+.tpo-sidebar .tpo-profile-text,
+.tpo-sidebar .tpo-profile-info,
+.sidebar-user .user-info,
+.tpo-profile-card .tpo-profile-info {
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+}
+
+.tpo-sidebar .user-name,
+.tpo-sidebar .sidebar-user strong,
+.tpo-sidebar .tpo-profile-info strong,
+.tpo-sidebar .tpo-profile-text strong,
+.sidebar-user .user-name,
+.sidebar-user strong,
+.tpo-profile-card strong {
+  font-size: 13px !important;
+  font-weight: 800 !important;
+  color: #ffffff !important; /* CRITICAL BRIGHT WHITE COLOR */
+}
+
+.tpo-sidebar .user-role,
+.tpo-sidebar .user-dept,
+.tpo-sidebar .tpo-role,
+.tpo-sidebar .sidebar-user span,
+.tpo-sidebar .tpo-profile-info span,
+.tpo-sidebar .tpo-profile-text span,
+.sidebar-user .user-role,
+.sidebar-user span,
+.tpo-profile-card span {
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  color: #bcaeff !important; /* LIGHT LAVENDER PURPLE COLOR */
+}
+
+/* SCOPE TOPBAR USER PROFILE EXCLUSIVELY TO TOPBAR */
+.topbar-user .topbar-user-info strong,
+.topbar-user-info strong {
+  font-size: 13px !important;
+  font-weight: 800 !important;
+  color: #0f172a !important;
+}
+
+.topbar-user .topbar-user-info span,
+.topbar-user-info span {
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  color: #64748b !important;
+}
+
+
+
+/* ==========================================================================
+   SKILL INTELLIGENCE - TABLE &amp; MIDDLE CONTENT FONT SIZE BOOST
+   ========================================================================== */
+
+/* OVERALL DIRECTORY CARD SCALE FOR OPTIMAL READABILITY */
+.directory-card,
+.tpo-content-container,
+.campus360-skill-page {
+  zoom: 1.15 !important;
+}
+
+/* SECTION HEADINGS &amp; SEARCH */
+.directory-title-box .sub {
+  font-size: 13px !important;
+  font-weight: 900 !important;
+  letter-spacing: 0.6px !important;
+  color: #6366f1 !important;
+}
+
+.directory-title-box h3 {
+  font-size: 22px !important;
+  font-weight: 950 !important;
+  color: #0f172a !important;
+}
+
+.directory-title-box p {
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  color: #64748b !important;
+}
+
+.popup-link {
+  font-size: 14px !important;
+  font-weight: 800 !important;
+}
+
+.table-search input {
+  font-size: 15px !important;
+  font-weight: 700 !important;
+  height: 44px !important;
+}
+
+.table-search input::placeholder {
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  color: #64748b !important;
+}
+
+/* TABLE HEADERS &amp; ROWS BOOST */
+table.custom-table th,
+.table-responsive th,
+.table th {
+  font-size: 13px !important;
+  font-weight: 900 !important;
+  padding: 16px 18px !important;
+  color: #334155 !important;
+  letter-spacing: 0.6px !important;
+  text-transform: uppercase !important;
+}
+
+table.custom-table td,
+.table-responsive td,
+.table td {
+  font-size: 15px !important;
+  font-weight: 700 !important;
+  padding: 16px 18px !important;
+  color: #0f172a !important;
+}
+
+/* CELL SPECIFIC ELEMENTS */
+.student-name, .student-info strong, td strong {
+  font-size: 16px !important;
+  font-weight: 900 !important;
+  color: #0f172a !important;
+}
+
+.student-usn, .student-info small, td small {
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  color: #64748b !important;
+}
+
+.branch-name, .batch-year {
+  font-size: 14px !important;
+  font-weight: 700 !important;
+}
+
+.score-val, .readiness-score {
+  font-size: 16px !important;
+  font-weight: 900 !important;
+}
+
+.risk-pill, .badge-risk, .gap-tag, .skill-badge {
+  font-size: 13px !important;
+  font-weight: 800 !important;
+  padding: 6px 14px !important;
+}
+
+.btn-intervention, .recorded-badge, .btn-action {
+  font-size: 13px !important;
+  font-weight: 800 !important;
+  padding: 7px 14px !important;
+}
+
+
+
+/* ==========================================================================
+   FAR RIGHT PAGE SCROLLBAR &amp; HIDE SIDEBAR SCROLLBAR (PERFECT FIX)
+   ========================================================================== */
+
+/* 1. HIDE ALL SCROLLBARS ON THE LEFT SIDEBAR / NAVBAR COMPLETELY */
+.tpo-sidebar,
+.tpo-sidebar *,
+.skill-sidebar,
+.skill-sidebar *,
+.sidebar-nav,
+.tpo-sidebar-nav,
+aside.tpo-sidebar {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+.tpo-sidebar::-webkit-scrollbar,
+.tpo-sidebar *::-webkit-scrollbar,
+.skill-sidebar::-webkit-scrollbar,
+.sidebar-nav::-webkit-scrollbar,
+.tpo-sidebar-nav::-webkit-scrollbar,
+aside.tpo-sidebar::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  background: transparent !important;
+}
+
+/* 2. MAKE MAIN PAGE CONTAINER WRAPPER SCROLLABLE ON FAR RIGHT */
+html, body, #sp-page, .sp-page-container, #page_content, .page, main {
+  width: 100% !important;
+  height: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  background-color: #f8fafc !important;
+}
+
+.campus360-tpo-layout,
+.tpo-layout,
+.tpo-container,
+.campus360-skill-intel,
+.tpo-dashboard-center {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  z-index: 9999 !important;
+  overflow: hidden !important;
+  display: flex !important;
+  background: #f8fafc !important;
+}
+
+.tpo-sidebar,
+.skill-sidebar,
+aside.tpo-sidebar {
+  width: 242px !important;
+  min-width: 242px !important;
+  max-width: 242px !important;
+  height: 100vh !important;
+  flex: 0 0 242px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  position: relative !important;
+  overflow-y: auto !important;
+  background: linear-gradient(180deg, #10092a 0%, #130d31 55%, #0d0822 100%) !important;
+  border-right: 1px solid #2b2247 !important;
+  color: #ffffff !important;
+  z-index: 100 !important;
+}
+
+/* MAIN CONTENT WRAPPER - SCROLLBAR FORCED TO FAR RIGHT BROWSER EDGE */
+.tpo-main-wrapper,
+.tpo-main,
+.main-content,
+.tpo-content {
+  flex: 1 1 auto !important;
+  height: 100vh !important;
+  max-height: 100vh !important;
+  overflow-y: scroll !important;
+  overflow-x: hidden !important;
+  background-color: #f8fafc !important;
+  min-width: 0 !important;
+  position: relative !important;
+}
+
+.tpo-content-container,
+.campus360-skill-page,
+.tpo-body {
+  height: auto !important;
+  min-height: 100% !important;
+  overflow: visible !important;
+}
+
+/* CUSTOM HIGH-VISIBILITY PURPLE SCROLLBAR ON THE FAR RIGHT */
+.tpo-main-wrapper::-webkit-scrollbar,
+.tpo-main::-webkit-scrollbar,
+.main-content::-webkit-scrollbar,
+.tpo-content::-webkit-scrollbar {
+  width: 10px !important;
+  display: block !important;
+}
+
+.tpo-main-wrapper::-webkit-scrollbar-track,
+.tpo-main::-webkit-scrollbar-track,
+.main-content::-webkit-scrollbar-track,
+.tpo-content::-webkit-scrollbar-track {
+  background: #f1f5f9 !important;
+  border-left: 1px solid #e2e8f0 !important;
+}
+
+.tpo-main-wrapper::-webkit-scrollbar-thumb,
+.tpo-main::-webkit-scrollbar-thumb,
+.main-content::-webkit-scrollbar-thumb,
+.tpo-content::-webkit-scrollbar-thumb {
+  background: #7c3aed !important;
+  border-radius: 5px !important;
+}
+
+.tpo-main-wrapper::-webkit-scrollbar-thumb:hover,
+.tpo-main::-webkit-scrollbar-thumb:hover,
+.main-content::-webkit-scrollbar-thumb:hover,
+.tpo-content::-webkit-scrollbar-thumb:hover {
+  background: #6d28d9 !important;
+}
+
+
+
+/* ==========================================================================
+   SKILL INTELLIGENCE FULLSCREEN, VISIBLE SCROLLBAR &amp; PURPLE SIDEBAR MASTER FIX
+   ========================================================================== */
+
+/* 1. FULL PAGE &amp; LAYOUT RESETS */
+html, body, #sp-page, .sp-page-container, #page_content, .page, main {
+  width: 100% !important;
+  height: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  background-color: #f8fafc !important;
+}
+
+.campus360-tpo-layout {
+  display: flex !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  max-height: 100vh !important;
+  overflow: hidden !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  background-color: #f8fafc !important;
+  position: relative !important;
+}
+
+/* 2. VISIBLE MAIN CONTENT SCROLLBAR (CRITICAL USER REQUEST) */
+.tpo-main-wrapper {
+  flex: 1 1 auto !important;
+  display: flex !important;
+  flex-direction: column !important;
+  height: 100vh !important;
+  max-height: 100vh !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  background-color: #f8fafc !important;
+  min-width: 0 !important;
+  position: relative !important;
+}
+
+/* CUSTOM HIGH-VISIBILITY SCROLLBAR FOR MAIN CONTENT */
+.tpo-main-wrapper::-webkit-scrollbar,
+.tpo-content-container::-webkit-scrollbar,
+.campus360-skill-page::-webkit-scrollbar {
+  width: 9px !important;
+  display: block !important;
+}
+
+.tpo-main-wrapper::-webkit-scrollbar-track,
+.tpo-content-container::-webkit-scrollbar-track,
+.campus360-skill-page::-webkit-scrollbar-track {
+  background: #f1f5f9 !important;
+  border-left: 1px solid #e2e8f0 !important;
+}
+
+.tpo-main-wrapper::-webkit-scrollbar-thumb,
+.tpo-content-container::-webkit-scrollbar-thumb,
+.campus360-skill-page::-webkit-scrollbar-thumb {
+  background: #7c3aed !important;
+  border-radius: 6px !important;
+}
+
+.tpo-main-wrapper::-webkit-scrollbar-thumb:hover,
+.tpo-content-container::-webkit-scrollbar-thumb:hover,
+.campus360-skill-page::-webkit-scrollbar-thumb:hover {
+  background: #6d28d9 !important;
+}
+
+/* 3. REMOVE SEARCH KBD SYMBOL (⌘K / hash key symbol) */
+.search-kbd, kbd, .search-shortcut {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+/* 4. EXACT PURPLE SIDEBAR THEME MATCHING STUDENT ASSESSMENTS PAGE */
+.tpo-sidebar,
+.skill-sidebar,
+aside.tpo-sidebar {
+  width: 242px !important;
+  min-width: 242px !important;
+  max-width: 242px !important;
+  height: 100vh !important;
+  flex: 0 0 242px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  position: relative !important;
+  overflow: hidden !important;
+  background: linear-gradient(180deg, #10092a 0%, #130d31 55%, #0d0822 100%) !important;
+  border-right: 1px solid #2b2247 !important;
+  color: #ffffff !important;
+  z-index: 100 !important;
+  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.25) !important;
+  box-sizing: border-box !important;
+}
+
+/* BRAND HEADER IN SIDEBAR */
+.sidebar-brand,
+.tpo-brand {
+  height: 84px !important;
+  min-height: 84px !important;
+  padding: 0 18px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 13px !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+.brand-logo,
+.tpo-brand-logo {
+  width: 44px !important;
+  height: 44px !important;
+  min-width: 44px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 12px !important;
+  background: linear-gradient(135deg, #723fff, #8c4cf2) !important;
+  color: #ffffff !important;
+  font-size: 20px !important;
+  font-weight: 950 !important;
+  box-shadow: 0 8px 20px rgba(106, 57, 235, 0.3) !important;
+}
+
+.brand-title,
+.tpo-brand-text strong {
+  color: #ffffff !important;
+  font-size: 17px !important;
+  font-weight: 900 !important;
+  line-height: 1.1 !important;
+}
+
+.brand-sub,
+.tpo-brand-text span {
+  margin-top: 3px !important;
+  color: #bcaeff !important;
+  font-size: 9px !important;
+  font-weight: 850 !important;
+  letter-spacing: 0.8px !important;
+}
+
+/* PROFILE CARD IN SIDEBAR */
+.sidebar-user,
+.tpo-profile-card {
+  margin: 14px 12px 8px !important;
+  min-height: 68px !important;
+  padding: 10px 12px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  border: 1px solid #35285b !important;
+  border-radius: 14px !important;
+  background: linear-gradient(145deg, #1c1340, #21174a) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+}
+
+.user-avatar,
+.tpo-profile-avatar {
+  width: 40px !important;
+  height: 40px !important;
+  min-width: 40px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 50% !important;
+  background: linear-gradient(135deg, #7540f4, #944ff5) !important;
+  color: #ffffff !important;
+  font-size: 11px !important;
+  font-weight: 950 !important;
+  box-shadow: 0 4px 12px rgba(117, 64, 244, 0.4) !important;
+}
+
+.user-name,
+.tpo-profile-info strong {
+  font-size: 13px !important;
+  font-weight: 800 !important;
+  color: #ffffff !important;
+}
+
+.user-role,
+.tpo-profile-info span {
+  font-size: 10px !important;
+  color: #bcaeff !important;
+  font-weight: 700 !important;
+}
+
+/* SIDEBAR NAVIGATION */
+.sidebar-nav,
+.tpo-sidebar-nav {
+  flex: 1 !important;
+  min-height: 0 !important;
+  overflow-y: auto !important;
+  padding: 6px 10px 12px !important;
+}
+
+.nav-section-title,
+.tpo-nav-section-label {
+  font-size: 9px !important;
+  font-weight: 850 !important;
+  color: #83769d !important;
+  letter-spacing: 0.8px !important;
+  padding: 12px 10px 4px !important;
+  text-transform: uppercase !important;
+}
+
+.nav-item,
+.tpo-nav-item {
+  width: 100% !important;
+  min-height: 40px !important;
+  margin: 2px 0 !important;
+  padding: 8px 12px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 11px !important;
+  border: 0 !important;
+  border-radius: 10px !important;
+  background: transparent !important;
+  color: #e6e0f1 !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  text-align: left !important;
+  cursor: pointer !important;
+  transition: background 0.16s ease, color 0.16s ease !important;
+  text-decoration: none !important;
+  box-sizing: border-box !important;
+}
+
+.nav-item:hover,
+.tpo-nav-item:hover {
+  background: #211743 !important;
+  color: #ffffff !important;
+}
+
+.nav-item.active,
+.tpo-nav-item.active {
+  background: linear-gradient(135deg, #793bef, #8b48f2) !important;
+  color: #ffffff !important;
+  box-shadow: 0 8px 18px rgba(103, 50, 224, 0.35) !important;
+}
+
+.nav-badge,
+.tpo-nav-count {
+  margin-left: auto !important;
+  min-width: 22px !important;
+  height: 20px !important;
+  padding: 0 7px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 999px !important;
+  background: rgba(255, 255, 255, 0.18) !important;
+  color: #ffffff !important;
+  font-size: 10px !important;
+  font-weight: 900 !important;
+}
+
+.nav-badge.purple {
+  background: rgba(139, 92, 246, 0.35) !important;
+  color: #e0d7ff !important;
+}
+
+
+
+/* =========================================================
+   CAMPUS360 TPO FULL SCREEN EDGE-TO-EDGE RESET
+   ========================================================= */
+
+body #sp-header,
+body .sp-header,
+body .sp-navbar,
+body .navbar.sp-navbar,
+body #sp-nav-bar,
+body .sp-nav-bar,
+body header#sp-header,
+body header.sp-header,
+body .nav.navbar-nav {
+    display: none !important;
+}
+
+html, body {
+    width: 100% !important;
+    height: 100% !important;
+    min-width: 100% !important;
+    min-height: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    background: #f8fafc !important;
+}
+
+body .page,
+body #sp-page,
+body #sp-main,
+body .sp-page,
+body .sp-main,
+body main,
+body .container,
+body .container-fluid,
+body .row,
+body [class*="col-"] {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    border: none !important;
+}
+
+.campus360-skill-page {&#13;
+  padding: 32px;&#13;
+  max-width: 1400px;&#13;
+  margin: 0 auto;&#13;
+  color: #18233f;&#13;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   HEADER&#13;
+   ========================================================= */&#13;
+&#13;
+.page-header {&#13;
+  display: flex;&#13;
+  justify-content: space-between;&#13;
+  align-items: flex-end;&#13;
+  gap: 24px;&#13;
+  margin-bottom: 28px;&#13;
+}&#13;
+&#13;
+.eyebrow,&#13;
+.card-eyebrow {&#13;
+  font-size: 11px;&#13;
+  font-weight: 800;&#13;
+  letter-spacing: 1.4px;&#13;
+  color: #6941d9;&#13;
+  margin-bottom: 7px;&#13;
+}&#13;
+&#13;
+.page-header h1 {&#13;
+  margin: 0;&#13;
+  font-size: 32px;&#13;
+  font-weight: 800;&#13;
+  color: #111b38;&#13;
+}&#13;
+&#13;
+.page-header p {&#13;
+  margin: 8px 0 0;&#13;
+  color: #71809c;&#13;
+  font-size: 14px;&#13;
+  max-width: 700px;&#13;
+  line-height: 1.6;&#13;
+}&#13;
+&#13;
+.header-actions {&#13;
+  display: flex;&#13;
+  gap: 10px;&#13;
+  align-items: center;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   BUTTONS&#13;
+   ========================================================= */&#13;
+&#13;
+.primary-btn,&#13;
+.secondary-btn {&#13;
+  border-radius: 9px;&#13;
+  padding: 10px 15px;&#13;
+  font-size: 13px;&#13;
+  font-weight: 700;&#13;
+  text-decoration: none;&#13;
+  cursor: pointer;&#13;
+  border: 1px solid transparent;&#13;
+}&#13;
+&#13;
+.primary-btn {&#13;
+  background: #6941d9;&#13;
+  color: white;&#13;
+}&#13;
+&#13;
+.primary-btn:hover {&#13;
+  background: #5631bd;&#13;
+  color: white;&#13;
+  text-decoration: none;&#13;
+}&#13;
+&#13;
+.secondary-btn {&#13;
+  background: white;&#13;
+  border-color: #dfe4ee;&#13;
+  color: #46536d;&#13;
+}&#13;
+&#13;
+.secondary-btn:hover {&#13;
+  background: #f7f8fb;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   FILTER&#13;
+   ========================================================= */&#13;
+&#13;
+.filter-card {&#13;
+  display: flex;&#13;
+  gap: 12px;&#13;
+  align-items: center;&#13;
+  background: white;&#13;
+  border: 1px solid #e6eaf1;&#13;
+  border-radius: 14px;&#13;
+  padding: 14px;&#13;
+  margin-bottom: 22px;&#13;
+  box-shadow: 0 3px 12px rgba(31, 43, 75, 0.04);&#13;
+}&#13;
+&#13;
+.search-box {&#13;
+  display: flex;&#13;
+  align-items: center;&#13;
+  gap: 9px;&#13;
+  flex: 1;&#13;
+  min-width: 280px;&#13;
+  background: #f7f8fb;&#13;
+  border: 1px solid #e4e8f0;&#13;
+  border-radius: 9px;&#13;
+  padding: 0 12px;&#13;
+}&#13;
+&#13;
+.search-icon {&#13;
+  font-size: 18px;&#13;
+  color: #8b96aa;&#13;
+}&#13;
+&#13;
+.search-box input {&#13;
+  width: 100%;&#13;
+  border: 0;&#13;
+  outline: none;&#13;
+  background: transparent;&#13;
+  padding: 11px 0;&#13;
+  font-size: 13px;&#13;
+}&#13;
+&#13;
+.filter-card select {&#13;
+  min-width: 180px;&#13;
+  padding: 11px 12px;&#13;
+  border: 1px solid #dfe4ed;&#13;
+  border-radius: 9px;&#13;
+  background: white;&#13;
+  color: #46536d;&#13;
+  font-size: 13px;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   SUMMARY&#13;
+   ========================================================= */&#13;
+&#13;
+.summary-grid {&#13;
+  display: grid;&#13;
+  grid-template-columns: repeat(4, 1fr);&#13;
+  gap: 16px;&#13;
+  margin-bottom: 22px;&#13;
+}&#13;
+&#13;
+.summary-card {&#13;
+  display: flex;&#13;
+  align-items: center;&#13;
+  gap: 14px;&#13;
+  background: white;&#13;
+  border: 1px solid #e7ebf2;&#13;
+  border-radius: 14px;&#13;
+  padding: 19px;&#13;
+  box-shadow: 0 3px 12px rgba(31, 43, 75, 0.04);&#13;
+}&#13;
+&#13;
+.summary-icon {&#13;
+  width: 42px;&#13;
+  height: 42px;&#13;
+  border-radius: 11px;&#13;
+  display: flex;&#13;
+  align-items: center;&#13;
+  justify-content: center;&#13;
+  font-size: 19px;&#13;
+  font-weight: 700;&#13;
+}&#13;
+&#13;
+.summary-card span {&#13;
+  display: block;&#13;
+  color: #77839b;&#13;
+  font-size: 12px;&#13;
+  margin-bottom: 4px;&#13;
+}&#13;
+&#13;
+.summary-card strong {&#13;
+  font-size: 24px;&#13;
+  color: #18233f;&#13;
+}&#13;
+&#13;
+.summary-card.blue .summary-icon {&#13;
+  background: #edf4ff;&#13;
+  color: #3978db;&#13;
+}&#13;
+&#13;
+.summary-card.purple .summary-icon {&#13;
+  background: #f1edff;&#13;
+  color: #6941d9;&#13;
+}&#13;
+&#13;
+.summary-card.green .summary-icon {&#13;
+  background: #eaf8f0;&#13;
+  color: #27945d;&#13;
+}&#13;
+&#13;
+.summary-card.orange .summary-icon {&#13;
+  background: #fff3e6;&#13;
+  color: #e88928;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   MAIN GRID&#13;
+   ========================================================= */&#13;
+&#13;
+.main-grid {&#13;
+  display: grid;&#13;
+  grid-template-columns: 1.1fr 0.9fr;&#13;
+  gap: 20px;&#13;
+  margin-bottom: 20px;&#13;
+}&#13;
+&#13;
+.card {&#13;
+  background: white;&#13;
+  border: 1px solid #e6eaf1;&#13;
+  border-radius: 15px;&#13;
+  padding: 22px;&#13;
+  box-shadow: 0 3px 12px rgba(31, 43, 75, 0.04);&#13;
+}&#13;
+&#13;
+.card-header {&#13;
+  display: flex;&#13;
+  justify-content: space-between;&#13;
+  align-items: flex-start;&#13;
+  gap: 15px;&#13;
+  margin-bottom: 20px;&#13;
+}&#13;
+&#13;
+.card-header h2 {&#13;
+  margin: 0;&#13;
+  font-size: 19px;&#13;
+  font-weight: 800;&#13;
+  color: #17213b;&#13;
+}&#13;
+&#13;
+.card-header p {&#13;
+  margin: 5px 0 0;&#13;
+  color: #8a95a8;&#13;
+  font-size: 12px;&#13;
+}&#13;
+&#13;
+.text-link {&#13;
+  color: #6941d9;&#13;
+  font-size: 12px;&#13;
+  font-weight: 700;&#13;
+  text-decoration: none;&#13;
+}&#13;
+&#13;
+.text-link:hover {&#13;
+  text-decoration: underline;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   CATEGORY&#13;
+   ========================================================= */&#13;
+&#13;
+.category-list {&#13;
+  display: flex;&#13;
+  flex-direction: column;&#13;
+  gap: 18px;&#13;
+}&#13;
+&#13;
+.category-row {&#13;
+  display: grid;&#13;
+  grid-template-columns: 160px 1fr 45px;&#13;
+  align-items: center;&#13;
+  gap: 12px;&#13;
+}&#13;
+&#13;
+.category-info strong {&#13;
+  display: block;&#13;
+  font-size: 13px;&#13;
+  color: #25304a;&#13;
+}&#13;
+&#13;
+.category-info span {&#13;
+  display: block;&#13;
+  margin-top: 3px;&#13;
+  color: #8994a8;&#13;
+  font-size: 11px;&#13;
+}&#13;
+&#13;
+.category-bar {&#13;
+  height: 8px;&#13;
+  border-radius: 20px;&#13;
+  background: #eef1f6;&#13;
+  overflow: hidden;&#13;
+}&#13;
+&#13;
+.category-fill {&#13;
+  height: 100%;&#13;
+  border-radius: 20px;&#13;
+  background: #6941d9;&#13;
+}&#13;
+&#13;
+.category-percent {&#13;
+  font-size: 12px;&#13;
+  color: #56627a;&#13;
+  text-align: right;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   TOP SKILLS&#13;
+   ========================================================= */&#13;
+&#13;
+.skill-list {&#13;
+  display: flex;&#13;
+  flex-direction: column;&#13;
+}&#13;
+&#13;
+.skill-row {&#13;
+  display: flex;&#13;
+  align-items: center;&#13;
+  gap: 12px;&#13;
+  padding: 12px 0;&#13;
+  border-bottom: 1px solid #edf0f5;&#13;
+}&#13;
+&#13;
+.skill-row:last-child {&#13;
+  border-bottom: 0;&#13;
+}&#13;
+&#13;
+.skill-rank {&#13;
+  width: 27px;&#13;
+  height: 27px;&#13;
+  border-radius: 8px;&#13;
+  background: #f1edff;&#13;
+  color: #6941d9;&#13;
+  display: flex;&#13;
+  align-items: center;&#13;
+  justify-content: center;&#13;
+  font-size: 11px;&#13;
+  font-weight: 800;&#13;
+}&#13;
+&#13;
+.skill-info {&#13;
+  flex: 1;&#13;
+}&#13;
+&#13;
+.skill-info strong {&#13;
+  display: block;&#13;
+  font-size: 13px;&#13;
+  color: #26314b;&#13;
+}&#13;
+&#13;
+.skill-info span {&#13;
+  display: block;&#13;
+  font-size: 11px;&#13;
+  color: #8a95a8;&#13;
+  margin-top: 3px;&#13;
+}&#13;
+&#13;
+.skill-count {&#13;
+  font-weight: 800;&#13;
+  font-size: 14px;&#13;
+  color: #46536d;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   TABLE&#13;
+   ========================================================= */&#13;
+&#13;
+.records-card {&#13;
+  margin-bottom: 20px;&#13;
+}&#13;
+&#13;
+.table-wrapper {&#13;
+  overflow-x: auto;&#13;
+}&#13;
+&#13;
+.skills-table {&#13;
+  width: 100%;&#13;
+  border-collapse: collapse;&#13;
+  min-width: 900px;&#13;
+}&#13;
+&#13;
+.skills-table th {&#13;
+  text-align: left;&#13;
+  padding: 12px 10px;&#13;
+  background: #f7f8fb;&#13;
+  color: #758198;&#13;
+  font-size: 10px;&#13;
+  font-weight: 800;&#13;
+  letter-spacing: 0.7px;&#13;
+  text-transform: uppercase;&#13;
+}&#13;
+&#13;
+.skills-table td {&#13;
+  padding: 14px 10px;&#13;
+  border-bottom: 1px solid #edf0f5;&#13;
+  color: #46536d;&#13;
+  font-size: 12px;&#13;
+}&#13;
+&#13;
+.skills-table tbody tr:hover {&#13;
+  background: #fafbfe;&#13;
+}&#13;
+&#13;
+.skill-name {&#13;
+  font-weight: 700;&#13;
+  color: #25304a;&#13;
+}&#13;
+&#13;
+.category-pill,&#13;
+.level-pill {&#13;
+  display: inline-block;&#13;
+  padding: 5px 8px;&#13;
+  border-radius: 7px;&#13;
+  background: #f3f5f9;&#13;
+  color: #59667d;&#13;
+  font-size: 10px;&#13;
+  font-weight: 700;&#13;
+}&#13;
+&#13;
+.certified {&#13;
+  color: #27945d;&#13;
+  font-weight: 700;&#13;
+  font-size: 11px;&#13;
+}&#13;
+&#13;
+.not-certified {&#13;
+  color: #8a95a8;&#13;
+  font-size: 11px;&#13;
+}&#13;
+&#13;
+.muted {&#13;
+  color: #9ba4b3;&#13;
+  font-size: 11px;&#13;
+}&#13;
+&#13;
+.empty-table {&#13;
+  padding: 40px;&#13;
+  text-align: center;&#13;
+  color: #8b95a8;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   EMPTY STATE&#13;
+   ========================================================= */&#13;
+&#13;
+.empty-state {&#13;
+  padding: 25px 10px;&#13;
+  text-align: center;&#13;
+  color: #8b95a8;&#13;
+  font-size: 12px;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   FOOTER&#13;
+   ========================================================= */&#13;
+&#13;
+.page-footer {&#13;
+  display: flex;&#13;
+  justify-content: space-between;&#13;
+  color: #8994a8;&#13;
+  font-size: 11px;&#13;
+  padding: 5px 2px 20px;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   RESPONSIVE&#13;
+   ========================================================= */&#13;
+&#13;
+@media (max-width: 1000px) {&#13;
+&#13;
+  .summary-grid {&#13;
+    grid-template-columns: repeat(2, 1fr);&#13;
+  }&#13;
+&#13;
+  .main-grid {&#13;
+    grid-template-columns: 1fr;&#13;
+  }&#13;
+&#13;
+}&#13;
+&#13;
+@media (max-width: 700px) {&#13;
+&#13;
+  .campus360-skill-page {&#13;
+    padding: 20px;&#13;
+  }&#13;
+&#13;
+  .page-header {&#13;
+    flex-direction: column;&#13;
+    align-items: flex-start;&#13;
+  }&#13;
+&#13;
+  .filter-card {&#13;
+    flex-wrap: wrap;&#13;
+  }&#13;
+&#13;
+  .search-box {&#13;
+    flex-basis: 100%;&#13;
+  }&#13;
+&#13;
+  .summary-grid {&#13;
+    grid-template-columns: 1fr;&#13;
+  }&#13;
+&#13;
+  .category-row {&#13;
+    grid-template-columns: 120px 1fr 40px;&#13;
+  }&#13;
+&#13;
+}
+.campus360-tpo-layout,
+.tpo-layout,
+.tpo-container,
+.campus360-skill-intel,
+.tpo-dashboard-center {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  z-index: 9999 !important;
+  overflow: hidden !important;
+  background: #f8fafc !important;
+}
+
+.campus360-tpo-layout,
+.tpo-layout,
+.tpo-container,
+.campus360-skill-intel,
+.tpo-dashboard-center {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  z-index: 9999 !important;
+  overflow: hidden !important;
+  background: #f8fafc !important;
+}
+</css>
+        <data_table>sp_instance</data_table>
+        <demo_data/>
+        <description/>
+        <docs/>
+        <field_list/>
+        <has_preview>false</has_preview>
+        <id>campus360_tpo_skill_intelligence</id>
+        <internal>false</internal>
+        <link><![CDATA[function link(scope, element, attrs, controller) {
+  
+}]]></link>
+        <name>Campus360 TPO Skill Intelligence</name>
+        <option_schema/>
+        <public>false</public>
+        <roles/>
+        <script><![CDATA[(function() {
+  try { data.chatbotWidget = $sp.getWidget('c4ae634574e703107f4410c9fee0cde5', {}); } catch(e) {}
+
+    /*
+     * =========================================================
+     * CAMPUS360 TPO SKILL INTELLIGENCE
+     * Server-side data provider
+     * =========================================================
+     */
+
+    data.skills = [];
+
+    data.categories = [];
+
+    data.categoryStats = [];
+
+    data.topSkills = [];
+
+    data.stats = {
+        totalSkills: 0,
+        studentsCovered: 0,
+        certified: 0,
+        averageScore: 0
+    };
+
+
+    /*
+     * =========================================================
+     * STUDENT SKILLS
+     * =========================================================
+     */
+
+    var skillGR = new GlideRecord(
+        'x_snc_campus360_student_skills'
+    );
+
+    skillGR.orderBy('skill_name');
+    skillGR.query();
+
+
+    var studentMap = {};
+    var categoryMap = {};
+    var skillMap = {};
+
+    var scoreTotal = 0;
+    var scoreCount = 0;
+
+
+    while (skillGR.next()) {
+
+        var studentName =
+            skillGR.student_reference.getDisplayValue();
+
+        var skillName =
+            skillGR.getValue('skill_name') || '';
+
+        var category =
+            skillGR.getValue('skill_category') || '';
+
+        var skillLevel =
+            skillGR.getValue('skill_level') || '';
+
+        var scoreValue =
+            skillGR.getValue('assessment_score');
+
+        var certified =
+            skillGR.getValue('certification') == 'true';
+
+        var lastAssessed =
+            skillGR.getDisplayValue('last_assessed_date') || '';
+
+
+        /*
+         * RECORD
+         */
+
+        data.skills.push({
+
+            student: studentName,
+
+            name: skillName,
+
+            category: category,
+
+            level: skillLevel,
+
+            score:
+                scoreValue !== null &&
+                scoreValue !== undefined &&
+                scoreValue !== ''
+                    ? parseInt(scoreValue, 10)
+                    : '',
+
+            certification: certified,
+
+            lastAssessed: lastAssessed
+
+        });
+
+
+        /*
+         * TOTAL
+         */
+
+        data.stats.totalSkills++;
+
+
+        /*
+         * STUDENTS
+         */
+
+        if (studentName) {
+            studentMap[studentName] = true;
+        }
+
+
+        /*
+         * CERTIFICATIONS
+         */
+
+        if (certified) {
+            data.stats.certified++;
+        }
+
+
+        /*
+         * ASSESSMENT SCORE
+         */
+
+        if (
+            scoreValue !== null &&
+            scoreValue !== undefined &&
+            scoreValue !== ''
+        ) {
+
+            var numericScore =
+                parseFloat(scoreValue);
+
+            if (!isNaN(numericScore)) {
+
+                scoreTotal += numericScore;
+                scoreCount++;
+
+            }
+
+        }
+
+
+        /*
+         * CATEGORY
+         */
+
+        if (category) {
+
+            if (!categoryMap[category]) {
+
+                categoryMap[category] = 0;
+
+            }
+
+            categoryMap[category]++;
+
+        }
+
+
+        /*
+         * SKILL
+         */
+
+        if (skillName) {
+
+            if (!skillMap[skillName]) {
+
+                skillMap[skillName] = {
+                    name: skillName,
+                    category: category,
+                    count: 0
+                };
+
+            }
+
+            skillMap[skillName].count++;
+
+        }
+
+    }
+
+
+    /*
+     * =========================================================
+     * STUDENT COUNT
+     * =========================================================
+     */
+
+    for (var studentKey in studentMap) {
+
+        if (studentMap.hasOwnProperty(studentKey)) {
+
+            data.stats.studentsCovered++;
+
+        }
+
+    }
+
+
+    /*
+     * =========================================================
+     * AVERAGE ASSESSMENT
+     * =========================================================
+     */
+
+    if (scoreCount > 0) {
+
+        data.stats.averageScore =
+            Math.round(scoreTotal / scoreCount);
+
+    }
+
+
+    /*
+     * =========================================================
+     * CATEGORIES
+     * =========================================================
+     */
+
+    for (var categoryKey in categoryMap) {
+
+        if (categoryMap.hasOwnProperty(categoryKey)) {
+
+            data.categories.push(categoryKey);
+
+        }
+
+    }
+
+
+    data.categories.sort();
+
+
+    /*
+     * =========================================================
+     * CATEGORY STATISTICS
+     * =========================================================
+     */
+
+    var totalCategoryRecords =
+        data.stats.totalSkills;
+
+
+    for (var categoryName in categoryMap) {
+
+        if (categoryMap.hasOwnProperty(categoryName)) {
+
+            var categoryCount =
+                categoryMap[categoryName];
+
+            var categoryPercent = 0;
+
+            if (totalCategoryRecords > 0) {
+
+                categoryPercent =
+                    Math.round(
+                        (categoryCount /
+                            totalCategoryRecords) * 100
+                    );
+
+            }
+
+            data.categoryStats.push({
+
+                category: categoryName,
+
+                count: categoryCount,
+
+                percent: categoryPercent
+
+            });
+
+        }
+
+    }
+
+
+    data.categoryStats.sort(function(a, b) {
+
+        return b.count - a.count;
+
+    });
+
+
+    /*
+     * =========================================================
+     * TOP SKILLS
+     * =========================================================
+     */
+
+    for (var skillKey in skillMap) {
+
+        if (skillMap.hasOwnProperty(skillKey)) {
+
+            data.topSkills.push(
+                skillMap[skillKey]
+            );
+
+        }
+
+    }
+
+
+    data.topSkills.sort(function(a, b) {
+
+        return b.count - a.count;
+
+    });
+
+
+    /*
+     * Keep the dashboard compact.
+     */
+
+    if (data.topSkills.length > 8) {
+
+        data.topSkills =
+            data.topSkills.slice(0, 8);
+
+    }
+
+
+})();
+
+try {
+  data.aiWidget = $sp.getWidget('c4ae634574e703107f4410c9fee0cde5', {});
+  data.chatbotWidget = data.aiWidget;
+} catch(e) {}
+]]></script>
+        <servicenow>false</servicenow>
+        <sys_class_name>sp_widget</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-23 18:13:19</sys_created_on>
+        <sys_id>0b442801c4ab43107f44164a4d246362</sys_id>
+        <sys_mod_count>11</sys_mod_count>
+        <sys_name>Campus360 TPO Skill Intelligence</sys_name>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name>sp_widget_0b442801c4ab43107f44164a4d246362</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-30 19:21:06</sys_updated_on>
+        <template><![CDATA[<div class="campus360-skill-page">
+
+  <!-- HEADER -->
+  <div class="page-header">
+
+    <div>
+      <div class="eyebrow">CAMPUS360 · INTELLIGENCE</div>
+
+      <h1>Skill Intelligence</h1>
+
+      <p>
+        Analyze student skills, assessment performance,
+        certification coverage, and skill distribution across campus.
+      </p>
+    </div>
+
+    <div class="header-actions">
+
+      <button class="secondary-btn"
+              ng-click="c.refresh()">
+        ↻ Refresh
+      </button>
+
+      <a class="primary-btn"
+         href="?id=campus360_tpo_students">
+        View Students →
+      </a>
+
+    </div>
+
+  </div>
+
+
+  <!-- SEARCH / FILTER -->
+  <div class="filter-card">
+
+    <div class="search-box">
+
+      <span class="search-icon">⌕</span>
+
+      <input type="text"
+             ng-model="c.search"
+             placeholder="Search skill, student, or category...">
+
+    </div>
+
+    <select ng-model="c.categoryFilter">
+
+      <option value="all">
+        All Categories
+      </option>
+
+      <option ng-repeat="category in data.categories"
+              value="{{category}}">
+        {{category}}
+      </option>
+
+    </select>
+
+    <select ng-model="c.certificationFilter">
+
+      <option value="all">
+        All Certification Status
+      </option>
+
+      <option value="certified">
+        Certified
+      </option>
+
+      <option value="not_certified">
+        Not Certified
+      </option>
+
+    </select>
+
+  </div>
+
+
+  <!-- SUMMARY -->
+  <div class="summary-grid">
+
+    <div class="summary-card blue">
+
+      <div class="summary-icon">✦</div>
+
+      <div>
+        <span>Total Skill Records</span>
+        <strong>{{data.stats.totalSkills}}</strong>
+      </div>
+
+    </div>
+
+
+    <div class="summary-card purple">
+
+      <div class="summary-icon">♙</div>
+
+      <div>
+        <span>Students Covered</span>
+        <strong>{{data.stats.studentsCovered}}</strong>
+      </div>
+
+    </div>
+
+
+    <div class="summary-card green">
+
+      <div class="summary-icon">✓</div>
+
+      <div>
+        <span>Certified Skills</span>
+        <strong>{{data.stats.certified}}</strong>
+      </div>
+
+    </div>
+
+
+    <div class="summary-card orange">
+
+      <div class="summary-icon">↗</div>
+
+      <div>
+        <span>Average Assessment</span>
+        <strong>
+          {{data.stats.averageScore}}
+        </strong>
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- MAIN GRID -->
+  <div class="main-grid">
+
+
+    <!-- SKILL DISTRIBUTION -->
+    <section class="card">
+
+      <div class="card-header">
+
+        <div>
+          <div class="card-eyebrow">
+            SKILL DISTRIBUTION
+          </div>
+
+          <h2>
+            Skills by Category
+          </h2>
+        </div>
+
+      </div>
+
+
+      <div class="category-list">
+
+        <div class="category-row"
+             ng-repeat="item in data.categoryStats">
+
+          <div class="category-info">
+
+            <strong>
+              {{item.category}}
+            </strong>
+
+            <span>
+              {{item.count}} skill records
+            </span>
+
+          </div>
+
+          <div class="category-bar">
+
+            <div class="category-fill"
+                 ng-style="{'width': item.percent + '%'}">
+            </div>
+
+          </div>
+
+          <strong class="category-percent">
+            {{item.percent}}%
+          </strong>
+
+        </div>
+
+
+        <div class="empty-state"
+             ng-if="!data.categoryStats.length">
+
+          No skill category data available.
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- TOP SKILLS -->
+    <section class="card">
+
+      <div class="card-header">
+
+        <div>
+          <div class="card-eyebrow">
+            CAMPUS SKILL PROFILE
+          </div>
+
+          <h2>
+            Most Recorded Skills
+          </h2>
+        </div>
+
+      </div>
+
+
+      <div class="skill-list">
+
+        <div class="skill-row"
+             ng-repeat="skill in data.topSkills">
+
+          <div class="skill-rank">
+            {{$index + 1}}
+          </div>
+
+          <div class="skill-info">
+
+            <strong>
+              {{skill.name}}
+            </strong>
+
+            <span>
+              {{skill.category}}
+            </span>
+
+          </div>
+
+          <div class="skill-count">
+            {{skill.count}}
+          </div>
+
+        </div>
+
+
+        <div class="empty-state"
+             ng-if="!data.topSkills.length">
+
+          No skill records available.
+
+        </div>
+
+      </div>
+
+    </section>
+
+  </div>
+
+
+  <!-- SKILL RECORDS -->
+  <section class="card records-card">
+
+    <div class="card-header">
+
+      <div>
+
+        <div class="card-eyebrow">
+          STUDENT SKILLS
+        </div>
+
+        <h2>
+          Skill Records
+        </h2>
+
+        <p>
+          {{c.getFilteredSkills().length}} matching records
+        </p>
+
+      </div>
+
+      <a class="text-link"
+         href="?id=campus360_tpo_students">
+        Manage Students →
+      </a>
+
+    </div>
+
+
+    <div class="table-wrapper">
+
+      <table class="skills-table">
+
+        <thead>
+
+          <tr>
+
+            <th>Student</th>
+
+            <th>Skill</th>
+
+            <th>Category</th>
+
+            <th>Skill Level</th>
+
+            <th>Assessment</th>
+
+            <th>Certification</th>
+
+            <th>Last Assessed</th>
+
+          </tr>
+
+        </thead>
+
+
+        <tbody>
+
+          <tr ng-repeat="skill in c.getFilteredSkills()">
+
+            <td>
+
+              <strong>
+                {{skill.student}}
+              </strong>
+
+            </td>
+
+            <td>
+
+              <span class="skill-name">
+                {{skill.name}}
+              </span>
+
+            </td>
+
+            <td>
+
+              <span class="category-pill">
+                {{skill.category || '—'}}
+              </span>
+
+            </td>
+
+            <td>
+
+              <span class="level-pill">
+                {{skill.level || '—'}}
+              </span>
+
+            </td>
+
+            <td>
+
+              <span ng-if="skill.score !== ''">
+                {{skill.score}}
+              </span>
+
+              <span ng-if="skill.score === ''"
+                    class="muted">
+                Not assessed
+              </span>
+
+            </td>
+
+            <td>
+
+              <span class="certified"
+                    ng-if="skill.certification">
+                ✓ Certified
+              </span>
+
+              <span class="not-certified"
+                    ng-if="!skill.certification">
+                Not certified
+              </span>
+
+            </td>
+
+            <td>
+              {{skill.lastAssessed || '—'}}
+            </td>
+
+          </tr>
+
+
+          <tr ng-if="!c.getFilteredSkills().length">
+
+            <td colspan="7">
+
+              <div class="empty-table">
+                No matching skill records found.
+              </div>
+
+            </td>
+
+          </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </section>
+
+
+  <!-- FOOTER -->
+  <div class="page-footer">
+
+    <span>
+      Campus360 · Skill Intelligence
+    </span>
+
+    <span>
+      {{data.stats.totalSkills}} skill records analyzed
+    </span>
+
+  </div>
+
+</div>
+<div style="position: fixed; bottom: 24px; right: 24px; z-index: 999999;">
+  
+</div>
+<div style="position: fixed; bottom: 24px; right: 24px; z-index: 999999;">
+  <sp-widget widget="data.aiWidget"></sp-widget>
+</div>
+]]></template>
+    </sp_widget>
+</record_update>

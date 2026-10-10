@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?><database>
+    <element attributes="enforce_dot_walk_cross_scope_access=true" db_object_id="ee5ea472ac6703107f44e94dfa051ad2" label="Campus360 AI Conversation" max_length="40" name="x_snc_campus360_campus360_ai_conversation" type="collection">
+        <element label="Content" max_length="4000" name="content" type="string"/>
+        <element label="User" max_length="32" name="user" reference="sys_user" type="reference"/>
+        <element label="Conversation ID" max_length="100" name="conversation_id" type="string"/>
+        <element choice="1" label="Role" max_length="40" name="role" type="choice">
+            <choice>
+                <element inactive_on_update="false" label="assistant" sequence="1" value="assistant"/>
+                <element inactive_on_update="false" label="user" sequence="0" value="user"/>
+            </choice>
+        </element>
+        <index name="index">
+            <element name="user"/>
+        </index>
+    </element>
+</database>

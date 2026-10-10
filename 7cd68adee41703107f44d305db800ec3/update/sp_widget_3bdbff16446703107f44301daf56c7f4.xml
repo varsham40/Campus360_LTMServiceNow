@@ -1,0 +1,6803 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_widget">
+    <sp_widget action="INSERT_OR_UPDATE">
+        <category>custom</category>
+        <client_script><![CDATA[api.controller = function($scope, $window, $timeout) {
+
+  var c = this;
+
+  /* =====================================================
+     STATE
+     ===================================================== */
+
+  c.sidebarCollapsed = false;
+  c.loading = false;
+  c.saving = false;
+
+  c.showApplicationModal = false;
+  c.showNotificationModal = false;
+
+  c.selectedApplication = null;
+
+  c.updateMessage = "";
+  c.updateSuccess = false;
+
+
+  /* =====================================================
+     NOTIFICATION STATE
+     ===================================================== */
+
+  c.notification = {
+    sending: false,
+    message: "",
+    success: false
+  };
+
+
+  /* =====================================================
+     FILTERS
+     ===================================================== */
+
+  c.filters = {
+    search: "",
+    company: "",
+    country: "",
+    applicationStatus: "",
+    studentResponse: "",
+    shortlisted: "",
+    assessmentStatus: "",
+    interviewStatus: "",
+    offerStatus: ""
+  };
+
+  c.filteredApplications = [];
+
+
+  /* =====================================================
+     SIDEBAR
+     ===================================================== */
+
+  c.toggleSidebar = function() {
+    c.sidebarCollapsed = !c.sidebarCollapsed;
+  };
+
+
+  /* =====================================================
+     NAVIGATION
+     ===================================================== */
+
+  c.goTo = function(pageId) {
+
+    if (!pageId) {
+      return;
+    }
+
+    var map = {
+
+      dashboard: "campus360_tpo_home",
+      home: "campus360_tpo_home",
+      campus360_tpo_home: "campus360_tpo_home",
+
+      students: "campus360_tpo_student_management",
+      student_management: "campus360_tpo_student_management",
+      campus360_tpo_student_management:
+        "campus360_tpo_student_management",
+
+      skills: "campus360_tpo_skill_intelligence_new",
+      skill_intelligence: "campus360_tpo_skill_intelligence_new",
+      campus360_tpo_skill_intelligence:
+        "campus360_tpo_skill_intelligence_new",
+      campus360_tpo_skill_intelligence_new:
+        "campus360_tpo_skill_intelligence_new",
+
+      assessments: "student_assessments_new",
+      student_assessments: "student_assessments_new",
+      student_assessments_new: "student_assessments_new",
+
+      companies: "campus360_tpo_companies_new",
+      campus360_tpo_companies: "campus360_tpo_companies_new",
+      campus360_tpo_companies_new:
+        "campus360_tpo_companies_new",
+
+      opportunities: "campus360_tpo_opportunities_new",
+      campus360_tpo_opportunities:
+        "campus360_tpo_opportunities_new",
+      campus360_tpo_opportunities_new:
+        "campus360_tpo_opportunities_new",
+
+      applications: "campus360_tpo_application_new",
+      application: "campus360_tpo_application_new",
+      campus360_tpo_application:
+        "campus360_tpo_application_new",
+      campus360_tpo_application_new:
+        "campus360_tpo_application_new",
+
+      interviews: "campus360_tpo_interviews_new",
+      campus360_tpo_interviews:
+        "campus360_tpo_interviews_new",
+      campus360_tpo_interviews_new:
+        "campus360_tpo_interviews_new",
+
+      outcomes: "campus360_tpo_placement_outcomes",
+      placement_outcomes:
+        "campus360_tpo_placement_outcomes",
+      campus360_tpo_placement_outcomes:
+        "campus360_tpo_placement_outcomes",
+
+      training: "campus360_tpo_training_programs",
+      training_programs:
+        "campus360_tpo_training_programs",
+      campus360_tpo_training_programs:
+        "campus360_tpo_training_programs",
+
+      enrollments:
+        "campus360_tpo_training_programs",
+
+      campus360_tpo_enrollments:
+        "campus360_tpo_training_programs",
+
+      mock_interviews:
+        "campus360_tpo_interviews_new",
+
+      campus360_tpo_mock_interviews:
+        "campus360_tpo_interviews_new",
+
+      risk:
+        "campus360_tpo_student_management",
+
+      campus360_tpo_risk_intelligence:
+        "campus360_tpo_student_management",
+
+      interventions:
+        "campus360_tpo_student_management",
+
+      campus360_tpo_interventions:
+        "campus360_tpo_student_management",
+
+      readiness:
+        "campus360_tpo_skill_intelligence_new",
+
+      ai_assistant:
+        "campus360_tpo_ai_assistant",
+
+      campus360_tpo_ai_assistant:
+        "campus360_tpo_ai_assistant"
+    };
+
+    var target = map[pageId] || pageId;
+
+    $window.location.href =
+      "?id=" + encodeURIComponent(target);
+  };
+
+
+  c.goToPage = function(pageId) {
+    c.goTo(pageId);
+  };
+
+
+  c.navigate = function(pageId) {
+    c.goTo(pageId);
+  };
+
+
+  /* =====================================================
+     APPLY FILTERS
+     ===================================================== */
+
+  c.applyFilters = function() {
+
+    var search =
+      String(c.filters.search || "")
+        .toLowerCase()
+        .trim();
+
+    c.filteredApplications =
+      (c.data.applications || [])
+        .filter(function(a) {
+
+          var searchable = [
+
+            a.application_id,
+            a.number,
+
+            a.student_name,
+            a.student_id,
+            a.student_email,
+
+            a.opportunity_title,
+            a.opportunity_id,
+
+            a.company_name,
+            a.country
+
+          ]
+            .join(" ")
+            .toLowerCase();
+
+
+          var searchOK =
+            !search ||
+            searchable.indexOf(search) !== -1;
+
+
+          var companyOK =
+            !c.filters.company ||
+            String(a.company_name || "") ===
+            String(c.filters.company);
+
+
+          var countryOK =
+            !c.filters.country ||
+            String(a.country || "") ===
+            String(c.filters.country);
+
+
+          var statusOK =
+            !c.filters.applicationStatus ||
+            String(a.application_status_value || "") ===
+            String(c.filters.applicationStatus);
+
+
+          var responseOK =
+            !c.filters.studentResponse ||
+            String(a.student_response_value || "") ===
+            String(c.filters.studentResponse);
+
+
+          var shortlistedOK =
+            c.filters.shortlisted === "" ||
+            Boolean(a.shortlisted) ===
+            (c.filters.shortlisted === "true");
+
+
+          var assessmentOK =
+            !c.filters.assessmentStatus ||
+            String(a.assessment_status_value || "") ===
+            String(c.filters.assessmentStatus);
+
+
+          var interviewOK =
+            !c.filters.interviewStatus ||
+            String(a.interview_status_value || "") ===
+            String(c.filters.interviewStatus);
+
+
+          var offerOK =
+            !c.filters.offerStatus ||
+            String(a.offer_status_value || "") ===
+            String(c.filters.offerStatus);
+
+
+          return (
+            searchOK &&
+            companyOK &&
+            countryOK &&
+            statusOK &&
+            responseOK &&
+            shortlistedOK &&
+            assessmentOK &&
+            interviewOK &&
+            offerOK
+          );
+
+        });
+  };
+
+
+  /* =====================================================
+     CLEAR FILTERS
+     ===================================================== */
+
+  c.clearFilters = function() {
+
+    c.filters = {
+      search: "",
+      company: "",
+      country: "",
+      applicationStatus: "",
+      studentResponse: "",
+      shortlisted: "",
+      assessmentStatus: "",
+      interviewStatus: "",
+      offerStatus: ""
+    };
+
+    c.applyFilters();
+  };
+
+
+  /* =====================================================
+     REFRESH DATA
+     ===================================================== */
+
+  c.refreshData = function() {
+
+    if (c.loading) {
+      return;
+    }
+
+    c.loading = true;
+
+    c.server.get({
+      action: "refresh"
+    }).then(
+
+      function(response) {
+
+        if (response && response.data) {
+          c.data = response.data;
+        }
+
+        c.loading = false;
+        c.applyFilters();
+
+      },
+
+      function() {
+        c.loading = false;
+      }
+
+    );
+  };
+
+
+  /* =====================================================
+     NOTIFICATION MODAL
+     ===================================================== */
+
+  c.openNotificationModal = function(event) {
+
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+
+    c.showNotificationModal = true;
+
+    c.notification.message = "";
+    c.notification.success = false;
+
+    c.refreshNotificationSummary();
+  };
+
+
+  c.closeNotificationModal = function(event) {
+
+    if (event) {
+
+      if (
+        event.target !== event.currentTarget &&
+        event.currentTarget.className &&
+        String(event.currentTarget.className)
+          .indexOf("notification-modal-backdrop") === -1
+      ) {
+        return;
+      }
+
+      event.preventDefault();
+      event.stopPropagation();
+    }
+
+    c.showNotificationModal = false;
+  };
+
+
+  c.toggleNotificationDropdown = function(event) {
+
+    if (c.showNotificationModal) {
+      c.closeNotificationModal(event);
+    } else {
+      c.openNotificationModal(event);
+    }
+  };
+
+
+  /* =====================================================
+     NOTIFICATION SUMMARY
+     ===================================================== */
+
+  c.refreshNotificationSummary = function() {
+
+    c.server.get({
+      action: "notification_summary"
+    }).then(
+
+      function(response) {
+
+        if (response && response.data) {
+
+          c.data = response.data;
+
+          if (!c.data.notification) {
+            c.data.notification = {
+              eligibleStudents: 0,
+              eligibleOpportunities: 0
+            };
+          }
+
+          c.applyFilters();
+        }
+
+      },
+
+      function() {
+
+        if (!c.data.notification) {
+          c.data.notification = {
+            eligibleStudents: 0,
+            eligibleOpportunities: 0
+          };
+        }
+
+      }
+
+    );
+  };
+
+
+  /* =====================================================
+     SEND ELIGIBLE STUDENT NOTIFICATIONS
+     ===================================================== */
+
+  c.sendEligibleNotifications = function() {
+
+    if (c.notification.sending) {
+      return;
+    }
+
+    c.notification.sending = true;
+    c.notification.message = "";
+    c.notification.success = false;
+
+
+    c.server.get({
+      action: "notify_eligible_students"
+    }).then(
+
+      function(response) {
+
+        c.notification.sending = false;
+
+        if (
+          response &&
+          response.data
+        ) {
+
+          c.data = response.data;
+
+          if (response.data.notificationResult) {
+
+            var result =
+              response.data.notificationResult;
+
+            c.notification.success =
+              Boolean(result.success);
+
+            c.notification.message =
+              result.message || "";
+
+          }
+
+          if (!c.data.notification) {
+
+            c.data.notification = {
+              eligibleStudents: 0,
+              eligibleOpportunities: 0
+            };
+
+          }
+
+          c.applyFilters();
+
+        } else {
+
+          c.notification.success = false;
+
+          c.notification.message =
+            "Unable to process student notifications.";
+
+        }
+
+      },
+
+      function() {
+
+        c.notification.sending = false;
+
+        c.notification.success = false;
+
+        c.notification.message =
+          "Unable to send student notifications.";
+
+      }
+
+    );
+  };
+
+
+  /* =====================================================
+     COMPATIBILITY ALIAS
+     ===================================================== */
+
+  c.sendNotifications = function() {
+    c.sendEligibleNotifications();
+  };
+
+
+  /* =====================================================
+     OPEN APPLICATION
+     ===================================================== */
+
+  c.openApplication = function(application) {
+
+    if (!application) {
+      return;
+    }
+
+    c.selectedApplication =
+      angular.copy(application);
+
+    c.updateMessage = "";
+    c.updateSuccess = false;
+
+    c.showApplicationModal = true;
+  };
+
+
+  /* =====================================================
+     CLOSE APPLICATION
+     ===================================================== */
+
+  c.closeApplication = function(event) {
+
+    if (
+      event &&
+      event.target !== event.currentTarget
+    ) {
+      return;
+    }
+
+    if (c.saving) {
+      return;
+    }
+
+    c.showApplicationModal = false;
+    c.selectedApplication = null;
+
+    c.updateMessage = "";
+    c.updateSuccess = false;
+  };
+
+
+  /* =====================================================
+     INITIALS
+     ===================================================== */
+
+  c.getInitials = function(name) {
+
+    if (!name) {
+      return "ST";
+    }
+
+    var parts =
+      String(name)
+        .trim()
+        .split(/\s+/);
+
+    if (parts.length === 1) {
+
+      return parts[0]
+        .substring(0, 2)
+        .toUpperCase();
+    }
+
+    return (
+      parts[0].charAt(0) +
+      parts[parts.length - 1].charAt(0)
+    ).toUpperCase();
+  };
+
+
+  /* =====================================================
+     STATUS CLASS
+     ===================================================== */
+
+  c.getStatusClass = function(status) {
+
+    var value =
+      String(status || "")
+        .toLowerCase();
+
+
+    if (value.indexOf("pending") !== -1) {
+      return "status-pending";
+    }
+
+
+    if (
+      value.indexOf("approved") !== -1 ||
+      value.indexOf("selected") !== -1 ||
+      value.indexOf("accepted") !== -1 ||
+      value.indexOf("shortlisted") !== -1
+    ) {
+      return "status-approved";
+    }
+
+
+    if (value.indexOf("reject") !== -1) {
+      return "status-rejected";
+    }
+
+
+    if (value.indexOf("withdraw") !== -1) {
+      return "status-withdrawn";
+    }
+
+
+    return "status-default";
+  };
+
+
+  /* =====================================================
+     RESPONSE CLASS
+     ===================================================== */
+
+  c.getResponseClass = function(response) {
+
+    var value =
+      String(response || "")
+        .toLowerCase();
+
+
+    if (
+      value === "apply" ||
+      value.indexOf("interested") !== -1
+    ) {
+      return "response-positive";
+    }
+
+
+    if (
+      value === "ignored" ||
+      value.indexOf("not interested") !== -1
+    ) {
+      return "response-negative";
+    }
+
+
+    if (value === "pending") {
+      return "response-neutral";
+    }
+
+
+    return "response-default";
+  };
+
+
+  /* =====================================================
+     SHOW ASSESSMENT
+     ===================================================== */
+
+  c.shouldShowAssessment = function(a) {
+
+    if (!a) {
+      return false;
+    }
+
+    if (!a.shortlisted) {
+      return false;
+    }
+
+    var status =
+      String(a.application_status || "")
+        .toLowerCase();
+
+    var response =
+      String(a.student_response || "")
+        .toLowerCase();
+
+
+    if (
+      status.indexOf("reject") !== -1 ||
+      status.indexOf("withdraw") !== -1
+    ) {
+      return false;
+    }
+
+
+    if (
+      response === "not interested" ||
+      response === "ignored"
+    ) {
+      return false;
+    }
+
+
+    return true;
+  };
+
+
+  /* =====================================================
+     SHOW INTERVIEW
+     ===================================================== */
+
+  c.shouldShowInterview = function(a) {
+
+    if (!c.shouldShowAssessment(a)) {
+      return false;
+    }
+
+    var assessment =
+      String(a.assessment_status || "")
+        .toLowerCase();
+
+
+    if (
+      !assessment ||
+      assessment === "not started"
+    ) {
+      return false;
+    }
+
+
+    if (
+      assessment.indexOf("fail") !== -1 ||
+      assessment.indexOf("reject") !== -1
+    ) {
+      return false;
+    }
+
+
+    return true;
+  };
+
+
+  /* =====================================================
+     SHOW OFFER
+     ===================================================== */
+
+  c.shouldShowOffer = function(a) {
+
+    if (!c.shouldShowInterview(a)) {
+      return false;
+    }
+
+    var interview =
+      String(a.interview_status || "")
+        .toLowerCase();
+
+
+    if (
+      !interview ||
+      interview === "not scheduled"
+    ) {
+      return false;
+    }
+
+
+    if (
+      interview.indexOf("reject") !== -1 ||
+      interview.indexOf("cancel") !== -1
+    ) {
+      return false;
+    }
+
+
+    return true;
+  };
+
+
+  /* =====================================================
+     UPDATE APPLICATION
+     ===================================================== */
+
+  c.updateApplication = function() {
+
+    if (!c.selectedApplication) {
+      return;
+    }
+
+    c.saving = true;
+    c.updateMessage = "";
+    c.updateSuccess = false;
+
+
+    c.server.get({
+
+      action: "update_application",
+
+      application: {
+
+        sys_id:
+          c.selectedApplication.sys_id,
+
+        application_status:
+          c.selectedApplication.application_status_value || "",
+
+        student_response:
+          c.selectedApplication.student_response_value || "",
+
+        shortlisted:
+          Boolean(
+            c.selectedApplication.shortlisted
+          ),
+
+        assessment_status:
+          c.selectedApplication.assessment_status_value || "",
+
+        interview_status:
+          c.selectedApplication.interview_status_value || "",
+
+        offer_status:
+          c.selectedApplication.offer_status_value || ""
+      }
+
+    }).then(
+
+      function(response) {
+
+        c.saving = false;
+
+
+        if (
+          response &&
+          response.data &&
+          response.data.updateResult
+        ) {
+
+          var result =
+            response.data.updateResult;
+
+
+          if (result.success) {
+
+            c.updateSuccess = true;
+
+            c.updateMessage =
+              result.message;
+
+
+            c.data =
+              response.data;
+
+
+            if (result.application) {
+
+              c.selectedApplication =
+                angular.copy(
+                  result.application
+                );
+
+            }
+
+
+            c.applyFilters();
+
+          } else {
+
+            c.updateSuccess = false;
+
+            c.updateMessage =
+              result.message;
+
+          }
+
+        } else {
+
+          c.updateSuccess = false;
+
+          c.updateMessage =
+            "Unable to update application.";
+
+        }
+
+      },
+
+      function() {
+
+        c.saving = false;
+
+        c.updateSuccess = false;
+
+        c.updateMessage =
+          "Unable to update application.";
+
+      }
+
+    );
+  };
+
+
+  /* =====================================================
+     ESCAPE KEY
+     ===================================================== */
+
+  var escapeHandler = function(event) {
+
+    if (event.key !== "Escape") {
+      return;
+    }
+
+
+    if (
+      c.showNotificationModal
+    ) {
+
+      $scope.$evalAsync(function() {
+        c.showNotificationModal = false;
+      });
+
+      return;
+    }
+
+
+    if (
+      c.showApplicationModal &&
+      !c.saving
+    ) {
+
+      $scope.$evalAsync(function() {
+
+        c.showApplicationModal = false;
+        c.selectedApplication = null;
+
+      });
+    }
+  };
+
+
+  $window.addEventListener(
+    "keydown",
+    escapeHandler
+  );
+
+
+  $scope.$on(
+    "$destroy",
+    function() {
+
+      $window.removeEventListener(
+        "keydown",
+        escapeHandler
+      );
+
+    }
+  );
+
+
+  /* =====================================================
+     INITIALIZE
+     ===================================================== */
+
+  if (!c.data.notification) {
+
+    c.data.notification = {
+      eligibleStudents: 0,
+      eligibleOpportunities: 0
+    };
+
+  }
+
+  c.applyFilters();
+
+};]]></client_script>
+        <controller_as>c</controller_as>
+        <css>@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap');&#13;
+&#13;
+html,&#13;
+body {&#13;
+  width:100% !important;&#13;
+  height:100% !important;&#13;
+  margin:0 !important;&#13;
+  padding:0 !important;&#13;
+  overflow:hidden !important;&#13;
+  background:#f8fafc !important;&#13;
+}&#13;
+&#13;
+body #sp-header,&#13;
+body .sp-header,&#13;
+body .sp-navbar,&#13;
+body #sp-nav-bar,&#13;
+body .sp-nav-bar,&#13;
+body header.navbar,&#13;
+body nav.navbar,&#13;
+body .navbar,&#13;
+body .navbar-fixed-top,&#13;
+body .navbar-default,&#13;
+body .navbar-inverse {&#13;
+  display:none !important;&#13;
+  height:0 !important;&#13;
+  min-height:0 !important;&#13;
+  margin:0 !important;&#13;
+  padding:0 !important;&#13;
+  overflow:hidden !important;&#13;
+}&#13;
+&#13;
+body .page,&#13;
+body #sp-page,&#13;
+body #sp-main,&#13;
+body .sp-page,&#13;
+body .sp-main,&#13;
+body .page-wrapper,&#13;
+body .main-content,&#13;
+body .container,&#13;
+body .container-fluid,&#13;
+body .row,&#13;
+body [class*="col-"] {&#13;
+  width:100% !important;&#13;
+  max-width:none !important;&#13;
+  margin:0 !important;&#13;
+  padding:0 !important;&#13;
+  border:0 !important;&#13;
+}&#13;
+&#13;
+.campus360-applications-app,&#13;
+.campus360-applications-app * {&#13;
+  box-sizing:border-box !important;&#13;
+}&#13;
+&#13;
+.campus360-applications-app {&#13;
+  --purple:#7c3aed;&#13;
+  --purple-dark:#6d28d9;&#13;
+  --navy:#121126;&#13;
+  --text:#172033;&#13;
+  --muted:#728096;&#13;
+  --border:#e2e7ed;&#13;
+  --bg:#f8fafc;&#13;
+  --white:#ffffff;&#13;
+  --teal:#0f766e;&#13;
+  --teal-light:#ccfbf1;&#13;
+  --rose:#e11d48;&#13;
+  --rose-light:#ffe4e6;&#13;
+  --amber:#d97706;&#13;
+  --amber-light:#fef3c7;&#13;
+  --indigo:#4f46e5;&#13;
+  --indigo-light:#e0e7ff;&#13;
+&#13;
+  position:fixed !important;&#13;
+  inset:0 !important;&#13;
+  width:100vw !important;&#13;
+  height:100vh !important;&#13;
+  display:flex !important;&#13;
+  overflow:hidden !important;&#13;
+  background:var(--bg) !important;&#13;
+  color:var(--text) !important;&#13;
+  font-family:'Plus Jakarta Sans',Arial,sans-serif !important;&#13;
+  font-size:14px !important;&#13;
+  line-height:1.45 !important;&#13;
+  z-index:999999 !important;&#13;
+}&#13;
+&#13;
+/* ================= SIDEBAR ================= */&#13;
+&#13;
+.applications-sidebar {&#13;
+  width:275px !important;&#13;
+  min-width:275px !important;&#13;
+  height:100vh !important;&#13;
+  display:flex !important;&#13;
+  flex-direction:column !important;&#13;
+  background:linear-gradient(180deg,#111025,#100e22) !important;&#13;
+  color:#fff !important;&#13;
+  border-right:1px solid rgba(255,255,255,.05) !important;&#13;
+  box-shadow:4px 0 24px rgba(0,0,0,.12) !important;&#13;
+  transition:.25s ease !important;&#13;
+  z-index:100 !important;&#13;
+}&#13;
+&#13;
+.sidebar-brand {&#13;
+  height:84px !important;&#13;
+  min-height:84px !important;&#13;
+  padding:18px 20px !important;&#13;
+  display:flex !important;&#13;
+  align-items:center !important;&#13;
+  gap:13px !important;&#13;
+  border-bottom:1px solid rgba(255,255,255,.05) !important;&#13;
+}&#13;
+&#13;
+.brand-mark {&#13;
+  width:44px !important;&#13;
+  height:44px !important;&#13;
+  min-width:44px !important;&#13;
+  display:flex !important;&#13;
+  align-items:center !important;&#13;
+  justify-content:center !important;&#13;
+  border-radius:13px !important;&#13;
+  background:linear-gradient(135deg,#8b5cf6,#6d28d9) !important;&#13;
+  color:#fff !important;&#13;
+  font-size:25px !important;&#13;
+  font-weight:900 !important;&#13;
+}&#13;
+&#13;
+.brand-title {&#13;
+  color:#fff !important;&#13;
+  font-size:19px !important;&#13;
+  font-weight:800 !important;&#13;
+}&#13;
+&#13;
+.brand-subtitle {&#13;
+  margin-top:4px !important;&#13;
+  color:#bcaeff !important;&#13;
+  font-size:10px !important;&#13;
+  font-weight:800 !important;&#13;
+  text-transform:uppercase !important;&#13;
+  letter-spacing:.7px !important;&#13;
+}&#13;
+&#13;
+.sidebar-user-card {&#13;
+  margin:16px 18px 9px !important;&#13;
+  padding:13px 12px !important;&#13;
+  min-height:66px !important;&#13;
+  display:flex !important;&#13;
+  align-items:center !important;&#13;
+  gap:11px !important;&#13;
+  border:1px solid rgba(124,58,237,.28) !important;&#13;
+  border-radius:15px !important;&#13;
+  background:rgba(124,58,237,.14) !important;&#13;
+}&#13;
+&#13;
+.sidebar-user-avatar {&#13;
+  width:42px !important;&#13;
+  height:42px !important;&#13;
+  min-width:42px !important;&#13;
+  display:flex !important;&#13;
+  align-items:center !important;&#13;
+  justify-content:center !important;&#13;
+  border-radius:50% !important;&#13;
+  background:linear-gradient(135deg,#8b5cf6,#6d28d9) !important;&#13;
+  color:#fff !important;&#13;
+  font-size:12px !important;&#13;
+  font-weight:800 !important;&#13;
+}&#13;
+&#13;
+.sidebar-user-name {&#13;
+  color:#fff !important;&#13;
+  font-size:13px !important;&#13;
+  font-weight:800 !important;&#13;
+}&#13;
+&#13;
+.sidebar-user-role {&#13;
+  margin-top:4px !important;&#13;
+  color:#b9b5cf !important;&#13;
+  font-size:9px !important;&#13;
+}&#13;
+&#13;
+.sidebar-scroll {&#13;
+  flex:1 !important;&#13;
+  min-height:0 !important;&#13;
+  padding:5px 13px 16px !important;&#13;
+  overflow-y:auto !important;&#13;
+  scrollbar-width:none !important;&#13;
+}&#13;
+&#13;
+.sidebar-scroll::-webkit-scrollbar {&#13;
+  display:none !important;&#13;
+}&#13;
+&#13;
+.menu-section-title {&#13;
+  margin:16px 12px 7px !important;&#13;
+  color:#9995b0 !important;&#13;
+  font-size:10px !important;&#13;
+  font-weight:800 !important;&#13;
+  letter-spacing:.65px !important;&#13;
+}&#13;
+&#13;
+.menu-item {&#13;
+  width:100% !important;&#13;
+  min-height:42px !important;&#13;
+  margin:3px 0 !important;&#13;
+  padding:0 12px !important;&#13;
+  display:flex !important;&#13;
+  align-items:center !important;&#13;
+  gap:10px !important;&#13;
+  border:0 !important;&#13;
+  border-radius:11px !important;&#13;
+  background:transparent !important;&#13;
+  color:#d9d6e6 !important;&#13;
+  font-size:13px !important;&#13;
+  font-weight:600 !important;&#13;
+  text-align:left !important;&#13;
+  cursor:pointer !important;&#13;
+  transition:.18s ease !important;&#13;
+}&#13;
+&#13;
+.menu-item:hover {&#13;
+  background:rgba(255,255,255,.07) !important;&#13;
+  color:#fff !important;&#13;
+  transform:translateX(2px);&#13;
+}&#13;
+&#13;
+.menu-item.active {&#13;
+  background:linear-gradient(90deg,#7c3aed,#8338ec) !important;&#13;
+  color:#fff !important;&#13;
+  box-shadow:0 8px 20px rgba(124,58,237,.25) !important;&#13;
+}&#13;
+&#13;
+.menu-icon {&#13;
+  width:20px !important;&#13;
+  min-width:20px !important;&#13;
+  color:#aaa6bd !important;&#13;
+  text-align:center !important;&#13;
+}&#13;
+&#13;
+.menu-item:hover .menu-icon,&#13;
+.menu-item.active .menu-icon {&#13;
+  color:#fff !important;&#13;
+}&#13;
+&#13;
+.menu-count {&#13;
+  min-width:25px !important;&#13;
+  height:22px !important;&#13;
+  margin-left:auto !important;&#13;
+  padding:0 7px !important;&#13;
+  display:inline-flex !important;&#13;
+  align-items:center !important;&#13;
+  justify-content:center !important;&#13;
+  border-radius:20px !important;&#13;
+  background:rgba(124,58,237,.35) !important;&#13;
+  color:#d8b4fe !important;&#13;
+  font-size:10px !important;&#13;
+  font-weight:800 !important;&#13;
+}&#13;
+&#13;
+.menu-item.active .menu-count {&#13;
+  background:rgba(255,255,255,.2) !important;&#13;
+  color:#fff !important;&#13;
+}&#13;
+&#13;
+.sidebar-footer {&#13;
+  padding:13px 10px 17px !important;&#13;
+  border-top:1px solid rgba(255,255,255,.05) !important;&#13;
+  color:#8c889e !important;&#13;
+  font-family:monospace !important;&#13;
+  font-size:9px !important;&#13;
+  text-align:center !important;&#13;
+}&#13;
+&#13;
+/* ================= MAIN ================= */&#13;
+&#13;
+.applications-main {&#13;
+  flex:1 1 auto !important;&#13;
+  min-width:0 !important;&#13;
+  height:100vh !important;&#13;
+  display:flex !important;&#13;
+  flex-direction:column !important;&#13;
+  overflow:hidden !important;&#13;
+  background:#f8fafc !important;&#13;
+}&#13;
+&#13;
+/* ================= TOPBAR ================= */&#13;
+&#13;
+.applications-topbar {&#13;
+  height:69px !important;&#13;
+  min-height:69px !important;&#13;
+  padding:0 25px !important;&#13;
+  display:flex !important;&#13;
+  align-items:center !important;&#13;
+  justify-content:space-between !important;&#13;
+  background:#fff !important;&#13;
+  border-bottom:1px solid #e2e7ed !important;&#13;
+  position:relative !important;&#13;
+  z-index:200 !important;&#13;
+}&#13;
+&#13;
+.topbar-left,&#13;
+.topbar-right {&#13;
+  display:flex !important;&#13;
+  align-items:center !important;&#13;
+}&#13;
+&#13;
+.topbar-right {&#13;
+  gap:9px !important;&#13;
+}&#13;
+&#13;
+.sidebar-toggle {&#13;
+  width:38px !important;&#13;
+  height:38px !important;&#13;
+  margin-right:15px !important;&#13;
+  display:flex !important;&#13;
+  align-items:center !important;&#13;
+  justify-content:center !important;&#13;
+  border:1px solid #dfe4ec !important;&#13;
+  border-radius:10px !important;&#13;
+  background:#fff !important;&#13;
+  color:#657286 !important;&#13;
+  cursor:pointer !important;&#13;
+}&#13;
+&#13;
+.sidebar-toggle:hover {&#13;
+  color:#6d28d9 !important;&#13;
+  border-color:#cbb8f4 !important;&#13;
+  background:#faf7ff !important;&#13;
+}&#13;
+&#13;
+.topbar-page-eyebrow {&#13;
+  color:#7c3aed !important;&#13;
+  font-size:9px !important;&#13;
+  font-weight:800 !important;&#13;
+  letter-spacing:1px !important;&#13;
+}&#13;
+&#13;
+.topbar-page-title {&#13;
+  margin-top:2px !important;&#13;
+  color:#172033 !important;&#13;
+  font-size:16px !important;&#13;
+  font-weight:800 !important;&#13;
+}&#13;
+&#13;
+.topbar-search {&#13;
+  width:min(360px,28vw) !important;&#13;
+  height:39px !important;&#13;
+  padding:0 12px !important;&#13;
+  display:flex !important;&#13;
+  align-items:center !important;&#13;
+  border:1px solid #dfe4ec !important;&#13;
+  border-radius:11px !important;&#13;
+  background:#f8fafc !important;&#13;
+}&#13;
+&#13;
+.topbar-search:focus-within {&#13;
+  background:#fff !important;&#13;
+  border-color:#bda7f1 !important;&#13;
+  box-shadow:0 0 0 3px rgba(124,58,237,.07) !important;&#13;
+}&#13;
+&#13;
+.topbar-search i {&#13;
+  margin-right:9px !important;&#13;
+  color:#8a96a8 !important;&#13;
+}&#13;
+&#13;
+.topbar-search input {&#13;
+  width:100% !important;&#13;
+  height:100% !important;&#13;
+  border:0 !important;&#13;
+  outline:0 !important;&#13;
+  background:transparent !important;&#13;
+  font-size:11px !important;&#13;
+}&#13;
+&#13;
+.topbar-circle-button {&#13;
+  position:relative !important;&#13;
+  width:38px !important;&#13;
+  height:38px !important;&#13;
+  display:inline-flex !important;&#13;
+  align-items:center !important;&#13;
+  justify-content:center !important;&#13;
+  border:1px solid #dfe4ec !important;&#13;
+  border-radius:11px !important;&#13;
+  background:#fff !important;&#13;
+  color:#59677b !important;&#13;
+  cursor:pointer !important;&#13;
+}&#13;
+&#13;
+.topbar-circle-button:hover {&#13;
+  color:#6d28d9 !important;&#13;
+  border-color:#cbb8f4 !important;&#13;
+  background:#faf7ff !important;&#13;
+}&#13;
+&#13;
+/* ================= BELL ================= */&#13;
+&#13;
+.notification-button {&#13;
+  position:relative !important;&#13;
+  z-index:300 !important;&#13;
+  cursor:pointer !important;&#13;
+}&#13;
+&#13;
+.notification-bell-icon {&#13;
+  display:inline-block !important;&#13;
+  color:#475569 !important;&#13;
+  font-size:16px !important;&#13;
+  pointer-events:none !important;&#13;
+}&#13;
+&#13;
+.notification-button:hover .notification-bell-icon {&#13;
+  color:#0f766e !important;&#13;
+}&#13;
+&#13;
+.notification-badge {&#13;
+  position:absolute !important;&#13;
+  top:-5px !important;&#13;
+  right:-5px !important;&#13;
+  min-width:17px !important;&#13;
+  height:17px !important;&#13;
+  padding:0 4px !important;&#13;
+  display:flex !important;&#13;
+  align-items:center !important;&#13;
+  justify-content:center !important;&#13;
+  border:2px solid #fff !important;&#13;
+  border-radius:12px !important;&#13;
+  background:#e11d48 !important;&#13;
+  color:#fff !important;&#13;
+  font-size:8px !important;&#13;
+  font-weight:900 !important;&#13;
+  z-index:500 !important;&#13;
+  pointer-events:none !important;&#13;
+}&#13;
+&#13;
+/* ================= PROFILE ================= */&#13;
+&#13;
+.topbar-profile {&#13;
+  display:flex !important;&#13;
+  align-items:center !important;&#13;
+  gap:9px !important;&#13;
+  padding-left:5px !important;&#13;
+}&#13;
+&#13;
+.topbar-avatar {&#13;
+  width:35px !important;&#13;
+  height:35px !important;&#13;
+  display:flex !important;&#13;
+  align-items:center !important;&#13;
+  justify-content:center !important;&#13;
+  border-radius:50% !important;&#13;
+  background:linear-gradient(135deg,#7c3aed,#4f46e5) !important;&#13;
+  color:#fff !important;&#13;
+  font-size:10px !important;&#13;
+  font-weight:800 !important;&#13;
+}&#13;
+&#13;
+.topbar-profile-name {&#13;
+  color:#172033 !important;&#13;
+  font-size:11px !important;&#13;
+  font-weight:800 !important;&#13;
+}&#13;
+&#13;
+.topbar-profile-role {&#13;
+  color:#8994a5 !important;&#13;
+  font-size:9px !important;&#13;
+}&#13;
+&#13;
+.profile-arrow {&#13;
+  color:#8b96a7 !important;&#13;
+}&#13;
+&#13;
+/* ================= CONTENT ================= */&#13;
+&#13;
+.applications-content {&#13;
+  flex:1 !important;&#13;
+  min-height:0 !important;&#13;
+  overflow-y:auto !important;&#13;
+  overflow-x:hidden !important;&#13;
+  padding:28px 30px 50px !important;&#13;
+}&#13;
+&#13;
+.page-heading {&#13;
+  display:flex !important;&#13;
+  align-items:flex-end !important;&#13;
+  justify-content:space-between !important;&#13;
+  gap:25px !important;&#13;
+  margin-bottom:22px !important;&#13;
+}&#13;
+&#13;
+.page-eyebrow,&#13;
+.directory-eyebrow {&#13;
+  color:#0f766e !important;&#13;
+  font-size:10px !important;&#13;
+  font-weight:900 !important;&#13;
+  letter-spacing:1px !important;&#13;
+}&#13;
+&#13;
+.page-eyebrow {&#13;
+  display:flex !important;&#13;
+  align-items:center !important;&#13;
+  gap:7px !important;&#13;
+}&#13;
+&#13;
+.eyebrow-dot {&#13;
+  width:7px !important;&#13;
+  height:7px !important;&#13;
+  border-radius:50% !important;&#13;
+  background:#0f766e !important;&#13;
+}&#13;
+&#13;
+.page-heading h1 {&#13;
+  margin:7px 0 5px !important;&#13;
+  color:#111827 !important;&#13;
+  font-size:30px !important;&#13;
+  line-height:1.1 !important;&#13;
+  font-weight:800 !important;&#13;
+  letter-spacing:-.8px !important;&#13;
+}&#13;
+&#13;
+.page-heading p {&#13;
+  margin:0 !important;&#13;
+  color:#728096 !important;&#13;
+  font-size:12px !important;&#13;
+}&#13;
+&#13;
+.page-heading-actions {&#13;
+  display:flex !important;&#13;
+  gap:10px !important;&#13;
+}&#13;
+&#13;
+.outline-button {&#13;
+  height:40px !important;&#13;
+  padding:0 15px !important;&#13;
+  display:inline-flex !important;&#13;
+  align-items:center !important;&#13;
+  gap:8px !important;&#13;
+  border:1px solid #d6dde7 !important;&#13;
+  border-radius:10px !important;&#13;
+  background:#fff !important;&#13;
+  color:#475569 !important;&#13;
+  font-size:11px !important;&#13;
+  font-weight:700 !important;&#13;
+  cursor:pointer !important;&#13;
+}&#13;
+&#13;
+.outline-button:hover {&#13;
+  border-color:#0f766e !important;&#13;
+  color:#0f766e !important;&#13;
+  background:#f0fdfa !important;&#13;
+}&#13;
+&#13;
+/* ================= NOTIFICATION SUMMARY ================= */&#13;
+&#13;
+.notification-panel {&#13;
+  margin-bottom:20px !important;&#13;
+  padding:17px 20px !important;&#13;
+  display:flex !important;&#13;
+  align-items:center !important;&#13;
+  justify-content:space-between !important;&#13;
+  gap:20px !important;&#13;
+  border:1px solid #99f6e4 !important;&#13;
+  border-radius:15px !important;&#13;
+  background:linear-gradient(135deg,#f0fdfa,#ffffff) !important;&#13;
+}&#13;
+&#13;
+.notification-panel-left {&#13;
+  display:flex !important;&#13;
+  align-items:center !important;&#13;
+  gap:14px !important;&#13;
+}&#13;
+&#13;
+.notification-icon {&#13;
+  width:46px !important;&#13;
+  height:46px !important;&#13;
+  min-width:46px !important;&#13;
+  display:flex !important;&#13;
+  align-items:center !important;&#13;
+  justify-content:center !important;&#13;
+  border-radius:13px !important;&#13;
+  background:#ccfbf1 !important;&#13;
+  color:#0f766e !important;&#13;
+  font-size:18px !important;&#13;
+}&#13;
+&#13;
+.notification-panel-title {&#13;
+  color:#134e4a !important;&#13;
+  font-size:13px !important;&#13;
+  font-weight:800 !important;&#13;
+}&#13;
+&#13;
+.notification-panel-text {&#13;
+  margin-top:4px !important;&#13;
+  color:#64748b !important;&#13;
+  font-size:10px !important;&#13;
+}&#13;
+&#13;
+.notification-stats {&#13;
+  display:flex !important;&#13;
+  align-items:center !important;&#13;
+  gap:18px !important;&#13;
+}&#13;
+&#13;
+.notification-stat {&#13;
+  min-width:95px !important;&#13;
+  text-align:center !important;&#13;
+}&#13;
+&#13;
+.notification-stat-value {&#13;
+  display:block !important;&#13;
+  color:#0f766e !important;&#13;
+  font-size:21px !important;&#13;
+  font-weight:900 !important;&#13;
+}&#13;
+&#13;
+.notification-stat-label {&#13;
+  display:block !important;&#13;
+  margin-top:2px !important;&#13;
+  color:#64748b !important;&#13;
+  font-size:9px !important;&#13;
+  font-weight:700 !important;&#13;
+}&#13;
+&#13;
+.notification-send-button {&#13;
+  height:38px !important;&#13;
+  padding:0 14px !important;&#13;
+  border:0 !important;&#13;
+  border-radius:9px !important;&#13;
+  background:#0f766e !important;&#13;
+  color:#fff !important;&#13;
+  font-size:10px !important;&#13;
+  font-weight:800 !important;&#13;
+  cursor:pointer !important;&#13;
+}&#13;
+&#13;
+.notification-send-button:hover {&#13;
+  background:#115e59 !important;&#13;
+}&#13;
+&#13;
+.notification-send-button:disabled {&#13;
+  opacity:.55 !important;&#13;
+  cursor:not-allowed !important;&#13;
+}&#13;
+&#13;
+/* ================= KPI ================= */&#13;
+&#13;
+.kpi-grid {&#13;
+  display:grid !important;&#13;
+  grid-template-columns:repeat(4,minmax(0,1fr)) !important;&#13;
+  gap:15px !important;&#13;
+  margin-bottom:20px !important;&#13;
+}&#13;
+&#13;
+.kpi-card {&#13;
+  min-height:142px !important;&#13;
+  padding:19px !important;&#13;
+  display:flex !important;&#13;
+  align-items:center !important;&#13;
+  gap:15px !important;&#13;
+  border-radius:16px !important;&#13;
+  border:1px solid transparent !important;&#13;
+  background:#fff !important;&#13;
+  box-shadow:0 7px 25px rgba(26,31,54,.05) !important;&#13;
+}&#13;
+&#13;
+.kpi-icon {&#13;
+  width:48px !important;&#13;
+  height:48px !important;&#13;
+  min-width:48px !important;&#13;
+  display:flex !important;&#13;
+  align-items:center !important;&#13;
+  justify-content:center !important;&#13;
+  border-radius:14px !important;&#13;
+  font-size:19px !important;&#13;
+}&#13;
+&#13;
+.kpi-content {&#13;
+  min-width:0 !important;&#13;
+}&#13;
+&#13;
+.kpi-label {&#13;
+  font-size:9px !important;&#13;
+  font-weight:900 !important;&#13;
+  letter-spacing:.7px !important;&#13;
+  line-height:1.35 !important;&#13;
+}&#13;
+&#13;
+.kpi-value {&#13;
+  margin-top:6px !important;&#13;
+  font-size:29px !important;&#13;
+  line-height:1 !important;&#13;
+  font-weight:900 !important;&#13;
+}&#13;
+&#13;
+.kpi-description {&#13;
+  margin-top:7px !important;&#13;
+  font-size:9px !important;&#13;
+  color:#7a8798 !important;&#13;
+}&#13;
+&#13;
+.kpi-teal {&#13;
+  border-color:#99f6e4 !important;&#13;
+  background:linear-gradient(135deg,#f0fdfa,#fff) !important;&#13;
+}&#13;
+&#13;
+.kpi-teal .kpi-icon {&#13;
+  background:#ccfbf1 !important;&#13;
+  color:#0f766e !important;&#13;
+}&#13;
+&#13;
+.kpi-teal .kpi-label,&#13;
+.kpi-teal .kpi-value {&#13;
+  color:#0f766e !important;&#13;
+}&#13;
+&#13;
+.kpi-rose {&#13;
+  border-color:#fecdd3 !important;&#13;
+  background:linear-gradient(135deg,#fff1f2,#fff) !important;&#13;
+}&#13;
+&#13;
+.kpi-rose .kpi-icon {&#13;
+  background:#ffe4e6 !important;&#13;
+  color:#e11d48 !important;&#13;
+}&#13;
+&#13;
+.kpi-rose .kpi-label,&#13;
+.kpi-rose .kpi-value {&#13;
+  color:#be123c !important;&#13;
+}&#13;
+&#13;
+.kpi-amber {&#13;
+  border-color:#fde68a !important;&#13;
+  background:linear-gradient(135deg,#fffbeb,#fff) !important;&#13;
+}&#13;
+&#13;
+.kpi-amber .kpi-icon {&#13;
+  background:#fef3c7 !important;&#13;
+  color:#d97706 !important;&#13;
+}&#13;
+&#13;
+.kpi-amber .kpi-label,&#13;
+.kpi-amber .kpi-value {&#13;
+  color:#b45309 !important;&#13;
+}&#13;
+&#13;
+.kpi-indigo {&#13;
+  border-color:#c7d2fe !important;&#13;
+  background:linear-gradient(135deg,#eef2ff,#fff) !important;&#13;
+}&#13;
+&#13;
+.kpi-indigo .kpi-icon {&#13;
+  background:#e0e7ff !important;&#13;
+  color:#4f46e5 !important;&#13;
+}&#13;
+&#13;
+.kpi-indigo .kpi-label,&#13;
+.kpi-indigo .kpi-value {&#13;
+  color:#4338ca !important;&#13;
+}&#13;
+&#13;
+/* ================= FILTERS ================= */&#13;
+&#13;
+.filter-bar {&#13;
+  min-height:64px !important;&#13;
+  padding:10px !important;&#13;
+  display:flex !important;&#13;
+  align-items:center !important;&#13;
+  gap:9px !important;&#13;
+  flex-wrap:wrap !important;&#13;
+  border:1px solid #e2e7ed !important;&#13;
+  border-radius:14px 14px 0 0 !important;&#13;
+  background:#fff !important;&#13;
+}&#13;
+&#13;
+.filter-record-count {&#13;
+  min-width:100px !important;&#13;
+  padding:0 8px !important;&#13;
+}&#13;
+&#13;
+.filter-count-label {&#13;
+  display:block !important;&#13;
+  color:#0f766e !important;&#13;
+  font-size:8px !important;&#13;
+  font-weight:900 !important;&#13;
+  letter-spacing:.7px !important;&#13;
+}&#13;
+&#13;
+.filter-record-count strong {&#13;
+  color:#172033 !important;&#13;
+  font-size:18px !important;&#13;
+}&#13;
+&#13;
+.filter-count-text {&#13;
+  color:#8994a5 !important;&#13;
+  font-size:9px !important;&#13;
+}&#13;
+&#13;
+.filter-search {&#13;
+  flex:1 1 270px !important;&#13;
+  height:38px !important;&#13;
+  padding:0 11px !important;&#13;
+  display:flex !important;&#13;
+  align-items:center !important;&#13;
+  border:1px solid #dfe4ec !important;&#13;
+  border-radius:9px !important;&#13;
+  background:#f8fafc !important;&#13;
+}&#13;
+&#13;
+.filter-search-icon {&#13;
+  margin-right:8px !important;&#13;
+  color:#8994a5 !important;&#13;
+}&#13;
+&#13;
+.filter-search input {&#13;
+  width:100% !important;&#13;
+  border:0 !important;&#13;
+  outline:0 !important;&#13;
+  background:transparent !important;&#13;
+  font-size:10px !important;&#13;
+}&#13;
+&#13;
+.filter-select,&#13;
+.secondary-select {&#13;
+  height:38px !important;&#13;
+  padding:0 10px !important;&#13;
+  border:1px solid #dfe4ec !important;&#13;
+  border-radius:9px !important;&#13;
+  background:#fff !important;&#13;
+  color:#475569 !important;&#13;
+  font-size:10px !important;&#13;
+  outline:0 !important;&#13;
+}&#13;
+&#13;
+.filter-select {&#13;
+  min-width:135px !important;&#13;
+}&#13;
+&#13;
+.clear-button {&#13;
+  height:38px !important;&#13;
+  padding:0 13px !important;&#13;
+  border:1px solid #fecdd3 !important;&#13;
+  border-radius:9px !important;&#13;
+  background:#fff1f2 !important;&#13;
+  color:#be123c !important;&#13;
+  font-size:10px !important;&#13;
+  font-weight:800 !important;&#13;
+  cursor:pointer !important;&#13;
+}&#13;
+&#13;
+.secondary-filter-bar {&#13;
+  padding:11px 13px !important;&#13;
+  display:flex !important;&#13;
+  align-items:center !important;&#13;
+  gap:9px !important;&#13;
+  flex-wrap:wrap !important;&#13;
+  border:1px solid #e2e7ed !important;&#13;
+  border-top:0 !important;&#13;
+  background:#f8fafc !important;&#13;
+}&#13;
+&#13;
+.secondary-filter-label {&#13;
+  color:#64748b !important;&#13;
+  font-size:9px !important;&#13;
+  font-weight:900 !important;&#13;
+  letter-spacing:.6px !important;&#13;
+  margin-right:5px !important;&#13;
+}&#13;
+&#13;
+.secondary-select {&#13;
+  min-width:145px !important;&#13;
+}&#13;
+&#13;
+/* ================= DIRECTORY ================= */&#13;
+&#13;
+.directory-card {&#13;
+  margin-top:20px !important;&#13;
+  overflow:hidden !important;&#13;
+  border:1px solid #dce4e9 !important;&#13;
+  border-radius:16px !important;&#13;
+  background:#fff !important;&#13;
+  box-shadow:0 8px 28px rgba(26,31,54,.05) !important;&#13;
+}&#13;
+&#13;
+.directory-header {&#13;
+  min-height:84px !important;&#13;
+  padding:18px 20px !important;&#13;
+  display:flex !important;&#13;
+  align-items:center !important;&#13;
+  justify-content:space-between !important;&#13;
+  border-bottom:1px solid #ccfbf1 !important;&#13;
+  background:linear-gradient(90deg,#f0fdfa,#ffffff) !important;&#13;
+}&#13;
+&#13;
+.directory-eyebrow {&#13;
+  color:#0f766e !important;&#13;
+}&#13;
+&#13;
+.directory-title {&#13;
+  margin-top:3px !important;&#13;
+  color:#172033 !important;&#13;
+  font-size:17px !important;&#13;
+  font-weight:900 !important;&#13;
+}&#13;
+&#13;
+.directory-subtitle {&#13;
+  margin-top:3px !important;&#13;
+  color:#7a8798 !important;&#13;
+  font-size:10px !important;&#13;
+}&#13;
+&#13;
+.directory-record-count {&#13;
+  padding:7px 10px !important;&#13;
+  border:1px solid #c7d2fe !important;&#13;
+  border-radius:20px !important;&#13;
+  background:#eef2ff !important;&#13;
+  color:#4338ca !important;&#13;
+  font-size:9px !important;&#13;
+  font-weight:800 !important;&#13;
+}&#13;
+&#13;
+.application-table-wrapper {&#13;
+  width:100% !important;&#13;
+  overflow:auto !important;&#13;
+}&#13;
+&#13;
+.application-table {&#13;
+  width:100% !important;&#13;
+  min-width:1120px !important;&#13;
+  border-collapse:collapse !important;&#13;
+}&#13;
+&#13;
+.application-table thead {&#13;
+  background:#f0fdfa !important;&#13;
+}&#13;
+&#13;
+.application-table th {&#13;
+  padding:13px 14px !important;&#13;
+  border-bottom:1px solid #99f6e4 !important;&#13;
+  color:#0f766e !important;&#13;
+  font-size:9px !important;&#13;
+  font-weight:900 !important;&#13;
+  text-align:left !important;&#13;
+  white-space:nowrap !important;&#13;
+  letter-spacing:.35px !important;&#13;
+}&#13;
+&#13;
+.application-table tbody tr {&#13;
+  border-bottom:1px solid #edf2f4 !important;&#13;
+  transition:.15s ease !important;&#13;
+}&#13;
+&#13;
+.application-table tbody tr:hover {&#13;
+  background:#fff7f8 !important;&#13;
+}&#13;
+&#13;
+.application-table td {&#13;
+  padding:14px !important;&#13;
+  color:#334155 !important;&#13;
+  font-size:10px !important;&#13;
+  vertical-align:middle !important;&#13;
+}&#13;
+&#13;
+.student-cell {&#13;
+  display:flex !important;&#13;
+  align-items:center !important;&#13;
+  gap:9px !important;&#13;
+}&#13;
+&#13;
+.student-avatar {&#13;
+  width:36px !important;&#13;
+  height:36px !important;&#13;
+  min-width:36px !important;&#13;
+  display:flex !important;&#13;
+  align-items:center !important;&#13;
+  justify-content:center !important;&#13;
+  border-radius:50% !important;&#13;
+  background:#ccfbf1 !important;&#13;
+  color:#0f766e !important;&#13;
+  font-size:9px !important;&#13;
+  font-weight:900 !important;&#13;
+}&#13;
+&#13;
+.student-name {&#13;
+  color:#172033 !important;&#13;
+  font-size:11px !important;&#13;
+  font-weight:800 !important;&#13;
+}&#13;
+&#13;
+.student-id {&#13;
+  margin-top:2px !important;&#13;
+  color:#94a3b8 !important;&#13;
+  font-size:8px !important;&#13;
+}&#13;
+&#13;
+.application-id {&#13;
+  color:#be123c !important;&#13;
+  font-weight:900 !important;&#13;
+}&#13;
+&#13;
+.application-number,&#13;
+.opportunity-id {&#13;
+  margin-top:3px !important;&#13;
+  color:#94a3b8 !important;&#13;
+  font-size:8px !important;&#13;
+}&#13;
+&#13;
+.opportunity-name {&#13;
+  color:#4338ca !important;&#13;
+  font-weight:800 !important;&#13;
+}&#13;
+&#13;
+.company-name {&#13;
+  color:#be123c !important;&#13;
+  font-weight:800 !important;&#13;
+}&#13;
+&#13;
+.country-name {&#13;
+  color:#475569 !important;&#13;
+  font-weight:700 !important;&#13;
+}&#13;
+&#13;
+.country-icon {&#13;
+  margin-right:5px !important;&#13;
+  color:#0f766e !important;&#13;
+}&#13;
+&#13;
+.status-pill,&#13;
+.response-pill,&#13;
+.shortlisted-pill {&#13;
+  display:inline-flex !important;&#13;
+  align-items:center !important;&#13;
+  gap:4px !important;&#13;
+  padding:5px 8px !important;&#13;
+  border-radius:20px !important;&#13;
+  font-size:8px !important;&#13;
+  font-weight:800 !important;&#13;
+  white-space:nowrap !important;&#13;
+}&#13;
+&#13;
+.status-pending {&#13;
+  background:#fef3c7 !important;&#13;
+  color:#b45309 !important;&#13;
+}&#13;
+&#13;
+.status-approved {&#13;
+  background:#ccfbf1 !important;&#13;
+  color:#0f766e !important;&#13;
+}&#13;
+&#13;
+.status-rejected {&#13;
+  background:#ffe4e6 !important;&#13;
+  color:#be123c !important;&#13;
+}&#13;
+&#13;
+.status-withdrawn {&#13;
+  background:#f1f5f9 !important;&#13;
+  color:#64748b !important;&#13;
+}&#13;
+&#13;
+.status-default {&#13;
+  background:#eef2ff !important;&#13;
+  color:#4338ca !important;&#13;
+}&#13;
+&#13;
+.response-positive {&#13;
+  background:#ccfbf1 !important;&#13;
+  color:#0f766e !important;&#13;
+}&#13;
+&#13;
+.response-negative {&#13;
+  background:#ffe4e6 !important;&#13;
+  color:#be123c !important;&#13;
+}&#13;
+&#13;
+.response-neutral,&#13;
+.response-default {&#13;
+  background:#f1f5f9 !important;&#13;
+  color:#64748b !important;&#13;
+}&#13;
+&#13;
+.is-shortlisted {&#13;
+  background:#ccfbf1 !important;&#13;
+  color:#0f766e !important;&#13;
+}&#13;
+&#13;
+.not-shortlisted {&#13;
+  background:#f1f5f9 !important;&#13;
+  color:#64748b !important;&#13;
+}&#13;
+&#13;
+.date-value {&#13;
+  color:#64748b !important;&#13;
+  white-space:nowrap !important;&#13;
+}&#13;
+&#13;
+.view-button {&#13;
+  height:31px !important;&#13;
+  padding:0 10px !important;&#13;
+  border:1px solid #c7d2fe !important;&#13;
+  border-radius:8px !important;&#13;
+  background:#eef2ff !important;&#13;
+  color:#4338ca !important;&#13;
+  font-size:9px !important;&#13;
+  font-weight:800 !important;&#13;
+  cursor:pointer !important;&#13;
+}&#13;
+&#13;
+.view-button:hover {&#13;
+  background:#e0e7ff !important;&#13;
+}&#13;
+&#13;
+.empty-state {&#13;
+  padding:55px 20px !important;&#13;
+  text-align:center !important;&#13;
+}&#13;
+&#13;
+.empty-state-icon {&#13;
+  width:54px !important;&#13;
+  height:54px !important;&#13;
+  margin:0 auto 12px !important;&#13;
+  display:flex !important;&#13;
+  align-items:center !important;&#13;
+  justify-content:center !important;&#13;
+  border-radius:15px !important;&#13;
+  background:#f0fdfa !important;&#13;
+  color:#0f766e !important;&#13;
+  font-size:22px !important;&#13;
+}&#13;
+&#13;
+.empty-state-title {&#13;
+  color:#172033 !important;&#13;
+  font-size:14px !important;&#13;
+  font-weight:900 !important;&#13;
+}&#13;
+&#13;
+.empty-state-text {&#13;
+  margin-top:5px !important;&#13;
+  color:#7a8798 !important;&#13;
+  font-size:10px !important;&#13;
+}&#13;
+&#13;
+.empty-state-button {&#13;
+  margin-top:14px !important;&#13;
+  padding:9px 14px !important;&#13;
+  border:0 !important;&#13;
+  border-radius:8px !important;&#13;
+  background:#0f766e !important;&#13;
+  color:#fff !important;&#13;
+  font-size:10px !important;&#13;
+  font-weight:800 !important;&#13;
+}&#13;
+&#13;
+/* ================= LOADING ================= */&#13;
+&#13;
+.loading-area {&#13;
+  min-height:250px !important;&#13;
+  display:flex !important;&#13;
+  align-items:center !important;&#13;
+  justify-content:center !important;&#13;
+  gap:10px !important;&#13;
+  color:#64748b !important;&#13;
+  font-size:11px !important;&#13;
+}&#13;
+&#13;
+.spinner {&#13;
+  width:22px !important;&#13;
+  height:22px !important;&#13;
+  border:3px solid #dbeafe !important;&#13;
+  border-top-color:#4f46e5 !important;&#13;
+  border-radius:50% !important;&#13;
+  animation:c360Spin .7s linear infinite !important;&#13;
+}&#13;
+&#13;
+@keyframes c360Spin {&#13;
+  to { transform:rotate(360deg); }&#13;
+}&#13;
+&#13;
+/* ================= NOTIFICATION RESULT ================= */&#13;
+&#13;
+.notification-result {&#13;
+  margin-top:12px !important;&#13;
+  padding:11px 14px !important;&#13;
+  border-radius:10px !important;&#13;
+  font-size:10px !important;&#13;
+  font-weight:700 !important;&#13;
+}&#13;
+&#13;
+.notification-result i {&#13;
+  margin-right:6px !important;&#13;
+}&#13;
+&#13;
+.notification-success {&#13;
+  background:#ecfdf5 !important;&#13;
+  border:1px solid #a7f3d0 !important;&#13;
+  color:#047857 !important;&#13;
+}&#13;
+&#13;
+.notification-error {&#13;
+  background:#fff1f2 !important;&#13;
+  border:1px solid #fecdd3 !important;&#13;
+  color:#be123c !important;&#13;
+}&#13;
+&#13;
+/* ================= APPLICATION MODAL ================= */&#13;
+&#13;
+.modal-backdrop {&#13;
+  position:fixed !important;&#13;
+  inset:0 !important;&#13;
+  z-index:1000000 !important;&#13;
+  display:flex !important;&#13;
+  align-items:center !important;&#13;
+  justify-content:center !important;&#13;
+  padding:30px !important;&#13;
+  background:rgba(15,23,42,.58) !important;&#13;
+  backdrop-filter:blur(4px) !important;&#13;
+}&#13;
+&#13;
+.application-modal {&#13;
+  width:min(1100px,96vw) !important;&#13;
+  max-height:92vh !important;&#13;
+  display:flex !important;&#13;
+  flex-direction:column !important;&#13;
+  overflow:hidden !important;&#13;
+  border-radius:18px !important;&#13;
+  background:#fff !important;&#13;
+  box-shadow:0 30px 90px rgba(0,0,0,.28) !important;&#13;
+}&#13;
+&#13;
+.modal-top {&#13;
+  min-height:76px !important;&#13;
+  padding:15px 20px !important;&#13;
+  display:flex !important;&#13;
+  align-items:center !important;&#13;
+  justify-content:space-between !important;&#13;
+  border-bottom:1px solid #e2e8f0 !important;&#13;
+}&#13;
+&#13;
+.modal-heading {&#13;
+  display:flex !important;&#13;
+  align-items:center !important;&#13;
+  gap:12px !important;&#13;
+}&#13;
+&#13;
+.modal-heading-icon {&#13;
+  width:42px !important;&#13;
+  height:42px !important;&#13;
+  display:flex !important;&#13;
+  align-items:center !important;&#13;
+  justify-content:center !important;&#13;
+  border-radius:12px !important;&#13;
+  background:#ccfbf1 !important;&#13;
+  color:#0f766e !important;&#13;
+}&#13;
+&#13;
+.modal-eyebrow {&#13;
+  color:#0f766e !important;&#13;
+  font-size:8px !important;&#13;
+  font-weight:900 !important;&#13;
+  letter-spacing:.8px !important;&#13;
+}&#13;
+&#13;
+.modal-title {&#13;
+  margin-top:3px !important;&#13;
+  color:#172033 !important;&#13;
+  font-size:17px !important;&#13;
+  font-weight:900 !important;&#13;
+}&#13;
+&#13;
+.modal-close {&#13;
+  width:36px !important;&#13;
+  height:36px !important;&#13;
+  display:flex !important;&#13;
+  align-items:center !important;&#13;
+  justify-content:center !important;&#13;
+  border:0 !important;&#13;
+  border-radius:9px !important;&#13;
+  background:#f8fafc !important;&#13;
+  color:#64748b !important;&#13;
+  cursor:pointer !important;&#13;
+}&#13;
+&#13;
+.modal-close:hover {&#13;
+  background:#ffe4e6 !important;&#13;
+  color:#be123c !important;&#13;
+}&#13;
+&#13;
+.modal-body {&#13;
+  flex:1 !important;&#13;
+  overflow:auto !important;&#13;
+  padding:20px !important;&#13;
+}&#13;
+&#13;
+.application-summary-strip {&#13;
+  display:grid !important;&#13;
+  grid-template-columns:repeat(4,minmax(0,1fr)) !important;&#13;
+  gap:10px !important;&#13;
+  margin-bottom:12px !important;&#13;
+}&#13;
+&#13;
+.summary-strip-item {&#13;
+  min-height:70px !important;&#13;
+  padding:12px !important;&#13;
+  display:flex !important;&#13;
+  flex-direction:column !important;&#13;
+  justify-content:center !important;&#13;
+  border:1px solid #e2e8f0 !important;&#13;
+  border-radius:11px !important;&#13;
+  background:#f8fafc !important;&#13;
+}&#13;
+&#13;
+.summary-strip-label {&#13;
+  margin-bottom:5px !important;&#13;
+  color:#94a3b8 !important;&#13;
+  font-size:8px !important;&#13;
+  font-weight:900 !important;&#13;
+  letter-spacing:.5px !important;&#13;
+}&#13;
+&#13;
+.summary-strip-item strong {&#13;
+  color:#172033 !important;&#13;
+  font-size:11px !important;&#13;
+}&#13;
+&#13;
+.summary-score,&#13;
+.ai-score {&#13;
+  color:#4f46e5 !important;&#13;
+  font-size:18px !important;&#13;
+  font-weight:900 !important;&#13;
+}&#13;
+&#13;
+.modal-section {&#13;
+  margin-top:16px !important;&#13;
+  padding:16px !important;&#13;
+  border:1px solid #e2e8f0 !important;&#13;
+  border-radius:13px !important;&#13;
+  background:#fff !important;&#13;
+}&#13;
+&#13;
+.modal-section-title {&#13;
+  margin-bottom:13px !important;&#13;
+  color:#0f766e !important;&#13;
+  font-size:10px !important;&#13;
+  font-weight:900 !important;&#13;
+  letter-spacing:.6px !important;&#13;
+}&#13;
+&#13;
+.details-grid,&#13;
+.edit-grid {&#13;
+  display:grid !important;&#13;
+  grid-template-columns:repeat(4,minmax(0,1fr)) !important;&#13;
+  gap:12px !important;&#13;
+}&#13;
+&#13;
+.detail-wide {&#13;
+  grid-column:span 2 !important;&#13;
+}&#13;
+&#13;
+.detail-item,&#13;
+.edit-item {&#13;
+  min-width:0 !important;&#13;
+}&#13;
+&#13;
+.detail-item label,&#13;
+.edit-item label {&#13;
+  display:block !important;&#13;
+  margin-bottom:5px !important;&#13;
+  color:#94a3b8 !important;&#13;
+  font-size:8px !important;&#13;
+  font-weight:800 !important;&#13;
+}&#13;
+&#13;
+.detail-item &gt; div {&#13;
+  color:#334155 !important;&#13;
+  font-size:10px !important;&#13;
+  font-weight:600 !important;&#13;
+  word-break:break-word !important;&#13;
+}&#13;
+&#13;
+.modal-select {&#13;
+  width:100% !important;&#13;
+  height:37px !important;&#13;
+  padding:0 9px !important;&#13;
+  border:1px solid #dfe4ec !important;&#13;
+  border-radius:8px !important;&#13;
+  background:#fff !important;&#13;
+  color:#334155 !important;&#13;
+  font-size:10px !important;&#13;
+}&#13;
+&#13;
+.modal-message {&#13;
+  margin-top:14px !important;&#13;
+  padding:11px 13px !important;&#13;
+  border-radius:9px !important;&#13;
+  font-size:10px !important;&#13;
+  font-weight:700 !important;&#13;
+}&#13;
+&#13;
+.modal-message.success {&#13;
+  background:#ecfdf5 !important;&#13;
+  border:1px solid #a7f3d0 !important;&#13;
+  color:#047857 !important;&#13;
+}&#13;
+&#13;
+.modal-message.error {&#13;
+  background:#fff1f2 !important;&#13;
+  border:1px solid #fecdd3 !important;&#13;
+  color:#be123c !important;&#13;
+}&#13;
+&#13;
+.modal-footer {&#13;
+  min-height:65px !important;&#13;
+  padding:12px 20px !important;&#13;
+  display:flex !important;&#13;
+  justify-content:flex-end !important;&#13;
+  align-items:center !important;&#13;
+  gap:9px !important;&#13;
+  border-top:1px solid #e2e8f0 !important;&#13;
+  background:#f8fafc !important;&#13;
+}&#13;
+&#13;
+.modal-cancel,&#13;
+.modal-update {&#13;
+  height:37px !important;&#13;
+  padding:0 15px !important;&#13;
+  border-radius:9px !important;&#13;
+  font-size:10px !important;&#13;
+  font-weight:800 !important;&#13;
+  cursor:pointer !important;&#13;
+}&#13;
+&#13;
+.modal-cancel {&#13;
+  border:1px solid #d7dee7 !important;&#13;
+  background:#fff !important;&#13;
+  color:#475569 !important;&#13;
+}&#13;
+&#13;
+.modal-update {&#13;
+  border:0 !important;&#13;
+  background:#0f766e !important;&#13;
+  color:#fff !important;&#13;
+}&#13;
+&#13;
+/* ================= NOTIFICATION MODAL ================= */&#13;
+&#13;
+.notification-modal-backdrop {&#13;
+  position:fixed !important;&#13;
+  inset:0 !important;&#13;
+  z-index:1100000 !important;&#13;
+  display:flex !important;&#13;
+  align-items:center !important;&#13;
+  justify-content:center !important;&#13;
+  padding:25px !important;&#13;
+  background:rgba(15,23,42,.58) !important;&#13;
+  backdrop-filter:blur(5px) !important;&#13;
+}&#13;
+&#13;
+.notification-modal-card {&#13;
+  width:min(570px,94vw) !important;&#13;
+  max-height:90vh !important;&#13;
+  overflow:hidden !important;&#13;
+  border-radius:18px !important;&#13;
+  background:#fff !important;&#13;
+  box-shadow:0 30px 90px rgba(0,0,0,.3) !important;&#13;
+  animation:c360NotificationIn .18s ease-out !important;&#13;
+}&#13;
+&#13;
+@keyframes c360NotificationIn {&#13;
+  from {&#13;
+    opacity:0;&#13;
+    transform:translateY(10px) scale(.98);&#13;
+  }&#13;
+  to {&#13;
+    opacity:1;&#13;
+    transform:translateY(0) scale(1);&#13;
+  }&#13;
+}&#13;
+&#13;
+.notification-modal-header {&#13;
+  min-height:78px !important;&#13;
+  padding:15px 18px !important;&#13;
+  display:flex !important;&#13;
+  align-items:center !important;&#13;
+  justify-content:space-between !important;&#13;
+  border-bottom:1px solid #e2e8f0 !important;&#13;
+}&#13;
+&#13;
+.notification-modal-heading {&#13;
+  display:flex !important;&#13;
+  align-items:center !important;&#13;
+  gap:11px !important;&#13;
+}&#13;
+&#13;
+.notification-modal-icon {&#13;
+  width:42px !important;&#13;
+  height:42px !important;&#13;
+  display:flex !important;&#13;
+  align-items:center !important;&#13;
+  justify-content:center !important;&#13;
+  border-radius:12px !important;&#13;
+  background:#ccfbf1 !important;&#13;
+  color:#0f766e !important;&#13;
+  font-size:17px !important;&#13;
+}&#13;
+&#13;
+.notification-modal-eyebrow {&#13;
+  color:#0f766e !important;&#13;
+  font-size:8px !important;&#13;
+  font-weight:900 !important;&#13;
+  letter-spacing:.7px !important;&#13;
+}&#13;
+&#13;
+.notification-modal-title {&#13;
+  margin-top:3px !important;&#13;
+  color:#172033 !important;&#13;
+  font-size:16px !important;&#13;
+  font-weight:900 !important;&#13;
+}&#13;
+&#13;
+.modal-close-btn {&#13;
+  width:35px !important;&#13;
+  height:35px !important;&#13;
+  display:flex !important;&#13;
+  align-items:center !important;&#13;
+  justify-content:center !important;&#13;
+  border:0 !important;&#13;
+  border-radius:9px !important;&#13;
+  background:#f8fafc !important;&#13;
+  color:#64748b !important;&#13;
+  cursor:pointer !important;&#13;
+}&#13;
+&#13;
+.modal-close-btn:hover {&#13;
+  background:#ffe4e6 !important;&#13;
+  color:#be123c !important;&#13;
+}&#13;
+&#13;
+.notification-modal-body {&#13;
+  padding:18px !important;&#13;
+  overflow:auto !important;&#13;
+  max-height:65vh !important;&#13;
+}&#13;
+&#13;
+.notification-highlight-card {&#13;
+  padding:17px !important;&#13;
+  display:flex !important;&#13;
+  align-items:center !important;&#13;
+  gap:14px !important;&#13;
+  border:1px solid #99f6e4 !important;&#13;
+  border-radius:14px !important;&#13;
+  background:linear-gradient(135deg,#f0fdfa,#fff) !important;&#13;
+}&#13;
+&#13;
+.notification-highlight-icon {&#13;
+  width:54px !important;&#13;
+  height:54px !important;&#13;
+  min-width:54px !important;&#13;
+  display:flex !important;&#13;
+  align-items:center !important;&#13;
+  justify-content:center !important;&#13;
+  border-radius:15px !important;&#13;
+  background:#ccfbf1 !important;&#13;
+  color:#0f766e !important;&#13;
+  font-size:21px !important;&#13;
+}&#13;
+&#13;
+.notification-highlight-number {&#13;
+  color:#0f766e !important;&#13;
+  font-size:25px !important;&#13;
+  line-height:1 !important;&#13;
+  font-weight:900 !important;&#13;
+}&#13;
+&#13;
+.notification-highlight-title {&#13;
+  margin-top:3px !important;&#13;
+  color:#134e4a !important;&#13;
+  font-size:11px !important;&#13;
+  font-weight:800 !important;&#13;
+}&#13;
+&#13;
+.notification-highlight-text {&#13;
+  margin-top:5px !important;&#13;
+  color:#64748b !important;&#13;
+  font-size:10px !important;&#13;
+  line-height:1.5 !important;&#13;
+}&#13;
+&#13;
+.notification-modal-stats {&#13;
+  display:grid !important;&#13;
+  grid-template-columns:1fr 1fr !important;&#13;
+  gap:10px !important;&#13;
+  margin-top:12px !important;&#13;
+}&#13;
+&#13;
+.notification-modal-stat {&#13;
+  padding:13px !important;&#13;
+  display:flex !important;&#13;
+  align-items:center !important;&#13;
+  gap:10px !important;&#13;
+  border-radius:11px !important;&#13;
+}&#13;
+&#13;
+.teal-stat {&#13;
+  background:#f0fdfa !important;&#13;
+  border:1px solid #99f6e4 !important;&#13;
+}&#13;
+&#13;
+.indigo-stat {&#13;
+  background:#eef2ff !important;&#13;
+  border:1px solid #c7d2fe !important;&#13;
+}&#13;
+&#13;
+.notification-modal-stat-icon {&#13;
+  width:34px !important;&#13;
+  height:34px !important;&#13;
+  display:flex !important;&#13;
+  align-items:center !important;&#13;
+  justify-content:center !important;&#13;
+  border-radius:9px !important;&#13;
+}&#13;
+&#13;
+.teal-stat .notification-modal-stat-icon {&#13;
+  background:#ccfbf1 !important;&#13;
+  color:#0f766e !important;&#13;
+}&#13;
+&#13;
+.indigo-stat .notification-modal-stat-icon {&#13;
+  background:#e0e7ff !important;&#13;
+  color:#4f46e5 !important;&#13;
+}&#13;
+&#13;
+.notification-modal-stat strong {&#13;
+  display:block !important;&#13;
+  color:#172033 !important;&#13;
+  font-size:17px !important;&#13;
+  font-weight:900 !important;&#13;
+}&#13;
+&#13;
+.notification-modal-stat span {&#13;
+  display:block !important;&#13;
+  margin-top:2px !important;&#13;
+  color:#64748b !important;&#13;
+  font-size:8px !important;&#13;
+  font-weight:700 !important;&#13;
+}&#13;
+&#13;
+.notification-dispatch-box {&#13;
+  margin-top:13px !important;&#13;
+  padding:14px !important;&#13;
+  border:1px solid #e2e8f0 !important;&#13;
+  border-radius:11px !important;&#13;
+  background:#f8fafc !important;&#13;
+}&#13;
+&#13;
+.notification-dispatch-title {&#13;
+  color:#475569 !important;&#13;
+  font-size:9px !important;&#13;
+  font-weight:900 !important;&#13;
+  letter-spacing:.6px !important;&#13;
+}&#13;
+&#13;
+.notification-dispatch-title i {&#13;
+  margin-right:5px !important;&#13;
+  color:#4f46e5 !important;&#13;
+}&#13;
+&#13;
+.notification-dispatch-box p {&#13;
+  margin:7px 0 0 !important;&#13;
+  color:#64748b !important;&#13;
+  font-size:10px !important;&#13;
+  line-height:1.6 !important;&#13;
+}&#13;
+&#13;
+.notification-modal-message {&#13;
+  margin-top:12px !important;&#13;
+  padding:11px 13px !important;&#13;
+  border-radius:9px !important;&#13;
+  font-size:10px !important;&#13;
+  font-weight:700 !important;&#13;
+}&#13;
+&#13;
+.notification-modal-message i {&#13;
+  margin-right:6px !important;&#13;
+}&#13;
+&#13;
+.notification-modal-success {&#13;
+  background:#ecfdf5 !important;&#13;
+  border:1px solid #a7f3d0 !important;&#13;
+  color:#047857 !important;&#13;
+}&#13;
+&#13;
+.notification-modal-error {&#13;
+  background:#fff1f2 !important;&#13;
+  border:1px solid #fecdd3 !important;&#13;
+  color:#be123c !important;&#13;
+}&#13;
+&#13;
+.notification-modal-footer {&#13;
+  min-height:65px !important;&#13;
+  padding:12px 18px !important;&#13;
+  display:flex !important;&#13;
+  justify-content:flex-end !important;&#13;
+  align-items:center !important;&#13;
+  gap:9px !important;&#13;
+  border-top:1px solid #e2e8f0 !important;&#13;
+  background:#f8fafc !important;&#13;
+}&#13;
+&#13;
+.secondary-btn,&#13;
+.primary-btn {&#13;
+  height:37px !important;&#13;
+  padding:0 15px !important;&#13;
+  border-radius:9px !important;&#13;
+  font-size:10px !important;&#13;
+  font-weight:800 !important;&#13;
+  cursor:pointer !important;&#13;
+}&#13;
+&#13;
+.secondary-btn {&#13;
+  border:1px solid #d7dee7 !important;&#13;
+  background:#fff !important;&#13;
+  color:#475569 !important;&#13;
+}&#13;
+&#13;
+.primary-btn {&#13;
+  border:0 !important;&#13;
+  background:#0f766e !important;&#13;
+  color:#fff !important;&#13;
+}&#13;
+&#13;
+.primary-btn:hover {&#13;
+  background:#115e59 !important;&#13;
+}&#13;
+&#13;
+.primary-btn:disabled {&#13;
+  opacity:.55 !important;&#13;
+  cursor:not-allowed !important;&#13;
+}&#13;
+&#13;
+/* ================= COLLAPSED SIDEBAR ================= */&#13;
+&#13;
+.sidebar-collapsed .applications-sidebar {&#13;
+  width:78px !important;&#13;
+  min-width:78px !important;&#13;
+}&#13;
+&#13;
+.sidebar-collapsed .brand-copy,&#13;
+.sidebar-collapsed .sidebar-user-info,&#13;
+.sidebar-collapsed .menu-section-title,&#13;
+.sidebar-collapsed .menu-item &gt; span:not(.menu-icon),&#13;
+.sidebar-collapsed .menu-count,&#13;
+.sidebar-collapsed .sidebar-footer {&#13;
+  display:none !important;&#13;
+}&#13;
+&#13;
+.sidebar-collapsed .sidebar-brand {&#13;
+  justify-content:center !important;&#13;
+  padding:18px 10px !important;&#13;
+}&#13;
+&#13;
+.sidebar-collapsed .sidebar-user-card {&#13;
+  justify-content:center !important;&#13;
+  margin-left:10px !important;&#13;
+  margin-right:10px !important;&#13;
+}&#13;
+&#13;
+.sidebar-collapsed .menu-item {&#13;
+  justify-content:center !important;&#13;
+  padding:0 !important;&#13;
+}&#13;
+&#13;
+.sidebar-collapsed .menu-icon {&#13;
+  width:auto !important;&#13;
+}&#13;
+&#13;
+/* ================= RESPONSIVE ================= */&#13;
+&#13;
+@media (max-width:1200px) {&#13;
+&#13;
+  .kpi-grid {&#13;
+    grid-template-columns:repeat(2,minmax(0,1fr)) !important;&#13;
+  }&#13;
+&#13;
+  .application-summary-strip,&#13;
+  .details-grid,&#13;
+  .edit-grid {&#13;
+    grid-template-columns:repeat(2,minmax(0,1fr)) !important;&#13;
+  }&#13;
+&#13;
+  .topbar-search {&#13;
+    width:220px !important;&#13;
+  }&#13;
+&#13;
+}&#13;
+&#13;
+@media (max-width:900px) {&#13;
+&#13;
+  .applications-sidebar {&#13;
+    width:230px !important;&#13;
+    min-width:230px !important;&#13;
+  }&#13;
+&#13;
+  .applications-content {&#13;
+    padding:22px 18px 40px !important;&#13;
+  }&#13;
+&#13;
+  .page-heading {&#13;
+    align-items:flex-start !important;&#13;
+    flex-direction:column !important;&#13;
+  }&#13;
+&#13;
+  .notification-panel {&#13;
+    align-items:flex-start !important;&#13;
+    flex-direction:column !important;&#13;
+  }&#13;
+&#13;
+  .notification-stats {&#13;
+    width:100% !important;&#13;
+    justify-content:space-between !important;&#13;
+  }&#13;
+&#13;
+  .topbar-search {&#13;
+    display:none !important;&#13;
+  }&#13;
+&#13;
+}&#13;
+&#13;
+@media (max-width:700px) {&#13;
+&#13;
+  .applications-sidebar {&#13;
+    position:absolute !important;&#13;
+    left:0 !important;&#13;
+    top:0 !important;&#13;
+    bottom:0 !important;&#13;
+    z-index:1000 !important;&#13;
+  }&#13;
+&#13;
+  .sidebar-collapsed .applications-sidebar {&#13;
+    width:0 !important;&#13;
+    min-width:0 !important;&#13;
+    overflow:hidden !important;&#13;
+  }&#13;
+&#13;
+  .applications-topbar {&#13;
+    padding:0 12px !important;&#13;
+  }&#13;
+&#13;
+  .topbar-profile-text,&#13;
+  .profile-arrow {&#13;
+    display:none !important;&#13;
+  }&#13;
+&#13;
+  .kpi-grid {&#13;
+    grid-template-columns:1fr !important;&#13;
+  }&#13;
+&#13;
+  .notification-modal-stats,&#13;
+  .application-summary-strip,&#13;
+  .details-grid,&#13;
+  .edit-grid {&#13;
+    grid-template-columns:1fr !important;&#13;
+  }&#13;
+&#13;
+  .detail-wide {&#13;
+    grid-column:auto !important;&#13;
+  }&#13;
+&#13;
+  .page-heading-actions {&#13;
+    width:100% !important;&#13;
+    flex-direction:column !important;&#13;
+  }&#13;
+&#13;
+  .outline-button {&#13;
+    width:100% !important;&#13;
+    justify-content:center !important;&#13;
+  }&#13;
+&#13;
+}</css>
+        <data_table>sp_instance</data_table>
+        <demo_data/>
+        <description/>
+        <docs/>
+        <field_list/>
+        <has_preview>false</has_preview>
+        <id>campus360_tpo_application_new</id>
+        <internal>false</internal>
+        <link><![CDATA[function link(scope, element, attrs, controller) {
+  
+}]]></link>
+        <name>Campus360 TPO Application New</name>
+        <option_schema/>
+        <public>false</public>
+        <roles/>
+        <script><![CDATA[(function() {
+
+  /* =========================================================
+     CAMPUS360 TPO APPLICATION MANAGEMENT
+     =========================================================
+
+     TABLES:
+
+       student_application
+       student_master
+       placement_opportunity
+       company_master
+
+     FEATURES:
+
+       - Application Directory
+       - Student -> Opportunity mapping
+       - Company filter
+       - Country filter
+       - Application Status filter
+       - Full application view
+       - Application update
+       - Eligible student detection
+       - Notification queueing
+
+     ========================================================= */
+
+
+  /* =========================================================
+     TABLE NAMES
+     ========================================================= */
+
+  var APPLICATION_TABLE =
+    "student_application";
+
+
+  var STUDENT_TABLE =
+    "student_master";
+
+
+  var OPPORTUNITY_TABLE =
+    "placement_opportunity";
+
+
+  var COMPANY_TABLE =
+    "company_master";
+
+
+  /*
+   * Event that must be registered in ServiceNow:
+   *
+   * campus360.student.opportunity.reminder
+   *
+   * The notification can use:
+   *   parm1 = student email
+   *   parm2 = notification body
+   */
+  var NOTIFICATION_EVENT =
+    "campus360.student.opportunity.reminder";
+
+
+  /* =========================================================
+     VALID TABLE HELPER
+     ========================================================= */
+
+  function getValidTable(
+    normalName,
+    scopedName
+  ) {
+
+    var gr =
+      new GlideRecord(normalName);
+
+
+    if (gr.isValid()) {
+      return normalName;
+    }
+
+
+    var scopedGR =
+      new GlideRecord(scopedName);
+
+
+    if (scopedGR.isValid()) {
+      return scopedName;
+    }
+
+
+    return normalName;
+
+  }
+
+
+  APPLICATION_TABLE =
+    getValidTable(
+      "student_application",
+      "x_snc_campus360_student_application"
+    );
+
+
+  STUDENT_TABLE =
+    getValidTable(
+      "student_master",
+      "x_snc_campus360_student_master"
+    );
+
+
+  OPPORTUNITY_TABLE =
+    getValidTable(
+      "placement_opportunity",
+      "x_snc_campus360_placement_opportunity"
+    );
+
+
+  COMPANY_TABLE =
+    getValidTable(
+      "company_master",
+      "x_snc_campus360_company_master"
+    );
+
+
+  /* =========================================================
+     DATA
+     ========================================================= */
+
+  data.applications = [];
+
+  data.companies = [];
+
+  data.countries = [];
+
+
+  data.choices = {
+
+    applicationStatus: [],
+
+    studentResponse: [],
+
+    assessmentStatus: [],
+
+    interviewStatus: [],
+
+    offerStatus: []
+
+  };
+
+
+  data.summary = {
+
+    totalApplications: 0,
+
+    pendingApplications: 0,
+
+    shortlistedApplications: 0,
+
+    offerApplications: 0
+
+  };
+
+
+  data.notification = {
+
+    eligibleStudents: 0,
+
+    eligibleOpportunities: 0,
+
+    message: ""
+
+  };
+
+
+  /* =========================================================
+     CHOICE HELPER
+     ========================================================= */
+
+  function addChoice(
+    list,
+    value,
+    label
+  ) {
+
+    value =
+      String(value || "");
+
+
+    label =
+      String(label || value);
+
+
+    if (!value) {
+      return;
+    }
+
+
+    for (
+      var i = 0;
+      i < list.length;
+      i++
+    ) {
+
+      if (
+        String(list[i].value) === value
+      ) {
+
+        return;
+
+      }
+
+    }
+
+
+    list.push({
+
+      value: value,
+
+      label: label
+
+    });
+
+  }
+
+
+  /* =========================================================
+     SIMPLE OPTION
+     ========================================================= */
+
+  function addSimpleOption(
+    list,
+    value,
+    label
+  ) {
+
+    value =
+      String(value || "").trim();
+
+
+    label =
+      String(label || value).trim();
+
+
+    if (!value) {
+      return;
+    }
+
+
+    for (
+      var i = 0;
+      i < list.length;
+      i++
+    ) {
+
+      if (
+        String(list[i].value).toLowerCase() ===
+        value.toLowerCase()
+      ) {
+
+        return;
+
+      }
+
+    }
+
+
+    list.push({
+
+      value: value,
+
+      label: label
+
+    });
+
+  }
+
+
+  /* =========================================================
+     SAFE VALUE
+     ========================================================= */
+
+  function getValue(
+    gr,
+    fieldName
+  ) {
+
+    if (
+
+      !gr ||
+
+      !fieldName ||
+
+      !gr.isValidField(fieldName)
+
+    ) {
+
+      return "";
+
+    }
+
+
+    return String(
+      gr.getValue(fieldName) || ""
+    );
+
+  }
+
+
+  /* =========================================================
+     SAFE DISPLAY
+     ========================================================= */
+
+  function getDisplay(
+    gr,
+    fieldName
+  ) {
+
+    if (
+
+      !gr ||
+
+      !fieldName ||
+
+      !gr.isValidField(fieldName)
+
+    ) {
+
+      return "";
+
+    }
+
+
+    return String(
+      gr.getDisplayValue(fieldName) || ""
+    );
+
+  }
+
+
+  /* =========================================================
+     DATE DISPLAY
+     ========================================================= */
+
+  function getDateDisplay(
+    gr,
+    fieldName
+  ) {
+
+    if (
+
+      !gr ||
+
+      !fieldName ||
+
+      !gr.isValidField(fieldName)
+
+    ) {
+
+      return "";
+
+    }
+
+
+    if (!gr.getValue(fieldName)) {
+      return "";
+    }
+
+
+    return String(
+      gr.getDisplayValue(fieldName) || ""
+    );
+
+  }
+
+
+  /* =========================================================
+     BOOLEAN
+     ========================================================= */
+
+  function getBoolean(
+    gr,
+    fieldName
+  ) {
+
+    var value =
+      getValue(
+        gr,
+        fieldName
+      ).toLowerCase();
+
+
+    return (
+
+      value === "true" ||
+
+      value === "1"
+
+    );
+
+  }
+
+
+  /* =========================================================
+     REFERENCE
+     ========================================================= */
+
+  function getReference(
+    gr,
+    fieldName
+  ) {
+
+    if (
+
+      !gr ||
+
+      !fieldName ||
+
+      !gr.isValidField(fieldName)
+
+    ) {
+
+      return null;
+
+    }
+
+
+    try {
+
+      var element =
+        gr.getElement(fieldName);
+
+
+      if (!element) {
+        return null;
+      }
+
+
+      var reference =
+        element.getRefRecord();
+
+
+      if (
+
+        reference &&
+
+        reference.isValidRecord()
+
+      ) {
+
+        return reference;
+
+      }
+
+    } catch (e) {
+
+      return null;
+
+    }
+
+
+    return null;
+
+  }
+
+
+  /* =========================================================
+     STUDENT
+     ========================================================= */
+
+  function getStudent(
+    applicationGR
+  ) {
+
+    var result = {
+
+      sys_id: "",
+
+      name: "",
+
+      student_id: "",
+
+      email: "",
+
+      phone: "",
+
+      batch: "",
+
+      branch: "",
+
+      degree: "",
+
+      cgpa: ""
+
+    };
+
+
+    var studentGR =
+      getReference(
+        applicationGR,
+        "student"
+      );
+
+
+    if (!studentGR) {
+      return result;
+    }
+
+
+    result.sys_id =
+      studentGR.getUniqueValue();
+
+
+    result.name =
+      getValue(
+        studentGR,
+        "student_name"
+      );
+
+
+    result.student_id =
+      getValue(
+        studentGR,
+        "student_id"
+      );
+
+
+    result.email =
+      getValue(
+        studentGR,
+        "email"
+      );
+
+
+    result.phone =
+      getValue(
+        studentGR,
+        "phone_number"
+      );
+
+
+    result.batch =
+      getValue(
+        studentGR,
+        "batch"
+      );
+
+
+    result.branch =
+      getDisplay(
+        studentGR,
+        "branch"
+      );
+
+
+    result.degree =
+      getDisplay(
+        studentGR,
+        "degree"
+      );
+
+
+    result.cgpa =
+      getValue(
+        studentGR,
+        "cgpa"
+      );
+
+
+    return result;
+
+  }
+
+
+  /* =========================================================
+     COMPANY
+     ========================================================= */
+
+  function getCompany(
+    opportunityGR
+  ) {
+
+    var companyGR =
+      getReference(
+        opportunityGR,
+        "company"
+      );
+
+
+    if (!companyGR) {
+      return {
+        sys_id: "",
+        name: ""
+      };
+    }
+
+
+    return {
+
+      sys_id:
+        companyGR.getUniqueValue(),
+
+      name:
+        getValue(
+          companyGR,
+          "company_name"
+        )
+
+    };
+
+  }
+
+
+  /* =========================================================
+     OPPORTUNITY
+     ========================================================= */
+
+  function getOpportunity(
+    applicationGR
+  ) {
+
+    var result = {
+
+      sys_id: "",
+
+      opportunity_id: "",
+
+      opportunity_title: "",
+
+      opportunity_type: "",
+
+      company_name: "",
+
+      country: "",
+
+      location: "",
+
+      ctc_stipend: "",
+
+      minimum_cgpa: "",
+
+      application_deadline_display: "",
+
+      drive_date_display: ""
+
+    };
+
+
+    var opportunityGR =
+      getReference(
+        applicationGR,
+        "opportunity"
+      );
+
+
+    if (!opportunityGR) {
+      return result;
+    }
+
+
+    result.sys_id =
+      opportunityGR.getUniqueValue();
+
+
+    result.opportunity_id =
+      getValue(
+        opportunityGR,
+        "opportunity_id"
+      );
+
+
+    result.opportunity_title =
+      getValue(
+        opportunityGR,
+        "opportunity_title"
+      );
+
+
+    result.opportunity_type =
+      getDisplay(
+        opportunityGR,
+        "opportunity_type"
+      );
+
+
+    var company =
+      getCompany(
+        opportunityGR
+      );
+
+
+    result.company_name =
+      company.name;
+
+
+    /*
+     * Country is read safely.
+     *
+     * If your placement_opportunity table
+     * does not contain a country field,
+     * this simply returns blank.
+     */
+    result.country =
+      getDisplay(
+        opportunityGR,
+        "country"
+      ) ||
+      getValue(
+        opportunityGR,
+        "country"
+      );
+
+
+    result.location =
+      getValue(
+        opportunityGR,
+        "location"
+      );
+
+
+    result.ctc_stipend =
+      getValue(
+        opportunityGR,
+        "ctc_stipend"
+      );
+
+
+    result.minimum_cgpa =
+      getValue(
+        opportunityGR,
+        "minimum_cgpa"
+      );
+
+
+    result.application_deadline_display =
+      getDateDisplay(
+        opportunityGR,
+        "application_deadline"
+      );
+
+
+    result.drive_date_display =
+      getDateDisplay(
+        opportunityGR,
+        "drive_date"
+      );
+
+
+    return result;
+
+  }
+
+
+  /* =========================================================
+     BUILD APPLICATION
+     ========================================================= */
+
+  function buildApplication(
+    gr
+  ) {
+
+    var student =
+      getStudent(gr);
+
+
+    var opportunity =
+      getOpportunity(gr);
+
+
+    var applicationStatusValue =
+      getValue(
+        gr,
+        "application_status"
+      );
+
+
+    var applicationStatusDisplay =
+      getDisplay(
+        gr,
+        "application_status"
+      );
+
+
+    var studentResponseValue =
+      getValue(
+        gr,
+        "student_response"
+      );
+
+
+    var studentResponseDisplay =
+      getDisplay(
+        gr,
+        "student_response"
+      );
+
+
+    var assessmentValue =
+      getValue(
+        gr,
+        "assessment_status"
+      );
+
+
+    var assessmentDisplay =
+      getDisplay(
+        gr,
+        "assessment_status"
+      );
+
+
+    var interviewValue =
+      getValue(
+        gr,
+        "interview_status"
+      );
+
+
+    var interviewDisplay =
+      getDisplay(
+        gr,
+        "interview_status"
+      );
+
+
+    var offerValue =
+      getValue(
+        gr,
+        "offer_status"
+      );
+
+
+    var offerDisplay =
+      getDisplay(
+        gr,
+        "offer_status"
+      );
+
+
+    return {
+
+      sys_id:
+        gr.getUniqueValue(),
+
+
+      number:
+        getValue(
+          gr,
+          "number"
+        ),
+
+
+      application_id:
+        getValue(
+          gr,
+          "application_id"
+        ),
+
+
+      application_status:
+        applicationStatusDisplay,
+
+
+      application_status_value:
+        applicationStatusValue,
+
+
+      student_response:
+        studentResponseDisplay,
+
+
+      student_response_value:
+        studentResponseValue,
+
+
+      assessment_status:
+        assessmentDisplay,
+
+
+      assessment_status_value:
+        assessmentValue,
+
+
+      interview_status:
+        interviewDisplay,
+
+
+      interview_status_value:
+        interviewValue,
+
+
+      offer_status:
+        offerDisplay,
+
+
+      offer_status_value:
+        offerValue,
+
+
+      shortlisted:
+        getBoolean(
+          gr,
+          "shortlisted"
+        ),
+
+
+      ai_match_score:
+        parseInt(
+          getValue(
+            gr,
+            "ai_match_score"
+          ),
+          10
+        ) || 0,
+
+
+      reminder_count:
+        parseInt(
+          getValue(
+            gr,
+            "reminder_count"
+          ),
+          10
+        ) || 0,
+
+
+      applied_date:
+        getValue(
+          gr,
+          "applied_date"
+        ),
+
+
+      applied_date_display:
+        getDateDisplay(
+          gr,
+          "applied_date"
+        ),
+
+
+      last_reminder:
+        getValue(
+          gr,
+          "last_reminder"
+        ),
+
+
+      last_reminder_display:
+        getDateDisplay(
+          gr,
+          "last_reminder"
+        ),
+
+
+      student_sys_id:
+        student.sys_id,
+
+
+      student_name:
+        student.name,
+
+
+      student_id:
+        student.student_id,
+
+
+      student_email:
+        student.email,
+
+
+      student_phone:
+        student.phone,
+
+
+      student_batch:
+        student.batch,
+
+
+      student_branch:
+        student.branch,
+
+
+      student_degree:
+        student.degree,
+
+
+      student_cgpa:
+        student.cgpa,
+
+
+      opportunity_sys_id:
+        opportunity.sys_id,
+
+
+      opportunity_id:
+        opportunity.opportunity_id,
+
+
+      opportunity_title:
+        opportunity.opportunity_title,
+
+
+      opportunity_type:
+        opportunity.opportunity_type,
+
+
+      company_name:
+        opportunity.company_name,
+
+
+      country:
+        opportunity.country,
+
+
+      location:
+        opportunity.location,
+
+
+      ctc_stipend:
+        opportunity.ctc_stipend,
+
+
+      minimum_cgpa:
+        opportunity.minimum_cgpa,
+
+
+      application_deadline_display:
+        opportunity.application_deadline_display,
+
+
+      drive_date_display:
+        opportunity.drive_date_display
+
+    };
+
+  }
+
+
+  /* =========================================================
+     LOAD APPLICATIONS
+     ========================================================= */
+
+  function loadApplications() {
+
+    data.applications = [];
+
+    data.companies = [];
+
+    data.countries = [];
+
+
+    var gr =
+      new GlideRecord(
+        APPLICATION_TABLE
+      );
+
+
+    if (!gr.isValid()) {
+
+      data.error =
+        "Student Application table could not be opened.";
+
+      return;
+
+    }
+
+
+    gr.query();
+
+
+    while (gr.next()) {
+
+      var application =
+        buildApplication(gr);
+
+
+      data.applications.push(
+        application
+      );
+
+
+      addChoice(
+        data.choices.applicationStatus,
+        application.application_status_value,
+        application.application_status
+      );
+
+
+      addChoice(
+        data.choices.studentResponse,
+        application.student_response_value,
+        application.student_response
+      );
+
+
+      addChoice(
+        data.choices.assessmentStatus,
+        application.assessment_status_value,
+        application.assessment_status
+      );
+
+
+      addChoice(
+        data.choices.interviewStatus,
+        application.interview_status_value,
+        application.interview_status
+      );
+
+
+      addChoice(
+        data.choices.offerStatus,
+        application.offer_status_value,
+        application.offer_status
+      );
+
+
+      addSimpleOption(
+        data.companies,
+        application.company_name,
+        application.company_name
+      );
+
+
+      addSimpleOption(
+        data.countries,
+        application.country,
+        application.country
+      );
+
+    }
+
+
+    calculateSummary();
+
+  }
+
+
+  /* =========================================================
+     SUMMARY
+     ========================================================= */
+
+  function calculateSummary() {
+
+    data.summary = {
+
+      totalApplications:
+        data.applications.length,
+
+      pendingApplications:
+        0,
+
+      shortlistedApplications:
+        0,
+
+      offerApplications:
+        0
+
+    };
+
+
+    for (
+      var i = 0;
+      i < data.applications.length;
+      i++
+    ) {
+
+      var application =
+        data.applications[i];
+
+
+      if (
+
+        String(
+          application.application_status || ""
+        )
+        .toLowerCase() ===
+        "pending"
+
+      ) {
+
+        data.summary.pendingApplications++;
+
+      }
+
+
+      if (application.shortlisted) {
+
+        data.summary.shortlistedApplications++;
+
+      }
+
+
+      if (application.offer_status_value) {
+
+        data.summary.offerApplications++;
+
+      }
+
+    }
+
+  }
+
+
+  /* =========================================================
+     UPDATE APPLICATION
+     ========================================================= */
+
+  function updateApplication(
+    incoming
+  ) {
+
+    var result = {
+
+      success:false,
+
+      message:"",
+
+      application:null
+
+    };
+
+
+    if (
+      !incoming ||
+      !incoming.sys_id
+    ) {
+
+      result.message =
+        "Application record was not identified.";
+
+      return result;
+
+    }
+
+
+    var gr =
+      new GlideRecord(
+        APPLICATION_TABLE
+      );
+
+
+    if (
+      !gr.get(
+        incoming.sys_id
+      )
+    ) {
+
+      result.message =
+        "Application record could not be found.";
+
+      return result;
+
+    }
+
+
+    var fields = [
+
+      "application_status",
+
+      "student_response",
+
+      "assessment_status",
+
+      "interview_status",
+
+      "offer_status"
+
+    ];
+
+
+    for (
+      var i = 0;
+      i < fields.length;
+      i++
+    ) {
+
+      if (
+        gr.isValidField(fields[i])
+      ) {
+
+        gr.setValue(
+          fields[i],
+          incoming[fields[i]] || ""
+        );
+
+      }
+
+    }
+
+
+    if (
+      gr.isValidField("shortlisted")
+    ) {
+
+      gr.setValue(
+
+        "shortlisted",
+
+        incoming.shortlisted
+          ? "true"
+          : "false"
+
+      );
+
+    }
+
+
+    var updatedSysId =
+      gr.update();
+
+
+    if (!updatedSysId) {
+
+      result.message =
+        "Application could not be updated.";
+
+      return result;
+
+    }
+
+
+    var updatedGR =
+      new GlideRecord(
+        APPLICATION_TABLE
+      );
+
+
+    if (
+      updatedGR.get(
+        updatedSysId
+      )
+    ) {
+
+      result.application =
+        buildApplication(
+          updatedGR
+        );
+
+    }
+
+
+    result.success = true;
+
+    result.message =
+      "Application updated successfully.";
+
+
+    return result;
+
+  }
+
+
+  /* =========================================================
+     NUMBER HELPER
+     ========================================================= */
+
+  function parseNumber(
+    value
+  ) {
+
+    var n =
+      parseFloat(
+        String(value || "")
+          .replace(
+            /[^0-9.\-]/g,
+            ""
+          )
+      );
+
+
+    return isNaN(n)
+      ? null
+      : n;
+
+  }
+
+
+  /* =========================================================
+     LIST HELPER
+     ========================================================= */
+
+  function splitList(
+    value
+  ) {
+
+    var raw =
+      String(value || "")
+        .split(/[,;\n]/);
+
+
+    var output = [];
+
+
+    for (
+      var i = 0;
+      i < raw.length;
+      i++
+    ) {
+
+      var item =
+        String(raw[i] || "")
+          .trim()
+          .toLowerCase();
+
+
+      if (item) {
+
+        output.push(item);
+
+      }
+
+    }
+
+
+    return output;
+
+  }
+
+
+  /* =========================================================
+     BRANCH ELIGIBILITY
+     ========================================================= */
+
+  function branchEligible(
+    studentGR,
+    opportunityGR
+  ) {
+
+    if (
+      !opportunityGR.isValidField(
+        "eligible_branches"
+      )
+    ) {
+
+      return true;
+
+    }
+
+
+    var required =
+      getValue(
+        opportunityGR,
+        "eligible_branches"
+      );
+
+
+    if (!required) {
+      return true;
+    }
+
+
+    var list =
+      splitList(required);
+
+
+    if (!list.length) {
+      return true;
+    }
+
+
+    var branchValue =
+      getValue(
+        studentGR,
+        "branch"
+      ).toLowerCase();
+
+
+    var branchDisplay =
+      getDisplay(
+        studentGR,
+        "branch"
+      ).toLowerCase();
+
+
+    for (
+      var i = 0;
+      i < list.length;
+      i++
+    ) {
+
+      if (
+
+        list[i] === branchValue ||
+
+        list[i] === branchDisplay
+
+      ) {
+
+        return true;
+
+      }
+
+    }
+
+
+    return false;
+
+  }
+
+
+  /* =========================================================
+     OPPORTUNITY OPEN
+     ========================================================= */
+
+  function opportunityOpen(
+    opportunityGR
+  ) {
+
+    var status =
+      getDisplay(
+        opportunityGR,
+        "status"
+      ) ||
+      getValue(
+        opportunityGR,
+        "status"
+      );
+
+
+    if (
+
+      status &&
+
+      status.toLowerCase() !== "open"
+
+    ) {
+
+      return false;
+
+    }
+
+
+    var deadline =
+      getValue(
+        opportunityGR,
+        "application_deadline"
+      );
+
+
+    if (deadline) {
+
+      try {
+
+        var deadlineGdt =
+          new GlideDateTime(
+            deadline
+          );
+
+
+        var now =
+          new GlideDateTime();
+
+
+        if (
+
+          deadlineGdt.getNumericValue() <
+
+          now.getNumericValue()
+
+        ) {
+
+          return false;
+
+        }
+
+      } catch (e) {
+
+        /*
+         * If the date cannot be parsed,
+         * do not block the opportunity.
+         */
+
+      }
+
+    }
+
+
+    return true;
+
+  }
+
+
+  /* =========================================================
+     STUDENT ELIGIBILITY
+     ========================================================= */
+
+  function studentEligibleForOpportunity(
+    studentGR,
+    opportunityGR
+  ) {
+
+    if (
+      !opportunityOpen(
+        opportunityGR
+      )
+    ) {
+
+      return false;
+
+    }
+
+
+    var minimumCgpa =
+      parseNumber(
+        getValue(
+          opportunityGR,
+          "minimum_cgpa"
+        )
+      );
+
+
+    var studentCgpa =
+      parseNumber(
+        getValue(
+          studentGR,
+          "cgpa"
+        )
+      );
+
+
+    if (
+
+      minimumCgpa !== null &&
+
+      (
+
+        studentCgpa === null ||
+
+        studentCgpa < minimumCgpa
+
+      )
+
+    ) {
+
+      return false;
+
+    }
+
+
+    if (
+      !branchEligible(
+        studentGR,
+        opportunityGR
+      )
+    ) {
+
+      return false;
+
+    }
+
+
+    return true;
+
+  }
+
+
+  /* =========================================================
+     APPLIED STUDENT MAP
+     ========================================================= */
+
+  function buildAppliedStudentMap() {
+
+    var map = {};
+
+
+    var gr =
+      new GlideRecord(
+        APPLICATION_TABLE
+      );
+
+
+    if (!gr.isValid()) {
+      return map;
+    }
+
+
+    gr.query();
+
+
+    while (gr.next()) {
+
+      var studentGR =
+        getReference(
+          gr,
+          "student"
+        );
+
+
+      if (studentGR) {
+
+        map[
+          studentGR.getUniqueValue()
+        ] = true;
+
+      }
+
+    }
+
+
+    return map;
+
+  }
+
+
+  /* =========================================================
+     GET ELIGIBLE STUDENTS
+     WHO HAVE NOT APPLIED ANYWHERE
+     ========================================================= */
+
+  function getEligibleStudentsWithoutApplications() {
+
+    var result = [];
+
+
+    var appliedMap =
+      buildAppliedStudentMap();
+
+
+    var opportunities = [];
+
+
+    var opportunityGR =
+      new GlideRecord(
+        OPPORTUNITY_TABLE
+      );
+
+
+    if (
+      opportunityGR.isValid()
+    ) {
+
+      opportunityGR.query();
+
+
+      while (
+        opportunityGR.next()
+      ) {
+
+        if (
+          opportunityOpen(
+            opportunityGR
+          )
+        ) {
+
+          opportunities.push(
+            opportunityGR.getUniqueValue()
+          );
+
+        }
+
+      }
+
+    }
+
+
+    var studentGR =
+      new GlideRecord(
+        STUDENT_TABLE
+      );
+
+
+    if (
+      !studentGR.isValid()
+    ) {
+
+      return {
+
+        students:result,
+
+        opportunityCount:
+          opportunities.length
+
+      };
+
+    }
+
+
+    studentGR.query();
+
+
+    while (
+      studentGR.next()
+    ) {
+
+      var studentSysId =
+        studentGR.getUniqueValue();
+
+
+      /*
+       * IMPORTANT:
+       *
+       * If this student has already applied
+       * for ANY opportunity, do not include them.
+       */
+
+      if (
+        appliedMap[studentSysId]
+      ) {
+
+        continue;
+
+      }
+
+
+      var eligible = [];
+
+
+      for (
+        var i = 0;
+        i < opportunities.length;
+        i++
+      ) {
+
+        var opp =
+          new GlideRecord(
+            OPPORTUNITY_TABLE
+          );
+
+
+        if (
+          opp.get(
+            opportunities[i]
+          )
+        ) {
+
+          if (
+            studentEligibleForOpportunity(
+              studentGR,
+              opp
+            )
+          ) {
+
+            var companyName = "";
+
+
+            var companyGR =
+              getReference(
+                opp,
+                "company"
+              );
+
+
+            if (companyGR) {
+
+              companyName =
+                getValue(
+                  companyGR,
+                  "company_name"
+                );
+
+            }
+
+
+            eligible.push({
+
+              sys_id:
+                opp.getUniqueValue(),
+
+              title:
+                getValue(
+                  opp,
+                  "opportunity_title"
+                ),
+
+              company:
+                companyName,
+
+              country:
+                getDisplay(
+                  opp,
+                  "country"
+                ) ||
+                getValue(
+                  opp,
+                  "country"
+                )
+
+            });
+
+          }
+
+        }
+
+      }
+
+
+      if (
+        eligible.length
+      ) {
+
+        result.push({
+
+          sys_id:
+            studentSysId,
+
+          name:
+            getValue(
+              studentGR,
+              "student_name"
+            ),
+
+          email:
+            getValue(
+              studentGR,
+              "email"
+            ),
+
+          opportunities:
+            eligible
+
+        });
+
+      }
+
+    }
+
+
+    return {
+
+      students:result,
+
+      opportunityCount:
+        opportunities.length
+
+    };
+
+  }
+
+
+  /* =========================================================
+     NOTIFICATION SUMMARY
+     ========================================================= */
+
+  function loadNotificationSummary() {
+
+    var info =
+      getEligibleStudentsWithoutApplications();
+
+
+    data.notification.eligibleStudents =
+      info.students.length;
+
+
+    data.notification.eligibleOpportunities =
+      info.opportunityCount;
+
+
+    return info;
+
+  }
+
+
+  /* =========================================================
+     SEND ELIGIBLE STUDENT NOTIFICATIONS
+     ========================================================= */
+
+  function sendEligibleStudentNotifications() {
+
+    var info =
+      getEligibleStudentsWithoutApplications();
+
+
+    var sent = 0;
+
+    var skipped = 0;
+
+
+    for (
+      var i = 0;
+      i < info.students.length;
+      i++
+    ) {
+
+      var student =
+        info.students[i];
+
+
+      if (!student.email) {
+
+        skipped++;
+
+        continue;
+
+      }
+
+
+      var lines = [];
+
+
+      for (
+        var j = 0;
+        j < student.opportunities.length;
+        j++
+      ) {
+
+        var opp =
+          student.opportunities[j];
+
+
+        var line =
+          "- " +
+          (
+            opp.title ||
+            "Placement Opportunity"
+          );
+
+
+        if (opp.company) {
+
+          line +=
+            " | Company: " +
+            opp.company;
+
+        }
+
+
+        if (opp.country) {
+
+          line +=
+            " | Country: " +
+            opp.country;
+
+        }
+
+
+        lines.push(line);
+
+      }
+
+
+      var subject =
+        "Campus360: Placement opportunities available for you";
+
+
+      var body =
+
+        "Hello " +
+
+        (
+          student.name ||
+          "Student"
+        ) +
+
+        ",\n\n" +
+
+        "Our placement records show that you have not applied for any placement opportunity yet. " +
+
+        "You are currently eligible for the following open opportunity/opportunities:\n\n" +
+
+        lines.join("\n") +
+
+        "\n\n" +
+
+        "Please review the opportunities in Campus360 and apply if you are interested." +
+
+        "\n\n" +
+
+        "Training & Placement Office" +
+
+        "\nCampus360";
+
+
+      try {
+
+        var studentRecord =
+          new GlideRecord(
+            STUDENT_TABLE
+          );
+
+
+        if (
+          studentRecord.get(
+            student.sys_id
+          )
+        ) {
+
+          /*
+           * parm1 = email
+           * parm2 = message body
+           *
+           * The ServiceNow Email Notification
+           * associated with this event should
+           * use these parameters.
+           */
+
+          gs.eventQueue(
+
+            NOTIFICATION_EVENT,
+
+            studentRecord,
+
+            student.email,
+
+            body
+
+          );
+
+
+          sent++;
+
+        } else {
+
+          skipped++;
+
+        }
+
+      } catch (e) {
+
+        skipped++;
+
+        gs.error(
+          "Campus360 notification error: " +
+          e.message
+        );
+
+      }
+
+    }
+
+
+    data.notification.eligibleStudents =
+      info.students.length;
+
+
+    data.notification.eligibleOpportunities =
+      info.opportunityCount;
+
+
+    data.notificationResult = {
+
+      success:true,
+
+      sent:sent,
+
+      skipped:skipped,
+
+      message:
+
+        sent +
+
+        " notification(s) queued." +
+
+        (
+
+          skipped
+
+            ? " " +
+              skipped +
+              " student(s) were skipped because no usable email/record was found."
+
+            : ""
+
+        )
+
+    };
+
+
+    data.notification.message =
+      data.notificationResult.message;
+
+  }
+
+
+  /* =========================================================
+     UPDATE APPLICATION REQUEST
+     ========================================================= */
+
+  if (
+    input &&
+    input.action ===
+      "update_application"
+  ) {
+
+    data.updateResult =
+      updateApplication(
+        input.application
+      );
+
+
+    loadApplications();
+
+    loadNotificationSummary();
+
+
+    if (
+
+      data.updateResult &&
+
+      data.updateResult.success
+
+    ) {
+
+      for (
+        var i = 0;
+        i < data.applications.length;
+        i++
+      ) {
+
+        if (
+
+          data.applications[i].sys_id ===
+
+          input.application.sys_id
+
+        ) {
+
+          data.updateResult.application =
+            data.applications[i];
+
+          break;
+
+        }
+
+      }
+
+    }
+
+
+    return;
+
+  }
+
+
+  /* =========================================================
+     SEND NOTIFICATION REQUEST
+     ========================================================= */
+
+  if (
+
+    input &&
+
+    input.action ===
+      "notify_eligible_students"
+
+  ) {
+
+    loadApplications();
+
+    sendEligibleStudentNotifications();
+
+    return;
+
+  }
+
+
+  /* =========================================================
+     NOTIFICATION SUMMARY REQUEST
+     ========================================================= */
+
+  if (
+
+    input &&
+
+    input.action ===
+      "notification_summary"
+
+  ) {
+
+    loadApplications();
+
+    loadNotificationSummary();
+
+    return;
+
+  }
+
+
+  /* =========================================================
+     NORMAL PAGE LOAD / REFRESH
+     ========================================================= */
+
+  loadApplications();
+
+  loadNotificationSummary();
+
+
+})();
+(function() {
+    var tpoGR = new GlideRecord('x_snc_campus360_campus360_tpo_profile');
+    tpoGR.query();
+    if (tpoGR.next()) {
+        data.tpoName = tpoGR.getValue('tpo_name') || 'MD Ali';
+        data.tpoInitials = 'MA';
+        data.tpoTitle = tpoGR.getValue('designation') || 'Training & Placement Officer';
+        data.tpoOffice = tpoGR.getValue('college_name') || 'CMR Institute of Technology';
+    } else {
+        data.tpoName = 'MD Ali';
+        data.tpoInitials = 'MA';
+        data.tpoTitle = 'TPO';
+        data.tpoOffice = 'Training & Placement Office';
+    }
+})();
+
+
+(function() {
+    var tpoGR = new GlideRecord('x_snc_campus360_campus360_tpo_profile');
+    tpoGR.query();
+    var name = 'MD Ali';
+    var title = 'Training & Placement Officer';
+    var office = 'CMR Institute of Technology';
+    if (tpoGR.next()) {
+        name = tpoGR.getValue('tpo_name') || 'MD Ali';
+        title = tpoGR.getValue('designation') || title;
+        office = tpoGR.getValue('college_name') || office;
+    }
+    data.tpo = {
+        name: name,
+        firstName: name,
+        initials: 'MA',
+        title: title,
+        office: office
+    };
+    data.tpoName = name;
+    data.tpoInitials = 'MA';
+})();
+
+
+data.aiWidget = $sp.getWidget('c4ae634574e703107f4410c9fee0cde5');
+]]></script>
+        <servicenow>false</servicenow>
+        <sys_class_name>sp_widget</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-28 07:02:02</sys_created_on>
+        <sys_id>3bdbff16446703107f44301daf56c7f4</sys_id>
+        <sys_mod_count>31</sys_mod_count>
+        <sys_name>Campus360 TPO Application New</sys_name>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name>sp_widget_3bdbff16446703107f44301daf56c7f4</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-10-01 09:41:09</sys_updated_on>
+        <template><![CDATA[<div class="campus360-applications-app"
+     ng-class="{'sidebar-collapsed': c.sidebarCollapsed}">
+
+  <!-- =====================================================
+       LEFT SIDEBAR
+       ===================================================== -->
+  <aside class="applications-sidebar">
+
+    <div class="sidebar-brand">
+      <div class="brand-mark">C</div>
+      <div class="brand-copy">
+        <div class="brand-title">Campus360</div>
+        <div class="brand-subtitle">TPO Portal</div>
+      </div>
+    </div>
+
+    <div class="sidebar-user-card">
+      <div class="sidebar-user-avatar">TPO</div>
+      <div class="sidebar-user-info">
+        <div class="sidebar-user-name">Md Ali</div>
+        <div class="sidebar-user-role">Training &amp; Placement Officer</div>
+      </div>
+    </div>
+
+    <div class="sidebar-scroll">
+
+      <div class="menu-section-title">OVERVIEW</div>
+
+      <button type="button"
+              class="menu-item"
+              ng-click="c.goTo('campus360_tpo_home')">
+        <span class="menu-icon"><i class="fa fa-th-large"></i></span>
+        <span>Dashboard</span>
+      </button>
+
+
+      <div class="menu-section-title">STUDENTS</div>
+
+      <button type="button"
+              class="menu-item"
+              ng-click="c.goTo('campus360_tpo_student_management')">
+        <span class="menu-icon"><i class="fa fa-users"></i></span>
+        <span>Students</span>
+      </button>
+
+      <button type="button"
+              class="menu-item"
+              ng-click="c.goTo('campus360_tpo_skill_intelligence_new')">
+        <span class="menu-icon"><i class="fa fa-line-chart"></i></span>
+        <span>Skill Intelligence</span>
+      </button>
+
+      <button type="button"
+              class="menu-item"
+              ng-click="c.goTo('student_assessments_new')">
+        <span class="menu-icon"><i class="fa fa-check-square-o"></i></span>
+        <span>Assessments</span>
+      </button>
+
+
+      <div class="menu-section-title">PLACEMENTS</div>
+
+      <button type="button"
+              class="menu-item"
+              ng-click="c.goTo('campus360_tpo_companies_new')">
+        <span class="menu-icon"><i class="fa fa-building-o"></i></span>
+        <span>Companies</span>
+      </button>
+
+      <button type="button"
+              class="menu-item"
+              ng-click="c.goTo('campus360_tpo_opportunities_new')">
+        <span class="menu-icon"><i class="fa fa-briefcase"></i></span>
+        <span>Opportunities</span>
+      </button>
+
+      <button type="button"
+              class="menu-item active">
+        <span class="menu-icon"><i class="fa fa-paper-plane-o"></i></span>
+        <span>Applications</span>
+
+        <span class="menu-count"
+              ng-if="c.data.summary.totalApplications > 0">
+          {{c.data.summary.totalApplications}}
+        </span>
+      </button>
+
+      <button type="button"
+              class="menu-item"
+              ng-click="c.goTo('campus360_tpo_interviews_new')">
+        <span class="menu-icon"><i class="fa fa-comments-o"></i></span>
+        <span>Interviews</span>
+      </button>
+
+      <button type="button"
+              class="menu-item"
+              ng-click="c.goTo('campus360_tpo_placement_outcomes')">
+        <span class="menu-icon"><i class="fa fa-trophy"></i></span>
+        <span>Placement Outcomes</span>
+      </button>
+
+
+      <div class="menu-section-title">TRAINING</div>
+
+      <button type="button"
+              class="menu-item"
+              ng-click="c.goTo('campus360_tpo_training_programs')">
+        <span class="menu-icon"><i class="fa fa-graduation-cap"></i></span>
+        <span>Training Programs</span>
+      </button>
+
+    </div>
+
+    <div class="sidebar-footer">
+      CAMPUS360 TPO PORTAL
+    </div>
+
+  </aside>
+
+
+  <!-- =====================================================
+       MAIN
+       ===================================================== -->
+  <main class="applications-main">
+
+    <!-- ===================================================
+         TOP NAVBAR
+         =================================================== -->
+    <header class="applications-topbar">
+
+      <div class="topbar-left">
+
+        <button type="button"
+                class="sidebar-toggle"
+                ng-click="c.toggleSidebar()"
+                title="Toggle Sidebar"
+                aria-label="Toggle Sidebar">
+          <i class="fa fa-bars"></i>
+        </button>
+
+        <div class="topbar-page-card">
+          <div class="topbar-page-eyebrow">
+            CAMPUS360
+          </div>
+
+          <div class="topbar-page-title">
+            Application Management
+          </div>
+        </div>
+
+      </div>
+
+
+      <div class="topbar-right">
+
+        <div class="topbar-search">
+          <i class="fa fa-search"></i>
+
+          <input type="text"
+                 placeholder="Search applications..."
+                 ng-model="c.filters.search"
+                 ng-change="c.applyFilters()">
+        </div>
+
+
+        <button type="button"
+                class="topbar-circle-button"
+                ng-click="c.refreshData()"
+                title="Refresh"
+                aria-label="Refresh">
+          <i class="fa fa-refresh"></i>
+        </button>
+
+
+        <!-- =================================================
+             NOTIFICATION BELL
+             ================================================= -->
+        <button type="button"
+                class="topbar-circle-button notification-button"
+                ng-click="c.openNotificationModal($event)"
+                title="Eligible Student Notifications"
+                aria-label="Eligible Student Notifications">
+
+          <i class="fa fa-bell-o notification-bell-icon"></i>
+
+          <span class="notification-badge"
+                ng-if="(c.data.notification.eligibleStudents || 0) > 0">
+
+            {{c.data.notification.eligibleStudents > 99
+              ? '99+'
+              : c.data.notification.eligibleStudents}}
+
+          </span>
+
+        </button>
+
+
+        <div class="topbar-profile">
+          <div class="topbar-avatar">TPO</div>
+
+          <div class="topbar-profile-text">
+            <div class="topbar-profile-name">Md Ali</div>
+            <div class="topbar-profile-role">TPO</div>
+          </div>
+
+          <span class="profile-arrow">
+            <i class="fa fa-angle-down"></i>
+          </span>
+        </div>
+
+      </div>
+
+    </header>
+
+
+    <!-- ===================================================
+         PAGE CONTENT
+         =================================================== -->
+    <section class="applications-content">
+
+      <!-- PAGE HEADING -->
+      <div class="page-heading">
+
+        <div class="page-heading-left">
+
+          <div class="page-eyebrow">
+            <span class="eyebrow-dot"></span>
+            TPO APPLICATION MANAGEMENT
+          </div>
+
+          <h1>
+            Application Directory
+          </h1>
+
+          <p>
+            Track which student applied for which opportunity,
+            company, country and application stage.
+          </p>
+
+        </div>
+
+
+        <div class="page-heading-actions">
+
+          <button type="button"
+                  class="outline-button notification-outline-button"
+                  ng-click="c.openNotificationModal($event)">
+
+            <i class="fa fa-bell-o"></i>
+            Eligible Student Notifications
+
+          </button>
+
+
+          <button type="button"
+                  class="outline-button"
+                  ng-click="c.refreshData()"
+                  ng-disabled="c.loading">
+
+            <span ng-if="!c.loading">
+              <i class="fa fa-refresh"></i>
+            </span>
+
+            <span ng-if="c.loading">
+              <i class="fa fa-spinner fa-spin"></i>
+            </span>
+
+            {{c.loading ? 'Refreshing...' : 'Refresh Data'}}
+
+          </button>
+
+        </div>
+
+      </div>
+
+
+      <!-- =================================================
+           NOTIFICATION SUMMARY
+           ================================================= -->
+      <div class="notification-panel">
+
+        <div class="notification-panel-left">
+
+          <div class="notification-icon">
+            <i class="fa fa-bell"></i>
+          </div>
+
+          <div>
+
+            <div class="notification-panel-title">
+              Eligible Students Who Have Not Applied
+            </div>
+
+            <div class="notification-panel-text">
+              Students with no application who are eligible for
+              at least one open placement opportunity.
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <div class="notification-stats">
+
+          <div class="notification-stat">
+
+            <span class="notification-stat-value">
+              {{c.data.notification.eligibleStudents || 0}}
+            </span>
+
+            <span class="notification-stat-label">
+              Students
+            </span>
+
+          </div>
+
+
+          <div class="notification-stat">
+
+            <span class="notification-stat-value">
+              {{c.data.notification.eligibleOpportunities || 0}}
+            </span>
+
+            <span class="notification-stat-label">
+              Open Opportunities
+            </span>
+
+          </div>
+
+
+          <button type="button"
+                  class="notification-send-button"
+                  ng-click="c.sendEligibleNotifications()"
+                  ng-disabled="c.notification.sending ||
+                               !c.data.notification.eligibleStudents">
+
+            <i class="fa fa-paper-plane-o"
+               ng-if="!c.notification.sending"></i>
+
+            <i class="fa fa-spinner fa-spin"
+               ng-if="c.notification.sending"></i>
+
+            {{c.notification.sending
+              ? 'Sending...'
+              : 'Send Notifications'}}
+
+          </button>
+
+        </div>
+
+      </div>
+
+
+      <!-- =================================================
+           KPI CARDS
+           ================================================= -->
+      <div class="kpi-grid">
+
+        <!-- TEAL -->
+        <div class="kpi-card kpi-teal">
+
+          <div class="kpi-icon">
+            <i class="fa fa-file-text-o"></i>
+          </div>
+
+          <div class="kpi-content">
+
+            <div class="kpi-label">
+              TOTAL<br>APPLICATIONS
+            </div>
+
+            <div class="kpi-value">
+              {{c.data.summary.totalApplications}}
+            </div>
+
+            <div class="kpi-description">
+              All student applications
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- ROSE -->
+        <div class="kpi-card kpi-rose">
+
+          <div class="kpi-icon">
+            <i class="fa fa-check-circle-o"></i>
+          </div>
+
+          <div class="kpi-content">
+
+            <div class="kpi-label">
+              SHORTLISTED<br>APPLICATIONS
+            </div>
+
+            <div class="kpi-value">
+              {{c.data.summary.shortlistedApplications}}
+            </div>
+
+            <div class="kpi-description">
+              Students shortlisted
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- AMBER -->
+        <div class="kpi-card kpi-amber">
+
+          <div class="kpi-icon">
+            <i class="fa fa-clock-o"></i>
+          </div>
+
+          <div class="kpi-content">
+
+            <div class="kpi-label">
+              PENDING<br>APPLICATIONS
+            </div>
+
+            <div class="kpi-value">
+              {{c.data.summary.pendingApplications}}
+            </div>
+
+            <div class="kpi-description">
+              Applications awaiting action
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- INDIGO -->
+        <div class="kpi-card kpi-indigo">
+
+          <div class="kpi-icon">
+            <i class="fa fa-star-o"></i>
+          </div>
+
+          <div class="kpi-content">
+
+            <div class="kpi-label">
+              WITH OFFER<br>STATUS
+            </div>
+
+            <div class="kpi-value">
+              {{c.data.summary.offerApplications}}
+            </div>
+
+            <div class="kpi-description">
+              Applications with offer status
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- =================================================
+           MAIN FILTER BAR
+           ================================================= -->
+      <div class="filter-bar">
+
+        <div class="filter-record-count">
+
+          <span class="filter-count-label">
+            APPLICATIONS
+          </span>
+
+          <strong>
+            {{c.filteredApplications.length}}
+          </strong>
+
+          <span class="filter-count-text">
+            records
+          </span>
+
+        </div>
+
+
+        <div class="filter-search">
+
+          <i class="fa fa-search filter-search-icon"></i>
+
+          <input type="text"
+                 placeholder="Search student, application ID, opportunity, company or country..."
+                 ng-model="c.filters.search"
+                 ng-change="c.applyFilters()">
+
+        </div>
+
+
+        <select class="filter-select"
+                ng-model="c.filters.company"
+                ng-change="c.applyFilters()">
+
+          <option value="">
+            All Companies
+          </option>
+
+          <option ng-repeat="company in c.data.companies"
+                  value="{{company.value}}">
+            {{company.label}}
+          </option>
+
+        </select>
+
+
+        <select class="filter-select"
+                ng-model="c.filters.country"
+                ng-change="c.applyFilters()">
+
+          <option value="">
+            All Countries
+          </option>
+
+          <option ng-repeat="country in c.data.countries"
+                  value="{{country.value}}">
+            {{country.label}}
+          </option>
+
+        </select>
+
+
+        <select class="filter-select"
+                ng-model="c.filters.applicationStatus"
+                ng-change="c.applyFilters()">
+
+          <option value="">
+            All Application Status
+          </option>
+
+          <option ng-repeat="choice in c.data.choices.applicationStatus"
+                  value="{{choice.value}}">
+            {{choice.label}}
+          </option>
+
+        </select>
+
+
+        <button type="button"
+                class="clear-button"
+                ng-click="c.clearFilters()">
+          Clear
+        </button>
+
+      </div>
+
+
+      <!-- =================================================
+           SECONDARY FILTER BAR
+           ================================================= -->
+      <div class="secondary-filter-bar">
+
+        <div class="secondary-filter-label">
+          ADDITIONAL FILTERS
+        </div>
+
+
+        <select class="secondary-select"
+                ng-model="c.filters.studentResponse"
+                ng-change="c.applyFilters()">
+
+          <option value="">
+            All Student Responses
+          </option>
+
+          <option ng-repeat="choice in c.data.choices.studentResponse"
+                  value="{{choice.value}}">
+            {{choice.label}}
+          </option>
+
+        </select>
+
+
+        <select class="secondary-select"
+                ng-model="c.filters.shortlisted"
+                ng-change="c.applyFilters()">
+
+          <option value="">
+            All Shortlisted
+          </option>
+
+          <option value="true">
+            Shortlisted
+          </option>
+
+          <option value="false">
+            Not Shortlisted
+          </option>
+
+        </select>
+
+
+        <select class="secondary-select"
+                ng-model="c.filters.assessmentStatus"
+                ng-change="c.applyFilters()">
+
+          <option value="">
+            All Assessment Status
+          </option>
+
+          <option ng-repeat="choice in c.data.choices.assessmentStatus"
+                  value="{{choice.value}}">
+            {{choice.label}}
+          </option>
+
+        </select>
+
+
+        <select class="secondary-select"
+                ng-model="c.filters.interviewStatus"
+                ng-change="c.applyFilters()">
+
+          <option value="">
+            All Interview Status
+          </option>
+
+          <option ng-repeat="choice in c.data.choices.interviewStatus"
+                  value="{{choice.value}}">
+            {{choice.label}}
+          </option>
+
+        </select>
+
+
+        <select class="secondary-select"
+                ng-model="c.filters.offerStatus"
+                ng-change="c.applyFilters()">
+
+          <option value="">
+            All Offer Status
+          </option>
+
+          <option ng-repeat="choice in c.data.choices.offerStatus"
+                  value="{{choice.value}}">
+            {{choice.label}}
+          </option>
+
+        </select>
+
+      </div>
+
+
+      <!-- NOTIFICATION RESULT -->
+      <div class="notification-result"
+           ng-if="c.notification.message"
+           ng-class="{
+             'notification-success': c.notification.success,
+             'notification-error': !c.notification.success
+           }">
+
+        <i class="fa"
+           ng-class="c.notification.success
+                     ? 'fa-check-circle'
+                     : 'fa-exclamation-circle'"></i>
+
+        {{c.notification.message}}
+
+      </div>
+
+
+      <!-- =================================================
+           APPLICATION DIRECTORY
+           ================================================= -->
+      <div class="directory-card">
+
+        <div class="directory-header">
+
+          <div>
+
+            <div class="directory-eyebrow">
+              APPLICATION DIRECTORY
+            </div>
+
+            <div class="directory-title">
+              Student Applications
+            </div>
+
+            <div class="directory-subtitle">
+              Student → Opportunity → Company → Country → Application Status
+            </div>
+
+          </div>
+
+
+          <div class="directory-right">
+
+            <span class="directory-record-count">
+              {{c.filteredApplications.length}} records
+            </span>
+
+          </div>
+
+        </div>
+
+
+        <!-- LOADING -->
+        <div class="loading-area"
+             ng-if="c.loading">
+
+          <div class="spinner"></div>
+
+          <span>
+            Loading applications...
+          </span>
+
+        </div>
+
+
+        <!-- TABLE -->
+        <div class="application-table-wrapper"
+             ng-if="!c.loading">
+
+          <table class="application-table">
+
+            <thead>
+
+              <tr>
+                <th>STUDENT</th>
+                <th>APPLICATION ID</th>
+                <th>OPPORTUNITY</th>
+                <th>COMPANY</th>
+                <th>COUNTRY</th>
+                <th>APPLICATION STATUS</th>
+                <th>SHORTLISTED</th>
+                <th>APPLIED DATE</th>
+                <th>VIEW</th>
+              </tr>
+
+            </thead>
+
+
+            <tbody>
+
+              <tr ng-repeat="application in c.filteredApplications track by application.sys_id">
+
+                <!-- STUDENT -->
+                <td>
+
+                  <div class="student-cell">
+
+                    <div class="student-avatar">
+                      {{c.getInitials(application.student_name)}}
+                    </div>
+
+                    <div>
+
+                      <div class="student-name">
+                        {{application.student_name || 'Not Available'}}
+                      </div>
+
+                      <div class="student-id">
+                        {{application.student_id || '—'}}
+                      </div>
+
+                    </div>
+
+                  </div>
+
+                </td>
+
+
+                <!-- APPLICATION ID -->
+                <td>
+
+                  <div class="application-id">
+                    {{application.application_id ||
+                      application.number ||
+                      '—'}}
+                  </div>
+
+                  <div class="application-number"
+                       ng-if="application.number &&
+                              application.application_id">
+                    {{application.number}}
+                  </div>
+
+                </td>
+
+
+                <!-- OPPORTUNITY -->
+                <td>
+
+                  <div class="opportunity-name">
+                    {{application.opportunity_title || 'Not Available'}}
+                  </div>
+
+                  <div class="opportunity-id">
+                    {{application.opportunity_id || '—'}}
+                  </div>
+
+                </td>
+
+
+                <!-- COMPANY -->
+                <td>
+
+                  <div class="company-name">
+                    {{application.company_name || 'Not Available'}}
+                  </div>
+
+                </td>
+
+
+                <!-- COUNTRY -->
+                <td>
+
+                  <div class="country-name">
+
+                    <span class="country-icon">
+                      <i class="fa fa-globe"></i>
+                    </span>
+
+                    {{application.country || 'Not Available'}}
+
+                  </div>
+
+                </td>
+
+
+                <!-- STATUS -->
+                <td>
+
+                  <span class="status-pill"
+                        ng-class="c.getStatusClass(application.application_status)">
+
+                    {{application.application_status || '—'}}
+
+                  </span>
+
+                </td>
+
+
+                <!-- SHORTLISTED -->
+                <td>
+
+                  <span class="shortlisted-pill"
+                        ng-class="application.shortlisted
+                                  ? 'is-shortlisted'
+                                  : 'not-shortlisted'">
+
+                    <span ng-if="application.shortlisted">
+                      <i class="fa fa-check"></i>
+                      Shortlisted
+                    </span>
+
+                    <span ng-if="!application.shortlisted">
+                      Not Shortlisted
+                    </span>
+
+                  </span>
+
+                </td>
+
+
+                <!-- APPLIED DATE -->
+                <td>
+
+                  <span class="date-value">
+                    {{application.applied_date_display || '—'}}
+                  </span>
+
+                </td>
+
+
+                <!-- VIEW -->
+                <td>
+
+                  <button type="button"
+                          class="view-button"
+                          ng-click="c.openApplication(application)">
+                    View
+                    <i class="fa fa-arrow-right"></i>
+                  </button>
+
+                </td>
+
+              </tr>
+
+
+              <!-- EMPTY -->
+              <tr ng-if="!c.filteredApplications.length">
+
+                <td colspan="9">
+
+                  <div class="empty-state">
+
+                    <div class="empty-state-icon">
+                      <i class="fa fa-folder-open-o"></i>
+                    </div>
+
+                    <div class="empty-state-title">
+                      No Applications Found
+                    </div>
+
+                    <div class="empty-state-text">
+                      No student application records match the current filters.
+                    </div>
+
+                    <button type="button"
+                            class="empty-state-button"
+                            ng-click="c.clearFilters()">
+                      Clear Filters
+                    </button>
+
+                  </div>
+
+                </td>
+
+              </tr>
+
+            </tbody>
+
+          </table>
+
+        </div>
+
+      </div>
+
+    </section>
+
+  </main>
+
+
+  <!-- =====================================================
+       FULL APPLICATION VIEW MODAL
+       ===================================================== -->
+  <div class="modal-backdrop"
+       ng-if="c.showApplicationModal"
+       ng-click="c.closeApplication($event)">
+
+    <div class="application-modal"
+         ng-click="$event.stopPropagation()">
+
+      <!-- HEADER -->
+      <div class="modal-top">
+
+        <div class="modal-heading">
+
+          <div class="modal-heading-icon">
+            <i class="fa fa-file-text-o"></i>
+          </div>
+
+          <div>
+
+            <div class="modal-eyebrow">
+              FULL APPLICATION VIEW
+            </div>
+
+            <div class="modal-title">
+              {{c.selectedApplication.application_id ||
+                c.selectedApplication.number ||
+                'Student Application'}}
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <button type="button"
+                class="modal-close"
+                ng-click="c.closeApplication()">
+          <i class="fa fa-times"></i>
+        </button>
+
+      </div>
+
+
+      <!-- BODY -->
+      <div class="modal-body"
+           ng-if="c.selectedApplication">
+
+        <!-- APPLICATION SUMMARY -->
+        <div class="application-summary-strip">
+
+          <div class="summary-strip-item">
+            <span class="summary-strip-label">STUDENT</span>
+            <strong>
+              {{c.selectedApplication.student_name || '—'}}
+            </strong>
+          </div>
+
+          <div class="summary-strip-item">
+            <span class="summary-strip-label">OPPORTUNITY</span>
+            <strong>
+              {{c.selectedApplication.opportunity_title || '—'}}
+            </strong>
+          </div>
+
+          <div class="summary-strip-item">
+            <span class="summary-strip-label">COMPANY</span>
+            <strong>
+              {{c.selectedApplication.company_name || '—'}}
+            </strong>
+          </div>
+
+          <div class="summary-strip-item">
+            <span class="summary-strip-label">COUNTRY</span>
+            <strong>
+              {{c.selectedApplication.country || '—'}}
+            </strong>
+          </div>
+
+        </div>
+
+
+        <!-- STATUS SUMMARY -->
+        <div class="application-summary-strip">
+
+          <div class="summary-strip-item">
+
+            <span class="summary-strip-label">
+              APPLICATION STATUS
+            </span>
+
+            <span class="status-pill"
+                  ng-class="c.getStatusClass(
+                    c.selectedApplication.application_status
+                  )">
+              {{c.selectedApplication.application_status || '—'}}
+            </span>
+
+          </div>
+
+
+          <div class="summary-strip-item">
+
+            <span class="summary-strip-label">
+              STUDENT RESPONSE
+            </span>
+
+            <span class="response-pill"
+                  ng-class="c.getResponseClass(
+                    c.selectedApplication.student_response
+                  )">
+              {{c.selectedApplication.student_response || '—'}}
+            </span>
+
+          </div>
+
+
+          <div class="summary-strip-item">
+
+            <span class="summary-strip-label">
+              SHORTLISTED
+            </span>
+
+            <span class="shortlisted-pill"
+                  ng-class="c.selectedApplication.shortlisted
+                            ? 'is-shortlisted'
+                            : 'not-shortlisted'">
+
+              {{c.selectedApplication.shortlisted
+                ? '✓ Shortlisted'
+                : 'Not Shortlisted'}}
+
+            </span>
+
+          </div>
+
+
+          <div class="summary-strip-item">
+
+            <span class="summary-strip-label">
+              AI MATCH SCORE
+            </span>
+
+            <strong class="summary-score">
+              {{c.selectedApplication.ai_match_score || 0}}
+            </strong>
+
+          </div>
+
+        </div>
+
+
+        <!-- STUDENT INFORMATION -->
+        <div class="modal-section">
+
+          <div class="modal-section-title">
+            STUDENT INFORMATION
+          </div>
+
+          <div class="details-grid">
+
+            <div class="detail-item">
+              <label>Student Name</label>
+              <div>{{c.selectedApplication.student_name || '—'}}</div>
+            </div>
+
+            <div class="detail-item">
+              <label>Student ID</label>
+              <div>{{c.selectedApplication.student_id || '—'}}</div>
+            </div>
+
+            <div class="detail-item">
+              <label>Email</label>
+              <div>{{c.selectedApplication.student_email || '—'}}</div>
+            </div>
+
+            <div class="detail-item">
+              <label>Phone Number</label>
+              <div>{{c.selectedApplication.student_phone || '—'}}</div>
+            </div>
+
+            <div class="detail-item">
+              <label>Batch</label>
+              <div>{{c.selectedApplication.student_batch || '—'}}</div>
+            </div>
+
+            <div class="detail-item">
+              <label>Degree</label>
+              <div>{{c.selectedApplication.student_degree || '—'}}</div>
+            </div>
+
+            <div class="detail-item">
+              <label>Branch</label>
+              <div>{{c.selectedApplication.student_branch || '—'}}</div>
+            </div>
+
+            <div class="detail-item">
+              <label>CGPA</label>
+              <div>{{c.selectedApplication.student_cgpa || '—'}}</div>
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- OPPORTUNITY INFORMATION -->
+        <div class="modal-section">
+
+          <div class="modal-section-title">
+            OPPORTUNITY INFORMATION
+          </div>
+
+          <div class="details-grid">
+
+            <div class="detail-item">
+              <label>Opportunity ID</label>
+              <div>{{c.selectedApplication.opportunity_id || '—'}}</div>
+            </div>
+
+            <div class="detail-item detail-wide">
+              <label>Opportunity Title</label>
+              <div>{{c.selectedApplication.opportunity_title || '—'}}</div>
+            </div>
+
+            <div class="detail-item">
+              <label>Company</label>
+              <div>{{c.selectedApplication.company_name || '—'}}</div>
+            </div>
+
+            <div class="detail-item">
+              <label>Country</label>
+              <div>{{c.selectedApplication.country || '—'}}</div>
+            </div>
+
+            <div class="detail-item">
+              <label>Opportunity Type</label>
+              <div>{{c.selectedApplication.opportunity_type || '—'}}</div>
+            </div>
+
+            <div class="detail-item">
+              <label>Location</label>
+              <div>{{c.selectedApplication.location || '—'}}</div>
+            </div>
+
+            <div class="detail-item">
+              <label>CTC / Stipend</label>
+              <div>{{c.selectedApplication.ctc_stipend || '—'}}</div>
+            </div>
+
+            <div class="detail-item">
+              <label>Minimum CGPA</label>
+              <div>{{c.selectedApplication.minimum_cgpa || '—'}}</div>
+            </div>
+
+            <div class="detail-item">
+              <label>Application Deadline</label>
+              <div>{{c.selectedApplication.application_deadline_display || '—'}}</div>
+            </div>
+
+            <div class="detail-item">
+              <label>Drive Date</label>
+              <div>{{c.selectedApplication.drive_date_display || '—'}}</div>
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- APPLICATION PROGRESS -->
+        <div class="modal-section">
+
+          <div class="modal-section-title">
+            APPLICATION PROGRESS
+          </div>
+
+          <div class="edit-grid">
+
+            <div class="edit-item">
+
+              <label>
+                Application Status
+              </label>
+
+              <select class="modal-select"
+                      ng-model="c.selectedApplication.application_status_value">
+
+                <option ng-repeat="choice in c.data.choices.applicationStatus"
+                        value="{{choice.value}}">
+                  {{choice.label}}
+                </option>
+
+              </select>
+
+            </div>
+
+
+            <div class="edit-item">
+
+              <label>
+                Student Response
+              </label>
+
+              <select class="modal-select"
+                      ng-model="c.selectedApplication.student_response_value">
+
+                <option ng-repeat="choice in c.data.choices.studentResponse"
+                        value="{{choice.value}}">
+                  {{choice.label}}
+                </option>
+
+              </select>
+
+            </div>
+
+
+            <div class="edit-item">
+
+              <label>
+                Shortlisted
+              </label>
+
+              <select class="modal-select"
+                      ng-model="c.selectedApplication.shortlisted">
+
+                <option ng-value="false">
+                  Not Shortlisted
+                </option>
+
+                <option ng-value="true">
+                  Shortlisted
+                </option>
+
+              </select>
+
+            </div>
+
+
+            <div class="edit-item"
+                 ng-if="c.shouldShowAssessment(c.selectedApplication)">
+
+              <label>
+                Assessment Status
+              </label>
+
+              <select class="modal-select"
+                      ng-model="c.selectedApplication.assessment_status_value">
+
+                <option ng-repeat="choice in c.data.choices.assessmentStatus"
+                        value="{{choice.value}}">
+                  {{choice.label}}
+                </option>
+
+              </select>
+
+            </div>
+
+
+            <div class="edit-item"
+                 ng-if="c.shouldShowInterview(c.selectedApplication)">
+
+              <label>
+                Interview Status
+              </label>
+
+              <select class="modal-select"
+                      ng-model="c.selectedApplication.interview_status_value">
+
+                <option ng-repeat="choice in c.data.choices.interviewStatus"
+                        value="{{choice.value}}">
+                  {{choice.label}}
+                </option>
+
+              </select>
+
+            </div>
+
+
+            <div class="edit-item"
+                 ng-if="c.shouldShowOffer(c.selectedApplication)">
+
+              <label>
+                Offer Status
+              </label>
+
+              <select class="modal-select"
+                      ng-model="c.selectedApplication.offer_status_value">
+
+                <option ng-repeat="choice in c.data.choices.offerStatus"
+                        value="{{choice.value}}">
+                  {{choice.label}}
+                </option>
+
+              </select>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- FOLLOW UP -->
+        <div class="modal-section">
+
+          <div class="modal-section-title">
+            FOLLOW-UP &amp; AI
+          </div>
+
+          <div class="details-grid">
+
+            <div class="detail-item">
+              <label>Applied Date</label>
+              <div>{{c.selectedApplication.applied_date_display || '—'}}</div>
+            </div>
+
+            <div class="detail-item">
+              <label>Last Reminder</label>
+              <div>{{c.selectedApplication.last_reminder_display || '—'}}</div>
+            </div>
+
+            <div class="detail-item">
+              <label>Reminder Count</label>
+              <div>{{c.selectedApplication.reminder_count || 0}}</div>
+            </div>
+
+            <div class="detail-item">
+              <label>AI Match Score</label>
+              <div class="ai-score">
+                {{c.selectedApplication.ai_match_score || 0}}
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <div class="modal-message success"
+             ng-if="c.updateSuccess">
+          <i class="fa fa-check-circle"></i>
+          {{c.updateMessage}}
+        </div>
+
+
+        <div class="modal-message error"
+             ng-if="c.updateMessage && !c.updateSuccess">
+          <i class="fa fa-exclamation-circle"></i>
+          {{c.updateMessage}}
+        </div>
+
+      </div>
+
+
+      <!-- FOOTER -->
+      <div class="modal-footer">
+
+        <button type="button"
+                class="modal-cancel"
+                ng-click="c.closeApplication()"
+                ng-disabled="c.saving">
+          Close
+        </button>
+
+        <button type="button"
+                class="modal-update"
+                ng-click="c.updateApplication()"
+                ng-disabled="c.saving">
+
+          <i class="fa"
+             ng-class="c.saving
+                       ? 'fa-spinner fa-spin'
+                       : 'fa-save'"></i>
+
+          {{c.saving
+            ? 'Updating...'
+            : 'Update Application'}}
+
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- =====================================================
+       NOTIFICATION MODAL
+       ===================================================== -->
+  <div class="notification-modal-backdrop"
+       ng-if="c.showNotificationModal"
+       ng-click="c.closeNotificationModal($event)">
+
+    <div class="notification-modal-card"
+         ng-click="$event.stopPropagation()">
+
+      <div class="notification-modal-header">
+
+        <div class="notification-modal-heading">
+
+          <div class="notification-modal-icon">
+            <i class="fa fa-bell"></i>
+          </div>
+
+          <div>
+
+            <div class="notification-modal-eyebrow">
+              CAMPUS360 NOTIFICATIONS
+            </div>
+
+            <div class="notification-modal-title">
+              Eligible Student Notifications
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <button type="button"
+                class="modal-close-btn"
+                ng-click="c.closeNotificationModal($event)"
+                aria-label="Close notifications">
+
+          <i class="fa fa-times"></i>
+
+        </button>
+
+      </div>
+
+
+      <div class="notification-modal-body">
+
+        <div class="notification-highlight-card">
+
+          <div class="notification-highlight-icon">
+            <i class="fa fa-users"></i>
+          </div>
+
+          <div class="notification-highlight-content">
+
+            <div class="notification-highlight-number">
+              {{c.data.notification.eligibleStudents || 0}}
+            </div>
+
+            <div class="notification-highlight-title">
+              Eligible Students
+            </div>
+
+            <div class="notification-highlight-text">
+              Students who have not applied and are eligible for
+              currently open placement opportunities.
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <div class="notification-modal-stats">
+
+          <div class="notification-modal-stat teal-stat">
+
+            <div class="notification-modal-stat-icon">
+              <i class="fa fa-users"></i>
+            </div>
+
+            <div>
+              <strong>
+                {{c.data.notification.eligibleStudents || 0}}
+              </strong>
+              <span>Eligible Students</span>
+            </div>
+
+          </div>
+
+
+          <div class="notification-modal-stat indigo-stat">
+
+            <div class="notification-modal-stat-icon">
+              <i class="fa fa-briefcase"></i>
+            </div>
+
+            <div>
+              <strong>
+                {{c.data.notification.eligibleOpportunities || 0}}
+              </strong>
+              <span>Open Opportunities</span>
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <div class="notification-dispatch-box">
+
+          <div class="notification-dispatch-title">
+            <i class="fa fa-paper-plane-o"></i>
+            NOTIFICATION DISPATCH
+          </div>
+
+          <p>
+            Triggering this action queues automated email reminders
+            through the ServiceNow Event System for eligible students
+            who have not yet submitted a placement application.
+          </p>
+
+        </div>
+
+
+        <div class="notification-modal-message"
+             ng-if="c.notification.message"
+             ng-class="c.notification.success
+                       ? 'notification-modal-success'
+                       : 'notification-modal-error'">
+
+          <i class="fa"
+             ng-class="c.notification.success
+                       ? 'fa-check-circle'
+                       : 'fa-exclamation-circle'"></i>
+
+          {{c.notification.message}}
+
+        </div>
+
+      </div>
+
+
+      <div class="notification-modal-footer">
+
+        <button type="button"
+                class="secondary-btn"
+                ng-click="c.closeNotificationModal($event)">
+          Close
+        </button>
+
+        <button type="button"
+                class="primary-btn"
+                ng-click="c.sendEligibleNotifications()"
+                ng-disabled="c.notification.sending ||
+                             !c.data.notification.eligibleStudents">
+
+          <i class="fa"
+             ng-class="c.notification.sending
+                       ? 'fa-spinner fa-spin'
+                       : 'fa-paper-plane-o'"></i>
+
+          {{c.notification.sending
+            ? 'Sending...'
+            : 'Send Notifications'}}
+
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- AI CHATBOT -->
+  <sp-widget widget="data.aiWidget"></sp-widget>
+
+</div>]]></template>
+    </sp_widget>
+</record_update>

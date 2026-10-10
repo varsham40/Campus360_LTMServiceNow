@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?><database>
+    <element attributes="enforce_dot_walk_cross_scope_access=true" db_object_id="febace9ae41703107f44d305db800e5e" label="Company Master" max_length="40" name="x_snc_campus360_company_master" type="collection">
+        <element label="Company Name" max_length="100" name="company_name" type="string"/>
+        <element choice="3" default="Active" label="Status" max_length="20" name="status" type="choice">
+            <choice>
+                <element inactive_on_update="false" label="Blacklisted" sequence="2" value="blacklisted"/>
+                <element inactive_on_update="false" label="Active" sequence="0" value="active"/>
+                <element inactive_on_update="false" label="Inactive" sequence="1" value="inactive"/>
+            </choice>
+        </element>
+        <element display="true" label="Company ID" max_length="20" name="company_id" type="string"/>
+        <element label="Recruiter Email" max_length="100" name="recruiter_email" type="string"/>
+        <element choice="3" label="Industry" max_length="50" name="industry" type="choice">
+            <choice>
+                <element inactive_on_update="false" label="Consulting" sequence="7" value="consulting"/>
+                <element inactive_on_update="false" label="Healthcare" sequence="4" value="healthcare"/>
+                <element inactive_on_update="false" label="Other" sequence="11" value="other"/>
+                <element inactive_on_update="false" label="Manufacturing" sequence="6" value="manufacturing"/>
+                <element inactive_on_update="false" label="Banking" sequence="3" value="banking"/>
+                <element inactive_on_update="false" label="Education" sequence="10" value="education"/>
+                <element inactive_on_update="false" label="IT Services" sequence="0" value="it_services"/>
+                <element inactive_on_update="false" label="FinTech" sequence="2" value="fintech"/>
+                <element inactive_on_update="false" label="Automotive" sequence="9" value="automotive"/>
+                <element inactive_on_update="false" label="E-Commerce" sequence="5" value="e_commerce"/>
+                <element inactive_on_update="false" label="Software" sequence="1" value="software"/>
+                <element inactive_on_update="false" label="Telecommunications" sequence="8" value="telecommunications"/>
+            </choice>
+        </element>
+        <element label="Recruiter Name" max_length="100" name="recruiter_name" type="string"/>
+        <element label="Contact Number" max_length="20" name="contact_number" type="string"/>
+        <element choice="3" label="Company Type" max_length="30" name="company_type" type="choice">
+            <choice>
+                <element inactive_on_update="false" label="Government" sequence="4" value="government"/>
+                <element inactive_on_update="false" label="Other" sequence="7" value="other"/>
+                <element inactive_on_update="false" label="Service Company" sequence="3" value="service_company"/>
+                <element inactive_on_update="false" label="MNC" sequence="0" value="mnc"/>
+                <element inactive_on_update="false" label="Consulting" sequence="6" value="consulting"/>
+                <element inactive_on_update="false" label="Product Company" sequence="2" value="product_company"/>
+                <element inactive_on_update="false" label="PSU" sequence="5" value="psu"/>
+                <element inactive_on_update="false" label="Startup" sequence="1" value="startup"/>
+            </choice>
+        </element>
+    </element>
+</database>

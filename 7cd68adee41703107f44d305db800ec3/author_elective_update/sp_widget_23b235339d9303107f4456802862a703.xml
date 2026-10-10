@@ -1,0 +1,515 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_widget">
+    <sp_widget action="DELETE">
+        <category>custom</category>
+        <client_script><![CDATA[api.controller=function() {
+  /* widget controller */
+  var c = this;
+};]]></client_script>
+        <controller_as>c</controller_as>
+        <css/>
+        <data_table>sp_instance</data_table>
+        <demo_data/>
+        <description>Process mock interview QR attendance</description>
+        <docs/>
+        <field_list/>
+        <has_preview>false</has_preview>
+        <id>campus360_qr_attendance</id>
+        <internal>false</internal>
+        <link><![CDATA[function link(scope, element, attrs, controller) {
+  
+}]]></link>
+        <name>Campus360 QR Attendance Processor</name>
+        <option_schema/>
+        <public>false</public>
+        <roles/>
+        <script><![CDATA[(function() {
+
+    data.success = false;
+    data.message = '';
+    data.interviewNumber = '';
+
+    var inputId = $sp.getParameter('interview_id');
+
+    if (!inputId) {
+        data.message = 'ERROR: interview_id is missing from the URL.';
+        return;
+    }
+
+    var gr = new GlideRecord('x_snc_campus360_mock_interview');
+
+    if (!gr.isValid()) {
+        data.message = 'ERROR: Mock Interview table is invalid.';
+        return;
+    }
+
+    /*
+     * Support both:
+     * 1. sys_id
+     * 2. Interview ID such as INT004
+     */
+
+    var found = false;
+
+    // First try sys_id
+    if (inputId.length == 32) {
+        found = gr.get(inputId);
+    }
+
+    // If not found, search using Interview ID
+    if (!found) {
+
+        gr.initialize();
+
+        gr.addQuery('interview_id', inputId);
+        gr.query();
+
+        if (gr.next()) {
+            found = true;
+        }
+    }
+
+    if (!found) {
+        data.message = 'ERROR: No Mock Interview record found for: ' + inputId;
+        return;
+    }
+
+    // Store interview information
+    data.interviewNumber = gr.getValue('interview_id');
+
+    /*
+     * DEBUG INFORMATION
+     */
+    var recordSysId = gr.getUniqueValue();
+    var currentAttendance = gr.getValue('attendance_status');
+    var currentQRStatus = gr.getValue('qr_status');
+
+    /*
+     * Prevent duplicate attendance
+     */
+    if (currentAttendance == 'Present') {
+
+        data.success = true;
+
+        data.message =
+            'Attendance already marked for ' +
+            data.interviewNumber + '.';
+
+        return;
+    }
+
+    /*
+     * Check write permission
+     */
+    if (!gr.canWrite()) {
+
+        data.message =
+            'ERROR: You do not have permission to update this Mock Interview record.';
+
+        return;
+    }
+
+    /*
+     * Update attendance
+     */
+    gr.setValue('attendance_status', 'Present');
+
+    /*
+     * Update QR status
+     */
+    gr.setValue('qr_status', 'Scanned');
+
+    /*
+     * Save record
+     */
+    var result = gr.update();
+
+    /*
+     * IMPORTANT:
+     * Capture ServiceNow's actual error
+     */
+    if (!result) {
+
+        var errorMessage = gr.getLastErrorMessage();
+
+        if (!errorMessage) {
+            errorMessage = 'Unknown ServiceNow update error.';
+        }
+
+        data.message =
+            'ERROR: Unable to update Mock Interview record.' +
+            '<br><br>' +
+            'Interview: ' + data.interviewNumber +
+            '<br>' +
+            'Sys ID: ' + recordSysId +
+            '<br>' +
+            'Attendance Before: ' + currentAttendance +
+            '<br>' +
+            'QR Status Before: ' + currentQRStatus +
+            '<br>' +
+            'ServiceNow Error: ' + errorMessage;
+
+        return;
+    }
+
+    /*
+     * Re-read record and verify
+     */
+    var verify = new GlideRecord('x_snc_campus360_mock_interview');
+
+    if (!verify.get(recordSysId)) {
+
+        data.message =
+            'ERROR: Record was updated but could not be re-read.';
+
+        return;
+    }
+
+    var finalAttendance = verify.getValue('attendance_status');
+    var finalQRStatus = verify.getValue('qr_status');
+
+    /*
+     * Confirm values
+     */
+    if (finalAttendance == 'Present' &&
+        finalQRStatus == 'Scanned') {
+
+        data.success = true;
+
+        data.message =
+            'Attendance marked successfully!' +
+            '<br><br>' +
+            '<strong>Interview:</strong> ' +
+            data.interviewNumber +
+            '<br>' +
+            '<strong>Attendance:</strong> Present' +
+            '<br>' +
+            '<strong>QR Status:</strong> Scanned';
+
+        return;
+    }
+
+    /*
+     * Update happened but values were not saved correctly
+     */
+    data.message =
+        'ERROR: Record update completed, but verification failed.' +
+        '<br><br>' +
+        'Attendance = ' + finalAttendance +
+        '<br>' +
+        'QR Status = ' + finalQRStatus;
+
+})();]]></script>
+        <servicenow>false</servicenow>
+        <sys_class_name>sp_widget</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-20 02:37:36</sys_created_on>
+        <sys_id>23b235339d9303107f4456802862a703</sys_id>
+        <sys_mod_count>11</sys_mod_count>
+        <sys_name>Campus360 QR Attendance Processor</sys_name>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name>sp_widget_23b235339d9303107f4456802862a703</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-20 06:53:43</sys_updated_on>
+        <template><![CDATA[<div style="text-align:center; padding:40px;">
+
+    <h1>Campus360 QR Attendance</h1>
+
+    <div class="panel panel-default"
+         style="max-width:700px; margin:30px auto; padding:40px;">
+
+        <div ng-if="c.success">
+
+            <h2 style="color:green;">
+                ✓ Attendance Marked
+            </h2>
+
+            <p>
+                {{c.message}}
+            </p>
+
+            <div ng-if="c.interviewNumber">
+                <strong>Interview ID:</strong>
+                {{c.interviewNumber}}
+            </div>
+
+        </div>
+
+        <div ng-if="!c.success">
+
+            <h2 style="color:red;">
+                Attendance Failed
+            </h2>
+
+            <p ng-bind-html="c.message"></p>
+
+        </div>
+
+    </div>
+
+</div>]]></template>
+    </sp_widget>
+    <sys_update_version action="INSERT_OR_UPDATE">
+        <action>DELETE</action>
+        <application display_value="Campus360">7cd68adee41703107f44d305db800ec3</application>
+        <file_path/>
+        <instance_id>82d18dc7c38fcf94a03197af0501316c</instance_id>
+        <instance_name>ltm-hck-2876-0027</instance_name>
+        <name>sp_widget_23b235339d9303107f4456802862a703</name>
+        <payload>&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;record_update table="sp_widget"&gt;&lt;sp_widget action="INSERT_OR_UPDATE"&gt;&lt;category&gt;custom&lt;/category&gt;&lt;client_script&gt;&lt;![CDATA[api.controller=function() {
+  /* widget controller */
+  var c = this;
+};]]&gt;&lt;/client_script&gt;&lt;controller_as&gt;c&lt;/controller_as&gt;&lt;css/&gt;&lt;data_table&gt;sp_instance&lt;/data_table&gt;&lt;demo_data/&gt;&lt;description&gt;Process mock interview QR attendance&lt;/description&gt;&lt;docs/&gt;&lt;field_list/&gt;&lt;has_preview&gt;false&lt;/has_preview&gt;&lt;id&gt;campus360_qr_attendance&lt;/id&gt;&lt;internal&gt;false&lt;/internal&gt;&lt;link&gt;&lt;![CDATA[function link(scope, element, attrs, controller) {
+  
+}]]&gt;&lt;/link&gt;&lt;name&gt;Campus360 QR Attendance Processor&lt;/name&gt;&lt;option_schema/&gt;&lt;public&gt;false&lt;/public&gt;&lt;roles/&gt;&lt;script&gt;&lt;![CDATA[(function() {
+
+    data.success = false;
+    data.message = '';
+    data.interviewNumber = '';
+
+    var inputId = $sp.getParameter('interview_id');
+
+    if (!inputId) {
+        data.message = 'ERROR: interview_id is missing from the URL.';
+        return;
+    }
+
+    var gr = new GlideRecord('x_snc_campus360_mock_interview');
+
+    if (!gr.isValid()) {
+        data.message = 'ERROR: Mock Interview table is invalid.';
+        return;
+    }
+
+    /*
+     * Support both:
+     * 1. sys_id
+     * 2. Interview ID such as INT004
+     */
+
+    var found = false;
+
+    // First try sys_id
+    if (inputId.length == 32) {
+        found = gr.get(inputId);
+    }
+
+    // If not found, search using Interview ID
+    if (!found) {
+
+        gr.initialize();
+
+        gr.addQuery('interview_id', inputId);
+        gr.query();
+
+        if (gr.next()) {
+            found = true;
+        }
+    }
+
+    if (!found) {
+        data.message = 'ERROR: No Mock Interview record found for: ' + inputId;
+        return;
+    }
+
+    // Store interview information
+    data.interviewNumber = gr.getValue('interview_id');
+
+    /*
+     * DEBUG INFORMATION
+     */
+    var recordSysId = gr.getUniqueValue();
+    var currentAttendance = gr.getValue('attendance_status');
+    var currentQRStatus = gr.getValue('qr_status');
+
+    /*
+     * Prevent duplicate attendance
+     */
+    if (currentAttendance == 'Present') {
+
+        data.success = true;
+
+        data.message =
+            'Attendance already marked for ' +
+            data.interviewNumber + '.';
+
+        return;
+    }
+
+    /*
+     * Check write permission
+     */
+    if (!gr.canWrite()) {
+
+        data.message =
+            'ERROR: You do not have permission to update this Mock Interview record.';
+
+        return;
+    }
+
+    /*
+     * Update attendance
+     */
+    gr.setValue('attendance_status', 'Present');
+
+    /*
+     * Update QR status
+     */
+    gr.setValue('qr_status', 'Scanned');
+
+    /*
+     * Save record
+     */
+    var result = gr.update();
+
+    /*
+     * IMPORTANT:
+     * Capture ServiceNow's actual error
+     */
+    if (!result) {
+
+        var errorMessage = gr.getLastErrorMessage();
+
+        if (!errorMessage) {
+            errorMessage = 'Unknown ServiceNow update error.';
+        }
+
+        data.message =
+            'ERROR: Unable to update Mock Interview record.' +
+            '&lt;br&gt;&lt;br&gt;' +
+            'Interview: ' + data.interviewNumber +
+            '&lt;br&gt;' +
+            'Sys ID: ' + recordSysId +
+            '&lt;br&gt;' +
+            'Attendance Before: ' + currentAttendance +
+            '&lt;br&gt;' +
+            'QR Status Before: ' + currentQRStatus +
+            '&lt;br&gt;' +
+            'ServiceNow Error: ' + errorMessage;
+
+        return;
+    }
+
+    /*
+     * Re-read record and verify
+     */
+    var verify = new GlideRecord('x_snc_campus360_mock_interview');
+
+    if (!verify.get(recordSysId)) {
+
+        data.message =
+            'ERROR: Record was updated but could not be re-read.';
+
+        return;
+    }
+
+    var finalAttendance = verify.getValue('attendance_status');
+    var finalQRStatus = verify.getValue('qr_status');
+
+    /*
+     * Confirm values
+     */
+    if (finalAttendance == 'Present' &amp;&amp;
+        finalQRStatus == 'Scanned') {
+
+        data.success = true;
+
+        data.message =
+            'Attendance marked successfully!' +
+            '&lt;br&gt;&lt;br&gt;' +
+            '&lt;strong&gt;Interview:&lt;/strong&gt; ' +
+            data.interviewNumber +
+            '&lt;br&gt;' +
+            '&lt;strong&gt;Attendance:&lt;/strong&gt; Present' +
+            '&lt;br&gt;' +
+            '&lt;strong&gt;QR Status:&lt;/strong&gt; Scanned';
+
+        return;
+    }
+
+    /*
+     * Update happened but values were not saved correctly
+     */
+    data.message =
+        'ERROR: Record update completed, but verification failed.' +
+        '&lt;br&gt;&lt;br&gt;' +
+        'Attendance = ' + finalAttendance +
+        '&lt;br&gt;' +
+        'QR Status = ' + finalQRStatus;
+
+})();]]&gt;&lt;/script&gt;&lt;servicenow&gt;false&lt;/servicenow&gt;&lt;sys_class_name&gt;sp_widget&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-20 02:37:36&lt;/sys_created_on&gt;&lt;sys_id&gt;23b235339d9303107f4456802862a703&lt;/sys_id&gt;&lt;sys_mod_count&gt;11&lt;/sys_mod_count&gt;&lt;sys_name&gt;Campus360 QR Attendance Processor&lt;/sys_name&gt;&lt;sys_package display_value="Campus360" source="x_snc_campus360"&gt;7cd68adee41703107f44d305db800ec3&lt;/sys_package&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="Campus360"&gt;7cd68adee41703107f44d305db800ec3&lt;/sys_scope&gt;&lt;sys_update_name&gt;sp_widget_23b235339d9303107f4456802862a703&lt;/sys_update_name&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-20 06:53:43&lt;/sys_updated_on&gt;&lt;template&gt;&lt;![CDATA[&lt;div style="text-align:center; padding:40px;"&gt;
+
+    &lt;h1&gt;Campus360 QR Attendance&lt;/h1&gt;
+
+    &lt;div class="panel panel-default"
+         style="max-width:700px; margin:30px auto; padding:40px;"&gt;
+
+        &lt;div ng-if="c.success"&gt;
+
+            &lt;h2 style="color:green;"&gt;
+                ✓ Attendance Marked
+            &lt;/h2&gt;
+
+            &lt;p&gt;
+                {{c.message}}
+            &lt;/p&gt;
+
+            &lt;div ng-if="c.interviewNumber"&gt;
+                &lt;strong&gt;Interview ID:&lt;/strong&gt;
+                {{c.interviewNumber}}
+            &lt;/div&gt;
+
+        &lt;/div&gt;
+
+        &lt;div ng-if="!c.success"&gt;
+
+            &lt;h2 style="color:red;"&gt;
+                Attendance Failed
+            &lt;/h2&gt;
+
+            &lt;p ng-bind-html="c.message"&gt;&lt;/p&gt;
+
+        &lt;/div&gt;
+
+    &lt;/div&gt;
+
+&lt;/div&gt;]]&gt;&lt;/template&gt;&lt;/sp_widget&gt;&lt;/record_update&gt;</payload>
+        <payload_hash>137319442</payload_hash>
+        <record_name>Campus360 QR Attendance Processor</record_name>
+        <reverted_from/>
+        <source>70d68adee41703107f44d305db800ec8</source>
+        <source_table>sys_update_set</source_table>
+        <state>previous</state>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-20 06:53:43</sys_created_on>
+        <sys_id>f6fda6b39d5b03107f4456802862a79d</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_recorded_at>1a0bd9796230000001</sys_recorded_at>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-20 06:53:43</sys_updated_on>
+        <type>Widget</type>
+        <update_guid>3afda6b3b25b0310a07462e9b938ec9c</update_guid>
+        <update_guid_history>3afda6b3b25b0310a07462e9b938ec9c:137319442,4d48567ba997031034b56923d9b2798a:1197606692,6856da77ba970310f1dc9b3d168b3ea2:998272128,730596f383970310801a4c9cd6139a28:314197514,24135ebf89570310b25e66ec7c2bde58:-354085911,a052567fed57031065d72838d724b2b2:1537112709,b45d8af34457031027c3375a74f17c4e:806495925,a169cefb661703107da6b0225afaa1a7:997101156,71290afb6a17031039f6df0d9452e1fe:-125877142,65970a3b4c170310c5f3ce0fb322ccf7:-853180553,8045b9770b93031024684b0aa7f81330:1334955373,d753b573cf93031057fc338d3f2d13ad:-1860845716</update_guid_history>
+    </sys_update_version>
+    <sys_metadata_delete action="INSERT_OR_UPDATE">
+        <sys_audit_delete display_value="Campus360 QR Attendance Processor">214e62f39d5b03107f4456802862a773</sys_audit_delete>
+        <sys_class_name>sys_metadata_delete</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-20 06:55:00</sys_created_on>
+        <sys_db_object display_value="" name="sp_widget">sp_widget</sys_db_object>
+        <sys_id>54bf8280ec2d4810b034505899dff859</sys_id>
+        <sys_metadata>23b235339d9303107f4456802862a703</sys_metadata>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>Campus360 QR Attendance Processor</sys_name>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_parent/>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_scope_delete display_value="">1cde9626740d46978b846077c1615101</sys_scope_delete>
+        <sys_update_name>sp_widget_23b235339d9303107f4456802862a703</sys_update_name>
+        <sys_update_version display_value="sp_widget_23b235339d9303107f4456802862a703">f6fda6b39d5b03107f4456802862a79d</sys_update_version>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-20 06:55:00</sys_updated_on>
+    </sys_metadata_delete>
+</record_update>

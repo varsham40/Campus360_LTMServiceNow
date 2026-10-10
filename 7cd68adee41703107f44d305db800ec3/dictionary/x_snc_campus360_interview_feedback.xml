@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?><database>
+    <element attributes="enforce_dot_walk_cross_scope_access=true" db_object_id="99b3da5ae49703107f44d305db800e8e" label="Interview Feedback" max_length="40" name="x_snc_campus360_interview_feedback" type="collection">
+        <element label="Problem Solving Score" max_length="40" name="problem_solving_score" type="integer"/>
+        <element label="Technical Score" max_length="40" name="technical_score" type="integer"/>
+        <element label="Student" max_length="32" name="student" reference="x_snc_campus360_student_master" type="reference"/>
+        <element label="Recommendation" max_length="2000" name="recommendation" type="string"/>
+        <element label="Overall Score" max_length="40" name="overall_score" type="integer"/>
+        <element label="Feedback Date" max_length="40" name="feedback_date" type="glide_date_time"/>
+        <element display="true" label="Feedback ID" max_length="20" name="feedback_id" type="string"/>
+        <element label="Strengths" max_length="2000" name="strengths" type="string"/>
+        <element label="Communication Score" max_length="40" name="communication_score" type="integer"/>
+        <element label="Trainer" max_length="32" name="trainer" reference="x_snc_campus360_trainer_master" type="reference"/>
+        <element label="Interview" max_length="32" name="interview" reference="x_snc_campus360_mock_interview" type="reference"/>
+        <element label="Improvement Areas" max_length="2000" name="improvement_areas" type="string"/>
+        <index name="index">
+            <element name="interview"/>
+        </index>
+        <index name="index2">
+            <element name="student"/>
+        </index>
+        <index name="index3">
+            <element name="trainer"/>
+        </index>
+    </element>
+</database>

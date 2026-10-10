@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?><database>
+    <element attributes="enforce_dot_walk_cross_scope_access=true" db_object_id="b5c89ed2e4d703107f44d305db800e85" label="Campus Community Post" max_length="40" name="x_snc_campus360_campus_community_post" type="collection">
+        <element label="Answered" max_length="40" name="answered" type="boolean"/>
+        <element label="Verified" max_length="40" name="verified" type="boolean"/>
+        <element choice="3" default="Question" label="Post Type" max_length="30" name="post_type" type="choice">
+            <choice>
+                <element inactive_on_update="false" label="Mentorship" sequence="3" value="mentorship"/>
+                <element inactive_on_update="false" label="Question" sequence="0" value="question"/>
+                <element inactive_on_update="false" label="Opportunity" sequence="2" value="opportunity"/>
+                <element inactive_on_update="false" label="Resource" sequence="5" value="resource"/>
+                <element inactive_on_update="false" label="Discussion" sequence="1" value="discussion"/>
+                <element inactive_on_update="false" label="Announcement" sequence="4" value="announcement"/>
+            </choice>
+        </element>
+        <element label="Posted By" max_length="100" name="posted_by" type="string"/>
+        <element choice="3" default="Active" label="Status" max_length="20" name="status" type="choice">
+            <choice>
+                <element inactive_on_update="false" label="Removed" sequence="3" value="removed"/>
+                <element inactive_on_update="false" label="Active" sequence="0" value="active"/>
+                <element inactive_on_update="false" label="Archived" sequence="2" value="archived"/>
+                <element inactive_on_update="false" label="Closed" sequence="1" value="closed"/>
+            </choice>
+        </element>
+        <element label="Alumni" max_length="32" name="alumni" reference="x_snc_campus360_alumni_master" type="reference"/>
+        <element label="Title" max_length="200" name="title" type="string"/>
+        <element label="Content" max_length="4000" name="content" type="string"/>
+        <element label="Student" max_length="32" name="student" reference="x_snc_campus360_student_master" type="reference"/>
+        <element display="true" label="Post ID" max_length="20" name="post_id" type="string"/>
+        <element choice="3" default="Pending" label="AI Validation Status" max_length="20" name="ai_validation_status" type="choice">
+            <choice>
+                <element inactive_on_update="false" label="Flagged" sequence="3" value="flagged"/>
+                <element inactive_on_update="false" label="Rejected" sequence="2" value="rejected"/>
+                <element inactive_on_update="false" label="Pending" sequence="0" value="pending"/>
+                <element inactive_on_update="false" label="Approved" sequence="1" value="approved"/>
+            </choice>
+        </element>
+        <index name="index">
+            <element name="student"/>
+        </index>
+        <index name="index2">
+            <element name="alumni"/>
+        </index>
+    </element>
+</database>

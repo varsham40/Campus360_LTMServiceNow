@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?><database>
+    <element attributes="enforce_dot_walk_cross_scope_access=true" db_object_id="13ce1e30c4e703107f44164a4d246344" label="Mock Interview Slot Request" max_length="40" name="x_snc_campus360_mock_interview_slot_request" type="collection">
+        <element attributes="ignore_filter_on_new=true" default="javascript:global.getNextObjNumberPadded();" label="Request ID" max_length="40" name="number" type="string"/>
+        <element choice="1" label="Status" max_length="255" name="status" type="choice">
+            <choice>
+                <element inactive_on_update="false" label="Accepted" sequence="1" value="Accepted"/>
+                <element inactive_on_update="false" label="Completed" sequence="3" value="Completed"/>
+                <element inactive_on_update="false" label="Requested" sequence="0" value="Requested"/>
+                <element inactive_on_update="false" label="Cancelled" sequence="2" value="Cancelled"/>
+            </choice>
+        </element>
+        <element label="Accepted On" max_length="255" name="accepted_on" type="glide_date_time"/>
+        <element label="Requested On" max_length="255" name="requested_on" type="glide_date_time"/>
+        <element label="Mock Interview" max_length="32" name="mock_interview" reference="x_snc_campus360_mock_interview" type="reference"/>
+        <element label="Notes" max_length="1000" name="notes" type="string"/>
+        <element label="Completed On" max_length="255" name="completed_on" type="glide_date_time"/>
+        <element label="Accepted Trainer" max_length="32" name="accepted_trainer" reference="x_snc_campus360_trainer_master" type="reference"/>
+        <element label="Student" max_length="32" name="student" reference="x_snc_campus360_student_master" type="reference"/>
+        <element label="Cancellation Reason" max_length="40" name="cancellation_reason" type="string"/>
+        <element label="Selected Availability" max_length="32" name="selected_availability" reference="x_snc_campus360_trainer_interview_availability" type="reference"/>
+        <element label="Requested Timing" max_length="32" name="requested_timing" reference="x_snc_campus360_trainer_interview_availability" type="reference"/>
+        <index name="index">
+            <element name="selected_availability"/>
+        </index>
+        <index name="index2">
+            <element name="requested_timing"/>
+        </index>
+        <index name="index3">
+            <element name="accepted_trainer"/>
+        </index>
+        <index name="index4">
+            <element name="student"/>
+        </index>
+        <index name="index5">
+            <element name="mock_interview"/>
+        </index>
+    </element>
+</database>

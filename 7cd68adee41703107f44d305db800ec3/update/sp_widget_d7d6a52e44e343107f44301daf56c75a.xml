@@ -1,0 +1,1705 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_widget">
+    <sp_widget action="INSERT_OR_UPDATE">
+        <category>custom</category>
+        <client_script><![CDATA[api.controller = function($scope) {
+
+    var c = this;
+
+
+    // =====================================================
+    // UPDATE OPPORTUNITY STATUS
+    // =====================================================
+
+    c.updateOpportunityStatus = function(opportunity) {
+
+        if (!opportunity || !opportunity.sys_id) {
+
+            return;
+
+        }
+
+
+        opportunity.updating = true;
+
+
+        // Send update request to Server Script
+
+        c.data.action =
+            'update_status';
+
+        c.data.opportunity_sys_id =
+            opportunity.sys_id;
+
+        c.data.new_status =
+            opportunity.edit_status;
+
+
+        c.server.update().then(
+            function(response) {
+
+                opportunity.updating = false;
+
+
+                // Server successfully updated
+
+                if (
+                    response.data.update_success
+                ) {
+
+                    /*
+                     * Server Script has already
+                     * reloaded the opportunity list.
+                     *
+                     * Therefore:
+                     * - table status updates
+                     * - Open count updates
+                     * - Closed count updates
+                     * - statistics update
+                     */
+
+                }
+
+            },
+            function() {
+
+                opportunity.updating = false;
+
+            }
+        );
+
+    };
+
+};]]></client_script>
+        <controller_as>c</controller_as>
+        <css>/* =========================================&#13;
+   PAGE&#13;
+========================================= */&#13;
+&#13;
+.opportunities-page {&#13;
+&#13;
+  max-width: 1200px;&#13;
+&#13;
+  margin: 30px auto;&#13;
+&#13;
+  padding:&#13;
+    0 20px 50px;&#13;
+&#13;
+  color: #102a56;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   HEADER&#13;
+========================================= */&#13;
+&#13;
+.page-header {&#13;
+&#13;
+  background: #ffffff;&#13;
+&#13;
+  border:&#13;
+    1px solid #e1e7f2;&#13;
+&#13;
+  border-radius: 18px;&#13;
+&#13;
+  padding: 30px 34px;&#13;
+&#13;
+  margin-bottom: 24px;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  justify-content: space-between;&#13;
+&#13;
+  gap: 25px;&#13;
+&#13;
+  box-shadow:&#13;
+    0 8px 25px&#13;
+    rgba(30,55,90,0.08);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.eyebrow {&#13;
+&#13;
+  font-size: 12px;&#13;
+&#13;
+  font-weight: 700;&#13;
+&#13;
+  letter-spacing: 2px;&#13;
+&#13;
+  color: #4d63e8;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.page-header h1 {&#13;
+&#13;
+  margin:&#13;
+    8px 0 6px;&#13;
+&#13;
+  font-size: 30px;&#13;
+&#13;
+  font-weight: 700;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.page-header p {&#13;
+&#13;
+  margin: 0;&#13;
+&#13;
+  color: #70809d;&#13;
+&#13;
+  font-size: 14px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.company-info {&#13;
+&#13;
+  display: inline-block;&#13;
+&#13;
+  margin-top: 12px;&#13;
+&#13;
+  padding:&#13;
+    7px 12px;&#13;
+&#13;
+  background: #f2f4ff;&#13;
+&#13;
+  border-radius: 7px;&#13;
+&#13;
+  color: #5368e8;&#13;
+&#13;
+  font-size: 12px;&#13;
+&#13;
+  font-weight: 600;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.header-actions {&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  gap: 10px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   BUTTONS&#13;
+========================================= */&#13;
+&#13;
+.btn {&#13;
+&#13;
+  height: 42px;&#13;
+&#13;
+  padding:&#13;
+    0 18px;&#13;
+&#13;
+  border-radius: 8px;&#13;
+&#13;
+  font-size: 13px;&#13;
+&#13;
+  font-weight: 600;&#13;
+&#13;
+  cursor: pointer;&#13;
+&#13;
+  transition: 0.2s;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.btn-primary {&#13;
+&#13;
+  background: #5368e8;&#13;
+&#13;
+  color: #ffffff;&#13;
+&#13;
+  border:&#13;
+    1px solid #5368e8;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.btn-primary:hover {&#13;
+&#13;
+  background: #4056d5;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.btn-secondary {&#13;
+&#13;
+  background: #ffffff;&#13;
+&#13;
+  color: #5368e8;&#13;
+&#13;
+  border:&#13;
+    1px solid #ccd5e5;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.btn-secondary:hover {&#13;
+&#13;
+  background: #f5f7ff;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   STATS&#13;
+========================================= */&#13;
+&#13;
+.stats-grid {&#13;
+&#13;
+  display: grid;&#13;
+&#13;
+  grid-template-columns:&#13;
+    repeat(3, 1fr);&#13;
+&#13;
+  gap: 18px;&#13;
+&#13;
+  margin-bottom: 24px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.stat-card {&#13;
+&#13;
+  background: #ffffff;&#13;
+&#13;
+  border:&#13;
+    1px solid #e1e7f2;&#13;
+&#13;
+  border-radius: 15px;&#13;
+&#13;
+  padding: 20px;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  gap: 15px;&#13;
+&#13;
+  box-shadow:&#13;
+    0 5px 18px&#13;
+    rgba(30,55,90,0.05);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.stat-icon {&#13;
+&#13;
+  width: 45px;&#13;
+&#13;
+  height: 45px;&#13;
+&#13;
+  border-radius: 11px;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  justify-content: center;&#13;
+&#13;
+  background: #f1f3ff;&#13;
+&#13;
+  color: #5368e8;&#13;
+&#13;
+  font-size: 20px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.stat-icon.open {&#13;
+&#13;
+  background: #effaf3;&#13;
+&#13;
+  color: #25804a;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.stat-icon.closed {&#13;
+&#13;
+  background: #fff2f2;&#13;
+&#13;
+  color: #c64b4b;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.stat-label {&#13;
+&#13;
+  color: #7a89a2;&#13;
+&#13;
+  font-size: 12px;&#13;
+&#13;
+  margin-bottom: 5px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.stat-value {&#13;
+&#13;
+  font-size: 24px;&#13;
+&#13;
+  font-weight: 700;&#13;
+&#13;
+  color: #20385f;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   LIST CARD&#13;
+========================================= */&#13;
+&#13;
+.list-card {&#13;
+&#13;
+  background: #ffffff;&#13;
+&#13;
+  border:&#13;
+    1px solid #e1e7f2;&#13;
+&#13;
+  border-radius: 18px;&#13;
+&#13;
+  overflow: hidden;&#13;
+&#13;
+  box-shadow:&#13;
+    0 8px 25px&#13;
+    rgba(30,55,90,0.06);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.list-header {&#13;
+&#13;
+  padding:&#13;
+    24px 28px;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  justify-content: space-between;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  border-bottom:&#13;
+    1px solid #e8edf5;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.list-header h2 {&#13;
+&#13;
+  margin: 0 0 5px;&#13;
+&#13;
+  font-size: 20px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.list-header p {&#13;
+&#13;
+  margin: 0;&#13;
+&#13;
+  color: #7888a3;&#13;
+&#13;
+  font-size: 13px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.record-count {&#13;
+&#13;
+  padding:&#13;
+    7px 12px;&#13;
+&#13;
+  background: #f2f4ff;&#13;
+&#13;
+  color: #5368e8;&#13;
+&#13;
+  border-radius: 7px;&#13;
+&#13;
+  font-size: 12px;&#13;
+&#13;
+  font-weight: 600;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   TABLE&#13;
+========================================= */&#13;
+&#13;
+.table-wrapper {&#13;
+&#13;
+  width: 100%;&#13;
+&#13;
+  overflow-x: auto;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.opportunity-table {&#13;
+&#13;
+  width: 100%;&#13;
+&#13;
+  border-collapse: collapse;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.opportunity-table th {&#13;
+&#13;
+  padding:&#13;
+    14px 18px;&#13;
+&#13;
+  text-align: left;&#13;
+&#13;
+  background: #f8faff;&#13;
+&#13;
+  border-bottom:&#13;
+    1px solid #e4eaf3;&#13;
+&#13;
+  color: #71809a;&#13;
+&#13;
+  font-size: 11px;&#13;
+&#13;
+  font-weight: 700;&#13;
+&#13;
+  text-transform: uppercase;&#13;
+&#13;
+  letter-spacing: 0.4px;&#13;
+&#13;
+  white-space: nowrap;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.opportunity-table td {&#13;
+&#13;
+  padding:&#13;
+    17px 18px;&#13;
+&#13;
+  border-bottom:&#13;
+    1px solid #edf1f6;&#13;
+&#13;
+  font-size: 13px;&#13;
+&#13;
+  color: #405575;&#13;
+&#13;
+  white-space: nowrap;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.opportunity-table tbody tr:hover {&#13;
+&#13;
+  background: #fafbff;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   OPPORTUNITY&#13;
+========================================= */&#13;
+&#13;
+.opportunity-main {&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  flex-direction: column;&#13;
+&#13;
+  gap: 4px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.opportunity-main strong {&#13;
+&#13;
+  color: #20385f;&#13;
+&#13;
+  font-size: 13px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.opportunity-main span {&#13;
+&#13;
+  color: #8a97aa;&#13;
+&#13;
+  font-size: 11px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.type-text {&#13;
+&#13;
+  color: #5368e8;&#13;
+&#13;
+  font-weight: 600;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   APPLICATION COUNT&#13;
+========================================= */&#13;
+&#13;
+.application-count {&#13;
+&#13;
+  display: inline-flex;&#13;
+&#13;
+  min-width: 30px;&#13;
+&#13;
+  height: 26px;&#13;
+&#13;
+  padding: 0 8px;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  justify-content: center;&#13;
+&#13;
+  border-radius: 6px;&#13;
+&#13;
+  background: #f2f4ff;&#13;
+&#13;
+  color: #5368e8;&#13;
+&#13;
+  font-weight: 700;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   STATUS&#13;
+========================================= */&#13;
+&#13;
+.status-badge {&#13;
+&#13;
+  display: inline-block;&#13;
+&#13;
+  padding:&#13;
+    5px 10px;&#13;
+&#13;
+  border-radius: 20px;&#13;
+&#13;
+  font-size: 11px;&#13;
+&#13;
+  font-weight: 700;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.status-open {&#13;
+&#13;
+  background: #eaf8ef;&#13;
+&#13;
+  color: #25804a;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.status-closed {&#13;
+&#13;
+  background: #f1f3f6;&#13;
+&#13;
+  color: #68758a;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   EMPTY&#13;
+========================================= */&#13;
+&#13;
+.empty-state {&#13;
+&#13;
+  text-align: center;&#13;
+&#13;
+  padding:&#13;
+    70px 30px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.empty-icon {&#13;
+&#13;
+  width: 55px;&#13;
+&#13;
+  height: 55px;&#13;
+&#13;
+  margin:&#13;
+    0 auto 15px;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  justify-content: center;&#13;
+&#13;
+  background: #f2f4ff;&#13;
+&#13;
+  border-radius: 14px;&#13;
+&#13;
+  color: #5368e8;&#13;
+&#13;
+  font-size: 24px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.empty-state h3 {&#13;
+&#13;
+  margin:&#13;
+    0 0 8px;&#13;
+&#13;
+  font-size: 18px;&#13;
+&#13;
+  color: #20385f;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.empty-state p {&#13;
+&#13;
+  max-width: 450px;&#13;
+&#13;
+  margin:&#13;
+    0 auto 20px;&#13;
+&#13;
+  color: #7c8ba2;&#13;
+&#13;
+  font-size: 13px;&#13;
+&#13;
+  line-height: 1.6;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   ERROR&#13;
+========================================= */&#13;
+&#13;
+.error-message {&#13;
+&#13;
+  margin-bottom: 20px;&#13;
+&#13;
+  padding:&#13;
+    13px 16px;&#13;
+&#13;
+  border-radius: 8px;&#13;
+&#13;
+  background: #fff1f1;&#13;
+&#13;
+  border:&#13;
+    1px solid #ffd1d1;&#13;
+&#13;
+  color: #c63f3f;&#13;
+&#13;
+  font-size: 13px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   MOBILE&#13;
+========================================= */&#13;
+&#13;
+@media (max-width: 768px) {&#13;
+&#13;
+  .page-header {&#13;
+&#13;
+    flex-direction: column;&#13;
+&#13;
+    align-items: flex-start;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .header-actions {&#13;
+&#13;
+    width: 100%;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .header-actions .btn {&#13;
+&#13;
+    flex: 1;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .stats-grid {&#13;
+&#13;
+    grid-template-columns: 1fr;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .list-header {&#13;
+&#13;
+    flex-direction: column;&#13;
+&#13;
+    align-items: flex-start;&#13;
+&#13;
+    gap: 12px;&#13;
+&#13;
+  }&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.btn {&#13;
+&#13;
+  display: inline-flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  justify-content: center;&#13;
+&#13;
+  text-decoration: none;&#13;
+&#13;
+  height: 42px;&#13;
+&#13;
+  padding: 0 18px;&#13;
+&#13;
+  border-radius: 8px;&#13;
+&#13;
+  font-size: 13px;&#13;
+&#13;
+  font-weight: 600;&#13;
+&#13;
+  cursor: pointer;&#13;
+&#13;
+  transition: 0.2s;&#13;
+&#13;
+  box-sizing: border-box;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   STATUS EDITOR&#13;
+========================================= */&#13;
+&#13;
+.status-editor {&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  gap: 8px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* STATUS SELECT */&#13;
+&#13;
+.status-select {&#13;
+&#13;
+  height: 32px;&#13;
+&#13;
+  min-width: 90px;&#13;
+&#13;
+  padding: 0 9px;&#13;
+&#13;
+  border:&#13;
+    1px solid #d8deeb;&#13;
+&#13;
+  border-radius: 7px;&#13;
+&#13;
+  background: #ffffff;&#13;
+&#13;
+  color: #405575;&#13;
+&#13;
+  font-size: 12px;&#13;
+&#13;
+  font-weight: 600;&#13;
+&#13;
+  cursor: pointer;&#13;
+&#13;
+  outline: none;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.status-select:focus {&#13;
+&#13;
+  border-color: #5368e8;&#13;
+&#13;
+  box-shadow:&#13;
+    0 0 0 2px&#13;
+    rgba(83,104,232,0.10);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* UPDATE BUTTON */&#13;
+&#13;
+.status-update-btn {&#13;
+&#13;
+  height: 32px;&#13;
+&#13;
+  padding:&#13;
+    0 11px;&#13;
+&#13;
+  border:&#13;
+    1px solid #5368e8;&#13;
+&#13;
+  border-radius: 7px;&#13;
+&#13;
+  background: #5368e8;&#13;
+&#13;
+  color: #ffffff;&#13;
+&#13;
+  font-size: 11px;&#13;
+&#13;
+  font-weight: 700;&#13;
+&#13;
+  cursor: pointer;&#13;
+&#13;
+  transition: 0.2s;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.status-update-btn:hover {&#13;
+&#13;
+  background: #4056d5;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.status-update-btn:disabled {&#13;
+&#13;
+  opacity: 0.55;&#13;
+&#13;
+  cursor: not-allowed;&#13;
+&#13;
+}</css>
+        <data_table>sp_instance</data_table>
+        <demo_data/>
+        <description/>
+        <docs/>
+        <field_list/>
+        <has_preview>false</has_preview>
+        <id>recruiter_opportunities_new</id>
+        <internal>false</internal>
+        <link><![CDATA[function link(scope, element, attrs, controller) {
+  
+}]]></link>
+        <name>recruiter opportunities new</name>
+        <option_schema/>
+        <public>false</public>
+        <roles/>
+        <script><![CDATA[(function() {
+
+    /*
+     * =====================================================
+     * CAMPUS360 RECRUITER - OPPORTUNITIES
+     * =====================================================
+     *
+     * Current recruiter:
+     * Ananya Mehta
+     * Recruiter ID: RCR001
+     *
+     * Current company:
+     * TechNova Solutions
+     * Company ID: CMP001
+     *
+     * IMPORTANT:
+     * This page currently works ONLY for this company.
+     * Later this can be replaced with logged-in recruiter
+     * / company mapping.
+     */
+
+
+	    // =====================================================
+    // UPDATE OPPORTUNITY STATUS
+    // =====================================================
+
+    if (
+        input &&
+        input.action == 'update_status'
+    ) {
+
+        var updateGR =
+            new GlideRecord(
+                'x_snc_campus360_placement_opportunity'
+            );
+
+
+        if (
+            updateGR.get(
+                input.opportunity_sys_id
+            )
+        ) {
+
+            // Make sure this opportunity
+            // belongs to our sample company
+
+            if (
+                updateGR.getValue('company') ==
+                'e9268662acd303107f44b432e349694b'
+            ) {
+
+                updateGR.setValue(
+                    'status',
+                    input.new_status
+                );
+
+                updateGR.update();
+
+                data.update_success = true;
+
+            } else {
+
+                data.update_success = false;
+
+                data.error =
+                    'You are not authorized to update this opportunity.';
+
+            }
+
+        } else {
+
+            data.update_success = false;
+
+            data.error =
+                'Opportunity record could not be found.';
+
+        }
+
+    }
+
+
+    // =====================================================
+    // COMPANY CONTEXT
+    // =====================================================
+
+    var companySysId =
+        'e9268662acd303107f44b432e349694b';
+
+
+    data.recruiter_name =
+        'Ananya Mehta';
+
+    data.recruiter_id =
+        'RCR001';
+
+
+    // =====================================================
+    // GET COMPANY
+    // =====================================================
+
+    var companyGR =
+        new GlideRecord(
+            'x_snc_campus360_company_master'
+        );
+
+
+    if (!companyGR.get(companySysId)) {
+
+        data.error =
+            'Company record could not be found.';
+
+        return;
+
+    }
+
+
+    data.company_name =
+        companyGR.getValue('company_name');
+
+    data.company_id =
+        companyGR.getValue('company_id');
+
+
+    // =====================================================
+    // OPPORTUNITY STATISTICS
+    // =====================================================
+
+    data.total_count = 0;
+
+    data.open_count = 0;
+
+    data.closed_count = 0;
+
+
+    var statsGR =
+        new GlideRecord(
+            'x_snc_campus360_placement_opportunity'
+        );
+
+
+    /*
+     * VERY IMPORTANT:
+     *
+     * Only opportunities belonging to this company.
+     */
+
+    statsGR.addQuery(
+        'company',
+        companySysId
+    );
+
+    statsGR.query();
+
+
+    while (statsGR.next()) {
+
+        data.total_count++;
+
+
+        var status =
+            statsGR.getValue('status');
+
+
+        if (
+            status &&
+            status.toLowerCase() == 'open'
+        ) {
+
+            data.open_count++;
+
+        } else {
+
+            data.closed_count++;
+
+        }
+
+    }
+
+
+    // =====================================================
+    // OPPORTUNITY LIST
+    // =====================================================
+
+    data.opportunities = [];
+
+
+    var opportunityGR =
+        new GlideRecord(
+            'x_snc_campus360_placement_opportunity'
+        );
+
+
+    /*
+     * COMPANY FILTER
+     *
+     * This is the most important filter on this page.
+     */
+
+    opportunityGR.addQuery(
+        'company',
+        companySysId
+    );
+
+
+    /*
+     * Newest opportunities first.
+     */
+
+    opportunityGR.orderByDesc(
+        'sys_created_on'
+    );
+
+
+    opportunityGR.query();
+
+
+    while (
+        opportunityGR.next()
+    ) {
+
+        var opportunity = {};
+
+
+        // -------------------------------------------------
+        // SYS ID
+        // -------------------------------------------------
+
+        opportunity.sys_id =
+            opportunityGR.getUniqueValue();
+
+
+        // -------------------------------------------------
+        // OPPORTUNITY ID
+        // -------------------------------------------------
+
+        opportunity.opportunity_id =
+            opportunityGR.getValue(
+                'opportunity_id'
+            );
+
+
+        // -------------------------------------------------
+        // TITLE
+        // -------------------------------------------------
+
+        opportunity.title =
+            opportunityGR.getValue(
+                'opportunity_title'
+            );
+
+
+        // -------------------------------------------------
+        // TYPE
+        // -------------------------------------------------
+
+        opportunity.type =
+            opportunityGR.getDisplayValue(
+                'opportunity_type'
+            );
+
+
+        // -------------------------------------------------
+        // LOCATION
+        // -------------------------------------------------
+
+        opportunity.location =
+            opportunityGR.getValue(
+                'location'
+            );
+
+
+        // -------------------------------------------------
+        // CTC / STIPEND
+        // -------------------------------------------------
+
+        opportunity.ctc =
+            opportunityGR.getValue(
+                'ctc_stipend'
+            );
+
+
+        // -------------------------------------------------
+        // DEADLINE
+        // -------------------------------------------------
+
+        var deadline =
+            opportunityGR.getValue(
+                'application_deadline'
+            );
+
+
+        if (deadline) {
+
+            var deadlineGDT =
+                new GlideDateTime(
+                    deadline
+                );
+
+
+            opportunity.deadline =
+                deadlineGDT
+                    .getDate()
+                    .getByFormat(
+                        'dd MMM yyyy'
+                    );
+
+        } else {
+
+            opportunity.deadline =
+                'Not specified';
+
+        }
+
+
+        // =================================================
+		// STATUS
+		// =================================================
+
+		opportunity.status =
+			opportunityGR.getDisplayValue('status');
+
+		// Keep the actual choice value
+		// for the dropdown
+
+		opportunity.edit_status =
+			opportunityGR.getValue('status');
+
+
+        // -------------------------------------------------
+        // CREATED DATE
+        // -------------------------------------------------
+
+        opportunity.created =
+            opportunityGR.getDisplayValue(
+                'sys_created_on'
+            );
+
+
+        // -------------------------------------------------
+        // APPLICATION COUNT
+        // -------------------------------------------------
+
+        opportunity.application_count = 0;
+
+
+        var applicationGR =
+            new GlideAggregate(
+                'x_snc_campus360_student_application'
+            );
+
+
+        /*
+         * Application
+         * ->
+         * Opportunity
+         */
+
+        applicationGR.addQuery(
+            'opportunity',
+            opportunityGR.getUniqueValue()
+        );
+
+
+        applicationGR.addAggregate(
+            'COUNT'
+        );
+
+
+        applicationGR.query();
+
+
+        if (
+            applicationGR.next()
+        ) {
+
+            opportunity.application_count =
+                parseInt(
+                    applicationGR.getAggregate(
+                        'COUNT'
+                    ),
+                    10
+                );
+
+        }
+
+
+        data.opportunities.push(
+            opportunity
+        );
+
+    }
+
+
+})();]]></script>
+        <servicenow>false</servicenow>
+        <sys_class_name>sp_widget</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-28 15:08:00</sys_created_on>
+        <sys_id>d7d6a52e44e343107f44301daf56c75a</sys_id>
+        <sys_mod_count>3</sys_mod_count>
+        <sys_name>recruiter opportunities new</sys_name>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name>sp_widget_d7d6a52e44e343107f44301daf56c75a</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-30 03:50:42</sys_updated_on>
+        <template><![CDATA[<div class="opportunities-page">
+
+  <!-- =========================================
+       HEADER
+  ========================================== -->
+
+  <div class="page-header">
+
+    <div>
+
+      <span class="eyebrow">
+        RECRUITMENT
+      </span>
+
+      <h1>
+        Placement Opportunities
+      </h1>
+
+      <p>
+        Manage opportunities published by
+        {{c.data.company_name}}.
+      </p>
+
+      <div class="company-info">
+
+        {{c.data.company_name}}
+        ·
+        {{c.data.company_id}}
+
+      </div>
+
+    </div>
+
+
+    <div class="header-actions">
+
+      <a
+        class="btn btn-secondary"
+        href="?id=campus360_recruiter_dashboard_new">
+
+        ← Dashboard
+
+      </a>
+
+
+      <a
+        class="btn btn-primary"
+        href="?id=campus360_create_opportunity">
+
+        + Create Opportunity
+
+      </a>
+
+    </div>
+
+  </div>
+
+
+  <!-- =========================================
+       ERROR
+  ========================================== -->
+
+  <div
+    class="error-message"
+    ng-if="c.data.error">
+
+    {{c.data.error}}
+
+  </div>
+
+
+  <!-- =========================================
+       STATISTICS
+  ========================================== -->
+
+  <div class="stats-grid">
+
+
+    <!-- TOTAL -->
+
+    <div class="stat-card">
+
+      <div class="stat-icon">
+        ▣
+      </div>
+
+      <div>
+
+        <div class="stat-label">
+          Total Opportunities
+        </div>
+
+        <div class="stat-value">
+          {{c.data.total_count}}
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- OPEN -->
+
+    <div class="stat-card">
+
+      <div class="stat-icon open">
+        ✓
+      </div>
+
+      <div>
+
+        <div class="stat-label">
+          Open Opportunities
+        </div>
+
+        <div class="stat-value">
+          {{c.data.open_count}}
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- CLOSED -->
+
+    <div class="stat-card">
+
+      <div class="stat-icon closed">
+        ×
+      </div>
+
+      <div>
+
+        <div class="stat-label">
+          Closed / Other
+        </div>
+
+        <div class="stat-value">
+          {{c.data.closed_count}}
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- =========================================
+       OPPORTUNITY LIST
+  ========================================== -->
+
+  <div class="list-card">
+
+
+    <div class="list-header">
+
+      <div>
+
+        <h2>
+          Your Opportunities
+        </h2>
+
+        <p>
+          Opportunities belonging to
+          {{c.data.company_name}}
+        </p>
+
+      </div>
+
+
+      <div class="record-count">
+
+        {{c.data.opportunities.length}}
+        records
+
+      </div>
+
+    </div>
+
+
+    <!-- =======================================
+         EMPTY STATE
+    ======================================== -->
+
+    <div
+      class="empty-state"
+      ng-if="!c.data.opportunities.length">
+
+      <div class="empty-icon">
+        ▣
+      </div>
+
+      <h3>
+        No opportunities found
+      </h3>
+
+      <p>
+        No placement opportunities have been created
+        for {{c.data.company_name}} yet.
+      </p>
+
+      <button
+        type="button"
+        class="btn btn-primary"
+        ng-click="c.createOpportunity()">
+
+        Create First Opportunity
+
+      </button>
+
+    </div>
+
+
+    <!-- =======================================
+         OPPORTUNITY TABLE
+    ======================================== -->
+
+    <div
+      class="table-wrapper"
+      ng-if="c.data.opportunities.length">
+
+      <table class="opportunity-table">
+
+        <thead>
+
+          <tr>
+
+            <th>
+              Opportunity
+            </th>
+
+            <th>
+              Type
+            </th>
+
+            <th>
+              Location
+            </th>
+
+            <th>
+              CTC / Stipend
+            </th>
+
+            <th>
+              Deadline
+            </th>
+
+            <th>
+              Applications
+            </th>
+
+            <th>
+              Status
+            </th>
+
+          </tr>
+
+        </thead>
+
+
+        <tbody>
+
+          <tr
+            ng-repeat="opportunity in c.data.opportunities">
+
+
+            <!-- OPPORTUNITY -->
+
+            <td>
+
+              <div class="opportunity-main">
+
+                <strong>
+                  {{opportunity.title}}
+                </strong>
+
+                <span>
+                  {{opportunity.opportunity_id}}
+                </span>
+
+              </div>
+
+            </td>
+
+
+            <!-- TYPE -->
+
+            <td>
+
+              <span class="type-text">
+
+                {{opportunity.type || '—'}}
+
+              </span>
+
+            </td>
+
+
+            <!-- LOCATION -->
+
+            <td>
+
+              {{opportunity.location || '—'}}
+
+            </td>
+
+
+            <!-- CTC -->
+
+            <td>
+
+              {{opportunity.ctc || '—'}}
+
+            </td>
+
+
+            <!-- DEADLINE -->
+
+            <td>
+
+              {{opportunity.deadline}}
+
+            </td>
+
+
+            <!-- APPLICATIONS -->
+
+            <td>
+
+              <span class="application-count">
+
+                {{opportunity.application_count}}
+
+              </span>
+
+            </td>
+
+
+            <!-- STATUS -->
+
+            <!-- STATUS -->
+
+            <td>
+
+              <div class="status-editor">
+
+                <!-- STATUS SELECT -->
+
+                <select
+                  class="status-select"
+                  ng-model="opportunity.edit_status">
+
+                  <option value="Open">
+                    Open
+                  </option>
+
+                  <option value="Closed">
+                    Closed
+                  </option>
+
+                </select>
+
+
+                <!-- UPDATE BUTTON -->
+
+                <button
+                  type="button"
+                  class="status-update-btn"
+                  ng-click="c.updateOpportunityStatus(opportunity)"
+                  ng-disabled="opportunity.updating">
+
+                  {{ opportunity.updating ? 'Updating...' : 'Update' }}
+
+                </button>
+
+              </div>
+
+            </td>
+
+          </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </div>
+
+</div>]]></template>
+    </sp_widget>
+</record_update>

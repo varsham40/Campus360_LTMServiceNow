@@ -1,0 +1,1118 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_widget">
+    <sp_widget action="INSERT_OR_UPDATE">
+        <category>custom</category>
+        <client_script><![CDATA[api.controller = function($window) {
+
+    var c = this;
+
+    c.goBack = function() {
+
+        $window.location.href =
+            "?id=recruiter_dashboard";
+
+    };
+
+};]]></client_script>
+        <controller_as>c</controller_as>
+        <css>.candidate-details-page {&#13;
+    background: #f6f8fc;&#13;
+    padding: 30px;&#13;
+    min-height: 100vh;&#13;
+    font-family: Arial, sans-serif;&#13;
+}&#13;
+&#13;
+&#13;
+/* HEADER */&#13;
+&#13;
+.candidate-header {&#13;
+    background: #ffffff;&#13;
+    padding: 25px;&#13;
+    border-radius: 14px;&#13;
+    display: flex;&#13;
+    justify-content: space-between;&#13;
+    align-items: center;&#13;
+    margin-bottom: 25px;&#13;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);&#13;
+}&#13;
+&#13;
+.candidate-profile {&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    gap: 18px;&#13;
+}&#13;
+&#13;
+.candidate-avatar {&#13;
+    width: 65px;&#13;
+    height: 65px;&#13;
+    border-radius: 50%;&#13;
+    background: #5368d8;&#13;
+    color: white;&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+    font-size: 20px;&#13;
+    font-weight: bold;&#13;
+}&#13;
+&#13;
+.candidate-header h1 {&#13;
+    margin: 0;&#13;
+    font-size: 26px;&#13;
+    color: #17213a;&#13;
+}&#13;
+&#13;
+.candidate-id {&#13;
+    margin: 5px 0;&#13;
+    color: #7d879c;&#13;
+}&#13;
+&#13;
+.candidate-meta {&#13;
+    display: flex;&#13;
+    gap: 8px;&#13;
+    color: #7d879c;&#13;
+    font-size: 13px;&#13;
+}&#13;
+&#13;
+.back-btn {&#13;
+    border: 1px solid #5368d8;&#13;
+    background: white;&#13;
+    color: #5368d8;&#13;
+    padding: 10px 18px;&#13;
+    border-radius: 8px;&#13;
+    cursor: pointer;&#13;
+}&#13;
+&#13;
+.back-btn:hover {&#13;
+    background: #5368d8;&#13;
+    color: white;&#13;
+}&#13;
+&#13;
+&#13;
+/* SECTION */&#13;
+&#13;
+.section-title {&#13;
+    font-size: 18px;&#13;
+    font-weight: bold;&#13;
+    color: #17213a;&#13;
+    margin-bottom: 12px;&#13;
+}&#13;
+&#13;
+&#13;
+/* OVERVIEW */&#13;
+&#13;
+.overview-grid {&#13;
+    display: grid;&#13;
+    grid-template-columns: repeat(4, 1fr);&#13;
+    gap: 15px;&#13;
+    margin-bottom: 25px;&#13;
+}&#13;
+&#13;
+.info-card {&#13;
+    background: white;&#13;
+    padding: 20px;&#13;
+    border-radius: 12px;&#13;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);&#13;
+}&#13;
+&#13;
+.info-card span {&#13;
+    display: block;&#13;
+    font-size: 12px;&#13;
+    color: #8a94a7;&#13;
+    margin-bottom: 8px;&#13;
+}&#13;
+&#13;
+.info-card strong {&#13;
+    color: #25304b;&#13;
+    font-size: 18px;&#13;
+}&#13;
+&#13;
+.match-score {&#13;
+    color: #20a66a !important;&#13;
+}&#13;
+&#13;
+&#13;
+/* MAIN GRID */&#13;
+&#13;
+.main-grid {&#13;
+    display: grid;&#13;
+    grid-template-columns: 1fr 1fr;&#13;
+    gap: 20px;&#13;
+    margin-bottom: 20px;&#13;
+}&#13;
+&#13;
+&#13;
+/* PANELS */&#13;
+&#13;
+.panel {&#13;
+    background: white;&#13;
+    padding: 22px;&#13;
+    border-radius: 14px;&#13;
+    margin-bottom: 20px;&#13;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);&#13;
+}&#13;
+&#13;
+.panel h2 {&#13;
+    margin-top: 0;&#13;
+    margin-bottom: 20px;&#13;
+    font-size: 18px;&#13;
+    color: #17213a;&#13;
+}&#13;
+&#13;
+&#13;
+/* DETAILS */&#13;
+&#13;
+.detail-grid {&#13;
+    display: grid;&#13;
+    grid-template-columns: 1fr 1fr;&#13;
+    gap: 20px;&#13;
+}&#13;
+&#13;
+.detail-grid label,&#13;
+.feedback-text label,&#13;
+.outcome-box label {&#13;
+    display: block;&#13;
+    color: #929bad;&#13;
+    font-size: 11px;&#13;
+    margin-bottom: 5px;&#13;
+}&#13;
+&#13;
+.detail-grid p {&#13;
+    margin: 0;&#13;
+    color: #29344e;&#13;
+    font-size: 14px;&#13;
+    font-weight: 500;&#13;
+}&#13;
+&#13;
+&#13;
+/* SKILLS */&#13;
+&#13;
+.skill-item {&#13;
+    margin-bottom: 17px;&#13;
+}&#13;
+&#13;
+.skill-header {&#13;
+    display: flex;&#13;
+    justify-content: space-between;&#13;
+    margin-bottom: 7px;&#13;
+}&#13;
+&#13;
+.skill-header strong {&#13;
+    color: #29344e;&#13;
+    font-size: 13px;&#13;
+}&#13;
+&#13;
+.skill-header span {&#13;
+    color: #7d879c;&#13;
+    font-size: 12px;&#13;
+}&#13;
+&#13;
+.skill-bar {&#13;
+    height: 7px;&#13;
+    background: #edf0f6;&#13;
+    border-radius: 10px;&#13;
+    overflow: hidden;&#13;
+}&#13;
+&#13;
+.skill-progress {&#13;
+    height: 100%;&#13;
+    background: #5368d8;&#13;
+    border-radius: 10px;&#13;
+}&#13;
+&#13;
+&#13;
+/* FEEDBACK SCORES */&#13;
+&#13;
+.score-grid {&#13;
+    display: grid;&#13;
+    grid-template-columns: repeat(4, 1fr);&#13;
+    gap: 12px;&#13;
+    margin-bottom: 20px;&#13;
+}&#13;
+&#13;
+.score-card {&#13;
+    background: #f7f8fc;&#13;
+    padding: 15px;&#13;
+    text-align: center;&#13;
+    border-radius: 10px;&#13;
+}&#13;
+&#13;
+.score-card span {&#13;
+    display: block;&#13;
+    color: #8a94a7;&#13;
+    font-size: 11px;&#13;
+    margin-bottom: 7px;&#13;
+}&#13;
+&#13;
+.score-card strong {&#13;
+    font-size: 20px;&#13;
+    color: #5368d8;&#13;
+}&#13;
+&#13;
+&#13;
+/* FEEDBACK */&#13;
+&#13;
+.feedback-text {&#13;
+    display: grid;&#13;
+    grid-template-columns: 1fr 1fr 1fr;&#13;
+    gap: 20px;&#13;
+}&#13;
+&#13;
+.feedback-text p {&#13;
+    color: #424c63;&#13;
+    font-size: 13px;&#13;
+    line-height: 1.5;&#13;
+}&#13;
+&#13;
+&#13;
+/* OUTCOME */&#13;
+&#13;
+.outcome-box {&#13;
+    display: flex;&#13;
+    gap: 80px;&#13;
+}&#13;
+&#13;
+.outcome-box strong {&#13;
+    display: block;&#13;
+    color: #20a66a;&#13;
+    font-size: 18px;&#13;
+}&#13;
+&#13;
+&#13;
+/* EMPTY */&#13;
+&#13;
+.empty-message {&#13;
+    color: #929bad;&#13;
+    font-size: 13px;&#13;
+}&#13;
+&#13;
+&#13;
+/* NOT FOUND */&#13;
+&#13;
+.not-found {&#13;
+    padding: 80px;&#13;
+    text-align: center;&#13;
+}&#13;
+&#13;
+.not-found h2 {&#13;
+    color: #17213a;&#13;
+}&#13;
+&#13;
+.not-found p {&#13;
+    color: #8a94a7;&#13;
+}&#13;
+&#13;
+&#13;
+/* RESPONSIVE */&#13;
+&#13;
+@media (max-width: 900px) {&#13;
+&#13;
+    .overview-grid {&#13;
+        grid-template-columns: 1fr 1fr;&#13;
+    }&#13;
+&#13;
+    .main-grid {&#13;
+        grid-template-columns: 1fr;&#13;
+    }&#13;
+&#13;
+    .score-grid {&#13;
+        grid-template-columns: 1fr 1fr;&#13;
+    }&#13;
+&#13;
+    .feedback-text {&#13;
+        grid-template-columns: 1fr;&#13;
+    }&#13;
+&#13;
+}&#13;
+&#13;
+@media (max-width: 600px) {&#13;
+&#13;
+    .candidate-details-page {&#13;
+        padding: 15px;&#13;
+    }&#13;
+&#13;
+    .candidate-header {&#13;
+        flex-direction: column;&#13;
+        align-items: flex-start;&#13;
+        gap: 15px;&#13;
+    }&#13;
+&#13;
+    .overview-grid {&#13;
+        grid-template-columns: 1fr;&#13;
+    }&#13;
+&#13;
+    .detail-grid {&#13;
+        grid-template-columns: 1fr;&#13;
+    }&#13;
+&#13;
+}</css>
+        <data_table>sp_instance</data_table>
+        <demo_data/>
+        <description>Recruiter candidate profile and hiring details</description>
+        <docs/>
+        <field_list/>
+        <has_preview>false</has_preview>
+        <id>campus360_recruiter_candidate_details</id>
+        <internal>false</internal>
+        <link><![CDATA[function link(scope, element, attrs, controller) {
+  
+}]]></link>
+        <name>Campus 360 Recruiter Candidate Details</name>
+        <option_schema/>
+        <public>false</public>
+        <roles/>
+        <script><![CDATA[(function() {
+
+    data.found = false;
+
+    data.student = {};
+    data.application = {};
+    data.skills = [];
+    data.interview = {
+        exists: false
+    };
+    data.feedback = {
+        exists: false
+    };
+    data.outcome = {
+        exists: false
+    };
+
+    var requestedSysId = $sp.getParameter("sys_id");
+
+    if (!requestedSysId) {
+        return;
+    }
+
+    var studentSysId = "";
+
+    /*
+     * =====================================================
+     * 1. CHECK STUDENT MASTER
+     * =====================================================
+     */
+
+    var studentGR = new GlideRecord(
+        "x_snc_campus360_student_master"
+    );
+
+    if (studentGR.get(requestedSysId)) {
+
+        studentSysId = studentGR.getUniqueValue();
+
+    }
+
+
+    /*
+     * =====================================================
+     * 2. CHECK STUDENT APPLICATION
+     * =====================================================
+     */
+
+    if (!studentSysId) {
+
+        var applicationLookup = new GlideRecord(
+            "x_snc_campus360_student_application"
+        );
+
+        if (applicationLookup.get(requestedSysId)) {
+
+            studentSysId =
+                applicationLookup.getValue("student");
+
+        }
+    }
+
+
+    /*
+     * =====================================================
+     * 3. IF STILL NOT FOUND
+     * =====================================================
+     */
+
+    if (!studentSysId) {
+
+        data.error =
+            "Candidate record not found for sys_id: " +
+            requestedSysId;
+
+        return;
+    }
+
+
+    /*
+     * =====================================================
+     * 4. LOAD STUDENT
+     * =====================================================
+     */
+
+    studentGR = new GlideRecord(
+        "x_snc_campus360_student_master"
+    );
+
+    if (!studentGR.get(studentSysId)) {
+        return;
+    }
+
+    data.found = true;
+
+
+    /*
+     * =====================================================
+     * STUDENT DETAILS
+     * =====================================================
+     */
+
+    var studentName =
+        studentGR.getValue("student_name") || "";
+
+    data.student.name = studentName;
+
+    data.student.student_id =
+        studentGR.getValue("student_id") || "";
+
+    data.student.email =
+        studentGR.getValue("email") || "";
+
+    data.student.phone =
+        studentGR.getValue("phone_number") || "";
+
+    data.student.branch =
+        studentGR.getDisplayValue("branch") || "";
+
+    data.student.cgpa =
+        studentGR.getValue("cgpa") || "";
+
+    data.student.degree =
+        studentGR.getDisplayValue("degree") || "";
+
+    data.student.placement_status =
+        studentGR.getDisplayValue("placement_status") || "";
+
+    data.student.initials =
+        getInitials(studentName);
+
+
+    /*
+     * =====================================================
+     * SKILLS
+     * =====================================================
+     */
+
+    var skillGR = new GlideRecord(
+        "x_snc_campus360_student_skills"
+    );
+
+    skillGR.addQuery(
+        "student",
+        studentSysId
+    );
+
+    skillGR.query();
+
+    while (skillGR.next()) {
+
+        var score =
+            parseInt(
+                skillGR.getValue("assessment_score"),
+                10
+            );
+
+        if (isNaN(score)) {
+            score = 0;
+        }
+
+        data.skills.push({
+            name:
+                skillGR.getValue("skill_name") || "",
+
+            level:
+                skillGR.getDisplayValue("skill_level") || "",
+
+            score: score
+        });
+    }
+
+
+    /*
+     * =====================================================
+     * APPLICATION
+     * =====================================================
+     */
+
+    var applicationGR = new GlideRecord(
+        "x_snc_campus360_student_application"
+    );
+
+    applicationGR.addQuery(
+        "student",
+        studentSysId
+    );
+
+    applicationGR.orderByDesc("sys_created_on");
+    applicationGR.setLimit(1);
+    applicationGR.query();
+
+    if (applicationGR.next()) {
+
+        data.application.application_id =
+            applicationGR.getValue("application_id") || "";
+
+        data.application.role =
+            applicationGR.getDisplayValue("opportunity") || "";
+
+        data.application.status =
+            applicationGR.getDisplayValue("application_status") || "";
+
+        data.application.match_score =
+            applicationGR.getValue("ai_match_score") || "0";
+
+        data.application.assessment_status =
+            applicationGR.getDisplayValue("assessment_status") || "";
+
+        data.application.applied_date =
+            applicationGR.getDisplayValue("applied_date") || "";
+
+        data.application.student_response =
+            applicationGR.getDisplayValue("student_response") || "";
+
+        data.application.interview_status =
+            applicationGR.getDisplayValue("interview_status") || "";
+
+        data.application.offer_status =
+            applicationGR.getDisplayValue("offer_status") || "";
+
+        data.application.shortlisted =
+            applicationGR.getValue("shortlisted") == "1"
+                ? "Yes"
+                : "No";
+    }
+
+
+    /*
+     * =====================================================
+     * MOCK INTERVIEW
+     * =====================================================
+     */
+
+    var interviewGR = new GlideRecord(
+        "x_snc_campus360_mock_interview"
+    );
+
+    interviewGR.addQuery(
+        "student",
+        studentSysId
+    );
+
+    interviewGR.orderByDesc("interview_date");
+    interviewGR.setLimit(1);
+    interviewGR.query();
+
+    if (interviewGR.next()) {
+
+        data.interview.exists = true;
+
+        data.interview.type =
+            interviewGR.getDisplayValue(
+                "interview_type"
+            ) || "";
+
+        data.interview.status =
+            interviewGR.getDisplayValue(
+                "interview_status"
+            ) || "";
+
+        data.interview.date =
+            interviewGR.getDisplayValue(
+                "interview_date"
+            ) || "";
+
+        data.interview.attendance =
+            interviewGR.getDisplayValue(
+                "attendance_status"
+            ) || "";
+    }
+
+
+    /*
+     * =====================================================
+     * FEEDBACK
+     * =====================================================
+     */
+
+    var feedbackGR = new GlideRecord(
+        "x_snc_campus360_interview_feedback"
+    );
+
+    feedbackGR.addQuery(
+        "student",
+        studentSysId
+    );
+
+    feedbackGR.orderByDesc("feedback_date");
+    feedbackGR.setLimit(1);
+    feedbackGR.query();
+
+    if (feedbackGR.next()) {
+
+        data.feedback.exists = true;
+
+        data.feedback.technical =
+            feedbackGR.getValue("technical_score") || "0";
+
+        data.feedback.problem_solving =
+            feedbackGR.getValue("problem_solving_score") || "0";
+
+        data.feedback.communication =
+            feedbackGR.getValue("communication_score") || "0";
+
+        data.feedback.overall =
+            feedbackGR.getValue("overall_score") || "0";
+
+        data.feedback.strengths =
+            feedbackGR.getValue("strengths") || "";
+
+        data.feedback.improvement =
+            feedbackGR.getValue("improvement_areas") || "";
+
+        data.feedback.recommendation =
+            feedbackGR.getValue("recommendation") || "";
+    }
+
+
+    /*
+     * =====================================================
+     * PLACEMENT OUTCOME
+     * =====================================================
+     */
+
+    var outcomeGR = new GlideRecord(
+        "x_snc_campus360_placement_outcome"
+    );
+
+    outcomeGR.addQuery(
+        "student",
+        studentSysId
+    );
+
+    outcomeGR.orderByDesc("sys_created_on");
+    outcomeGR.setLimit(1);
+    outcomeGR.query();
+
+    if (outcomeGR.next()) {
+
+        data.outcome.exists = true;
+
+        data.outcome.status =
+            outcomeGR.getDisplayValue("status") || "";
+
+        data.outcome.offer =
+            outcomeGR.getDisplayValue("offer_status") || "";
+    }
+
+
+    /*
+     * =====================================================
+     * INITIALS
+     * =====================================================
+     */
+
+    function getInitials(name) {
+
+        if (!name) {
+            return "ST";
+        }
+
+        var parts =
+            name.trim().split(/\s+/);
+
+        if (parts.length == 1) {
+            return parts[0]
+                .substring(0, 2)
+                .toUpperCase();
+        }
+
+        return (
+            parts[0].charAt(0) +
+            parts[parts.length - 1].charAt(0)
+        ).toUpperCase();
+    }
+
+})();]]></script>
+        <servicenow>false</servicenow>
+        <sys_class_name>sp_widget</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-23 06:56:42</sys_created_on>
+        <sys_id>6f694634c42703107f44164a4d246337</sys_id>
+        <sys_mod_count>4</sys_mod_count>
+        <sys_name>Campus 360 Recruiter Candidate Details</sys_name>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name>sp_widget_6f694634c42703107f44164a4d246337</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-24 08:13:36</sys_updated_on>
+        <template><![CDATA[<div class="candidate-details-page" ng-if="data.found">
+
+    <!-- Header -->
+    <div class="candidate-header">
+
+        <div class="candidate-profile">
+
+            <div class="candidate-avatar">
+                {{data.student.initials}}
+            </div>
+
+            <div>
+                <h1>{{data.student.name}}</h1>
+
+                <p class="candidate-id">
+                    {{data.student.student_id}}
+                </p>
+
+                <div class="candidate-meta">
+                    <span>{{data.student.branch}}</span>
+                    <span>•</span>
+                    <span>CGPA: {{data.student.cgpa}}</span>
+                    <span>•</span>
+                    <span>{{data.student.email}}</span>
+                </div>
+            </div>
+
+        </div>
+
+        <button class="back-btn" ng-click="c.goBack()">
+            ← Back to Candidates
+        </button>
+
+    </div>
+
+
+    <!-- Application Summary -->
+
+    <div class="section-title">
+        Application Overview
+    </div>
+
+    <div class="overview-grid">
+
+        <div class="info-card">
+            <span>Applied Role</span>
+            <strong>{{data.application.role}}</strong>
+        </div>
+
+        <div class="info-card">
+            <span>Application Status</span>
+            <strong class="status">
+                {{data.application.status}}
+            </strong>
+        </div>
+
+        <div class="info-card">
+            <span>AI Match Score</span>
+            <strong class="match-score">
+                {{data.application.match_score}}%
+            </strong>
+        </div>
+
+        <div class="info-card">
+            <span>Assessment</span>
+            <strong>
+                {{data.application.assessment_status}}
+            </strong>
+        </div>
+
+    </div>
+
+
+    <!-- Main Grid -->
+
+    <div class="main-grid">
+
+        <!-- Student Information -->
+
+        <div class="panel">
+
+            <h2>Candidate Information</h2>
+
+            <div class="detail-grid">
+
+                <div>
+                    <label>Student Name</label>
+                    <p>{{data.student.name}}</p>
+                </div>
+
+                <div>
+                    <label>Student ID</label>
+                    <p>{{data.student.student_id}}</p>
+                </div>
+
+                <div>
+                    <label>Email</label>
+                    <p>{{data.student.email}}</p>
+                </div>
+
+                <div>
+                    <label>Phone</label>
+                    <p>{{data.student.phone}}</p>
+                </div>
+
+                <div>
+                    <label>Branch</label>
+                    <p>{{data.student.branch}}</p>
+                </div>
+
+                <div>
+                    <label>CGPA</label>
+                    <p>{{data.student.cgpa}}</p>
+                </div>
+
+                <div>
+                    <label>Degree</label>
+                    <p>{{data.student.degree}}</p>
+                </div>
+
+                <div>
+                    <label>Placement Status</label>
+                    <p>{{data.student.placement_status}}</p>
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Skills -->
+
+        <div class="panel">
+
+            <h2>Candidate Skills</h2>
+
+            <div class="skills-list">
+
+                <div
+                    class="skill-item"
+                    ng-repeat="skill in data.skills">
+
+                    <div class="skill-header">
+
+                        <strong>
+                            {{skill.name}}
+                        </strong>
+
+                        <span>
+                            {{skill.level}}
+                        </span>
+
+                    </div>
+
+                    <div class="skill-bar">
+
+                        <div
+                            class="skill-progress"
+                            ng-style="{'width': skill.score + '%'}">
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div
+                    class="empty-message"
+                    ng-if="data.skills.length == 0">
+
+                    No skills available.
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Application Details -->
+
+    <div class="panel">
+
+        <h2>Application Details</h2>
+
+        <div class="detail-grid">
+
+            <div>
+                <label>Application ID</label>
+                <p>{{data.application.application_id}}</p>
+            </div>
+
+            <div>
+                <label>Application Date</label>
+                <p>{{data.application.applied_date}}</p>
+            </div>
+
+            <div>
+                <label>Student Response</label>
+                <p>{{data.application.student_response}}</p>
+            </div>
+
+            <div>
+                <label>Interview Status</label>
+                <p>{{data.application.interview_status}}</p>
+            </div>
+
+            <div>
+                <label>Offer Status</label>
+                <p>{{data.application.offer_status}}</p>
+            </div>
+
+            <div>
+                <label>Shortlisted</label>
+                <p>{{data.application.shortlisted}}</p>
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Interview -->
+
+    <div
+        class="panel"
+        ng-if="data.interview.exists">
+
+        <h2>Interview Information</h2>
+
+        <div class="detail-grid">
+
+            <div>
+                <label>Interview Type</label>
+                <p>{{data.interview.type}}</p>
+            </div>
+
+            <div>
+                <label>Interview Status</label>
+                <p>{{data.interview.status}}</p>
+            </div>
+
+            <div>
+                <label>Interview Date</label>
+                <p>{{data.interview.date}}</p>
+            </div>
+
+            <div>
+                <label>Attendance</label>
+                <p>{{data.interview.attendance}}</p>
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Interview Feedback -->
+
+    <div
+        class="panel"
+        ng-if="data.feedback.exists">
+
+        <h2>Interview Feedback</h2>
+
+        <div class="score-grid">
+
+            <div class="score-card">
+                <span>Technical</span>
+                <strong>{{data.feedback.technical}}</strong>
+            </div>
+
+            <div class="score-card">
+                <span>Problem Solving</span>
+                <strong>{{data.feedback.problem_solving}}</strong>
+            </div>
+
+            <div class="score-card">
+                <span>Communication</span>
+                <strong>{{data.feedback.communication}}</strong>
+            </div>
+
+            <div class="score-card">
+                <span>Overall</span>
+                <strong>{{data.feedback.overall}}</strong>
+            </div>
+
+        </div>
+
+        <div class="feedback-text">
+
+            <div>
+                <label>Strengths</label>
+                <p>{{data.feedback.strengths}}</p>
+            </div>
+
+            <div>
+                <label>Improvement Areas</label>
+                <p>{{data.feedback.improvement}}</p>
+            </div>
+
+            <div>
+                <label>Recommendation</label>
+                <p>{{data.feedback.recommendation}}</p>
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Placement Outcome -->
+
+    <div
+        class="panel"
+        ng-if="data.outcome.exists">
+
+        <h2>Placement Outcome</h2>
+
+        <div class="outcome-box">
+
+            <div>
+                <label>Status</label>
+                <strong>
+                    {{data.outcome.status}}
+                </strong>
+            </div>
+
+            <div>
+                <label>Offer</label>
+                <strong>
+                    {{data.outcome.offer}}
+                </strong>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- Candidate Not Found -->
+
+<div
+    class="not-found"
+    ng-if="!data.found">
+
+    <h2>Candidate Not Found</h2>
+
+    <p>
+        The selected candidate could not be found.
+    </p>
+
+    <button
+        class="back-btn"
+        ng-click="c.goBack()">
+
+        ← Back to Dashboard
+
+    </button>
+
+</div>]]></template>
+    </sp_widget>
+</record_update>

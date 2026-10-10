@@ -1,0 +1,2046 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_widget">
+    <sp_widget action="INSERT_OR_UPDATE">
+        <category>custom</category>
+        <client_script><![CDATA[api.controller = function() {
+
+    var c = this;
+
+
+    /*
+     * ============================================================
+     * VARIABLES
+     * ============================================================
+     */
+
+    c.search = '';
+
+    c.statusFilter = 'all';
+
+    c.selectedStudent = null;
+
+
+    /*
+     * ============================================================
+     * FILTER STUDENTS
+     * ============================================================
+     */
+
+    c.getFilteredStudents = function() {
+
+        var students =
+            c.data.students || [];
+
+        var results = [];
+
+        var searchText =
+            String(c.search || '')
+            .toLowerCase()
+            .trim();
+
+
+        for (var i = 0; i < students.length; i++) {
+
+            var student =
+                students[i];
+
+
+            /*
+             * ----------------------------------------------------
+             * SEARCH
+             * ----------------------------------------------------
+             */
+
+            var searchableText =
+                String(student.name || '') + ' ' +
+                String(student.id || '') + ' ' +
+                String(student.branch || '') + ' ' +
+                String(student.degree || '') + ' ' +
+                String(student.email || '');
+
+            searchableText =
+                searchableText.toLowerCase();
+
+
+            if (
+                searchText &&
+                searchableText.indexOf(searchText) === -1
+            ) {
+
+                continue;
+
+            }
+
+
+            /*
+             * ----------------------------------------------------
+             * PROFILE STATUS FILTER
+             * ----------------------------------------------------
+             */
+
+            if (
+                c.statusFilter === 'active' &&
+                String(student.profileStatus).toLowerCase() !==
+                'active'
+            ) {
+
+                continue;
+
+            }
+
+
+            if (
+                c.statusFilter === 'inactive' &&
+                String(student.profileStatus).toLowerCase() !==
+                'inactive'
+            ) {
+
+                continue;
+
+            }
+
+
+            results.push(student);
+
+        }
+
+
+        return results;
+
+    };
+
+
+    /*
+     * ============================================================
+     * OPEN STUDENT
+     * ============================================================
+     */
+
+    c.openStudent = function(student) {
+
+        if (!student) {
+            return;
+        }
+
+        c.selectedStudent =
+            student;
+
+    };
+
+
+    /*
+     * ============================================================
+     * CLOSE STUDENT
+     * ============================================================
+     */
+
+    c.closeStudent = function() {
+
+        c.selectedStudent =
+            null;
+
+    };
+
+
+    /*
+     * ============================================================
+     * ADD STUDENT
+     * ============================================================
+     *
+     * Opens a new record in the Campus360 Student Master table.
+     *
+     * ============================================================
+     */
+
+    c.addStudent = function() {
+
+        window.location.href =
+            '/x_snc_campus360_student_master.do?sys_id=-1';
+
+    };
+
+
+    /*
+     * ============================================================
+     * OPEN FULL STUDENT RECORD
+     * ============================================================
+     */
+
+    c.viewRecord = function(student) {
+
+        if (!student || !student.sys_id) {
+            return;
+        }
+
+
+        window.location.href =
+            '/x_snc_campus360_student_master.do?sys_id=' +
+            encodeURIComponent(student.sys_id);
+
+    };
+
+
+    /*
+     * ============================================================
+     * REFRESH
+     * ============================================================
+     */
+
+    c.refresh = function() {
+
+        c.server.refresh();
+
+    };
+
+
+    /*
+     * ============================================================
+     * INITIAL STATE
+     * ============================================================
+     */
+
+    c.getFilteredStudents();
+
+};]]></client_script>
+        <controller_as>c</controller_as>
+        <css>/* ==========================================================================
+   ULTIMATE FULLSCREEN EDGE-TO-EDGE RESET (HIDES SERVICENOW TOP BANNER &amp; NAVBAR)
+   ========================================================================== */
+
+html, body, #sp-page, .sp-page-container, #page_content, .page, main {
+  width: 100% !important;
+  height: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  background-color: #f8fafc !important;
+}
+
+/* HIDE SERVICENOW TOP BANNER &amp; NAVBAR FOR ALL TPO PAGE ROOT CONTAINERS */
+body #sp-header,
+body .sp-header,
+body .sp-navbar,
+body #sp-nav-bar,
+body .sp-nav-bar,
+body header#sp-header,
+body header.sp-header,
+body header.navbar,
+body nav.navbar,
+body .navbar.sp-navbar,
+body .navbar.navbar-default,
+body .navbar.navbar-inverse,
+#sp-header,
+.sp-header,
+.sp-navbar,
+#responsiveNav,
+header#sp-header,
+header.sp-header,
+header.navbar,
+nav.navbar {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  min-height: 0 !important;
+  max-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* ZERO MARGIN &amp; PADDING ON SERVICENOW PAGE CONTAINERS */
+.page,
+#sp-page,
+#sp-main,
+.sp-page,
+.sp-main,
+.page-wrapper,
+.main-content,
+.container,
+.container-fluid,
+.row {
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+}
+
+/* FORCE ALL TPO APP ROOT CONTAINERS TO FULLSCREEN FIXED OVERLAY (COVERING TOP NAVBAR 100%) */
+.c360-app,
+.c360-page,
+.campus360-app,
+.campus360-company-app,
+.campus360-company-page,
+.campus360-interviews-app,
+.campus360-applications-app,
+.campus360-applications-page,
+.campus360-tpo-page,
+.campus360-opportunity-page,
+.campus360-tpo-layout,
+.campus360-tpo-app,
+.campus360-skill-page,
+.campus360-tpo-assessments,
+.campus360-skill-intel,
+.interviews-shell,
+.tpo-layout,
+.tpo-container,
+div[class*="campus360"],
+div[class*="c360"] {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  z-index: 99999 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  display: flex !important;
+  background: #f5f7fb !important;
+}
+
+/* ==========================================================================
+   SIDEBAR USER PROFILE CARD - BRIGHT WHITE TEXT FIX (CRITICAL)
+   ========================================================================== */
+
+.tpo-sidebar .sidebar-user,
+.tpo-sidebar .tpo-profile,
+.tpo-sidebar .tpo-profile-card,
+.sidebar-user,
+.tpo-profile-card {
+  margin: 14px 12px 8px !important;
+  padding: 10px 12px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  border: 1px solid #35285b !important;
+  border-radius: 14px !important;
+  background: linear-gradient(145deg, #1c1340, #21174a) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+}
+
+.tpo-sidebar .user-avatar,
+.tpo-sidebar .tpo-avatar,
+.tpo-sidebar .tpo-profile-avatar,
+.sidebar-user .user-avatar,
+.tpo-profile-card .tpo-profile-avatar {
+  width: 40px !important;
+  height: 40px !important;
+  min-width: 40px !important;
+  border-radius: 50% !important;
+  background: linear-gradient(135deg, #7540f4, #944ff5) !important;
+  color: #ffffff !important;
+  font-size: 11px !important;
+  font-weight: 950 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-shadow: 0 4px 12px rgba(117, 64, 244, 0.4) !important;
+}
+
+.tpo-sidebar .user-info,
+.tpo-sidebar .tpo-profile-text,
+.tpo-sidebar .tpo-profile-info,
+.sidebar-user .user-info,
+.tpo-profile-card .tpo-profile-info {
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+}
+
+.tpo-sidebar .user-name,
+.tpo-sidebar .sidebar-user strong,
+.tpo-sidebar .tpo-profile-info strong,
+.tpo-sidebar .tpo-profile-text strong,
+.sidebar-user .user-name,
+.sidebar-user strong,
+.tpo-profile-card strong {
+  font-size: 13px !important;
+  font-weight: 800 !important;
+  color: #ffffff !important; /* CRITICAL BRIGHT WHITE COLOR */
+}
+
+.tpo-sidebar .user-role,
+.tpo-sidebar .user-dept,
+.tpo-sidebar .tpo-role,
+.tpo-sidebar .sidebar-user span,
+.tpo-sidebar .tpo-profile-info span,
+.tpo-sidebar .tpo-profile-text span,
+.sidebar-user .user-role,
+.sidebar-user span,
+.tpo-profile-card span {
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  color: #bcaeff !important; /* LIGHT LAVENDER PURPLE COLOR */
+}
+
+/* SCOPE TOPBAR USER PROFILE EXCLUSIVELY TO TOPBAR */
+.topbar-user .topbar-user-info strong,
+.topbar-user-info strong {
+  font-size: 13px !important;
+  font-weight: 800 !important;
+  color: #0f172a !important;
+}
+
+.topbar-user .topbar-user-info span,
+.topbar-user-info span {
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  color: #64748b !important;
+}
+
+
+
+/* ==========================================================================
+   STUDENT MANAGEMENT FULLSCREEN EDGE-TO-EDGE &amp; PURPLE SIDEBAR THEME
+   ========================================================================== */
+
+/* 1. HIDE SERVICENOW TOP HEADER / NAVBAR COMPLETELY FOR FULL SCREEN */
+body #sp-header,
+body .sp-header,
+body .sp-navbar,
+body .navbar.sp-navbar,
+body #sp-nav-bar,
+body .sp-nav-bar,
+body header#sp-header,
+body header.sp-header,
+body .nav.navbar-nav,
+#sp-header,
+.sp-header,
+.sp-navbar,
+header#sp-header {
+  display: none !important;
+  height: 0 !important;
+  visibility: hidden !important;
+  overflow: hidden !important;
+}
+
+html, body, #sp-page, .sp-page-container, #page_content, .page, main {
+  width: 100% !important;
+  height: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  background-color: #f8fafc !important;
+}
+
+/* 2. LAYOUT WRAPPER */
+.campus360-tpo-app,
+.campus360-tpo-layout,
+.tpo-layout,
+.tpo-container {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  z-index: 9999 !important;
+  overflow: hidden !important;
+  display: flex !important;
+  background: #f8fafc !important;
+}
+
+/* 3. DARK PURPLE SIDEBAR THEME (EXACT MATCHING ASSESSMENTS PAGE) */
+.campus360-sidebar,
+.tpo-sidebar,
+.skill-sidebar,
+aside.campus360-sidebar,
+aside.tpo-sidebar {
+  width: 242px !important;
+  min-width: 242px !important;
+  max-width: 242px !important;
+  height: 100vh !important;
+  flex: 0 0 242px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  position: relative !important;
+  overflow-y: auto !important;
+  background: linear-gradient(180deg, #10092a 0%, #130d31 55%, #0d0822 100%) !important;
+  border-right: 1px solid #2b2247 !important;
+  color: #ffffff !important;
+  z-index: 100 !important;
+  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.25) !important;
+}
+
+/* HIDE ALL SCROLLBARS ON SIDEBAR */
+.campus360-sidebar,
+.campus360-sidebar *,
+.tpo-sidebar,
+.tpo-sidebar *,
+.sidebar-navigation,
+.tpo-sidebar-nav {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+.campus360-sidebar::-webkit-scrollbar,
+.campus360-sidebar *::-webkit-scrollbar,
+.tpo-sidebar::-webkit-scrollbar,
+.sidebar-navigation::-webkit-scrollbar,
+.tpo-sidebar-nav::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+/* BRAND HEADER IN SIDEBAR */
+.sidebar-brand,
+.tpo-brand {
+  height: 84px !important;
+  min-height: 84px !important;
+  padding: 0 18px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 13px !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+  background: transparent !important;
+}
+
+.brand-logo,
+.tpo-brand-logo {
+  width: 44px !important;
+  height: 44px !important;
+  min-width: 44px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 12px !important;
+  background: linear-gradient(135deg, #723fff, #8c4cf2) !important;
+  color: #ffffff !important;
+  font-size: 20px !important;
+  font-weight: 950 !important;
+  box-shadow: 0 8px 20px rgba(106, 57, 235, 0.3) !important;
+}
+
+.brand-title,
+.tpo-brand-text strong {
+  color: #ffffff !important;
+  font-size: 17px !important;
+  font-weight: 900 !important;
+  line-height: 1.1 !important;
+}
+
+.brand-subtitle,
+.brand-sub,
+.tpo-brand-text span {
+  margin-top: 3px !important;
+  color: #bcaeff !important;
+  font-size: 9px !important;
+  font-weight: 850 !important;
+  letter-spacing: 0.8px !important;
+}
+
+/* PROFILE CARD IN SIDEBAR */
+.tpo-profile,
+.sidebar-user,
+.tpo-profile-card {
+  margin: 14px 12px 8px !important;
+  min-height: 68px !important;
+  padding: 10px 12px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  border: 1px solid #35285b !important;
+  border-radius: 14px !important;
+  background: linear-gradient(145deg, #1c1340, #21174a) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+}
+
+.tpo-avatar,
+.user-avatar,
+.tpo-profile-avatar {
+  width: 40px !important;
+  height: 40px !important;
+  min-width: 40px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 50% !important;
+  background: linear-gradient(135deg, #7540f4, #944ff5) !important;
+  color: #ffffff !important;
+  font-size: 11px !important;
+  font-weight: 950 !important;
+  box-shadow: 0 4px 12px rgba(117, 64, 244, 0.4) !important;
+}
+
+.tpo-profile-text strong,
+.user-name,
+.tpo-profile-info strong {
+  font-size: 13px !important;
+  font-weight: 800 !important;
+  color: #ffffff !important;
+}
+
+.tpo-role,
+.tpo-profile-text span,
+.user-role,
+.tpo-profile-info span {
+  font-size: 10px !important;
+  color: #bcaeff !important;
+  font-weight: 700 !important;
+}
+
+/* SIDEBAR NAVIGATION ITEMS */
+.sidebar-navigation,
+.sidebar-nav,
+.tpo-sidebar-nav {
+  flex: 1 !important;
+  min-height: 0 !important;
+  overflow-y: auto !important;
+  padding: 6px 10px 12px !important;
+}
+
+.nav-group-title,
+.nav-section-title,
+.tpo-nav-label {
+  font-size: 9px !important;
+  font-weight: 850 !important;
+  color: #83769d !important;
+  letter-spacing: 0.8px !important;
+  padding: 12px 10px 4px !important;
+  text-transform: uppercase !important;
+}
+
+.nav-link,
+.nav-item,
+.tpo-nav-item {
+  width: 100% !important;
+  min-height: 40px !important;
+  margin: 2px 0 !important;
+  padding: 8px 12px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 11px !important;
+  border: 0 !important;
+  border-radius: 10px !important;
+  background: transparent !important;
+  color: #e6e0f1 !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  text-align: left !important;
+  cursor: pointer !important;
+  transition: background 0.16s ease, color 0.16s ease !important;
+  text-decoration: none !important;
+  box-sizing: border-box !important;
+}
+
+.nav-link:hover,
+.nav-item:hover,
+.tpo-nav-item:hover {
+  background: #211743 !important;
+  color: #ffffff !important;
+}
+
+.nav-link.active,
+.nav-item.active,
+.tpo-nav-item.active {
+  background: linear-gradient(135deg, #793bef, #8b48f2) !important;
+  color: #ffffff !important;
+  box-shadow: 0 8px 18px rgba(103, 50, 224, 0.35) !important;
+}
+
+.nav-link-icon,
+.nav-icon,
+.tpo-nav-icon {
+  font-size: 14px !important;
+  width: 18px !important;
+  text-align: center !important;
+  color: inherit !important;
+}
+
+.nav-link-text,
+.nav-label {
+  color: inherit !important;
+}
+
+.nav-count,
+.nav-badge,
+.tpo-nav-count {
+  margin-left: auto !important;
+  min-width: 22px !important;
+  height: 20px !important;
+  padding: 0 7px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 999px !important;
+  background: rgba(255, 255, 255, 0.18) !important;
+  color: #ffffff !important;
+  font-size: 10px !important;
+  font-weight: 900 !important;
+}
+
+.nav-count.purple,
+.nav-badge.purple {
+  background: rgba(139, 92, 246, 0.35) !important;
+  color: #e0d7ff !important;
+}
+
+/* 4. MAIN CONTENT WRAPPER &amp; FAR-RIGHT SCROLLBAR */
+.campus360-main,
+.tpo-main-wrapper,
+.tpo-main,
+.main-content,
+.tpo-content {
+  flex: 1 1 auto !important;
+  height: 100vh !important;
+  max-height: 100vh !important;
+  overflow-y: scroll !important;
+  overflow-x: hidden !important;
+  background-color: #f8fafc !important;
+  min-width: 0 !important;
+  position: relative !important;
+}
+
+.campus360-main::-webkit-scrollbar,
+.tpo-main-wrapper::-webkit-scrollbar,
+.tpo-main::-webkit-scrollbar,
+.main-content::-webkit-scrollbar,
+.tpo-content::-webkit-scrollbar {
+  width: 10px !important;
+  display: block !important;
+}
+
+.campus360-main::-webkit-scrollbar-track,
+.tpo-main-wrapper::-webkit-scrollbar-track,
+.tpo-main::-webkit-scrollbar-track,
+.main-content::-webkit-scrollbar-track,
+.tpo-content::-webkit-scrollbar-track {
+  background: #f1f5f9 !important;
+  border-left: 1px solid #e2e8f0 !important;
+}
+
+.campus360-main::-webkit-scrollbar-thumb,
+.tpo-main-wrapper::-webkit-scrollbar-thumb,
+.tpo-main::-webkit-scrollbar-thumb,
+.main-content::-webkit-scrollbar-thumb,
+.tpo-content::-webkit-scrollbar-thumb {
+  background: #7c3aed !important;
+  border-radius: 5px !important;
+}
+
+.campus360-main::-webkit-scrollbar-thumb:hover,
+.tpo-main-wrapper::-webkit-scrollbar-thumb:hover,
+.tpo-main::-webkit-scrollbar-thumb:hover,
+.main-content::-webkit-scrollbar-thumb:hover,
+.tpo-content::-webkit-scrollbar-thumb:hover {
+  background: #6d28d9 !important;
+}
+
+
+
+/* ==========================================================================
+   FAR RIGHT PAGE SCROLLBAR &amp; HIDE SIDEBAR SCROLLBAR (PERFECT FIX)
+   ========================================================================== */
+
+/* 1. HIDE ALL SCROLLBARS ON THE LEFT SIDEBAR / NAVBAR COMPLETELY */
+.tpo-sidebar,
+.tpo-sidebar *,
+.skill-sidebar,
+.skill-sidebar *,
+.sidebar-nav,
+.tpo-sidebar-nav,
+aside.tpo-sidebar {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+.tpo-sidebar::-webkit-scrollbar,
+.tpo-sidebar *::-webkit-scrollbar,
+.skill-sidebar::-webkit-scrollbar,
+.sidebar-nav::-webkit-scrollbar,
+.tpo-sidebar-nav::-webkit-scrollbar,
+aside.tpo-sidebar::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  background: transparent !important;
+}
+
+/* 2. MAKE MAIN PAGE CONTAINER WRAPPER SCROLLABLE ON FAR RIGHT */
+html, body, #sp-page, .sp-page-container, #page_content, .page, main {
+  width: 100% !important;
+  height: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  background-color: #f8fafc !important;
+}
+
+.campus360-tpo-layout,
+.tpo-layout,
+.tpo-container,
+.campus360-skill-intel,
+.tpo-dashboard-center {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  z-index: 9999 !important;
+  overflow: hidden !important;
+  display: flex !important;
+  background: #f8fafc !important;
+}
+
+.tpo-sidebar,
+.skill-sidebar,
+aside.tpo-sidebar {
+  width: 242px !important;
+  min-width: 242px !important;
+  max-width: 242px !important;
+  height: 100vh !important;
+  flex: 0 0 242px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  position: relative !important;
+  overflow-y: auto !important;
+  background: linear-gradient(180deg, #10092a 0%, #130d31 55%, #0d0822 100%) !important;
+  border-right: 1px solid #2b2247 !important;
+  color: #ffffff !important;
+  z-index: 100 !important;
+}
+
+/* MAIN CONTENT WRAPPER - SCROLLBAR FORCED TO FAR RIGHT BROWSER EDGE */
+.tpo-main-wrapper,
+.tpo-main,
+.main-content,
+.tpo-content {
+  flex: 1 1 auto !important;
+  height: 100vh !important;
+  max-height: 100vh !important;
+  overflow-y: scroll !important;
+  overflow-x: hidden !important;
+  background-color: #f8fafc !important;
+  min-width: 0 !important;
+  position: relative !important;
+}
+
+.tpo-content-container,
+.campus360-skill-page,
+.tpo-body {
+  height: auto !important;
+  min-height: 100% !important;
+  overflow: visible !important;
+}
+
+/* CUSTOM HIGH-VISIBILITY PURPLE SCROLLBAR ON THE FAR RIGHT */
+.tpo-main-wrapper::-webkit-scrollbar,
+.tpo-main::-webkit-scrollbar,
+.main-content::-webkit-scrollbar,
+.tpo-content::-webkit-scrollbar {
+  width: 10px !important;
+  display: block !important;
+}
+
+.tpo-main-wrapper::-webkit-scrollbar-track,
+.tpo-main::-webkit-scrollbar-track,
+.main-content::-webkit-scrollbar-track,
+.tpo-content::-webkit-scrollbar-track {
+  background: #f1f5f9 !important;
+  border-left: 1px solid #e2e8f0 !important;
+}
+
+.tpo-main-wrapper::-webkit-scrollbar-thumb,
+.tpo-main::-webkit-scrollbar-thumb,
+.main-content::-webkit-scrollbar-thumb,
+.tpo-content::-webkit-scrollbar-thumb {
+  background: #7c3aed !important;
+  border-radius: 5px !important;
+}
+
+.tpo-main-wrapper::-webkit-scrollbar-thumb:hover,
+.tpo-main::-webkit-scrollbar-thumb:hover,
+.main-content::-webkit-scrollbar-thumb:hover,
+.tpo-content::-webkit-scrollbar-thumb:hover {
+  background: #6d28d9 !important;
+}
+
+
+
+/* =========================================================
+   CAMPUS360 TPO FULL SCREEN EDGE-TO-EDGE RESET
+   ========================================================= */
+
+body #sp-header,
+body .sp-header,
+body .sp-navbar,
+body .navbar.sp-navbar,
+body #sp-nav-bar,
+body .sp-nav-bar,
+body header#sp-header,
+body header.sp-header,
+body .nav.navbar-nav {
+    display: none !important;
+}
+
+html, body {
+    width: 100% !important;
+    height: 100% !important;
+    min-width: 100% !important;
+    min-height: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    background: #f8fafc !important;
+}
+
+body .page,
+body #sp-page,
+body #sp-main,
+body .sp-page,
+body .sp-main,
+body main,
+body .container,
+body .container-fluid,
+body .row,
+body [class*="col-"] {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    border: none !important;
+}
+
+.campus360-tpo-page {&#13;
+  padding: 32px;&#13;
+  max-width: 1400px;&#13;
+  margin: 0 auto;&#13;
+  color: #18233f;&#13;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;&#13;
+}&#13;
+&#13;
+.page-header {&#13;
+  display: flex;&#13;
+  align-items: flex-end;&#13;
+  justify-content: space-between;&#13;
+  margin-bottom: 28px;&#13;
+}&#13;
+&#13;
+.eyebrow,&#13;
+.card-eyebrow {&#13;
+  font-size: 11px;&#13;
+  font-weight: 800;&#13;
+  letter-spacing: 1.4px;&#13;
+  color: #6941d9;&#13;
+  margin-bottom: 6px;&#13;
+}&#13;
+&#13;
+.page-header h1 {&#13;
+  margin: 0;&#13;
+  font-size: 32px;&#13;
+  font-weight: 800;&#13;
+  color: #111b38;&#13;
+}&#13;
+&#13;
+.page-header p {&#13;
+  margin: 7px 0 0;&#13;
+  color: #71809c;&#13;
+  font-size: 14px;&#13;
+}&#13;
+&#13;
+.primary-btn {&#13;
+  border: 0;&#13;
+  border-radius: 12px;&#13;
+  padding: 12px 18px;&#13;
+  background: #6338d8;&#13;
+  color: #fff;&#13;
+  font-weight: 700;&#13;
+  cursor: pointer;&#13;
+  box-shadow: 0 7px 18px rgba(99, 56, 216, .22);&#13;
+  transition: .2s;&#13;
+}&#13;
+&#13;
+.primary-btn:hover {&#13;
+  transform: translateY(-2px);&#13;
+  box-shadow: 0 10px 24px rgba(99, 56, 216, .28);&#13;
+}&#13;
+&#13;
+.summary-grid {&#13;
+  display: grid;&#13;
+  grid-template-columns: repeat(4, 1fr);&#13;
+  gap: 16px;&#13;
+  margin-bottom: 20px;&#13;
+}&#13;
+&#13;
+.summary-card {&#13;
+  min-height: 92px;&#13;
+  border: 1px solid #e4e9f3;&#13;
+  border-radius: 16px;&#13;
+  padding: 18px;&#13;
+  display: flex;&#13;
+  align-items: center;&#13;
+  gap: 14px;&#13;
+  background: #fff;&#13;
+  transition: .2s;&#13;
+}&#13;
+&#13;
+.summary-card:hover {&#13;
+  transform: translateY(-3px);&#13;
+  box-shadow: 0 10px 28px rgba(35, 50, 90, .08);&#13;
+}&#13;
+&#13;
+.summary-icon {&#13;
+  width: 42px;&#13;
+  height: 42px;&#13;
+  border-radius: 12px;&#13;
+  display: flex;&#13;
+  align-items: center;&#13;
+  justify-content: center;&#13;
+  font-size: 19px;&#13;
+  font-weight: 800;&#13;
+}&#13;
+&#13;
+.summary-card span {&#13;
+  display: block;&#13;
+  font-size: 12px;&#13;
+  color: #7886a0;&#13;
+  margin-bottom: 4px;&#13;
+}&#13;
+&#13;
+.summary-card strong {&#13;
+  font-size: 25px;&#13;
+  color: #18233f;&#13;
+}&#13;
+&#13;
+.blue .summary-icon {&#13;
+  background: #eaf3ff;&#13;
+  color: #2874e6;&#13;
+}&#13;
+&#13;
+.green .summary-icon {&#13;
+  background: #e7f9ef;&#13;
+  color: #159957;&#13;
+}&#13;
+&#13;
+.purple .summary-icon {&#13;
+  background: #f0eaff;&#13;
+  color: #6941d9;&#13;
+}&#13;
+&#13;
+.red .summary-icon {&#13;
+  background: #fff0f1;&#13;
+  color: #df3148;&#13;
+}&#13;
+&#13;
+.toolbar {&#13;
+  display: flex;&#13;
+  gap: 12px;&#13;
+  margin-bottom: 18px;&#13;
+}&#13;
+&#13;
+.search-box {&#13;
+  flex: 1;&#13;
+  height: 44px;&#13;
+  border: 1px solid #dfe5f0;&#13;
+  background: #fff;&#13;
+  border-radius: 11px;&#13;
+  display: flex;&#13;
+  align-items: center;&#13;
+  padding: 0 14px;&#13;
+}&#13;
+&#13;
+.search-box span {&#13;
+  font-size: 21px;&#13;
+  color: #8a96aa;&#13;
+  margin-right: 9px;&#13;
+}&#13;
+&#13;
+.search-box input {&#13;
+  border: 0;&#13;
+  outline: 0;&#13;
+  width: 100%;&#13;
+  font-size: 13px;&#13;
+  color: #283550;&#13;
+}&#13;
+&#13;
+.toolbar select {&#13;
+  min-width: 150px;&#13;
+  border: 1px solid #dfe5f0;&#13;
+  border-radius: 11px;&#13;
+  padding: 0 13px;&#13;
+  background: #fff;&#13;
+  color: #394662;&#13;
+}&#13;
+&#13;
+.refresh-btn {&#13;
+  width: 44px;&#13;
+  border: 1px solid #dfe5f0;&#13;
+  background: #fff;&#13;
+  border-radius: 11px;&#13;
+  font-size: 19px;&#13;
+  cursor: pointer;&#13;
+}&#13;
+&#13;
+.refresh-btn:hover {&#13;
+  background: #f6f3ff;&#13;
+}&#13;
+&#13;
+.student-card {&#13;
+  background: #fff;&#13;
+  border: 1px solid #e2e7f0;&#13;
+  border-radius: 18px;&#13;
+  overflow: hidden;&#13;
+  box-shadow: 0 4px 18px rgba(35, 50, 90, .04);&#13;
+}&#13;
+&#13;
+.card-heading {&#13;
+  display: flex;&#13;
+  justify-content: space-between;&#13;
+  align-items: center;&#13;
+  padding: 22px 24px;&#13;
+  border-bottom: 1px solid #edf0f5;&#13;
+}&#13;
+&#13;
+.card-heading h2 {&#13;
+  margin: 0;&#13;
+  font-size: 19px;&#13;
+  color: #17213d;&#13;
+}&#13;
+&#13;
+.record-count {&#13;
+  font-size: 12px;&#13;
+  color: #75829a;&#13;
+  background: #f4f6fb;&#13;
+  padding: 7px 11px;&#13;
+  border-radius: 20px;&#13;
+}&#13;
+&#13;
+.table-wrap {&#13;
+  overflow-x: auto;&#13;
+}&#13;
+&#13;
+table {&#13;
+  width: 100%;&#13;
+  border-collapse: collapse;&#13;
+}&#13;
+&#13;
+thead {&#13;
+  background: #fafbfe;&#13;
+}&#13;
+&#13;
+th {&#13;
+  padding: 13px 18px;&#13;
+  text-align: left;&#13;
+  font-size: 11px;&#13;
+  text-transform: uppercase;&#13;
+  letter-spacing: .6px;&#13;
+  color: #8290a9;&#13;
+  font-weight: 800;&#13;
+}&#13;
+&#13;
+td {&#13;
+  padding: 15px 18px;&#13;
+  border-top: 1px solid #edf0f5;&#13;
+  font-size: 13px;&#13;
+  color: #48556e;&#13;
+}&#13;
+&#13;
+.student-row {&#13;
+  cursor: pointer;&#13;
+  transition: .15s;&#13;
+}&#13;
+&#13;
+.student-row:hover {&#13;
+  background: #faf8ff;&#13;
+}&#13;
+&#13;
+.student-cell {&#13;
+  display: flex;&#13;
+  align-items: center;&#13;
+  gap: 11px;&#13;
+}&#13;
+&#13;
+.avatar,&#13;
+.modal-avatar {&#13;
+  width: 38px;&#13;
+  height: 38px;&#13;
+  border-radius: 11px;&#13;
+  background: #eee8ff;&#13;
+  color: #6639d7;&#13;
+  display: flex;&#13;
+  align-items: center;&#13;
+  justify-content: center;&#13;
+  font-weight: 800;&#13;
+}&#13;
+&#13;
+.student-cell strong {&#13;
+  display: block;&#13;
+  color: #1d2944;&#13;
+  font-size: 13px;&#13;
+}&#13;
+&#13;
+.student-cell span {&#13;
+  display: block;&#13;
+  color: #8a96aa;&#13;
+  font-size: 11px;&#13;
+  margin-top: 2px;&#13;
+}&#13;
+&#13;
+.student-id {&#13;
+  font-family: monospace;&#13;
+  font-size: 12px;&#13;
+  color: #66738d;&#13;
+}&#13;
+&#13;
+.cgpa {&#13;
+  color: #253252;&#13;
+}&#13;
+&#13;
+.backlog-badge,&#13;
+.status-badge,&#13;
+.profile-badge {&#13;
+  display: inline-block;&#13;
+  padding: 5px 9px;&#13;
+  border-radius: 20px;&#13;
+  font-size: 11px;&#13;
+  font-weight: 700;&#13;
+}&#13;
+&#13;
+.backlog-clear {&#13;
+  background: #eaf8ef;&#13;
+  color: #16864c;&#13;
+}&#13;
+&#13;
+.backlog-warning {&#13;
+  background: #fff1df;&#13;
+  color: #c56a00;&#13;
+}&#13;
+&#13;
+.status-placed {&#13;
+  background: #e6f8ee;&#13;
+  color: #16894d;&#13;
+}&#13;
+&#13;
+.status-active {&#13;
+  background: #edf3ff;&#13;
+  color: #316ed3;&#13;
+}&#13;
+&#13;
+.profile-active {&#13;
+  background: #eeeaff;&#13;
+  color: #6742d5;&#13;
+}&#13;
+&#13;
+.profile-inactive {&#13;
+  background: #f0f2f6;&#13;
+  color: #7d8799;&#13;
+}&#13;
+&#13;
+.view-btn {&#13;
+  border: 0;&#13;
+  background: transparent;&#13;
+  color: #6036d2;&#13;
+  font-weight: 700;&#13;
+  cursor: pointer;&#13;
+}&#13;
+&#13;
+.view-btn:hover {&#13;
+  text-decoration: underline;&#13;
+}&#13;
+&#13;
+.empty-state {&#13;
+  text-align: center;&#13;
+  padding: 55px 20px;&#13;
+}&#13;
+&#13;
+.empty-icon {&#13;
+  font-size: 35px;&#13;
+  color: #8b7ae6;&#13;
+}&#13;
+&#13;
+.empty-state h3 {&#13;
+  margin: 12px 0 4px;&#13;
+  color: #26324d;&#13;
+}&#13;
+&#13;
+.empty-state p {&#13;
+  margin: 0;&#13;
+  color: #8994a9;&#13;
+}&#13;
+&#13;
+.modal-overlay {&#13;
+  position: fixed;&#13;
+  inset: 0;&#13;
+  background: rgba(20, 28, 48, .45);&#13;
+  display: flex;&#13;
+  align-items: center;&#13;
+  justify-content: center;&#13;
+  z-index: 9999;&#13;
+  padding: 20px;&#13;
+}&#13;
+&#13;
+.student-modal {&#13;
+  width: 720px;&#13;
+  max-width: 100%;&#13;
+  background: #fff;&#13;
+  border-radius: 20px;&#13;
+  padding: 28px;&#13;
+  position: relative;&#13;
+  box-shadow: 0 25px 70px rgba(15, 25, 50, .2);&#13;
+}&#13;
+&#13;
+.modal-close {&#13;
+  position: absolute;&#13;
+  right: 18px;&#13;
+  top: 15px;&#13;
+  border: 0;&#13;
+  background: transparent;&#13;
+  font-size: 27px;&#13;
+  color: #8994a9;&#13;
+  cursor: pointer;&#13;
+}&#13;
+&#13;
+.modal-profile {&#13;
+  display: flex;&#13;
+  align-items: center;&#13;
+  gap: 15px;&#13;
+  padding-bottom: 22px;&#13;
+  border-bottom: 1px solid #edf0f5;&#13;
+}&#13;
+&#13;
+.modal-avatar {&#13;
+  width: 55px;&#13;
+  height: 55px;&#13;
+  border-radius: 15px;&#13;
+  font-size: 17px;&#13;
+}&#13;
+&#13;
+.modal-profile h2 {&#13;
+  margin: 0 0 3px;&#13;
+  color: #17213d;&#13;
+}&#13;
+&#13;
+.modal-profile span {&#13;
+  color: #8490a5;&#13;
+  font-size: 12px;&#13;
+}&#13;
+&#13;
+.detail-grid {&#13;
+  display: grid;&#13;
+  grid-template-columns: repeat(2, 1fr);&#13;
+  gap: 18px;&#13;
+  padding: 24px 0;&#13;
+}&#13;
+&#13;
+.detail-grid span {&#13;
+  display: block;&#13;
+  color: #8a96aa;&#13;
+  font-size: 11px;&#13;
+  text-transform: uppercase;&#13;
+  margin-bottom: 5px;&#13;
+}&#13;
+&#13;
+.detail-grid strong {&#13;
+  color: #293650;&#13;
+  font-size: 13px;&#13;
+}&#13;
+&#13;
+.modal-actions {&#13;
+  border-top: 1px solid #edf0f5;&#13;
+  padding-top: 20px;&#13;
+}&#13;
+&#13;
+.secondary-btn {&#13;
+  border: 1px solid #d9d0f7;&#13;
+  background: #f7f4ff;&#13;
+  color: #6137cf;&#13;
+  padding: 10px 15px;&#13;
+  border-radius: 10px;&#13;
+  font-weight: 700;&#13;
+  cursor: pointer;&#13;
+}&#13;
+&#13;
+@media (max-width: 900px) {&#13;
+  .summary-grid {&#13;
+    grid-template-columns: repeat(2, 1fr);&#13;
+  }&#13;
+&#13;
+  .campus360-tpo-page {&#13;
+    padding: 20px;&#13;
+  }&#13;
+}&#13;
+&#13;
+@media (max-width: 600px) {&#13;
+  .summary-grid {&#13;
+    grid-template-columns: 1fr;&#13;
+  }&#13;
+&#13;
+  .page-header {&#13;
+    display: block;&#13;
+  }&#13;
+&#13;
+  .primary-btn {&#13;
+    margin-top: 15px;&#13;
+  }&#13;
+&#13;
+  .toolbar {&#13;
+    flex-wrap: wrap;&#13;
+  }&#13;
+&#13;
+  .search-box {&#13;
+    flex-basis: 100%;&#13;
+  }&#13;
+}
+.campus360-tpo-layout,
+.tpo-layout,
+.tpo-container,
+.campus360-skill-intel,
+.tpo-dashboard-center {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  z-index: 9999 !important;
+  overflow: hidden !important;
+  background: #f8fafc !important;
+}
+
+.campus360-tpo-layout,
+.tpo-layout,
+.tpo-container,
+.campus360-skill-intel,
+.tpo-dashboard-center {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  z-index: 9999 !important;
+  overflow: hidden !important;
+  background: #f8fafc !important;
+}
+</css>
+        <data_table>sp_instance</data_table>
+        <demo_data/>
+        <description>Campus360 TPO student management and placement overview</description>
+        <docs/>
+        <field_list/>
+        <has_preview>false</has_preview>
+        <id>campus360_tpo_students</id>
+        <internal>false</internal>
+        <link><![CDATA[function link(scope, element, attrs, controller) {
+  
+}]]></link>
+        <name>Campus360 TPO Students</name>
+        <option_schema/>
+        <public>false</public>
+        <roles>x_snc_campus360.tpo,x_snc_campus360.campus_admin</roles>
+        <script><![CDATA[(function() {
+  try { data.chatbotWidget = $sp.getWidget('c4ae634574e703107f4410c9fee0cde5', {}); } catch(e) {}
+
+    /*
+     * ============================================================
+     * CAMPUS360 TPO STUDENTS
+     * Server-side data provider
+     * ============================================================
+     */
+
+    data.students = [];
+    data.stats = {
+        total: 0,
+        placed: 0,
+        active: 0,
+        highRisk: 0
+    };
+
+
+    /*
+     * ============================================================
+     * STUDENT MASTER
+     * ============================================================
+     */
+
+    var studentGR = new GlideRecordSecure(
+        'x_snc_campus360_student_master'
+    );
+
+    studentGR.orderBy('student_name');
+    studentGR.query();
+
+
+    while (studentGR.next()) {
+
+        var studentName =
+            studentGR.getValue('student_name') || 'Unnamed Student';
+
+        var initials = getInitials(studentName);
+
+        var placementStatus =
+            studentGR.getDisplayValue('placement_status') ||
+            studentGR.getValue('placement_status') ||
+            'Not Placed';
+
+        var profileStatus =
+            studentGR.getDisplayValue('profile_status') ||
+            studentGR.getValue('profile_status') ||
+            '';
+
+
+        var student = {
+
+            sys_id:
+                studentGR.getUniqueValue(),
+
+            id:
+                studentGR.getValue('student_id') || '',
+
+            name:
+                studentName,
+
+            initials:
+                initials,
+
+            email:
+                studentGR.getValue('email') || '',
+
+            phone:
+                studentGR.getValue('phone_number') || '',
+
+            batch:
+                studentGR.getValue('batch') || '',
+
+            degree:
+                studentGR.getValue('degree') || '',
+
+            branch:
+                studentGR.getValue('branch') || '',
+
+            cgpa:
+                studentGR.getValue('cgpa') || '',
+
+            backlogs:
+                parseInt(
+                    studentGR.getValue('backlogs'),
+                    10
+                ) || 0,
+
+            placementStatus:
+                placementStatus,
+
+            profileStatus:
+                profileStatus
+
+        };
+
+
+        data.students.push(student);
+
+    }
+
+
+    /*
+     * ============================================================
+     * BASIC STATISTICS
+     * ============================================================
+     */
+
+    data.stats.total =
+        data.students.length;
+
+
+    for (var i = 0; i < data.students.length; i++) {
+
+        var s =
+            data.students[i];
+
+
+        if (
+            String(s.placementStatus).toLowerCase() ===
+            'placed'
+        ) {
+
+            data.stats.placed++;
+
+        }
+
+
+        if (
+            String(s.profileStatus).toLowerCase() ===
+            'active'
+        ) {
+
+            data.stats.active++;
+
+        }
+
+    }
+
+
+    /*
+     * ============================================================
+     * HIGH-RISK STUDENTS
+     *
+     * Based on Placement Intelligence records.
+     * ============================================================
+     */
+
+    var intelligenceGR = new GlideRecordSecure(
+        'x_snc_campus360_placement_intelligence'
+    );
+
+    intelligenceGR.addQuery(
+        'risk_level',
+        'High'
+    );
+
+    intelligenceGR.query();
+
+    data.stats.highRisk =
+        intelligenceGR.getRowCount();
+
+
+    /*
+     * ============================================================
+     * ADD STUDENT ACTION
+     * ============================================================
+     *
+     * The actual navigation is handled by the client controller.
+     *
+     * ============================================================
+     */
+
+
+    /*
+     * ============================================================
+     * HELPER
+     * ============================================================
+     */
+
+    function getInitials(name) {
+
+        if (!name) {
+            return '?';
+        }
+
+        var parts =
+            String(name).trim().split(/\s+/);
+
+        if (parts.length === 1) {
+
+            return parts[0]
+                .substring(0, 2)
+                .toUpperCase();
+
+        }
+
+        return (
+            parts[0].charAt(0) +
+            parts[parts.length - 1].charAt(0)
+        ).toUpperCase();
+
+    }
+
+})();
+
+try {
+  data.aiWidget = $sp.getWidget('c4ae634574e703107f4410c9fee0cde5', {});
+  data.chatbotWidget = data.aiWidget;
+} catch(e) {}
+]]></script>
+        <servicenow>false</servicenow>
+        <sys_class_name>sp_widget</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-23 12:33:16</sys_created_on>
+        <sys_id>82f45330c42343107f44164a4d246303</sys_id>
+        <sys_mod_count>9</sys_mod_count>
+        <sys_name>Campus360 TPO Students</sys_name>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name>sp_widget_82f45330c42343107f44164a4d246303</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-30 19:21:10</sys_updated_on>
+        <template><![CDATA[<div class="campus360-tpo-page">
+
+  <div class="page-header">
+    <div>
+      <div class="eyebrow">STUDENT MANAGEMENT</div>
+      <h1>Students</h1>
+      <p>Manage student profiles, placement status and academic readiness.</p>
+    </div>
+
+    <button class="primary-btn" ng-click="c.addStudent()">
+      <span>＋</span>
+      Add Student
+    </button>
+  </div>
+
+
+  <!-- SUMMARY -->
+
+  <div class="summary-grid">
+
+    <div class="summary-card blue">
+      <div class="summary-icon">♙</div>
+      <div>
+        <span>Total Students</span>
+        <strong>{{data.stats.total}}</strong>
+      </div>
+    </div>
+
+    <div class="summary-card green">
+      <div class="summary-icon">✓</div>
+      <div>
+        <span>Placed</span>
+        <strong>{{data.stats.placed}}</strong>
+      </div>
+    </div>
+
+    <div class="summary-card purple">
+      <div class="summary-icon">↗</div>
+      <div>
+        <span>Active Profiles</span>
+        <strong>{{data.stats.active}}</strong>
+      </div>
+    </div>
+
+    <div class="summary-card red">
+      <div class="summary-icon">!</div>
+      <div>
+        <span>High Risk</span>
+        <strong>{{data.stats.highRisk}}</strong>
+      </div>
+    </div>
+
+  </div>
+
+
+  <!-- SEARCH / FILTER -->
+
+  <div class="toolbar">
+
+    <div class="search-box">
+
+      <span>⌕</span>
+
+      <input
+        type="text"
+        ng-model="c.search"
+        placeholder="Search by student name, ID or branch..."
+      />
+
+    </div>
+
+    <select ng-model="c.statusFilter">
+      <option value="all">All Profiles</option>
+      <option value="active">Active</option>
+      <option value="inactive">Inactive</option>
+    </select>
+
+    <button class="refresh-btn" ng-click="c.refresh()">
+      ↻
+    </button>
+
+  </div>
+
+
+  <!-- STUDENTS -->
+
+  <div class="student-card">
+
+    <div class="card-heading">
+
+      <div>
+        <div class="card-eyebrow">STUDENT DIRECTORY</div>
+        <h2>Student Profiles</h2>
+      </div>
+
+      <span class="record-count">
+        {{c.getFilteredStudents().length}} students
+      </span>
+
+    </div>
+
+
+    <div class="table-wrap">
+
+      <table>
+
+        <thead>
+
+          <tr>
+            <th>Student</th>
+            <th>Student ID</th>
+            <th>Branch</th>
+            <th>CGPA</th>
+            <th>Backlogs</th>
+            <th>Placement</th>
+            <th>Profile</th>
+            <th></th>
+          </tr>
+
+        </thead>
+
+        <tbody>
+
+          <tr
+            ng-repeat="student in c.getFilteredStudents() track by student.sys_id"
+            ng-click="c.openStudent(student)"
+            class="student-row"
+          >
+
+            <td>
+
+              <div class="student-cell">
+
+                <div class="avatar">
+                  {{student.initials}}
+                </div>
+
+                <div>
+
+                  <strong>
+                    {{student.name}}
+                  </strong>
+
+                  <span>
+                    {{student.email}}
+                  </span>
+
+                </div>
+
+              </div>
+
+            </td>
+
+
+            <td>
+              <span class="student-id">
+                {{student.id}}
+              </span>
+            </td>
+
+
+            <td>
+              {{student.branch || '—'}}
+            </td>
+
+
+            <td>
+
+              <strong class="cgpa">
+                {{student.cgpa || '—'}}
+              </strong>
+
+            </td>
+
+
+            <td>
+
+              <span
+                class="backlog-badge"
+                ng-class="{
+                  'backlog-warning': student.backlogs > 0,
+                  'backlog-clear': student.backlogs == 0
+                }"
+              >
+                {{student.backlogs || 0}}
+              </span>
+
+            </td>
+
+
+            <td>
+
+              <span
+                class="status-badge"
+                ng-class="{
+                  'status-placed': student.placementStatus == 'Placed',
+                  'status-active': student.placementStatus != 'Placed'
+                }"
+              >
+                {{student.placementStatus || 'Not Placed'}}
+              </span>
+
+            </td>
+
+
+            <td>
+
+              <span
+                class="profile-badge"
+                ng-class="{
+                  'profile-active': student.profileStatus == 'Active',
+                  'profile-inactive': student.profileStatus == 'Inactive'
+                }"
+              >
+                {{student.profileStatus || '—'}}
+              </span>
+
+            </td>
+
+
+            <td>
+
+              <button
+                class="view-btn"
+                ng-click="c.openStudent(student); $event.stopPropagation()"
+              >
+                View →
+              </button>
+
+            </td>
+
+          </tr>
+
+
+          <tr ng-if="!c.getFilteredStudents().length">
+
+            <td colspan="8">
+
+              <div class="empty-state">
+
+                <div class="empty-icon">
+                  ◌
+                </div>
+
+                <h3>No students found</h3>
+
+                <p>
+                  Try changing your search or filter.
+                </p>
+
+              </div>
+
+            </td>
+
+          </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </div>
+
+
+  <!-- STUDENT DETAILS MODAL -->
+
+  <div
+    class="modal-overlay"
+    ng-if="c.selectedStudent"
+    ng-click="c.closeStudent()"
+  >
+
+    <div
+      class="student-modal"
+      ng-click="$event.stopPropagation()"
+    >
+
+      <button
+        class="modal-close"
+        ng-click="c.closeStudent()"
+      >
+        ×
+      </button>
+
+
+      <div class="modal-profile">
+
+        <div class="modal-avatar">
+          {{c.selectedStudent.initials}}
+        </div>
+
+        <div>
+
+          <div class="eyebrow">
+            STUDENT PROFILE
+          </div>
+
+          <h2>
+            {{c.selectedStudent.name}}
+          </h2>
+
+          <span>
+            {{c.selectedStudent.id}}
+          </span>
+
+        </div>
+
+      </div>
+
+
+      <div class="detail-grid">
+
+        <div>
+          <span>Email</span>
+          <strong>{{c.selectedStudent.email || '—'}}</strong>
+        </div>
+
+        <div>
+          <span>Branch</span>
+          <strong>{{c.selectedStudent.branch || '—'}}</strong>
+        </div>
+
+        <div>
+          <span>Degree</span>
+          <strong>{{c.selectedStudent.degree || '—'}}</strong>
+        </div>
+
+        <div>
+          <span>Batch</span>
+          <strong>{{c.selectedStudent.batch || '—'}}</strong>
+        </div>
+
+        <div>
+          <span>CGPA</span>
+          <strong>{{c.selectedStudent.cgpa || '—'}}</strong>
+        </div>
+
+        <div>
+          <span>Backlogs</span>
+          <strong>{{c.selectedStudent.backlogs || 0}}</strong>
+        </div>
+
+        <div>
+          <span>Placement Status</span>
+          <strong>{{c.selectedStudent.placementStatus || '—'}}</strong>
+        </div>
+
+        <div>
+          <span>Profile Status</span>
+          <strong>{{c.selectedStudent.profileStatus || '—'}}</strong>
+        </div>
+
+      </div>
+
+
+      <div class="modal-actions">
+
+        <button
+          class="secondary-btn"
+          ng-click="c.viewRecord(c.selectedStudent)"
+        >
+          Open Full Record →
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+<div style="position: fixed; bottom: 24px; right: 24px; z-index: 999999;">
+  
+</div>
+<div style="position: fixed; bottom: 24px; right: 24px; z-index: 999999;">
+  <sp-widget widget="data.aiWidget"></sp-widget>
+</div>
+]]></template>
+    </sp_widget>
+</record_update>

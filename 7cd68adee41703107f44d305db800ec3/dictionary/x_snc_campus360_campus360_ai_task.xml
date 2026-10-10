@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?><database>
+    <element attributes="enforce_dot_walk_cross_scope_access=true" db_object_id="3c4c2829a02b03107f44e28050a33b38" label="Campus360 AI Task" max_length="40" name="x_snc_campus360_campus360_ai_task" type="collection">
+        <element label="Task State" max_length="4000" name="task_state" type="string"/>
+        <element choice="1" label="Intent" max_length="40" name="intent" type="choice">
+            <choice>
+                <element inactive_on_update="false" label="create" sequence="0" value="create"/>
+                <element inactive_on_update="false" label="unknown" sequence="4" value="unknown"/>
+                <element inactive_on_update="false" label="update" sequence="2" value="update"/>
+                <element inactive_on_update="false" label="read" sequence="1" value="read"/>
+                <element inactive_on_update="false" label="delete" sequence="3" value="delete"/>
+            </choice>
+        </element>
+        <element label="Conversation ID" max_length="100" name="conversation_id" type="string"/>
+        <element label="Target Table" max_length="100" name="target_table" type="string"/>
+        <element label="Last User Message" max_length="4000" name="last_user_message" type="string"/>
+        <element label="User" max_length="32" name="user" reference="sys_user" type="reference"/>
+        <element label="Current Field" max_length="100" name="current_field" type="string"/>
+        <element choice="1" label="Status" max_length="40" name="status" type="choice">
+            <choice>
+                <element inactive_on_update="false" label="awaiting_input" sequence="1" value="awaiting_input"/>
+                <element inactive_on_update="false" label="cancelled" sequence="4" value="cancelled"/>
+                <element inactive_on_update="false" label="active" sequence="0" value="active"/>
+                <element inactive_on_update="false" label="completed" sequence="3" value="completed"/>
+                <element inactive_on_update="false" label="awaiting_confirmation" sequence="2" value="awaiting_confirmation"/>
+            </choice>
+        </element>
+        <element label="Last AI Response" max_length="4000" name="last_ai_response" type="string"/>
+        <index name="index">
+            <element name="user"/>
+        </index>
+    </element>
+</database>

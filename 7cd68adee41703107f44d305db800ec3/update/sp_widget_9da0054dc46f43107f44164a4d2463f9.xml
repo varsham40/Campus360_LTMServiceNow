@@ -1,0 +1,1533 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_widget">
+    <sp_widget action="INSERT_OR_UPDATE">
+        <category>custom</category>
+        <client_script><![CDATA[api.controller = function($scope,$window) {
+
+    var c = this;
+
+
+    /*
+     * =========================================
+     * FORM
+     * =========================================
+     */
+
+    c.form = {
+
+        student: "",
+
+        opportunity: "",
+
+        round: "",
+
+        mode: "",
+
+        date: "",
+
+        interviewer: "",
+
+        meeting_link: "",
+
+        interview_sys_id: ""
+
+    };
+
+
+    c.existingInterview = false;
+
+    c.saving = false;
+
+    c.error = "";
+
+    c.success = "";
+
+
+    /*
+     * =========================================
+     * LOAD EXISTING INTERVIEW
+     * =========================================
+     *
+     * data.interview comes from
+     * the Server Script.
+     */
+
+    if (
+        c.data.interview &&
+        c.data.interview.sys_id
+    ) {
+
+        var interview =
+            c.data.interview;
+
+
+        c.existingInterview = true;
+
+
+        /*
+         * Existing interview ID
+         */
+
+        c.form.interview_sys_id =
+            interview.sys_id;
+
+
+        /*
+         * Candidate
+         */
+
+        c.form.student =
+            interview.student || "";
+
+
+        /*
+         * Opportunity
+         */
+
+        c.form.opportunity =
+            interview.opportunity || "";
+
+
+        /*
+         * Interview Round
+         */
+
+        c.form.round =
+            interview.round || "";
+
+
+        /*
+         * Interview Mode
+         */
+
+        c.form.mode =
+            interview.mode || "";
+
+
+        /*
+         * Interviewer
+         */
+
+        c.form.interviewer =
+            interview.interviewer || "";
+
+
+        /*
+         * Meeting Link
+         */
+
+        c.form.meeting_link =
+            interview.meeting_link || "";
+
+
+        /*
+         * Date
+         */
+
+        if (interview.date) {
+
+            /*
+             * datetime-local requires a Date object
+             */
+
+            var dateString =
+                interview.date;
+
+
+            /*
+             * Example:
+             *
+             * 2026-09-25T19:45
+             */
+
+            var parts =
+                dateString.split(
+                    /[-T: ]/
+                );
+
+
+            if (parts.length >= 5) {
+
+                c.form.date =
+                    new Date(
+                        parseInt(parts[0], 10),
+                        parseInt(parts[1], 10) - 1,
+                        parseInt(parts[2], 10),
+                        parseInt(parts[3], 10),
+                        parseInt(parts[4], 10)
+                    );
+
+            }
+
+        }
+
+    }
+
+
+    /*
+     * =========================================
+     * BACK
+     * =========================================
+     */
+
+    c.goBack = function() {
+
+        $window.location.href =
+            "?id=campus360_recruiter_dashboard_new";
+
+    };
+
+
+    /*
+     * =========================================
+     * SCHEDULE
+     * =========================================
+     */
+
+    c.schedule = function() {
+
+        c.error = "";
+
+        c.success = "";
+
+
+        /*
+         * Validate
+         */
+
+        if (
+            !c.form.student ||
+            !c.form.opportunity ||
+            !c.form.round ||
+            !c.form.mode ||
+            !c.form.date ||
+            !c.form.interviewer
+        ) {
+
+            c.error =
+                "Please fill all required fields.";
+
+            return;
+
+        }
+
+
+        c.saving = true;
+
+
+        /*
+         * =========================================
+         * SEND DATA TO SERVER
+         * =========================================
+         */
+
+        c.data.action =
+            "schedule";
+
+
+        c.data.form = {
+
+            student:
+                c.form.student,
+
+            opportunity:
+                c.form.opportunity,
+
+            round:
+                c.form.round,
+
+            mode:
+                c.form.mode,
+
+            date:
+                formatDateForServiceNow(
+                    c.form.date
+                ),
+
+            interviewer:
+                c.form.interviewer,
+
+            meeting_link:
+                c.form.meeting_link,
+
+            /*
+             * VERY IMPORTANT
+             *
+             * If this exists,
+             * server will UPDATE
+             * instead of INSERT.
+             */
+
+            interview_sys_id:
+                c.form.interview_sys_id
+
+        };
+
+
+        /*
+         * =========================================
+         * SAVE
+         * =========================================
+         */
+
+        c.server.update().then(
+
+            function(response) {
+
+                c.saving = false;
+
+
+                if (
+                    response.data &&
+                    response.data.success
+                ) {
+
+                    c.success =
+                        c.existingInterview
+                        ? "Interview scheduled successfully."
+                        : "Interview created successfully.";
+
+
+                    /*
+                     * Go back after save
+                     */
+
+                    setTimeout(
+                        function() {
+
+                            $window.location.href =
+                                "?id=campus360_recruiter_interviews";
+
+                        },
+                        800
+                    );
+
+
+                } else {
+
+                    c.error =
+                        (
+                            response.data &&
+                            response.data.error
+                        )
+                        ||
+                        "Unable to schedule interview.";
+
+                }
+
+            },
+
+
+            function() {
+
+                c.saving = false;
+
+                c.error =
+                    "Server error. Please try again.";
+
+            }
+
+        );
+
+    };
+
+
+    /*
+     * =========================================
+     * DATE FORMATTER
+     * =========================================
+     *
+     * Converts JavaScript Date to:
+     *
+     * YYYY-MM-DD HH:mm:ss
+     *
+     */
+
+    function formatDateForServiceNow(date) {
+
+        if (!date) {
+            return "";
+        }
+
+
+        /*
+         * If Angular provides a Date object
+         */
+
+        if (
+            Object.prototype.toString
+                .call(date) ===
+            "[object Date]"
+        ) {
+
+            var year =
+                date.getFullYear();
+
+
+            var month =
+                ("0" +
+                    (date.getMonth() + 1))
+                .slice(-2);
+
+
+            var day =
+                ("0" +
+                    date.getDate())
+                .slice(-2);
+
+
+            var hours =
+                ("0" +
+                    date.getHours())
+                .slice(-2);
+
+
+            var minutes =
+                ("0" +
+                    date.getMinutes())
+                .slice(-2);
+
+
+            var seconds =
+                ("0" +
+                    date.getSeconds())
+                .slice(-2);
+
+
+            return (
+                year +
+                "-" +
+                month +
+                "-" +
+                day +
+                " " +
+                hours +
+                ":" +
+                minutes +
+                ":" +
+                seconds
+            );
+
+        }
+
+
+        /*
+         * If it is already a string
+         */
+
+        return date;
+
+    }
+
+};]]></client_script>
+        <controller_as>c</controller_as>
+        <css>.schedule-page {&#13;
+  max-width: 1100px;&#13;
+  margin: 30px auto;&#13;
+  padding: 0 20px 50px;&#13;
+  color: #102a56;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================= */&#13;
+/* HEADER */&#13;
+/* ============================= */&#13;
+&#13;
+.page-header {&#13;
+  background: #ffffff;&#13;
+  border-radius: 18px;&#13;
+  padding: 30px 34px;&#13;
+  margin-bottom: 24px;&#13;
+&#13;
+  display: flex;&#13;
+  align-items: center;&#13;
+  justify-content: space-between;&#13;
+&#13;
+  box-shadow: 0 8px 25px rgba(30, 55, 90, 0.08);&#13;
+&#13;
+  border: 1px solid #e1e7f2;&#13;
+}&#13;
+&#13;
+&#13;
+.eyebrow {&#13;
+  font-size: 12px;&#13;
+  font-weight: 700;&#13;
+  letter-spacing: 2px;&#13;
+  color: #4d63e8;&#13;
+}&#13;
+&#13;
+&#13;
+.page-header h1 {&#13;
+  margin: 8px 0 6px;&#13;
+&#13;
+  font-size: 30px;&#13;
+  font-weight: 700;&#13;
+}&#13;
+&#13;
+&#13;
+.page-header p {&#13;
+  margin: 0;&#13;
+&#13;
+  color: #70809d;&#13;
+  font-size: 14px;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================= */&#13;
+/* FORM CARD */&#13;
+/* ============================= */&#13;
+&#13;
+.form-card {&#13;
+  background: #ffffff;&#13;
+&#13;
+  border: 1px solid #e1e7f2;&#13;
+&#13;
+  border-radius: 18px;&#13;
+&#13;
+  padding: 30px;&#13;
+&#13;
+  box-shadow: 0 8px 25px rgba(30, 55, 90, 0.06);&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================= */&#13;
+/* FORM TITLE */&#13;
+/* ============================= */&#13;
+&#13;
+.form-title {&#13;
+  border-bottom: 1px solid #e8edf5;&#13;
+&#13;
+  padding-bottom: 20px;&#13;
+&#13;
+  margin-bottom: 25px;&#13;
+}&#13;
+&#13;
+&#13;
+.form-title h2 {&#13;
+  margin: 0 0 5px;&#13;
+&#13;
+  font-size: 20px;&#13;
+}&#13;
+&#13;
+&#13;
+.form-title p {&#13;
+  margin: 0;&#13;
+&#13;
+  color: #7888a3;&#13;
+&#13;
+  font-size: 13px;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================= */&#13;
+/* FORM GRID */&#13;
+/* ============================= */&#13;
+&#13;
+.form-grid {&#13;
+  display: grid;&#13;
+&#13;
+  grid-template-columns: 1fr 1fr;&#13;
+&#13;
+  gap: 20px;&#13;
+}&#13;
+&#13;
+&#13;
+.form-group {&#13;
+  display: flex;&#13;
+&#13;
+  flex-direction: column;&#13;
+}&#13;
+&#13;
+&#13;
+.form-group.full-width {&#13;
+  grid-column: 1 / -1;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================= */&#13;
+/* LABEL */&#13;
+/* ============================= */&#13;
+&#13;
+.form-group label {&#13;
+  font-size: 13px;&#13;
+&#13;
+  font-weight: 600;&#13;
+&#13;
+  color: #30466d;&#13;
+&#13;
+  margin-bottom: 8px;&#13;
+}&#13;
+&#13;
+&#13;
+.form-group label span {&#13;
+  color: #e05252;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================= */&#13;
+/* INPUTS */&#13;
+/* ============================= */&#13;
+&#13;
+.form-group input,&#13;
+.form-group select {&#13;
+&#13;
+  height: 44px;&#13;
+&#13;
+  border: 1px solid #d6deeb;&#13;
+&#13;
+  border-radius: 8px;&#13;
+&#13;
+  padding: 0 13px;&#13;
+&#13;
+  font-size: 13px;&#13;
+&#13;
+  color: #24395f;&#13;
+&#13;
+  background: #fff;&#13;
+&#13;
+  outline: none;&#13;
+&#13;
+  transition: 0.2s;&#13;
+}&#13;
+&#13;
+&#13;
+.form-group input:focus,&#13;
+.form-group select:focus {&#13;
+&#13;
+  border-color: #5368e8;&#13;
+&#13;
+  box-shadow:&#13;
+    0 0 0 3px rgba(83, 104, 232, 0.10);&#13;
+}&#13;
+&#13;
+&#13;
+/* Disabled pre-filled fields */&#13;
+&#13;
+.form-group select:disabled {&#13;
+&#13;
+  background: #f5f7fb;&#13;
+&#13;
+  color: #64748b;&#13;
+&#13;
+  cursor: not-allowed;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================= */&#13;
+/* ACTIONS */&#13;
+/* ============================= */&#13;
+&#13;
+.form-actions {&#13;
+&#13;
+  margin-top: 30px;&#13;
+&#13;
+  padding-top: 22px;&#13;
+&#13;
+  border-top: 1px solid #e8edf5;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  justify-content: flex-end;&#13;
+&#13;
+  gap: 12px;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================= */&#13;
+/* BUTTONS */&#13;
+/* ============================= */&#13;
+&#13;
+.btn {&#13;
+&#13;
+  min-width: 130px;&#13;
+&#13;
+  height: 42px;&#13;
+&#13;
+  padding: 0 18px;&#13;
+&#13;
+  border-radius: 8px;&#13;
+&#13;
+  font-size: 13px;&#13;
+&#13;
+  font-weight: 600;&#13;
+&#13;
+  cursor: pointer;&#13;
+&#13;
+  transition: 0.2s;&#13;
+}&#13;
+&#13;
+&#13;
+.btn-primary {&#13;
+&#13;
+  background: #5368e8;&#13;
+&#13;
+  color: #fff;&#13;
+&#13;
+  border: 1px solid #5368e8;&#13;
+}&#13;
+&#13;
+&#13;
+.btn-primary:hover {&#13;
+&#13;
+  background: #4056d5;&#13;
+}&#13;
+&#13;
+&#13;
+.btn-secondary {&#13;
+&#13;
+  background: #fff;&#13;
+&#13;
+  color: #5368e8;&#13;
+&#13;
+  border: 1px solid #ccd5e5;&#13;
+}&#13;
+&#13;
+&#13;
+.btn-secondary:hover {&#13;
+&#13;
+  background: #f5f7ff;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================= */&#13;
+/* ERROR */&#13;
+/* ============================= */&#13;
+&#13;
+.error-message {&#13;
+&#13;
+  margin-top: 20px;&#13;
+&#13;
+  padding: 12px 15px;&#13;
+&#13;
+  border-radius: 8px;&#13;
+&#13;
+  background: #fff1f1;&#13;
+&#13;
+  border: 1px solid #ffd1d1;&#13;
+&#13;
+  color: #c63f3f;&#13;
+&#13;
+  font-size: 13px;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================= */&#13;
+/* SUCCESS */&#13;
+/* ============================= */&#13;
+&#13;
+.success-message {&#13;
+&#13;
+  margin-top: 20px;&#13;
+&#13;
+  padding: 12px 15px;&#13;
+&#13;
+  border-radius: 8px;&#13;
+&#13;
+  background: #effaf3;&#13;
+&#13;
+  border: 1px solid #c9ecd5;&#13;
+&#13;
+  color: #25804a;&#13;
+&#13;
+  font-size: 13px;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================= */&#13;
+/* MOBILE */&#13;
+/* ============================= */&#13;
+&#13;
+@media (max-width: 768px) {&#13;
+&#13;
+  .page-header {&#13;
+&#13;
+    flex-direction: column;&#13;
+&#13;
+    align-items: flex-start;&#13;
+&#13;
+    gap: 20px;&#13;
+  }&#13;
+&#13;
+&#13;
+  .form-grid {&#13;
+&#13;
+    grid-template-columns: 1fr;&#13;
+  }&#13;
+&#13;
+&#13;
+  .form-group.full-width {&#13;
+&#13;
+    grid-column: auto;&#13;
+  }&#13;
+&#13;
+&#13;
+  .form-actions {&#13;
+&#13;
+    flex-direction: column;&#13;
+  }&#13;
+&#13;
+&#13;
+  .btn {&#13;
+&#13;
+    width: 100%;&#13;
+  }&#13;
+&#13;
+}</css>
+        <data_table>sp_instance</data_table>
+        <demo_data/>
+        <description/>
+        <docs/>
+        <field_list/>
+        <has_preview>false</has_preview>
+        <id>recruiter_schedule_interview</id>
+        <internal>false</internal>
+        <link><![CDATA[function link(scope, element, attrs, controller) {
+  
+}]]></link>
+        <name>Recruiter Schedule Interview</name>
+        <option_schema/>
+        <public>false</public>
+        <roles/>
+        <script><![CDATA[(function() {
+
+    /*
+     * =========================================
+     * INITIAL DATA
+     * =========================================
+     */
+
+    data.students = [];
+    data.opportunities = [];
+
+    data.interview = null;
+
+    data.success = false;
+    data.error = "";
+
+
+    /*
+     * =========================================
+     * GET EXISTING INTERVIEW ID
+     * =========================================
+     *
+     * URL example:
+     *
+     * ?id=campus360_recruiter_schedule
+     * &interview_sys_id=xxxxxxxx
+     *
+     */
+
+    var interviewSysId =
+        $sp.getParameter("interview_sys_id");
+
+
+    /*
+     * =========================================
+     * LOAD STUDENTS
+     * =========================================
+     */
+
+    var studentGR = new GlideRecord(
+        "x_snc_campus360_student_master"
+    );
+
+    studentGR.orderBy("student_name");
+
+    studentGR.query();
+
+    while (studentGR.next()) {
+
+        data.students.push({
+
+            sys_id:
+                studentGR.getUniqueValue(),
+
+            name:
+                studentGR.getValue("student_name")
+
+        });
+
+    }
+
+
+    /*
+     * =========================================
+     * LOAD OPPORTUNITIES
+     * =========================================
+     */
+
+    var opportunityGR = new GlideRecord(
+        "x_snc_campus360_placement_opportunity"
+    );
+
+    opportunityGR.orderBy("opportunity_title");
+
+    opportunityGR.query();
+
+    while (opportunityGR.next()) {
+
+        data.opportunities.push({
+
+            sys_id:
+                opportunityGR.getUniqueValue(),
+
+            label:
+                opportunityGR.getValue("opportunity_id") +
+                " - " +
+                opportunityGR.getValue("opportunity_title")
+
+        });
+
+    }
+
+
+    /*
+     * =========================================
+     * LOAD EXISTING INTERVIEW
+     * =========================================
+     *
+     * If interview_sys_id exists,
+     * DO NOT create a new record.
+     *
+     * Load the existing record instead.
+     */
+
+    if (interviewSysId) {
+
+        var existingInterview =
+            new GlideRecord(
+                "x_snc_campus360_recruiter_interview"
+            );
+
+
+        if (existingInterview.get(interviewSysId)) {
+
+            data.interview = {
+
+                sys_id:
+                    existingInterview.getUniqueValue(),
+
+                student:
+                    existingInterview.getValue("student"),
+
+                student_display:
+                    existingInterview.getDisplayValue("student"),
+
+                opportunity:
+                    existingInterview.getValue("opportunity"),
+
+                opportunity_display:
+                    existingInterview.getDisplayValue("opportunity"),
+
+                round:
+                    existingInterview.getValue(
+                        "interview_round"
+                    ),
+
+                round_display:
+                    existingInterview.getDisplayValue(
+                        "interview_round"
+                    ),
+
+                mode:
+                    existingInterview.getValue(
+                        "interview_mode"
+                    ),
+
+                mode_display:
+                    existingInterview.getDisplayValue(
+                        "interview_mode"
+                    ),
+
+                interviewer:
+                    existingInterview.getValue(
+                        "interviewer"
+                    ),
+
+                meeting_link:
+                    existingInterview.getValue(
+                        "meeting_link"
+                    ),
+
+                /*
+                 * Display value is used because
+                 * datetime-local needs:
+                 *
+                 * YYYY-MM-DDTHH:mm
+                 */
+
+                date:
+                    existingInterview
+                        .getDisplayValue("interview_date")
+                        .replace(" ", "T")
+                        .substring(0, 16)
+
+            };
+
+        } else {
+
+            data.error =
+                "Interview record was not found.";
+
+        }
+
+    }
+
+
+    /*
+     * =========================================
+     * SCHEDULE / UPDATE INTERVIEW
+     * =========================================
+     */
+
+    if (input && input.action == "schedule") {
+
+        var form = input.form;
+
+        /*
+         * Validate
+         */
+
+        if (!form ||
+            !form.student ||
+            !form.opportunity ||
+            !form.round ||
+            !form.mode ||
+            !form.date ||
+            !form.interviewer) {
+
+            data.success = false;
+
+            data.error =
+                "Please fill all required fields.";
+
+            return;
+        }
+
+
+        /*
+         * =========================================
+         * DETERMINE INSERT OR UPDATE
+         * =========================================
+         */
+
+        var interview =
+            new GlideRecord(
+                "x_snc_campus360_recruiter_interview"
+            );
+
+
+        /*
+         * Existing interview
+         *
+         * UPDATE
+         */
+
+        if (form.interview_sys_id) {
+
+            if (!interview.get(form.interview_sys_id)) {
+
+                data.success = false;
+
+                data.error =
+                    "Existing interview could not be found.";
+
+                return;
+            }
+
+        }
+
+        /*
+         * New interview
+         *
+         * INSERT
+         */
+
+        else {
+
+            interview.initialize();
+
+        }
+
+
+        /*
+         * =========================================
+         * SET CANDIDATE
+         * =========================================
+         */
+
+        interview.setValue(
+            "student",
+            form.student
+        );
+
+
+        /*
+         * =========================================
+         * SET OPPORTUNITY
+         * =========================================
+         */
+
+        interview.setValue(
+            "opportunity",
+            form.opportunity
+        );
+
+
+        /*
+         * =========================================
+         * SET ROUND
+         * =========================================
+         */
+
+        interview.setValue(
+            "interview_round",
+            form.round
+        );
+
+
+        /*
+         * =========================================
+         * SET MODE
+         * =========================================
+         */
+
+        interview.setValue(
+            "interview_mode",
+            form.mode
+        );
+
+
+        /*
+         * =========================================
+         * SET DATE
+         * =========================================
+         */
+
+        interview.setValue(
+            "interview_date",
+            form.date
+        );
+
+
+        /*
+         * =========================================
+         * SET INTERVIEWER
+         * =========================================
+         */
+
+        interview.setValue(
+            "interviewer",
+            form.interviewer
+        );
+
+
+        /*
+         * =========================================
+         * SET MEETING LINK
+         * =========================================
+         */
+
+        interview.setValue(
+            "meeting_link",
+            form.meeting_link || ""
+        );
+
+
+        /*
+         * =========================================
+         * STATUS
+         * =========================================
+         */
+
+        interview.setValue(
+            "status",
+            "Scheduled"
+        );
+
+
+        /*
+         * =========================================
+         * RESULT
+         * =========================================
+         */
+
+        interview.setValue(
+            "result",
+            "Pending"
+        );
+
+
+        /*
+         * =========================================
+         * INTERVIEW ID
+         * =========================================
+         *
+         * Generate only for NEW records.
+         */
+
+        if (!form.interview_sys_id) {
+
+            interview.setValue(
+                "interview_id",
+                "INT" +
+                new GlideDateTime()
+                    .getNumericValue()
+            );
+
+        }
+
+
+        /*
+         * =========================================
+         * SAVE
+         * =========================================
+         */
+
+        var savedSysId;
+
+
+        if (form.interview_sys_id) {
+
+            /*
+             * UPDATE EXISTING RECORD
+             */
+
+            savedSysId =
+                interview.update();
+
+        } else {
+
+            /*
+             * INSERT NEW RECORD
+             */
+
+            savedSysId =
+                interview.insert();
+
+        }
+
+
+        /*
+         * =========================================
+         * RESPONSE
+         * =========================================
+         */
+
+        if (savedSysId) {
+
+            data.success = true;
+
+            data.interview_sys_id =
+                savedSysId;
+
+        } else {
+
+            data.success = false;
+
+            data.error =
+                "Interview could not be saved.";
+
+        }
+
+    }
+
+})();]]></script>
+        <servicenow>false</servicenow>
+        <sys_class_name>sp_widget</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-23 20:12:17</sys_created_on>
+        <sys_id>9da0054dc46f43107f44164a4d2463f9</sys_id>
+        <sys_mod_count>2</sys_mod_count>
+        <sys_name>Recruiter Schedule Interview</sys_name>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name>sp_widget_9da0054dc46f43107f44164a4d2463f9</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-27 15:20:52</sys_updated_on>
+        <template><![CDATA[<div class="schedule-page">
+
+  <!-- ============================= -->
+  <!-- PAGE HEADER -->
+  <!-- ============================= -->
+
+  <div class="page-header">
+
+    <div>
+      <span class="eyebrow">RECRUITMENT</span>
+
+      <h1>Schedule Interview</h1>
+
+      <p>
+        Schedule an interview for a shortlisted candidate.
+      </p>
+    </div>
+
+    <button
+      type="button"
+      class="btn btn-secondary"
+      ng-click="c.goBack()">
+
+      ← Back to Dashboard
+
+    </button>
+
+  </div>
+
+
+  <!-- ============================= -->
+  <!-- FORM CARD -->
+  <!-- ============================= -->
+
+  <div class="form-card">
+
+    <div class="form-title">
+
+      <h2>Interview Details</h2>
+
+      <p>
+        Enter the details for the interview.
+      </p>
+
+    </div>
+
+
+    <div class="form-grid">
+
+
+      <!-- ============================= -->
+      <!-- CANDIDATE -->
+      <!-- ============================= -->
+
+      <div class="form-group">
+
+        <label>
+          Candidate <span>*</span>
+        </label>
+
+        <select
+          ng-model="c.form.student"
+          ng-options="s.sys_id as s.name for s in c.data.students"
+          ng-disabled="c.existingInterview">
+
+          <option value="">
+            Select Candidate
+          </option>
+
+        </select>
+
+      </div>
+
+
+      <!-- ============================= -->
+      <!-- OPPORTUNITY -->
+      <!-- ============================= -->
+
+      <div class="form-group">
+
+        <label>
+          Opportunity <span>*</span>
+        </label>
+
+        <select
+          ng-model="c.form.opportunity"
+          ng-options="o.sys_id as o.label for o in c.data.opportunities"
+          ng-disabled="c.existingInterview">
+
+          <option value="">
+            Select Opportunity
+          </option>
+
+        </select>
+
+      </div>
+
+
+      <!-- ============================= -->
+      <!-- INTERVIEW ROUND -->
+      <!-- ============================= -->
+
+      <div class="form-group">
+
+        <label>
+          Interview Round <span>*</span>
+        </label>
+
+        <select
+          ng-model="c.form.round"
+          ng-disabled="c.existingInterview">
+
+          <option value="">
+            Select Round
+          </option>
+
+          <option value="Technical Round">
+            Technical Round
+          </option>
+
+          <option value="HR Round">
+            HR Round
+          </option>
+
+          <option value="Managerial Round">
+            Managerial Round
+          </option>
+
+          <option value="Final Round">
+            Final Round
+          </option>
+
+        </select>
+
+      </div>
+
+
+      <!-- ============================= -->
+      <!-- INTERVIEW MODE -->
+      <!-- ============================= -->
+
+      <div class="form-group">
+
+        <label>
+          Interview Mode <span>*</span>
+        </label>
+
+        <select
+          ng-model="c.form.mode">
+
+          <option value="">
+            Select Mode
+          </option>
+
+          <option value="Online">
+            Online
+          </option>
+
+          <option value="Offline">
+            Offline
+          </option>
+
+          <option value="Hybrid">
+            Hybrid
+          </option>
+
+        </select>
+
+      </div>
+
+
+      <!-- ============================= -->
+      <!-- DATE -->
+      <!-- ============================= -->
+
+      <div class="form-group">
+
+        <label>
+          Interview Date & Time <span>*</span>
+        </label>
+
+        <input
+          type="datetime-local"
+          ng-model="c.form.date">
+
+      </div>
+
+
+      <!-- ============================= -->
+      <!-- INTERVIEWER -->
+      <!-- ============================= -->
+
+      <div class="form-group">
+
+        <label>
+          Interviewer <span>*</span>
+        </label>
+
+        <input
+          type="text"
+          ng-model="c.form.interviewer"
+          placeholder="Enter interviewer name">
+
+      </div>
+
+
+      <!-- ============================= -->
+      <!-- MEETING LINK -->
+      <!-- ============================= -->
+
+      <div class="form-group full-width">
+
+        <label>
+          Meeting Link
+        </label>
+
+        <input
+          type="text"
+          ng-model="c.form.meeting_link"
+          placeholder="https://meet.google.com/...">
+
+      </div>
+
+
+    </div>
+
+
+    <!-- ============================= -->
+    <!-- ERROR -->
+    <!-- ============================= -->
+
+    <div
+      class="error-message"
+      ng-if="c.error">
+
+      {{c.error}}
+
+    </div>
+
+
+    <!-- ============================= -->
+    <!-- SUCCESS -->
+    <!-- ============================= -->
+
+    <div
+      class="success-message"
+      ng-if="c.success">
+
+      {{c.success}}
+
+    </div>
+
+
+    <!-- ============================= -->
+    <!-- ACTIONS -->
+    <!-- ============================= -->
+
+    <div class="form-actions">
+
+      <button
+        type="button"
+        class="btn btn-secondary"
+        ng-click="c.goBack()">
+
+        Cancel
+
+      </button>
+
+
+      <button
+        type="button"
+        class="btn btn-primary"
+        ng-click="c.schedule()"
+        ng-disabled="c.saving">
+
+        {{c.saving ? 'Scheduling...' : 'Schedule Interview'}}
+
+      </button>
+
+    </div>
+
+  </div>
+
+</div>]]></template>
+    </sp_widget>
+</record_update>

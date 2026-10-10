@@ -1,0 +1,7709 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_widget">
+    <sp_widget action="INSERT_OR_UPDATE">
+        <category>custom</category>
+        <client_script><![CDATA[api.controller = function($scope, $timeout) {
+
+    var c = this;
+
+
+    /* ============================================================
+       INITIAL STATE
+       ============================================================ */
+
+    c.search = '';
+    c.statusFilter = 'all';
+    c.typeFilter = 'all';
+
+    c.filteredOpportunities = [];
+    c.selectedOpportunity = null;
+
+
+    /* ============================================================
+       CURRENT TRAINER
+       ============================================================ */
+
+    c.getCurrentTrainerId = function() {
+
+        var params =
+            new URLSearchParams(
+                window.location.search
+            );
+
+        return (
+            params.get('trainer') ||
+            ''
+        );
+
+    };
+
+
+    c.currentTrainerId =
+        c.getCurrentTrainerId();
+
+
+    /* ============================================================
+       FILTER OPPORTUNITIES
+       ============================================================ */
+
+    c.applyFilters = function() {
+
+        if (
+            !c.data ||
+            !c.data.opportunities
+        ) {
+
+            c.filteredOpportunities = [];
+
+            return;
+
+        }
+
+
+        var search =
+            (c.search || '')
+                .toLowerCase()
+                .trim();
+
+
+        c.filteredOpportunities =
+            c.data.opportunities.filter(
+                function(opportunity) {
+
+                    var matchesSearch =
+                        !search ||
+                        (
+                            (opportunity.title || '')
+                                .toLowerCase()
+                                .indexOf(search) !== -1
+                        ) ||
+                        (
+                            (opportunity.opportunity_id || '')
+                                .toLowerCase()
+                                .indexOf(search) !== -1
+                        ) ||
+                        (
+                            (opportunity.company_name || '')
+                                .toLowerCase()
+                                .indexOf(search) !== -1
+                        ) ||
+                        (
+                            (opportunity.location || '')
+                                .toLowerCase()
+                                .indexOf(search) !== -1
+                        ) ||
+                        (
+                            (opportunity.required_skills || '')
+                                .toLowerCase()
+                                .indexOf(search) !== -1
+                        );
+
+
+                    var matchesStatus =
+                        c.statusFilter === 'all' ||
+                        (
+                            (opportunity.status || '')
+                                .toLowerCase() ===
+                            c.statusFilter.toLowerCase()
+                        );
+
+
+                    var matchesType =
+                        c.typeFilter === 'all' ||
+                        (
+                            (opportunity.opportunity_type || '')
+                                .toLowerCase() ===
+                            c.typeFilter.toLowerCase()
+                        );
+
+
+                    return (
+                        matchesSearch &&
+                        matchesStatus &&
+                        matchesType
+                    );
+
+                }
+            );
+
+    };
+
+
+    /* ============================================================
+       SEARCH WATCHERS
+       ============================================================ */
+
+    $scope.$watch(
+        'c.search',
+        function() {
+
+            c.applyFilters();
+
+        }
+    );
+
+
+    $scope.$watch(
+        'c.statusFilter',
+        function() {
+
+            c.applyFilters();
+
+        }
+    );
+
+
+    $scope.$watch(
+        'c.typeFilter',
+        function() {
+
+            c.applyFilters();
+
+        }
+    );
+
+
+    /* ============================================================
+       CLEAR SEARCH
+       ============================================================ */
+
+    c.clearSearch = function() {
+
+        c.search = '';
+        c.statusFilter = 'all';
+        c.typeFilter = 'all';
+
+        c.applyFilters();
+
+    };
+
+
+    /* ============================================================
+       OPEN OPPORTUNITY
+       ============================================================ */
+
+    c.openOpportunity = function(
+        opportunity
+    ) {
+
+        if (!opportunity) {
+            return;
+        }
+
+
+        c.selectedOpportunity =
+            opportunity;
+
+
+        $timeout(
+            function() {
+
+                var element =
+                    document.querySelector(
+                        '.c360-details-panel'
+                    );
+
+
+                if (element) {
+
+                    element.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+
+                }
+
+            },
+            80
+        );
+
+    };
+
+
+    /* ============================================================
+       CLOSE OPPORTUNITY
+       ============================================================ */
+
+    c.closeOpportunity = function() {
+
+        c.selectedOpportunity = null;
+
+    };
+
+
+    /* ============================================================
+       REFRESH
+       ============================================================ */
+
+    c.refresh = function() {
+
+        c.selectedOpportunity = null;
+
+        c.server.update().then(
+            function() {
+
+                c.applyFilters();
+
+            }
+        );
+
+    };
+
+
+    /* ============================================================
+       ESCAPE KEY
+       ============================================================ */
+
+    c.onKeyDown = function(
+        event
+    ) {
+
+        if (
+            event &&
+            event.keyCode === 27
+        ) {
+
+            if (
+                c.selectedOpportunity
+            ) {
+
+                c.closeOpportunity();
+
+            }
+
+        }
+
+    };
+
+
+    /* ============================================================
+       CLEANUP
+       ============================================================ */
+
+    c.$onDestroy = function() {
+
+        c.selectedOpportunity = null;
+
+    };
+
+
+    /* ============================================================
+       INITIAL FILTER
+       ============================================================ */
+
+    $timeout(
+        function() {
+
+            c.applyFilters();
+
+        },
+        100
+    );
+
+};]]></client_script>
+        <controller_as>c</controller_as>
+        <css>/* ========================================================= &#13;
+   CAMPUS360 TRAINER &#13;
+   OPPORTUNITIES &amp; ROOMS &#13;
+   DASHBOARD-STYLE SHELL &#13;
+   FULL SCREEN 100% PC VIEW &#13;
+   DARK PURPLE SIDE NAVBAR - STUDENT PAGE STYLE&#13;
+   ========================================================= */ &#13;
+ &#13;
+ &#13;
+/* ========================================================= &#13;
+   RESET &#13;
+   ========================================================= */ &#13;
+ &#13;
+html, &#13;
+body { &#13;
+ &#13;
+  width:100% !important; &#13;
+  height:100% !important; &#13;
+ &#13;
+  min-width:100% !important; &#13;
+  min-height:100% !important; &#13;
+ &#13;
+  margin:0 !important; &#13;
+  padding:0 !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+body { &#13;
+ &#13;
+  overflow-x:hidden !important; &#13;
+ &#13;
+  background:#f2f6fa !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+/* ========================================================= &#13;
+   SERVICENOW CONTAINER RESET &#13;
+   ========================================================= */ &#13;
+ &#13;
+.container:has(.campus360-opportunities-app), &#13;
+.container-fluid:has(.campus360-opportunities-app), &#13;
+.row:has(.campus360-opportunities-app), &#13;
+[class*="col-"]:has(.campus360-opportunities-app), &#13;
+.well:has(.campus360-opportunities-app), &#13;
+.panel:has(.campus360-opportunities-app) { &#13;
+ &#13;
+  width:100% !important; &#13;
+ &#13;
+  max-width:none !important; &#13;
+ &#13;
+  min-width:0 !important; &#13;
+ &#13;
+  margin:0 !important; &#13;
+ &#13;
+  padding:0 !important; &#13;
+ &#13;
+  border:0 !important; &#13;
+ &#13;
+  background:transparent !important; &#13;
+ &#13;
+  box-shadow:none !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+/* ========================================================= &#13;
+   COMPLETE CAMPUS360 APPLICATION &#13;
+   ========================================================= */ &#13;
+ &#13;
+.campus360-opportunities-app { &#13;
+ &#13;
+  position:fixed !important; &#13;
+ &#13;
+  top:0 !important; &#13;
+  left:0 !important; &#13;
+  right:0 !important; &#13;
+  bottom:0 !important; &#13;
+ &#13;
+  width:100vw !important; &#13;
+ &#13;
+  height:100vh !important; &#13;
+ &#13;
+  min-width:100vw !important; &#13;
+  min-height:100vh !important; &#13;
+ &#13;
+  max-width:100vw !important; &#13;
+  max-height:100vh !important; &#13;
+ &#13;
+  margin:0 !important; &#13;
+ &#13;
+  padding:0 !important; &#13;
+ &#13;
+  z-index:2147483647 !important; &#13;
+ &#13;
+  display:flex !important; &#13;
+ &#13;
+  flex-direction:row !important; &#13;
+ &#13;
+  overflow:hidden !important; &#13;
+ &#13;
+  isolation:isolate; &#13;
+ &#13;
+  background: &#13;
+ &#13;
+    radial-gradient( &#13;
+      circle at 8% 8%, &#13;
+      rgba(238,230,255,.55), &#13;
+      transparent 25% &#13;
+    ), &#13;
+ &#13;
+    radial-gradient( &#13;
+      circle at 96% 9%, &#13;
+      rgba(227,245,255,.58), &#13;
+      transparent 26% &#13;
+    ), &#13;
+ &#13;
+    linear-gradient( &#13;
+      135deg, &#13;
+      #f6f8fc 0%, &#13;
+      #f3f7fb 52%, &#13;
+      #f9f6ff 100% &#13;
+    ); &#13;
+ &#13;
+  color:#263a52; &#13;
+ &#13;
+  font-family: &#13;
+    "Segoe UI", &#13;
+    "Inter", &#13;
+    Arial, &#13;
+    sans-serif; &#13;
+ &#13;
+  -webkit-font-smoothing:antialiased; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.campus360-opportunities-app, &#13;
+.campus360-opportunities-app *, &#13;
+.campus360-opportunities-app *::before, &#13;
+.campus360-opportunities-app *::after { &#13;
+ &#13;
+  box-sizing:border-box; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+/* ========================================================= &#13;
+   SIDEBAR &#13;
+   DARK PURPLE - SAME STYLE AS STUDENT PAGES&#13;
+   ========================================================= */ &#13;
+ &#13;
+.campus360-opportunities-app &#13;
+.campus360-trainer-sidebar { &#13;
+ &#13;
+  position:relative !important; &#13;
+ &#13;
+  top:0 !important; &#13;
+  left:0 !important; &#13;
+ &#13;
+  width:280px !important; &#13;
+ &#13;
+  min-width:280px !important; &#13;
+ &#13;
+  max-width:280px !important; &#13;
+ &#13;
+  height:100vh !important; &#13;
+ &#13;
+  min-height:100vh !important; &#13;
+ &#13;
+  max-height:100vh !important; &#13;
+ &#13;
+  flex:0 0 280px !important; &#13;
+ &#13;
+  display:flex; &#13;
+ &#13;
+  flex-direction:column; &#13;
+ &#13;
+  overflow:hidden; &#13;
+ &#13;
+  background: &#13;
+    linear-gradient( &#13;
+      180deg, &#13;
+      #130d2f 0%, &#13;
+      #160d38 48%, &#13;
+      #100a29 100% &#13;
+    ) !important; &#13;
+ &#13;
+  border-right:1px solid #2d2157 !important; &#13;
+ &#13;
+  box-shadow: &#13;
+    5px &#13;
+    0 &#13;
+    18px &#13;
+    rgba(10,7,30,.18); &#13;
+ &#13;
+  z-index:100; &#13;
+ &#13;
+  transition: &#13;
+    width .25s ease, &#13;
+    min-width .25s ease, &#13;
+    max-width .25s ease, &#13;
+    flex-basis .25s ease; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+/* ========================================================= &#13;
+   COLLAPSED SIDEBAR &#13;
+   ========================================================= */ &#13;
+ &#13;
+.campus360-opportunities-app.sidebar-collapsed &#13;
+.campus360-trainer-sidebar { &#13;
+ &#13;
+  width:0 !important; &#13;
+ &#13;
+  min-width:0 !important; &#13;
+ &#13;
+  max-width:0 !important; &#13;
+ &#13;
+  flex-basis:0 !important; &#13;
+ &#13;
+  border-right:0 !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+/* ========================================================= &#13;
+   BRAND&#13;
+   DARK PURPLE&#13;
+   ========================================================= */ &#13;
+ &#13;
+.campus360-opportunities-app &#13;
+.trainer-brand { &#13;
+ &#13;
+  width:100%; &#13;
+ &#13;
+  height:98px; &#13;
+ &#13;
+  min-height:98px; &#13;
+ &#13;
+  padding: &#13;
+    0 &#13;
+    17px; &#13;
+ &#13;
+  display:flex; &#13;
+ &#13;
+  align-items:center; &#13;
+ &#13;
+  gap:13px; &#13;
+ &#13;
+  flex-shrink:0; &#13;
+ &#13;
+  background: &#13;
+    linear-gradient( &#13;
+      135deg, &#13;
+      #170e38, &#13;
+      #1c1045 &#13;
+    ) !important; &#13;
+ &#13;
+  border-bottom:1px solid #2d2157 !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.campus360-opportunities-app &#13;
+.trainer-brand-mark { &#13;
+ &#13;
+  width:50px; &#13;
+ &#13;
+  height:50px; &#13;
+ &#13;
+  min-width:50px; &#13;
+ &#13;
+  display:flex; &#13;
+ &#13;
+  align-items:center; &#13;
+ &#13;
+  justify-content:center; &#13;
+ &#13;
+  border-radius:14px; &#13;
+ &#13;
+  background: &#13;
+    linear-gradient( &#13;
+      135deg, &#13;
+      #7c3aed, &#13;
+      #8b3ff2 &#13;
+    ) !important; &#13;
+ &#13;
+  color:#ffffff; &#13;
+ &#13;
+  font-size:23px; &#13;
+ &#13;
+  box-shadow: &#13;
+    0 &#13;
+    8px &#13;
+    18px &#13;
+    rgba(124,58,237,.28); &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.campus360-opportunities-app &#13;
+.trainer-brand-text { &#13;
+ &#13;
+  min-width:0; &#13;
+ &#13;
+  display:flex; &#13;
+ &#13;
+  flex-direction:column; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.campus360-opportunities-app &#13;
+.trainer-brand-text strong { &#13;
+ &#13;
+  display:block; &#13;
+ &#13;
+  color:#ffffff !important; &#13;
+ &#13;
+  font-size:21px; &#13;
+ &#13;
+  line-height:1; &#13;
+ &#13;
+  font-weight:900; &#13;
+ &#13;
+  letter-spacing:-.3px; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.campus360-opportunities-app &#13;
+.trainer-brand-text span { &#13;
+ &#13;
+  display:block; &#13;
+ &#13;
+  margin-top:5px; &#13;
+ &#13;
+  color:#b9abd8 !important; &#13;
+ &#13;
+  font-size:10px; &#13;
+ &#13;
+  line-height:1; &#13;
+ &#13;
+  font-weight:900; &#13;
+ &#13;
+  letter-spacing:1.25px; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+/* ========================================================= &#13;
+   TRAINER PROFILE&#13;
+   DARK PURPLE&#13;
+   ========================================================= */ &#13;
+ &#13;
+.campus360-opportunities-app &#13;
+.trainer-profile-mini { &#13;
+ &#13;
+  margin: &#13;
+    18px &#13;
+    10px &#13;
+    15px; &#13;
+ &#13;
+  min-height:74px; &#13;
+ &#13;
+  padding:11px; &#13;
+ &#13;
+  display:flex; &#13;
+ &#13;
+  align-items:center; &#13;
+ &#13;
+  gap:10px; &#13;
+ &#13;
+  flex-shrink:0; &#13;
+ &#13;
+  background: &#13;
+    linear-gradient( &#13;
+      135deg, &#13;
+      #211342, &#13;
+      #29164f &#13;
+    ) !important; &#13;
+ &#13;
+  border:1px solid #4b3475 !important; &#13;
+ &#13;
+  border-radius:13px; &#13;
+ &#13;
+  text-decoration:none !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.campus360-opportunities-app &#13;
+.trainer-profile-mini:hover { &#13;
+ &#13;
+  background: &#13;
+    linear-gradient( &#13;
+      135deg, &#13;
+      #29174f, &#13;
+      #321d5d &#13;
+    ) !important; &#13;
+ &#13;
+  border-color:#60458e !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.campus360-opportunities-app &#13;
+.trainer-avatar { &#13;
+ &#13;
+  width:46px; &#13;
+ &#13;
+  height:46px; &#13;
+ &#13;
+  min-width:46px; &#13;
+ &#13;
+  display:flex; &#13;
+ &#13;
+  align-items:center; &#13;
+ &#13;
+  justify-content:center; &#13;
+ &#13;
+  border-radius:12px; &#13;
+ &#13;
+  background: &#13;
+    linear-gradient( &#13;
+      135deg, &#13;
+      #7c3aed, &#13;
+      #8b3ff2 &#13;
+    ) !important; &#13;
+ &#13;
+  color:#ffffff !important; &#13;
+ &#13;
+  font-size:13px; &#13;
+ &#13;
+  font-weight:900; &#13;
+ &#13;
+  box-shadow: &#13;
+    0 &#13;
+    5px &#13;
+    14px &#13;
+    rgba(124,58,237,.20); &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.campus360-opportunities-app &#13;
+.trainer-profile-info { &#13;
+ &#13;
+  flex:1; &#13;
+ &#13;
+  min-width:0; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.campus360-opportunities-app &#13;
+.trainer-profile-info strong { &#13;
+ &#13;
+  display:block; &#13;
+ &#13;
+  overflow:hidden; &#13;
+ &#13;
+  color:#ffffff !important; &#13;
+ &#13;
+  font-size:13px; &#13;
+ &#13;
+  line-height:1.2; &#13;
+ &#13;
+  font-weight:850; &#13;
+ &#13;
+  white-space:nowrap; &#13;
+ &#13;
+  text-overflow:ellipsis; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.campus360-opportunities-app &#13;
+.trainer-profile-info span { &#13;
+ &#13;
+  display:block; &#13;
+ &#13;
+  margin-top:4px; &#13;
+ &#13;
+  color:#b9abd8 !important; &#13;
+ &#13;
+  font-size:9px; &#13;
+ &#13;
+  font-weight:800; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.campus360-opportunities-app &#13;
+.trainer-profile-arrow { &#13;
+ &#13;
+  color:#a99bc7 !important; &#13;
+ &#13;
+  font-size:19px; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+/* ========================================================= &#13;
+   SIDEBAR NAVIGATION&#13;
+   DARK PURPLE - STUDENT PAGE STYLE&#13;
+   ========================================================= */ &#13;
+ &#13;
+.campus360-opportunities-app &#13;
+.trainer-nav { &#13;
+ &#13;
+  flex:1; &#13;
+ &#13;
+  min-height:0; &#13;
+ &#13;
+  overflow-x:hidden; &#13;
+ &#13;
+  overflow-y:auto; &#13;
+ &#13;
+  padding: &#13;
+    0 &#13;
+    6px &#13;
+    20px; &#13;
+ &#13;
+  scrollbar-width:none !important; &#13;
+ &#13;
+  -ms-overflow-style:none !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.campus360-opportunities-app &#13;
+.trainer-nav::-webkit-scrollbar { &#13;
+ &#13;
+  width:0 !important; &#13;
+ &#13;
+  height:0 !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.campus360-opportunities-app &#13;
+.trainer-nav::-webkit-scrollbar-track { &#13;
+ &#13;
+  background:transparent !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.campus360-opportunities-app &#13;
+.trainer-nav::-webkit-scrollbar-thumb { &#13;
+ &#13;
+  background:transparent !important; &#13;
+ &#13;
+  border-radius:10px; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.campus360-opportunities-app &#13;
+.trainer-nav-label { &#13;
+ &#13;
+  margin: &#13;
+    18px &#13;
+    7px &#13;
+    8px; &#13;
+ &#13;
+  color:#9283b6 !important; &#13;
+ &#13;
+  font-size:10px; &#13;
+ &#13;
+  line-height:1; &#13;
+ &#13;
+  font-weight:900; &#13;
+ &#13;
+  letter-spacing:1.15px; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.campus360-opportunities-app &#13;
+.trainer-nav-item { &#13;
+ &#13;
+  position:relative; &#13;
+ &#13;
+  width:100%; &#13;
+ &#13;
+  min-height:48px; &#13;
+ &#13;
+  margin: &#13;
+    2px &#13;
+    0; &#13;
+ &#13;
+  padding: &#13;
+    0 &#13;
+    11px; &#13;
+ &#13;
+  display:flex; &#13;
+ &#13;
+  align-items:center; &#13;
+ &#13;
+  gap:11px; &#13;
+ &#13;
+  border-radius:10px; &#13;
+ &#13;
+  color:#c4b8dc !important; &#13;
+ &#13;
+  background:transparent !important; &#13;
+ &#13;
+  text-decoration:none !important; &#13;
+ &#13;
+  font-size:13px; &#13;
+ &#13;
+  line-height:1.25; &#13;
+ &#13;
+  font-weight:850; &#13;
+ &#13;
+  transition: &#13;
+    background .18s ease, &#13;
+    color .18s ease, &#13;
+    transform .18s ease; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.campus360-opportunities-app &#13;
+.trainer-nav-item:hover { &#13;
+ &#13;
+  color:#ffffff !important; &#13;
+ &#13;
+  background:rgba(124,58,237,.18) !important; &#13;
+ &#13;
+  transform:translateX(1px); &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.campus360-opportunities-app &#13;
+.trainer-nav-item.active { &#13;
+ &#13;
+  color:#ffffff !important; &#13;
+ &#13;
+  background: &#13;
+    linear-gradient( &#13;
+      90deg, &#13;
+      #7c3aed 0%, &#13;
+      #8b3ff2 100% &#13;
+    ) !important; &#13;
+ &#13;
+  border-left:4px solid #a78bfa !important; &#13;
+ &#13;
+  padding-left:7px; &#13;
+ &#13;
+  box-shadow: &#13;
+    inset &#13;
+    0 &#13;
+    0 &#13;
+    0 &#13;
+    1px &#13;
+    rgba(196,181,253,.10), &#13;
+ &#13;
+    0 &#13;
+    6px &#13;
+    16px &#13;
+    rgba(124,58,237,.18); &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.campus360-opportunities-app &#13;
+.trainer-nav-icon { &#13;
+ &#13;
+  width:28px; &#13;
+ &#13;
+  min-width:28px; &#13;
+ &#13;
+  height:28px; &#13;
+ &#13;
+  display:flex; &#13;
+ &#13;
+  align-items:center; &#13;
+ &#13;
+  justify-content:center; &#13;
+ &#13;
+  color:#a99ac8 !important; &#13;
+ &#13;
+  font-size:18px; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.campus360-opportunities-app &#13;
+.trainer-nav-item:hover &#13;
+.trainer-nav-icon { &#13;
+ &#13;
+  color:#ffffff !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.campus360-opportunities-app &#13;
+.trainer-nav-item.active &#13;
+.trainer-nav-icon { &#13;
+ &#13;
+  color:#ffffff !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.campus360-opportunities-app &#13;
+.trainer-nav-count { &#13;
+ &#13;
+  min-width:23px; &#13;
+ &#13;
+  height:23px; &#13;
+ &#13;
+  margin-left:auto; &#13;
+ &#13;
+  padding:0 6px; &#13;
+ &#13;
+  display:flex; &#13;
+ &#13;
+  align-items:center; &#13;
+ &#13;
+  justify-content:center; &#13;
+ &#13;
+  border-radius:20px; &#13;
+ &#13;
+  background:#3a2764 !important; &#13;
+ &#13;
+  color:#d9ceef !important; &#13;
+ &#13;
+  font-size:9px; &#13;
+ &#13;
+  font-weight:900; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.campus360-opportunities-app &#13;
+.trainer-nav-item.active &#13;
+.trainer-nav-count { &#13;
+ &#13;
+  background:rgba(255,255,255,.18) !important; &#13;
+ &#13;
+  color:#ffffff !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.campus360-opportunities-app &#13;
+.trainer-nav-count.warning { &#13;
+ &#13;
+  background:#5a3511 !important; &#13;
+ &#13;
+  color:#ffd08a !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+/* ========================================================= &#13;
+   MAIN &#13;
+   ========================================================= */ &#13;
+ &#13;
+.campus360-trainer-main { &#13;
+ &#13;
+  width: &#13;
+    calc(100vw - 280px) !important; &#13;
+ &#13;
+  max-width: &#13;
+    calc(100vw - 280px) !important; &#13;
+ &#13;
+  min-width:0 !important; &#13;
+ &#13;
+  height:100vh !important; &#13;
+ &#13;
+  min-height:100vh !important; &#13;
+ &#13;
+  max-height:100vh !important; &#13;
+ &#13;
+  flex:1 1 auto; &#13;
+ &#13;
+  margin:0 !important; &#13;
+ &#13;
+  padding:0 !important; &#13;
+ &#13;
+  overflow-x:hidden !important; &#13;
+ &#13;
+  overflow-y:auto !important; &#13;
+ &#13;
+  background:#f3f6fb; &#13;
+ &#13;
+  transition: &#13;
+    width .25s ease, &#13;
+    max-width .25s ease; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+/* Collapsed */ &#13;
+ &#13;
+.sidebar-collapsed &#13;
+.campus360-trainer-main { &#13;
+ &#13;
+  width:100% !important; &#13;
+ &#13;
+  max-width:100% !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+/* ========================================================= &#13;
+   TOPBAR &#13;
+   WHITE - KEPT UNCHANGED&#13;
+   ========================================================= */ &#13;
+ &#13;
+.trainer-topbar { &#13;
+ &#13;
+  position:sticky; &#13;
+ &#13;
+  top:0; &#13;
+ &#13;
+  z-index:500; &#13;
+ &#13;
+  width:100%; &#13;
+ &#13;
+  height:72px; &#13;
+ &#13;
+  min-height:72px; &#13;
+ &#13;
+  padding: &#13;
+    0 &#13;
+    19px &#13;
+    0 &#13;
+    22px; &#13;
+ &#13;
+  display:flex; &#13;
+ &#13;
+  align-items:center; &#13;
+ &#13;
+  justify-content:space-between; &#13;
+ &#13;
+  gap:18px; &#13;
+ &#13;
+  background: &#13;
+    linear-gradient( &#13;
+      90deg, &#13;
+      #ffffff, &#13;
+      #fbfdff &#13;
+    ); &#13;
+ &#13;
+  border-bottom:1px solid #dce4ec; &#13;
+ &#13;
+  box-shadow: &#13;
+    0 &#13;
+    2px &#13;
+    10px &#13;
+    rgba(23,43,67,.035); &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.trainer-topbar-left { &#13;
+ &#13;
+  min-width:0; &#13;
+ &#13;
+  display:flex; &#13;
+ &#13;
+  align-items:center; &#13;
+ &#13;
+  gap:12px; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.trainer-hamburger { &#13;
+ &#13;
+  width:44px; &#13;
+ &#13;
+  height:44px; &#13;
+ &#13;
+  min-width:44px; &#13;
+ &#13;
+  display:flex; &#13;
+ &#13;
+  align-items:center; &#13;
+ &#13;
+  justify-content:center; &#13;
+ &#13;
+  border:1px solid #d6e0e8; &#13;
+ &#13;
+  border-radius:10px; &#13;
+ &#13;
+  background:#ffffff; &#13;
+ &#13;
+  color:#536a81; &#13;
+ &#13;
+  font-size:18px; &#13;
+ &#13;
+  cursor:pointer; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.trainer-hamburger:hover { &#13;
+ &#13;
+  color:#643fe1; &#13;
+ &#13;
+  background:#f5f1ff; &#13;
+ &#13;
+  border-color:#cec1f4; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+/* ========================================================= &#13;
+   TOP HEADING &#13;
+   ========================================================= */ &#13;
+ &#13;
+.trainer-page-heading { &#13;
+ &#13;
+  min-width:0; &#13;
+ &#13;
+  display:flex; &#13;
+ &#13;
+  flex-direction:column; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.trainer-topbar-eyebrow { &#13;
+ &#13;
+  display:block; &#13;
+ &#13;
+  color:#7244e8; &#13;
+ &#13;
+  font-size:9px; &#13;
+ &#13;
+  line-height:1; &#13;
+ &#13;
+  font-weight:950; &#13;
+ &#13;
+  letter-spacing:1.7px; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.trainer-topbar-title { &#13;
+ &#13;
+  display:block; &#13;
+ &#13;
+  margin-top:4px; &#13;
+ &#13;
+  color:#1a304a; &#13;
+ &#13;
+  font-size:16px; &#13;
+ &#13;
+  line-height:1.1; &#13;
+ &#13;
+  font-weight:900; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+/* ========================================================= &#13;
+   TOP RIGHT &#13;
+   ========================================================= */ &#13;
+ &#13;
+.trainer-topbar-actions { &#13;
+ &#13;
+  display:flex; &#13;
+ &#13;
+  align-items:center; &#13;
+ &#13;
+  gap:9px; &#13;
+ &#13;
+  flex-shrink:0; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.trainer-top-icon { &#13;
+ &#13;
+  position:relative; &#13;
+ &#13;
+  width:42px; &#13;
+ &#13;
+  height:42px; &#13;
+ &#13;
+  min-width:42px; &#13;
+ &#13;
+  display:flex; &#13;
+ &#13;
+  align-items:center; &#13;
+ &#13;
+  justify-content:center; &#13;
+ &#13;
+  border:1px solid #d7e0e8; &#13;
+ &#13;
+  border-radius:10px; &#13;
+ &#13;
+  background:#ffffff; &#13;
+ &#13;
+  color:#5b7187; &#13;
+ &#13;
+  font-size:16px; &#13;
+ &#13;
+  cursor:pointer; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.trainer-top-icon:hover { &#13;
+ &#13;
+  color:#6843df; &#13;
+ &#13;
+  background:#f5f1ff; &#13;
+ &#13;
+  border-color:#cfc2f6; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+/* ========================================================= &#13;
+   NOTIFICATION &#13;
+   ========================================================= */ &#13;
+ &#13;
+.trainer-notification-button { &#13;
+ &#13;
+  overflow:visible; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.trainer-notification-button &#13;
+.fa-bell { &#13;
+ &#13;
+  color:#f4a400; &#13;
+ &#13;
+  font-size:17px; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.trainer-notification-dot { &#13;
+ &#13;
+  position:absolute; &#13;
+ &#13;
+  top:7px; &#13;
+ &#13;
+  right:7px; &#13;
+ &#13;
+  width:8px; &#13;
+ &#13;
+  height:8px; &#13;
+ &#13;
+  border-radius:50%; &#13;
+ &#13;
+  background:#ef4444; &#13;
+ &#13;
+  border:2px solid #ffffff; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+/* ========================================================= &#13;
+   TOP TRAINER PROFILE &#13;
+   ========================================================= */ &#13;
+ &#13;
+.trainer-top-profile { &#13;
+ &#13;
+  min-height:43px; &#13;
+ &#13;
+  padding-left:11px; &#13;
+ &#13;
+  display:flex; &#13;
+ &#13;
+  align-items:center; &#13;
+ &#13;
+  gap:8px; &#13;
+ &#13;
+  border-left:1px solid #e2e7ed; &#13;
+ &#13;
+  text-decoration:none !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.trainer-top-avatar { &#13;
+ &#13;
+  width:42px; &#13;
+ &#13;
+  height:42px; &#13;
+ &#13;
+  min-width:42px; &#13;
+ &#13;
+  display:flex; &#13;
+ &#13;
+  align-items:center; &#13;
+ &#13;
+  justify-content:center; &#13;
+ &#13;
+  border-radius:10px; &#13;
+ &#13;
+  background: &#13;
+    linear-gradient( &#13;
+      135deg, &#13;
+      #693ef2, &#13;
+      #8053ff &#13;
+    ); &#13;
+ &#13;
+  color:#ffffff; &#13;
+ &#13;
+  font-size:10px; &#13;
+ &#13;
+  font-weight:900; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.trainer-top-profile-text { &#13;
+ &#13;
+  display:flex; &#13;
+ &#13;
+  flex-direction:column; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.trainer-top-profile-text strong { &#13;
+ &#13;
+  display:block; &#13;
+ &#13;
+  color:#23384f; &#13;
+ &#13;
+  font-size:11px; &#13;
+ &#13;
+  line-height:1.1; &#13;
+ &#13;
+  font-weight:900; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.trainer-top-profile-text span { &#13;
+ &#13;
+  display:block; &#13;
+ &#13;
+  margin-top:3px; &#13;
+ &#13;
+  color:#7c8a9c; &#13;
+ &#13;
+  font-size:8px; &#13;
+ &#13;
+  line-height:1; &#13;
+ &#13;
+  font-weight:750; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+/* ========================================================= &#13;
+   SIDEBAR OVERLAY &#13;
+   ========================================================= */ &#13;
+ &#13;
+.trainer-sidebar-overlay { &#13;
+ &#13;
+  display:none; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+/* ========================================================= &#13;
+   PAGE CONTENT &#13;
+   ========================================================= */ &#13;
+ &#13;
+.trainer-opportunities-content { &#13;
+ &#13;
+  width:100% !important; &#13;
+ &#13;
+  max-width:none !important; &#13;
+ &#13;
+  min-width:0; &#13;
+ &#13;
+  margin:0 !important; &#13;
+ &#13;
+  padding: &#13;
+    23px &#13;
+    24px &#13;
+    40px; &#13;
+ &#13;
+  background: &#13;
+ &#13;
+    radial-gradient( &#13;
+      circle at 95% 14%, &#13;
+      rgba(230,245,255,.35), &#13;
+      transparent 24% &#13;
+    ), &#13;
+ &#13;
+    radial-gradient( &#13;
+      circle at 3% 58%, &#13;
+      rgba(241,232,255,.38), &#13;
+      transparent 25% &#13;
+    ), &#13;
+ &#13;
+    #f3f6fb; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+/* ========================================================= &#13;
+   WELCOME &#13;
+   ========================================================= */ &#13;
+ &#13;
+.opportunity-welcome { &#13;
+ &#13;
+  width:100%; &#13;
+ &#13;
+  min-height:157px; &#13;
+ &#13;
+  margin-bottom:17px; &#13;
+ &#13;
+  padding: &#13;
+    25px &#13;
+    28px; &#13;
+ &#13;
+  display:flex; &#13;
+ &#13;
+  align-items:center; &#13;
+ &#13;
+  justify-content:space-between; &#13;
+ &#13;
+  gap:25px; &#13;
+ &#13;
+  background: &#13;
+    linear-gradient( &#13;
+      110deg, &#13;
+      #ffffff 0%, &#13;
+      #f8f4ff 55%, &#13;
+      #f1fbf9 100% &#13;
+    ); &#13;
+ &#13;
+  border:1px solid #d9d3ed; &#13;
+ &#13;
+  border-radius:16px; &#13;
+ &#13;
+  box-shadow: &#13;
+    0 &#13;
+    5px &#13;
+    15px &#13;
+    rgba(42,52,75,.045); &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.opportunity-welcome-copy { &#13;
+ &#13;
+  min-width:0; &#13;
+ &#13;
+  flex:1; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.trainer-eyebrow { &#13;
+ &#13;
+  display:block; &#13;
+ &#13;
+  margin-bottom:7px; &#13;
+ &#13;
+  color:#6842df; &#13;
+ &#13;
+  font-size:9px; &#13;
+ &#13;
+  line-height:1; &#13;
+ &#13;
+  font-weight:950; &#13;
+ &#13;
+  letter-spacing:1.6px; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.opportunity-welcome h1 { &#13;
+ &#13;
+  margin:0; &#13;
+ &#13;
+  color:#182c48; &#13;
+ &#13;
+  font-size:34px; &#13;
+ &#13;
+  line-height:1.08; &#13;
+ &#13;
+  font-weight:950; &#13;
+ &#13;
+  letter-spacing:-.7px; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.opportunity-welcome p { &#13;
+ &#13;
+  max-width:970px; &#13;
+ &#13;
+  margin: &#13;
+    8px &#13;
+    0 &#13;
+    0; &#13;
+ &#13;
+  color:#617289; &#13;
+ &#13;
+  font-size:13px; &#13;
+ &#13;
+  line-height:1.6; &#13;
+ &#13;
+  font-weight:600; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.opportunity-trainer-card { &#13;
+ &#13;
+  width:228px; &#13;
+ &#13;
+  min-width:228px; &#13;
+ &#13;
+  min-height:82px; &#13;
+ &#13;
+  padding:12px 14px; &#13;
+ &#13;
+  display:flex; &#13;
+ &#13;
+  align-items:center; &#13;
+ &#13;
+  gap:10px; &#13;
+ &#13;
+  background:#ffffff; &#13;
+ &#13;
+  border:1px solid #ddd3f7; &#13;
+ &#13;
+  border-radius:12px; &#13;
+ &#13;
+  box-shadow: &#13;
+    0 &#13;
+    5px &#13;
+    12px &#13;
+    rgba(70,55,120,.045); &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.opportunity-trainer-avatar { &#13;
+ &#13;
+  width:45px; &#13;
+ &#13;
+  height:45px; &#13;
+ &#13;
+  min-width:45px; &#13;
+ &#13;
+  display:flex; &#13;
+ &#13;
+  align-items:center; &#13;
+ &#13;
+  justify-content:center; &#13;
+ &#13;
+  border-radius:11px; &#13;
+ &#13;
+  background: &#13;
+    linear-gradient( &#13;
+      135deg, &#13;
+      #6b3df4, &#13;
+      #8054ff &#13;
+    ); &#13;
+ &#13;
+  color:#ffffff; &#13;
+ &#13;
+  font-size:11px; &#13;
+ &#13;
+  font-weight:900; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.opportunity-trainer-card span { &#13;
+ &#13;
+  display:block; &#13;
+ &#13;
+  color:#8391a3; &#13;
+ &#13;
+  font-size:8px; &#13;
+ &#13;
+  line-height:1; &#13;
+ &#13;
+  font-weight:950; &#13;
+ &#13;
+  letter-spacing:1px; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.opportunity-trainer-card strong { &#13;
+ &#13;
+  display:block; &#13;
+ &#13;
+  margin-top:4px; &#13;
+ &#13;
+  color:#243a51; &#13;
+ &#13;
+  font-size:12px; &#13;
+ &#13;
+  font-weight:900; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.opportunity-trainer-card small { &#13;
+ &#13;
+  display:block; &#13;
+ &#13;
+  margin-top:3px; &#13;
+ &#13;
+  color:#7b899a; &#13;
+ &#13;
+  font-size:9px; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+/* ========================================================= &#13;
+   KPI GRID &#13;
+   ========================================================= */ &#13;
+ &#13;
+.opportunity-kpi-grid { &#13;
+ &#13;
+  width:100%; &#13;
+ &#13;
+  display:grid; &#13;
+ &#13;
+  grid-template-columns: &#13;
+    repeat( &#13;
+      4, &#13;
+      minmax(0,1fr) &#13;
+    ); &#13;
+ &#13;
+  gap:14px; &#13;
+ &#13;
+  margin-bottom:17px; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.opportunity-kpi-card { &#13;
+ &#13;
+  min-height:135px; &#13;
+ &#13;
+  padding:18px; &#13;
+ &#13;
+  display:flex; &#13;
+ &#13;
+  align-items:center; &#13;
+ &#13;
+  gap:13px; &#13;
+ &#13;
+  border:1px solid; &#13;
+ &#13;
+  border-radius:14px; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.kpi-purple { &#13;
+ &#13;
+  background: &#13;
+    linear-gradient( &#13;
+      135deg, &#13;
+      #f0e9ff, &#13;
+      #e2d6ff &#13;
+    ); &#13;
+ &#13;
+  border-color:#d2c0fa; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.kpi-teal { &#13;
+ &#13;
+  background: &#13;
+    linear-gradient( &#13;
+      135deg, &#13;
+      #ffeae2, &#13;
+      #ffe0d5 &#13;
+    ); &#13;
+ &#13;
+  border-color:#f1c9bc; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.kpi-orange { &#13;
+ &#13;
+  background: &#13;
+    linear-gradient( &#13;
+      135deg, &#13;
+      #e9f8f7, &#13;
+      #d9f0ee &#13;
+    ); &#13;
+ &#13;
+  border-color:#bce2df; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.kpi-green { &#13;
+ &#13;
+  background: &#13;
+    linear-gradient( &#13;
+      135deg, &#13;
+      #fdebf1, &#13;
+      #f8dfe7 &#13;
+    ); &#13;
+ &#13;
+  border-color:#ecc3d0; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.opportunity-kpi-icon { &#13;
+ &#13;
+  width:52px; &#13;
+ &#13;
+  height:52px; &#13;
+ &#13;
+  min-width:52px; &#13;
+ &#13;
+  display:flex; &#13;
+ &#13;
+  align-items:center; &#13;
+ &#13;
+  justify-content:center; &#13;
+ &#13;
+  border-radius:13px; &#13;
+ &#13;
+  background:rgba(255,255,255,.88); &#13;
+ &#13;
+  font-size:19px; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.kpi-purple &#13;
+.opportunity-kpi-icon { &#13;
+ &#13;
+  color:#6441dc; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.kpi-teal &#13;
+.opportunity-kpi-icon { &#13;
+ &#13;
+  color:#b65f47; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.kpi-orange &#13;
+.opportunity-kpi-icon { &#13;
+ &#13;
+  color:#147b7d; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.kpi-green &#13;
+.opportunity-kpi-icon { &#13;
+ &#13;
+  color:#b13e69; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.opportunity-kpi-content { &#13;
+ &#13;
+  min-width:0; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.opportunity-kpi-content span { &#13;
+ &#13;
+  display:block; &#13;
+ &#13;
+  color:#6f7d90; &#13;
+ &#13;
+  font-size:8px; &#13;
+ &#13;
+  font-weight:950; &#13;
+ &#13;
+  letter-spacing:1px; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.opportunity-kpi-content strong { &#13;
+ &#13;
+  display:block; &#13;
+ &#13;
+  margin-top:5px; &#13;
+ &#13;
+  color:#132c48; &#13;
+ &#13;
+  font-size:29px; &#13;
+ &#13;
+  line-height:1; &#13;
+ &#13;
+  font-weight:950; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.opportunity-kpi-content small { &#13;
+ &#13;
+  display:block; &#13;
+ &#13;
+  margin-top:6px; &#13;
+ &#13;
+  color:#748398; &#13;
+ &#13;
+  font-size:9px; &#13;
+ &#13;
+  font-weight:650; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+/* ========================================================= &#13;
+   PANELS &#13;
+   ========================================================= */ &#13;
+ &#13;
+.trainer-panel { &#13;
+ &#13;
+  width:100%; &#13;
+ &#13;
+  margin-bottom:17px; &#13;
+ &#13;
+  padding: &#13;
+    22px; &#13;
+ &#13;
+  background: &#13;
+    rgba(255,255,255,.98); &#13;
+ &#13;
+  border: &#13;
+    1px &#13;
+    solid &#13;
+    #dce4ec; &#13;
+ &#13;
+  border-radius:15px; &#13;
+ &#13;
+  box-shadow: &#13;
+    0 &#13;
+    5px &#13;
+    17px &#13;
+    rgba(34,48,67,.04); &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.trainer-panel-heading { &#13;
+ &#13;
+  display:flex; &#13;
+ &#13;
+  align-items:flex-start; &#13;
+ &#13;
+  justify-content:space-between; &#13;
+ &#13;
+  gap:15px; &#13;
+ &#13;
+  padding-bottom:16px; &#13;
+ &#13;
+  border-bottom:1px solid #e4e9ef; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.trainer-panel-heading.compact { &#13;
+ &#13;
+  align-items:center; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.trainer-panel-heading &gt; div &gt; span { &#13;
+ &#13;
+  display:block; &#13;
+ &#13;
+  margin-bottom:5px; &#13;
+ &#13;
+  color:#6542dc; &#13;
+ &#13;
+  font-size:8px; &#13;
+ &#13;
+  font-weight:950; &#13;
+ &#13;
+  letter-spacing:1.5px; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.trainer-panel-heading h2 { &#13;
+ &#13;
+  margin:0; &#13;
+ &#13;
+  color:#172d49; &#13;
+ &#13;
+  font-size:22px; &#13;
+ &#13;
+  line-height:1.15; &#13;
+ &#13;
+  font-weight:950; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.trainer-panel-heading p { &#13;
+ &#13;
+  margin: &#13;
+    5px &#13;
+    0 &#13;
+    0; &#13;
+ &#13;
+  color:#718096; &#13;
+ &#13;
+  font-size:10px; &#13;
+ &#13;
+  line-height:1.45; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+/* ========================================================= &#13;
+   SEARCH &#13;
+   ========================================================= */ &#13;
+ &#13;
+.opportunity-search-grid { &#13;
+ &#13;
+  display:grid; &#13;
+ &#13;
+  grid-template-columns: &#13;
+    minmax(0,1fr) &#13;
+    180px &#13;
+    180px; &#13;
+ &#13;
+  gap:10px; &#13;
+ &#13;
+  margin-top:17px; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.opportunity-search-box { &#13;
+ &#13;
+  height:49px; &#13;
+ &#13;
+  padding: &#13;
+    0 &#13;
+    13px; &#13;
+ &#13;
+  display:flex; &#13;
+ &#13;
+  align-items:center; &#13;
+ &#13;
+  gap:9px; &#13;
+ &#13;
+  border:1px solid #d7e0e9; &#13;
+ &#13;
+  border-radius:9px; &#13;
+ &#13;
+  background:#fbfcfe; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.opportunity-search-box:focus-within { &#13;
+ &#13;
+  background:#ffffff; &#13;
+ &#13;
+  border-color:#9984e8; &#13;
+ &#13;
+  box-shadow: &#13;
+    0 &#13;
+    0 &#13;
+    0 &#13;
+    3px &#13;
+    rgba(101,66,232,.07); &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.opportunity-search-box i { &#13;
+ &#13;
+  color:#159293; &#13;
+ &#13;
+  font-size:14px; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.opportunity-search-box input { &#13;
+ &#13;
+  width:100%; &#13;
+ &#13;
+  height:100%; &#13;
+ &#13;
+  padding:0; &#13;
+ &#13;
+  border:0; &#13;
+ &#13;
+  outline:0; &#13;
+ &#13;
+  background:transparent; &#13;
+ &#13;
+  color:#30445a; &#13;
+ &#13;
+  font-size:11px; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.opportunity-search-box input::placeholder { &#13;
+ &#13;
+  color:#9aa7b6; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.opportunity-filter { &#13;
+ &#13;
+  height:49px; &#13;
+ &#13;
+  padding: &#13;
+    0 &#13;
+    11px; &#13;
+ &#13;
+  border:1px solid #d7e0e9; &#13;
+ &#13;
+  border-radius:9px; &#13;
+ &#13;
+  background:#fbfcfe; &#13;
+ &#13;
+  color:#364b62; &#13;
+ &#13;
+  font-size:10px; &#13;
+ &#13;
+  cursor:pointer; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.opportunity-filter:focus { &#13;
+ &#13;
+  border-color:#9984e8; &#13;
+ &#13;
+  box-shadow: &#13;
+    0 &#13;
+    0 &#13;
+    0 &#13;
+    3px &#13;
+    rgba(101,66,232,.07); &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.opportunity-clear-btn { &#13;
+ &#13;
+  height:35px; &#13;
+ &#13;
+  padding: &#13;
+    0 &#13;
+    11px; &#13;
+ &#13;
+  border:1px solid #d9e0e8; &#13;
+ &#13;
+  border-radius:8px; &#13;
+ &#13;
+  background:#ffffff; &#13;
+ &#13;
+  color:#6b7a8c; &#13;
+ &#13;
+  font-size:9px; &#13;
+ &#13;
+  font-weight:800; &#13;
+ &#13;
+  cursor:pointer; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.opportunity-clear-btn:hover { &#13;
+ &#13;
+  background:#fff0f4; &#13;
+ &#13;
+  color:#b83e67; &#13;
+ &#13;
+  border-color:#edc6d4; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.opportunity-record-count { &#13;
+ &#13;
+  padding: &#13;
+    6px &#13;
+    10px; &#13;
+ &#13;
+  background:#e2f4f1; &#13;
+ &#13;
+  color:#197879; &#13;
+ &#13;
+  border:1px solid #bfe4e1; &#13;
+ &#13;
+  border-radius:18px; &#13;
+ &#13;
+  font-size:8px; &#13;
+ &#13;
+  font-weight:900; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+/* ========================================================= &#13;
+   OPPORTUNITY LIST &#13;
+   ========================================================= */ &#13;
+ &#13;
+.opportunity-list { &#13;
+ &#13;
+  display:flex; &#13;
+ &#13;
+  flex-direction:column; &#13;
+ &#13;
+  gap:13px; &#13;
+ &#13;
+  padding-top:16px; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.opportunity-card { &#13;
+ &#13;
+  position:relative; &#13;
+ &#13;
+  overflow:hidden; &#13;
+ &#13;
+  padding: &#13;
+    18px &#13;
+    18px &#13;
+    0; &#13;
+ &#13;
+  border: &#13;
+    1px &#13;
+    solid &#13;
+    #dce3eb; &#13;
+ &#13;
+  border-radius:11px; &#13;
+ &#13;
+  background:#ffffff; &#13;
+ &#13;
+  box-shadow: &#13;
+    0 &#13;
+    3px &#13;
+    9px &#13;
+    rgba(30,44,62,.025); &#13;
+ &#13;
+  transition: &#13;
+    transform .18s ease, &#13;
+    box-shadow .18s ease, &#13;
+    border-color .18s ease; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.opportunity-card:hover { &#13;
+ &#13;
+  transform:translateY(-2px); &#13;
+ &#13;
+  border-color:#cbbef1; &#13;
+ &#13;
+  box-shadow: &#13;
+    0 &#13;
+    8px &#13;
+    19px &#13;
+    rgba(46,48,84,.065); &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.opportunity-card-color { &#13;
+ &#13;
+  position:absolute; &#13;
+ &#13;
+  left:0; &#13;
+ &#13;
+  top:0; &#13;
+ &#13;
+  bottom:0; &#13;
+ &#13;
+  width:4px; &#13;
+ &#13;
+  background:#6843de; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.opportunity-card:nth-child(4n+2) &#13;
+.opportunity-card-color { &#13;
+ &#13;
+  background:#199192; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.opportunity-card:nth-child(4n+3) &#13;
+.opportunity-card-color { &#13;
+ &#13;
+  background:#de7d2b; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.opportunity-card:nth-child(4n+4) &#13;
+.opportunity-card-color { &#13;
+ &#13;
+  background:#cf537d; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+/* ========================================================= &#13;
+   OPPORTUNITY CARD HEADER &#13;
+   ========================================================= */ &#13;
+ &#13;
+.opportunity-card-top { &#13;
+ &#13;
+  display:grid; &#13;
+ &#13;
+  grid-template-columns: &#13;
+    auto &#13;
+    minmax(0,1fr) &#13;
+    auto; &#13;
+ &#13;
+  align-items:center; &#13;
+ &#13;
+  gap:12px; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.company-avatar { &#13;
+ &#13;
+  width:47px; &#13;
+ &#13;
+  height:47px; &#13;
+ &#13;
+  min-width:47px; &#13;
+ &#13;
+  display:flex; &#13;
+ &#13;
+  align-items:center; &#13;
+ &#13;
+  justify-content:center; &#13;
+ &#13;
+  border-radius:11px; &#13;
+ &#13;
+  background:#eee7ff; &#13;
+ &#13;
+  color:#6542df; &#13;
+ &#13;
+  font-size:11px; &#13;
+ &#13;
+  font-weight:900; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.opportunity-card:nth-child(4n+2) &#13;
+.company-avatar { &#13;
+ &#13;
+  background:#dff4f2; &#13;
+ &#13;
+  color:#167a7c; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.opportunity-card:nth-child(4n+3) &#13;
+.company-avatar { &#13;
+ &#13;
+  background:#fff0e1; &#13;
+ &#13;
+  color:#bd6a23; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.opportunity-card:nth-child(4n+4) &#13;
+.company-avatar { &#13;
+ &#13;
+  background:#fde8ef; &#13;
+ &#13;
+  color:#b84468; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.opportunity-main-title { &#13;
+ &#13;
+  min-width:0; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.opportunity-id { &#13;
+ &#13;
+  display:block; &#13;
+ &#13;
+  color:#6542dc; &#13;
+ &#13;
+  font-size:8px; &#13;
+ &#13;
+  font-weight:950; &#13;
+ &#13;
+  letter-spacing:.9px; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.opportunity-main-title h3 { &#13;
+ &#13;
+  margin: &#13;
+    4px &#13;
+    0 &#13;
+    0; &#13;
+ &#13;
+  color:#20354d; &#13;
+ &#13;
+  font-size:17px; &#13;
+ &#13;
+  line-height:1.25; &#13;
+ &#13;
+  font-weight:900; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.opportunity-main-title p { &#13;
+ &#13;
+  margin: &#13;
+    4px &#13;
+    0 &#13;
+    0; &#13;
+ &#13;
+  color:#718095; &#13;
+ &#13;
+  font-size:10px; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.opportunity-main-title p i { &#13;
+ &#13;
+  margin-right:3px; &#13;
+ &#13;
+  color:#168d90; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.opportunity-status { &#13;
+ &#13;
+  display:inline-flex; &#13;
+ &#13;
+  align-items:center; &#13;
+ &#13;
+  gap:5px; &#13;
+ &#13;
+  padding: &#13;
+    6px &#13;
+    9px; &#13;
+ &#13;
+  border-radius:15px; &#13;
+ &#13;
+  font-size:8px; &#13;
+ &#13;
+  font-weight:900; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.opportunity-status i { &#13;
+ &#13;
+  font-size:5px; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.opportunity-status.open { &#13;
+ &#13;
+  background:#e4f6eb; &#13;
+ &#13;
+  color:#22744e; &#13;
+ &#13;
+  border:1px solid #c2e3cf; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.opportunity-status.closed { &#13;
+ &#13;
+  background:#edf0f3; &#13;
+ &#13;
+  color:#677589; &#13;
+ &#13;
+  border:1px solid #dbe1e6; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.opportunity-status.hold { &#13;
+ &#13;
+  background:#fff1de; &#13;
+ &#13;
+  color:#a95f10; &#13;
+ &#13;
+  border:1px solid #efd5b4; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+/* ========================================================= &#13;
+   DETAILS GRID &#13;
+   ========================================================= */ &#13;
+ &#13;
+.opportunity-details-grid { &#13;
+ &#13;
+  display:grid; &#13;
+ &#13;
+  grid-template-columns: &#13;
+    repeat( &#13;
+      4, &#13;
+      minmax(0,1fr) &#13;
+    ); &#13;
+ &#13;
+  gap:9px; &#13;
+ &#13;
+  margin-top:15px; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.opportunity-detail { &#13;
+ &#13;
+  min-height:60px; &#13;
+ &#13;
+  padding: &#13;
+    10px &#13;
+    11px; &#13;
+ &#13;
+  border:1px solid; &#13;
+ &#13;
+  border-radius:8px; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.opportunity-detail span { &#13;
+ &#13;
+  display:block; &#13;
+ &#13;
+  margin-bottom:5px; &#13;
+ &#13;
+  font-size:7px; &#13;
+ &#13;
+  font-weight:950; &#13;
+ &#13;
+  letter-spacing:.8px; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.opportunity-detail strong { &#13;
+ &#13;
+  display:block; &#13;
+ &#13;
+  color:#32465c; &#13;
+ &#13;
+  font-size:10px; &#13;
+ &#13;
+  font-weight:850; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.opportunity-detail strong i { &#13;
+ &#13;
+  margin-right:4px; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.detail-purple { &#13;
+ &#13;
+  background:#f8f5ff; &#13;
+ &#13;
+  border-color:#e1d9fa; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.detail-purple span, &#13;
+.detail-purple strong i { &#13;
+ &#13;
+  color:#6541dd; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.detail-teal { &#13;
+ &#13;
+  background:#f1fbfa; &#13;
+ &#13;
+  border-color:#d1ece9; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.detail-teal span, &#13;
+.detail-teal strong i { &#13;
+ &#13;
+  color:#177b7c; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.detail-orange { &#13;
+ &#13;
+  background:#fff8ee; &#13;
+ &#13;
+  border-color:#f1dfca; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.detail-orange span, &#13;
+.detail-orange strong i { &#13;
+ &#13;
+  color:#c26c20; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.detail-pink { &#13;
+ &#13;
+  background:#fff5f8; &#13;
+ &#13;
+  border-color:#f0d9e1; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.detail-pink span, &#13;
+.detail-pink strong i { &#13;
+ &#13;
+  color:#b34469; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+/* ========================================================= &#13;
+   SKILLS &#13;
+   ========================================================= */ &#13;
+ &#13;
+.opportunity-skills { &#13;
+ &#13;
+  margin-top:13px; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.opportunity-field-label { &#13;
+ &#13;
+  display:block; &#13;
+ &#13;
+  margin-bottom:6px; &#13;
+ &#13;
+  color:#8592a3; &#13;
+ &#13;
+  font-size:7px; &#13;
+ &#13;
+  font-weight:950; &#13;
+ &#13;
+  letter-spacing:1px; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.skill-tags { &#13;
+ &#13;
+  display:flex; &#13;
+ &#13;
+  flex-wrap:wrap; &#13;
+ &#13;
+  gap:5px; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.skill-tag { &#13;
+ &#13;
+  padding: &#13;
+    5px &#13;
+    8px; &#13;
+ &#13;
+  border-radius:6px; &#13;
+ &#13;
+  background:#eee8ff; &#13;
+ &#13;
+  border:1px solid #dcd1ff; &#13;
+ &#13;
+  color:#6040cf; &#13;
+ &#13;
+  font-size:8px; &#13;
+ &#13;
+  font-weight:800; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.skill-tag:nth-child(4n+2) { &#13;
+ &#13;
+  background:#e2f4f2; &#13;
+ &#13;
+  color:#197777; &#13;
+ &#13;
+  border-color:#c2e3e0; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.skill-tag:nth-child(4n+3) { &#13;
+ &#13;
+  background:#fff1e2; &#13;
+ &#13;
+  color:#af641d; &#13;
+ &#13;
+  border-color:#eed5b9; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.skill-tag:nth-child(4n+4) { &#13;
+ &#13;
+  background:#fde9ef; &#13;
+ &#13;
+  color:#ad4364; &#13;
+ &#13;
+  border-color:#efccd8; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.skill-empty { &#13;
+ &#13;
+  color:#9aa4b0; &#13;
+ &#13;
+  font-size:9px; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+/* ========================================================= &#13;
+   APPLICATION STRIP &#13;
+   ========================================================= */ &#13;
+ &#13;
+.opportunity-application-strip { &#13;
+ &#13;
+  display:grid; &#13;
+ &#13;
+  grid-template-columns: &#13;
+    1.5fr &#13;
+    .75fr &#13;
+    .75fr &#13;
+    .75fr &#13;
+    auto; &#13;
+ &#13;
+  align-items:center; &#13;
+ &#13;
+  gap:13px; &#13;
+ &#13;
+  margin-top:14px; &#13;
+ &#13;
+  padding: &#13;
+    12px &#13;
+    0; &#13;
+ &#13;
+  border-top:1px solid #e7ecf1; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.application-total span, &#13;
+.application-stat span { &#13;
+ &#13;
+  display:block; &#13;
+ &#13;
+  color:#8793a4; &#13;
+ &#13;
+  font-size:7px; &#13;
+ &#13;
+  font-weight:950; &#13;
+ &#13;
+  letter-spacing:.8px; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.application-total strong { &#13;
+ &#13;
+  display:block; &#13;
+ &#13;
+  margin-top:3px; &#13;
+ &#13;
+  color:#6540d6; &#13;
+ &#13;
+  font-size:19px; &#13;
+ &#13;
+  font-weight:950; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.application-stat strong { &#13;
+ &#13;
+  display:block; &#13;
+ &#13;
+  margin-top:3px; &#13;
+ &#13;
+  color:#34475c; &#13;
+ &#13;
+  font-size:13px; &#13;
+ &#13;
+  font-weight:850; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.opportunity-view-btn { &#13;
+ &#13;
+  height:37px; &#13;
+ &#13;
+  padding: &#13;
+    0 &#13;
+    13px; &#13;
+ &#13;
+  display:inline-flex; &#13;
+ &#13;
+  align-items:center; &#13;
+ &#13;
+  justify-content:center; &#13;
+ &#13;
+  gap:7px; &#13;
+ &#13;
+  border:0; &#13;
+ &#13;
+  border-radius:8px; &#13;
+ &#13;
+  background: &#13;
+    linear-gradient( &#13;
+      135deg, &#13;
+      #6743df, &#13;
+      #7d5ceb &#13;
+    ); &#13;
+ &#13;
+  color:#ffffff; &#13;
+ &#13;
+  font-size:9px; &#13;
+ &#13;
+  font-weight:900; &#13;
+ &#13;
+  cursor:pointer; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.opportunity-view-btn:hover { &#13;
+ &#13;
+  background: &#13;
+    linear-gradient( &#13;
+      135deg, &#13;
+      #5732cd, &#13;
+      #6c49dc &#13;
+    ); &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+/* ========================================================= &#13;
+   EMPTY &#13;
+   ========================================================= */ &#13;
+ &#13;
+.opportunity-empty { &#13;
+ &#13;
+  padding: &#13;
+    55px &#13;
+    20px; &#13;
+ &#13;
+  text-align:center; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.opportunity-empty-icon { &#13;
+ &#13;
+  width:55px; &#13;
+ &#13;
+  height:55px; &#13;
+ &#13;
+  margin: &#13;
+    0 &#13;
+    auto &#13;
+    11px; &#13;
+ &#13;
+  display:flex; &#13;
+ &#13;
+  align-items:center; &#13;
+ &#13;
+  justify-content:center; &#13;
+ &#13;
+  border-radius:14px; &#13;
+ &#13;
+  background:#e7f5f2; &#13;
+ &#13;
+  border:1px solid #c7e5df; &#13;
+ &#13;
+  color:#187d7d; &#13;
+ &#13;
+  font-size:20px; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.opportunity-empty h3 { &#13;
+ &#13;
+  margin:0; &#13;
+ &#13;
+  color:#30445a; &#13;
+ &#13;
+  font-size:16px; &#13;
+ &#13;
+  font-weight:900; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.opportunity-empty p { &#13;
+ &#13;
+  margin: &#13;
+    5px &#13;
+    0 &#13;
+    0; &#13;
+ &#13;
+  color:#8693a3; &#13;
+ &#13;
+  font-size:10px; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+/* ========================================================= &#13;
+   SELECTED DETAILS &#13;
+   ========================================================= */ &#13;
+ &#13;
+.opportunity-details-panel { &#13;
+ &#13;
+  border-top: &#13;
+    3px &#13;
+    solid &#13;
+    #6842df; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.opportunity-details-header { &#13;
+ &#13;
+  display:flex; &#13;
+ &#13;
+  align-items:flex-start; &#13;
+ &#13;
+  justify-content:space-between; &#13;
+ &#13;
+  gap:15px; &#13;
+ &#13;
+  padding-bottom:15px; &#13;
+ &#13;
+  border-bottom:1px solid #e4e9ef; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.opportunity-details-header &gt; div &gt; span { &#13;
+ &#13;
+  display:block; &#13;
+ &#13;
+  margin-bottom:5px; &#13;
+ &#13;
+  color:#6742dc; &#13;
+ &#13;
+  font-size:8px; &#13;
+ &#13;
+  font-weight:950; &#13;
+ &#13;
+  letter-spacing:1.5px; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.opportunity-details-header h2 { &#13;
+ &#13;
+  margin:0; &#13;
+ &#13;
+  color:#182e49; &#13;
+ &#13;
+  font-size:24px; &#13;
+ &#13;
+  line-height:1.15; &#13;
+ &#13;
+  font-weight:950; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.opportunity-details-header p { &#13;
+ &#13;
+  margin: &#13;
+    5px &#13;
+    0 &#13;
+    0; &#13;
+ &#13;
+  color:#788699; &#13;
+ &#13;
+  font-size:10px; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.opportunity-close-btn { &#13;
+ &#13;
+  width:37px; &#13;
+ &#13;
+  height:37px; &#13;
+ &#13;
+  display:flex; &#13;
+ &#13;
+  align-items:center; &#13;
+ &#13;
+  justify-content:center; &#13;
+ &#13;
+  border:1px solid #d8e0e8; &#13;
+ &#13;
+  border-radius:8px; &#13;
+ &#13;
+  background:#ffffff; &#13;
+ &#13;
+  color:#68788c; &#13;
+ &#13;
+  cursor:pointer; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.opportunity-close-btn:hover { &#13;
+ &#13;
+  background:#fff0f4; &#13;
+ &#13;
+  color:#b84367; &#13;
+ &#13;
+  border-color:#ebc6d3; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+/* ========================================================= &#13;
+   DETAIL SUMMARY &#13;
+   ========================================================= */ &#13;
+ &#13;
+.opportunity-detail-summary { &#13;
+ &#13;
+  display:grid; &#13;
+ &#13;
+  grid-template-columns: &#13;
+    repeat(4,1fr); &#13;
+ &#13;
+  gap:9px; &#13;
+ &#13;
+  margin: &#13;
+    16px &#13;
+    0; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.opportunity-detail-summary &gt; div { &#13;
+ &#13;
+  min-height:62px; &#13;
+ &#13;
+  padding: &#13;
+    11px; &#13;
+ &#13;
+  border:1px solid; &#13;
+ &#13;
+  border-radius:8px; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.opportunity-detail-summary span { &#13;
+ &#13;
+  display:block; &#13;
+ &#13;
+  margin-bottom:4px; &#13;
+ &#13;
+  font-size:7px; &#13;
+ &#13;
+  font-weight:950; &#13;
+ &#13;
+  letter-spacing:.9px; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.opportunity-detail-summary strong { &#13;
+ &#13;
+  color:#34475b; &#13;
+ &#13;
+  font-size:10px; &#13;
+ &#13;
+  font-weight:850; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.summary-purple { &#13;
+ &#13;
+  background:#f8f4ff; &#13;
+ &#13;
+  border-color:#e0d7fa; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.summary-purple span { &#13;
+ &#13;
+  color:#6541d9; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.summary-purple strong { &#13;
+ &#13;
+  color:#5235b8; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.summary-teal { &#13;
+ &#13;
+  background:#f1fbfa; &#13;
+ &#13;
+  border-color:#cee9e6; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.summary-teal span { &#13;
+ &#13;
+  color:#147879; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.summary-orange { &#13;
+ &#13;
+  background:#fff8ef; &#13;
+ &#13;
+  border-color:#efddc7; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.summary-orange span { &#13;
+ &#13;
+  color:#b96b20; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.summary-green { &#13;
+ &#13;
+  background:#f1faf4; &#13;
+ &#13;
+  border-color:#cfe8d8; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.summary-green span { &#13;
+ &#13;
+  color:#34734f; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+/* ========================================================= &#13;
+   DETAIL SECTIONS &#13;
+   ========================================================= */ &#13;
+ &#13;
+.opportunity-info-section { &#13;
+ &#13;
+  margin-top:13px; &#13;
+ &#13;
+  padding: &#13;
+    17px; &#13;
+ &#13;
+  border:1px solid #dfe6ed; &#13;
+ &#13;
+  border-radius:10px; &#13;
+ &#13;
+  background:#ffffff; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.company-section { &#13;
+ &#13;
+  border-left: &#13;
+    3px &#13;
+    solid &#13;
+    #6842df; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.eligibility-section { &#13;
+ &#13;
+  border-left: &#13;
+    3px &#13;
+    solid &#13;
+    #208f90; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.description-section { &#13;
+ &#13;
+  border-left: &#13;
+    3px &#13;
+    solid &#13;
+    #dc7b29; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.applications-section { &#13;
+ &#13;
+  border-left: &#13;
+    3px &#13;
+    solid &#13;
+    #ce537c; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.outcome-section { &#13;
+ &#13;
+  border-left: &#13;
+    3px &#13;
+    solid &#13;
+    #2d9063; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.opportunity-info-heading { &#13;
+ &#13;
+  display:flex; &#13;
+ &#13;
+  align-items:center; &#13;
+ &#13;
+  gap:9px; &#13;
+ &#13;
+  margin-bottom:13px; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.info-heading-icon { &#13;
+ &#13;
+  width:35px; &#13;
+ &#13;
+  height:35px; &#13;
+ &#13;
+  flex:0 0 35px; &#13;
+ &#13;
+  display:flex; &#13;
+ &#13;
+  align-items:center; &#13;
+ &#13;
+  justify-content:center; &#13;
+ &#13;
+  border-radius:8px; &#13;
+ &#13;
+  font-size:13px; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.info-heading-icon.purple { &#13;
+ &#13;
+  background:#eee7ff; &#13;
+ &#13;
+  color:#6440d9; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.info-heading-icon.teal { &#13;
+ &#13;
+  background:#e0f4f2; &#13;
+ &#13;
+  color:#197b7c; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.info-heading-icon.orange { &#13;
+ &#13;
+  background:#fff0e1; &#13;
+ &#13;
+  color:#bc681f; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.info-heading-icon.pink { &#13;
+ &#13;
+  background:#fde7ee; &#13;
+ &#13;
+  color:#b54369; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.info-heading-icon.green { &#13;
+ &#13;
+  background:#e2f4e9; &#13;
+ &#13;
+  color:#2d7c54; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.opportunity-info-heading h3 { &#13;
+ &#13;
+  margin:0; &#13;
+ &#13;
+  color:#30435a; &#13;
+ &#13;
+  font-size:14px; &#13;
+ &#13;
+  font-weight:900; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.opportunity-info-heading p { &#13;
+ &#13;
+  margin: &#13;
+    3px &#13;
+    0 &#13;
+    0; &#13;
+ &#13;
+  color:#7d8999; &#13;
+ &#13;
+  font-size:9px; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+/* ========================================================= &#13;
+   INFORMATION GRID &#13;
+   ========================================================= */ &#13;
+ &#13;
+.company-info-grid { &#13;
+ &#13;
+  display:grid; &#13;
+ &#13;
+  grid-template-columns: &#13;
+    repeat( &#13;
+      3, &#13;
+      minmax(0,1fr) &#13;
+    ); &#13;
+ &#13;
+  gap:9px; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.company-info-grid &gt; div { &#13;
+ &#13;
+  min-height:57px; &#13;
+ &#13;
+  padding: &#13;
+    10px; &#13;
+ &#13;
+  background:#fafbfd; &#13;
+ &#13;
+  border:1px solid #e3e8ee; &#13;
+ &#13;
+  border-radius:8px; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.company-info-grid span { &#13;
+ &#13;
+  display:block; &#13;
+ &#13;
+  margin-bottom:4px; &#13;
+ &#13;
+  color:#8793a3; &#13;
+ &#13;
+  font-size:7px; &#13;
+ &#13;
+  font-weight:950; &#13;
+ &#13;
+  letter-spacing:.8px; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.company-info-grid strong { &#13;
+ &#13;
+  color:#31445a; &#13;
+ &#13;
+  font-size:10px; &#13;
+ &#13;
+  line-height:1.35; &#13;
+ &#13;
+  font-weight:800; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+/* ========================================================= &#13;
+   DESCRIPTION &#13;
+   ========================================================= */ &#13;
+ &#13;
+.job-description-box { &#13;
+ &#13;
+  padding: &#13;
+    13px; &#13;
+ &#13;
+  border: &#13;
+    1px &#13;
+    solid &#13;
+    #f0dec8; &#13;
+ &#13;
+  border-radius:8px; &#13;
+ &#13;
+  background: &#13;
+    linear-gradient( &#13;
+      110deg, &#13;
+      #fffaf3, &#13;
+      #fffefd &#13;
+    ); &#13;
+ &#13;
+  color:#596a7e; &#13;
+ &#13;
+  font-size:10px; &#13;
+ &#13;
+  line-height:1.65; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+/* ========================================================= &#13;
+   APPLICATION EMPTY &#13;
+   ========================================================= */ &#13;
+ &#13;
+.application-empty { &#13;
+ &#13;
+  min-height:80px; &#13;
+ &#13;
+  display:flex; &#13;
+ &#13;
+  align-items:center; &#13;
+ &#13;
+  justify-content:center; &#13;
+ &#13;
+  gap:7px; &#13;
+ &#13;
+  border: &#13;
+    1px dashed &#13;
+    #d7dfe7; &#13;
+ &#13;
+  border-radius:8px; &#13;
+ &#13;
+  background:#fafbfd; &#13;
+ &#13;
+  color:#8a96a5; &#13;
+ &#13;
+  font-size:9px; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.application-empty i { &#13;
+ &#13;
+  color:#ce537c; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+/* ========================================================= &#13;
+   APPLICATION TABLE &#13;
+   ========================================================= */ &#13;
+ &#13;
+.student-application-table, &#13;
+.outcome-table { &#13;
+ &#13;
+  width:100%; &#13;
+ &#13;
+  overflow-x:auto; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.application-table-header, &#13;
+.application-table-row { &#13;
+ &#13;
+  min-width:750px; &#13;
+ &#13;
+  display:grid; &#13;
+ &#13;
+  grid-template-columns: &#13;
+    1.45fr &#13;
+    .9fr &#13;
+    .9fr &#13;
+    .9fr &#13;
+    .9fr; &#13;
+ &#13;
+  align-items:center; &#13;
+ &#13;
+  gap:10px; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.application-table-header { &#13;
+ &#13;
+  padding: &#13;
+    9px &#13;
+    11px; &#13;
+ &#13;
+  border-radius: &#13;
+    8px &#13;
+    8px &#13;
+    0 &#13;
+    0; &#13;
+ &#13;
+  background: &#13;
+    linear-gradient( &#13;
+      90deg, &#13;
+      #eee8ff, &#13;
+      #e9f6f4 &#13;
+    ); &#13;
+ &#13;
+  color:#6242cc; &#13;
+ &#13;
+  font-size:7px; &#13;
+ &#13;
+  font-weight:950; &#13;
+ &#13;
+  letter-spacing:.8px; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.application-table-row { &#13;
+ &#13;
+  min-height:53px; &#13;
+ &#13;
+  padding: &#13;
+    9px &#13;
+    11px; &#13;
+ &#13;
+  color:#53647a; &#13;
+ &#13;
+  font-size:9px; &#13;
+ &#13;
+  border: &#13;
+    1px &#13;
+    solid &#13;
+    #e3e8ee; &#13;
+ &#13;
+  border-top:0; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.student-cell { &#13;
+ &#13;
+  display:flex; &#13;
+ &#13;
+  align-items:center; &#13;
+ &#13;
+  gap:7px; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.student-avatar { &#13;
+ &#13;
+  width:32px; &#13;
+ &#13;
+  height:32px; &#13;
+ &#13;
+  min-width:32px; &#13;
+ &#13;
+  display:flex; &#13;
+ &#13;
+  align-items:center; &#13;
+ &#13;
+  justify-content:center; &#13;
+ &#13;
+  border-radius:7px; &#13;
+ &#13;
+  background:#fde9ef; &#13;
+ &#13;
+  color:#ad4566; &#13;
+ &#13;
+  font-size:8px; &#13;
+ &#13;
+  font-weight:900; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.student-cell strong { &#13;
+ &#13;
+  display:block; &#13;
+ &#13;
+  color:#30435a; &#13;
+ &#13;
+  font-size:9px; &#13;
+ &#13;
+  font-weight:850; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.student-cell small { &#13;
+ &#13;
+  display:block; &#13;
+ &#13;
+  margin-top:2px; &#13;
+ &#13;
+  color:#8490a1; &#13;
+ &#13;
+  font-size:7px; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.table-status { &#13;
+ &#13;
+  display:inline-block; &#13;
+ &#13;
+  padding: &#13;
+    5px &#13;
+    7px; &#13;
+ &#13;
+  border-radius:5px; &#13;
+ &#13;
+  font-size:7px; &#13;
+ &#13;
+  font-weight:850; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.application-status { &#13;
+ &#13;
+  background:#eee8ff; &#13;
+ &#13;
+  color:#6140ce; &#13;
+ &#13;
+  border:1px solid #ddd1ff; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.offer-status { &#13;
+ &#13;
+  background:#fff1df; &#13;
+ &#13;
+  color:#ab631e; &#13;
+ &#13;
+  border:1px solid #edd3b3; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.interview-status { &#13;
+ &#13;
+  background:#e2f4f2; &#13;
+ &#13;
+  color:#177878; &#13;
+ &#13;
+  border:1px solid #c3e3e1; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.table-date { &#13;
+ &#13;
+  color:#5b6c80; &#13;
+ &#13;
+  font-size:9px; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+/* ========================================================= &#13;
+   OUTCOME TABLE &#13;
+   ========================================================= */ &#13;
+ &#13;
+.outcome-table-header, &#13;
+.outcome-table-row { &#13;
+ &#13;
+  min-width:750px; &#13;
+ &#13;
+  display:grid; &#13;
+ &#13;
+  grid-template-columns: &#13;
+    1.45fr &#13;
+    1fr &#13;
+    1fr &#13;
+    .8fr &#13;
+    1fr; &#13;
+ &#13;
+  align-items:center; &#13;
+ &#13;
+  gap:10px; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.outcome-table-header { &#13;
+ &#13;
+  padding: &#13;
+    9px &#13;
+    11px; &#13;
+ &#13;
+  background: &#13;
+    linear-gradient( &#13;
+      90deg, &#13;
+      #e6f5eb, &#13;
+      #f0faf5 &#13;
+    ); &#13;
+ &#13;
+  color:#2f7954; &#13;
+ &#13;
+  border-radius: &#13;
+    8px &#13;
+    8px &#13;
+    0 &#13;
+    0; &#13;
+ &#13;
+  font-size:7px; &#13;
+ &#13;
+  font-weight:950; &#13;
+ &#13;
+  letter-spacing:.8px; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.outcome-table-row { &#13;
+ &#13;
+  min-height:53px; &#13;
+ &#13;
+  padding: &#13;
+    9px &#13;
+    11px; &#13;
+ &#13;
+  border: &#13;
+    1px &#13;
+    solid &#13;
+    #e0ebe4; &#13;
+ &#13;
+  border-top:0; &#13;
+ &#13;
+  color:#506478; &#13;
+ &#13;
+  font-size:9px; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.outcome-table-row strong { &#13;
+ &#13;
+  display:block; &#13;
+ &#13;
+  color:#30495a; &#13;
+ &#13;
+  font-size:9px; &#13;
+ &#13;
+  font-weight:850; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.outcome-table-row small { &#13;
+ &#13;
+  display:block; &#13;
+ &#13;
+  margin-top:2px; &#13;
+ &#13;
+  color:#86929f; &#13;
+ &#13;
+  font-size:7px; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.verification-status { &#13;
+ &#13;
+  display:inline-block; &#13;
+ &#13;
+  padding: &#13;
+    5px &#13;
+    7px; &#13;
+ &#13;
+  border-radius:5px; &#13;
+ &#13;
+  background:#e4f5eb; &#13;
+ &#13;
+  border:1px solid #c4e2d1; &#13;
+ &#13;
+  color:#2b7450; &#13;
+ &#13;
+  font-size:7px; &#13;
+ &#13;
+  font-weight:850; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+/* ========================================================= &#13;
+   READ ONLY &#13;
+   ========================================================= */ &#13;
+ &#13;
+.read-only-banner { &#13;
+ &#13;
+  margin-top:14px; &#13;
+ &#13;
+  padding: &#13;
+    12px; &#13;
+ &#13;
+  display:flex; &#13;
+ &#13;
+  align-items:flex-start; &#13;
+ &#13;
+  gap:9px; &#13;
+ &#13;
+  background: &#13;
+    linear-gradient( &#13;
+      100deg, &#13;
+      #edf8f7, &#13;
+      #f4fbff &#13;
+    ); &#13;
+ &#13;
+  border: &#13;
+    1px &#13;
+    solid &#13;
+    #cbe2e0; &#13;
+ &#13;
+  border-radius:8px; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.read-only-icon { &#13;
+ &#13;
+  width:31px; &#13;
+ &#13;
+  height:31px; &#13;
+ &#13;
+  min-width:31px; &#13;
+ &#13;
+  display:flex; &#13;
+ &#13;
+  align-items:center; &#13;
+ &#13;
+  justify-content:center; &#13;
+ &#13;
+  border-radius:7px; &#13;
+ &#13;
+  background:#dff3f0; &#13;
+ &#13;
+  color:#19797c; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.read-only-banner strong { &#13;
+ &#13;
+  display:block; &#13;
+ &#13;
+  color:#315d66; &#13;
+ &#13;
+  font-size:9px; &#13;
+ &#13;
+  font-weight:900; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.read-only-banner p { &#13;
+ &#13;
+  margin: &#13;
+    3px &#13;
+    0 &#13;
+    0; &#13;
+ &#13;
+  color:#6f8191; &#13;
+ &#13;
+  font-size:8px; &#13;
+ &#13;
+  line-height:1.5; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+/* ========================================================= &#13;
+   FOOTER &#13;
+   ========================================================= */ &#13;
+ &#13;
+.trainer-dashboard-footer { &#13;
+ &#13;
+  width:100%; &#13;
+ &#13;
+  padding: &#13;
+    14px &#13;
+    2px &#13;
+    3px; &#13;
+ &#13;
+  display:flex; &#13;
+ &#13;
+  align-items:center; &#13;
+ &#13;
+  justify-content:space-between; &#13;
+ &#13;
+  color:#8491a1; &#13;
+ &#13;
+  font-size:8px; &#13;
+ &#13;
+  font-weight:700; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+/* ========================================================= &#13;
+   LOADING &#13;
+   ========================================================= */ &#13;
+ &#13;
+.trainer-dashboard-loading { &#13;
+ &#13;
+  position:fixed; &#13;
+ &#13;
+  inset:0; &#13;
+ &#13;
+  z-index:2147483647; &#13;
+ &#13;
+  display:flex; &#13;
+ &#13;
+  align-items:center; &#13;
+ &#13;
+  justify-content:center; &#13;
+ &#13;
+  gap:9px; &#13;
+ &#13;
+  background:#f3f6fb; &#13;
+ &#13;
+  color:#738297; &#13;
+ &#13;
+  font-size:11px; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.trainer-dashboard-loading i { &#13;
+ &#13;
+  color:#6641db; &#13;
+ &#13;
+  font-size:17px; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+/* ========================================================= &#13;
+   1200px &#13;
+   ========================================================= */ &#13;
+ &#13;
+@media (max-width:1200px){ &#13;
+ &#13;
+  .campus360-opportunities-app &#13;
+  .campus360-trainer-sidebar { &#13;
+ &#13;
+    width:260px !important; &#13;
+ &#13;
+    min-width:260px !important; &#13;
+ &#13;
+    max-width:260px !important; &#13;
+ &#13;
+    flex-basis:260px !important; &#13;
+ &#13;
+    background: &#13;
+      linear-gradient( &#13;
+        180deg, &#13;
+        #130d2f 0%, &#13;
+        #160d38 48%, &#13;
+        #100a29 100% &#13;
+      ) !important; &#13;
+ &#13;
+    border-right:1px solid #2d2157 !important; &#13;
+ &#13;
+  } &#13;
+ &#13;
+ &#13;
+  .campus360-trainer-main { &#13;
+ &#13;
+    width: &#13;
+      calc(100vw - 260px) !important; &#13;
+ &#13;
+    max-width: &#13;
+      calc(100vw - 260px) !important; &#13;
+ &#13;
+  } &#13;
+ &#13;
+ &#13;
+  .opportunity-kpi-grid { &#13;
+ &#13;
+    grid-template-columns: &#13;
+      repeat(2,minmax(0,1fr)); &#13;
+ &#13;
+  } &#13;
+ &#13;
+ &#13;
+  .opportunity-details-grid { &#13;
+ &#13;
+    grid-template-columns: &#13;
+      repeat(2,minmax(0,1fr)); &#13;
+ &#13;
+  } &#13;
+ &#13;
+ &#13;
+  .company-info-grid { &#13;
+ &#13;
+    grid-template-columns: &#13;
+      repeat(2,minmax(0,1fr)); &#13;
+ &#13;
+  } &#13;
+ &#13;
+ &#13;
+  .opportunity-detail-summary { &#13;
+ &#13;
+    grid-template-columns: &#13;
+      repeat(2,minmax(0,1fr)); &#13;
+ &#13;
+  } &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+/* ========================================================= &#13;
+   950px &#13;
+   ========================================================= */ &#13;
+ &#13;
+@media (max-width:950px){ &#13;
+ &#13;
+  .campus360-opportunities-app &#13;
+  .campus360-trainer-sidebar { &#13;
+ &#13;
+    position:fixed !important; &#13;
+ &#13;
+    top:0 !important; &#13;
+ &#13;
+    left:0 !important; &#13;
+ &#13;
+    bottom:0 !important; &#13;
+ &#13;
+    width:280px !important; &#13;
+ &#13;
+    min-width:280px !important; &#13;
+ &#13;
+    max-width:280px !important; &#13;
+ &#13;
+    flex-basis:280px !important; &#13;
+ &#13;
+    height:100vh !important; &#13;
+ &#13;
+    transform:translateX(-100%); &#13;
+ &#13;
+    background: &#13;
+      linear-gradient( &#13;
+        180deg, &#13;
+        #130d2f 0%, &#13;
+        #160d38 48%, &#13;
+        #100a29 100% &#13;
+      ) !important; &#13;
+ &#13;
+    border-right:1px solid #2d2157 !important; &#13;
+ &#13;
+    box-shadow: &#13;
+      8px &#13;
+      0 &#13;
+      30px &#13;
+      rgba(10,7,30,.30); &#13;
+ &#13;
+  } &#13;
+ &#13;
+ &#13;
+  .campus360-opportunities-app &#13;
+  .campus360-trainer-sidebar { &#13;
+ &#13;
+    transform:translateX(-100%); &#13;
+ &#13;
+  } &#13;
+ &#13;
+ &#13;
+  .campus360-opportunities-app:not(.sidebar-collapsed) &#13;
+  .campus360-trainer-sidebar { &#13;
+ &#13;
+    transform:translateX(0); &#13;
+ &#13;
+  } &#13;
+ &#13;
+ &#13;
+  .campus360-trainer-main { &#13;
+ &#13;
+    width:100% !important; &#13;
+ &#13;
+    max-width:100% !important; &#13;
+ &#13;
+  } &#13;
+ &#13;
+ &#13;
+  .trainer-sidebar-overlay { &#13;
+ &#13;
+    position:fixed; &#13;
+ &#13;
+    inset:0; &#13;
+ &#13;
+    z-index:1900; &#13;
+ &#13;
+    display:block; &#13;
+ &#13;
+    background: &#13;
+      rgba(22,34,52,.34); &#13;
+ &#13;
+  } &#13;
+ &#13;
+ &#13;
+  .sidebar-collapsed &#13;
+  .trainer-sidebar-overlay { &#13;
+ &#13;
+    display:none; &#13;
+ &#13;
+  } &#13;
+ &#13;
+ &#13;
+  .opportunity-welcome { &#13;
+ &#13;
+    flex-direction:column; &#13;
+ &#13;
+    align-items:flex-start; &#13;
+ &#13;
+  } &#13;
+ &#13;
+ &#13;
+  .opportunity-trainer-card { &#13;
+ &#13;
+    width:100%; &#13;
+ &#13;
+    min-width:0; &#13;
+ &#13;
+  } &#13;
+ &#13;
+ &#13;
+  .opportunity-search-grid { &#13;
+ &#13;
+    grid-template-columns:1fr; &#13;
+ &#13;
+  } &#13;
+ &#13;
+ &#13;
+  .opportunity-card-top { &#13;
+ &#13;
+    grid-template-columns: &#13;
+      auto &#13;
+      minmax(0,1fr); &#13;
+ &#13;
+  } &#13;
+ &#13;
+ &#13;
+  .opportunity-status-wrapper { &#13;
+ &#13;
+    grid-column:2; &#13;
+ &#13;
+  } &#13;
+ &#13;
+ &#13;
+  .opportunity-application-strip { &#13;
+ &#13;
+    grid-template-columns: &#13;
+      repeat(3,minmax(0,1fr)); &#13;
+ &#13;
+  } &#13;
+ &#13;
+ &#13;
+  .opportunity-view-btn { &#13;
+ &#13;
+    grid-column:1/-1; &#13;
+ &#13;
+    width:100%; &#13;
+ &#13;
+  } &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+/* ========================================================= &#13;
+   700px &#13;
+   ========================================================= */ &#13;
+ &#13;
+@media (max-width:700px){ &#13;
+ &#13;
+  .trainer-topbar { &#13;
+ &#13;
+    height:64px; &#13;
+ &#13;
+    min-height:64px; &#13;
+ &#13;
+    padding: &#13;
+      0 &#13;
+      10px; &#13;
+ &#13;
+  } &#13;
+ &#13;
+ &#13;
+  .trainer-hamburger { &#13;
+ &#13;
+    width:38px; &#13;
+ &#13;
+    height:38px; &#13;
+ &#13;
+    min-width:38px; &#13;
+ &#13;
+  } &#13;
+ &#13;
+ &#13;
+  .trainer-top-icon { &#13;
+ &#13;
+    width:37px; &#13;
+ &#13;
+    height:37px; &#13;
+ &#13;
+    min-width:37px; &#13;
+ &#13;
+  } &#13;
+ &#13;
+ &#13;
+  .trainer-top-profile-text { &#13;
+ &#13;
+    display:none; &#13;
+ &#13;
+  } &#13;
+ &#13;
+ &#13;
+  .trainer-top-profile { &#13;
+ &#13;
+    padding-left:5px; &#13;
+ &#13;
+  } &#13;
+ &#13;
+ &#13;
+  .trainer-top-avatar { &#13;
+ &#13;
+    width:37px; &#13;
+ &#13;
+    height:37px; &#13;
+ &#13;
+    min-width:37px; &#13;
+ &#13;
+  } &#13;
+ &#13;
+ &#13;
+  .trainer-topbar-title { &#13;
+ &#13;
+    font-size:12px; &#13;
+ &#13;
+  } &#13;
+ &#13;
+ &#13;
+  .trainer-topbar-eyebrow { &#13;
+ &#13;
+    font-size:8px; &#13;
+ &#13;
+  } &#13;
+ &#13;
+ &#13;
+  .trainer-opportunities-content { &#13;
+ &#13;
+    padding: &#13;
+      15px &#13;
+      11px &#13;
+      28px; &#13;
+ &#13;
+  } &#13;
+ &#13;
+ &#13;
+  .opportunity-welcome { &#13;
+ &#13;
+    min-height:auto; &#13;
+ &#13;
+    padding: &#13;
+      20px &#13;
+      18px; &#13;
+ &#13;
+  } &#13;
+ &#13;
+ &#13;
+  .opportunity-welcome h1 { &#13;
+ &#13;
+    font-size:26px; &#13;
+ &#13;
+  } &#13;
+ &#13;
+ &#13;
+  .opportunity-welcome p { &#13;
+ &#13;
+    font-size:11px; &#13;
+ &#13;
+  } &#13;
+ &#13;
+ &#13;
+  .opportunity-kpi-grid { &#13;
+ &#13;
+    grid-template-columns:1fr; &#13;
+ &#13;
+  } &#13;
+ &#13;
+ &#13;
+  .trainer-panel { &#13;
+ &#13;
+    padding: &#13;
+      16px; &#13;
+ &#13;
+  } &#13;
+ &#13;
+ &#13;
+  .trainer-panel-heading h2 { &#13;
+ &#13;
+    font-size:19px; &#13;
+ &#13;
+  } &#13;
+ &#13;
+ &#13;
+  .opportunity-details-grid { &#13;
+ &#13;
+    grid-template-columns:1fr; &#13;
+ &#13;
+  } &#13;
+ &#13;
+ &#13;
+  .company-info-grid { &#13;
+ &#13;
+    grid-template-columns:1fr; &#13;
+ &#13;
+  } &#13;
+ &#13;
+ &#13;
+  .opportunity-detail-summary { &#13;
+ &#13;
+    grid-template-columns:1fr; &#13;
+ &#13;
+  } &#13;
+ &#13;
+ &#13;
+  .opportunity-application-strip { &#13;
+ &#13;
+    grid-template-columns: &#13;
+      1fr &#13;
+      1fr; &#13;
+ &#13;
+  } &#13;
+ &#13;
+ &#13;
+  .application-total { &#13;
+ &#13;
+    grid-column:1/-1; &#13;
+ &#13;
+  } &#13;
+ &#13;
+ &#13;
+  .opportunity-view-btn { &#13;
+ &#13;
+    grid-column:1/-1; &#13;
+ &#13;
+  } &#13;
+ &#13;
+ &#13;
+  .trainer-dashboard-footer { &#13;
+ &#13;
+    flex-direction:column; &#13;
+ &#13;
+    align-items:flex-start; &#13;
+ &#13;
+    gap:5px; &#13;
+ &#13;
+  } &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+/* ========================================================= &#13;
+   430px &#13;
+   ========================================================= */ &#13;
+ &#13;
+@media (max-width:430px){ &#13;
+ &#13;
+  .trainer-topbar { &#13;
+ &#13;
+    padding-left:8px; &#13;
+ &#13;
+    padding-right:8px; &#13;
+ &#13;
+  } &#13;
+ &#13;
+ &#13;
+  .trainer-page-heading { &#13;
+ &#13;
+    max-width:130px; &#13;
+ &#13;
+  } &#13;
+ &#13;
+ &#13;
+  .opportunity-welcome h1 { &#13;
+ &#13;
+    font-size:23px; &#13;
+ &#13;
+  } &#13;
+ &#13;
+ &#13;
+  .opportunity-main-title h3 { &#13;
+ &#13;
+    font-size:15px; &#13;
+ &#13;
+  } &#13;
+ &#13;
+ &#13;
+  .opportunity-card { &#13;
+ &#13;
+    padding: &#13;
+      15px &#13;
+      15px &#13;
+      0; &#13;
+ &#13;
+  } &#13;
+ &#13;
+ &#13;
+  .opportunity-card-top { &#13;
+ &#13;
+    grid-template-columns: &#13;
+      auto &#13;
+      minmax(0,1fr); &#13;
+ &#13;
+  } &#13;
+ &#13;
+ &#13;
+  .opportunity-status-wrapper { &#13;
+ &#13;
+    grid-column:1/-1; &#13;
+ &#13;
+  } &#13;
+ &#13;
+ &#13;
+  .opportunity-application-strip { &#13;
+ &#13;
+    grid-template-columns:1fr; &#13;
+ &#13;
+  } &#13;
+ &#13;
+ &#13;
+  .application-total { &#13;
+ &#13;
+    grid-column:auto; &#13;
+ &#13;
+  } &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+/* ========================================================= &#13;
+   FINAL FULL VIEW SAFETY &#13;
+   ========================================================= */ &#13;
+ &#13;
+.campus360-opportunities-app &#13;
+.trainer-opportunities-content, &#13;
+.campus360-opportunities-app &#13;
+.trainer-panel, &#13;
+.campus360-opportunities-app &#13;
+.opportunity-welcome, &#13;
+.campus360-opportunities-app &#13;
+.opportunity-kpi-grid { &#13;
+ &#13;
+  max-width:none !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.campus360-opportunities-app &#13;
+button, &#13;
+.campus360-opportunities-app &#13;
+input, &#13;
+.campus360-opportunities-app &#13;
+select { &#13;
+ &#13;
+  font-family:inherit; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.campus360-opportunities-app &#13;
+a { &#13;
+ &#13;
+  text-decoration:none !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+/* ========================================================= &#13;
+   FINAL DARK PURPLE SIDEBAR SAFETY&#13;
+   ENSURES SERVICE NOW / OTHER CSS CANNOT TURN IT WHITE&#13;
+   ========================================================= */ &#13;
+ &#13;
+.campus360-opportunities-app &#13;
+.campus360-trainer-sidebar { &#13;
+ &#13;
+  background: &#13;
+    linear-gradient( &#13;
+      180deg, &#13;
+      #130d2f 0%, &#13;
+      #160d38 48%, &#13;
+      #100a29 100% &#13;
+    ) !important; &#13;
+ &#13;
+  border-right:1px solid #2d2157 !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.campus360-opportunities-app &#13;
+.campus360-trainer-sidebar &#13;
+.trainer-brand { &#13;
+ &#13;
+  background: &#13;
+    linear-gradient( &#13;
+      135deg, &#13;
+      #170e38, &#13;
+      #1c1045 &#13;
+    ) !important; &#13;
+ &#13;
+  border-bottom:1px solid #2d2157 !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.campus360-opportunities-app &#13;
+.campus360-trainer-sidebar &#13;
+.trainer-profile-mini { &#13;
+ &#13;
+  background: &#13;
+    linear-gradient( &#13;
+      135deg, &#13;
+      #211342, &#13;
+      #29164f &#13;
+    ) !important; &#13;
+ &#13;
+  border-color:#4b3475 !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.campus360-opportunities-app &#13;
+.campus360-trainer-sidebar &#13;
+.trainer-nav-item { &#13;
+ &#13;
+  background:transparent !important; &#13;
+ &#13;
+  color:#c4b8dc !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.campus360-opportunities-app &#13;
+.campus360-trainer-sidebar &#13;
+.trainer-nav-item:hover { &#13;
+ &#13;
+  background:rgba(124,58,237,.18) !important; &#13;
+ &#13;
+  color:#ffffff !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.campus360-opportunities-app &#13;
+.campus360-trainer-sidebar &#13;
+.trainer-nav-item.active { &#13;
+ &#13;
+  background: &#13;
+    linear-gradient( &#13;
+      90deg, &#13;
+      #7c3aed 0%, &#13;
+      #8b3ff2 100% &#13;
+    ) !important; &#13;
+ &#13;
+  color:#ffffff !important; &#13;
+ &#13;
+  border-left:4px solid #a78bfa !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.campus360-opportunities-app &#13;
+.campus360-trainer-sidebar &#13;
+.trainer-nav-icon { &#13;
+ &#13;
+  color:#a99ac8 !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.campus360-opportunities-app &#13;
+.campus360-trainer-sidebar &#13;
+.trainer-nav-item:hover &#13;
+.trainer-nav-icon, &#13;
+ &#13;
+.campus360-opportunities-app &#13;
+.campus360-trainer-sidebar &#13;
+.trainer-nav-item.active &#13;
+.trainer-nav-icon { &#13;
+ &#13;
+  color:#ffffff !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.campus360-opportunities-app &#13;
+.campus360-trainer-sidebar &#13;
+.trainer-brand-text strong, &#13;
+ &#13;
+.campus360-opportunities-app &#13;
+.campus360-trainer-sidebar &#13;
+.trainer-profile-info strong { &#13;
+ &#13;
+  color:#ffffff !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.campus360-opportunities-app &#13;
+.campus360-trainer-sidebar &#13;
+.trainer-brand-text span, &#13;
+ &#13;
+.campus360-opportunities-app &#13;
+.campus360-trainer-sidebar &#13;
+.trainer-profile-info span { &#13;
+ &#13;
+  color:#b9abd8 !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.campus360-opportunities-app &#13;
+.campus360-trainer-sidebar &#13;
+.trainer-nav-label { &#13;
+ &#13;
+  color:#9283b6 !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.campus360-opportunities-app &#13;
+.campus360-trainer-sidebar &#13;
+.trainer-nav-count { &#13;
+ &#13;
+  background:#3a2764 !important; &#13;
+ &#13;
+  color:#d9ceef !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.campus360-opportunities-app &#13;
+.campus360-trainer-sidebar &#13;
+.trainer-nav-item.active &#13;
+.trainer-nav-count { &#13;
+ &#13;
+  background:rgba(255,255,255,.18) !important; &#13;
+ &#13;
+  color:#ffffff !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+/* ========================================================= &#13;
+   END &#13;
+   ========================================================= */ </css>
+        <data_table>sp_instance</data_table>
+        <demo_data/>
+        <description/>
+        <docs/>
+        <field_list/>
+        <has_preview>false</has_preview>
+        <id>campus360_trainer_opportunities</id>
+        <internal>false</internal>
+        <link><![CDATA[function link(scope, element, attrs, controller) {
+  
+}]]></link>
+        <name>Campus360 Trainer Opportunities</name>
+        <option_schema/>
+        <public>false</public>
+        <roles/>
+        <script><![CDATA[(function() {
+
+    /* ============================================================
+       CAMPUS360 TRAINER OPPORTUNITIES
+       
+       READ ONLY
+       
+       Tables:
+       1. x_snc_campus360_placement_opportunity
+       2. x_snc_campus360_student_application
+       3. x_snc_campus360_placement_outcome
+       4. x_snc_campus360_company_master
+       ============================================================ */
+
+
+    data.loaded = false;
+
+
+    /* ============================================================
+       HELPER FUNCTIONS
+       ============================================================ */
+
+    function safeValue(
+        gr,
+        field
+    ) {
+
+        if (
+            !gr ||
+            !gr.isValidField(field)
+        ) {
+
+            return '';
+
+        }
+
+        return (
+            gr.getDisplayValue(field) ||
+            gr.getValue(field) ||
+            ''
+        );
+
+    }
+
+
+    function rawValue(
+        gr,
+        field
+    ) {
+
+        if (
+            !gr ||
+            !gr.isValidField(field)
+        ) {
+
+            return '';
+
+        }
+
+        return (
+            gr.getValue(field) ||
+            ''
+        );
+
+    }
+
+
+    function getInitials(
+        name
+    ) {
+
+        name =
+            (name || '')
+                .toString()
+                .trim();
+
+
+        if (!name) {
+            return 'OP';
+        }
+
+
+        var parts =
+            name.split(/\s+/);
+
+
+        if (
+            parts.length === 1
+        ) {
+
+            return parts[0]
+                .substring(0, 2)
+                .toUpperCase();
+
+        }
+
+
+        return (
+            parts[0].charAt(0) +
+            parts[parts.length - 1].charAt(0)
+        ).toUpperCase();
+
+    }
+
+
+    function formatDate(
+        value
+    ) {
+
+        if (!value) {
+            return '';
+        }
+
+
+        try {
+
+            var gdt =
+                new GlideDateTime(value);
+
+            return gdt
+                .getDate()
+                .getDisplayValue();
+
+        } catch (e) {
+
+            return value;
+
+        }
+
+    }
+
+
+    function normalizeStatus(
+        value
+    ) {
+
+        if (!value) {
+            return '';
+        }
+
+
+        return value
+            .toString()
+            .trim();
+
+    }
+
+
+    /* ============================================================
+       CURRENT TRAINER
+       ============================================================ */
+
+    var trainerId =
+        '';
+
+    try {
+
+        trainerId =
+            (input && input.trainerId) ||
+            gs.getSession()
+                .getClientData('trainer_id') ||
+            '';
+
+    } catch (trainerError) {
+
+        trainerId = '';
+
+    }
+
+
+    /*
+     * The trainer ID is normally supplied in the URL:
+     *
+     * ?id=campus360_trainer_opportunities&trainer=TR001
+     *
+     * Server-side gs action parameters are not always directly
+     * available from the widget URL, so we also read the request.
+     */
+
+    try {
+
+        var request =
+            gs.action.getGlideURI();
+
+        if (request) {
+
+            var requestTrainer =
+                request.get('trainer');
+
+            if (requestTrainer) {
+                trainerId =
+                    requestTrainer;
+            }
+
+        }
+
+    } catch (uriError) {
+
+        // Keep existing trainerId.
+
+    }
+
+
+    /* ============================================================
+       TRAINER DATA
+       ============================================================ */
+
+    data.trainer = {
+
+        id: trainerId || '',
+
+        name: '',
+
+        initials: ''
+
+    };
+
+
+    if (trainerId) {
+
+        var trainerGR =
+            new GlideRecord(
+                'x_snc_campus360_trainer_master'
+            );
+
+
+        trainerGR.addQuery(
+            'u_trainer_id',
+            trainerId
+        );
+
+
+        trainerGR.query();
+
+
+        if (trainerGR.next()) {
+
+            data.trainer.name =
+                safeValue(
+                    trainerGR,
+                    'u_trainer_name'
+                ) ||
+                safeValue(
+                    trainerGR,
+                    'name'
+                ) ||
+                trainerId;
+
+
+            data.trainer.initials =
+                getInitials(
+                    data.trainer.name
+                );
+
+        }
+
+    }
+
+
+    if (!data.trainer.name) {
+
+        data.trainer.name =
+            trainerId ||
+            'Trainer';
+
+        data.trainer.initials =
+            getInitials(
+                data.trainer.name
+            );
+
+    }
+
+
+    /* ============================================================
+       SUMMARY
+       ============================================================ */
+
+    data.summary = {
+
+        total: 0,
+
+        open: 0,
+
+        applications: 0,
+
+        placed: 0
+
+    };
+
+
+    data.opportunities = [];
+
+
+    /* ============================================================
+       LOAD PLACEMENT OUTCOMES FIRST
+       
+       Used for summary count and opportunity details.
+       ============================================================ */
+
+    var outcomeMap = {};
+
+
+    var outcomeGR =
+        new GlideRecord(
+            'x_snc_campus360_placement_outcome'
+        );
+
+
+    outcomeGR.query();
+
+
+    while (
+        outcomeGR.next()
+    ) {
+
+        var outcomeOpportunity =
+            rawValue(
+                outcomeGR,
+                'u_opportunity'
+            );
+
+
+        if (
+            !outcomeOpportunity
+        ) {
+
+            continue;
+
+        }
+
+
+        if (
+            !outcomeMap[
+                outcomeOpportunity
+            ]
+        ) {
+
+            outcomeMap[
+                outcomeOpportunity
+            ] = [];
+
+        }
+
+
+        var outcomeStudent =
+            outcomeGR.student;
+
+
+        var outcomeStudentName =
+            '';
+
+
+        var outcomeStudentId =
+            '';
+
+
+        if (
+            outcomeStudent &&
+            outcomeStudent.getRefRecord
+        ) {
+
+            var outcomeStudentGR =
+                outcomeStudent.getRefRecord();
+
+
+            if (
+                outcomeStudentGR &&
+                outcomeStudentGR.isValidRecord()
+            ) {
+
+                outcomeStudentName =
+                    safeValue(
+                        outcomeStudentGR,
+                        'u_student_name'
+                    ) ||
+                    safeValue(
+                        outcomeStudentGR,
+                        'student_name'
+                    );
+
+
+                outcomeStudentId =
+                    safeValue(
+                        outcomeStudentGR,
+                        'u_student_id'
+                    ) ||
+                    safeValue(
+                        outcomeStudentGR,
+                        'student_id'
+                    );
+
+            }
+
+        }
+
+
+        outcomeMap[
+            outcomeOpportunity
+        ].push({
+
+            sys_id:
+                outcomeGR.getUniqueValue(),
+
+            student_name:
+                outcomeStudentName,
+
+            student_id:
+                outcomeStudentId,
+
+            outcome_type:
+                safeValue(
+                    outcomeGR,
+                    'u_outcome_type'
+                ) ||
+                safeValue(
+                    outcomeGR,
+                    'outcome_type'
+                ),
+
+            joining_date:
+                formatDate(
+                    rawValue(
+                        outcomeGR,
+                        'u_joining_date'
+                    ) ||
+                    rawValue(
+                        outcomeGR,
+                        'joining_date'
+                    )
+                ),
+
+            placement_type:
+                safeValue(
+                    outcomeGR,
+                    'u_placement_type'
+                ) ||
+                safeValue(
+                    outcomeGR,
+                    'placement_type'
+                ),
+
+            ctc:
+                safeValue(
+                    outcomeGR,
+                    'u_ctc'
+                ) ||
+                safeValue(
+                    outcomeGR,
+                    'ctc'
+                ),
+
+            verification_status:
+                safeValue(
+                    outcomeGR,
+                    'u_verification_status'
+                ) ||
+                safeValue(
+                    outcomeGR,
+                    'verification_status'
+                ),
+
+            company_name:
+                safeValue(
+                    outcomeGR,
+                    'u_company'
+                ) ||
+                safeValue(
+                    outcomeGR,
+                    'company'
+                )
+
+        });
+
+    }
+
+
+    /* ============================================================
+       LOAD PLACEMENT OPPORTUNITIES
+       ============================================================ */
+
+    var opportunityGR =
+        new GlideRecord(
+            'x_snc_campus360_placement_opportunity'
+        );
+
+
+    opportunityGR.orderByDesc(
+        'sys_created_on'
+    );
+
+
+    opportunityGR.query();
+
+
+    while (
+        opportunityGR.next()
+    ) {
+
+        var opportunityId =
+            safeValue(
+                opportunityGR,
+                'u_opportunity_id'
+            ) ||
+            safeValue(
+                opportunityGR,
+                'opportunity_id'
+            );
+
+
+        var opportunityTitle =
+            safeValue(
+                opportunityGR,
+                'u_opportunity_title'
+            ) ||
+            safeValue(
+                opportunityGR,
+                'opportunity_title'
+            );
+
+
+        var opportunityStatus =
+            normalizeStatus(
+                safeValue(
+                    opportunityGR,
+                    'u_status'
+                ) ||
+                safeValue(
+                    opportunityGR,
+                    'status'
+                )
+            );
+
+
+        var opportunityType =
+            safeValue(
+                opportunityGR,
+                'u_opportunity_type'
+            ) ||
+            safeValue(
+                opportunityGR,
+                'opportunity_type'
+            );
+
+
+        var companyName =
+            '';
+
+
+        var companyId =
+            '';
+
+
+        var companyType =
+            '';
+
+
+        var industry =
+            '';
+
+
+        var recruiterName =
+            '';
+
+
+        var recruiterEmail =
+            '';
+
+
+        /*
+         * Company is a reference to Company Master.
+         */
+
+        if (
+            opportunityGR.company &&
+            opportunityGR.company.getRefRecord
+        ) {
+
+            var companyGR =
+                opportunityGR.company.getRefRecord();
+
+
+            if (
+                companyGR &&
+                companyGR.isValidRecord()
+            ) {
+
+                companyName =
+                    safeValue(
+                        companyGR,
+                        'u_company_name'
+                    ) ||
+                    safeValue(
+                        companyGR,
+                        'company_name'
+                    );
+
+
+                companyId =
+                    safeValue(
+                        companyGR,
+                        'u_company_id'
+                    ) ||
+                    safeValue(
+                        companyGR,
+                        'company_id'
+                    );
+
+
+                companyType =
+                    safeValue(
+                        companyGR,
+                        'u_company_type'
+                    ) ||
+                    safeValue(
+                        companyGR,
+                        'company_type'
+                    );
+
+
+                industry =
+                    safeValue(
+                        companyGR,
+                        'u_industry'
+                    ) ||
+                    safeValue(
+                        companyGR,
+                        'industry'
+                    );
+
+
+                recruiterName =
+                    safeValue(
+                        companyGR,
+                        'u_recruiter_name'
+                    ) ||
+                    safeValue(
+                        companyGR,
+                        'recruiter_name'
+                    );
+
+
+                recruiterEmail =
+                    safeValue(
+                        companyGR,
+                        'u_recruiter_email'
+                    ) ||
+                    safeValue(
+                        companyGR,
+                        'recruiter_email'
+                    );
+
+            }
+
+        }
+
+
+        /*
+         * Fallback to display value if the reference
+         * could not be expanded.
+         */
+
+        if (!companyName) {
+
+            companyName =
+                safeValue(
+                    opportunityGR,
+                    'u_company'
+                ) ||
+                safeValue(
+                    opportunityGR,
+                    'company'
+                );
+
+        }
+
+
+        var opportunity = {
+
+            sys_id:
+                opportunityGR.getUniqueValue(),
+
+            opportunity_id:
+                opportunityId,
+
+            title:
+                opportunityTitle,
+
+            status:
+                opportunityStatus,
+
+            opportunity_type:
+                opportunityType,
+
+            opportunity_source:
+                safeValue(
+                    opportunityGR,
+                    'u_opportunity_source'
+                ) ||
+                safeValue(
+                    opportunityGR,
+                    'opportunity_source'
+                ),
+
+            company_name:
+                companyName,
+
+            company_id:
+                companyId,
+
+            company_type:
+                companyType,
+
+            industry:
+                industry,
+
+            recruiter_name:
+                recruiterName,
+
+            recruiter_email:
+                recruiterEmail,
+
+            location:
+                safeValue(
+                    opportunityGR,
+                    'u_location'
+                ) ||
+                safeValue(
+                    opportunityGR,
+                    'location'
+                ),
+
+            job_description:
+                safeValue(
+                    opportunityGR,
+                    'u_job_description'
+                ) ||
+                safeValue(
+                    opportunityGR,
+                    'job_description'
+                ),
+
+            required_skills:
+                safeValue(
+                    opportunityGR,
+                    'u_required_skills'
+                ) ||
+                safeValue(
+                    opportunityGR,
+                    'required_skills'
+                ),
+
+            eligible_branches:
+                safeValue(
+                    opportunityGR,
+                    'u_eligible_branches'
+                ) ||
+                safeValue(
+                    opportunityGR,
+                    'eligible_branches'
+                ),
+
+            minimum_cgpa:
+                safeValue(
+                    opportunityGR,
+                    'u_minimum_cgpa'
+                ) ||
+                safeValue(
+                    opportunityGR,
+                    'minimum_cgpa'
+                ),
+
+            ctc_stipend:
+                safeValue(
+                    opportunityGR,
+                    'u_ctc_stipend'
+                ) ||
+                safeValue(
+                    opportunityGR,
+                    'ctc_stipend'
+                ),
+
+            application_deadline:
+                formatDate(
+                    rawValue(
+                        opportunityGR,
+                        'u_application_deadline'
+                    ) ||
+                    rawValue(
+                        opportunityGR,
+                        'application_deadline'
+                    )
+                ),
+
+            drive_date:
+                formatDate(
+                    rawValue(
+                        opportunityGR,
+                        'u_drive_date'
+                    ) ||
+                    rawValue(
+                        opportunityGR,
+                        'drive_date'
+                    )
+                ),
+
+            skillList: [],
+
+            application_count: 0,
+
+            pending_count: 0,
+
+            shortlisted_count: 0,
+
+            selected_count: 0,
+
+            applications: [],
+
+            outcomes:
+                outcomeMap[
+                    opportunityGR.getUniqueValue()
+                ] || []
+
+        };
+
+
+        /* ========================================================
+           SKILLS
+           ======================================================== */
+
+        var skillText =
+            opportunity.required_skills ||
+            '';
+
+
+        if (skillText) {
+
+            opportunity.skillList =
+                skillText
+                    .split(',')
+                    .map(
+                        function(skill) {
+
+                            return skill
+                                .trim();
+
+                        }
+                    )
+                    .filter(
+                        function(skill) {
+
+                            return !!skill;
+
+                        }
+                    );
+
+        }
+
+
+        /*
+         * Company initials
+         */
+
+        opportunity.companyInitials =
+            getInitials(
+                companyName ||
+                opportunityTitle ||
+                'OP'
+            );
+
+
+        /* ========================================================
+           APPLICATIONS FOR THIS OPPORTUNITY
+           ======================================================== */
+
+        var applicationGR =
+            new GlideRecord(
+                'x_snc_campus360_student_application'
+            );
+
+
+        /*
+         * Opportunity is a reference field.
+         */
+
+        if (
+            applicationGR.isValidField(
+                'u_opportunity'
+            )
+        ) {
+
+            applicationGR.addQuery(
+                'u_opportunity',
+                opportunityGR.getUniqueValue()
+            );
+
+        } else if (
+            applicationGR.isValidField(
+                'opportunity'
+            )
+        ) {
+
+            applicationGR.addQuery(
+                'opportunity',
+                opportunityGR.getUniqueValue()
+            );
+
+        } else {
+
+            applicationGR =
+                null;
+
+        }
+
+
+        if (applicationGR) {
+
+            applicationGR.query();
+
+
+            while (
+                applicationGR.next()
+            ) {
+
+                opportunity.application_count++;
+
+
+                var applicationStatus =
+                    normalizeStatus(
+                        safeValue(
+                            applicationGR,
+                            'u_application_status'
+                        ) ||
+                        safeValue(
+                            applicationGR,
+                            'application_status'
+                        )
+                    );
+
+
+                var offerStatus =
+                    normalizeStatus(
+                        safeValue(
+                            applicationGR,
+                            'u_offer_status'
+                        ) ||
+                        safeValue(
+                            applicationGR,
+                            'offer_status'
+                        )
+                    );
+
+
+                var interviewStatus =
+                    normalizeStatus(
+                        safeValue(
+                            applicationGR,
+                            'u_interview_status'
+                        ) ||
+                        safeValue(
+                            applicationGR,
+                            'interview_status'
+                        )
+                    );
+
+
+                /*
+                 * Summary counters.
+                 */
+
+                if (
+                    applicationStatus
+                        .toLowerCase()
+                        .indexOf('short') !== -1
+                ) {
+
+                    opportunity.shortlisted_count++;
+
+                }
+
+
+                if (
+                    applicationStatus
+                        .toLowerCase()
+                        .indexOf('select') !== -1 ||
+                    offerStatus
+                        .toLowerCase()
+                        .indexOf('accept') !== -1
+                ) {
+
+                    opportunity.selected_count++;
+
+                }
+
+
+                if (
+                    !applicationStatus ||
+                    applicationStatus
+                        .toLowerCase()
+                        .indexOf('pending') !== -1
+                ) {
+
+                    opportunity.pending_count++;
+
+                }
+
+
+                /* =================================================
+                   STUDENT
+                   ================================================= */
+
+                var studentName =
+                    '';
+
+
+                var studentId =
+                    '';
+
+
+                if (
+                    applicationGR.student &&
+                    applicationGR.student.getRefRecord
+                ) {
+
+                    var studentGR =
+                        applicationGR.student.getRefRecord();
+
+
+                    if (
+                        studentGR &&
+                        studentGR.isValidRecord()
+                    ) {
+
+                        studentName =
+                            safeValue(
+                                studentGR,
+                                'u_student_name'
+                            ) ||
+                            safeValue(
+                                studentGR,
+                                'student_name'
+                            );
+
+
+                        studentId =
+                            safeValue(
+                                studentGR,
+                                'u_student_id'
+                            ) ||
+                            safeValue(
+                                studentGR,
+                                'student_id'
+                            );
+
+                    }
+
+                }
+
+
+                if (!studentName) {
+
+                    studentName =
+                        safeValue(
+                            applicationGR,
+                            'u_student'
+                        ) ||
+                        safeValue(
+                            applicationGR,
+                            'student'
+                        );
+
+                }
+
+
+                if (!studentId) {
+
+                    studentId =
+                        safeValue(
+                            applicationGR,
+                            'u_student_id'
+                        ) ||
+                        safeValue(
+                            applicationGR,
+                            'student_id'
+                        );
+
+                }
+
+
+                opportunity.applications.push({
+
+                    sys_id:
+                        applicationGR.getUniqueValue(),
+
+                    student_name:
+                        studentName,
+
+                    student_id:
+                        studentId,
+
+                    initials:
+                        getInitials(
+                            studentName
+                        ),
+
+                    application_status:
+                        applicationStatus,
+
+                    assessment_status:
+                        safeValue(
+                            applicationGR,
+                            'u_assessment_status'
+                        ) ||
+                        safeValue(
+                            applicationGR,
+                            'assessment_status'
+                        ),
+
+                    offer_status:
+                        offerStatus,
+
+                    student_response:
+                        safeValue(
+                            applicationGR,
+                            'u_student_response'
+                        ) ||
+                        safeValue(
+                            applicationGR,
+                            'student_response'
+                        ),
+
+                    applied_date:
+                        formatDate(
+                            rawValue(
+                                applicationGR,
+                                'u_applied_date'
+                            ) ||
+                            rawValue(
+                                applicationGR,
+                                'applied_date'
+                            )
+                        ),
+
+                    interview_status:
+                        interviewStatus,
+
+                    shortlisted:
+                        safeValue(
+                            applicationGR,
+                            'u_shortlisted'
+                        ) ||
+                        safeValue(
+                            applicationGR,
+                            'shortlisted'
+                        )
+
+                });
+
+            }
+
+        }
+
+
+        /* ========================================================
+           SUMMARY
+           ======================================================== */
+
+        data.summary.total++;
+
+
+        if (
+            opportunityStatus
+                .toLowerCase() ===
+            'open'
+        ) {
+
+            data.summary.open++;
+
+        }
+
+
+        data.summary.applications +=
+            opportunity.application_count;
+
+
+        data.summary.placed +=
+            opportunity.outcomes.length;
+
+
+        data.opportunities.push(
+            opportunity
+        );
+
+    }
+
+
+    /* ============================================================
+       DATA LIMIT
+       
+       Keep the widget responsive for larger datasets.
+       ============================================================ */
+
+    if (
+        data.opportunities.length > 100
+    ) {
+
+        data.opportunities =
+            data.opportunities.slice(
+                0,
+                100
+            );
+
+    }
+
+
+    /* ============================================================
+       FINAL STATE
+       ============================================================ */
+
+    data.loaded = true;
+
+
+})();
+
+data.aiWidget = $sp.getWidget('campus360_ai_assistant');
+]]></script>
+        <servicenow>false</servicenow>
+        <sys_class_name>sp_widget</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-26 06:53:28</sys_created_on>
+        <sys_id>5c37a5fd092703107f442a080dcb4298</sys_id>
+        <sys_mod_count>13</sys_mod_count>
+        <sys_name>Campus360 Trainer Opportunities</sys_name>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name>sp_widget_5c37a5fd092703107f442a080dcb4298</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-10-01 16:08:20</sys_updated_on>
+        <template><![CDATA[<div
+  class="campus360-opportunities-app"
+  ng-if="c.data.loaded"
+  ng-init="c.sidebarOpen = true"
+  ng-class="{'sidebar-collapsed': !c.sidebarOpen}"
+>
+
+  <!-- =========================================================
+       SIDEBAR OVERLAY
+       ========================================================= -->
+
+  <div
+    class="trainer-sidebar-overlay"
+    ng-if="c.sidebarOpen"
+    ng-click="c.sidebarOpen = false">
+  </div>
+
+
+  <!-- =========================================================
+       CAMPUS360 TRAINER SIDEBAR
+       ========================================================= -->
+
+  <aside class="campus360-trainer-sidebar">
+
+    <!-- BRAND -->
+
+    <div class="trainer-brand">
+
+      <div class="trainer-brand-mark">
+        <i class="fa fa-graduation-cap"></i>
+      </div>
+
+      <div class="trainer-brand-text">
+
+        <strong>
+          Campus360
+        </strong>
+
+        <span>
+          TRAINER PORTAL
+        </span>
+
+      </div>
+
+    </div>
+
+
+    <!-- TRAINER PROFILE -->
+
+    <a
+      class="trainer-profile-mini"
+      ng-href="?id=campus360_trainer_profile&trainer={{c.data.trainer.id}}"
+    >
+
+      <div class="trainer-avatar">
+        {{c.data.trainer.initials}}
+      </div>
+
+      <div class="trainer-profile-info">
+
+        <strong>
+          {{c.data.trainer.name}}
+        </strong>
+
+        <span>
+          {{c.data.trainer.id}}
+        </span>
+
+      </div>
+
+      <i class="fa fa-angle-right trainer-profile-arrow"></i>
+
+    </a>
+
+
+    <!-- =========================================================
+         NAVIGATION
+         ========================================================= -->
+
+    <nav class="trainer-nav">
+
+      <!-- OVERVIEW -->
+
+      <div class="trainer-nav-label">
+        OVERVIEW
+      </div>
+
+      <a
+        class="trainer-nav-item"
+        ng-href="?id=campus360_trainer_dashboard&trainer={{c.data.trainer.id}}"
+      >
+
+        <span class="trainer-nav-icon">
+          <i class="fa fa-th-large"></i>
+        </span>
+
+        <span>
+          Dashboard
+        </span>
+
+      </a>
+
+
+      <!-- TRAINING -->
+
+      <div class="trainer-nav-label">
+        TRAINING
+      </div>
+
+      <a
+        class="trainer-nav-item"
+        ng-href="?id=campus360_trainer_my_training&trainer={{c.data.trainer.id}}"
+      >
+
+        <span class="trainer-nav-icon">
+          <i class="fa fa-book"></i>
+        </span>
+
+        <span>
+          My Training
+        </span>
+
+        <span
+          class="trainer-nav-count"
+          ng-if="
+            c.data.metrics &&
+            c.data.metrics.trainingPrograms > 0
+          "
+        >
+          {{c.data.metrics.trainingPrograms}}
+        </span>
+
+      </a>
+
+
+      <!-- MOCK INTERVIEWS -->
+
+      <div class="trainer-nav-label">
+        MOCK INTERVIEWS
+      </div>
+
+      <a
+        class="trainer-nav-item"
+        ng-href="?id=campus360_trainer_mock_slots&trainer={{c.data.trainer.id}}"
+      >
+
+        <span class="trainer-nav-icon">
+          <i class="fa fa-calendar-check-o"></i>
+        </span>
+
+        <span>
+          Slot Availability &amp; Requests
+        </span>
+
+        <span
+          class="trainer-nav-count warning"
+          ng-if="
+            c.data.metrics &&
+            c.data.metrics.interviewRequests > 0
+          "
+        >
+          {{c.data.metrics.interviewRequests}}
+        </span>
+
+      </a>
+
+
+      <a
+        class="trainer-nav-item"
+        ng-href="?id=campus360_trainer_interview_feedback&trainer={{c.data.trainer.id}}"
+      >
+
+        <span class="trainer-nav-icon">
+          <i class="fa fa-commenting-o"></i>
+        </span>
+
+        <span>
+          Feedback &amp; Performance
+        </span>
+
+        <span
+          class="trainer-nav-count"
+          ng-if="
+            c.data.metrics &&
+            c.data.metrics.pendingFeedback > 0
+          "
+        >
+          {{c.data.metrics.pendingFeedback}}
+        </span>
+
+      </a>
+
+
+      <!-- INTELLIGENCE -->
+
+      <div class="trainer-nav-label">
+        INTELLIGENCE
+      </div>
+
+      <a
+        class="trainer-nav-item"
+        ng-href="?id=campus360_trainer_placement_intelligence&trainer={{c.data.trainer.id}}"
+      >
+
+        <span class="trainer-nav-icon">
+          <i class="fa fa-line-chart"></i>
+        </span>
+
+        <span>
+          Placement Intelligence
+        </span>
+
+      </a>
+
+
+      <!-- TPO COORDINATION -->
+
+      <div class="trainer-nav-label">
+        TPO COORDINATION
+      </div>
+
+      <a
+        class="trainer-nav-item active"
+        ng-href="?id=campus360_trainer_tpo_coordination&trainer={{c.data.trainer.id}}"
+      >
+
+        <span class="trainer-nav-icon">
+          <i class="fa fa-university"></i>
+        </span>
+
+        <span>
+          Opportunities &amp; Rooms
+        </span>
+
+      </a>
+
+
+      <!-- ACCOUNT -->
+
+      <div class="trainer-nav-label">
+        ACCOUNT
+      </div>
+
+      <a
+        class="trainer-nav-item"
+        ng-href="?id=campus360_trainer_profile&trainer={{c.data.trainer.id}}"
+      >
+
+        <span class="trainer-nav-icon">
+          <i class="fa fa-user-circle-o"></i>
+        </span>
+
+        <span>
+          Trainer Profile
+        </span>
+
+      </a>
+
+    </nav>
+
+  </aside>
+
+
+  <!-- =========================================================
+       MAIN APPLICATION
+       ========================================================= -->
+
+  <main class="campus360-trainer-main">
+
+
+    <!-- =======================================================
+         TOP NAVBAR
+         ======================================================= -->
+
+    <header class="trainer-topbar">
+
+      <!-- LEFT SIDE -->
+
+      <div class="trainer-topbar-left">
+
+        <button
+          type="button"
+          class="trainer-hamburger"
+          ng-click="c.sidebarOpen = !c.sidebarOpen"
+          title="Open / Close Sidebar"
+          aria-label="Open or close sidebar"
+        >
+
+          <i class="fa fa-bars"></i>
+
+        </button>
+
+
+        <div class="trainer-page-heading">
+
+          <span class="trainer-topbar-eyebrow">
+            CAMPUS360
+          </span>
+
+          <span class="trainer-topbar-title">
+            Opportunities &amp; Rooms
+          </span>
+
+        </div>
+
+      </div>
+
+
+      <!-- RIGHT SIDE -->
+
+      <div class="trainer-topbar-actions">
+
+
+        <!-- REFRESH -->
+
+        <button
+          type="button"
+          class="trainer-top-icon"
+          ng-click="c.refresh()"
+          title="Refresh"
+          aria-label="Refresh"
+        >
+
+          <i class="fa fa-refresh"></i>
+
+        </button>
+
+
+        <!-- NOTIFICATION -->
+
+        <button
+          type="button"
+          class="trainer-top-icon trainer-notification-button"
+          title="Notifications"
+          aria-label="Notifications"
+        >
+
+          <i class="fa fa-bell"></i>
+
+          <span class="trainer-notification-dot"></span>
+
+        </button>
+
+
+        <!-- TRAINER PROFILE -->
+
+        <a
+          class="trainer-top-profile"
+          ng-href="?id=campus360_trainer_profile&trainer={{c.data.trainer.id}}"
+        >
+
+          <div class="trainer-top-avatar">
+            {{c.data.trainer.initials}}
+          </div>
+
+          <div class="trainer-top-profile-text">
+
+            <strong>
+              {{c.data.trainer.name}}
+            </strong>
+
+            <span>
+              {{c.data.trainer.id}}
+            </span>
+
+          </div>
+
+        </a>
+
+      </div>
+
+    </header>
+
+
+    <!-- =======================================================
+         PAGE CONTENT
+         ======================================================= -->
+
+    <section class="trainer-opportunities-content">
+
+
+      <!-- =====================================================
+           PAGE HERO
+           ===================================================== -->
+
+      <section class="opportunity-welcome">
+
+        <div class="opportunity-welcome-copy">
+
+          <span class="trainer-eyebrow">
+            TPO COORDINATION
+          </span>
+
+          <h1>
+            Opportunities &amp; Rooms
+          </h1>
+
+          <p>
+            View placement opportunities available for your students,
+            company details, eligibility requirements, applications,
+            placement outcomes and training room information.
+          </p>
+
+        </div>
+
+
+        <div class="opportunity-trainer-card">
+
+          <div class="opportunity-trainer-avatar">
+            {{c.data.trainer.initials}}
+          </div>
+
+          <div>
+
+            <span>
+              TRAINER
+            </span>
+
+            <strong>
+              {{c.data.trainer.name}}
+            </strong>
+
+            <small>
+              {{c.data.trainer.id}}
+            </small>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- =====================================================
+           KPI CARDS
+           ===================================================== -->
+
+      <section class="opportunity-kpi-grid">
+
+
+        <div class="opportunity-kpi-card kpi-purple">
+
+          <div class="opportunity-kpi-icon">
+            <i class="fa fa-briefcase"></i>
+          </div>
+
+          <div class="opportunity-kpi-content">
+
+            <span>
+              TOTAL OPPORTUNITIES
+            </span>
+
+            <strong>
+              {{c.data.summary.total || 0}}
+            </strong>
+
+            <small>
+              Placement opportunities
+            </small>
+
+          </div>
+
+        </div>
+
+
+        <div class="opportunity-kpi-card kpi-teal">
+
+          <div class="opportunity-kpi-icon">
+            <i class="fa fa-unlock"></i>
+          </div>
+
+          <div class="opportunity-kpi-content">
+
+            <span>
+              OPEN OPPORTUNITIES
+            </span>
+
+            <strong>
+              {{c.data.summary.open || 0}}
+            </strong>
+
+            <small>
+              Currently available
+            </small>
+
+          </div>
+
+        </div>
+
+
+        <div class="opportunity-kpi-card kpi-orange">
+
+          <div class="opportunity-kpi-icon">
+            <i class="fa fa-users"></i>
+          </div>
+
+          <div class="opportunity-kpi-content">
+
+            <span>
+              STUDENT APPLICATIONS
+            </span>
+
+            <strong>
+              {{c.data.summary.applications || 0}}
+            </strong>
+
+            <small>
+              Applications recorded
+            </small>
+
+          </div>
+
+        </div>
+
+
+        <div class="opportunity-kpi-card kpi-green">
+
+          <div class="opportunity-kpi-icon">
+            <i class="fa fa-check-circle"></i>
+          </div>
+
+          <div class="opportunity-kpi-content">
+
+            <span>
+              PLACED STUDENTS
+            </span>
+
+            <strong>
+              {{c.data.summary.placed || 0}}
+            </strong>
+
+            <small>
+              Recorded outcomes
+            </small>
+
+          </div>
+
+        </div>
+
+
+      </section>
+
+
+      <!-- =====================================================
+           SEARCH / FILTERS
+           ===================================================== -->
+
+      <section class="trainer-panel opportunity-search-panel">
+
+
+        <div class="trainer-panel-heading">
+
+          <div>
+
+            <span>
+              OPPORTUNITY TRACKING
+            </span>
+
+            <h2>
+              Available Opportunities
+            </h2>
+
+            <p>
+              Search and review placement opportunities for student guidance.
+            </p>
+
+          </div>
+
+
+          <button
+            type="button"
+            class="opportunity-clear-btn"
+            ng-click="c.clearSearch()"
+            ng-if="
+              c.search ||
+              c.statusFilter != 'all' ||
+              c.typeFilter != 'all'
+            "
+          >
+
+            <i class="fa fa-times"></i>
+
+            Clear
+
+          </button>
+
+        </div>
+
+
+        <div class="opportunity-search-grid">
+
+
+          <div class="opportunity-search-box">
+
+            <i class="fa fa-search"></i>
+
+            <input
+              type="text"
+              ng-model="c.search"
+              placeholder="Search opportunity, company, location, skill or opportunity ID..."
+            >
+
+          </div>
+
+
+          <select
+            class="opportunity-filter"
+            ng-model="c.statusFilter"
+          >
+
+            <option value="all">
+              All Status
+            </option>
+
+            <option value="Open">
+              Open
+            </option>
+
+            <option value="Closed">
+              Closed
+            </option>
+
+            <option value="On Hold">
+              On Hold
+            </option>
+
+          </select>
+
+
+          <select
+            class="opportunity-filter"
+            ng-model="c.typeFilter"
+          >
+
+            <option value="all">
+              All Types
+            </option>
+
+            <option value="Job">
+              Job
+            </option>
+
+            <option value="Internship">
+              Internship
+            </option>
+
+          </select>
+
+
+        </div>
+
+      </section>
+
+
+      <!-- =====================================================
+           OPPORTUNITIES
+           ===================================================== -->
+
+      <section class="trainer-panel opportunity-list-panel">
+
+
+        <div class="trainer-panel-heading compact">
+
+          <div>
+
+            <span>
+              PLACEMENT OPPORTUNITIES
+            </span>
+
+            <h2>
+              Opportunities
+            </h2>
+
+          </div>
+
+
+          <span class="opportunity-record-count">
+
+            {{c.filteredOpportunities.length || 0}}
+
+            records
+
+          </span>
+
+        </div>
+
+
+        <!-- EMPTY -->
+
+        <div
+          class="opportunity-empty"
+          ng-if="!c.filteredOpportunities.length"
+        >
+
+          <div class="opportunity-empty-icon">
+
+            <i class="fa fa-briefcase"></i>
+
+          </div>
+
+          <h3>
+            No opportunities found
+          </h3>
+
+          <p>
+            Try changing the search text or filters.
+          </p>
+
+        </div>
+
+
+        <!-- LIST -->
+
+        <div
+          class="opportunity-list"
+          ng-if="c.filteredOpportunities.length"
+        >
+
+          <article
+            class="opportunity-card"
+            ng-repeat="
+              opportunity in c.filteredOpportunities
+              track by opportunity.sys_id
+            "
+          >
+
+
+            <div class="opportunity-card-color"></div>
+
+
+            <!-- CARD HEADER -->
+
+            <div class="opportunity-card-top">
+
+
+              <div class="company-avatar">
+                {{opportunity.companyInitials}}
+              </div>
+
+
+              <div class="opportunity-main-title">
+
+                <span class="opportunity-id">
+                  {{opportunity.opportunity_id || 'OPPORTUNITY'}}
+                </span>
+
+                <h3>
+                  {{opportunity.title || 'Placement Opportunity'}}
+                </h3>
+
+                <p>
+
+                  <i class="fa fa-building-o"></i>
+
+                  {{opportunity.company_name || 'Company not specified'}}
+
+                </p>
+
+              </div>
+
+
+              <div class="opportunity-status-wrapper">
+
+                <span
+                  class="opportunity-status"
+                  ng-class="{
+                    'open': opportunity.status == 'Open',
+                    'closed': opportunity.status == 'Closed',
+                    'hold': opportunity.status == 'On Hold'
+                  }"
+                >
+
+                  <i class="fa fa-circle"></i>
+
+                  {{opportunity.status || 'Unknown'}}
+
+                </span>
+
+              </div>
+
+
+            </div>
+
+
+            <!-- CARD DETAILS -->
+
+            <div class="opportunity-details-grid">
+
+
+              <div class="opportunity-detail detail-purple">
+
+                <span>
+                  TYPE
+                </span>
+
+                <strong>
+
+                  <i class="fa fa-briefcase"></i>
+
+                  {{opportunity.opportunity_type || '—'}}
+
+                </strong>
+
+              </div>
+
+
+              <div class="opportunity-detail detail-teal">
+
+                <span>
+                  LOCATION
+                </span>
+
+                <strong>
+
+                  <i class="fa fa-map-marker"></i>
+
+                  {{opportunity.location || '—'}}
+
+                </strong>
+
+              </div>
+
+
+              <div class="opportunity-detail detail-orange">
+
+                <span>
+                  MINIMUM CGPA
+                </span>
+
+                <strong>
+
+                  <i class="fa fa-graduation-cap"></i>
+
+                  {{opportunity.minimum_cgpa || '—'}}
+
+                </strong>
+
+              </div>
+
+
+              <div class="opportunity-detail detail-pink">
+
+                <span>
+                  APPLICATION DEADLINE
+                </span>
+
+                <strong>
+
+                  <i class="fa fa-calendar"></i>
+
+                  {{opportunity.application_deadline || '—'}}
+
+                </strong>
+
+              </div>
+
+
+            </div>
+
+
+            <!-- SKILLS -->
+
+            <div class="opportunity-skills">
+
+              <span class="opportunity-field-label">
+                REQUIRED SKILLS
+              </span>
+
+
+              <div class="skill-tags">
+
+                <span
+                  class="skill-tag"
+                  ng-repeat="
+                    skill in opportunity.skillList
+                    track by $index
+                  "
+                >
+
+                  {{skill}}
+
+                </span>
+
+
+                <span
+                  class="skill-empty"
+                  ng-if="!opportunity.skillList.length"
+                >
+
+                  Not specified
+
+                </span>
+
+              </div>
+
+            </div>
+
+
+            <!-- APPLICATION STRIP -->
+
+            <div class="opportunity-application-strip">
+
+
+              <div class="application-total">
+
+                <span>
+                  STUDENT APPLICATIONS
+                </span>
+
+                <strong>
+                  {{opportunity.application_count || 0}}
+                </strong>
+
+              </div>
+
+
+              <div class="application-stat">
+
+                <span>
+                  Pending
+                </span>
+
+                <strong>
+                  {{opportunity.pending_count || 0}}
+                </strong>
+
+              </div>
+
+
+              <div class="application-stat">
+
+                <span>
+                  Shortlisted
+                </span>
+
+                <strong>
+                  {{opportunity.shortlisted_count || 0}}
+                </strong>
+
+              </div>
+
+
+              <div class="application-stat">
+
+                <span>
+                  Selected
+                </span>
+
+                <strong>
+                  {{opportunity.selected_count || 0}}
+                </strong>
+
+              </div>
+
+
+              <button
+                type="button"
+                class="opportunity-view-btn"
+                ng-click="c.openOpportunity(opportunity)"
+              >
+
+                View Details
+
+                <i class="fa fa-arrow-right"></i>
+
+              </button>
+
+
+            </div>
+
+
+          </article>
+
+        </div>
+
+      </section>
+
+
+      <!-- =====================================================
+           SELECTED OPPORTUNITY DETAILS
+           ===================================================== -->
+
+      <section
+        class="trainer-panel opportunity-details-panel"
+        ng-if="c.selectedOpportunity"
+      >
+
+
+        <div class="opportunity-details-header">
+
+
+          <div>
+
+            <span>
+              OPPORTUNITY DETAILS
+            </span>
+
+            <h2>
+              {{c.selectedOpportunity.title}}
+            </h2>
+
+            <p>
+
+              {{c.selectedOpportunity.company_name}}
+
+              ·
+
+              {{c.selectedOpportunity.opportunity_id}}
+
+            </p>
+
+          </div>
+
+
+          <button
+            type="button"
+            class="opportunity-close-btn"
+            ng-click="c.closeOpportunity()"
+            aria-label="Close details"
+          >
+
+            <i class="fa fa-times"></i>
+
+          </button>
+
+
+        </div>
+
+
+        <!-- SUMMARY -->
+
+        <div class="opportunity-detail-summary">
+
+
+          <div class="summary-purple">
+
+            <span>
+              STATUS
+            </span>
+
+            <strong>
+              {{c.selectedOpportunity.status || '—'}}
+            </strong>
+
+          </div>
+
+
+          <div class="summary-teal">
+
+            <span>
+              COMPANY
+            </span>
+
+            <strong>
+              {{c.selectedOpportunity.company_name || '—'}}
+            </strong>
+
+          </div>
+
+
+          <div class="summary-orange">
+
+            <span>
+              LOCATION
+            </span>
+
+            <strong>
+              {{c.selectedOpportunity.location || '—'}}
+            </strong>
+
+          </div>
+
+
+          <div class="summary-green">
+
+            <span>
+              DEADLINE
+            </span>
+
+            <strong>
+              {{c.selectedOpportunity.application_deadline || '—'}}
+            </strong>
+
+          </div>
+
+
+        </div>
+
+
+        <!-- COMPANY INFORMATION -->
+
+        <div class="opportunity-info-section company-section">
+
+
+          <div class="opportunity-info-heading">
+
+            <div class="info-heading-icon purple">
+
+              <i class="fa fa-building-o"></i>
+
+            </div>
+
+
+            <div>
+
+              <h3>
+                Company Information
+              </h3>
+
+              <p>
+                Company details associated with this opportunity.
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <div class="company-info-grid">
+
+
+            <div>
+
+              <span>
+                COMPANY NAME
+              </span>
+
+              <strong>
+                {{c.selectedOpportunity.company_name || '—'}}
+              </strong>
+
+            </div>
+
+
+            <div>
+
+              <span>
+                COMPANY ID
+              </span>
+
+              <strong>
+                {{c.selectedOpportunity.company_id || '—'}}
+              </strong>
+
+            </div>
+
+
+            <div>
+
+              <span>
+                COMPANY TYPE
+              </span>
+
+              <strong>
+                {{c.selectedOpportunity.company_type || '—'}}
+              </strong>
+
+            </div>
+
+
+            <div>
+
+              <span>
+                INDUSTRY
+              </span>
+
+              <strong>
+                {{c.selectedOpportunity.industry || '—'}}
+              </strong>
+
+            </div>
+
+
+            <div>
+
+              <span>
+                RECRUITER
+              </span>
+
+              <strong>
+                {{c.selectedOpportunity.recruiter_name || '—'}}
+              </strong>
+
+            </div>
+
+
+            <div>
+
+              <span>
+                RECRUITER EMAIL
+              </span>
+
+              <strong>
+                {{c.selectedOpportunity.recruiter_email || '—'}}
+              </strong>
+
+            </div>
+
+
+          </div>
+
+        </div>
+
+
+        <!-- ELIGIBILITY -->
+
+        <div class="opportunity-info-section eligibility-section">
+
+
+          <div class="opportunity-info-heading">
+
+            <div class="info-heading-icon teal">
+
+              <i class="fa fa-check"></i>
+
+            </div>
+
+
+            <div>
+
+              <h3>
+                Eligibility &amp; Requirements
+              </h3>
+
+              <p>
+                Requirements defined for this opportunity.
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <div class="company-info-grid">
+
+
+            <div>
+
+              <span>
+                MINIMUM CGPA
+              </span>
+
+              <strong>
+                {{
+                  c.selectedOpportunity.minimum_cgpa
+                  || 'Not specified'
+                }}
+              </strong>
+
+            </div>
+
+
+            <div>
+
+              <span>
+                ELIGIBLE BRANCHES
+              </span>
+
+              <strong>
+                {{
+                  c.selectedOpportunity.eligible_branches
+                  || 'Not specified'
+                }}
+              </strong>
+
+            </div>
+
+
+            <div>
+
+              <span>
+                REQUIRED SKILLS
+              </span>
+
+              <strong>
+                {{
+                  c.selectedOpportunity.required_skills
+                  || 'Not specified'
+                }}
+              </strong>
+
+            </div>
+
+
+            <div>
+
+              <span>
+                CTC / STIPEND
+              </span>
+
+              <strong>
+                {{
+                  c.selectedOpportunity.ctc_stipend
+                  || 'Not specified'
+                }}
+              </strong>
+
+            </div>
+
+
+          </div>
+
+        </div>
+
+
+        <!-- JOB DESCRIPTION -->
+
+        <div class="opportunity-info-section description-section">
+
+
+          <div class="opportunity-info-heading">
+
+            <div class="info-heading-icon orange">
+
+              <i class="fa fa-file-text-o"></i>
+
+            </div>
+
+
+            <div>
+
+              <h3>
+                Job Description
+              </h3>
+
+              <p>
+                Details provided for the placement opportunity.
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <div class="job-description-box">
+
+            {{
+              c.selectedOpportunity.job_description
+              || 'No job description provided.'
+            }}
+
+          </div>
+
+        </div>
+
+
+        <!-- STUDENT APPLICATIONS -->
+
+        <div class="opportunity-info-section applications-section">
+
+
+          <div class="opportunity-info-heading">
+
+            <div class="info-heading-icon pink">
+
+              <i class="fa fa-users"></i>
+
+            </div>
+
+
+            <div>
+
+              <h3>
+                Student Applications
+              </h3>
+
+              <p>
+                Read-only application information.
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <div
+            class="application-empty"
+            ng-if="!c.selectedOpportunity.applications.length"
+          >
+
+            <i class="fa fa-users"></i>
+
+            <span>
+              No student applications found for this opportunity.
+            </span>
+
+          </div>
+
+
+          <div
+            class="student-application-table"
+            ng-if="c.selectedOpportunity.applications.length"
+          >
+
+
+            <div class="application-table-header">
+
+              <span>
+                STUDENT
+              </span>
+
+              <span>
+                APPLICATION
+              </span>
+
+              <span>
+                OFFER
+              </span>
+
+              <span>
+                INTERVIEW
+              </span>
+
+              <span>
+                APPLIED DATE
+              </span>
+
+            </div>
+
+
+            <div
+              class="application-table-row"
+              ng-repeat="
+                application in
+                c.selectedOpportunity.applications
+                track by application.sys_id
+              "
+            >
+
+
+              <div class="student-cell">
+
+                <div class="student-avatar">
+
+                  {{application.initials}}
+
+                </div>
+
+
+                <div>
+
+                  <strong>
+                    {{application.student_name || 'Student'}}
+                  </strong>
+
+                  <small>
+                    {{application.student_id || '—'}}
+                  </small>
+
+                </div>
+
+              </div>
+
+
+              <div>
+
+                <span class="table-status application-status">
+
+                  {{application.application_status || '—'}}
+
+                </span>
+
+              </div>
+
+
+              <div>
+
+                <span class="table-status offer-status">
+
+                  {{application.offer_status || '—'}}
+
+                </span>
+
+              </div>
+
+
+              <div>
+
+                <span class="table-status interview-status">
+
+                  {{application.interview_status || '—'}}
+
+                </span>
+
+              </div>
+
+
+              <div class="table-date">
+
+                {{application.applied_date || '—'}}
+
+              </div>
+
+
+            </div>
+
+
+          </div>
+
+        </div>
+
+
+        <!-- PLACEMENT OUTCOMES -->
+
+        <div class="opportunity-info-section outcome-section">
+
+
+          <div class="opportunity-info-heading">
+
+            <div class="info-heading-icon green">
+
+              <i class="fa fa-trophy"></i>
+
+            </div>
+
+
+            <div>
+
+              <h3>
+                Placement Outcomes
+              </h3>
+
+              <p>
+                Recorded placement outcome information.
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <div
+            class="application-empty"
+            ng-if="!c.selectedOpportunity.outcomes.length"
+          >
+
+            <i class="fa fa-trophy"></i>
+
+            <span>
+              No placement outcome has been recorded.
+            </span>
+
+          </div>
+
+
+          <div
+            class="outcome-table"
+            ng-if="c.selectedOpportunity.outcomes.length"
+          >
+
+
+            <div class="outcome-table-header">
+
+              <span>
+                STUDENT
+              </span>
+
+              <span>
+                OUTCOME
+              </span>
+
+              <span>
+                PLACEMENT TYPE
+              </span>
+
+              <span>
+                CTC
+              </span>
+
+              <span>
+                VERIFICATION
+              </span>
+
+            </div>
+
+
+            <div
+              class="outcome-table-row"
+              ng-repeat="
+                outcome in
+                c.selectedOpportunity.outcomes
+                track by outcome.sys_id
+              "
+            >
+
+
+              <div>
+
+                <strong>
+                  {{outcome.student_name || 'Student'}}
+                </strong>
+
+                <small>
+                  {{outcome.student_id || '—'}}
+                </small>
+
+              </div>
+
+
+              <div>
+                {{outcome.outcome_type || '—'}}
+              </div>
+
+
+              <div>
+                {{outcome.placement_type || '—'}}
+              </div>
+
+
+              <div>
+                {{outcome.ctc || '—'}}
+              </div>
+
+
+              <div>
+
+                <span class="verification-status">
+
+                  {{outcome.verification_status || '—'}}
+
+                </span>
+
+              </div>
+
+
+            </div>
+
+
+          </div>
+
+        </div>
+
+
+        <!-- READ ONLY -->
+
+        <div class="read-only-banner">
+
+
+          <div class="read-only-icon">
+
+            <i class="fa fa-lock"></i>
+
+          </div>
+
+
+          <div>
+
+            <strong>
+              Read-only access
+            </strong>
+
+            <p>
+
+              Trainers can view placement opportunity, application
+              and placement outcome information. Records cannot be
+              created, edited or deleted from this page.
+
+            </p>
+
+          </div>
+
+
+        </div>
+
+
+      </section>
+
+
+      <!-- =====================================================
+           FOOTER
+           ===================================================== -->
+
+      <footer class="trainer-dashboard-footer">
+
+        <span>
+          Campus360 Trainer Portal
+        </span>
+
+        <span>
+          Trainer ID: {{c.data.trainer.id}}
+        </span>
+
+      </footer>
+
+
+    </section>
+
+  </main>
+
+</div>
+
+
+<!-- =========================================================
+     LOADING
+     ========================================================= -->
+
+<div
+  class="trainer-dashboard-loading"
+  ng-if="!c.data.loaded"
+>
+
+  <i class="fa fa-spinner fa-spin"></i>
+
+  Loading Opportunities &amp; Rooms...
+
+
+  <!-- Campus360 AI Assistant Floating Widget -->
+  <sp-widget widget="data.aiWidget"></sp-widget>
+</div>]]></template>
+    </sp_widget>
+</record_update>

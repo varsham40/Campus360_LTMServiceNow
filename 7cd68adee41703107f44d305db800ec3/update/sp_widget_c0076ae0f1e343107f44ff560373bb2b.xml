@@ -1,0 +1,6617 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_widget">
+    <sp_widget action="INSERT_OR_UPDATE">
+        <category>custom</category>
+        <client_script><![CDATA[api.controller = function($window) {
+
+    var c = this;
+
+
+    /* =====================================================
+       STATE
+       ===================================================== */
+
+    c.loading = true;
+
+    c.searchText = '';
+
+    c.statusFilter = '';
+
+    c.selectedApplication = null;
+
+
+    /* =====================================================
+       SIDEBAR
+       ===================================================== */
+
+    /*
+     * Desktop:
+     * Sidebar starts OPEN.
+     *
+     * Mobile:
+     * Sidebar starts CLOSED.
+     */
+
+    c.sidebarOpen =
+        $window.innerWidth > 900;
+
+
+    /*
+     * SAME 3-LINE BUTTON BEHAVIOR
+     *
+     * The button is located in the TOP BAR,
+     * outside the sidebar.
+     *
+     * Therefore it always remains visible.
+     */
+
+    c.toggleSidebar = function() {
+
+        c.sidebarOpen =
+            !c.sidebarOpen;
+
+    };
+
+
+    c.closeSidebar = function() {
+
+        c.sidebarOpen = false;
+
+    };
+
+
+    /* =====================================================
+       NAVIGATION
+       ===================================================== */
+
+    c.navigate = function(pageId) {
+
+        if (!pageId) {
+            return;
+        }
+
+
+        c.closeSidebar();
+
+
+        var studentId =
+            'STU_TEST_001';
+
+
+        if (
+            c.data &&
+            c.data.student &&
+            c.data.student.student_id
+        ) {
+
+            studentId =
+                c.data.student.student_id;
+
+        }
+
+
+        window.location.href =
+            '?id=' +
+            encodeURIComponent(pageId) +
+            '&student=' +
+            encodeURIComponent(studentId);
+
+    };
+
+
+    /* =====================================================
+       LOAD APPLICATIONS
+       ===================================================== */
+
+    c.loadApplications = function() {
+
+        c.loading = true;
+
+
+        c.server.get({
+
+            action:
+                'load_applications'
+
+        }).then(
+
+            function(response) {
+
+
+                if (
+                    response &&
+                    response.data
+                ) {
+
+                    c.data =
+                        response.data;
+
+                }
+
+
+                c.loading = false;
+
+            },
+
+
+            function() {
+
+                c.loading = false;
+
+            }
+
+        );
+
+    };
+
+
+    /* =====================================================
+       REFRESH
+       ===================================================== */
+
+    c.refresh = function() {
+
+        if (c.loading) {
+            return;
+        }
+
+
+        c.loadApplications();
+
+    };
+
+
+    /* =====================================================
+       FILTER
+       ===================================================== */
+
+    c.filteredApplications =
+        function() {
+
+
+        if (
+            !c.data ||
+            !c.data.applications
+        ) {
+
+            return [];
+
+        }
+
+
+        var search =
+            (c.searchText || '')
+            .toLowerCase()
+            .trim();
+
+
+        var status =
+            (c.statusFilter || '')
+            .toLowerCase()
+            .trim();
+
+
+        return c.data.applications.filter(
+
+            function(application) {
+
+
+                var searchable = [
+
+                    application.application_id,
+
+                    application.opportunity_title,
+
+                    application.company,
+
+                    application.location,
+
+                    application.opportunity_type
+
+                ]
+                .join(' ')
+                .toLowerCase();
+
+
+                var searchMatch =
+                    !search ||
+                    searchable.indexOf(search) !== -1;
+
+
+                var applicationStatus =
+                    (
+                        application.application_status ||
+                        ''
+                    )
+                    .toLowerCase();
+
+
+                var statusMatch =
+                    !status ||
+                    applicationStatus.indexOf(status) !== -1;
+
+
+                return (
+                    searchMatch &&
+                    statusMatch
+                );
+
+            }
+
+        );
+
+    };
+
+
+    /* =====================================================
+       CLEAR FILTERS
+       ===================================================== */
+
+    c.clearFilters = function() {
+
+        c.searchText = '';
+
+        c.statusFilter = '';
+
+    };
+
+
+    /* =====================================================
+       VIEW APPLICATION
+       ===================================================== */
+
+    c.viewApplication =
+        function(application) {
+
+            c.selectedApplication =
+                application;
+
+        };
+
+
+    /* =====================================================
+       CLOSE APPLICATION
+       ===================================================== */
+
+    c.closeApplication =
+        function(event) {
+
+
+            if (
+                event &&
+                event.target !==
+                event.currentTarget
+            ) {
+
+                return;
+
+            }
+
+
+            c.selectedApplication =
+                null;
+
+        };
+
+
+    /* =====================================================
+       STATUS COLOR
+       ===================================================== */
+
+    c.getStatusClass =
+        function(status) {
+
+
+        var value =
+            (status || '')
+            .toLowerCase();
+
+
+        if (
+            value.indexOf('selected') !== -1 ||
+            value.indexOf('accepted') !== -1 ||
+            value.indexOf('offer') !== -1
+        ) {
+
+            return 'status-green';
+
+        }
+
+
+        if (
+            value.indexOf('shortlist') !== -1 ||
+            value.indexOf('interview') !== -1
+        ) {
+
+            return 'status-blue';
+
+        }
+
+
+        if (
+            value.indexOf('submitted') !== -1 ||
+            value.indexOf('pending') !== -1 ||
+            value.indexOf('review') !== -1
+        ) {
+
+            return 'status-purple';
+
+        }
+
+
+        if (
+            value.indexOf('reject') !== -1 ||
+            value.indexOf('withdraw') !== -1
+        ) {
+
+            return 'status-red';
+
+        }
+
+
+        return 'status-orange';
+
+    };
+
+
+    /* =====================================================
+       INITIALS
+       ===================================================== */
+
+    c.getInitials =
+        function(name) {
+
+
+        if (!name) {
+            return 'C';
+        }
+
+
+        var parts =
+            name
+            .trim()
+            .split(/\s+/);
+
+
+        if (parts.length === 1) {
+
+            return parts[0]
+                .substring(0, 2)
+                .toUpperCase();
+
+        }
+
+
+        return (
+
+            parts[0].charAt(0) +
+
+            parts[
+                parts.length - 1
+            ].charAt(0)
+
+        ).toUpperCase();
+
+    };
+
+
+    /* =====================================================
+       INITIAL LOAD
+       ===================================================== */
+
+    c.loadApplications();
+
+};]]></client_script>
+        <controller_as>c</controller_as>
+        <css>/* ========================================================= &#13;
+   CAMPUS360 APPLICATIONS &#13;
+   FULL VIEWPORT &#13;
+   DARK PURPLE SIDEBAR &#13;
+   WHITE TOP NAVBAR &#13;
+   DARK PURPLE APPLICATIONS HERO &#13;
+   ========================================================= */ &#13;
+ &#13;
+ &#13;
+/* ========================================================= &#13;
+   GLOBAL &#13;
+   ========================================================= */ &#13;
+ &#13;
+html, &#13;
+body { &#13;
+ &#13;
+  width: 100% !important; &#13;
+  height: 100% !important; &#13;
+ &#13;
+  margin: 0 !important; &#13;
+  padding: 0 !important; &#13;
+ &#13;
+  overflow: hidden !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+/* ========================================================= &#13;
+   REMOVE SERVICENOW SYSTEM ADMINISTRATOR NAVBAR &#13;
+   ========================================================= */ &#13;
+ &#13;
+body:has(.campus360-applications) #sp-header, &#13;
+body:has(.campus360-applications) header#sp-header, &#13;
+body:has(.campus360-applications) .sp-header, &#13;
+body:has(.campus360-applications) .sp-header-bar, &#13;
+body:has(.campus360-applications) .sp-navbar, &#13;
+body:has(.campus360-applications) #sp-nav, &#13;
+body:has(.campus360-applications) #sp-nav-bar, &#13;
+body:has(.campus360-applications) .sp-nav, &#13;
+body:has(.campus360-applications) .sp-nav-bar, &#13;
+body:has(.campus360-applications) .portal-header, &#13;
+body:has(.campus360-applications) .portal-header-wrapper, &#13;
+body:has(.campus360-applications) .service-portal-header, &#13;
+body:has(.campus360-applications) .sp-page-header, &#13;
+body:has(.campus360-applications) .sp-page-header-wrapper, &#13;
+body:has(.campus360-applications) .header-wrapper, &#13;
+body:has(.campus360-applications) .navbar-header, &#13;
+body:has(.campus360-applications) .navbar, &#13;
+body:has(.campus360-applications) .navbar-default, &#13;
+body:has(.campus360-applications) .navbar-inverse, &#13;
+body:has(.campus360-applications) nav.navbar, &#13;
+body:has(.campus360-applications) header[role="banner"], &#13;
+body:has(.campus360-applications) nav[role="navigation"] { &#13;
+ &#13;
+  display: none !important; &#13;
+ &#13;
+  visibility: hidden !important; &#13;
+  opacity: 0 !important; &#13;
+ &#13;
+  width: 0 !important; &#13;
+  height: 0 !important; &#13;
+ &#13;
+  min-width: 0 !important; &#13;
+  min-height: 0 !important; &#13;
+ &#13;
+  max-width: 0 !important; &#13;
+  max-height: 0 !important; &#13;
+ &#13;
+  margin: 0 !important; &#13;
+  padding: 0 !important; &#13;
+ &#13;
+  border: 0 !important; &#13;
+ &#13;
+  overflow: hidden !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+/* EXTRA SERVICE NOW HEADER SAFETY */ &#13;
+ &#13;
+body:has(.campus360-applications) &gt; header, &#13;
+body:has(.campus360-applications) &gt; nav { &#13;
+ &#13;
+  display: none !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+/* ========================================================= &#13;
+   REMOVE SERVICENOW HEADER SPACE &#13;
+   ========================================================= */ &#13;
+ &#13;
+body:has(.campus360-applications) #sp-container, &#13;
+body:has(.campus360-applications) #sp-page, &#13;
+body:has(.campus360-applications) .sp-page, &#13;
+body:has(.campus360-applications) .sp-container, &#13;
+body:has(.campus360-applications) .page { &#13;
+ &#13;
+  margin-top: 0 !important; &#13;
+  padding-top: 0 !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+/* ========================================================= &#13;
+   SERVICENOW WRAPPERS &#13;
+   ========================================================= */ &#13;
+ &#13;
+body:has(.campus360-applications) .container, &#13;
+body:has(.campus360-applications) .container-fluid, &#13;
+body:has(.campus360-applications) .row, &#13;
+body:has(.campus360-applications) [class*="col-"], &#13;
+body:has(.campus360-applications) .well, &#13;
+body:has(.campus360-applications) .panel { &#13;
+ &#13;
+  width: 100% !important; &#13;
+ &#13;
+  max-width: none !important; &#13;
+ &#13;
+  min-width: 0 !important; &#13;
+ &#13;
+  margin: 0 !important; &#13;
+ &#13;
+  padding-left: 0 !important; &#13;
+  padding-right: 0 !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+body:has(.campus360-applications) .panel-body { &#13;
+ &#13;
+  width: 100% !important; &#13;
+ &#13;
+  max-width: none !important; &#13;
+ &#13;
+  margin: 0 !important; &#13;
+ &#13;
+  padding: 0 !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+/* ========================================================= &#13;
+   CAMPUS360 ROOT &#13;
+   ========================================================= */ &#13;
+ &#13;
+.campus360-applications { &#13;
+ &#13;
+  position: fixed !important; &#13;
+ &#13;
+  inset: 0 !important; &#13;
+ &#13;
+  width: 100vw !important; &#13;
+  height: 100vh !important; &#13;
+ &#13;
+  min-width: 100vw !important; &#13;
+  min-height: 100vh !important; &#13;
+ &#13;
+  max-width: 100vw !important; &#13;
+  max-height: 100vh !important; &#13;
+ &#13;
+  margin: 0 !important; &#13;
+  padding: 0 !important; &#13;
+ &#13;
+  display: block !important; &#13;
+ &#13;
+  overflow: hidden !important; &#13;
+ &#13;
+  background: #f3f6fb !important; &#13;
+ &#13;
+  color: #101828 !important; &#13;
+ &#13;
+  font-family: &#13;
+    Inter, &#13;
+    -apple-system, &#13;
+    BlinkMacSystemFont, &#13;
+    "Segoe UI", &#13;
+    Arial, &#13;
+    sans-serif !important; &#13;
+ &#13;
+  -webkit-font-smoothing: antialiased !important; &#13;
+ &#13;
+  z-index: 999999 !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+/* GLOBAL BOX SIZING */ &#13;
+ &#13;
+.campus360-applications *, &#13;
+.campus360-applications *::before, &#13;
+.campus360-applications *::after { &#13;
+ &#13;
+  box-sizing: border-box !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+/* ========================================================= &#13;
+   SIDEBAR &#13;
+   DARK PURPLE &#13;
+   ========================================================= */ &#13;
+ &#13;
+.c360-left-sidebar { &#13;
+ &#13;
+  position: absolute !important; &#13;
+ &#13;
+  top: 0 !important; &#13;
+  left: 0 !important; &#13;
+  bottom: 0 !important; &#13;
+ &#13;
+  width: 285px !important; &#13;
+ &#13;
+  min-width: 285px !important; &#13;
+  max-width: 285px !important; &#13;
+ &#13;
+  height: 100vh !important; &#13;
+ &#13;
+  z-index: 100 !important; &#13;
+ &#13;
+  display: flex !important; &#13;
+ &#13;
+  flex-direction: column !important; &#13;
+ &#13;
+  overflow: hidden !important; &#13;
+ &#13;
+  background: &#13;
+    linear-gradient( &#13;
+      180deg, &#13;
+      #130d2f 0%, &#13;
+      #160d38 48%, &#13;
+      #100a29 100% &#13;
+    ) !important; &#13;
+ &#13;
+  border-right: &#13;
+    1px solid #2d2157 !important; &#13;
+ &#13;
+  color: #ffffff !important; &#13;
+ &#13;
+  box-shadow: &#13;
+    4px 0 20px rgba(15,10,40,.18) !important; &#13;
+ &#13;
+  transition: &#13;
+    transform .25s ease !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+/* CLOSED */ &#13;
+ &#13;
+.campus360-applications.sidebar-closed &#13;
+.c360-left-sidebar { &#13;
+ &#13;
+  transform: &#13;
+    translateX(-105%) !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+/* ========================================================= &#13;
+   SIDEBAR BRAND &#13;
+   ========================================================= */ &#13;
+ &#13;
+.c360-sidebar-brand { &#13;
+ &#13;
+  height: &#13;
+    88px !important; &#13;
+ &#13;
+  min-height: &#13;
+    88px !important; &#13;
+ &#13;
+  flex: &#13;
+    0 0 88px !important; &#13;
+ &#13;
+  padding: &#13;
+    0 20px !important; &#13;
+ &#13;
+  display: &#13;
+    flex !important; &#13;
+ &#13;
+  align-items: &#13;
+    center !important; &#13;
+ &#13;
+  gap: &#13;
+    12px !important; &#13;
+ &#13;
+  border-bottom: &#13;
+    1px solid rgba(255,255,255,.08) !important; &#13;
+ &#13;
+  background: &#13;
+    transparent !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.c360-brand-logo { &#13;
+ &#13;
+  width: &#13;
+    48px !important; &#13;
+ &#13;
+  height: &#13;
+    48px !important; &#13;
+ &#13;
+  min-width: &#13;
+    48px !important; &#13;
+ &#13;
+  display: &#13;
+    flex !important; &#13;
+ &#13;
+  align-items: &#13;
+    center !important; &#13;
+ &#13;
+  justify-content: &#13;
+    center !important; &#13;
+ &#13;
+  border-radius: &#13;
+    14px !important; &#13;
+ &#13;
+  background: &#13;
+    linear-gradient( &#13;
+      135deg, &#13;
+      #7c3aed, &#13;
+      #9333ea &#13;
+    ) !important; &#13;
+ &#13;
+  color: &#13;
+    #ffffff !important; &#13;
+ &#13;
+  font-size: &#13;
+    23px !important; &#13;
+ &#13;
+  font-weight: &#13;
+    900 !important; &#13;
+ &#13;
+  box-shadow: &#13;
+    0 7px 18px rgba(124,58,237,.34) !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.c360-brand-name { &#13;
+ &#13;
+  min-width: &#13;
+    0 !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.c360-brand-name strong { &#13;
+ &#13;
+  display: &#13;
+    block !important; &#13;
+ &#13;
+  color: &#13;
+    #ffffff !important; &#13;
+ &#13;
+  font-size: &#13;
+    20px !important; &#13;
+ &#13;
+  line-height: &#13;
+    1.05 !important; &#13;
+ &#13;
+  font-weight: &#13;
+    900 !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.c360-brand-name span { &#13;
+ &#13;
+  display: &#13;
+    block !important; &#13;
+ &#13;
+  margin-top: &#13;
+    4px !important; &#13;
+ &#13;
+  color: &#13;
+    #c4b5fd !important; &#13;
+ &#13;
+  font-size: &#13;
+    11px !important; &#13;
+ &#13;
+  font-weight: &#13;
+    800 !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+/* ========================================================= &#13;
+   STUDENT PROFILE &#13;
+   ========================================================= */ &#13;
+ &#13;
+.c360-sidebar-student { &#13;
+ &#13;
+  margin: &#13;
+    18px 13px 10px !important; &#13;
+ &#13;
+  min-height: &#13;
+    67px !important; &#13;
+ &#13;
+  padding: &#13;
+    12px !important; &#13;
+ &#13;
+  flex: &#13;
+    0 0 auto !important; &#13;
+ &#13;
+  display: &#13;
+    flex !important; &#13;
+ &#13;
+  align-items: &#13;
+    center !important; &#13;
+ &#13;
+  gap: &#13;
+    10px !important; &#13;
+ &#13;
+  border: &#13;
+    1px solid #3c2b69 !important; &#13;
+ &#13;
+  border-radius: &#13;
+    14px !important; &#13;
+ &#13;
+  background: &#13;
+    linear-gradient( &#13;
+      145deg, &#13;
+      #1f1448, &#13;
+      #21154d &#13;
+    ) !important; &#13;
+ &#13;
+  color: &#13;
+    #ffffff !important; &#13;
+ &#13;
+  text-decoration: &#13;
+    none !important; &#13;
+ &#13;
+  box-shadow: &#13;
+    0 6px 18px rgba(0,0,0,.16) !important; &#13;
+ &#13;
+  transition: &#13;
+    .2s ease !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.c360-sidebar-student:hover { &#13;
+ &#13;
+  border-color: &#13;
+    #5b3ea2 !important; &#13;
+ &#13;
+  background: &#13;
+    linear-gradient( &#13;
+      145deg, &#13;
+      #271957, &#13;
+      #2b1c61 &#13;
+    ) !important; &#13;
+ &#13;
+  box-shadow: &#13;
+    0 8px 20px rgba(124,58,237,.18) !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.c360-sidebar-avatar { &#13;
+ &#13;
+  width: &#13;
+    43px !important; &#13;
+ &#13;
+  height: &#13;
+    43px !important; &#13;
+ &#13;
+  min-width: &#13;
+    43px !important; &#13;
+ &#13;
+  display: &#13;
+    flex !important; &#13;
+ &#13;
+  align-items: &#13;
+    center !important; &#13;
+ &#13;
+  justify-content: &#13;
+    center !important; &#13;
+ &#13;
+  border-radius: &#13;
+    50% !important; &#13;
+ &#13;
+  background: &#13;
+    linear-gradient( &#13;
+      135deg, &#13;
+      #8b5cf6, &#13;
+      #7c3aed &#13;
+    ) !important; &#13;
+ &#13;
+  color: &#13;
+    #ffffff !important; &#13;
+ &#13;
+  font-size: &#13;
+    11px !important; &#13;
+ &#13;
+  font-weight: &#13;
+    900 !important; &#13;
+ &#13;
+  box-shadow: &#13;
+    0 6px 16px rgba(124,58,237,.28) !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.c360-sidebar-student-info { &#13;
+ &#13;
+  min-width: &#13;
+    0 !important; &#13;
+ &#13;
+  flex: &#13;
+    1 !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.c360-sidebar-student-info strong { &#13;
+ &#13;
+  display: &#13;
+    block !important; &#13;
+ &#13;
+  max-width: &#13;
+    185px !important; &#13;
+ &#13;
+  overflow: &#13;
+    hidden !important; &#13;
+ &#13;
+  white-space: &#13;
+    nowrap !important; &#13;
+ &#13;
+  text-overflow: &#13;
+    ellipsis !important; &#13;
+ &#13;
+  color: &#13;
+    #ffffff !important; &#13;
+ &#13;
+  font-size: &#13;
+    13px !important; &#13;
+ &#13;
+  font-weight: &#13;
+    900 !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.c360-sidebar-student-info span { &#13;
+ &#13;
+  display: &#13;
+    block !important; &#13;
+ &#13;
+  margin-top: &#13;
+    3px !important; &#13;
+ &#13;
+  color: &#13;
+    #b9add7 !important; &#13;
+ &#13;
+  font-size: &#13;
+    10px !important; &#13;
+ &#13;
+  font-weight: &#13;
+    600 !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.c360-student-arrow { &#13;
+ &#13;
+  color: &#13;
+    #aaa0c2 !important; &#13;
+ &#13;
+  font-size: &#13;
+    21px !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+/* ========================================================= &#13;
+   SIDEBAR NAVIGATION &#13;
+   SCROLLABLE / NO VISIBLE SCROLLBAR &#13;
+   ========================================================= */ &#13;
+ &#13;
+.c360-sidebar-nav { &#13;
+ &#13;
+  flex: &#13;
+    1 1 auto !important; &#13;
+ &#13;
+  min-height: &#13;
+    0 !important; &#13;
+ &#13;
+  padding: &#13;
+    2px 8px 12px !important; &#13;
+ &#13;
+  overflow-y: &#13;
+    auto !important; &#13;
+ &#13;
+  overflow-x: &#13;
+    hidden !important; &#13;
+ &#13;
+  scrollbar-width: &#13;
+    none !important; &#13;
+ &#13;
+  -ms-overflow-style: &#13;
+    none !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.c360-sidebar-nav::-webkit-scrollbar { &#13;
+ &#13;
+  width: &#13;
+    0 !important; &#13;
+ &#13;
+  height: &#13;
+    0 !important; &#13;
+ &#13;
+  display: &#13;
+    none !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.c360-sidebar-nav::-webkit-scrollbar-track { &#13;
+ &#13;
+  background: &#13;
+    transparent !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.c360-sidebar-nav::-webkit-scrollbar-thumb { &#13;
+ &#13;
+  background: &#13;
+    transparent !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+/* ========================================================= &#13;
+   NAV HEADINGS &#13;
+   ========================================================= */ &#13;
+ &#13;
+.c360-nav-group { &#13;
+ &#13;
+  margin-bottom: &#13;
+    4px !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.c360-nav-heading { &#13;
+ &#13;
+  padding: &#13;
+    17px 9px 8px !important; &#13;
+ &#13;
+  color: &#13;
+    #9f94bd !important; &#13;
+ &#13;
+  font-size: &#13;
+    10px !important; &#13;
+ &#13;
+  font-weight: &#13;
+    900 !important; &#13;
+ &#13;
+  line-height: &#13;
+    1 !important; &#13;
+ &#13;
+  letter-spacing: &#13;
+    .11em !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+/* ========================================================= &#13;
+   NAV LINK &#13;
+   ========================================================= */ &#13;
+ &#13;
+.c360-nav-link { &#13;
+ &#13;
+  position: &#13;
+    relative !important; &#13;
+ &#13;
+  width: &#13;
+    100% !important; &#13;
+ &#13;
+  min-height: &#13;
+    46px !important; &#13;
+ &#13;
+  margin: &#13;
+    3px 0 !important; &#13;
+ &#13;
+  padding: &#13;
+    9px 12px !important; &#13;
+ &#13;
+  display: &#13;
+    flex !important; &#13;
+ &#13;
+  align-items: &#13;
+    center !important; &#13;
+ &#13;
+  gap: &#13;
+    12px !important; &#13;
+ &#13;
+  border: &#13;
+    0 !important; &#13;
+ &#13;
+  border-radius: &#13;
+    11px !important; &#13;
+ &#13;
+  background: &#13;
+    transparent !important; &#13;
+ &#13;
+  color: &#13;
+    #ddd8e8 !important; &#13;
+ &#13;
+  font-size: &#13;
+    14px !important; &#13;
+ &#13;
+  font-weight: &#13;
+    750 !important; &#13;
+ &#13;
+  text-decoration: &#13;
+    none !important; &#13;
+ &#13;
+  transition: &#13;
+    background .2s ease, &#13;
+    color .2s ease, &#13;
+    transform .2s ease !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.c360-nav-link:hover { &#13;
+ &#13;
+  color: &#13;
+    #ffffff !important; &#13;
+ &#13;
+  background: &#13;
+    rgba(124,58,237,.16) !important; &#13;
+ &#13;
+  transform: &#13;
+    translateX(2px) !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.c360-nav-link.active { &#13;
+ &#13;
+  color: &#13;
+    #ffffff !important; &#13;
+ &#13;
+  background: &#13;
+    linear-gradient( &#13;
+      90deg, &#13;
+      #7c3aed 0%, &#13;
+      #8b3ff2 100% &#13;
+    ) !important; &#13;
+ &#13;
+  font-weight: &#13;
+    900 !important; &#13;
+ &#13;
+  box-shadow: &#13;
+    0 7px 18px rgba(124,58,237,.28) !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.c360-nav-link.active::before { &#13;
+ &#13;
+  content: &#13;
+    "" !important; &#13;
+ &#13;
+  position: &#13;
+    absolute !important; &#13;
+ &#13;
+  left: &#13;
+    0 !important; &#13;
+ &#13;
+  top: &#13;
+    8px !important; &#13;
+ &#13;
+  bottom: &#13;
+    8px !important; &#13;
+ &#13;
+  width: &#13;
+    4px !important; &#13;
+ &#13;
+  border-radius: &#13;
+    0 4px 4px 0 !important; &#13;
+ &#13;
+  background: &#13;
+    #c4b5fd !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+/* ========================================================= &#13;
+   NAV ICON &#13;
+   ========================================================= */ &#13;
+ &#13;
+.c360-nav-icon { &#13;
+ &#13;
+  width: &#13;
+    24px !important; &#13;
+ &#13;
+  height: &#13;
+    24px !important; &#13;
+ &#13;
+  min-width: &#13;
+    24px !important; &#13;
+ &#13;
+  display: &#13;
+    flex !important; &#13;
+ &#13;
+  align-items: &#13;
+    center !important; &#13;
+ &#13;
+  justify-content: &#13;
+    center !important; &#13;
+ &#13;
+  color: &#13;
+    #b8aecb !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.c360-nav-link:hover &#13;
+.c360-nav-icon { &#13;
+ &#13;
+  color: &#13;
+    #ffffff !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.c360-nav-link.active &#13;
+.c360-nav-icon { &#13;
+ &#13;
+  color: &#13;
+    #ffffff !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.c360-nav-icon svg { &#13;
+ &#13;
+  width: &#13;
+    21px !important; &#13;
+ &#13;
+  height: &#13;
+    21px !important; &#13;
+ &#13;
+  fill: &#13;
+    none !important; &#13;
+ &#13;
+  stroke: &#13;
+    currentColor !important; &#13;
+ &#13;
+  stroke-width: &#13;
+    1.8 !important; &#13;
+ &#13;
+  stroke-linecap: &#13;
+    round !important; &#13;
+ &#13;
+  stroke-linejoin: &#13;
+    round !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.c360-nav-text { &#13;
+ &#13;
+  min-width: &#13;
+    0 !important; &#13;
+ &#13;
+  flex: &#13;
+    1 !important; &#13;
+ &#13;
+  white-space: &#13;
+    nowrap !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.c360-nav-count { &#13;
+ &#13;
+  min-width: &#13;
+    23px !important; &#13;
+ &#13;
+  height: &#13;
+    23px !important; &#13;
+ &#13;
+  margin-left: &#13;
+    auto !important; &#13;
+ &#13;
+  padding: &#13;
+    0 6px !important; &#13;
+ &#13;
+  display: &#13;
+    flex !important; &#13;
+ &#13;
+  align-items: &#13;
+    center !important; &#13;
+ &#13;
+  justify-content: &#13;
+    center !important; &#13;
+ &#13;
+  border-radius: &#13;
+    50% !important; &#13;
+ &#13;
+  background: &#13;
+    rgba(139,92,246,.30) !important; &#13;
+ &#13;
+  color: &#13;
+    #ddd6fe !important; &#13;
+ &#13;
+  border: &#13;
+    1px solid rgba(196,181,253,.08) !important; &#13;
+ &#13;
+  font-size: &#13;
+    11px !important; &#13;
+ &#13;
+  font-weight: &#13;
+    900 !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+/* ========================================================= &#13;
+   SIDEBAR FOOTER &#13;
+   ========================================================= */ &#13;
+ &#13;
+.c360-sidebar-footer { &#13;
+ &#13;
+  flex: &#13;
+    0 0 auto !important; &#13;
+ &#13;
+  padding: &#13;
+    10px 12px 13px !important; &#13;
+ &#13;
+  border-top: &#13;
+    1px solid rgba(255,255,255,.08) !important; &#13;
+ &#13;
+  background: &#13;
+    #120c2d !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.c360-journey-mini { &#13;
+ &#13;
+  padding: &#13;
+    12px !important; &#13;
+ &#13;
+  border-radius: &#13;
+    12px !important; &#13;
+ &#13;
+  background: &#13;
+    linear-gradient( &#13;
+      145deg, &#13;
+      #1e143f, &#13;
+      #21164a &#13;
+    ) !important; &#13;
+ &#13;
+  border: &#13;
+    1px solid #382963 !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.c360-journey-label { &#13;
+ &#13;
+  color: &#13;
+    #a69abd !important; &#13;
+ &#13;
+  font-size: &#13;
+    9px !important; &#13;
+ &#13;
+  font-weight: &#13;
+    900 !important; &#13;
+ &#13;
+  letter-spacing: &#13;
+    .08em !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.c360-journey-progress { &#13;
+ &#13;
+  height: &#13;
+    7px !important; &#13;
+ &#13;
+  margin-top: &#13;
+    9px !important; &#13;
+ &#13;
+  border-radius: &#13;
+    8px !important; &#13;
+ &#13;
+  overflow: &#13;
+    hidden !important; &#13;
+ &#13;
+  background: &#13;
+    #30234f !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.c360-journey-fill { &#13;
+ &#13;
+  height: &#13;
+    100% !important; &#13;
+ &#13;
+  border-radius: &#13;
+    8px !important; &#13;
+ &#13;
+  background: &#13;
+    linear-gradient( &#13;
+      90deg, &#13;
+      #7c3aed, &#13;
+      #a855f7 &#13;
+    ) !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.c360-journey-score { &#13;
+ &#13;
+  margin-top: &#13;
+    6px !important; &#13;
+ &#13;
+  color: &#13;
+    #c1b7d3 !important; &#13;
+ &#13;
+  font-size: &#13;
+    10px !important; &#13;
+ &#13;
+  font-weight: &#13;
+    700 !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+/* ========================================================= &#13;
+   RIGHT PAGE &#13;
+   ========================================================= */ &#13;
+ &#13;
+.c360-right-page { &#13;
+ &#13;
+  position: &#13;
+    absolute !important; &#13;
+ &#13;
+  top: &#13;
+    0 !important; &#13;
+ &#13;
+  right: &#13;
+    0 !important; &#13;
+ &#13;
+  bottom: &#13;
+    0 !important; &#13;
+ &#13;
+  left: &#13;
+    285px !important; &#13;
+ &#13;
+  width: &#13;
+    auto !important; &#13;
+ &#13;
+  height: &#13;
+    100vh !important; &#13;
+ &#13;
+  min-width: &#13;
+    0 !important; &#13;
+ &#13;
+  max-width: &#13;
+    none !important; &#13;
+ &#13;
+  overflow-x: &#13;
+    hidden !important; &#13;
+ &#13;
+  overflow-y: &#13;
+    auto !important; &#13;
+ &#13;
+  background: &#13;
+    linear-gradient( &#13;
+      135deg, &#13;
+      #f1f6fc 0%, &#13;
+      #f7f4ff 50%, &#13;
+      #f0f8f6 100% &#13;
+    ) !important; &#13;
+ &#13;
+  scrollbar-width: &#13;
+    none !important; &#13;
+ &#13;
+  -ms-overflow-style: &#13;
+    none !important; &#13;
+ &#13;
+  transition: &#13;
+    left .25s ease !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.c360-right-page::-webkit-scrollbar { &#13;
+ &#13;
+  width: &#13;
+    0 !important; &#13;
+ &#13;
+  height: &#13;
+    0 !important; &#13;
+ &#13;
+  display: &#13;
+    none !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.campus360-applications.sidebar-closed &#13;
+.c360-right-page { &#13;
+ &#13;
+  left: &#13;
+    0 !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+/* ========================================================= &#13;
+   TOP NAVBAR &#13;
+   WHITE &#13;
+   ========================================================= */ &#13;
+ &#13;
+.c360-topbar { &#13;
+ &#13;
+  position: &#13;
+    sticky !important; &#13;
+ &#13;
+  top: &#13;
+    0 !important; &#13;
+ &#13;
+  z-index: &#13;
+    5000 !important; &#13;
+ &#13;
+  width: &#13;
+    100% !important; &#13;
+ &#13;
+  height: &#13;
+    78px !important; &#13;
+ &#13;
+  min-height: &#13;
+    78px !important; &#13;
+ &#13;
+  flex: &#13;
+    0 0 78px !important; &#13;
+ &#13;
+  padding: &#13;
+    0 24px !important; &#13;
+ &#13;
+  display: &#13;
+    flex !important; &#13;
+ &#13;
+  align-items: &#13;
+    center !important; &#13;
+ &#13;
+  justify-content: &#13;
+    space-between !important; &#13;
+ &#13;
+  background: &#13;
+    #ffffff !important; &#13;
+ &#13;
+  border-bottom: &#13;
+    1px solid #dfe4ec !important; &#13;
+ &#13;
+  box-shadow: &#13;
+    0 2px 10px rgba(20,39,60,.035) !important; &#13;
+ &#13;
+  isolation: &#13;
+    isolate !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+/* ========================================================= &#13;
+   TOPBAR LEFT &#13;
+   ========================================================= */ &#13;
+ &#13;
+.c360-topbar-left { &#13;
+ &#13;
+  min-width: &#13;
+    0 !important; &#13;
+ &#13;
+  display: &#13;
+    flex !important; &#13;
+ &#13;
+  align-items: &#13;
+    center !important; &#13;
+ &#13;
+  gap: &#13;
+    13px !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.c360-menu-button { &#13;
+ &#13;
+  width: &#13;
+    42px !important; &#13;
+ &#13;
+  height: &#13;
+    42px !important; &#13;
+ &#13;
+  min-width: &#13;
+    42px !important; &#13;
+ &#13;
+  padding: &#13;
+    9px !important; &#13;
+ &#13;
+  display: &#13;
+    flex !important; &#13;
+ &#13;
+  flex-direction: &#13;
+    column !important; &#13;
+ &#13;
+  align-items: &#13;
+    center !important; &#13;
+ &#13;
+  justify-content: &#13;
+    center !important; &#13;
+ &#13;
+  gap: &#13;
+    4px !important; &#13;
+ &#13;
+  border: &#13;
+    1px solid #dce2ea !important; &#13;
+ &#13;
+  border-radius: &#13;
+    10px !important; &#13;
+ &#13;
+  background: &#13;
+    #ffffff !important; &#13;
+ &#13;
+  cursor: &#13;
+    pointer !important; &#13;
+ &#13;
+  transition: &#13;
+    .2s ease !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.c360-menu-button:hover { &#13;
+ &#13;
+  background: &#13;
+    #f8f5ff !important; &#13;
+ &#13;
+  border-color: &#13;
+    #bcb5ff !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.c360-menu-button span { &#13;
+ &#13;
+  width: &#13;
+    19px !important; &#13;
+ &#13;
+  height: &#13;
+    2px !important; &#13;
+ &#13;
+  border-radius: &#13;
+    3px !important; &#13;
+ &#13;
+  background: &#13;
+    #5362ee !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+/* ========================================================= &#13;
+   PAGE HEADING &#13;
+   ========================================================= */ &#13;
+ &#13;
+.c360-page-heading { &#13;
+ &#13;
+  min-width: &#13;
+    155px !important; &#13;
+ &#13;
+  display: &#13;
+    flex !important; &#13;
+ &#13;
+  flex-direction: &#13;
+    column !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.c360-page-heading span { &#13;
+ &#13;
+  color: &#13;
+    #673cff !important; &#13;
+ &#13;
+  font-size: &#13;
+    9px !important; &#13;
+ &#13;
+  font-weight: &#13;
+    950 !important; &#13;
+ &#13;
+  letter-spacing: &#13;
+    1.6px !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.c360-page-heading strong { &#13;
+ &#13;
+  margin-top: &#13;
+    5px !important; &#13;
+ &#13;
+  color: &#13;
+    #172a33 !important; &#13;
+ &#13;
+  font-size: &#13;
+    17px !important; &#13;
+ &#13;
+  font-weight: &#13;
+    900 !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+/* ========================================================= &#13;
+   TOP RIGHT &#13;
+   ========================================================= */ &#13;
+ &#13;
+.c360-topbar-right { &#13;
+ &#13;
+  margin-left: &#13;
+    auto !important; &#13;
+ &#13;
+  display: &#13;
+    flex !important; &#13;
+ &#13;
+  align-items: &#13;
+    center !important; &#13;
+ &#13;
+  gap: &#13;
+    10px !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+/* ========================================================= &#13;
+   TOP ICONS &#13;
+   ========================================================= */ &#13;
+ &#13;
+.c360-top-icon { &#13;
+ &#13;
+  position: &#13;
+    relative !important; &#13;
+ &#13;
+  width: &#13;
+    41px !important; &#13;
+ &#13;
+  height: &#13;
+    41px !important; &#13;
+ &#13;
+  min-width: &#13;
+    41px !important; &#13;
+ &#13;
+  display: &#13;
+    flex !important; &#13;
+ &#13;
+  align-items: &#13;
+    center !important; &#13;
+ &#13;
+  justify-content: &#13;
+    center !important; &#13;
+ &#13;
+  border: &#13;
+    1px solid #dce2ea !important; &#13;
+ &#13;
+  border-radius: &#13;
+    10px !important; &#13;
+ &#13;
+  background: &#13;
+    #ffffff !important; &#13;
+ &#13;
+  color: &#13;
+    #536476 !important; &#13;
+ &#13;
+  cursor: &#13;
+    pointer !important; &#13;
+ &#13;
+  transition: &#13;
+    .2s ease !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.c360-top-icon:hover { &#13;
+ &#13;
+  color: &#13;
+    #673cff !important; &#13;
+ &#13;
+  border-color: &#13;
+    #c9baff !important; &#13;
+ &#13;
+  background: &#13;
+    #f8f5ff !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.c360-top-icon svg { &#13;
+ &#13;
+  width: &#13;
+    18px !important; &#13;
+ &#13;
+  height: &#13;
+    18px !important; &#13;
+ &#13;
+  fill: &#13;
+    none !important; &#13;
+ &#13;
+  stroke: &#13;
+    currentColor !important; &#13;
+ &#13;
+  stroke-width: &#13;
+    1.8 !important; &#13;
+ &#13;
+  stroke-linecap: &#13;
+    round !important; &#13;
+ &#13;
+  stroke-linejoin: &#13;
+    round !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.c360-notification-button { &#13;
+ &#13;
+  border-color: &#13;
+    #d9ddff !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.c360-notification-button svg { &#13;
+ &#13;
+  color: &#13;
+    #4f46e5 !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.c360-notification-dot { &#13;
+ &#13;
+  position: &#13;
+    absolute !important; &#13;
+ &#13;
+  width: &#13;
+    7px !important; &#13;
+ &#13;
+  height: &#13;
+    7px !important; &#13;
+ &#13;
+  top: &#13;
+    6px !important; &#13;
+ &#13;
+  right: &#13;
+    6px !important; &#13;
+ &#13;
+  border-radius: &#13;
+    50% !important; &#13;
+ &#13;
+  background: &#13;
+    #ff3b4f !important; &#13;
+ &#13;
+  border: &#13;
+    1.5px solid #ffffff !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+/* ========================================================= &#13;
+   TOP PROFILE &#13;
+   ========================================================= */ &#13;
+ &#13;
+.c360-top-profile { &#13;
+ &#13;
+  min-height: &#13;
+    45px !important; &#13;
+ &#13;
+  padding-left: &#13;
+    11px !important; &#13;
+ &#13;
+  display: &#13;
+    flex !important; &#13;
+ &#13;
+  align-items: &#13;
+    center !important; &#13;
+ &#13;
+  gap: &#13;
+    9px !important; &#13;
+ &#13;
+  border-left: &#13;
+    1px solid #e0e4eb !important; &#13;
+ &#13;
+  text-decoration: &#13;
+    none !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.c360-top-avatar { &#13;
+ &#13;
+  width: &#13;
+    39px !important; &#13;
+ &#13;
+  height: &#13;
+    39px !important; &#13;
+ &#13;
+  min-width: &#13;
+    39px !important; &#13;
+ &#13;
+  display: &#13;
+    flex !important; &#13;
+ &#13;
+  align-items: &#13;
+    center !important; &#13;
+ &#13;
+  justify-content: &#13;
+    center !important; &#13;
+ &#13;
+  border-radius: &#13;
+    50% !important; &#13;
+ &#13;
+  background: &#13;
+    linear-gradient( &#13;
+      135deg, &#13;
+      #7659f4, &#13;
+      #6654eb &#13;
+    ) !important; &#13;
+ &#13;
+  color: &#13;
+    #ffffff !important; &#13;
+ &#13;
+  font-size: &#13;
+    11px !important; &#13;
+ &#13;
+  font-weight: &#13;
+    900 !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.c360-top-profile-info { &#13;
+ &#13;
+  min-width: &#13;
+    0 !important; &#13;
+ &#13;
+  display: &#13;
+    flex !important; &#13;
+ &#13;
+  flex-direction: &#13;
+    column !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.c360-top-profile-info strong { &#13;
+ &#13;
+  display: &#13;
+    block !important; &#13;
+ &#13;
+  max-width: &#13;
+    190px !important; &#13;
+ &#13;
+  overflow: &#13;
+    hidden !important; &#13;
+ &#13;
+  white-space: &#13;
+    nowrap !important; &#13;
+ &#13;
+  text-overflow: &#13;
+    ellipsis !important; &#13;
+ &#13;
+  color: &#13;
+    #101828 !important; &#13;
+ &#13;
+  font-size: &#13;
+    12px !important; &#13;
+ &#13;
+  font-weight: &#13;
+    900 !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.c360-top-profile-info span { &#13;
+ &#13;
+  display: &#13;
+    block !important; &#13;
+ &#13;
+  margin-top: &#13;
+    2px !important; &#13;
+ &#13;
+  color: &#13;
+    #667085 !important; &#13;
+ &#13;
+  font-size: &#13;
+    9px !important; &#13;
+ &#13;
+  font-weight: &#13;
+    600 !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.c360-profile-chevron { &#13;
+ &#13;
+  color: &#13;
+    #667085 !important; &#13;
+ &#13;
+  font-size: &#13;
+    13px !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+/* ========================================================= &#13;
+   PAGE CONTENT &#13;
+   ========================================================= */ &#13;
+ &#13;
+.c360-page-content { &#13;
+ &#13;
+  position: &#13;
+    relative !important; &#13;
+ &#13;
+  z-index: &#13;
+    1 !important; &#13;
+ &#13;
+  width: &#13;
+    100% !important; &#13;
+ &#13;
+  max-width: &#13;
+    none !important; &#13;
+ &#13;
+  min-width: &#13;
+    0 !important; &#13;
+ &#13;
+  margin: &#13;
+    0 !important; &#13;
+ &#13;
+  padding: &#13;
+    18px 15px 55px !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+/* ========================================================= &#13;
+   TOP APPLICATIONS HERO&#13;
+   DARK PURPLE — SAME STYLE AS INTERVIEW HERO&#13;
+   ========================================================= */ &#13;
+ &#13;
+.applications-hero { &#13;
+ &#13;
+  position: &#13;
+    relative !important; &#13;
+ &#13;
+  z-index: &#13;
+    1 !important; &#13;
+ &#13;
+  width: &#13;
+    100% !important; &#13;
+ &#13;
+  min-height: &#13;
+    178px !important; &#13;
+ &#13;
+  margin: &#13;
+    0 !important; &#13;
+ &#13;
+  padding: &#13;
+    30px 38px !important; &#13;
+ &#13;
+  display: &#13;
+    flex !important; &#13;
+ &#13;
+  align-items: &#13;
+    center !important; &#13;
+ &#13;
+  border-radius: &#13;
+    18px !important; &#13;
+ &#13;
+  background: &#13;
+    linear-gradient(&#13;
+      135deg,&#13;
+      #241044 0%,&#13;
+      #351A61 52%,&#13;
+      #45206D 100%&#13;
+    ) !important; &#13;
+ &#13;
+  border: &#13;
+    1px solid #5A357D !important; &#13;
+ &#13;
+  color:&#13;
+    #ffffff !important;&#13;
+&#13;
+  box-shadow: &#13;
+    0 12px 30px rgba(53,26,97,.22) !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.hero-left { &#13;
+ &#13;
+  min-width: &#13;
+    0 !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.hero-eyebrow { &#13;
+ &#13;
+  display: &#13;
+    flex !important; &#13;
+ &#13;
+  align-items: &#13;
+    center !important; &#13;
+ &#13;
+  gap: &#13;
+    9px !important; &#13;
+ &#13;
+  margin-bottom: &#13;
+    9px !important; &#13;
+ &#13;
+  color: &#13;
+    #DCCBFF !important; &#13;
+ &#13;
+  font-size: &#13;
+    12px !important; &#13;
+ &#13;
+  font-weight: &#13;
+    850 !important; &#13;
+ &#13;
+  letter-spacing: &#13;
+    1.5px !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.hero-dot { &#13;
+ &#13;
+  width: &#13;
+    10px !important; &#13;
+ &#13;
+  height: &#13;
+    10px !important; &#13;
+ &#13;
+  border-radius: &#13;
+    50% !important; &#13;
+ &#13;
+  background: &#13;
+    #C4B5FD !important; &#13;
+ &#13;
+  box-shadow: &#13;
+    0 0 0 6px rgba(196,181,253,.14) !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.applications-hero h1 { &#13;
+ &#13;
+  margin: &#13;
+    0 !important; &#13;
+ &#13;
+  color: &#13;
+    #ffffff !important; &#13;
+ &#13;
+  font-size: &#13;
+    40px !important; &#13;
+ &#13;
+  line-height: &#13;
+    1.1 !important; &#13;
+ &#13;
+  font-weight: &#13;
+    850 !important; &#13;
+ &#13;
+  letter-spacing: &#13;
+    -.8px !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.applications-hero p { &#13;
+ &#13;
+  max-width: &#13;
+    760px !important; &#13;
+ &#13;
+  margin: &#13;
+    11px 0 0 !important; &#13;
+ &#13;
+  color: &#13;
+    #E5DCF0 !important; &#13;
+ &#13;
+  font-size: &#13;
+    16px !important; &#13;
+ &#13;
+  line-height: &#13;
+    1.55 !important; &#13;
+ &#13;
+  font-weight: &#13;
+    600 !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+/* ========================================================= &#13;
+   LOADING &#13;
+   ========================================================= */ &#13;
+ &#13;
+.loading-container { &#13;
+ &#13;
+  min-height: &#13;
+    300px !important; &#13;
+ &#13;
+  display: &#13;
+    flex !important; &#13;
+ &#13;
+  align-items: &#13;
+    center !important; &#13;
+ &#13;
+  justify-content: &#13;
+    center !important; &#13;
+ &#13;
+  gap: &#13;
+    10px !important; &#13;
+ &#13;
+  color: &#13;
+    #53677f !important; &#13;
+ &#13;
+  font-size: &#13;
+    13px !important; &#13;
+ &#13;
+  font-weight: &#13;
+    700 !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.spinner { &#13;
+ &#13;
+  width: &#13;
+    21px !important; &#13;
+ &#13;
+  height: &#13;
+    21px !important; &#13;
+ &#13;
+  border: &#13;
+    3px solid #ded6f7 !important; &#13;
+ &#13;
+  border-top-color: &#13;
+    #7040ff !important; &#13;
+ &#13;
+  border-radius: &#13;
+    50% !important; &#13;
+ &#13;
+  animation: &#13;
+    applicationSpin .8s linear infinite !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+@keyframes applicationSpin { &#13;
+ &#13;
+  to { &#13;
+    transform: &#13;
+      rotate(360deg); &#13;
+  } &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+/* ========================================================= &#13;
+   SUMMARY &#13;
+   ========================================================= */ &#13;
+ &#13;
+.summary-grid { &#13;
+ &#13;
+  width: &#13;
+    100% !important; &#13;
+ &#13;
+  display: &#13;
+    grid !important; &#13;
+ &#13;
+  grid-template-columns: &#13;
+    repeat(4,minmax(0,1fr)) !important; &#13;
+ &#13;
+  gap: &#13;
+    17px !important; &#13;
+ &#13;
+  margin: &#13;
+    25px 0 30px !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.summary-card { &#13;
+ &#13;
+  position: &#13;
+    relative !important; &#13;
+ &#13;
+  min-height: &#13;
+    126px !important; &#13;
+ &#13;
+  padding: &#13;
+    19px !important; &#13;
+ &#13;
+  display: &#13;
+    flex !important; &#13;
+ &#13;
+  align-items: &#13;
+    flex-start !important; &#13;
+ &#13;
+  gap: &#13;
+    13px !important; &#13;
+ &#13;
+  background: &#13;
+    #ffffff !important; &#13;
+ &#13;
+  border: &#13;
+    1px solid #d8e2ed !important; &#13;
+ &#13;
+  border-radius: &#13;
+    15px !important; &#13;
+ &#13;
+  box-shadow: &#13;
+    0 5px 17px rgba(25,43,60,.045) !important; &#13;
+ &#13;
+  overflow: &#13;
+    hidden !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.summary-card::after { &#13;
+ &#13;
+  content: &#13;
+    "" !important; &#13;
+ &#13;
+  position: &#13;
+    absolute !important; &#13;
+ &#13;
+  left: &#13;
+    0 !important; &#13;
+ &#13;
+  right: &#13;
+    0 !important; &#13;
+ &#13;
+  bottom: &#13;
+    0 !important; &#13;
+ &#13;
+  height: &#13;
+    4px !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.total-card::after { &#13;
+  background: &#13;
+    #7040ff !important; &#13;
+} &#13;
+ &#13;
+ &#13;
+.submitted-card::after { &#13;
+  background: &#13;
+    #2782e6 !important; &#13;
+} &#13;
+ &#13;
+ &#13;
+.shortlisted-card::after { &#13;
+  background: &#13;
+    #13a66b !important; &#13;
+} &#13;
+ &#13;
+ &#13;
+.interview-card::after { &#13;
+  background: &#13;
+    #e79a13 !important; &#13;
+} &#13;
+ &#13;
+ &#13;
+.summary-icon { &#13;
+ &#13;
+  width: &#13;
+    40px !important; &#13;
+ &#13;
+  height: &#13;
+    40px !important; &#13;
+ &#13;
+  flex: &#13;
+    0 0 40px !important; &#13;
+ &#13;
+  display: &#13;
+    flex !important; &#13;
+ &#13;
+  align-items: &#13;
+    center !important; &#13;
+ &#13;
+  justify-content: &#13;
+    center !important; &#13;
+ &#13;
+  border-radius: &#13;
+    10px !important; &#13;
+ &#13;
+  font-size: &#13;
+    17px !important; &#13;
+ &#13;
+  font-weight: &#13;
+    800 !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.total-card .summary-icon { &#13;
+  color: &#13;
+    #7040ff !important; &#13;
+  background: &#13;
+    #eee7ff !important; &#13;
+} &#13;
+ &#13;
+ &#13;
+.submitted-card .summary-icon { &#13;
+  color: &#13;
+    #2479d4 !important; &#13;
+  background: &#13;
+    #e2efff !important; &#13;
+} &#13;
+ &#13;
+ &#13;
+.shortlisted-card .summary-icon { &#13;
+  color: &#13;
+    #078454 !important; &#13;
+  background: &#13;
+    #dff8eb !important; &#13;
+} &#13;
+ &#13;
+ &#13;
+.interview-card .summary-icon { &#13;
+  color: &#13;
+    #c97900 !important; &#13;
+  background: &#13;
+    #fff0ca !important; &#13;
+} &#13;
+ &#13;
+ &#13;
+.summary-label { &#13;
+ &#13;
+  display: &#13;
+    block !important; &#13;
+ &#13;
+  color: &#13;
+    #637188 !important; &#13;
+ &#13;
+  font-size: &#13;
+    10px !important; &#13;
+ &#13;
+  font-weight: &#13;
+    850 !important; &#13;
+ &#13;
+  letter-spacing: &#13;
+    1px !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.summary-card strong { &#13;
+ &#13;
+  display: &#13;
+    block !important; &#13;
+ &#13;
+  margin-top: &#13;
+    7px !important; &#13;
+ &#13;
+  color: &#13;
+    #0d203a !important; &#13;
+ &#13;
+  font-size: &#13;
+    29px !important; &#13;
+ &#13;
+  line-height: &#13;
+    1 !important; &#13;
+ &#13;
+  font-weight: &#13;
+    850 !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.summary-card p { &#13;
+ &#13;
+  margin: &#13;
+    7px 0 0 !important; &#13;
+ &#13;
+  color: &#13;
+    #8290a4 !important; &#13;
+ &#13;
+  font-size: &#13;
+    11px !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+/* ========================================================= &#13;
+   FILTER &#13;
+   ========================================================= */ &#13;
+ &#13;
+.filter-section { &#13;
+ &#13;
+  width: &#13;
+    100% !important; &#13;
+ &#13;
+  padding: &#13;
+    15px !important; &#13;
+ &#13;
+  display: &#13;
+    flex !important; &#13;
+ &#13;
+  align-items: &#13;
+    center !important; &#13;
+ &#13;
+  gap: &#13;
+    10px !important; &#13;
+ &#13;
+  background: &#13;
+    #ffffff !important; &#13;
+ &#13;
+  border: &#13;
+    1px solid #d9e3ef !important; &#13;
+ &#13;
+  border-radius: &#13;
+    15px !important; &#13;
+ &#13;
+  box-shadow: &#13;
+    0 5px 17px rgba(25,43,60,.045) !important; &#13;
+ &#13;
+  margin-bottom: &#13;
+    30px !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.search-box { &#13;
+ &#13;
+  flex: &#13;
+    1 !important; &#13;
+ &#13;
+  min-width: &#13;
+    200px !important; &#13;
+ &#13;
+  height: &#13;
+    45px !important; &#13;
+ &#13;
+  display: &#13;
+    flex !important; &#13;
+ &#13;
+  align-items: &#13;
+    center !important; &#13;
+ &#13;
+  padding: &#13;
+    0 13px !important; &#13;
+ &#13;
+  background: &#13;
+    #fbfcff !important; &#13;
+ &#13;
+  border: &#13;
+    1px solid #d5e0ed !important; &#13;
+ &#13;
+  border-radius: &#13;
+    10px !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.search-icon { &#13;
+ &#13;
+  margin-right: &#13;
+    8px !important; &#13;
+ &#13;
+  color: &#13;
+    #617995 !important; &#13;
+ &#13;
+  font-size: &#13;
+    20px !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.search-box input { &#13;
+ &#13;
+  width: &#13;
+    100% !important; &#13;
+ &#13;
+  border: &#13;
+    0 !important; &#13;
+ &#13;
+  outline: &#13;
+    0 !important; &#13;
+ &#13;
+  box-shadow: &#13;
+    none !important; &#13;
+ &#13;
+  background: &#13;
+    transparent !important; &#13;
+ &#13;
+  color: &#13;
+    #1a304d !important; &#13;
+ &#13;
+  font-size: &#13;
+    13px !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.status-select { &#13;
+ &#13;
+  height: &#13;
+    45px !important; &#13;
+ &#13;
+  min-width: &#13;
+    145px !important; &#13;
+ &#13;
+  padding: &#13;
+    0 12px !important; &#13;
+ &#13;
+  border: &#13;
+    1px solid #d5e0ed !important; &#13;
+ &#13;
+  border-radius: &#13;
+    10px !important; &#13;
+ &#13;
+  background: &#13;
+    #ffffff !important; &#13;
+ &#13;
+  color: &#13;
+    #18304e !important; &#13;
+ &#13;
+  font-size: &#13;
+    12px !important; &#13;
+ &#13;
+  font-weight: &#13;
+    750 !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.clear-btn { &#13;
+ &#13;
+  height: &#13;
+    45px !important; &#13;
+ &#13;
+  padding: &#13;
+    0 16px !important; &#13;
+ &#13;
+  border: &#13;
+    1px solid #c7b4ff !important; &#13;
+ &#13;
+  border-radius: &#13;
+    10px !important; &#13;
+ &#13;
+  background: &#13;
+    #f5f0ff !important; &#13;
+ &#13;
+  color: &#13;
+    #6535d0 !important; &#13;
+ &#13;
+  font-size: &#13;
+    12px !important; &#13;
+ &#13;
+  font-weight: &#13;
+    850 !important; &#13;
+ &#13;
+  cursor: &#13;
+    pointer !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.clear-btn:hover { &#13;
+ &#13;
+  background: &#13;
+    #e7ddff !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+/* ========================================================= &#13;
+   APPLICATIONS SECTION &#13;
+   ========================================================= */ &#13;
+ &#13;
+.applications-section { &#13;
+ &#13;
+  width: &#13;
+    100% !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.section-header { &#13;
+ &#13;
+  width: &#13;
+    100% !important; &#13;
+ &#13;
+  margin-bottom: &#13;
+    16px !important; &#13;
+ &#13;
+  display: &#13;
+    flex !important; &#13;
+ &#13;
+  align-items: &#13;
+    flex-end !important; &#13;
+ &#13;
+  justify-content: &#13;
+    space-between !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.section-eyebrow { &#13;
+ &#13;
+  color: &#13;
+    #7039da !important; &#13;
+ &#13;
+  font-size: &#13;
+    10px !important; &#13;
+ &#13;
+  font-weight: &#13;
+    900 !important; &#13;
+ &#13;
+  letter-spacing: &#13;
+    1.2px !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.section-header h2 { &#13;
+ &#13;
+  margin: &#13;
+    5px 0 0 !important; &#13;
+ &#13;
+  color: &#13;
+    #10213f !important; &#13;
+ &#13;
+  font-size: &#13;
+    27px !important; &#13;
+ &#13;
+  font-weight: &#13;
+    850 !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.application-count { &#13;
+ &#13;
+  color: &#13;
+    #607995 !important; &#13;
+ &#13;
+  font-size: &#13;
+    12px !important; &#13;
+ &#13;
+  font-weight: &#13;
+    750 !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+/* ========================================================= &#13;
+   APPLICATION GRID &#13;
+   ========================================================= */ &#13;
+ &#13;
+.applications-grid { &#13;
+ &#13;
+  width: &#13;
+    100% !important; &#13;
+ &#13;
+  display: &#13;
+    grid !important; &#13;
+ &#13;
+  grid-template-columns: &#13;
+    repeat(3,minmax(0,1fr)) !important; &#13;
+ &#13;
+  gap: &#13;
+    17px !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.application-card { &#13;
+ &#13;
+  min-width: &#13;
+    0 !important; &#13;
+ &#13;
+  padding: &#13;
+    18px !important; &#13;
+ &#13;
+  background: &#13;
+    #ffffff !important; &#13;
+ &#13;
+  border: &#13;
+    1px solid #dce5f0 !important; &#13;
+ &#13;
+  border-top: &#13;
+    4px solid #7441e5 !important; &#13;
+ &#13;
+  border-radius: &#13;
+    16px !important; &#13;
+ &#13;
+  box-shadow: &#13;
+    0 7px 22px rgba(26,50,84,.06) !important; &#13;
+ &#13;
+  transition: &#13;
+    transform .18s ease, &#13;
+    box-shadow .18s ease !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.application-card:nth-child(3n + 2) { &#13;
+  border-top-color: &#13;
+    #2784e7 !important; &#13;
+} &#13;
+ &#13;
+ &#13;
+.application-card:nth-child(3n) { &#13;
+  border-top-color: &#13;
+    #13a66a !important; &#13;
+} &#13;
+ &#13;
+ &#13;
+.application-card:hover { &#13;
+ &#13;
+  transform: &#13;
+    translateY(-2px) !important; &#13;
+ &#13;
+  box-shadow: &#13;
+    0 13px 30px rgba(26,50,84,.10) !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+/* ========================================================= &#13;
+   APPLICATION HEADER &#13;
+   ========================================================= */ &#13;
+ &#13;
+.application-header { &#13;
+ &#13;
+  display: &#13;
+    flex !important; &#13;
+ &#13;
+  align-items: &#13;
+    flex-start !important; &#13;
+ &#13;
+  gap: &#13;
+    11px !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.company-icon { &#13;
+ &#13;
+  width: &#13;
+    48px !important; &#13;
+ &#13;
+  height: &#13;
+    48px !important; &#13;
+ &#13;
+  min-width: &#13;
+    48px !important; &#13;
+ &#13;
+  display: &#13;
+    flex !important; &#13;
+ &#13;
+  align-items: &#13;
+    center !important; &#13;
+ &#13;
+  justify-content: &#13;
+    center !important; &#13;
+ &#13;
+  border-radius: &#13;
+    12px !important; &#13;
+ &#13;
+  background: &#13;
+    #eee8ff !important; &#13;
+ &#13;
+  color: &#13;
+    #6936d9 !important; &#13;
+ &#13;
+  font-size: &#13;
+    16px !important; &#13;
+ &#13;
+  font-weight: &#13;
+    900 !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.application-title { &#13;
+ &#13;
+  flex: &#13;
+    1 !important; &#13;
+ &#13;
+  min-width: &#13;
+    0 !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.application-id { &#13;
+ &#13;
+  display: &#13;
+    block !important; &#13;
+ &#13;
+  color: &#13;
+    #7138dc !important; &#13;
+ &#13;
+  font-size: &#13;
+    9px !important; &#13;
+ &#13;
+  font-weight: &#13;
+    900 !important; &#13;
+ &#13;
+  letter-spacing: &#13;
+    1px !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.application-title h3 { &#13;
+ &#13;
+  margin: &#13;
+    4px 0 2px !important; &#13;
+ &#13;
+  color: &#13;
+    #10213f !important; &#13;
+ &#13;
+  font-size: &#13;
+    17px !important; &#13;
+ &#13;
+  line-height: &#13;
+    1.2 !important; &#13;
+ &#13;
+  font-weight: &#13;
+    850 !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.application-title p { &#13;
+ &#13;
+  margin: &#13;
+    0 !important; &#13;
+ &#13;
+  color: &#13;
+    #59718d !important; &#13;
+ &#13;
+  font-size: &#13;
+    12px !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.application-status { &#13;
+ &#13;
+  padding: &#13;
+    5px 8px !important; &#13;
+ &#13;
+  border: &#13;
+    1px solid !important; &#13;
+ &#13;
+  border-radius: &#13;
+    20px !important; &#13;
+ &#13;
+  white-space: &#13;
+    nowrap !important; &#13;
+ &#13;
+  font-size: &#13;
+    9px !important; &#13;
+ &#13;
+  font-weight: &#13;
+    900 !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.status-purple { &#13;
+  color: &#13;
+    #6432d0 !important; &#13;
+  background: &#13;
+    #f0eaff !important; &#13;
+  border-color: &#13;
+    #cdbaff !important; &#13;
+} &#13;
+ &#13;
+ &#13;
+.status-blue { &#13;
+  color: &#13;
+    #1768b9 !important; &#13;
+  background: &#13;
+    #e7f2ff !important; &#13;
+  border-color: &#13;
+    #a7ceff !important; &#13;
+} &#13;
+ &#13;
+ &#13;
+.status-green { &#13;
+  color: &#13;
+    #087d4b !important; &#13;
+  background: &#13;
+    #e5faef !important; &#13;
+  border-color: &#13;
+    #9ae1bb !important; &#13;
+} &#13;
+ &#13;
+ &#13;
+.status-orange { &#13;
+  color: &#13;
+    #a45c00 !important; &#13;
+  background: &#13;
+    #fff3d9 !important; &#13;
+  border-color: &#13;
+    #ffd18a !important; &#13;
+} &#13;
+ &#13;
+ &#13;
+.status-red { &#13;
+  color: &#13;
+    #b52c37 !important; &#13;
+  background: &#13;
+    #ffebed !important; &#13;
+  border-color: &#13;
+    #ffc0c5 !important; &#13;
+} &#13;
+ &#13;
+ &#13;
+/* ========================================================= &#13;
+   BRIEF &#13;
+   ========================================================= */ &#13;
+ &#13;
+.brief-grid { &#13;
+ &#13;
+  display: &#13;
+    grid !important; &#13;
+ &#13;
+  grid-template-columns: &#13;
+    1fr 1fr !important; &#13;
+ &#13;
+  gap: &#13;
+    8px !important; &#13;
+ &#13;
+  margin-top: &#13;
+    17px !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.brief-item { &#13;
+ &#13;
+  min-height: &#13;
+    61px !important; &#13;
+ &#13;
+  padding: &#13;
+    10px 11px !important; &#13;
+ &#13;
+  border-radius: &#13;
+    9px !important; &#13;
+ &#13;
+  border: &#13;
+    1px solid #dce6f1 !important; &#13;
+ &#13;
+  background: &#13;
+    #f7f9fc !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.brief-item:nth-child(1) { &#13;
+ &#13;
+  background: &#13;
+    #f0f7ff !important; &#13;
+ &#13;
+  border-color: &#13;
+    #bad8ff !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.brief-item:nth-child(2) { &#13;
+ &#13;
+  background: &#13;
+    #f5f0ff !important; &#13;
+ &#13;
+  border-color: &#13;
+    #d2c0ff !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.brief-item:nth-child(3) { &#13;
+ &#13;
+  background: &#13;
+    #fff7e9 !important; &#13;
+ &#13;
+  border-color: &#13;
+    #ffd69a !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.brief-item:nth-child(4) { &#13;
+ &#13;
+  background: &#13;
+    #effaf5 !important; &#13;
+ &#13;
+  border-color: &#13;
+    #b3e7cb !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.brief-item span, &#13;
+.response-row span { &#13;
+ &#13;
+  display: &#13;
+    block !important; &#13;
+ &#13;
+  color: &#13;
+    #667d99 !important; &#13;
+ &#13;
+  font-size: &#13;
+    8px !important; &#13;
+ &#13;
+  font-weight: &#13;
+    900 !important; &#13;
+ &#13;
+  letter-spacing: &#13;
+    1px !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.brief-item strong { &#13;
+ &#13;
+  display: &#13;
+    block !important; &#13;
+ &#13;
+  margin-top: &#13;
+    5px !important; &#13;
+ &#13;
+  color: &#13;
+    #172d49 !important; &#13;
+ &#13;
+  font-size: &#13;
+    11px !important; &#13;
+ &#13;
+  line-height: &#13;
+    1.3 !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+/* ========================================================= &#13;
+   RESPONSE &#13;
+   ========================================================= */ &#13;
+ &#13;
+.response-row { &#13;
+ &#13;
+  margin-top: &#13;
+    12px !important; &#13;
+ &#13;
+  padding: &#13;
+    11px 12px !important; &#13;
+ &#13;
+  border-radius: &#13;
+    9px !important; &#13;
+ &#13;
+  border: &#13;
+    1px solid #e0e7ef !important; &#13;
+ &#13;
+  background: &#13;
+    #f8fafc !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.response-row strong { &#13;
+ &#13;
+  display: &#13;
+    block !important; &#13;
+ &#13;
+  margin-top: &#13;
+    4px !important; &#13;
+ &#13;
+  color: &#13;
+    #6336d0 !important; &#13;
+ &#13;
+  font-size: &#13;
+    12px !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+/* ========================================================= &#13;
+   CARD FOOTER &#13;
+   ========================================================= */ &#13;
+ &#13;
+.card-footer { &#13;
+ &#13;
+  margin-top: &#13;
+    13px !important; &#13;
+ &#13;
+  padding-top: &#13;
+    13px !important; &#13;
+ &#13;
+  display: &#13;
+    flex !important; &#13;
+ &#13;
+  justify-content: &#13;
+    flex-end !important; &#13;
+ &#13;
+  border-top: &#13;
+    1px solid #e0e7ef !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.view-btn { &#13;
+ &#13;
+  min-height: &#13;
+    39px !important; &#13;
+ &#13;
+  padding: &#13;
+    0 15px !important; &#13;
+ &#13;
+  border: &#13;
+    1px solid #bba2ff !important; &#13;
+ &#13;
+  border-radius: &#13;
+    9px !important; &#13;
+ &#13;
+  background: &#13;
+    #f2ecff !important; &#13;
+ &#13;
+  color: &#13;
+    #6031cc !important; &#13;
+ &#13;
+  font-size: &#13;
+    11px !important; &#13;
+ &#13;
+  font-weight: &#13;
+    850 !important; &#13;
+ &#13;
+  cursor: &#13;
+    pointer !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.view-btn:hover { &#13;
+ &#13;
+  background: &#13;
+    #e7ddff !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.view-btn span { &#13;
+ &#13;
+  margin-left: &#13;
+    5px !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+/* ========================================================= &#13;
+   EMPTY STATE &#13;
+   ========================================================= */ &#13;
+ &#13;
+.empty-state { &#13;
+ &#13;
+  padding: &#13;
+    55px 20px !important; &#13;
+ &#13;
+  text-align: &#13;
+    center !important; &#13;
+ &#13;
+  background: &#13;
+    #ffffff !important; &#13;
+ &#13;
+  border: &#13;
+    1px dashed #cbd8e7 !important; &#13;
+ &#13;
+  border-radius: &#13;
+    16px !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.empty-icon { &#13;
+ &#13;
+  width: &#13;
+    55px !important; &#13;
+ &#13;
+  height: &#13;
+    55px !important; &#13;
+ &#13;
+  margin: &#13;
+    auto !important; &#13;
+ &#13;
+  display: &#13;
+    flex !important; &#13;
+ &#13;
+  align-items: &#13;
+    center !important; &#13;
+ &#13;
+  justify-content: &#13;
+    center !important; &#13;
+ &#13;
+  border-radius: &#13;
+    14px !important; &#13;
+ &#13;
+  background: &#13;
+    #eee8ff !important; &#13;
+ &#13;
+  color: &#13;
+    #6b3cda !important; &#13;
+ &#13;
+  font-size: &#13;
+    25px !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.empty-state h3 { &#13;
+ &#13;
+  margin: &#13;
+    13px 0 5px !important; &#13;
+ &#13;
+  color: &#13;
+    #142943 !important; &#13;
+ &#13;
+  font-size: &#13;
+    19px !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.empty-state p { &#13;
+ &#13;
+  margin: &#13;
+    0 !important; &#13;
+ &#13;
+  color: &#13;
+    #607894 !important; &#13;
+ &#13;
+  font-size: &#13;
+    13px !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.empty-clear-btn { &#13;
+ &#13;
+  margin-top: &#13;
+    16px !important; &#13;
+ &#13;
+  height: &#13;
+    39px !important; &#13;
+ &#13;
+  padding: &#13;
+    0 15px !important; &#13;
+ &#13;
+  border: &#13;
+    1px solid #c7b5ff !important; &#13;
+ &#13;
+  border-radius: &#13;
+    9px !important; &#13;
+ &#13;
+  background: &#13;
+    #f4efff !important; &#13;
+ &#13;
+  color: &#13;
+    #6336d1 !important; &#13;
+ &#13;
+  font-weight: &#13;
+    800 !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+/* ========================================================= &#13;
+   MODAL &#13;
+   ========================================================= */ &#13;
+ &#13;
+.modal-overlay { &#13;
+ &#13;
+  position: &#13;
+    fixed !important; &#13;
+ &#13;
+  inset: &#13;
+    0 !important; &#13;
+ &#13;
+  z-index: &#13;
+    1000000 !important; &#13;
+ &#13;
+  padding: &#13;
+    20px !important; &#13;
+ &#13;
+  display: &#13;
+    flex !important; &#13;
+ &#13;
+  align-items: &#13;
+    center !important; &#13;
+ &#13;
+  justify-content: &#13;
+    center !important; &#13;
+ &#13;
+  background: &#13;
+    rgba(13,27,45,.67) !important; &#13;
+ &#13;
+  backdrop-filter: &#13;
+    blur(4px) !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.application-modal { &#13;
+ &#13;
+  width: &#13;
+    min(950px,96vw) !important; &#13;
+ &#13;
+  max-height: &#13;
+    92vh !important; &#13;
+ &#13;
+  overflow-y: &#13;
+    auto !important; &#13;
+ &#13;
+  background: &#13;
+    #ffffff !important; &#13;
+ &#13;
+  border-radius: &#13;
+    20px !important; &#13;
+ &#13;
+  box-shadow: &#13;
+    0 30px 80px rgba(8,25,49,.32) !important; &#13;
+ &#13;
+  scrollbar-width: &#13;
+    none !important; &#13;
+ &#13;
+  -ms-overflow-style: &#13;
+    none !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.application-modal::-webkit-scrollbar { &#13;
+ &#13;
+  width: &#13;
+    0 !important; &#13;
+ &#13;
+  height: &#13;
+    0 !important; &#13;
+ &#13;
+  display: &#13;
+    none !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.modal-header { &#13;
+ &#13;
+  padding: &#13;
+    24px 28px !important; &#13;
+ &#13;
+  display: &#13;
+    flex !important; &#13;
+ &#13;
+  align-items: &#13;
+    flex-start !important; &#13;
+ &#13;
+  justify-content: &#13;
+    space-between !important; &#13;
+ &#13;
+  gap: &#13;
+    15px !important; &#13;
+ &#13;
+  border-bottom: &#13;
+    1px solid #e1e8f0 !important; &#13;
+ &#13;
+  background: &#13;
+    linear-gradient( &#13;
+      135deg, &#13;
+      #f6f1ff, &#13;
+      #f4f9ff &#13;
+    ) !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.modal-title { &#13;
+ &#13;
+  display: &#13;
+    flex !important; &#13;
+ &#13;
+  align-items: &#13;
+    center !important; &#13;
+ &#13;
+  gap: &#13;
+    13px !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.modal-company-icon { &#13;
+ &#13;
+  width: &#13;
+    55px !important; &#13;
+ &#13;
+  height: &#13;
+    55px !important; &#13;
+ &#13;
+  border-radius: &#13;
+    14px !important; &#13;
+ &#13;
+  display: &#13;
+    flex !important; &#13;
+ &#13;
+  align-items: &#13;
+    center !important; &#13;
+ &#13;
+  justify-content: &#13;
+    center !important; &#13;
+ &#13;
+  background: &#13;
+    #eae2ff !important; &#13;
+ &#13;
+  color: &#13;
+    #6737d5 !important; &#13;
+ &#13;
+  font-size: &#13;
+    18px !important; &#13;
+ &#13;
+  font-weight: &#13;
+    900 !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.modal-title &gt; div:last-child &gt; span { &#13;
+ &#13;
+  color: &#13;
+    #7039d9 !important; &#13;
+ &#13;
+  font-size: &#13;
+    9px !important; &#13;
+ &#13;
+  font-weight: &#13;
+    900 !important; &#13;
+ &#13;
+  letter-spacing: &#13;
+    1.1px !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.modal-title h2 { &#13;
+ &#13;
+  margin: &#13;
+    4px 0 2px !important; &#13;
+ &#13;
+  color: &#13;
+    #10213e !important; &#13;
+ &#13;
+  font-size: &#13;
+    23px !important; &#13;
+ &#13;
+  font-weight: &#13;
+    850 !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.modal-title p { &#13;
+ &#13;
+  margin: &#13;
+    0 !important; &#13;
+ &#13;
+  color: &#13;
+    #59728e !important; &#13;
+ &#13;
+  font-size: &#13;
+    13px !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.modal-close { &#13;
+ &#13;
+  width: &#13;
+    37px !important; &#13;
+ &#13;
+  height: &#13;
+    37px !important; &#13;
+ &#13;
+  border: &#13;
+    0 !important; &#13;
+ &#13;
+  border-radius: &#13;
+    50% !important; &#13;
+ &#13;
+  background: &#13;
+    #edf2f8 !important; &#13;
+ &#13;
+  color: &#13;
+    #38536f !important; &#13;
+ &#13;
+  font-size: &#13;
+    24px !important; &#13;
+ &#13;
+  cursor: &#13;
+    pointer !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.modal-status { &#13;
+ &#13;
+  display: &#13;
+    grid !important; &#13;
+ &#13;
+  grid-template-columns: &#13;
+    repeat(3,1fr) !important; &#13;
+ &#13;
+  gap: &#13;
+    11px !important; &#13;
+ &#13;
+  padding: &#13;
+    18px 28px !important; &#13;
+ &#13;
+  background: &#13;
+    #fbfcfe !important; &#13;
+ &#13;
+  border-bottom: &#13;
+    1px solid #e1e8f0 !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.modal-status div { &#13;
+ &#13;
+  padding: &#13;
+    11px !important; &#13;
+ &#13;
+  border-radius: &#13;
+    10px !important; &#13;
+ &#13;
+  border: &#13;
+    1px solid #dfe7ef !important; &#13;
+ &#13;
+  background: &#13;
+    #ffffff !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.modal-status span, &#13;
+.modal-field span, &#13;
+.progress-field span { &#13;
+ &#13;
+  display: &#13;
+    block !important; &#13;
+ &#13;
+  color: &#13;
+    #71849b !important; &#13;
+ &#13;
+  font-size: &#13;
+    8px !important; &#13;
+ &#13;
+  font-weight: &#13;
+    900 !important; &#13;
+ &#13;
+  letter-spacing: &#13;
+    1px !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.modal-status strong, &#13;
+.modal-field strong, &#13;
+.progress-field strong { &#13;
+ &#13;
+  display: &#13;
+    block !important; &#13;
+ &#13;
+  margin-top: &#13;
+    5px !important; &#13;
+ &#13;
+  color: &#13;
+    #182e4a !important; &#13;
+ &#13;
+  font-size: &#13;
+    13px !important; &#13;
+ &#13;
+  line-height: &#13;
+    1.35 !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.modal-section { &#13;
+ &#13;
+  padding: &#13;
+    22px 28px !important; &#13;
+ &#13;
+  border-bottom: &#13;
+    1px solid #e3e9f1 !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.modal-section-title span { &#13;
+ &#13;
+  color: &#13;
+    #7039da !important; &#13;
+ &#13;
+  font-size: &#13;
+    9px !important; &#13;
+ &#13;
+  font-weight: &#13;
+    900 !important; &#13;
+ &#13;
+  letter-spacing: &#13;
+    1.1px !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.modal-section-title h3 { &#13;
+ &#13;
+  margin: &#13;
+    4px 0 15px !important; &#13;
+ &#13;
+  color: &#13;
+    #152a45 !important; &#13;
+ &#13;
+  font-size: &#13;
+    18px !important; &#13;
+ &#13;
+  font-weight: &#13;
+    850 !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.modal-grid { &#13;
+ &#13;
+  display: &#13;
+    grid !important; &#13;
+ &#13;
+  grid-template-columns: &#13;
+    repeat(4,1fr) !important; &#13;
+ &#13;
+  gap: &#13;
+    10px !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.modal-field { &#13;
+ &#13;
+  min-height: &#13;
+    70px !important; &#13;
+ &#13;
+  padding: &#13;
+    11px !important; &#13;
+ &#13;
+  border-radius: &#13;
+    10px !important; &#13;
+ &#13;
+  background: &#13;
+    #f7f9fc !important; &#13;
+ &#13;
+  border: &#13;
+    1px solid #e0e7ef !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.progress-grid { &#13;
+ &#13;
+  display: &#13;
+    grid !important; &#13;
+ &#13;
+  grid-template-columns: &#13;
+    repeat(3,1fr) !important; &#13;
+ &#13;
+  gap: &#13;
+    10px !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.progress-field { &#13;
+ &#13;
+  padding: &#13;
+    12px !important; &#13;
+ &#13;
+  border-radius: &#13;
+    10px !important; &#13;
+ &#13;
+  background: &#13;
+    #f7f3ff !important; &#13;
+ &#13;
+  border: &#13;
+    1px solid #ddd0ff !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.description-box { &#13;
+ &#13;
+  padding: &#13;
+    14px !important; &#13;
+ &#13;
+  border-radius: &#13;
+    11px !important; &#13;
+ &#13;
+  background: &#13;
+    #f7f9fc !important; &#13;
+ &#13;
+  border: &#13;
+    1px solid #e0e7ef !important; &#13;
+ &#13;
+  color: &#13;
+    #405975 !important; &#13;
+ &#13;
+  font-size: &#13;
+    13px !important; &#13;
+ &#13;
+  line-height: &#13;
+    1.7 !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.modal-footer { &#13;
+ &#13;
+  padding: &#13;
+    16px 28px !important; &#13;
+ &#13;
+  display: &#13;
+    flex !important; &#13;
+ &#13;
+  justify-content: &#13;
+    flex-end !important; &#13;
+ &#13;
+  background: &#13;
+    #fbfcfe !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.modal-close-btn { &#13;
+ &#13;
+  height: &#13;
+    42px !important; &#13;
+ &#13;
+  padding: &#13;
+    0 18px !important; &#13;
+ &#13;
+  border: &#13;
+    1px solid #d2dce8 !important; &#13;
+ &#13;
+  border-radius: &#13;
+    10px !important; &#13;
+ &#13;
+  background: &#13;
+    #ffffff !important; &#13;
+ &#13;
+  color: &#13;
+    #38536f !important; &#13;
+ &#13;
+  font-weight: &#13;
+    800 !important; &#13;
+ &#13;
+  cursor: &#13;
+    pointer !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+/* ========================================================= &#13;
+   MOBILE OVERLAY &#13;
+   ========================================================= */ &#13;
+ &#13;
+.c360-sidebar-overlay { &#13;
+ &#13;
+  display: &#13;
+    none !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+/* ========================================================= &#13;
+   RESPONSIVE &#13;
+   ========================================================= */ &#13;
+ &#13;
+@media (max-width:1200px) { &#13;
+ &#13;
+  .summary-grid { &#13;
+ &#13;
+    grid-template-columns: &#13;
+      repeat(2,minmax(0,1fr)) !important; &#13;
+ &#13;
+  } &#13;
+ &#13;
+ &#13;
+  .applications-grid { &#13;
+ &#13;
+    grid-template-columns: &#13;
+      repeat(2,minmax(0,1fr)) !important; &#13;
+ &#13;
+  } &#13;
+ &#13;
+ &#13;
+  .modal-grid { &#13;
+ &#13;
+    grid-template-columns: &#13;
+      repeat(2,1fr) !important; &#13;
+ &#13;
+  } &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+/* ========================================================= &#13;
+   TABLET / MOBILE &#13;
+   ========================================================= */ &#13;
+ &#13;
+@media (max-width:900px) { &#13;
+ &#13;
+  .c360-left-sidebar { &#13;
+ &#13;
+    position: &#13;
+      fixed !important; &#13;
+ &#13;
+    top: &#13;
+      0 !important; &#13;
+ &#13;
+    left: &#13;
+      0 !important; &#13;
+ &#13;
+    bottom: &#13;
+      0 !important; &#13;
+ &#13;
+    width: &#13;
+      285px !important; &#13;
+ &#13;
+    min-width: &#13;
+      285px !important; &#13;
+ &#13;
+    max-width: &#13;
+      285px !important; &#13;
+ &#13;
+    height: &#13;
+      100vh !important; &#13;
+ &#13;
+    transform: &#13;
+      translateX(-105%) !important; &#13;
+ &#13;
+    box-shadow: &#13;
+      8px 0 28px rgba(15,10,40,.22) !important; &#13;
+ &#13;
+  } &#13;
+ &#13;
+ &#13;
+  .campus360-applications.sidebar-open &#13;
+  .c360-left-sidebar { &#13;
+ &#13;
+    transform: &#13;
+      translateX(0) !important; &#13;
+ &#13;
+  } &#13;
+ &#13;
+ &#13;
+  .c360-right-page { &#13;
+ &#13;
+    left: &#13;
+      0 !important; &#13;
+ &#13;
+    width: &#13;
+      100vw !important; &#13;
+ &#13;
+  } &#13;
+ &#13;
+ &#13;
+  .c360-sidebar-overlay { &#13;
+ &#13;
+    position: &#13;
+      fixed !important; &#13;
+ &#13;
+    inset: &#13;
+      0 !important; &#13;
+ &#13;
+    z-index: &#13;
+      90 !important; &#13;
+ &#13;
+    display: &#13;
+      block !important; &#13;
+ &#13;
+    background: &#13;
+      rgba(15,10,40,.38) !important; &#13;
+ &#13;
+  } &#13;
+ &#13;
+ &#13;
+  .campus360-applications.sidebar-closed &#13;
+  .c360-sidebar-overlay { &#13;
+ &#13;
+    display: &#13;
+      none !important; &#13;
+ &#13;
+  } &#13;
+ &#13;
+ &#13;
+  .c360-topbar { &#13;
+ &#13;
+    height: &#13;
+      70px !important; &#13;
+ &#13;
+    min-height: &#13;
+      70px !important; &#13;
+ &#13;
+    flex-basis: &#13;
+      70px !important; &#13;
+ &#13;
+    padding: &#13;
+      0 14px !important; &#13;
+ &#13;
+  } &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+/* ========================================================= &#13;
+   SMALL MOBILE &#13;
+   ========================================================= */ &#13;
+ &#13;
+@media (max-width:760px) { &#13;
+ &#13;
+  .c360-page-content { &#13;
+ &#13;
+    padding: &#13;
+      15px 10px 45px !important; &#13;
+ &#13;
+  } &#13;
+ &#13;
+ &#13;
+  .applications-hero { &#13;
+ &#13;
+    min-height: &#13;
+      160px !important; &#13;
+ &#13;
+    padding: &#13;
+      25px 22px !important; &#13;
+ &#13;
+    border-radius: &#13;
+      15px !important; &#13;
+ &#13;
+    background:&#13;
+      linear-gradient(&#13;
+        135deg,&#13;
+        #241044 0%,&#13;
+        #351A61 52%,&#13;
+        #45206D 100%&#13;
+      ) !important;&#13;
+&#13;
+    border-color:&#13;
+      #5A357D !important;&#13;
+&#13;
+  } &#13;
+ &#13;
+ &#13;
+  .applications-hero h1 { &#13;
+ &#13;
+    font-size: &#13;
+      31px !important; &#13;
+ &#13;
+    color:&#13;
+      #ffffff !important;&#13;
+&#13;
+  } &#13;
+ &#13;
+ &#13;
+  .applications-hero p { &#13;
+ &#13;
+    font-size: &#13;
+      13px !important; &#13;
+ &#13;
+    color:&#13;
+      #E5DCF0 !important;&#13;
+&#13;
+  } &#13;
+ &#13;
+ &#13;
+  .filter-section { &#13;
+ &#13;
+    flex-direction: &#13;
+      column !important; &#13;
+ &#13;
+    align-items: &#13;
+      stretch !important; &#13;
+ &#13;
+  } &#13;
+ &#13;
+ &#13;
+  .search-box, &#13;
+  .status-select, &#13;
+  .clear-btn { &#13;
+ &#13;
+    width: &#13;
+      100% !important; &#13;
+ &#13;
+  } &#13;
+ &#13;
+ &#13;
+  .section-header { &#13;
+ &#13;
+    flex-direction: &#13;
+      column !important; &#13;
+ &#13;
+    align-items: &#13;
+      flex-start !important; &#13;
+ &#13;
+    gap: &#13;
+      7px !important; &#13;
+ &#13;
+  } &#13;
+ &#13;
+ &#13;
+  .modal-status, &#13;
+  .modal-grid, &#13;
+  .progress-grid { &#13;
+ &#13;
+    grid-template-columns: &#13;
+      1fr !important; &#13;
+ &#13;
+  } &#13;
+ &#13;
+ &#13;
+  .modal-overlay { &#13;
+ &#13;
+    padding: &#13;
+      10px !important; &#13;
+ &#13;
+  } &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+/* ========================================================= &#13;
+   MOBILE 650 &#13;
+   ========================================================= */ &#13;
+ &#13;
+@media (max-width:650px) { &#13;
+ &#13;
+  .c360-topbar { &#13;
+ &#13;
+    height: &#13;
+      68px !important; &#13;
+ &#13;
+    min-height: &#13;
+      68px !important; &#13;
+ &#13;
+    flex-basis: &#13;
+      68px !important; &#13;
+ &#13;
+    padding: &#13;
+      0 11px !important; &#13;
+ &#13;
+  } &#13;
+ &#13;
+ &#13;
+  .c360-page-heading { &#13;
+ &#13;
+    display: &#13;
+      none !important; &#13;
+ &#13;
+  } &#13;
+ &#13;
+ &#13;
+  .c360-top-profile-info, &#13;
+  .c360-profile-chevron { &#13;
+ &#13;
+    display: &#13;
+      none !important; &#13;
+ &#13;
+  } &#13;
+ &#13;
+ &#13;
+  .c360-top-profile { &#13;
+ &#13;
+    padding-left: &#13;
+      3px !important; &#13;
+ &#13;
+  } &#13;
+ &#13;
+ &#13;
+  .c360-top-icon { &#13;
+ &#13;
+    width: &#13;
+      37px !important; &#13;
+ &#13;
+    height: &#13;
+      37px !important; &#13;
+ &#13;
+    min-width: &#13;
+      37px !important; &#13;
+ &#13;
+  } &#13;
+ &#13;
+ &#13;
+  .c360-top-avatar { &#13;
+ &#13;
+    width: &#13;
+      37px !important; &#13;
+ &#13;
+    height: &#13;
+      37px !important; &#13;
+ &#13;
+    min-width: &#13;
+      37px !important; &#13;
+ &#13;
+  } &#13;
+ &#13;
+ &#13;
+  .summary-grid, &#13;
+  .applications-grid { &#13;
+ &#13;
+    grid-template-columns: &#13;
+      1fr !important; &#13;
+ &#13;
+  } &#13;
+ &#13;
+ &#13;
+  .application-header { &#13;
+ &#13;
+    flex-wrap: &#13;
+      wrap !important; &#13;
+ &#13;
+  } &#13;
+ &#13;
+ &#13;
+  .application-status { &#13;
+ &#13;
+    margin-left: &#13;
+      auto !important; &#13;
+ &#13;
+  } &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+/* ========================================================= &#13;
+   VERY SMALL MOBILE &#13;
+   ========================================================= */ &#13;
+ &#13;
+@media (max-width:430px) { &#13;
+ &#13;
+  .c360-menu-button { &#13;
+ &#13;
+    width: &#13;
+      38px !important; &#13;
+ &#13;
+    height: &#13;
+      38px !important; &#13;
+ &#13;
+    min-width: &#13;
+      38px !important; &#13;
+ &#13;
+  } &#13;
+ &#13;
+ &#13;
+  .applications-hero h1 { &#13;
+ &#13;
+    font-size: &#13;
+      28px !important; &#13;
+ &#13;
+    color:&#13;
+      #ffffff !important;&#13;
+&#13;
+  } &#13;
+ &#13;
+ &#13;
+  .applications-hero p {&#13;
+&#13;
+    color:&#13;
+      #E5DCF0 !important;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .hero-eyebrow {&#13;
+&#13;
+    color:&#13;
+      #DCCBFF !important;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .hero-dot {&#13;
+&#13;
+    background:&#13;
+      #C4B5FD !important;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .brief-grid { &#13;
+ &#13;
+    grid-template-columns: &#13;
+      1fr !important; &#13;
+ &#13;
+  } &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+/* ========================================================= &#13;
+   FINAL FULL VIEW &#13;
+   ========================================================= */ &#13;
+ &#13;
+/* Hide outer browser/page scrollbar */ &#13;
+ &#13;
+html:has(.campus360-applications), &#13;
+body:has(.campus360-applications) { &#13;
+ &#13;
+  width: &#13;
+    100% !important; &#13;
+ &#13;
+  height: &#13;
+    100% !important; &#13;
+ &#13;
+  margin: &#13;
+    0 !important; &#13;
+ &#13;
+  padding: &#13;
+    0 !important; &#13;
+ &#13;
+  overflow: &#13;
+    hidden !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+/* Main content scrolls */ &#13;
+ &#13;
+.c360-right-page { &#13;
+ &#13;
+  overflow-y: &#13;
+    auto !important; &#13;
+ &#13;
+  overflow-x: &#13;
+    hidden !important; &#13;
+ &#13;
+  scrollbar-width: &#13;
+    none !important; &#13;
+ &#13;
+  -ms-overflow-style: &#13;
+    none !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.c360-right-page::-webkit-scrollbar { &#13;
+ &#13;
+  width: &#13;
+    0 !important; &#13;
+ &#13;
+  height: &#13;
+    0 !important; &#13;
+ &#13;
+  display: &#13;
+    none !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+/* Sidebar scrolls without visible scrollbar */ &#13;
+ &#13;
+.c360-sidebar-nav { &#13;
+ &#13;
+  overflow-y: &#13;
+    auto !important; &#13;
+ &#13;
+  overflow-x: &#13;
+    hidden !important; &#13;
+ &#13;
+  scrollbar-width: &#13;
+    none !important; &#13;
+ &#13;
+  -ms-overflow-style: &#13;
+    none !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.c360-sidebar-nav::-webkit-scrollbar { &#13;
+ &#13;
+  width: &#13;
+    0 !important; &#13;
+ &#13;
+  height: &#13;
+    0 !important; &#13;
+ &#13;
+  display: &#13;
+    none !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+/* Modal scrolls without visible scrollbar */ &#13;
+ &#13;
+.application-modal { &#13;
+ &#13;
+  overflow-y: &#13;
+    auto !important; &#13;
+ &#13;
+  scrollbar-width: &#13;
+    none !important; &#13;
+ &#13;
+  -ms-overflow-style: &#13;
+    none !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+.application-modal::-webkit-scrollbar { &#13;
+ &#13;
+  width: &#13;
+    0 !important; &#13;
+ &#13;
+  height: &#13;
+    0 !important; &#13;
+ &#13;
+  display: &#13;
+    none !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+/* ========================================================= &#13;
+   FINAL NAVBAR / HERO SEPARATION &#13;
+   ========================================================= */ &#13;
+ &#13;
+/* &#13;
+   The white Campus360 navbar always stays above &#13;
+   the page content while scrolling. &#13;
+*/ &#13;
+ &#13;
+.c360-topbar { &#13;
+ &#13;
+  background: &#13;
+    #ffffff !important; &#13;
+ &#13;
+  position: &#13;
+    sticky !important; &#13;
+ &#13;
+  top: &#13;
+    0 !important; &#13;
+ &#13;
+  z-index: &#13;
+    5000 !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+/* &#13;
+   Hero begins below the white navbar with &#13;
+   its own visible spacing. &#13;
+*/ &#13;
+ &#13;
+.c360-page-content { &#13;
+ &#13;
+  position: &#13;
+    relative !important; &#13;
+ &#13;
+  z-index: &#13;
+    1 !important; &#13;
+ &#13;
+  padding-top: &#13;
+    18px !important; &#13;
+ &#13;
+} &#13;
+ &#13;
+ &#13;
+/* &#13;
+   Keep the purple hero fully below the navbar. &#13;
+*/ &#13;
+ &#13;
+.applications-hero { &#13;
+ &#13;
+  position: &#13;
+    relative !important; &#13;
+ &#13;
+  z-index: &#13;
+    1 !important; &#13;
+ &#13;
+  margin-top: &#13;
+    0 !important; &#13;
+ &#13;
+  background:&#13;
+    linear-gradient(&#13;
+      135deg,&#13;
+      #241044 0%,&#13;
+      #351A61 52%,&#13;
+      #45206D 100%&#13;
+    ) !important;&#13;
+&#13;
+  border:&#13;
+    1px solid #5A357D !important;&#13;
+&#13;
+  color:&#13;
+    #ffffff !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.applications-hero h1 {&#13;
+&#13;
+  color:&#13;
+    #ffffff !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.applications-hero p {&#13;
+&#13;
+  color:&#13;
+    #E5DCF0 !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.applications-hero .hero-eyebrow {&#13;
+&#13;
+  color:&#13;
+    #DCCBFF !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.applications-hero .hero-dot {&#13;
+&#13;
+  background:&#13;
+    #C4B5FD !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* ========================================================= &#13;
+   FINAL CAMPUS360 FULLSCREEN &#13;
+   ========================================================= */ &#13;
+ &#13;
+.campus360-applications { &#13;
+ &#13;
+  width: &#13;
+    100vw !important; &#13;
+ &#13;
+  height: &#13;
+    100vh !important; &#13;
+ &#13;
+  margin: &#13;
+    0 !important; &#13;
+ &#13;
+  padding: &#13;
+    0 !important; &#13;
+ &#13;
+}</css>
+        <data_table>sp_instance</data_table>
+        <demo_data/>
+        <description/>
+        <docs/>
+        <field_list/>
+        <has_preview>false</has_preview>
+        <id>campus360_applications_widget</id>
+        <internal>false</internal>
+        <link><![CDATA[function link(scope, element, attrs, controller) {
+  
+}]]></link>
+        <name>Campus360 Applications</name>
+        <option_schema/>
+        <public>false</public>
+        <roles/>
+        <script><![CDATA[(function() {
+
+    /* =====================================================
+       INITIAL DATA
+       ===================================================== */
+
+    data.success = false;
+
+    data.message = '';
+
+    data.student = null;
+
+    data.applications = [];
+
+    data.stats = {
+
+        total: 0,
+
+        submitted: 0,
+
+        shortlisted: 0,
+
+        interview: 0
+
+    };
+
+
+    /* =====================================================
+       STUDENT ID
+       ===================================================== */
+
+    var studentId =
+        $sp.getParameter('student') ||
+        'STU_TEST_001';
+
+
+    /* =====================================================
+       FIND STUDENT
+       ===================================================== */
+
+    var studentGR =
+        new GlideRecord(
+            'x_snc_campus360_student_master'
+        );
+
+
+    studentGR.addQuery(
+        'student_id',
+        studentId
+    );
+
+
+    studentGR.query();
+
+
+    if (!studentGR.next()) {
+
+        data.message =
+            'Student record not found.';
+
+        return;
+
+    }
+
+
+    var studentSysId =
+        studentGR.getUniqueValue();
+
+
+    /* =====================================================
+       STUDENT INFORMATION
+       ===================================================== */
+
+    data.student = {
+
+        sys_id:
+            studentSysId,
+
+        student_id:
+            studentGR.getValue(
+                'student_id'
+            ) || '',
+
+        student_name:
+            studentGR.getValue(
+                'student_name'
+            ) || '',
+
+        email:
+            studentGR.getValue(
+                'email'
+            ) || '',
+
+        phone_number:
+            studentGR.getValue(
+                'phone_number'
+            ) || '',
+
+        degree:
+            studentGR.getDisplayValue(
+                'degree'
+            ) || '',
+
+        branch:
+            studentGR.getDisplayValue(
+                'branch'
+            ) || '',
+
+        batch:
+            studentGR.getValue(
+                'batch'
+            ) || '',
+
+        cgpa:
+            studentGR.getValue(
+                'cgpa'
+            ) || ''
+
+    };
+
+
+    /* =====================================================
+       LOAD STUDENT APPLICATIONS
+       ===================================================== */
+
+    loadStudentApplications();
+
+
+    /* =====================================================
+       LOAD APPLICATIONS
+       ===================================================== */
+
+    function loadStudentApplications() {
+
+        var appGR =
+            new GlideRecord(
+                'x_snc_campus360_student_application'
+            );
+
+
+        /*
+         * IMPORTANT:
+         *
+         * Only get application records belonging
+         * to the current student.
+         *
+         * We DO NOT filter by application_id.
+         *
+         * This is important because a newly saved
+         * application may have:
+         *
+         * student_response = Apply
+         * application_status = Submitted
+         *
+         * even if application_id has not been
+         * populated yet.
+         */
+
+        appGR.addQuery(
+            'student',
+            studentSysId
+        );
+
+
+        /*
+         * Show latest applications first.
+         */
+
+        appGR.orderByDesc(
+            'sys_created_on'
+        );
+
+
+        appGR.query();
+
+
+        while (appGR.next()) {
+
+
+            /* =============================================
+               READ CHOICE DISPLAY VALUES
+               ============================================= */
+
+            var applicationStatus =
+                (
+                    appGR.getDisplayValue(
+                        'application_status'
+                    ) || ''
+                ).trim();
+
+
+            var studentResponse =
+                (
+                    appGR.getDisplayValue(
+                        'student_response'
+                    ) || ''
+                ).trim();
+
+
+            /*
+             * Normalize values so this works whether
+             * ServiceNow stores:
+             *
+             * Apply
+             * apply
+             * APPLY
+             *
+             * and similarly:
+             *
+             * Submitted
+             * submitted
+             * SUBMITTED
+             */
+
+            var normalizedResponse =
+                studentResponse.toLowerCase();
+
+
+            var normalizedStatus =
+                applicationStatus.toLowerCase();
+
+
+            /* =============================================
+               DETERMINE WHETHER THIS IS AN APPLIED RECORD
+               ============================================= */
+
+            var isApplied =
+                false;
+
+
+            /*
+             * PRIMARY CONDITION
+             *
+             * If the student selected Apply,
+             * this is an applied application.
+             */
+
+            if (
+                normalizedResponse === 'apply'
+            ) {
+
+                isApplied = true;
+
+            }
+
+
+            /*
+             * SECOND CONDITION
+             *
+             * If application status is Submitted,
+             * this is also considered an applied
+             * application.
+             */
+
+            if (
+                normalizedStatus === 'submitted'
+            ) {
+
+                isApplied = true;
+
+            }
+
+
+            /*
+             * If the record is not actually applied,
+             * do not show it on this page.
+             */
+
+            if (!isApplied) {
+
+                continue;
+
+            }
+
+
+            /* =============================================
+               APPLICATION OBJECT
+               ============================================= */
+
+            var application = {
+
+                sys_id:
+                    appGR.getUniqueValue(),
+
+                application_id:
+                    appGR.getValue(
+                        'application_id'
+                    ) || '',
+
+                application_status:
+                    applicationStatus,
+
+                assessment_status:
+                    appGR.getDisplayValue(
+                        'assessment_status'
+                    ) || '',
+
+                offer_status:
+                    appGR.getDisplayValue(
+                        'offer_status'
+                    ) || '',
+
+                student_response:
+                    studentResponse,
+
+                applied_date:
+                    appGR.getDisplayValue(
+                        'applied_date'
+                    ) || '',
+
+                shortlisted:
+                    appGR.getDisplayValue(
+                        'shortlisted'
+                    ) || '',
+
+                interview_status:
+                    appGR.getDisplayValue(
+                        'interview_status'
+                    ) || '',
+
+                ai_match_score:
+                    appGR.getValue(
+                        'ai_match_score'
+                    ) || '',
+
+                opportunity_sys_id:
+                    appGR.getValue(
+                        'opportunity'
+                    ) || '',
+
+
+                /* =========================================
+                   OPPORTUNITY DATA
+                   ========================================= */
+
+                opportunity_title: '',
+
+                company: '',
+
+                opportunity_type: '',
+
+                location: '',
+
+                ctc_stipend: '',
+
+                minimum_cgpa: '',
+
+                eligible_branches: '',
+
+                required_skills: '',
+
+                job_description: '',
+
+                drive_date: '',
+
+                application_deadline: ''
+
+            };
+
+
+            /* =============================================
+               GET RELATED OPPORTUNITY
+               ============================================= */
+
+            if (
+                application.opportunity_sys_id
+            ) {
+
+                var opportunityGR =
+                    new GlideRecord(
+                        'x_snc_campus360_placement_opportunity'
+                    );
+
+
+                if (
+                    opportunityGR.get(
+                        application.opportunity_sys_id
+                    )
+                ) {
+
+                    application.opportunity_title =
+                        opportunityGR.getValue(
+                            'opportunity_title'
+                        ) || '';
+
+
+                    application.company =
+                        opportunityGR.getDisplayValue(
+                            'company'
+                        ) || '';
+
+
+                    application.opportunity_type =
+                        opportunityGR.getDisplayValue(
+                            'opportunity_type'
+                        ) || '';
+
+
+                    application.location =
+                        opportunityGR.getValue(
+                            'location'
+                        ) || '';
+
+
+                    application.ctc_stipend =
+                        opportunityGR.getValue(
+                            'ctc_stipend'
+                        ) || '';
+
+
+                    application.minimum_cgpa =
+                        opportunityGR.getValue(
+                            'minimum_cgpa'
+                        ) || '';
+
+
+                    application.eligible_branches =
+                        opportunityGR.getValue(
+                            'eligible_branches'
+                        ) || '';
+
+
+                    application.required_skills =
+                        opportunityGR.getValue(
+                            'required_skills'
+                        ) || '';
+
+
+                    application.job_description =
+                        opportunityGR.getValue(
+                            'job_description'
+                        ) || '';
+
+
+                    application.drive_date =
+                        opportunityGR.getDisplayValue(
+                            'drive_date'
+                        ) || '';
+
+
+                    application.application_deadline =
+                        opportunityGR.getDisplayValue(
+                            'application_deadline'
+                        ) || '';
+
+                }
+
+            }
+
+
+            /* =============================================
+               ADD APPLICATION
+               ============================================= */
+
+            data.applications.push(
+                application
+            );
+
+
+            /* =============================================
+               STATISTICS
+               ============================================= */
+
+            data.stats.total++;
+
+
+            /*
+             * Since this page contains only applied
+             * applications, every record here is
+             * considered submitted/applied.
+             */
+
+            data.stats.submitted++;
+
+
+            /* =============================================
+               SHORTLISTED
+               ============================================= */
+
+            var shortlist =
+                (
+                    application.shortlisted ||
+                    ''
+                ).toLowerCase()
+                .trim();
+
+
+            if (
+                shortlist === 'true' ||
+                shortlist === 'yes' ||
+                shortlist === 'shortlisted'
+            ) {
+
+                data.stats.shortlisted++;
+
+            }
+
+
+            /* =============================================
+               INTERVIEW
+               ============================================= */
+
+            var interview =
+                (
+                    application.interview_status ||
+                    ''
+                ).toLowerCase()
+                .trim();
+
+
+            if (
+                interview &&
+                interview !== 'not scheduled' &&
+                interview !== 'not_scheduled' &&
+                interview !== 'none' &&
+                interview !== 'pending'
+            ) {
+
+                data.stats.interview++;
+
+            }
+
+        }
+
+
+        /* =============================================
+           RESPONSE
+           ============================================= */
+
+        data.success = true;
+
+
+        if (
+            data.applications.length > 0
+        ) {
+
+            data.message =
+                'Student applications loaded successfully.';
+
+        } else {
+
+            data.message =
+                'No submitted applications found.';
+
+        }
+
+    }
+
+
+})();
+
+
+/* =====================================================
+   AI ASSISTANT WIDGET
+   ===================================================== */
+
+data.aiWidget =
+    $sp.getWidget(
+        'campus360_ai_assistant'
+    );]]></script>
+        <servicenow>false</servicenow>
+        <sys_class_name>sp_widget</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-22 14:23:08</sys_created_on>
+        <sys_id>c0076ae0f1e343107f44ff560373bb2b</sys_id>
+        <sys_mod_count>23</sys_mod_count>
+        <sys_name>Campus360 Applications</sys_name>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name>sp_widget_c0076ae0f1e343107f44ff560373bb2b</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-10-02 18:27:08</sys_updated_on>
+        <template><![CDATA[<div
+  class="campus360-applications"
+  ng-class="{
+    'sidebar-open': c.sidebarOpen,
+    'sidebar-closed': !c.sidebarOpen
+  }">
+
+
+  <!-- =========================================================
+       SIDEBAR
+       ========================================================= -->
+
+  <aside class="c360-left-sidebar">
+
+
+    <!-- BRAND -->
+
+    <div class="c360-sidebar-brand">
+
+      <div class="c360-brand-logo">
+        C
+      </div>
+
+      <div class="c360-brand-name">
+
+        <strong>
+          Campus360
+        </strong>
+
+        <span>
+          Student Portal
+        </span>
+
+      </div>
+
+    </div>
+
+
+    <!-- STUDENT PROFILE -->
+
+    <a
+      class="c360-sidebar-student"
+      ng-if="c.data.student"
+      ng-href="?id=campus360_profile&student={{c.data.student.student_id}}">
+
+      <div class="c360-sidebar-avatar">
+
+        {{c.getInitials(c.data.student.student_name)}}
+
+      </div>
+
+      <div class="c360-sidebar-student-info">
+
+        <strong>
+          {{c.data.student.student_name}}
+        </strong>
+
+        <span>
+          {{c.data.student.student_id}}
+        </span>
+
+      </div>
+
+      <span class="c360-student-arrow">
+        ›
+      </span>
+
+    </a>
+
+
+    <!-- =====================================================
+         NAVIGATION
+         ===================================================== -->
+
+    <nav class="c360-sidebar-nav">
+
+
+      <!-- OVERVIEW -->
+
+      <div class="c360-nav-group">
+
+        <div class="c360-nav-heading">
+          OVERVIEW
+        </div>
+
+
+        <a
+          class="c360-nav-link"
+          ng-href="?id=campus360_student_dashboard&student={{c.data.student.student_id}}">
+
+          <span class="c360-nav-icon">
+
+            <svg viewBox="0 0 24 24">
+
+              <path d="M4 10.5L12 4l8 6.5v8.2a1.3 1.3 0 0 1-1.3 1.3h-13A1.3 1.3 0 0 1 4 18.7z"/>
+              <path d="M9.5 20v-5h5v5"/>
+
+            </svg>
+
+          </span>
+
+          <span class="c360-nav-text">
+            Dashboard
+          </span>
+
+        </a>
+
+      </div>
+
+
+      <!-- =====================================================
+           PLACEMENT JOURNEY
+           ===================================================== -->
+
+      <div class="c360-nav-group">
+
+        <div class="c360-nav-heading">
+          PLACEMENT JOURNEY
+        </div>
+
+
+        <!-- OPPORTUNITIES -->
+
+        <a
+          class="c360-nav-link"
+          ng-href="?id=campus360_opportunities&student={{c.data.student.student_id}}">
+
+          <span class="c360-nav-icon">
+
+            <svg viewBox="0 0 24 24">
+
+              <path d="M12 3l3 6 6 3-6 3-3 6-3-6-6-3 6-3 3-6z"/>
+
+            </svg>
+
+          </span>
+
+          <span class="c360-nav-text">
+            Opportunities
+          </span>
+
+        </a>
+
+
+        <!-- APPLICATIONS ACTIVE -->
+
+        <a
+          class="c360-nav-link active"
+          ng-href="?id=campus360_applications&student={{c.data.student.student_id}}">
+
+          <span class="c360-nav-icon">
+
+            <svg viewBox="0 0 24 24">
+
+              <rect
+                x="5"
+                y="3.5"
+                width="14"
+                height="17"
+                rx="2"/>
+
+              <path d="M8 8h8"/>
+              <path d="M8 12h8"/>
+              <path d="M8 16h5"/>
+
+            </svg>
+
+          </span>
+
+          <span class="c360-nav-text">
+            Applications
+          </span>
+
+          <span
+            class="c360-nav-count"
+            ng-if="c.data.stats.total > 0">
+
+            {{c.data.stats.total}}
+
+          </span>
+
+        </a>
+
+
+        <!-- INTERVIEWS -->
+
+        <a
+          class="c360-nav-link"
+          ng-href="?id=campus360_interviews&student={{c.data.student.student_id}}">
+
+          <span class="c360-nav-icon">
+
+            <svg viewBox="0 0 24 24">
+
+              <circle cx="12" cy="12" r="8"/>
+              <circle cx="12" cy="12" r="3"/>
+
+            </svg>
+
+          </span>
+
+          <span class="c360-nav-text">
+            Interviews
+          </span>
+
+        </a>
+
+
+        <!-- TRAINING -->
+
+        <a
+          class="c360-nav-link"
+          ng-href="?id=campus360_training&student={{c.data.student.student_id}}">
+
+          <span class="c360-nav-icon">
+
+            <svg viewBox="0 0 24 24">
+
+              <path d="M4 7.5L12 4l8 3.5L12 11 4 7.5z"/>
+              <path d="M7 10.2v4.1c0 1.7 2.2 3.1 5 3.1s5-1.4 5-3.1v-4.1"/>
+              <path d="M20 8v5"/>
+
+            </svg>
+
+          </span>
+
+          <span class="c360-nav-text">
+            Training
+          </span>
+
+        </a>
+
+
+        <!-- MOCK SLOTS -->
+
+        <a
+          class="c360-nav-link"
+          ng-href="?id=mock_interview_booking&student={{c.data.student.student_id}}">
+
+          <span class="c360-nav-icon">
+
+            <svg viewBox="0 0 24 24">
+
+              <path d="M12 3v4"/>
+              <path d="M12 17v4"/>
+              <path d="M3 12h4"/>
+              <path d="M17 12h4"/>
+              <circle cx="12" cy="12" r="5"/>
+
+            </svg>
+
+          </span>
+
+          <span class="c360-nav-text">
+            Mock Slots
+          </span>
+
+        </a>
+
+      </div>
+
+
+      <!-- =====================================================
+           INTELLIGENCE
+           ===================================================== -->
+
+      <div class="c360-nav-group">
+
+        <div class="c360-nav-heading">
+          INTELLIGENCE
+        </div>
+
+
+        <a
+          class="c360-nav-link"
+          ng-href="?id=campus360_progress&student={{c.data.student.student_id}}">
+
+          <span class="c360-nav-icon">
+
+            <svg viewBox="0 0 24 24">
+
+              <path d="M5 18V10"/>
+              <path d="M12 18V6"/>
+              <path d="M19 18V3"/>
+              <path d="M3 20h18"/>
+
+            </svg>
+
+          </span>
+
+          <span class="c360-nav-text">
+            Assessments
+          </span>
+
+        </a>
+
+
+        <a
+          class="c360-nav-link"
+          ng-href="?id=placement_readiness&student={{c.data.student.student_id}}">
+
+          <span class="c360-nav-icon">
+
+            <svg viewBox="0 0 24 24">
+
+              <path d="M12 3l2.4 5 5.6.8-4 3.9.9 5.5-4.9-2.6-4.9 2.6.9-5.5-4-3.9 5.6-.8L12 3z"/>
+
+            </svg>
+
+          </span>
+
+          <span class="c360-nav-text">
+            Placement Readiness
+          </span>
+
+        </a>
+
+      </div>
+
+
+      <!-- =====================================================
+           ACCOUNT
+           ===================================================== -->
+
+      <div class="c360-nav-group">
+
+        <div class="c360-nav-heading">
+          ACCOUNT
+        </div>
+
+
+        <a
+          class="c360-nav-link"
+          ng-href="?id=campus360_profile&student={{c.data.student.student_id}}">
+
+          <span class="c360-nav-icon">
+
+            <svg viewBox="0 0 24 24">
+
+              <circle cx="12" cy="8" r="3.5"/>
+              <path d="M5 20c.7-3.7 3.1-5.5 7-5.5s6.3 1.8 7 5.5"/>
+
+            </svg>
+
+          </span>
+
+          <span class="c360-nav-text">
+            My Profile
+          </span>
+
+        </a>
+
+      </div>
+
+    </nav>
+
+
+    <!-- =====================================================
+         PLACEMENT JOURNEY FOOTER
+         ===================================================== -->
+
+    <div class="c360-sidebar-footer">
+
+      <div class="c360-journey-mini">
+
+        <div class="c360-journey-label">
+          PLACEMENT JOURNEY
+        </div>
+
+        <div class="c360-journey-progress">
+
+          <div
+            class="c360-journey-fill"
+            ng-style="{
+              width:
+                (
+                  c.data.readiness &&
+                  c.data.readiness.score !== undefined
+                )
+                ? c.data.readiness.score + '%'
+                : ((c.data.readinessScore || 0) + '%')
+            }">
+          </div>
+
+        </div>
+
+        <div class="c360-journey-score">
+
+          {{
+            (
+              c.data.readiness &&
+              c.data.readiness.score !== undefined
+            )
+            ? c.data.readiness.score
+            : (c.data.readinessScore || 0)
+          }}% readiness
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </aside>
+
+
+  <!-- MOBILE OVERLAY -->
+
+  <div
+    class="c360-sidebar-overlay"
+    ng-if="c.sidebarOpen"
+    ng-click="c.closeSidebar()">
+  </div>
+
+
+  <!-- =========================================================
+       MAIN PAGE
+       ========================================================= -->
+
+  <main class="c360-right-page">
+
+
+    <!-- =======================================================
+         TOP NAVBAR
+         SAME STYLE AS TRAINER PAGES
+         ======================================================= -->
+
+    <header class="c360-topbar">
+
+
+      <!-- LEFT -->
+
+      <div class="c360-topbar-left">
+
+
+        <!-- HAMBURGER -->
+
+        <button
+          type="button"
+          class="c360-menu-button"
+          ng-click="c.toggleSidebar()"
+          aria-label="Toggle Campus360 sidebar">
+
+          <span></span>
+          <span></span>
+          <span></span>
+
+        </button>
+
+
+        <!-- PAGE TITLE -->
+
+        <div class="c360-page-heading">
+
+          <span>
+            CAMPUS360
+          </span>
+
+          <strong>
+            Applications
+          </strong>
+
+        </div>
+
+      </div>
+
+
+      <!-- RIGHT -->
+
+      <div class="c360-topbar-right">
+
+
+        <!-- REFRESH -->
+
+        <button
+          type="button"
+          class="c360-top-icon"
+          ng-click="c.refresh()"
+          ng-disabled="c.loading"
+          title="Refresh">
+
+          <svg viewBox="0 0 24 24">
+
+            <path d="M20 11a8 8 0 0 0-14.8-4L4 9"/>
+            <path d="M4 5v4h4"/>
+            <path d="M4 13a8 8 0 0 0 14.8 4L20 15"/>
+            <path d="M20 19v-4h-4"/>
+
+          </svg>
+
+        </button>
+
+
+        <!-- NOTIFICATIONS -->
+
+        <button
+          type="button"
+          class="c360-top-icon c360-notification-button"
+          title="Notifications">
+
+          <svg viewBox="0 0 24 24">
+
+            <path d="M18 10a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/>
+            <path d="M10 21h4"/>
+
+          </svg>
+
+          <span class="c360-notification-dot"></span>
+
+        </button>
+
+
+        <!-- STUDENT PROFILE -->
+
+        <a
+          class="c360-top-profile"
+          ng-if="c.data.student"
+          ng-href="?id=campus360_profile&student={{c.data.student.student_id}}">
+
+
+          <div class="c360-top-avatar">
+
+            {{c.getInitials(c.data.student.student_name)}}
+
+          </div>
+
+
+          <div class="c360-top-profile-info">
+
+            <strong>
+              {{c.data.student.student_name}}
+            </strong>
+
+            <span>
+              {{c.data.student.student_id}}
+            </span>
+
+          </div>
+
+
+          <span class="c360-profile-chevron">
+            ˅
+          </span>
+
+
+        </a>
+
+      </div>
+
+    </header>
+
+
+    <!-- =======================================================
+         PAGE CONTENT
+         ======================================================= -->
+
+    <div class="c360-page-content">
+
+
+      <!-- HERO -->
+
+      <section class="applications-hero">
+
+        <div class="hero-left">
+
+          <div class="hero-eyebrow">
+
+            <span class="hero-dot"></span>
+
+            PLACEMENT JOURNEY
+
+          </div>
+
+
+          <h1>
+            My Applications
+          </h1>
+
+
+          <p>
+            Track the placement opportunities you have applied for
+            and monitor your application progress.
+          </p>
+
+        </div>
+
+      </section>
+
+
+      <!-- LOADING -->
+
+      <div
+        class="loading-container"
+        ng-if="c.loading">
+
+        <div class="spinner"></div>
+
+        <span>
+          Loading your applications...
+        </span>
+
+      </div>
+
+
+      <!-- MAIN APPLICATION CONTENT -->
+
+      <div ng-if="!c.loading">
+
+
+        <!-- SUMMARY -->
+
+        <section class="summary-grid">
+
+
+          <div class="summary-card total-card">
+
+            <div class="summary-icon">
+              ▣
+            </div>
+
+            <div>
+
+              <span class="summary-label">
+                TOTAL APPLICATIONS
+              </span>
+
+              <strong>
+                {{c.data.stats.total}}
+              </strong>
+
+              <p>
+                Applications submitted by you
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <div class="summary-card submitted-card">
+
+            <div class="summary-icon">
+              ◷
+            </div>
+
+            <div>
+
+              <span class="summary-label">
+                SUBMITTED
+              </span>
+
+              <strong>
+                {{c.data.stats.submitted}}
+              </strong>
+
+              <p>
+                Applications under review
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <div class="summary-card shortlisted-card">
+
+            <div class="summary-icon">
+              ✓
+            </div>
+
+            <div>
+
+              <span class="summary-label">
+                SHORTLISTED
+              </span>
+
+              <strong>
+                {{c.data.stats.shortlisted}}
+              </strong>
+
+              <p>
+                Applications shortlisted
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <div class="summary-card interview-card">
+
+            <div class="summary-icon">
+              ★
+            </div>
+
+            <div>
+
+              <span class="summary-label">
+                INTERVIEW
+              </span>
+
+              <strong>
+                {{c.data.stats.interview}}
+              </strong>
+
+              <p>
+                Interview related applications
+              </p>
+
+            </div>
+
+          </div>
+
+
+        </section>
+
+
+        <!-- FILTER -->
+
+        <section class="filter-section">
+
+
+          <div class="search-box">
+
+            <span class="search-icon">
+              ⌕
+            </span>
+
+            <input
+              type="text"
+              ng-model="c.searchText"
+              placeholder="Search your applications by opportunity, company, location or ID..."
+              autocomplete="off">
+
+          </div>
+
+
+          <select
+            ng-model="c.statusFilter"
+            class="status-select">
+
+            <option value="">
+              All Status
+            </option>
+
+            <option value="Submitted">
+              Submitted
+            </option>
+
+            <option value="Shortlisted">
+              Shortlisted
+            </option>
+
+            <option value="Interview">
+              Interview
+            </option>
+
+            <option value="Selected">
+              Selected
+            </option>
+
+            <option value="Rejected">
+              Rejected
+            </option>
+
+          </select>
+
+
+          <button
+            type="button"
+            class="clear-btn"
+            ng-click="c.clearFilters()">
+
+            Clear
+
+          </button>
+
+        </section>
+
+
+        <!-- APPLICATIONS -->
+
+        <section class="applications-section">
+
+
+          <div class="section-header">
+
+            <div>
+
+              <span class="section-eyebrow">
+                MY PLACEMENT JOURNEY
+              </span>
+
+              <h2>
+                My Applications
+              </h2>
+
+            </div>
+
+
+            <span class="application-count">
+
+              {{c.filteredApplications().length}}
+              applications
+
+            </span>
+
+          </div>
+
+
+          <!-- EMPTY -->
+
+          <div
+            class="empty-state"
+            ng-if="c.filteredApplications().length === 0">
+
+            <div class="empty-icon">
+              □
+            </div>
+
+            <h3>
+              No applications found
+            </h3>
+
+            <p>
+              You have not submitted any applications matching
+              the current filter.
+            </p>
+
+            <button
+              type="button"
+              class="empty-clear-btn"
+              ng-click="c.clearFilters()">
+
+              Clear Filters
+
+            </button>
+
+          </div>
+
+
+          <!-- CARDS -->
+
+          <div
+            class="applications-grid"
+            ng-if="c.filteredApplications().length > 0">
+
+
+            <article
+              class="application-card"
+              ng-repeat="
+                application in c.filteredApplications()
+                track by application.sys_id
+              ">
+
+
+              <div class="application-header">
+
+
+                <div class="company-icon">
+
+                  {{c.getInitials(application.company)}}
+
+                </div>
+
+
+                <div class="application-title">
+
+                  <span class="application-id">
+                    {{application.application_id}}
+                  </span>
+
+
+                  <h3>
+                    {{application.opportunity_title}}
+                  </h3>
+
+
+                  <p>
+                    {{application.company}}
+                  </p>
+
+                </div>
+
+
+                <span
+                  class="application-status"
+                  ng-class="
+                    c.getStatusClass(
+                      application.application_status
+                    )
+                  ">
+
+                  {{application.application_status}}
+
+                </span>
+
+              </div>
+
+
+              <div class="brief-grid">
+
+
+                <div class="brief-item">
+
+                  <span>
+                    LOCATION
+                  </span>
+
+                  <strong>
+                    {{application.location || 'Not specified'}}
+                  </strong>
+
+                </div>
+
+
+                <div class="brief-item">
+
+                  <span>
+                    TYPE
+                  </span>
+
+                  <strong>
+                    {{application.opportunity_type || 'Job'}}
+                  </strong>
+
+                </div>
+
+
+                <div class="brief-item">
+
+                  <span>
+                    CTC / STIPEND
+                  </span>
+
+                  <strong>
+                    {{application.ctc_stipend || 'Not specified'}}
+                  </strong>
+
+                </div>
+
+
+                <div class="brief-item">
+
+                  <span>
+                    APPLIED DATE
+                  </span>
+
+                  <strong>
+                    {{application.applied_date || 'Not available'}}
+                  </strong>
+
+                </div>
+
+
+              </div>
+
+
+              <div class="response-row">
+
+                <div>
+
+                  <span>
+                    MY RESPONSE
+                  </span>
+
+                  <strong>
+                    {{application.student_response || 'Submitted'}}
+                  </strong>
+
+                </div>
+
+              </div>
+
+
+              <div class="card-footer">
+
+                <button
+                  type="button"
+                  class="view-btn"
+                  ng-click="c.viewApplication(application)">
+
+                  View Application
+
+                  <span>
+                    →
+                  </span>
+
+                </button>
+
+              </div>
+
+
+            </article>
+
+
+          </div>
+
+
+        </section>
+
+
+      </div>
+
+
+    </div>
+
+  </main>
+
+
+  <!-- =========================================================
+       APPLICATION DETAIL MODAL
+       ========================================================= -->
+
+  <div
+    class="modal-overlay"
+    ng-if="c.selectedApplication"
+    ng-click="c.closeApplication($event)">
+
+
+    <div
+      class="application-modal"
+      ng-click="$event.stopPropagation()">
+
+
+      <!-- HEADER -->
+
+      <div class="modal-header">
+
+
+        <div class="modal-title">
+
+
+          <div class="modal-company-icon">
+
+            {{c.getInitials(c.selectedApplication.company)}}
+
+          </div>
+
+
+          <div>
+
+            <span>
+              APPLICATION DETAILS
+            </span>
+
+            <h2>
+              {{c.selectedApplication.opportunity_title}}
+            </h2>
+
+            <p>
+              {{c.selectedApplication.company}}
+            </p>
+
+          </div>
+
+
+        </div>
+
+
+        <button
+          type="button"
+          class="modal-close"
+          ng-click="c.closeApplication()">
+
+          ×
+
+        </button>
+
+      </div>
+
+
+      <!-- STATUS -->
+
+      <div class="modal-status">
+
+
+        <div>
+
+          <span>
+            APPLICATION ID
+          </span>
+
+          <strong>
+            {{c.selectedApplication.application_id}}
+          </strong>
+
+        </div>
+
+
+        <div>
+
+          <span>
+            STATUS
+          </span>
+
+          <strong>
+            {{c.selectedApplication.application_status}}
+          </strong>
+
+        </div>
+
+
+        <div>
+
+          <span>
+            APPLIED DATE
+          </span>
+
+          <strong>
+            {{c.selectedApplication.applied_date}}
+          </strong>
+
+        </div>
+
+
+      </div>
+
+
+      <!-- OPPORTUNITY -->
+
+      <section class="modal-section">
+
+
+        <div class="modal-section-title">
+
+          <span>
+            PLACEMENT OPPORTUNITY
+          </span>
+
+          <h3>
+            Opportunity Information
+          </h3>
+
+        </div>
+
+
+        <div class="modal-grid">
+
+
+          <div class="modal-field">
+
+            <span>
+              Opportunity
+            </span>
+
+            <strong>
+              {{c.selectedApplication.opportunity_title}}
+            </strong>
+
+          </div>
+
+
+          <div class="modal-field">
+
+            <span>
+              Company
+            </span>
+
+            <strong>
+              {{c.selectedApplication.company}}
+            </strong>
+
+          </div>
+
+
+          <div class="modal-field">
+
+            <span>
+              Opportunity Type
+            </span>
+
+            <strong>
+              {{c.selectedApplication.opportunity_type}}
+            </strong>
+
+          </div>
+
+
+          <div class="modal-field">
+
+            <span>
+              Location
+            </span>
+
+            <strong>
+              {{c.selectedApplication.location}}
+            </strong>
+
+          </div>
+
+
+          <div class="modal-field">
+
+            <span>
+              CTC / Stipend
+            </span>
+
+            <strong>
+              {{c.selectedApplication.ctc_stipend}}
+            </strong>
+
+          </div>
+
+
+          <div class="modal-field">
+
+            <span>
+              Minimum CGPA
+            </span>
+
+            <strong>
+              {{c.selectedApplication.minimum_cgpa}}
+            </strong>
+
+          </div>
+
+
+          <div class="modal-field">
+
+            <span>
+              Drive Date
+            </span>
+
+            <strong>
+              {{c.selectedApplication.drive_date}}
+            </strong>
+
+          </div>
+
+
+          <div class="modal-field">
+
+            <span>
+              Application Deadline
+            </span>
+
+            <strong>
+              {{c.selectedApplication.application_deadline}}
+            </strong>
+
+          </div>
+
+
+        </div>
+
+
+      </section>
+
+
+      <!-- PROGRESS -->
+
+      <section class="modal-section">
+
+
+        <div class="modal-section-title">
+
+          <span>
+            MY APPLICATION
+          </span>
+
+          <h3>
+            Application Progress
+          </h3>
+
+        </div>
+
+
+        <div class="progress-grid">
+
+
+          <div class="progress-field">
+
+            <span>
+              Application Status
+            </span>
+
+            <strong>
+              {{c.selectedApplication.application_status}}
+            </strong>
+
+          </div>
+
+
+          <div class="progress-field">
+
+            <span>
+              Assessment Status
+            </span>
+
+            <strong>
+              {{c.selectedApplication.assessment_status || 'Not Started'}}
+            </strong>
+
+          </div>
+
+
+          <div class="progress-field">
+
+            <span>
+              Interview Status
+            </span>
+
+            <strong>
+              {{c.selectedApplication.interview_status || 'Not Scheduled'}}
+            </strong>
+
+          </div>
+
+
+          <div class="progress-field">
+
+            <span>
+              Offer Status
+            </span>
+
+            <strong>
+              {{c.selectedApplication.offer_status || 'Not Available'}}
+            </strong>
+
+          </div>
+
+
+          <div class="progress-field">
+
+            <span>
+              Student Response
+            </span>
+
+            <strong>
+              {{c.selectedApplication.student_response || 'Submitted'}}
+            </strong>
+
+          </div>
+
+
+          <div class="progress-field">
+
+            <span>
+              AI Match Score
+            </span>
+
+            <strong>
+              {{c.selectedApplication.ai_match_score || '—'}}
+            </strong>
+
+          </div>
+
+
+        </div>
+
+
+      </section>
+
+
+      <!-- DESCRIPTION -->
+
+      <section
+        class="modal-section"
+        ng-if="c.selectedApplication.job_description">
+
+
+        <div class="modal-section-title">
+
+          <span>
+            OPPORTUNITY
+          </span>
+
+          <h3>
+            Job Description
+          </h3>
+
+        </div>
+
+
+        <div class="description-box">
+
+          {{c.selectedApplication.job_description}}
+
+        </div>
+
+      </section>
+
+
+      <!-- SKILLS -->
+
+      <section
+        class="modal-section"
+        ng-if="c.selectedApplication.required_skills">
+
+
+        <div class="modal-section-title">
+
+          <span>
+            REQUIREMENTS
+          </span>
+
+          <h3>
+            Required Skills
+          </h3>
+
+        </div>
+
+
+        <div class="description-box">
+
+          {{c.selectedApplication.required_skills}}
+
+        </div>
+
+      </section>
+
+
+      <!-- FOOTER -->
+
+      <div class="modal-footer">
+
+        <button
+          type="button"
+          class="modal-close-btn"
+          ng-click="c.closeApplication()">
+
+          Close
+
+        </button>
+
+      </div>
+
+
+    </div>
+
+  </div>
+
+
+</div>
+<!-- Campus360 AI Assistant Floating Widget -->
+<sp-widget widget="data.aiWidget"></sp-widget>
+]]></template>
+    </sp_widget>
+</record_update>

@@ -1,0 +1,1866 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_widget">
+    <sp_widget action="INSERT_OR_UPDATE">
+        <category>custom</category>
+        <client_script><![CDATA[api.controller = function($scope, $window) {
+
+    var c = this;
+
+
+    /*
+     * =====================================================
+     * STATE
+     * =====================================================
+     */
+
+    c.showForm = false;
+
+    c.editMode = false;
+
+    c.search = "";
+
+    c.statusFilter = "";
+
+
+    /*
+     * =====================================================
+     * EMPTY FORM
+     * =====================================================
+     */
+
+    c.emptyJob = function() {
+
+        return {
+
+            sys_id: "",
+
+            opportunity_id: "",
+
+            opportunity_title: "",
+
+            company: "",
+
+            opportunity_type: "Job",
+
+            opportunity_source: "TPO",
+
+            job_description: "",
+
+            location: "",
+
+            required_skills: "",
+
+            minimum_cgpa: "",
+
+            eligible_branches: "",
+
+            ctc_stipend: "",
+
+            drive_date: "",
+
+            application_deadline: "",
+
+            status: "Open"
+
+        };
+
+    };
+
+
+    c.job = c.emptyJob();
+
+
+    /*
+     * =====================================================
+     * BACK TO DASHBOARD
+     * =====================================================
+     */
+
+    c.backToDashboard = function() {
+
+        $window.location.href =
+            "?id=recruiter_dashboard";
+
+    };
+
+
+    /*
+     * =====================================================
+     * CREATE
+     * =====================================================
+     */
+
+    c.openCreate = function() {
+
+        c.job = c.emptyJob();
+
+        c.editMode = false;
+
+        c.showForm = true;
+
+    };
+
+
+    /*
+     * =====================================================
+     * EDIT
+     * =====================================================
+     */
+
+    c.openEdit = function(job) {
+
+        c.job = angular.copy(job);
+
+        c.editMode = true;
+
+        c.showForm = true;
+
+        window.scrollTo(0, 0);
+
+    };
+
+
+    /*
+     * =====================================================
+     * CANCEL
+     * =====================================================
+     */
+
+    c.cancelForm = function() {
+
+        c.job = c.emptyJob();
+
+        c.showForm = false;
+
+        c.editMode = false;
+
+    };
+
+
+    /*
+     * =====================================================
+     * SAVE
+     * =====================================================
+     */
+
+    c.saveJob = function() {
+
+        if (!c.job.opportunity_id ||
+            !c.job.opportunity_title ||
+            !c.job.company) {
+
+            alert(
+                "Please enter Opportunity ID, Job Title and Company."
+            );
+
+            return;
+
+        }
+
+
+        var action =
+            c.editMode ? "update" : "create";
+
+
+        c.server.get({
+
+            action: action,
+
+            job: c.job
+
+        }).then(function(response) {
+
+            c.data = response.data;
+
+            c.showForm = false;
+
+            c.editMode = false;
+
+            c.job = c.emptyJob();
+
+        });
+
+    };
+
+
+    /*
+     * =====================================================
+     * CLOSE JOB
+     * =====================================================
+     */
+
+    c.closeJob = function(job) {
+
+        if (!job || !job.sys_id) {
+            return;
+        }
+
+
+        var confirmClose =
+            confirm(
+                "Close this job opportunity?"
+            );
+
+
+        if (!confirmClose) {
+            return;
+        }
+
+
+        c.server.get({
+
+            action: "close",
+
+            sys_id: job.sys_id
+
+        }).then(function(response) {
+
+            c.data = response.data;
+
+        });
+
+    };
+
+
+    /*
+     * =====================================================
+     * SEARCH / FILTER
+     * =====================================================
+     */
+
+    c.filterJob = function(job) {
+
+        if (!job) {
+            return false;
+        }
+
+
+        /*
+         * SEARCH
+         */
+
+        if (c.search) {
+
+            var text =
+                c.search.toLowerCase().trim();
+
+
+            var title =
+                (job.opportunity_title || "")
+                .toLowerCase();
+
+            var company =
+                (job.company_name || "")
+                .toLowerCase();
+
+            var location =
+                (job.location || "")
+                .toLowerCase();
+
+            var skills =
+                (job.required_skills || "")
+                .toLowerCase();
+
+            var opportunityId =
+                (job.opportunity_id || "")
+                .toLowerCase();
+
+
+            var matches =
+                title.indexOf(text) !== -1 ||
+                company.indexOf(text) !== -1 ||
+                location.indexOf(text) !== -1 ||
+                skills.indexOf(text) !== -1 ||
+                opportunityId.indexOf(text) !== -1;
+
+
+            if (!matches) {
+                return false;
+            }
+
+        }
+
+
+        /*
+         * STATUS
+         */
+
+        if (c.statusFilter) {
+
+            if (job.status !== c.statusFilter) {
+                return false;
+            }
+
+        }
+
+
+        return true;
+
+    };
+
+
+    /*
+     * =====================================================
+     * CLEAR FILTER
+     * =====================================================
+     */
+
+    c.clearFilters = function() {
+
+        c.search = "";
+
+        c.statusFilter = "";
+
+    };
+
+
+    /*
+     * =====================================================
+     * JOB COUNT
+     * =====================================================
+     */
+
+    c.getJobCount = function() {
+
+        if (!c.data || !c.data.jobs) {
+            return 0;
+        }
+
+
+        var count = 0;
+
+
+        c.data.jobs.forEach(function(job) {
+
+            if (c.filterJob(job)) {
+                count++;
+            }
+
+        });
+
+
+        return count;
+
+    };
+
+};]]></client_script>
+        <controller_as>c</controller_as>
+        <css>.jobs-page {&#13;
+    min-height: 100vh;&#13;
+    padding: 32px;&#13;
+    background: #f4f6fb;&#13;
+    font-family: Arial, sans-serif;&#13;
+    color: #17213a;&#13;
+}&#13;
+&#13;
+&#13;
+/* HEADER */&#13;
+&#13;
+.jobs-header {&#13;
+    background: #ffffff;&#13;
+    border: 1px solid #e4e8f1;&#13;
+    border-radius: 16px;&#13;
+    padding: 26px 30px;&#13;
+    margin-bottom: 20px;&#13;
+&#13;
+    display: flex;&#13;
+    justify-content: space-between;&#13;
+    align-items: center;&#13;
+&#13;
+    box-shadow: 0 5px 18px rgba(31, 43, 75, 0.06);&#13;
+}&#13;
+&#13;
+.eyebrow {&#13;
+    color: #5368d8;&#13;
+    font-size: 10px;&#13;
+    font-weight: 700;&#13;
+    letter-spacing: 1.4px;&#13;
+    margin-bottom: 7px;&#13;
+}&#13;
+&#13;
+.jobs-header h1 {&#13;
+    margin: 0;&#13;
+    font-size: 27px;&#13;
+    color: #14203b;&#13;
+}&#13;
+&#13;
+.jobs-header p {&#13;
+    margin: 7px 0 0;&#13;
+    color: #7d879c;&#13;
+    font-size: 13px;&#13;
+}&#13;
+&#13;
+.header-actions {&#13;
+    display: flex;&#13;
+    gap: 10px;&#13;
+}&#13;
+&#13;
+&#13;
+/* BUTTONS */&#13;
+&#13;
+.primary-btn {&#13;
+    border: none;&#13;
+    background: #5368d8;&#13;
+    color: white;&#13;
+    padding: 11px 18px;&#13;
+    border-radius: 8px;&#13;
+    cursor: pointer;&#13;
+    font-size: 12px;&#13;
+    font-weight: 600;&#13;
+}&#13;
+&#13;
+.primary-btn:hover {&#13;
+    background: #4357c7;&#13;
+}&#13;
+&#13;
+.secondary-btn {&#13;
+    border: 1px solid #d9deea;&#13;
+    background: white;&#13;
+    color: #5368d8;&#13;
+    padding: 10px 17px;&#13;
+    border-radius: 8px;&#13;
+    cursor: pointer;&#13;
+    font-size: 12px;&#13;
+    font-weight: 600;&#13;
+}&#13;
+&#13;
+.secondary-btn:hover {&#13;
+    border-color: #5368d8;&#13;
+}&#13;
+&#13;
+&#13;
+/* FORM */&#13;
+&#13;
+.job-form-card {&#13;
+    background: white;&#13;
+    border: 1px solid #e1e5ef;&#13;
+    border-radius: 16px;&#13;
+    padding: 25px;&#13;
+    margin-bottom: 20px;&#13;
+&#13;
+    box-shadow: 0 5px 18px rgba(31, 43, 75, 0.06);&#13;
+}&#13;
+&#13;
+.form-header {&#13;
+    display: flex;&#13;
+    justify-content: space-between;&#13;
+    align-items: flex-start;&#13;
+&#13;
+    margin-bottom: 25px;&#13;
+}&#13;
+&#13;
+.form-header h2 {&#13;
+    margin: 0;&#13;
+    font-size: 20px;&#13;
+}&#13;
+&#13;
+.close-btn {&#13;
+    border: none;&#13;
+    background: #f1f3f8;&#13;
+    color: #65708a;&#13;
+    width: 32px;&#13;
+    height: 32px;&#13;
+    border-radius: 7px;&#13;
+    cursor: pointer;&#13;
+    font-size: 20px;&#13;
+}&#13;
+&#13;
+.form-grid {&#13;
+    display: grid;&#13;
+    grid-template-columns: 1fr 1fr;&#13;
+    gap: 18px;&#13;
+}&#13;
+&#13;
+.form-group {&#13;
+    display: flex;&#13;
+    flex-direction: column;&#13;
+}&#13;
+&#13;
+.form-group.full {&#13;
+    grid-column: 1 / -1;&#13;
+}&#13;
+&#13;
+.form-group label {&#13;
+    font-size: 11px;&#13;
+    color: #68738b;&#13;
+    margin-bottom: 7px;&#13;
+    font-weight: 600;&#13;
+}&#13;
+&#13;
+.form-group input,&#13;
+.form-group select,&#13;
+.form-group textarea {&#13;
+    border: 1px solid #dce1eb;&#13;
+    border-radius: 8px;&#13;
+    padding: 11px 12px;&#13;
+    outline: none;&#13;
+    background: #fbfcfe;&#13;
+    color: #26324d;&#13;
+    font-size: 12px;&#13;
+}&#13;
+&#13;
+.form-group input:focus,&#13;
+.form-group select:focus,&#13;
+.form-group textarea:focus {&#13;
+    border-color: #5368d8;&#13;
+    background: white;&#13;
+}&#13;
+&#13;
+.form-group textarea {&#13;
+    resize: vertical;&#13;
+}&#13;
+&#13;
+.form-actions {&#13;
+    margin-top: 24px;&#13;
+    padding-top: 20px;&#13;
+    border-top: 1px solid #edf0f5;&#13;
+&#13;
+    display: flex;&#13;
+    justify-content: flex-end;&#13;
+    gap: 10px;&#13;
+}&#13;
+&#13;
+&#13;
+/* SEARCH */&#13;
+&#13;
+.search-card {&#13;
+    background: white;&#13;
+    padding: 17px;&#13;
+    border-radius: 14px;&#13;
+    border: 1px solid #e3e7f0;&#13;
+&#13;
+    display: flex;&#13;
+    gap: 10px;&#13;
+&#13;
+    margin-bottom: 16px;&#13;
+}&#13;
+&#13;
+.search-box {&#13;
+    flex: 1;&#13;
+&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+&#13;
+    border: 1px solid #dce1eb;&#13;
+    border-radius: 8px;&#13;
+    background: #fafbfe;&#13;
+&#13;
+    padding: 0 12px;&#13;
+}&#13;
+&#13;
+.search-box span {&#13;
+    font-size: 19px;&#13;
+    color: #7d879c;&#13;
+    margin-right: 9px;&#13;
+}&#13;
+&#13;
+.search-box input {&#13;
+    width: 100%;&#13;
+    border: none;&#13;
+    outline: none;&#13;
+    background: transparent;&#13;
+    padding: 11px 0;&#13;
+    font-size: 12px;&#13;
+}&#13;
+&#13;
+.search-card select {&#13;
+    width: 150px;&#13;
+    border: 1px solid #dce1eb;&#13;
+    border-radius: 8px;&#13;
+    padding: 10px;&#13;
+    background: white;&#13;
+    color: #29344e;&#13;
+}&#13;
+&#13;
+&#13;
+/* SUMMARY */&#13;
+&#13;
+.summary-row {&#13;
+    display: flex;&#13;
+    justify-content: space-between;&#13;
+&#13;
+    color: #7c879c;&#13;
+    font-size: 12px;&#13;
+&#13;
+    margin: 18px 3px;&#13;
+}&#13;
+&#13;
+.summary-row strong {&#13;
+    color: #17213a;&#13;
+    font-size: 15px;&#13;
+}&#13;
+&#13;
+&#13;
+/* GRID */&#13;
+&#13;
+.job-grid {&#13;
+    display: grid;&#13;
+    grid-template-columns: repeat(3, 1fr);&#13;
+    gap: 18px;&#13;
+}&#13;
+&#13;
+&#13;
+/* JOB CARD */&#13;
+&#13;
+.job-card {&#13;
+    background: white;&#13;
+    border: 1px solid #e1e5ee;&#13;
+    border-radius: 15px;&#13;
+    padding: 20px;&#13;
+&#13;
+    box-shadow: 0 4px 14px rgba(31, 43, 75, 0.045);&#13;
+&#13;
+    transition: 0.2s;&#13;
+}&#13;
+&#13;
+.job-card:hover {&#13;
+    border-color: #bfc9f7;&#13;
+    transform: translateY(-2px);&#13;
+    box-shadow: 0 8px 22px rgba(31, 43, 75, 0.08);&#13;
+}&#13;
+&#13;
+.job-card-top {&#13;
+    display: flex;&#13;
+    gap: 12px;&#13;
+    align-items: center;&#13;
+}&#13;
+&#13;
+.company-icon {&#13;
+    width: 43px;&#13;
+    height: 43px;&#13;
+    border-radius: 10px;&#13;
+&#13;
+    background: #eef1ff;&#13;
+    color: #5368d8;&#13;
+&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+&#13;
+    font-weight: bold;&#13;
+    font-size: 15px;&#13;
+}&#13;
+&#13;
+.job-card h3 {&#13;
+    margin: 0;&#13;
+    font-size: 15px;&#13;
+    color: #17213a;&#13;
+}&#13;
+&#13;
+.job-card-top p {&#13;
+    margin: 4px 0 0;&#13;
+    color: #8992a5;&#13;
+    font-size: 11px;&#13;
+}&#13;
+&#13;
+&#13;
+/* STATUS */&#13;
+&#13;
+.job-status-row {&#13;
+    display: flex;&#13;
+    gap: 8px;&#13;
+    margin: 17px 0;&#13;
+}&#13;
+&#13;
+.status-badge {&#13;
+    background: #eaf8f1;&#13;
+    color: #15965d;&#13;
+    padding: 5px 9px;&#13;
+    border-radius: 6px;&#13;
+    font-size: 10px;&#13;
+    font-weight: 600;&#13;
+}&#13;
+&#13;
+.job-type {&#13;
+    background: #f0f2ff;&#13;
+    color: #5368d8;&#13;
+    padding: 5px 9px;&#13;
+    border-radius: 6px;&#13;
+    font-size: 10px;&#13;
+}&#13;
+&#13;
+&#13;
+/* DETAILS */&#13;
+&#13;
+.job-details {&#13;
+    display: grid;&#13;
+    grid-template-columns: 1fr 1fr;&#13;
+    gap: 15px;&#13;
+&#13;
+    padding: 15px 0;&#13;
+&#13;
+    border-top: 1px solid #edf0f5;&#13;
+    border-bottom: 1px solid #edf0f5;&#13;
+}&#13;
+&#13;
+.job-details label {&#13;
+    display: block;&#13;
+    color: #929bad;&#13;
+    font-size: 9px;&#13;
+    margin-bottom: 5px;&#13;
+}&#13;
+&#13;
+.job-details span {&#13;
+    color: #29344e;&#13;
+    font-size: 11px;&#13;
+    font-weight: 600;&#13;
+}&#13;
+&#13;
+&#13;
+/* SKILLS */&#13;
+&#13;
+.job-skills {&#13;
+    display: flex;&#13;
+    flex-wrap: wrap;&#13;
+    gap: 5px;&#13;
+&#13;
+    margin: 15px 0;&#13;
+    min-height: 25px;&#13;
+}&#13;
+&#13;
+.skill-tag {&#13;
+    background: #f0f2ff;&#13;
+    color: #5368d8;&#13;
+    padding: 5px 7px;&#13;
+    border-radius: 5px;&#13;
+    font-size: 9px;&#13;
+}&#13;
+&#13;
+&#13;
+/* FOOTER */&#13;
+&#13;
+.job-footer {&#13;
+    border-top: 1px solid #edf0f5;&#13;
+    padding-top: 15px;&#13;
+&#13;
+    display: flex;&#13;
+    justify-content: space-between;&#13;
+    align-items: center;&#13;
+}&#13;
+&#13;
+.job-footer small {&#13;
+    display: block;&#13;
+    color: #929bad;&#13;
+    font-size: 9px;&#13;
+    margin-bottom: 4px;&#13;
+}&#13;
+&#13;
+.job-footer strong {&#13;
+    color: #29344e;&#13;
+    font-size: 10px;&#13;
+    font-weight: 500;&#13;
+}&#13;
+&#13;
+.job-actions {&#13;
+    display: flex;&#13;
+    gap: 6px;&#13;
+}&#13;
+&#13;
+.edit-btn,&#13;
+.close-job-btn {&#13;
+    border: none;&#13;
+    border-radius: 6px;&#13;
+    padding: 7px 10px;&#13;
+    cursor: pointer;&#13;
+    font-size: 10px;&#13;
+}&#13;
+&#13;
+.edit-btn {&#13;
+    background: #f0f2ff;&#13;
+    color: #5368d8;&#13;
+}&#13;
+&#13;
+.close-job-btn {&#13;
+    background: #fff0f0;&#13;
+    color: #d95353;&#13;
+}&#13;
+&#13;
+&#13;
+/* EMPTY */&#13;
+&#13;
+.empty-state {&#13;
+    grid-column: 1 / -1;&#13;
+&#13;
+    background: white;&#13;
+    border: 1px solid #e1e5ee;&#13;
+    border-radius: 15px;&#13;
+&#13;
+    padding: 60px 20px;&#13;
+&#13;
+    text-align: center;&#13;
+}&#13;
+&#13;
+.empty-icon {&#13;
+    width: 45px;&#13;
+    height: 45px;&#13;
+    margin: auto auto 15px;&#13;
+&#13;
+    border-radius: 50%;&#13;
+    background: #eef1ff;&#13;
+    color: #5368d8;&#13;
+&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+&#13;
+    font-size: 22px;&#13;
+}&#13;
+&#13;
+.empty-state h3 {&#13;
+    margin: 0 0 7px;&#13;
+}&#13;
+&#13;
+.empty-state p {&#13;
+    color: #8992a5;&#13;
+    font-size: 12px;&#13;
+    margin-bottom: 18px;&#13;
+}&#13;
+&#13;
+&#13;
+/* RESPONSIVE */&#13;
+&#13;
+@media (max-width: 1100px) {&#13;
+&#13;
+    .job-grid {&#13;
+        grid-template-columns: repeat(2, 1fr);&#13;
+    }&#13;
+&#13;
+}&#13;
+&#13;
+@media (max-width: 750px) {&#13;
+&#13;
+    .jobs-page {&#13;
+        padding: 15px;&#13;
+    }&#13;
+&#13;
+    .jobs-header {&#13;
+        flex-direction: column;&#13;
+        align-items: flex-start;&#13;
+        gap: 18px;&#13;
+    }&#13;
+&#13;
+    .header-actions {&#13;
+        width: 100%;&#13;
+    }&#13;
+&#13;
+    .header-actions button {&#13;
+        flex: 1;&#13;
+    }&#13;
+&#13;
+    .search-card {&#13;
+        flex-direction: column;&#13;
+    }&#13;
+&#13;
+    .search-card select {&#13;
+        width: 100%;&#13;
+    }&#13;
+&#13;
+    .form-grid {&#13;
+        grid-template-columns: 1fr;&#13;
+    }&#13;
+&#13;
+    .form-group.full {&#13;
+        grid-column: auto;&#13;
+    }&#13;
+&#13;
+    .job-grid {&#13;
+        grid-template-columns: 1fr;&#13;
+    }&#13;
+&#13;
+}</css>
+        <data_table>sp_instance</data_table>
+        <demo_data/>
+        <description/>
+        <docs/>
+        <field_list/>
+        <has_preview>false</has_preview>
+        <id>recruiter_job_opportunities</id>
+        <internal>false</internal>
+        <link><![CDATA[function link(scope, element, attrs, controller) {
+  
+}]]></link>
+        <name>Recruiter Job Opportunities</name>
+        <option_schema/>
+        <public>false</public>
+        <roles/>
+        <script><![CDATA[(function() {
+
+    data.jobs = [];
+    data.companies = [];
+
+    /*
+     * =====================================================
+     * LOAD COMPANIES
+     * =====================================================
+     */
+
+    var companyGR = new GlideRecord('x_snc_campus360_company_master');
+    companyGR.orderBy('name');
+    companyGR.query();
+
+    while (companyGR.next()) {
+
+        data.companies.push({
+            sys_id: companyGR.getUniqueValue(),
+            name: companyGR.getDisplayValue()
+        });
+
+    }
+
+
+    /*
+     * =====================================================
+     * CREATE JOB
+     * =====================================================
+     */
+
+    if (input && input.action == 'create') {
+
+        var newJob =
+            new GlideRecord('x_snc_campus360_placement_opportunity');
+
+        newJob.initialize();
+
+        newJob.setValue(
+            'opportunity_id',
+            input.job.opportunity_id
+        );
+
+        newJob.setValue(
+            'opportunity_title',
+            input.job.opportunity_title
+        );
+
+        newJob.setValue(
+            'company',
+            input.job.company
+        );
+
+        newJob.setValue(
+            'opportunity_type',
+            input.job.opportunity_type
+        );
+
+        newJob.setValue(
+            'opportunity_source',
+            input.job.opportunity_source
+        );
+
+        newJob.setValue(
+            'job_description',
+            input.job.job_description
+        );
+
+        newJob.setValue(
+            'location',
+            input.job.location
+        );
+
+        newJob.setValue(
+            'required_skills',
+            input.job.required_skills
+        );
+
+        newJob.setValue(
+            'minimum_cgpa',
+            input.job.minimum_cgpa
+        );
+
+        newJob.setValue(
+            'eligible_branches',
+            input.job.eligible_branches
+        );
+
+        newJob.setValue(
+            'ctc_stipend',
+            input.job.ctc_stipend
+        );
+
+        newJob.setValue(
+            'drive_date',
+            input.job.drive_date
+        );
+
+        newJob.setValue(
+            'application_deadline',
+            input.job.application_deadline
+        );
+
+        newJob.setValue(
+            'status',
+            input.job.status || 'Open'
+        );
+
+        data.created_sys_id = newJob.insert();
+
+    }
+
+
+    /*
+     * =====================================================
+     * UPDATE JOB
+     * =====================================================
+     */
+
+    if (input && input.action == 'update') {
+
+        var updateJob =
+            new GlideRecord('x_snc_campus360_placement_opportunity');
+
+        if (updateJob.get(input.job.sys_id)) {
+
+            updateJob.setValue(
+                'opportunity_id',
+                input.job.opportunity_id
+            );
+
+            updateJob.setValue(
+                'opportunity_title',
+                input.job.opportunity_title
+            );
+
+            updateJob.setValue(
+                'company',
+                input.job.company
+            );
+
+            updateJob.setValue(
+                'opportunity_type',
+                input.job.opportunity_type
+            );
+
+            updateJob.setValue(
+                'opportunity_source',
+                input.job.opportunity_source
+            );
+
+            updateJob.setValue(
+                'job_description',
+                input.job.job_description
+            );
+
+            updateJob.setValue(
+                'location',
+                input.job.location
+            );
+
+            updateJob.setValue(
+                'required_skills',
+                input.job.required_skills
+            );
+
+            updateJob.setValue(
+                'minimum_cgpa',
+                input.job.minimum_cgpa
+            );
+
+            updateJob.setValue(
+                'eligible_branches',
+                input.job.eligible_branches
+            );
+
+            updateJob.setValue(
+                'ctc_stipend',
+                input.job.ctc_stipend
+            );
+
+            updateJob.setValue(
+                'drive_date',
+                input.job.drive_date
+            );
+
+            updateJob.setValue(
+                'application_deadline',
+                input.job.application_deadline
+            );
+
+            updateJob.setValue(
+                'status',
+                input.job.status
+            );
+
+            updateJob.update();
+
+        }
+
+    }
+
+
+    /*
+     * =====================================================
+     * CLOSE JOB
+     * =====================================================
+     */
+
+    if (input && input.action == 'close') {
+
+        var closeJob =
+            new GlideRecord('x_snc_campus360_placement_opportunity');
+
+        if (closeJob.get(input.sys_id)) {
+
+            closeJob.setValue('status', 'Closed');
+
+            closeJob.update();
+
+        }
+
+    }
+
+
+    /*
+     * =====================================================
+     * LOAD JOBS
+     * =====================================================
+     */
+
+    var jobsGR =
+        new GlideRecord(
+            'x_snc_campus360_placement_opportunity'
+        );
+
+    jobsGR.orderByDesc('sys_created_on');
+    jobsGR.query();
+
+    while (jobsGR.next()) {
+
+        var job = {};
+
+        job.sys_id =
+            jobsGR.getUniqueValue();
+
+        job.opportunity_id =
+            jobsGR.getValue('opportunity_id') || '';
+
+        job.opportunity_title =
+            jobsGR.getValue('opportunity_title') || '';
+
+        job.company =
+            jobsGR.getValue('company') || '';
+
+        job.company_name =
+            jobsGR.getDisplayValue('company') || '';
+
+        job.opportunity_type =
+            jobsGR.getValue('opportunity_type') || '';
+
+        job.opportunity_type_display =
+            jobsGR.getDisplayValue('opportunity_type') || '';
+
+        job.opportunity_source =
+            jobsGR.getValue('opportunity_source') || '';
+
+        job.job_description =
+            jobsGR.getValue('job_description') || '';
+
+        job.location =
+            jobsGR.getValue('location') || '';
+
+        job.required_skills =
+            jobsGR.getValue('required_skills') || '';
+
+        job.minimum_cgpa =
+            jobsGR.getValue('minimum_cgpa') || '';
+
+        job.eligible_branches =
+            jobsGR.getValue('eligible_branches') || '';
+
+        job.ctc_stipend =
+            jobsGR.getValue('ctc_stipend') || '';
+
+        job.drive_date =
+            jobsGR.getValue('drive_date') || '';
+
+        job.application_deadline =
+            jobsGR.getValue('application_deadline') || '';
+
+        job.status =
+            jobsGR.getValue('status') || '';
+
+        job.status_display =
+            jobsGR.getDisplayValue('status') || '';
+
+        data.jobs.push(job);
+
+    }
+
+})();]]></script>
+        <servicenow>false</servicenow>
+        <sys_class_name>sp_widget</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-23 17:02:10</sys_created_on>
+        <sys_id>5f051841c42b43107f44164a4d24635a</sys_id>
+        <sys_mod_count>2</sys_mod_count>
+        <sys_name>Recruiter Job Opportunities</sys_name>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name>sp_widget_5f051841c42b43107f44164a4d24635a</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-23 18:05:55</sys_updated_on>
+        <template><![CDATA[<div class="jobs-page">
+
+
+    <!-- ================================================= -->
+    <!-- HEADER -->
+    <!-- ================================================= -->
+
+    <div class="jobs-header">
+
+        <div>
+
+            <div class="eyebrow">
+                RECRUITMENT
+            </div>
+
+            <h1>
+                Job Opportunities
+            </h1>
+
+            <p>
+                Create and manage campus hiring opportunities.
+            </p>
+
+        </div>
+
+
+        <div class="header-actions">
+
+            <button class="back-btn"
+        		ng-click="c.backToDashboard()">
+    			← Back to Dashboard
+			</button>
+
+
+            <button
+                class="primary-btn"
+                ng-click="c.openCreate()">
+
+                + Create Opportunity
+
+            </button>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- ================================================= -->
+    <!-- CREATE / EDIT FORM -->
+    <!-- ================================================= -->
+
+    <div
+        class="job-form-card"
+        ng-if="c.showForm">
+
+
+        <div class="form-header">
+
+            <div>
+
+                <div class="eyebrow">
+                    {{c.editMode ? 'EDIT OPPORTUNITY' : 'NEW OPPORTUNITY'}}
+                </div>
+
+                <h2>
+                    {{c.editMode ? 'Edit Job Opportunity' : 'Create Job Opportunity'}}
+                </h2>
+
+            </div>
+
+
+            <button
+                class="close-btn"
+                ng-click="c.cancelForm()">
+
+                ×
+
+            </button>
+
+        </div>
+
+
+        <div class="form-grid">
+
+
+            <!-- OPPORTUNITY ID -->
+
+            <div class="form-group">
+
+                <label>
+                    Opportunity ID *
+                </label>
+
+                <input
+                    type="text"
+                    ng-model="c.job.opportunity_id"
+                    placeholder="Example: OPP001">
+
+            </div>
+
+
+            <!-- TITLE -->
+
+            <div class="form-group">
+
+                <label>
+                    Opportunity Title *
+                </label>
+
+                <input
+                    type="text"
+                    ng-model="c.job.opportunity_title"
+                    placeholder="Example: Software Engineer">
+
+            </div>
+
+
+            <!-- COMPANY -->
+
+            <div class="form-group">
+
+                <label>
+                    Company *
+                </label>
+
+                <select
+                    ng-model="c.job.company">
+
+                    <option value="">
+                        Select Company
+                    </option>
+
+                    <option
+                        ng-repeat="company in c.data.companies"
+                        value="{{company.sys_id}}">
+
+                        {{company.name}}
+
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <!-- TYPE -->
+
+            <div class="form-group">
+
+                <label>
+                    Opportunity Type
+                </label>
+
+                <select
+                    ng-model="c.job.opportunity_type">
+
+                    <option value="Job">
+                        Job
+                    </option>
+
+                    <option value="Internship">
+                        Internship
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <!-- SOURCE -->
+
+            <div class="form-group">
+
+                <label>
+                    Opportunity Source
+                </label>
+
+                <select
+                    ng-model="c.job.opportunity_source">
+
+                    <option value="TPO">
+                        TPO
+                    </option>
+
+                    <option value="Off Campus">
+                        Off Campus
+                    </option>
+
+                    <option value="Referral">
+                        Referral
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <!-- LOCATION -->
+
+            <div class="form-group">
+
+                <label>
+                    Location
+                </label>
+
+                <input
+                    type="text"
+                    ng-model="c.job.location"
+                    placeholder="Example: Bangalore">
+
+            </div>
+
+
+            <!-- CGPA -->
+
+            <div class="form-group">
+
+                <label>
+                    Minimum CGPA
+                </label>
+
+                <input
+                    type="number"
+                    step="0.1"
+                    ng-model="c.job.minimum_cgpa"
+                    placeholder="Example: 7.5">
+
+            </div>
+
+
+            <!-- CTC -->
+
+            <div class="form-group">
+
+                <label>
+                    CTC / Stipend
+                </label>
+
+                <input
+                    type="text"
+                    ng-model="c.job.ctc_stipend"
+                    placeholder="Example: 8 LPA">
+
+            </div>
+
+
+            <!-- BRANCHES -->
+
+            <div class="form-group">
+
+                <label>
+                    Eligible Branches
+                </label>
+
+                <input
+                    type="text"
+                    ng-model="c.job.eligible_branches"
+                    placeholder="CSE, IT, ECE">
+
+            </div>
+
+
+            <!-- DRIVE DATE -->
+
+            <div class="form-group">
+
+                <label>
+                    Drive Date
+                </label>
+
+                <input
+                    type="datetime-local"
+                    ng-model="c.job.drive_date">
+
+            </div>
+
+
+            <!-- DEADLINE -->
+
+            <div class="form-group">
+
+                <label>
+                    Application Deadline
+                </label>
+
+                <input
+                    type="datetime-local"
+                    ng-model="c.job.application_deadline">
+
+            </div>
+
+
+            <!-- STATUS -->
+
+            <div class="form-group">
+
+                <label>
+                    Status
+                </label>
+
+                <select
+                    ng-model="c.job.status">
+
+                    <option value="Open">
+                        Open
+                    </option>
+
+                    <option value="Closed">
+                        Closed
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <!-- SKILLS -->
+
+            <div class="form-group full">
+
+                <label>
+                    Required Skills
+                </label>
+
+                <input
+                    type="text"
+                    ng-model="c.job.required_skills"
+                    placeholder="Java, React, SQL, Python">
+
+            </div>
+
+
+            <!-- DESCRIPTION -->
+
+            <div class="form-group full">
+
+                <label>
+                    Job Description
+                </label>
+
+                <textarea
+                    ng-model="c.job.job_description"
+                    rows="5"
+                    placeholder="Describe the role, responsibilities and requirements...">
+                </textarea>
+
+            </div>
+
+        </div>
+
+
+        <div class="form-actions">
+
+            <button
+                class="secondary-btn"
+                ng-click="c.cancelForm()">
+
+                Cancel
+
+            </button>
+
+
+            <button
+                class="primary-btn"
+                ng-click="c.saveJob()">
+
+                {{c.editMode ? 'Update Opportunity' : 'Create Opportunity'}}
+
+            </button>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- ================================================= -->
+    <!-- SEARCH -->
+    <!-- ================================================= -->
+
+    <div class="search-card">
+
+        <div class="search-box">
+
+            <span>
+                ⌕
+            </span>
+
+            <input
+                type="text"
+                ng-model="c.search"
+                placeholder="Search by job title, company, location, skills or opportunity ID...">
+
+        </div>
+
+
+        <select
+            ng-model="c.statusFilter">
+
+            <option value="">
+                All Status
+            </option>
+
+            <option value="Open">
+                Open
+            </option>
+
+            <option value="Closed">
+                Closed
+            </option>
+
+        </select>
+
+
+        <button
+            class="secondary-btn"
+            ng-click="c.clearFilters()">
+
+            Clear
+
+        </button>
+
+    </div>
+
+
+
+    <!-- ================================================= -->
+    <!-- SUMMARY -->
+    <!-- ================================================= -->
+
+    <div class="summary-row">
+
+        <div>
+
+            <strong>
+                {{c.getJobCount()}}
+            </strong>
+
+            opportunities
+
+        </div>
+
+        <div>
+
+            Total:
+            <strong>
+                {{c.data.jobs.length}}
+            </strong>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- ================================================= -->
+    <!-- JOB GRID -->
+    <!-- ================================================= -->
+
+    <div class="job-grid">
+
+
+        <div
+            class="job-card"
+            ng-repeat="job in c.data.jobs"
+            ng-if="c.filterJob(job)">
+
+
+            <!-- TOP -->
+
+            <div class="job-card-top">
+
+                <div class="company-icon">
+
+                    {{job.company_name.substring(0,1).toUpperCase()}}
+
+                </div>
+
+
+                <div>
+
+                    <h3>
+                        {{job.opportunity_title}}
+                    </h3>
+
+                    <p>
+                        {{job.company_name}}
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <!-- STATUS -->
+
+            <div class="job-status-row">
+
+                <span class="status-badge">
+
+                    {{job.status_display || job.status}}
+
+                </span>
+
+                <span class="job-type">
+
+                    {{job.opportunity_type_display}}
+
+                </span>
+
+            </div>
+
+
+            <!-- DETAILS -->
+
+            <div class="job-details">
+
+                <div>
+
+                    <label>
+                        Opportunity ID
+                    </label>
+
+                    <span>
+                        {{job.opportunity_id}}
+                    </span>
+
+                </div>
+
+
+                <div>
+
+                    <label>
+                        Location
+                    </label>
+
+                    <span>
+                        {{job.location || 'Not specified'}}
+                    </span>
+
+                </div>
+
+
+                <div>
+
+                    <label>
+                        Minimum CGPA
+                    </label>
+
+                    <span>
+                        {{job.minimum_cgpa || 'Any'}}
+                    </span>
+
+                </div>
+
+
+                <div>
+
+                    <label>
+                        CTC / Stipend
+                    </label>
+
+                    <span>
+                        {{job.ctc_stipend || 'Not specified'}}
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <!-- SKILLS -->
+
+            <div class="job-skills">
+
+                <span
+                    class="skill-tag"
+                    ng-repeat="skill in job.required_skills.split(',') | limitTo:5"
+                    ng-if="skill.trim()">
+
+                    {{skill.trim()}}
+
+                </span>
+
+            </div>
+
+
+            <!-- FOOTER -->
+
+            <div class="job-footer">
+
+                <div>
+
+                    <small>
+                        Application Deadline
+                    </small>
+
+                    <strong>
+                        {{job.application_deadline || 'Not specified'}}
+                    </strong>
+
+                </div>
+
+
+                <div class="job-actions">
+
+                    <button
+                        class="edit-btn"
+                        ng-click="c.openEdit(job)">
+
+                        Edit
+
+                    </button>
+
+
+                    <button
+                        class="close-job-btn"
+                        ng-if="job.status != 'Closed'"
+                        ng-click="c.closeJob(job)">
+
+                        Close
+
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- EMPTY -->
+
+        <div
+            class="empty-state"
+            ng-if="c.getJobCount() == 0">
+
+            <div class="empty-icon">
+                +
+            </div>
+
+            <h3>
+                No job opportunities found
+            </h3>
+
+            <p>
+                Create your first campus hiring opportunity.
+            </p>
+
+            <button
+                class="primary-btn"
+                ng-click="c.openCreate()">
+
+                + Create Opportunity
+
+            </button>
+
+        </div>
+
+
+    </div>
+
+</div>]]></template>
+    </sp_widget>
+</record_update>

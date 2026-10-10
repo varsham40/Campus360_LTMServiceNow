@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?><database>
+    <element attributes="enforce_dot_walk_cross_scope_access=true" db_object_id="c937b089c42f43107f44164a4d2463a9" label="Recruiter Interview" max_length="40" name="x_snc_campus360_recruiter_interview" type="collection">
+        <element label="Feedback" max_length="40" name="feedback" type="string"/>
+        <element label="Application" max_length="32" name="application" reference="x_snc_campus360_student_application" type="reference"/>
+        <element choice="1" label="Interview Round" max_length="40" name="interview_round" type="choice">
+            <choice>
+                <element inactive_on_update="false" label="Technical Round" sequence="0" value="technical_round"/>
+                <element inactive_on_update="false" label="HR Round" sequence="1" value="hr_round"/>
+            </choice>
+        </element>
+        <element choice="1" label="Status" max_length="40" name="status" type="choice">
+            <choice>
+                <element inactive_on_update="false" label="Cancelled" sequence="2" value="cancelled"/>
+                <element inactive_on_update="false" label="Scheduled" sequence="0" value="scheduled"/>
+                <element inactive_on_update="false" label="Completed" sequence="1" value="completed"/>
+                <element inactive_on_update="false" label="Pending Result" sequence="3" value="pending_result"/>
+            </choice>
+        </element>
+        <element choice="1" label="Interview Mode" max_length="40" name="interview_mode" type="choice">
+            <choice>
+                <element inactive_on_update="false" label="Offline" sequence="1" value="offline"/>
+                <element inactive_on_update="false" label="Online" sequence="0" value="online"/>
+            </choice>
+        </element>
+        <element display="true" label="Interview ID" max_length="40" name="interview_id" type="string"/>
+        <element label="Interviewer" max_length="40" name="interviewer" type="string"/>
+        <element label="Meeting Link" max_length="40" name="meeting_link" type="string"/>
+        <element choice="1" label="Result" max_length="40" name="result" type="choice">
+            <choice>
+                <element inactive_on_update="false" label="Selected" sequence="1" value="selected"/>
+                <element inactive_on_update="false" label="Rejected" sequence="2" value="rejected"/>
+                <element inactive_on_update="false" label="Next Round" sequence="3" value="next_round"/>
+                <element inactive_on_update="false" label="Pending" sequence="0" value="pending"/>
+            </choice>
+        </element>
+        <element label="Coding Score" max_length="40" name="coding_score" type="integer"/>
+        <element label="Opportunity" max_length="32" name="opportunity" reference="x_snc_campus360_placement_opportunity" type="reference"/>
+        <element label="Interview Date" max_length="40" name="interview_date" type="glide_date_time"/>
+        <element label="Student" max_length="32" name="student" reference="x_snc_campus360_student_master" type="reference"/>
+        <element label="Company" max_length="32" name="company" reference="x_snc_campus360_company_master" type="reference"/>
+        <element label="Confidence Score" max_length="40" name="confidence_score" type="integer"/>
+        <element label="Technical Score" max_length="40" name="technical_score" type="integer"/>
+        <element choice="1" label="Recommendation" max_length="40" name="recommendation" type="choice">
+            <choice>
+                <element inactive_on_update="false" label="Select" sequence="0" value="select"/>
+                <element inactive_on_update="false" label="Recommended" sequence="2" value="recommended"/>
+                <element inactive_on_update="false" label="Not Recommended" sequence="3" value="not_recommended"/>
+                <element inactive_on_update="false" label="Strongly Recommended" sequence="1" value="strongly_recommended"/>
+            </choice>
+        </element>
+        <element label="Problem Solving Score" max_length="40" name="problem_solving_score" type="integer"/>
+        <element label="Communication Score" max_length="40" name="communication_score" type="integer"/>
+        <element label="Evaluation Feedback" max_length="40" name="evaluation_feedback" type="string"/>
+        <element choice="1" label="Evaluation Status" max_length="40" name="evaluation_status" type="choice">
+            <choice>
+                <element inactive_on_update="false" label="Pending" sequence="0" value="pending"/>
+                <element inactive_on_update="false" label="Evaluated" sequence="1" value="evaluated"/>
+            </choice>
+        </element>
+        <element label="Overall Score" max_length="38" name="overall_score" type="decimal"/>
+        <index name="index">
+            <element name="opportunity"/>
+        </index>
+        <index name="index2">
+            <element name="company"/>
+        </index>
+        <index name="index3">
+            <element name="application"/>
+        </index>
+        <index name="index4">
+            <element name="student"/>
+        </index>
+    </element>
+</database>

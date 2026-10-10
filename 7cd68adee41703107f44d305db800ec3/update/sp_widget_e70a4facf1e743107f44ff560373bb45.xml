@@ -1,0 +1,7072 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_widget">
+    <sp_widget action="INSERT_OR_UPDATE">
+        <category>custom</category>
+        <client_script><![CDATA[api.controller = function($window) {
+
+    var c = this;
+
+    /* ========================================================
+       CAMPUS360 SIDEBAR
+       ======================================================== */
+
+    c.sidebarOpen = true;
+    c.loading = false;
+
+
+    /* ========================================================
+       STUDENT INITIALS
+       ======================================================== */
+
+    c.getStudentInitials = function() {
+
+        var name =
+            c.data &&
+            c.data.student &&
+            c.data.student.name
+                ? String(c.data.student.name)
+                : 'Test Student';
+
+        var parts = name.trim().split(/\s+/);
+
+        if (!parts.length) {
+            return 'TS';
+        }
+
+        if (parts.length === 1) {
+            return parts[0]
+                .substring(0, 2)
+                .toUpperCase();
+        }
+
+        return (
+            parts[0].charAt(0) +
+            parts[parts.length - 1].charAt(0)
+        ).toUpperCase();
+    };
+
+
+    /* ========================================================
+       SIDEBAR TOGGLE
+       ======================================================== */
+
+    c.toggleSidebar = function() {
+
+        c.sidebarOpen = !c.sidebarOpen;
+
+    };
+
+
+    /* ========================================================
+       STUDENT ID
+       ======================================================== */
+
+    c.getStudentId = function() {
+
+        var student = 'STU_TEST_001';
+
+        if (
+            c.data &&
+            c.data.student &&
+            c.data.student.id
+        ) {
+
+            student =
+                c.data.student.id;
+
+        }
+
+        return student;
+
+    };
+
+
+    /* ========================================================
+       NAVIGATION
+       ======================================================== */
+
+    c.navigate = function(pageId) {
+
+        if (!pageId) {
+            return;
+        }
+
+        var student =
+            c.getStudentId();
+
+        var url =
+            '?id=' +
+            encodeURIComponent(pageId) +
+            '&student=' +
+            encodeURIComponent(student);
+
+        $window.location.href = url;
+
+    };
+
+
+    /* ========================================================
+       DASHBOARD
+       ======================================================== */
+
+    c.goToDashboard = function() {
+
+        c.navigate(
+            'campus360_student_dashboard'
+        );
+
+    };
+
+
+    /* ========================================================
+       RISK
+       ======================================================== */
+
+    c.getRiskClass = function(risk) {
+
+        var value =
+            String(
+                risk || ''
+            ).toLowerCase();
+
+
+        if (value === 'low') {
+
+            return 'cr-risk-low';
+
+        }
+
+
+        if (
+            value === 'medium' ||
+            value === 'moderate'
+        ) {
+
+            return 'cr-risk-medium';
+
+        }
+
+
+        if (
+            value === 'high' ||
+            value === 'critical'
+        ) {
+
+            return 'cr-risk-high';
+
+        }
+
+
+        return 'cr-risk-medium';
+
+    };
+
+
+    /* ========================================================
+       INTERVENTION STATUS
+       ======================================================== */
+
+    c.getStatusClass = function(status) {
+
+        var value =
+            String(
+                status || ''
+            ).toLowerCase();
+
+
+        if (
+            value.indexOf('complete') !== -1
+        ) {
+
+            return 'cr-status-completed';
+
+        }
+
+
+        if (
+            value.indexOf('progress') !== -1 ||
+            value.indexOf('active') !== -1
+        ) {
+
+            return 'cr-status-progress';
+
+        }
+
+
+        if (
+            value.indexOf('open') !== -1 ||
+            value.indexOf('pending') !== -1
+        ) {
+
+            return 'cr-status-open';
+
+        }
+
+
+        return 'cr-status-default';
+
+    };
+
+
+    /* ========================================================
+       INTERESTED
+       EXACT EXISTING SERVER FLOW
+       ======================================================== */
+
+    c.interested = function(training) {
+
+        if (
+            !training ||
+            !training.sys_id ||
+            training.processing
+        ) {
+
+            return;
+
+        }
+
+
+        training.processing = true;
+
+
+        c.server.get({
+
+            action:
+                'interested_training',
+
+            trainingSysId:
+                training.sys_id
+
+        }).then(
+
+            function(response) {
+
+                training.processing = false;
+
+
+                if (
+                    response &&
+                    response.data &&
+                    response.data.success === true
+                ) {
+
+                    training.enrolled = true;
+
+                    training.ignored = false;
+
+                    training.message =
+                        response.data.message ||
+                        'Interest recorded. You will be enrolled by the TPO.';
+
+                } else {
+
+                    alert(
+                        response &&
+                        response.data &&
+                        response.data.message
+                            ?
+                            response.data.message
+                            :
+                            'Unable to record your interest.'
+                    );
+
+                }
+
+            },
+
+            function() {
+
+                training.processing = false;
+
+                alert(
+                    'Unable to contact the server. Please try again.'
+                );
+
+            }
+
+        );
+
+    };
+
+
+    /* ========================================================
+       IGNORE
+       ======================================================== */
+
+    c.ignoreTraining = function(training) {
+
+        if (!training) {
+            return;
+        }
+
+        training.ignored = true;
+
+    };
+
+
+    /* ========================================================
+       RESTORE
+       ======================================================== */
+
+    c.restoreTraining = function(training) {
+
+        if (!training) {
+            return;
+        }
+
+        training.ignored = false;
+
+    };
+
+
+    /* ========================================================
+       REFRESH
+       EXACT EXISTING SERVER FLOW
+       ======================================================== */
+
+    c.refresh = function() {
+
+        if (c.loading) {
+            return;
+        }
+
+
+        c.loading = true;
+
+
+        c.server.refresh().then(
+
+            function() {
+
+                c.loading = false;
+
+            },
+
+            function() {
+
+                c.loading = false;
+
+            }
+
+        );
+
+    };
+
+};]]></client_script>
+        <controller_as>c</controller_as>
+        <css>/* =========================================================&#13;
+   CAMPUS360 PLACEMENT READINESS&#13;
+   FINAL STUDENT PORTAL STYLE&#13;
+   UPDATED:&#13;
+   - LEFT SIDEBAR = DARK PURPLE&#13;
+   - PLACEMENT READINESS TOP CARD = DARK PURPLE&#13;
+   - TOP CAMPUS360 NAVBAR = WHITE&#13;
+   ========================================================= */&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   SERVICENOW DEFAULT HEADER&#13;
+   HIDE SYSTEM ADMINISTRATOR NAVBAR&#13;
+   ========================================================= */&#13;
+&#13;
+body:has(.campus360-readiness-page) #sp-header,&#13;
+body:has(.campus360-readiness-page) .sp-header,&#13;
+body:has(.campus360-readiness-page) .sp-navbar,&#13;
+body:has(.campus360-readiness-page) .navbar.sp-navbar,&#13;
+body:has(.campus360-readiness-page) #sp-nav-bar,&#13;
+body:has(.campus360-readiness-page) .sp-nav-bar,&#13;
+body:has(.campus360-readiness-page) header#sp-header,&#13;
+body:has(.campus360-readiness-page) header.sp-header {&#13;
+&#13;
+    display: none !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+body:has(.campus360-readiness-page) #sp-page,&#13;
+body:has(.campus360-readiness-page) #sp-main {&#13;
+&#13;
+    margin-top: 0 !important;&#13;
+&#13;
+    padding-top: 0 !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   SERVICENOW WRAPPER RESET&#13;
+   ========================================================= */&#13;
+&#13;
+.well:has(.campus360-readiness-page),&#13;
+.panel:has(.campus360-readiness-page) {&#13;
+&#13;
+    width: 100% !important;&#13;
+&#13;
+    max-width: none !important;&#13;
+&#13;
+    margin: 0 !important;&#13;
+&#13;
+    padding: 0 !important;&#13;
+&#13;
+    border: 0 !important;&#13;
+&#13;
+    background: transparent !important;&#13;
+&#13;
+    box-shadow: none !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.panel:has(.campus360-readiness-page) .panel-body {&#13;
+&#13;
+    width: 100% !important;&#13;
+&#13;
+    margin: 0 !important;&#13;
+&#13;
+    padding: 0 !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.row:has(.campus360-readiness-page) {&#13;
+&#13;
+    margin-left: 0 !important;&#13;
+&#13;
+    margin-right: 0 !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   ROOT&#13;
+   ========================================================= */&#13;
+&#13;
+.campus360-readiness-page {&#13;
+&#13;
+    position: fixed !important;&#13;
+&#13;
+    inset: 0 !important;&#13;
+&#13;
+    width: 100vw !important;&#13;
+&#13;
+    height: 100vh !important;&#13;
+&#13;
+    min-height: 100vh !important;&#13;
+&#13;
+    max-width: 100vw !important;&#13;
+&#13;
+    max-height: 100vh !important;&#13;
+&#13;
+    margin: 0 !important;&#13;
+&#13;
+    padding: 0 !important;&#13;
+&#13;
+    overflow: hidden !important;&#13;
+&#13;
+    display: block !important;&#13;
+&#13;
+    background:&#13;
+        linear-gradient(&#13;
+            135deg,&#13;
+            #f2f5fa 0%,&#13;
+            #f7f5fc 50%,&#13;
+            #f2f8f8 100%&#13;
+        );&#13;
+&#13;
+    color: #152840;&#13;
+&#13;
+    font-family:&#13;
+        "Inter",&#13;
+        "Segoe UI",&#13;
+        Arial,&#13;
+        Helvetica,&#13;
+        sans-serif;&#13;
+&#13;
+    z-index: 999999 !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.campus360-readiness-page,&#13;
+.campus360-readiness-page *,&#13;
+.campus360-readiness-page *::before,&#13;
+.campus360-readiness-page *::after {&#13;
+&#13;
+    box-sizing: border-box;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   LEFT SIDEBAR&#13;
+   DARK PURPLE&#13;
+   ========================================================= */&#13;
+&#13;
+.c360-left-sidebar {&#13;
+&#13;
+    position: absolute !important;&#13;
+&#13;
+    top: 0;&#13;
+&#13;
+    left: 0;&#13;
+&#13;
+    bottom: 0;&#13;
+&#13;
+    width: 242px !important;&#13;
+&#13;
+    min-width: 242px !important;&#13;
+&#13;
+    max-width: 242px !important;&#13;
+&#13;
+    height: 100vh !important;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    flex-direction: column;&#13;
+&#13;
+    overflow: hidden;&#13;
+&#13;
+    background:&#13;
+        linear-gradient(&#13;
+            180deg,&#13;
+            #130d2f 0%,&#13;
+            #160d38 48%,&#13;
+            #100a29 100%&#13;
+        ) !important;&#13;
+&#13;
+    border-right:&#13;
+        1px&#13;
+        solid&#13;
+        #2d2157 !important;&#13;
+&#13;
+    box-shadow:&#13;
+        4px 0 16px&#13;
+        rgba(25,10,60,.20);&#13;
+&#13;
+    z-index: 5000;&#13;
+&#13;
+    transition:&#13;
+        transform .25s ease;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.campus360-readiness-page.sidebar-closed&#13;
+.c360-left-sidebar {&#13;
+&#13;
+    transform:&#13;
+        translateX(-105%);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   BRAND&#13;
+   ========================================================= */&#13;
+&#13;
+.c360-sidebar-brand {&#13;
+&#13;
+    height: 78px;&#13;
+&#13;
+    min-height: 78px;&#13;
+&#13;
+    padding:&#13;
+        0&#13;
+        14px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 11px;&#13;
+&#13;
+    border-bottom:&#13;
+        1px&#13;
+        solid&#13;
+        #2d2157;&#13;
+&#13;
+    background:&#13;
+        #130d2f !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-brand-logo {&#13;
+&#13;
+    width: 40px;&#13;
+&#13;
+    height: 40px;&#13;
+&#13;
+    min-width: 40px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    justify-content: center;&#13;
+&#13;
+    border-radius: 11px;&#13;
+&#13;
+    background:&#13;
+        linear-gradient(&#13;
+            135deg,&#13;
+            #7c3aed,&#13;
+            #9333ea&#13;
+        );&#13;
+&#13;
+    color: #ffffff;&#13;
+&#13;
+    font-size: 18px;&#13;
+&#13;
+    font-weight: 900;&#13;
+&#13;
+    box-shadow:&#13;
+        0&#13;
+        7px&#13;
+        16px&#13;
+        rgba(124,58,237,.30);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-brand-name {&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    flex-direction: column;&#13;
+&#13;
+    white-space: nowrap;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-brand-name strong {&#13;
+&#13;
+    color: #ffffff;&#13;
+&#13;
+    font-size: 16px;&#13;
+&#13;
+    font-weight: 900;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-brand-name span {&#13;
+&#13;
+    margin-top: 3px;&#13;
+&#13;
+    color: #c4b5fd;&#13;
+&#13;
+    font-size: 9px;&#13;
+&#13;
+    font-weight: 800;&#13;
+&#13;
+    letter-spacing: .7px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   STUDENT SIDEBAR CARD&#13;
+   ========================================================= */&#13;
+&#13;
+.c360-sidebar-student {&#13;
+&#13;
+    position: relative;&#13;
+&#13;
+    margin:&#13;
+        15px&#13;
+        10px&#13;
+        9px;&#13;
+&#13;
+    padding:&#13;
+        10px;&#13;
+&#13;
+    min-height: 63px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 10px;&#13;
+&#13;
+    border:&#13;
+        1px&#13;
+        solid&#13;
+        #3a2d68;&#13;
+&#13;
+    border-radius: 11px;&#13;
+&#13;
+    background:&#13;
+        #1d1440;&#13;
+&#13;
+    color: inherit !important;&#13;
+&#13;
+    text-decoration: none !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-sidebar-student:hover {&#13;
+&#13;
+    border-color: #6246a8;&#13;
+&#13;
+    background:&#13;
+        #24174d;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-sidebar-avatar {&#13;
+&#13;
+    width: 38px;&#13;
+&#13;
+    height: 38px;&#13;
+&#13;
+    min-width: 38px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    justify-content: center;&#13;
+&#13;
+    border-radius: 10px;&#13;
+&#13;
+    background:&#13;
+        linear-gradient(&#13;
+            135deg,&#13;
+            #7c5ce8,&#13;
+            #6d4fe1&#13;
+        );&#13;
+&#13;
+    color: #ffffff;&#13;
+&#13;
+    font-size: 11px;&#13;
+&#13;
+    font-weight: 900;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-sidebar-student-info {&#13;
+&#13;
+    min-width: 0;&#13;
+&#13;
+    flex: 1;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-sidebar-student-info strong {&#13;
+&#13;
+    display: block;&#13;
+&#13;
+    max-width: 160px;&#13;
+&#13;
+    overflow: hidden;&#13;
+&#13;
+    white-space: nowrap;&#13;
+&#13;
+    text-overflow: ellipsis;&#13;
+&#13;
+    color: #ffffff;&#13;
+&#13;
+    font-size: 12px;&#13;
+&#13;
+    font-weight: 850;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-sidebar-student-info span {&#13;
+&#13;
+    display: block;&#13;
+&#13;
+    margin-top: 3px;&#13;
+&#13;
+    color: #aaa0c7;&#13;
+&#13;
+    font-size: 9px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-student-arrow {&#13;
+&#13;
+    color: #a99fc7;&#13;
+&#13;
+    font-size: 20px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   SIDEBAR NAV&#13;
+   ========================================================= */&#13;
+&#13;
+.c360-sidebar-nav {&#13;
+&#13;
+    flex:&#13;
+        1&#13;
+        1&#13;
+        auto;&#13;
+&#13;
+    min-height: 0;&#13;
+&#13;
+    padding:&#13;
+        2px&#13;
+        9px&#13;
+        12px;&#13;
+&#13;
+    overflow-y: auto;&#13;
+&#13;
+    overflow-x: hidden;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-sidebar-nav::-webkit-scrollbar {&#13;
+&#13;
+    width: 5px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-sidebar-nav::-webkit-scrollbar-track {&#13;
+&#13;
+    background: transparent;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-sidebar-nav::-webkit-scrollbar-thumb {&#13;
+&#13;
+    background: #40326e;&#13;
+&#13;
+    border-radius: 10px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-nav-group {&#13;
+&#13;
+    margin-bottom: 5px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-nav-heading {&#13;
+&#13;
+    padding:&#13;
+        11px&#13;
+        10px&#13;
+        6px;&#13;
+&#13;
+    color: #8f84ae;&#13;
+&#13;
+    font-size: 9px;&#13;
+&#13;
+    font-weight: 900;&#13;
+&#13;
+    letter-spacing: 1.25px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-nav-link {&#13;
+&#13;
+    position: relative;&#13;
+&#13;
+    width: 100%;&#13;
+&#13;
+    min-height: 40px;&#13;
+&#13;
+    margin:&#13;
+        2px&#13;
+        0;&#13;
+&#13;
+    padding:&#13;
+        7px&#13;
+        11px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 10px;&#13;
+&#13;
+    border: 0;&#13;
+&#13;
+    border-radius: 8px;&#13;
+&#13;
+    background: transparent;&#13;
+&#13;
+    color: #d8d0eb !important;&#13;
+&#13;
+    font-family: inherit;&#13;
+&#13;
+    font-size: 13px;&#13;
+&#13;
+    font-weight: 650;&#13;
+&#13;
+    text-align: left;&#13;
+&#13;
+    cursor: pointer;&#13;
+&#13;
+    transition:&#13;
+        background .16s ease,&#13;
+        color .16s ease,&#13;
+        transform .16s ease;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-nav-link:hover {&#13;
+&#13;
+    background:&#13;
+        rgba(124,58,237,.18);&#13;
+&#13;
+    color: #ffffff !important;&#13;
+&#13;
+    transform:&#13;
+        translateX(1px);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-nav-link.active {&#13;
+&#13;
+    background:&#13;
+        linear-gradient(&#13;
+            135deg,&#13;
+            #7c3aed,&#13;
+            #8b3ff2&#13;
+        );&#13;
+&#13;
+    color: #ffffff !important;&#13;
+&#13;
+    font-weight: 850;&#13;
+&#13;
+    box-shadow:&#13;
+        0&#13;
+        6px&#13;
+        13px&#13;
+        rgba(124,58,237,.24);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-nav-link.active::before {&#13;
+&#13;
+    display: none;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-nav-icon {&#13;
+&#13;
+    width: 19px;&#13;
+&#13;
+    min-width: 19px;&#13;
+&#13;
+    display: inline-flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    justify-content: center;&#13;
+&#13;
+    color: #a99fc7;&#13;
+&#13;
+    font-size: 14px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-nav-link:hover&#13;
+.c360-nav-icon {&#13;
+&#13;
+    color: #ffffff;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-nav-link.active&#13;
+.c360-nav-icon {&#13;
+&#13;
+    color: #ffffff;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   SIDEBAR FOOTER&#13;
+   ========================================================= */&#13;
+&#13;
+.c360-sidebar-footer {&#13;
+&#13;
+    height: 70px;&#13;
+&#13;
+    min-height: 70px;&#13;
+&#13;
+    margin:&#13;
+        0&#13;
+        10px&#13;
+        10px;&#13;
+&#13;
+    padding:&#13;
+        10px&#13;
+        11px;&#13;
+&#13;
+    border:&#13;
+        1px&#13;
+        solid&#13;
+        #3a2d68;&#13;
+&#13;
+    border-radius: 10px;&#13;
+&#13;
+    background:&#13;
+        #1a1138;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-footer-title {&#13;
+&#13;
+    color: #9d91b8;&#13;
+&#13;
+    font-size: 8px;&#13;
+&#13;
+    font-weight: 900;&#13;
+&#13;
+    letter-spacing: 1px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-readiness-track {&#13;
+&#13;
+    width: 100%;&#13;
+&#13;
+    height: 6px;&#13;
+&#13;
+    margin-top: 8px;&#13;
+&#13;
+    overflow: hidden;&#13;
+&#13;
+    border-radius: 10px;&#13;
+&#13;
+    background: #302454;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-readiness-fill {&#13;
+&#13;
+    height: 100%;&#13;
+&#13;
+    border-radius: inherit;&#13;
+&#13;
+    background:&#13;
+        linear-gradient(&#13;
+            90deg,&#13;
+            #7c3aed,&#13;
+            #a855f7&#13;
+        );&#13;
+&#13;
+    transition:&#13;
+        width .3s ease;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-readiness-text {&#13;
+&#13;
+    margin-top: 5px;&#13;
+&#13;
+    color: #9d91b8;&#13;
+&#13;
+    font-size: 9px;&#13;
+&#13;
+    font-weight: 700;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   SIDEBAR OVERLAY&#13;
+   ========================================================= */&#13;
+&#13;
+.c360-sidebar-overlay {&#13;
+&#13;
+    display: none;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   RIGHT PAGE&#13;
+   ========================================================= */&#13;
+&#13;
+.c360-right-page {&#13;
+&#13;
+    position: absolute !important;&#13;
+&#13;
+    top: 0;&#13;
+&#13;
+    right: 0;&#13;
+&#13;
+    bottom: 0;&#13;
+&#13;
+    left: 242px;&#13;
+&#13;
+    width: auto !important;&#13;
+&#13;
+    height: 100vh !important;&#13;
+&#13;
+    min-width: 0 !important;&#13;
+&#13;
+    overflow-y: auto !important;&#13;
+&#13;
+    overflow-x: hidden !important;&#13;
+&#13;
+    background:&#13;
+        linear-gradient(&#13;
+            135deg,&#13;
+            #f1f6fc 0%,&#13;
+            #f7f4ff 50%,&#13;
+            #f0f8f6 100%&#13;
+        );&#13;
+&#13;
+    transition:&#13;
+        left .25s ease;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.campus360-readiness-page.sidebar-closed&#13;
+.c360-right-page {&#13;
+&#13;
+    left: 0;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   TOP NAVBAR&#13;
+   WHITE&#13;
+   ========================================================= */&#13;
+&#13;
+.c360-topbar {&#13;
+&#13;
+    position: sticky;&#13;
+&#13;
+    top: 0;&#13;
+&#13;
+    z-index: 6000;&#13;
+&#13;
+    width: 100%;&#13;
+&#13;
+    height: 70px;&#13;
+&#13;
+    min-height: 70px;&#13;
+&#13;
+    padding:&#13;
+        0&#13;
+        17px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    justify-content: space-between;&#13;
+&#13;
+    background: #ffffff !important;&#13;
+&#13;
+    border-bottom:&#13;
+        1px&#13;
+        solid&#13;
+        #dfe6ee;&#13;
+&#13;
+    box-shadow:&#13;
+        0&#13;
+        2px&#13;
+        7px&#13;
+        rgba(25,43,60,.025);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-topbar-left {&#13;
+&#13;
+    min-width: 0;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 13px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-menu-button {&#13;
+&#13;
+    width: 40px;&#13;
+&#13;
+    height: 40px;&#13;
+&#13;
+    min-width: 40px;&#13;
+&#13;
+    padding: 0;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    flex-direction: column;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    justify-content: center;&#13;
+&#13;
+    gap: 5px;&#13;
+&#13;
+    border:&#13;
+        1px&#13;
+        solid&#13;
+        #d6dfeb;&#13;
+&#13;
+    border-radius: 10px;&#13;
+&#13;
+    background: #ffffff;&#13;
+&#13;
+    cursor: pointer;&#13;
+&#13;
+    box-shadow:&#13;
+        0&#13;
+        2px&#13;
+        5px&#13;
+        rgba(25,43,60,.035);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-menu-button:hover {&#13;
+&#13;
+    background: #f7f4ff;&#13;
+&#13;
+    border-color: #cfc2fa;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-menu-button span {&#13;
+&#13;
+    width: 19px;&#13;
+&#13;
+    height: 2px;&#13;
+&#13;
+    display: block;&#13;
+&#13;
+    border-radius: 3px;&#13;
+&#13;
+    background: #7040ff;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-page-heading {&#13;
+&#13;
+    min-width: 0;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    flex-direction: column;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-page-heading span {&#13;
+&#13;
+    color: #7040ff;&#13;
+&#13;
+    font-size: 8px;&#13;
+&#13;
+    font-weight: 900;&#13;
+&#13;
+    letter-spacing: 1.5px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-page-heading strong {&#13;
+&#13;
+    margin-top: 4px;&#13;
+&#13;
+    color: #152a43;&#13;
+&#13;
+    font-size: 14px;&#13;
+&#13;
+    font-weight: 850;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-topbar-right {&#13;
+&#13;
+    margin-left: auto;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 9px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-top-icon {&#13;
+&#13;
+    position: relative;&#13;
+&#13;
+    width: 40px;&#13;
+&#13;
+    height: 40px;&#13;
+&#13;
+    min-width: 40px;&#13;
+&#13;
+    padding: 0;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    justify-content: center;&#13;
+&#13;
+    border:&#13;
+        1px&#13;
+        solid&#13;
+        #d7e0eb;&#13;
+&#13;
+    border-radius: 10px;&#13;
+&#13;
+    background: #ffffff;&#13;
+&#13;
+    color: #63748a;&#13;
+&#13;
+    cursor: pointer;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-top-icon:hover {&#13;
+&#13;
+    color: #7040ff;&#13;
+&#13;
+    background: #f7f4ff;&#13;
+&#13;
+    border-color: #cdc3ee;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-top-icon:disabled {&#13;
+&#13;
+    opacity: .55;&#13;
+&#13;
+    cursor: not-allowed;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-top-icon .fa {&#13;
+&#13;
+    font-size: 15px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-notification-dot {&#13;
+&#13;
+    position: absolute;&#13;
+&#13;
+    top: 7px;&#13;
+&#13;
+    right: 7px;&#13;
+&#13;
+    width: 6px;&#13;
+&#13;
+    height: 6px;&#13;
+&#13;
+    border-radius: 50%;&#13;
+&#13;
+    background: #ff4d67;&#13;
+&#13;
+    border:&#13;
+        1px&#13;
+        solid&#13;
+        #ffffff;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-top-student {&#13;
+&#13;
+    min-height: 43px;&#13;
+&#13;
+    padding-left:&#13;
+        10px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 8px;&#13;
+&#13;
+    border-left:&#13;
+        1px&#13;
+        solid&#13;
+        #e2e6ee;&#13;
+&#13;
+    color: inherit !important;&#13;
+&#13;
+    text-decoration: none !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-top-avatar {&#13;
+&#13;
+    width: 37px;&#13;
+&#13;
+    height: 37px;&#13;
+&#13;
+    min-width: 37px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    justify-content: center;&#13;
+&#13;
+    border-radius: 50%;&#13;
+&#13;
+    background:&#13;
+        linear-gradient(&#13;
+            135deg,&#13;
+            #7040ff,&#13;
+            #8152ff&#13;
+        );&#13;
+&#13;
+    color: #ffffff;&#13;
+&#13;
+    font-size: 11px;&#13;
+&#13;
+    font-weight: 900;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-top-student-info {&#13;
+&#13;
+    min-width: 0;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    flex-direction: column;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-top-student-info strong {&#13;
+&#13;
+    display: block;&#13;
+&#13;
+    max-width: 180px;&#13;
+&#13;
+    overflow: hidden;&#13;
+&#13;
+    white-space: nowrap;&#13;
+&#13;
+    text-overflow: ellipsis;&#13;
+&#13;
+    color: #26374c;&#13;
+&#13;
+    font-size: 11px;&#13;
+&#13;
+    font-weight: 850;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-top-student-info span {&#13;
+&#13;
+    margin-top: 2px;&#13;
+&#13;
+    color: #8a97a8;&#13;
+&#13;
+    font-size: 8px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-top-chevron {&#13;
+&#13;
+    color: #77859a;&#13;
+&#13;
+    font-size: 13px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   PAGE CONTENT&#13;
+   ========================================================= */&#13;
+&#13;
+.c360-page-content {&#13;
+&#13;
+    width: 100%;&#13;
+&#13;
+    min-width: 0;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   PAGE SHELL&#13;
+   ========================================================= */&#13;
+&#13;
+.cr-page-shell {&#13;
+&#13;
+    width: 100%;&#13;
+&#13;
+    min-height:&#13;
+        calc(100vh - 70px);&#13;
+&#13;
+    display: grid;&#13;
+&#13;
+    grid-template-columns:&#13;
+        minmax(0,1fr)&#13;
+        390px;&#13;
+&#13;
+    align-items: start;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.cr-main-content {&#13;
+&#13;
+    width: 100%;&#13;
+&#13;
+    min-width: 0;&#13;
+&#13;
+    padding:&#13;
+        20px&#13;
+        20px&#13;
+        45px;&#13;
+&#13;
+    background: #f4f7fb;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   PLACEMENT READINESS TOP CARD&#13;
+   DARK PURPLE&#13;
+   ========================================================= */&#13;
+&#13;
+.cr-student-header {&#13;
+&#13;
+    position: relative;&#13;
+&#13;
+    z-index: 1;&#13;
+&#13;
+    width: 100%;&#13;
+&#13;
+    min-height: 116px;&#13;
+&#13;
+    padding:&#13;
+        20px&#13;
+        22px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    justify-content: space-between;&#13;
+&#13;
+    gap: 20px;&#13;
+&#13;
+    background:&#13;
+        linear-gradient(&#13;
+            135deg,&#13;
+            #241044 0%,&#13;
+            #32145b 52%,&#13;
+            #45206d 100%&#13;
+        ) !important;&#13;
+&#13;
+    border:&#13;
+        1px&#13;
+        solid&#13;
+        #5a357d;&#13;
+&#13;
+    border-radius: 16px;&#13;
+&#13;
+    box-shadow:&#13;
+        0&#13;
+        10px&#13;
+        26px&#13;
+        rgba(50,20,80,.18);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.cr-student-left {&#13;
+&#13;
+    min-width: 0;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 15px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.cr-student-avatar {&#13;
+&#13;
+    width: 60px;&#13;
+&#13;
+    height: 60px;&#13;
+&#13;
+    min-width: 60px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    justify-content: center;&#13;
+&#13;
+    border-radius: 15px;&#13;
+&#13;
+    background:&#13;
+        linear-gradient(&#13;
+            135deg,&#13;
+            #8b5cf6,&#13;
+            #7c3aed&#13;
+        );&#13;
+&#13;
+    color: #ffffff;&#13;
+&#13;
+    font-size: 18px;&#13;
+&#13;
+    font-weight: 900;&#13;
+&#13;
+    box-shadow:&#13;
+        0&#13;
+        7px&#13;
+        18px&#13;
+        rgba(0,0,0,.18);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.cr-student-information {&#13;
+&#13;
+    min-width: 0;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.cr-student-name-row {&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    flex-wrap: wrap;&#13;
+&#13;
+    gap: 8px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.cr-student-name-row h1 {&#13;
+&#13;
+    margin: 0;&#13;
+&#13;
+    color: #ffffff;&#13;
+&#13;
+    font-size: 24px;&#13;
+&#13;
+    line-height: 1.2;&#13;
+&#13;
+    font-weight: 900;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.cr-student-id {&#13;
+&#13;
+    padding:&#13;
+        5px&#13;
+        8px;&#13;
+&#13;
+    border:&#13;
+        1px&#13;
+        solid&#13;
+        rgba(255,255,255,.20);&#13;
+&#13;
+    border-radius: 6px;&#13;
+&#13;
+    background:&#13;
+        rgba(255,255,255,.12);&#13;
+&#13;
+    color: #e9ddff;&#13;
+&#13;
+    font-size: 9px;&#13;
+&#13;
+    font-weight: 850;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.cr-student-meta {&#13;
+&#13;
+    margin-top: 7px;&#13;
+&#13;
+    color: #d6cbe4;&#13;
+&#13;
+    font-size: 12px;&#13;
+&#13;
+    line-height: 1.5;&#13;
+&#13;
+    font-weight: 600;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.cr-risk-area {&#13;
+&#13;
+    flex-shrink: 0;&#13;
+&#13;
+    min-width: 155px;&#13;
+&#13;
+    text-align: right;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.cr-risk-label {&#13;
+&#13;
+    margin-bottom: 6px;&#13;
+&#13;
+    color: #c5b7d8;&#13;
+&#13;
+    font-size: 9px;&#13;
+&#13;
+    font-weight: 900;&#13;
+&#13;
+    letter-spacing: .55px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.cr-risk-badge {&#13;
+&#13;
+    display: inline-flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 7px;&#13;
+&#13;
+    padding:&#13;
+        7px&#13;
+        12px;&#13;
+&#13;
+    border-radius: 20px;&#13;
+&#13;
+    font-size: 11px;&#13;
+&#13;
+    font-weight: 900;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.cr-risk-dot {&#13;
+&#13;
+    width: 8px;&#13;
+&#13;
+    height: 8px;&#13;
+&#13;
+    border-radius: 50%;&#13;
+&#13;
+    background: currentColor;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.cr-risk-low {&#13;
+&#13;
+    color: #b9f3d0;&#13;
+&#13;
+    background:&#13;
+        rgba(22,163,74,.18);&#13;
+&#13;
+    border:&#13;
+        1px&#13;
+        solid&#13;
+        rgba(134,239,172,.35);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.cr-risk-medium {&#13;
+&#13;
+    color: #fde68a;&#13;
+&#13;
+    background:&#13;
+        rgba(180,83,9,.18);&#13;
+&#13;
+    border:&#13;
+        1px&#13;
+        solid&#13;
+        rgba(253,230,138,.30);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.cr-risk-high {&#13;
+&#13;
+    color: #fecaca;&#13;
+&#13;
+    background:&#13;
+        rgba(185,28,28,.18);&#13;
+&#13;
+    border:&#13;
+        1px&#13;
+        solid&#13;
+        rgba(252,165,165,.30);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   ALL REMAINING PLACEMENT READINESS CSS&#13;
+   ========================================================= */&#13;
+&#13;
+.cr-summary-grid {&#13;
+&#13;
+    width: 100%;&#13;
+&#13;
+    margin-top: 17px;&#13;
+&#13;
+    display: grid;&#13;
+&#13;
+    grid-template-columns:&#13;
+        1.1fr&#13;
+        1fr&#13;
+        1fr&#13;
+        1fr&#13;
+        1fr;&#13;
+&#13;
+    gap: 10px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.cr-summary-card {&#13;
+&#13;
+    min-width: 0;&#13;
+&#13;
+    min-height: 145px;&#13;
+&#13;
+    padding: 16px;&#13;
+&#13;
+    border:&#13;
+        1px&#13;
+        solid&#13;
+        #d8e2ed;&#13;
+&#13;
+    border-radius: 14px;&#13;
+&#13;
+    background: #ffffff;&#13;
+&#13;
+    box-shadow:&#13;
+        0&#13;
+        4px&#13;
+        12px&#13;
+        rgba(18,42,75,.04);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.cr-readiness-card {&#13;
+&#13;
+    background:&#13;
+        linear-gradient(&#13;
+            145deg,&#13;
+            #5145d8,&#13;
+            #392bb3&#13;
+        );&#13;
+&#13;
+    border-color: #473bc7;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.cr-summary-label {&#13;
+&#13;
+    color: #68788c;&#13;
+&#13;
+    font-size: 9px;&#13;
+&#13;
+    font-weight: 900;&#13;
+&#13;
+    letter-spacing: .65px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.cr-readiness-card&#13;
+.cr-summary-label {&#13;
+&#13;
+    color: #dedcff;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.cr-readiness-number {&#13;
+&#13;
+    margin-top: 8px;&#13;
+&#13;
+    color: #ffffff;&#13;
+&#13;
+    font-size: 34px;&#13;
+&#13;
+    line-height: 1;&#13;
+&#13;
+    font-weight: 900;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.cr-readiness-number span {&#13;
+&#13;
+    color: #d9d7ff;&#13;
+&#13;
+    font-size: 12px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.cr-summary-description {&#13;
+&#13;
+    margin-top: 9px;&#13;
+&#13;
+    color: #eeeeff;&#13;
+&#13;
+    font-size: 10px;&#13;
+&#13;
+    line-height: 1.45;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.cr-mini-progress {&#13;
+&#13;
+    height: 5px;&#13;
+&#13;
+    margin-top: 10px;&#13;
+&#13;
+    overflow: hidden;&#13;
+&#13;
+    border-radius: 10px;&#13;
+&#13;
+    background:&#13;
+        rgba(255,255,255,.24);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.cr-mini-progress-fill {&#13;
+&#13;
+    height: 100%;&#13;
+&#13;
+    border-radius: inherit;&#13;
+&#13;
+    background: #ffffff;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.cr-skill-card {&#13;
+&#13;
+    border-top:&#13;
+        4px&#13;
+        solid&#13;
+        #8b43e8;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.cr-bottleneck-card {&#13;
+&#13;
+    border-top:&#13;
+        4px&#13;
+        solid&#13;
+        #e39415;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.cr-participation-card {&#13;
+&#13;
+    border-top:&#13;
+        4px&#13;
+        solid&#13;
+        #10a875;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.cr-missed-card {&#13;
+&#13;
+    border-top:&#13;
+        4px&#13;
+        solid&#13;
+        #e57c18;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.cr-summary-main-value {&#13;
+&#13;
+    margin-top: 12px;&#13;
+&#13;
+    color: #172238;&#13;
+&#13;
+    font-size: 18px;&#13;
+&#13;
+    line-height: 1.25;&#13;
+&#13;
+    font-weight: 900;&#13;
+&#13;
+    word-break: break-word;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.cr-summary-number {&#13;
+&#13;
+    margin-top: 12px;&#13;
+&#13;
+    color: #172238;&#13;
+&#13;
+    font-size: 28px;&#13;
+&#13;
+    line-height: 1;&#13;
+&#13;
+    font-weight: 900;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.cr-summary-number span {&#13;
+&#13;
+    color: #65748a;&#13;
+&#13;
+    font-size: 11px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.cr-summary-bottom {&#13;
+&#13;
+    margin-top: 17px;&#13;
+&#13;
+    font-size: 10px;&#13;
+&#13;
+    font-weight: 850;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.skill-bottom {&#13;
+    color: #7037bf;&#13;
+}&#13;
+&#13;
+.bottleneck-bottom {&#13;
+    color: #b46a05;&#13;
+}&#13;
+&#13;
+.participation-bottom {&#13;
+    color: #087c50;&#13;
+}&#13;
+&#13;
+.missed-bottom {&#13;
+    color: #b65c10;&#13;
+}&#13;
+&#13;
+&#13;
+.cr-summary-bottom i {&#13;
+    margin-right: 5px;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   SECTIONS&#13;
+   ========================================================= */&#13;
+&#13;
+.cr-section,&#13;
+.cr-analysis-section {&#13;
+&#13;
+    width: 100%;&#13;
+&#13;
+    margin-top: 18px;&#13;
+&#13;
+    padding: 20px;&#13;
+&#13;
+    border:&#13;
+        1px&#13;
+        solid&#13;
+        #d8e2ed;&#13;
+&#13;
+    border-radius: 15px;&#13;
+&#13;
+    background: #ffffff;&#13;
+&#13;
+    box-shadow:&#13;
+        0&#13;
+        4px&#13;
+        14px&#13;
+        rgba(18,42,75,.04);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.cr-section-header {&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: flex-start;&#13;
+&#13;
+    justify-content: space-between;&#13;
+&#13;
+    gap: 15px;&#13;
+&#13;
+    padding-bottom: 14px;&#13;
+&#13;
+    border-bottom:&#13;
+        1px&#13;
+        solid&#13;
+        #e0e7ef;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.cr-section-kicker {&#13;
+&#13;
+    margin-bottom: 5px;&#13;
+&#13;
+    color: #5146d5;&#13;
+&#13;
+    font-size: 10px;&#13;
+&#13;
+    font-weight: 900;&#13;
+&#13;
+    letter-spacing: 1.1px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.cr-section-title {&#13;
+&#13;
+    margin: 0;&#13;
+&#13;
+    color: #142033;&#13;
+&#13;
+    font-size: 22px;&#13;
+&#13;
+    font-weight: 900;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.cr-section-description {&#13;
+&#13;
+    margin-top: 5px;&#13;
+&#13;
+    color: #607086;&#13;
+&#13;
+    font-size: 11px;&#13;
+&#13;
+    line-height: 1.5;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.cr-analysis-status {&#13;
+&#13;
+    padding-top: 6px;&#13;
+&#13;
+    color: #657489;&#13;
+&#13;
+    font-size: 10px;&#13;
+&#13;
+    font-weight: 800;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.cr-analysis-status span {&#13;
+&#13;
+    width: 8px;&#13;
+&#13;
+    height: 8px;&#13;
+&#13;
+    display: inline-block;&#13;
+&#13;
+    margin-right: 5px;&#13;
+&#13;
+    border-radius: 50%;&#13;
+&#13;
+    background: #12ad7a;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   AI ANALYSIS&#13;
+   ========================================================= */&#13;
+&#13;
+.cr-analysis-cards {&#13;
+&#13;
+    margin-top: 16px;&#13;
+&#13;
+    display: grid;&#13;
+&#13;
+    grid-template-columns:&#13;
+        repeat(3,minmax(0,1fr));&#13;
+&#13;
+    gap: 11px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.cr-ai-card {&#13;
+&#13;
+    min-height: 180px;&#13;
+&#13;
+    padding: 16px;&#13;
+&#13;
+    border:&#13;
+        1px&#13;
+        solid;&#13;
+&#13;
+    border-radius: 13px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.cr-ai-insight {&#13;
+&#13;
+    background: #f1f4ff;&#13;
+&#13;
+    border-color: #bcc7f1;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.cr-ai-gap {&#13;
+&#13;
+    background: #fff9e9;&#13;
+&#13;
+    border-color: #efd98a;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.cr-ai-action {&#13;
+&#13;
+    background: #eefbf5;&#13;
+&#13;
+    border-color: #a8dec2;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.cr-ai-icon {&#13;
+&#13;
+    width: 40px;&#13;
+&#13;
+    height: 40px;&#13;
+&#13;
+    margin-bottom: 12px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    justify-content: center;&#13;
+&#13;
+    border-radius: 11px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.cr-ai-insight .cr-ai-icon {&#13;
+&#13;
+    background: #dce3ff;&#13;
+&#13;
+    color: #4238c1;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.cr-ai-gap .cr-ai-icon {&#13;
+&#13;
+    background: #ffedb2;&#13;
+&#13;
+    color: #a56304;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.cr-ai-action .cr-ai-icon {&#13;
+&#13;
+    background: #cef5df;&#13;
+&#13;
+    color: #08794f;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.cr-ai-card-title {&#13;
+&#13;
+    color: #172238;&#13;
+&#13;
+    font-size: 15px;&#13;
+&#13;
+    font-weight: 900;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.cr-ai-card-text {&#13;
+&#13;
+    margin-top: 8px;&#13;
+&#13;
+    color: #334258;&#13;
+&#13;
+    font-size: 11px;&#13;
+&#13;
+    line-height: 1.6;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   INTERVENTION&#13;
+   ========================================================= */&#13;
+&#13;
+.cr-intervention-card {&#13;
+&#13;
+    margin-top: 17px;&#13;
+&#13;
+    padding: 17px;&#13;
+&#13;
+    border:&#13;
+        1px&#13;
+        solid&#13;
+        #cad7e6;&#13;
+&#13;
+    border-left:&#13;
+        5px&#13;
+        solid&#13;
+        #3570d1;&#13;
+&#13;
+    border-radius: 12px;&#13;
+&#13;
+    background: #ffffff;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.cr-intervention-top {&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: flex-start;&#13;
+&#13;
+    justify-content: space-between;&#13;
+&#13;
+    gap: 15px;&#13;
+&#13;
+    padding-bottom: 14px;&#13;
+&#13;
+    border-bottom:&#13;
+        1px&#13;
+        solid&#13;
+        #dce5ef;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.cr-intervention-title {&#13;
+&#13;
+    color: #172238;&#13;
+&#13;
+    font-size: 15px;&#13;
+&#13;
+    font-weight: 900;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.cr-intervention-reason {&#13;
+&#13;
+    margin-top: 4px;&#13;
+&#13;
+    color: #627085;&#13;
+&#13;
+    font-size: 11px;&#13;
+&#13;
+    line-height: 1.5;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.cr-intervention-status {&#13;
+&#13;
+    padding:&#13;
+        6px&#13;
+        10px;&#13;
+&#13;
+    border-radius: 16px;&#13;
+&#13;
+    font-size: 9px;&#13;
+&#13;
+    font-weight: 900;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.cr-intervention-details {&#13;
+&#13;
+    margin-top: 14px;&#13;
+&#13;
+    display: grid;&#13;
+&#13;
+    grid-template-columns:&#13;
+        repeat(4,minmax(0,1fr));&#13;
+&#13;
+    gap: 9px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.cr-intervention-detail {&#13;
+&#13;
+    min-height: 66px;&#13;
+&#13;
+    padding: 10px;&#13;
+&#13;
+    border:&#13;
+        1px&#13;
+        solid&#13;
+        #d8e2ed;&#13;
+&#13;
+    border-radius: 9px;&#13;
+&#13;
+    background: #f5f8fb;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.cr-score-detail {&#13;
+&#13;
+    background: #eef5ff;&#13;
+&#13;
+    border-color: #cadcf4;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.cr-detail-label {&#13;
+&#13;
+    color: #68788c;&#13;
+&#13;
+    font-size: 8px;&#13;
+&#13;
+    font-weight: 900;&#13;
+&#13;
+    letter-spacing: .55px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.cr-detail-value {&#13;
+&#13;
+    margin-top: 5px;&#13;
+&#13;
+    color: #17243a;&#13;
+&#13;
+    font-size: 11px;&#13;
+&#13;
+    line-height: 1.35;&#13;
+&#13;
+    font-weight: 800;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.cr-score-value {&#13;
+&#13;
+    margin-top: 3px;&#13;
+&#13;
+    color: #1858a8;&#13;
+&#13;
+    font-size: 19px;&#13;
+&#13;
+    font-weight: 900;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.cr-empty-card {&#13;
+&#13;
+    margin-top: 15px;&#13;
+&#13;
+    padding: 15px;&#13;
+&#13;
+    border:&#13;
+        1px&#13;
+        dashed&#13;
+        #c8d5e3;&#13;
+&#13;
+    border-radius: 11px;&#13;
+&#13;
+    background: #f8fafc;&#13;
+&#13;
+    color: #607086;&#13;
+&#13;
+    font-size: 11px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   TRAINING&#13;
+   ========================================================= */&#13;
+&#13;
+.cr-match-badge {&#13;
+&#13;
+    display: inline-flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 5px;&#13;
+&#13;
+    padding:&#13;
+        6px&#13;
+        9px;&#13;
+&#13;
+    border:&#13;
+        1px&#13;
+        solid&#13;
+        #c5d8f3;&#13;
+&#13;
+    border-radius: 8px;&#13;
+&#13;
+    background: #edf3ff;&#13;
+&#13;
+    color: #245a9f;&#13;
+&#13;
+    font-size: 9px;&#13;
+&#13;
+    font-weight: 850;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.cr-training-grid {&#13;
+&#13;
+    margin-top: 17px;&#13;
+&#13;
+    display: grid;&#13;
+&#13;
+    grid-template-columns:&#13;
+        repeat(2,minmax(0,1fr));&#13;
+&#13;
+    gap: 11px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.cr-training-card {&#13;
+&#13;
+    min-width: 0;&#13;
+&#13;
+    padding: 16px;&#13;
+&#13;
+    border:&#13;
+        1px&#13;
+        solid&#13;
+        #cad9e7;&#13;
+&#13;
+    border-radius: 13px;&#13;
+&#13;
+    background: #ffffff;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.cr-training-card-top {&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    justify-content: space-between;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.cr-training-icon {&#13;
+&#13;
+    width: 42px;&#13;
+&#13;
+    height: 42px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    justify-content: center;&#13;
+&#13;
+    border-radius: 11px;&#13;
+&#13;
+    background: #e2efff;&#13;
+&#13;
+    color: #1d5dab;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.cr-training-status {&#13;
+&#13;
+    padding:&#13;
+        5px&#13;
+        9px;&#13;
+&#13;
+    border-radius: 14px;&#13;
+&#13;
+    background: #e7f8ee;&#13;
+&#13;
+    color: #08794d;&#13;
+&#13;
+    font-size: 9px;&#13;
+&#13;
+    font-weight: 900;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.cr-training-name {&#13;
+&#13;
+    margin-top: 12px;&#13;
+&#13;
+    color: #152238;&#13;
+&#13;
+    font-size: 16px;&#13;
+&#13;
+    font-weight: 900;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.cr-training-id {&#13;
+&#13;
+    margin-top: 3px;&#13;
+&#13;
+    color: #6d7c8e;&#13;
+&#13;
+    font-size: 9px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.cr-training-information {&#13;
+&#13;
+    margin-top: 13px;&#13;
+&#13;
+    display: grid;&#13;
+&#13;
+    grid-template-columns:&#13;
+        repeat(2,minmax(0,1fr));&#13;
+&#13;
+    gap: 7px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.cr-training-information-item {&#13;
+&#13;
+    padding: 9px;&#13;
+&#13;
+    border:&#13;
+        1px&#13;
+        solid&#13;
+        #dce4ec;&#13;
+&#13;
+    border-radius: 8px;&#13;
+&#13;
+    background: #f4f7fa;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.cr-training-information-label {&#13;
+&#13;
+    color: #68788c;&#13;
+&#13;
+    font-size: 7px;&#13;
+&#13;
+    font-weight: 900;&#13;
+&#13;
+    letter-spacing: .5px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.cr-training-information-value {&#13;
+&#13;
+    margin-top: 4px;&#13;
+&#13;
+    color: #1e2e43;&#13;
+&#13;
+    font-size: 10px;&#13;
+&#13;
+    line-height: 1.35;&#13;
+&#13;
+    font-weight: 800;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.cr-training-actions {&#13;
+&#13;
+    margin-top: 15px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    gap: 8px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.cr-interested-button,&#13;
+.cr-ignore-button {&#13;
+&#13;
+    min-height: 39px;&#13;
+&#13;
+    border-radius: 9px;&#13;
+&#13;
+    font-size: 11px;&#13;
+&#13;
+    font-weight: 850;&#13;
+&#13;
+    cursor: pointer;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.cr-interested-button {&#13;
+&#13;
+    flex: 1;&#13;
+&#13;
+    border:&#13;
+        1px&#13;
+        solid&#13;
+        #087a50;&#13;
+&#13;
+    background: #0d9c68;&#13;
+&#13;
+    color: #ffffff;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.cr-ignore-button {&#13;
+&#13;
+    min-width: 85px;&#13;
+&#13;
+    border:&#13;
+        1px&#13;
+        solid&#13;
+        #c5d0dc;&#13;
+&#13;
+    background: #ffffff;&#13;
+&#13;
+    color: #536276;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.cr-training-success {&#13;
+&#13;
+    margin-top: 15px;&#13;
+&#13;
+    padding: 10px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 7px;&#13;
+&#13;
+    border:&#13;
+        1px&#13;
+        solid&#13;
+        #b8e5ca;&#13;
+&#13;
+    border-radius: 9px;&#13;
+&#13;
+    background: #e9f9f0;&#13;
+&#13;
+    color: #08784e;&#13;
+&#13;
+    font-size: 10px;&#13;
+&#13;
+    font-weight: 800;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.cr-training-ignored-message {&#13;
+&#13;
+    margin-top: 15px;&#13;
+&#13;
+    padding: 10px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 7px;&#13;
+&#13;
+    border:&#13;
+        1px&#13;
+        solid&#13;
+        #d6dee6;&#13;
+&#13;
+    border-radius: 9px;&#13;
+&#13;
+    background: #f2f4f7;&#13;
+&#13;
+    color: #677486;&#13;
+&#13;
+    font-size: 10px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.cr-training-ignored-message button {&#13;
+&#13;
+    margin-left: auto;&#13;
+&#13;
+    border: 0;&#13;
+&#13;
+    background: transparent;&#13;
+&#13;
+    color: #1d5cac;&#13;
+&#13;
+    font-size: 10px;&#13;
+&#13;
+    font-weight: 850;&#13;
+&#13;
+    cursor: pointer;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.cr-no-training {&#13;
+&#13;
+    margin-top: 16px;&#13;
+&#13;
+    padding: 30px;&#13;
+&#13;
+    text-align: center;&#13;
+&#13;
+    border:&#13;
+        1px&#13;
+        dashed&#13;
+        #c9d5e2;&#13;
+&#13;
+    border-radius: 13px;&#13;
+&#13;
+    background: #f9fbfd;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.cr-no-training-icon {&#13;
+&#13;
+    width: 45px;&#13;
+&#13;
+    height: 45px;&#13;
+&#13;
+    margin:&#13;
+        auto;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    justify-content: center;&#13;
+&#13;
+    border-radius: 50%;&#13;
+&#13;
+    background: #eaf1f8;&#13;
+&#13;
+    color: #47719e;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.cr-no-training-title {&#13;
+&#13;
+    margin-top: 10px;&#13;
+&#13;
+    color: #1b2a3f;&#13;
+&#13;
+    font-size: 15px;&#13;
+&#13;
+    font-weight: 900;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.cr-no-training-description {&#13;
+&#13;
+    max-width: 550px;&#13;
+&#13;
+    margin:&#13;
+        6px&#13;
+        auto&#13;
+        0;&#13;
+&#13;
+    color: #647488;&#13;
+&#13;
+    font-size: 11px;&#13;
+&#13;
+    line-height: 1.5;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   FOOTER&#13;
+   ========================================================= */&#13;
+&#13;
+.cr-footer {&#13;
+&#13;
+    padding:&#13;
+        20px&#13;
+        0&#13;
+        0;&#13;
+&#13;
+    text-align: center;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.cr-dashboard-footer {&#13;
+&#13;
+    min-height: 40px;&#13;
+&#13;
+    padding:&#13;
+        0&#13;
+        15px;&#13;
+&#13;
+    border:&#13;
+        1px&#13;
+        solid&#13;
+        #c7d4e2;&#13;
+&#13;
+    border-radius: 9px;&#13;
+&#13;
+    background: #ffffff;&#13;
+&#13;
+    color: #315d91;&#13;
+&#13;
+    font-size: 11px;&#13;
+&#13;
+    font-weight: 850;&#13;
+&#13;
+    cursor: pointer;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   CAMPUSAI SIDEBAR&#13;
+   UNCHANGED&#13;
+   ========================================================= */&#13;
+&#13;
+.cr-ai-sidebar {&#13;
+&#13;
+    position: sticky !important;&#13;
+&#13;
+    top: 70px !important;&#13;
+&#13;
+    align-self: start !important;&#13;
+&#13;
+    width: 100%;&#13;
+&#13;
+    height:&#13;
+        calc(100vh - 70px) !important;&#13;
+&#13;
+    min-height:&#13;
+        calc(100vh - 70px) !important;&#13;
+&#13;
+    max-height:&#13;
+        calc(100vh - 70px) !important;&#13;
+&#13;
+    overflow: hidden;&#13;
+&#13;
+    background:&#13;
+        linear-gradient(&#13;
+            180deg,&#13;
+            #f8fdff 0%,&#13;
+            #eaf7fd 48%,&#13;
+            #e3f4fc 100%&#13;
+        );&#13;
+&#13;
+    border-left:&#13;
+        1px&#13;
+        solid&#13;
+        #cfe1ec;&#13;
+&#13;
+    z-index: 100;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.cr-ai-sidebar-inner {&#13;
+&#13;
+    position: relative;&#13;
+&#13;
+    width: 100%;&#13;
+&#13;
+    height:&#13;
+        calc(100vh - 70px) !important;&#13;
+&#13;
+    min-height:&#13;
+        calc(100vh - 70px) !important;&#13;
+&#13;
+    max-height:&#13;
+        calc(100vh - 70px) !important;&#13;
+&#13;
+    padding:&#13;
+        17px&#13;
+        18px&#13;
+        12px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    flex-direction: column;&#13;
+&#13;
+    overflow: hidden;&#13;
+&#13;
+    background:&#13;
+        linear-gradient(&#13;
+            180deg,&#13;
+            rgba(255,255,255,.98) 0%,&#13;
+            rgba(246,252,255,.96) 42%,&#13;
+            rgba(229,245,253,.98) 100%&#13;
+        );&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.cr-ai-sidebar-header {&#13;
+&#13;
+    flex:&#13;
+        0&#13;
+        0&#13;
+        auto;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 7px;&#13;
+&#13;
+    padding-bottom:&#13;
+        11px;&#13;
+&#13;
+    border-bottom:&#13;
+        1px&#13;
+        solid&#13;
+        #d7e7ef;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.cr-ai-status-dot {&#13;
+&#13;
+    width: 9px;&#13;
+&#13;
+    height: 9px;&#13;
+&#13;
+    border-radius: 50%;&#13;
+&#13;
+    background: #13bd91;&#13;
+&#13;
+    box-shadow:&#13;
+        0&#13;
+        0&#13;
+        9px&#13;
+        rgba(19,189,145,.35);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.cr-ai-sidebar-title {&#13;
+&#13;
+    color: #1b3447;&#13;
+&#13;
+    font-size: 12px;&#13;
+&#13;
+    font-weight: 900;&#13;
+&#13;
+    letter-spacing: .55px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.cr-ai-version {&#13;
+&#13;
+    margin-left: auto;&#13;
+&#13;
+    padding:&#13;
+        5px&#13;
+        8px;&#13;
+&#13;
+    border:&#13;
+        1px&#13;
+        solid&#13;
+        #c5dce9;&#13;
+&#13;
+    border-radius: 12px;&#13;
+&#13;
+    background: #f0f8fc;&#13;
+&#13;
+    color: #688095;&#13;
+&#13;
+    font-size: 7px;&#13;
+&#13;
+    font-weight: 900;&#13;
+&#13;
+    letter-spacing: .55px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.cr-robot-stage {&#13;
+&#13;
+    position: relative;&#13;
+&#13;
+    flex:&#13;
+        1&#13;
+        1&#13;
+        auto;&#13;
+&#13;
+    min-height: 0;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    justify-content: center;&#13;
+&#13;
+    padding:&#13;
+        8px&#13;
+        0;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.cr-robot-card {&#13;
+&#13;
+    position: relative;&#13;
+&#13;
+    z-index: 2;&#13;
+&#13;
+    width:&#13;
+        min(100%,330px);&#13;
+&#13;
+    height:&#13;
+        min(60vh,500px);&#13;
+&#13;
+    min-height: 365px;&#13;
+&#13;
+    padding:&#13;
+        11px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    flex-direction: column;&#13;
+&#13;
+    justify-content: center;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    border:&#13;
+        1px&#13;
+        solid&#13;
+        #c9e0ec;&#13;
+&#13;
+    border-radius: 19px;&#13;
+&#13;
+    background:&#13;
+        linear-gradient(&#13;
+            145deg,&#13;
+            #ffffff 0%,&#13;
+            #f8fcff 42%,&#13;
+            #eaf7fd 100%&#13;
+        );&#13;
+&#13;
+    box-shadow:&#13;
+        0&#13;
+        12px&#13;
+        28px&#13;
+        rgba(62,112,145,.09);&#13;
+&#13;
+    overflow: hidden;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.cr-robot-card::before {&#13;
+&#13;
+    content: "";&#13;
+&#13;
+    position: absolute;&#13;
+&#13;
+    left: 50%;&#13;
+&#13;
+    top: 45%;&#13;
+&#13;
+    width: 240px;&#13;
+&#13;
+    height: 240px;&#13;
+&#13;
+    transform:&#13;
+        translate(-50%,-50%);&#13;
+&#13;
+    border-radius: 50%;&#13;
+&#13;
+    background:&#13;
+        radial-gradient(&#13;
+            circle,&#13;
+            rgba(101,190,230,.13) 0%,&#13;
+            rgba(139,209,237,.06) 45%,&#13;
+            rgba(255,255,255,0) 75%&#13;
+        );&#13;
+&#13;
+    pointer-events: none;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.cr-robot-image-wrap {&#13;
+&#13;
+    position: relative;&#13;
+&#13;
+    z-index: 2;&#13;
+&#13;
+    width: 100%;&#13;
+&#13;
+    height:&#13;
+        calc(100% - 49px);&#13;
+&#13;
+    min-height: 295px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    justify-content: center;&#13;
+&#13;
+    overflow: hidden;&#13;
+&#13;
+    border-radius: 14px;&#13;
+&#13;
+    background:&#13;
+        linear-gradient(&#13;
+            145deg,&#13;
+            #ffffff,&#13;
+            #eff9ff&#13;
+        );&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.cr-reference-robot {&#13;
+&#13;
+    display: block;&#13;
+&#13;
+    width: 100%;&#13;
+&#13;
+    height: 100%;&#13;
+&#13;
+    object-fit: cover;&#13;
+&#13;
+    object-position: center;&#13;
+&#13;
+    border-radius: 14px;&#13;
+&#13;
+    background: #eef9ff;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.cr-robot-caption {&#13;
+&#13;
+    position: relative;&#13;
+&#13;
+    z-index: 4;&#13;
+&#13;
+    padding:&#13;
+        8px&#13;
+        0&#13;
+        1px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    flex-direction: column;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    text-align: center;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.cr-robot-caption strong {&#13;
+&#13;
+    color: #18344a;&#13;
+&#13;
+    font-size: 13px;&#13;
+&#13;
+    font-weight: 900;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.cr-robot-caption span {&#13;
+&#13;
+    margin-top: 3px;&#13;
+&#13;
+    color: #71889a;&#13;
+&#13;
+    font-size: 8px;&#13;
+&#13;
+    font-weight: 650;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.cr-robot-metric {&#13;
+&#13;
+    position: absolute;&#13;
+&#13;
+    z-index: 10;&#13;
+&#13;
+    min-width: 100px;&#13;
+&#13;
+    max-width: 120px;&#13;
+&#13;
+    padding:&#13;
+        8px&#13;
+        9px;&#13;
+&#13;
+    border:&#13;
+        1px&#13;
+        solid&#13;
+        #c9dce8;&#13;
+&#13;
+    border-radius: 10px;&#13;
+&#13;
+    background:&#13;
+        rgba(255,255,255,.97);&#13;
+&#13;
+    box-shadow:&#13;
+        0&#13;
+        6px&#13;
+        15px&#13;
+        rgba(32,66,91,.10);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.metric-left-top {&#13;
+&#13;
+    top: 8%;&#13;
+&#13;
+    left: 0;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.metric-right-top {&#13;
+&#13;
+    top: 13%;&#13;
+&#13;
+    right: 0;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.metric-left-bottom {&#13;
+&#13;
+    bottom: 10%;&#13;
+&#13;
+    left: 0;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.metric-right-bottom {&#13;
+&#13;
+    bottom: 7%;&#13;
+&#13;
+    right: 0;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.cr-metric-title {&#13;
+&#13;
+    color: #76899a;&#13;
+&#13;
+    font-size: 8px;&#13;
+&#13;
+    font-weight: 800;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.cr-metric-title i {&#13;
+&#13;
+    color: #5588a6;&#13;
+&#13;
+    margin-right: 3px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.cr-metric-value {&#13;
+&#13;
+    margin-top: 3px;&#13;
+&#13;
+    color: #19364b;&#13;
+&#13;
+    font-size: 14px;&#13;
+&#13;
+    font-weight: 900;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.cr-metric-value span {&#13;
+&#13;
+    color: #8195a6;&#13;
+&#13;
+    font-size: 8px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.cr-metric-small {&#13;
+&#13;
+    display: inline-block;&#13;
+&#13;
+    margin-top: 2px;&#13;
+&#13;
+    color: #a06f0b;&#13;
+&#13;
+    font-size: 7px;&#13;
+&#13;
+    font-weight: 900;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.skill-metric {&#13;
+&#13;
+    max-width: 100px;&#13;
+&#13;
+    overflow: hidden;&#13;
+&#13;
+    text-overflow: ellipsis;&#13;
+&#13;
+    white-space: nowrap;&#13;
+&#13;
+    color: #5146d5;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.cr-ai-status-card {&#13;
+&#13;
+    flex:&#13;
+        0&#13;
+        0&#13;
+        auto;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: flex-start;&#13;
+&#13;
+    gap: 9px;&#13;
+&#13;
+    padding:&#13;
+        10px;&#13;
+&#13;
+    border:&#13;
+        1px&#13;
+        solid&#13;
+        #cadee9;&#13;
+&#13;
+    border-radius: 11px;&#13;
+&#13;
+    background:&#13;
+        linear-gradient(&#13;
+            135deg,&#13;
+            #ffffff,&#13;
+            #eef9ff&#13;
+        );&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.cr-ai-status-card-icon {&#13;
+&#13;
+    width: 34px;&#13;
+&#13;
+    height: 34px;&#13;
+&#13;
+    min-width: 34px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    justify-content: center;&#13;
+&#13;
+    border:&#13;
+        1px&#13;
+        solid&#13;
+        #cbdcf4;&#13;
+&#13;
+    border-radius: 9px;&#13;
+&#13;
+    background: #edf1ff;&#13;
+&#13;
+    color: #5146e5;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.cr-ai-status-card-content {&#13;
+&#13;
+    min-width: 0;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.cr-ai-status-card-title {&#13;
+&#13;
+    color: #1c3348;&#13;
+&#13;
+    font-size: 10px;&#13;
+&#13;
+    font-weight: 900;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.cr-ai-status-card-text {&#13;
+&#13;
+    margin-top: 4px;&#13;
+&#13;
+    color: #718597;&#13;
+&#13;
+    font-size: 8px;&#13;
+&#13;
+    line-height: 1.45;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.cr-ai-sidebar-footer {&#13;
+&#13;
+    flex:&#13;
+        0&#13;
+        0&#13;
+        auto;&#13;
+&#13;
+    margin-top: 7px;&#13;
+&#13;
+    text-align: center;&#13;
+&#13;
+    color: #879aaa;&#13;
+&#13;
+    font-size: 7px;&#13;
+&#13;
+    font-weight: 800;&#13;
+&#13;
+    letter-spacing: .5px;&#13;
+&#13;
+    text-transform: uppercase;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.cr-ai-sidebar-footer span {&#13;
+&#13;
+    width: 5px;&#13;
+&#13;
+    height: 5px;&#13;
+&#13;
+    display: inline-block;&#13;
+&#13;
+    margin-right: 4px;&#13;
+&#13;
+    border-radius: 50%;&#13;
+&#13;
+    background: #15c99b;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   RESPONSIVE&#13;
+   ========================================================= */&#13;
+&#13;
+@media (max-width:1250px) {&#13;
+&#13;
+    .cr-page-shell {&#13;
+&#13;
+        grid-template-columns:&#13;
+            minmax(0,1fr)&#13;
+            340px;&#13;
+&#13;
+    }&#13;
+&#13;
+    .cr-summary-grid {&#13;
+&#13;
+        grid-template-columns:&#13;
+            repeat(3,minmax(0,1fr));&#13;
+&#13;
+    }&#13;
+&#13;
+    .cr-analysis-cards {&#13;
+&#13;
+        grid-template-columns:&#13;
+            1fr;&#13;
+&#13;
+    }&#13;
+&#13;
+    .cr-intervention-details {&#13;
+&#13;
+        grid-template-columns:&#13;
+            repeat(3,minmax(0,1fr));&#13;
+&#13;
+    }&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+@media (max-width:1000px) {&#13;
+&#13;
+    .c360-left-sidebar {&#13;
+&#13;
+        position: fixed !important;&#13;
+&#13;
+        top: 0;&#13;
+&#13;
+        left: 0;&#13;
+&#13;
+        bottom: 0;&#13;
+&#13;
+        width: 250px !important;&#13;
+&#13;
+        min-width: 250px !important;&#13;
+&#13;
+        max-width: 250px !important;&#13;
+&#13;
+        z-index: 9000;&#13;
+&#13;
+        background:&#13;
+            linear-gradient(&#13;
+                180deg,&#13;
+                #130d2f 0%,&#13;
+                #160d38 48%,&#13;
+                #100a29 100%&#13;
+            ) !important;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .c360-right-page {&#13;
+&#13;
+        left: 0 !important;&#13;
+&#13;
+        width: 100% !important;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .campus360-readiness-page.sidebar-open&#13;
+    .c360-sidebar-overlay {&#13;
+&#13;
+        display: block;&#13;
+&#13;
+        position: fixed;&#13;
+&#13;
+        inset: 0;&#13;
+&#13;
+        z-index: 8500;&#13;
+&#13;
+        background:&#13;
+            rgba(15,23,42,.34);&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .cr-page-shell {&#13;
+&#13;
+        display: block;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .cr-main-content {&#13;
+&#13;
+        padding:&#13;
+            18px&#13;
+            18px&#13;
+            40px;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .cr-ai-sidebar {&#13;
+&#13;
+        position: relative !important;&#13;
+&#13;
+        top: auto !important;&#13;
+&#13;
+        width: 100%;&#13;
+&#13;
+        height: 620px !important;&#13;
+&#13;
+        min-height: 620px !important;&#13;
+&#13;
+        max-height: 620px !important;&#13;
+&#13;
+        border-left: 0;&#13;
+&#13;
+        border-top:&#13;
+            1px&#13;
+            solid&#13;
+            #cfe1ec;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .cr-ai-sidebar-inner {&#13;
+&#13;
+        height: 620px !important;&#13;
+&#13;
+        min-height: 620px !important;&#13;
+&#13;
+        max-height: 620px !important;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .cr-summary-grid {&#13;
+&#13;
+        grid-template-columns:&#13;
+            repeat(2,minmax(0,1fr));&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .cr-intervention-details {&#13;
+&#13;
+        grid-template-columns:&#13;
+            repeat(2,minmax(0,1fr));&#13;
+&#13;
+    }&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+@media (max-width:650px) {&#13;
+&#13;
+    .c360-left-sidebar {&#13;
+&#13;
+        width: 280px !important;&#13;
+&#13;
+        min-width: 280px !important;&#13;
+&#13;
+        max-width: 280px !important;&#13;
+&#13;
+        background:&#13;
+            linear-gradient(&#13;
+                180deg,&#13;
+                #130d2f 0%,&#13;
+                #160d38 48%,&#13;
+                #100a29 100%&#13;
+            ) !important;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .c360-topbar {&#13;
+&#13;
+        height: 64px;&#13;
+&#13;
+        min-height: 64px;&#13;
+&#13;
+        padding:&#13;
+            0&#13;
+            10px;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .c360-page-heading {&#13;
+&#13;
+        display: none;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .c360-topbar-right {&#13;
+&#13;
+        gap: 5px;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .c360-top-student-info,&#13;
+    .c360-top-chevron {&#13;
+&#13;
+        display: none;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .c360-top-student {&#13;
+&#13;
+        padding-left: 4px;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .c360-top-icon {&#13;
+&#13;
+        width: 37px;&#13;
+&#13;
+        height: 37px;&#13;
+&#13;
+        min-width: 37px;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .c360-top-avatar {&#13;
+&#13;
+        width: 37px;&#13;
+&#13;
+        height: 37px;&#13;
+&#13;
+        min-width: 37px;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .cr-main-content {&#13;
+&#13;
+        padding:&#13;
+            11px&#13;
+            10px&#13;
+            35px;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .cr-student-header {&#13;
+&#13;
+        flex-direction: column;&#13;
+&#13;
+        align-items: stretch;&#13;
+&#13;
+        padding: 16px;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .cr-student-name-row h1 {&#13;
+&#13;
+        color: #ffffff;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .cr-risk-area {&#13;
+&#13;
+        text-align: left;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .cr-summary-grid {&#13;
+&#13;
+        grid-template-columns:&#13;
+            1fr;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .cr-section,&#13;
+    .cr-analysis-section {&#13;
+&#13;
+        padding: 16px;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .cr-section-header {&#13;
+&#13;
+        flex-direction: column;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .cr-training-grid {&#13;
+&#13;
+        grid-template-columns:&#13;
+            1fr;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .cr-intervention-details {&#13;
+&#13;
+        grid-template-columns:&#13;
+            1fr;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .cr-training-information {&#13;
+&#13;
+        grid-template-columns:&#13;
+            1fr;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .cr-training-actions {&#13;
+&#13;
+        flex-direction: column;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .cr-ignore-button {&#13;
+&#13;
+        width: 100%;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .cr-ai-sidebar {&#13;
+&#13;
+        height: 560px !important;&#13;
+&#13;
+        min-height: 560px !important;&#13;
+&#13;
+        max-height: 560px !important;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .cr-ai-sidebar-inner {&#13;
+&#13;
+        height: 560px !important;&#13;
+&#13;
+        min-height: 560px !important;&#13;
+&#13;
+        max-height: 560px !important;&#13;
+&#13;
+        padding:&#13;
+            14px&#13;
+            10px&#13;
+            10px;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .cr-robot-card {&#13;
+&#13;
+        width:&#13;
+            min(100%,305px);&#13;
+&#13;
+        height: 430px;&#13;
+&#13;
+        min-height: 350px;&#13;
+&#13;
+    }&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+@media (max-width:430px) {&#13;
+&#13;
+    .c360-topbar {&#13;
+&#13;
+        height: 60px;&#13;
+&#13;
+        min-height: 60px;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .c360-menu-button {&#13;
+&#13;
+        width: 37px;&#13;
+&#13;
+        height: 37px;&#13;
+&#13;
+        min-width: 37px;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .c360-menu-button span {&#13;
+&#13;
+        width: 17px;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .cr-student-name-row h1 {&#13;
+&#13;
+        font-size: 20px;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .cr-ai-sidebar {&#13;
+&#13;
+        height: 525px !important;&#13;
+&#13;
+        min-height: 525px !important;&#13;
+&#13;
+        max-height: 525px !important;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .cr-ai-sidebar-inner {&#13;
+&#13;
+        height: 525px !important;&#13;
+&#13;
+        min-height: 525px !important;&#13;
+&#13;
+        max-height: 525px !important;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .cr-robot-card {&#13;
+&#13;
+        height: 395px;&#13;
+&#13;
+        min-height: 330px;&#13;
+&#13;
+    }&#13;
+&#13;
+}</css>
+        <data_table>sp_instance</data_table>
+        <demo_data/>
+        <description/>
+        <docs/>
+        <field_list/>
+        <has_preview>false</has_preview>
+        <id>campus360_placement_readiness</id>
+        <internal>false</internal>
+        <link><![CDATA[function link(scope, element, attrs, controller) {
+  
+}]]></link>
+        <name>campus360_placement_readiness_widget</name>
+        <option_schema/>
+        <public>false</public>
+        <roles/>
+        <script><![CDATA[(function() {
+
+    /* ========================================================
+       INITIAL DATA
+       ======================================================== */
+
+    data.student = {};
+
+    data.intelligence = {};
+
+    data.intervention = null;
+
+    data.primarySkillGap = '';
+
+    data.trainings = [];
+
+    data.loadingTrainings = false;
+
+    data.success = false;
+
+    data.message = '';
+
+
+    /* ========================================================
+       FIND STUDENT
+       ======================================================== */
+
+    var requestedStudent =
+        (input && input.student) ||
+        $sp.getParameter('student') ||
+        '';
+
+
+    var studentGR =
+        new GlideRecord(
+            'x_snc_campus360_student_master'
+        );
+
+
+    var foundStudent = false;
+
+
+    if (requestedStudent) {
+
+        studentGR.addQuery(
+            'student_id',
+            requestedStudent
+        );
+
+        studentGR.query();
+
+
+        if (studentGR.next()) {
+
+            foundStudent = true;
+        }
+    }
+
+
+    if (!foundStudent) {
+
+        var email =
+            gs.getUser().getEmail();
+
+
+        if (email) {
+
+            studentGR =
+                new GlideRecord(
+                    'x_snc_campus360_student_master'
+                );
+
+
+            studentGR.addQuery(
+                'email',
+                email
+            );
+
+
+            studentGR.query();
+
+
+            if (studentGR.next()) {
+
+                foundStudent = true;
+            }
+        }
+    }
+
+
+    if (!foundStudent) {
+
+        studentGR =
+            new GlideRecord(
+                'x_snc_campus360_student_master'
+            );
+
+
+        studentGR.addQuery(
+            'student_id',
+            'STU_TEST_001'
+        );
+
+
+        studentGR.query();
+
+
+        if (studentGR.next()) {
+
+            foundStudent = true;
+        }
+    }
+
+
+    /* ========================================================
+       STUDENT
+       ======================================================== */
+
+    if (foundStudent) {
+
+        var studentId =
+            studentGR.getValue(
+                'student_id'
+            );
+
+
+        var studentName =
+            studentGR.getValue(
+                'name'
+            ) ||
+            studentGR.getDisplayValue();
+
+
+        data.student = {
+
+            sys_id:
+                studentGR.getUniqueValue(),
+
+            id:
+                studentId,
+
+            name:
+                studentName,
+
+            email:
+                studentGR.getValue(
+                    'email'
+                ) || '',
+
+            program:
+                getOptionalValue(
+                    studentGR,
+                    [
+                        'program',
+                        'course',
+                        'degree',
+                        'branch'
+                    ]
+                ),
+
+            batch:
+                getOptionalValue(
+                    studentGR,
+                    [
+                        'batch',
+                        'batch_name'
+                    ]
+                ),
+
+            initials:
+                getInitials(
+                    studentName
+                )
+        };
+
+    } else {
+
+        data.student = {
+
+            id:
+                'STU_TEST_001',
+
+            name:
+                'Test Student',
+
+            email:
+                '',
+
+            program:
+                '',
+
+            batch:
+                '',
+
+            initials:
+                'TS'
+        };
+    }
+
+
+    /* ========================================================
+       PLACEMENT INTELLIGENCE
+       ======================================================== */
+
+    var intelligenceGR =
+        new GlideRecord(
+            'x_snc_campus360_placement_intelligence'
+        );
+
+
+    if (data.student.sys_id) {
+
+        intelligenceGR.addQuery(
+            'student',
+            data.student.sys_id
+        );
+    }
+
+
+    intelligenceGR.orderByDesc(
+        'sys_created_on'
+    );
+
+
+    intelligenceGR.setLimit(1);
+
+    intelligenceGR.query();
+
+
+    if (intelligenceGR.next()) {
+
+        data.intelligence = {
+
+            sys_id:
+                intelligenceGR.getUniqueValue(),
+
+            intelligence_id:
+                intelligenceGR.getValue(
+                    'intelligence_id'
+                ) || '',
+
+            readiness_score:
+                toNumber(
+                    intelligenceGR.getValue(
+                        'readiness_score'
+                    )
+                ),
+
+            risk_level:
+                intelligenceGR.getValue(
+                    'risk_level'
+                ) || '',
+
+            skill_gap_summary:
+                intelligenceGR.getValue(
+                    'skill_gap_summary'
+                ) || '',
+
+            ai_insight:
+                intelligenceGR.getValue(
+                    'ai_insight'
+                ) || '',
+
+            recommended_action:
+                intelligenceGR.getValue(
+                    'recommended_action'
+                ) || '',
+
+            participation_score:
+                toNumber(
+                    intelligenceGR.getValue(
+                        'participation_score'
+                    )
+                ),
+
+            missed_opportunities:
+                toNumber(
+                    intelligenceGR.getValue(
+                        'missed_opportunities'
+                    )
+                ),
+
+            bottleneck_stage:
+                intelligenceGR.getValue(
+                    'bottleneck_stage'
+                ) || ''
+        };
+
+    } else {
+
+        data.intelligence = {
+
+            readiness_score:
+                0,
+
+            risk_level:
+                'Not Available',
+
+            skill_gap_summary:
+                'Placement intelligence has not been generated yet.',
+
+            ai_insight:
+                'AI analysis will appear when sufficient placement performance data is available.',
+
+            recommended_action:
+                'Continue participating in interviews and placement preparation activities.',
+
+            participation_score:
+                0,
+
+            missed_opportunities:
+                0,
+
+            bottleneck_stage:
+                'Not Identified'
+        };
+    }
+
+
+    /* ========================================================
+       PRIMARY SKILL GAP
+       ======================================================== */
+
+    data.primarySkillGap =
+        findPrimarySkillGap(
+            data.intelligence.skill_gap_summary,
+            data.intelligence.ai_insight,
+            data.intelligence.recommended_action
+        );
+
+
+    /* ========================================================
+       PLACEMENT INTERVENTION
+       ======================================================== */
+
+    var interventionGR =
+        new GlideRecord(
+            'x_snc_campus360_placement_intervention'
+        );
+
+
+    if (data.student.sys_id) {
+
+        interventionGR.addQuery(
+            'student',
+            data.student.sys_id
+        );
+    }
+
+
+    interventionGR.orderByDesc(
+        'sys_created_on'
+    );
+
+
+    interventionGR.setLimit(1);
+
+    interventionGR.query();
+
+
+    if (interventionGR.next()) {
+
+        data.intervention = {
+
+            sys_id:
+                interventionGR.getUniqueValue(),
+
+            intervention_id:
+                interventionGR.getValue(
+                    'intervention_id'
+                ) || '',
+
+            intervention_type:
+                interventionGR.getValue(
+                    'intervention_type'
+                ) || '',
+
+            status:
+                interventionGR.getValue(
+                    'status'
+                ) || '',
+
+            reason:
+                interventionGR.getValue(
+                    'reason'
+                ) || '',
+
+            before_score:
+                toNumber(
+                    interventionGR.getValue(
+                        'before_score'
+                    )
+                ),
+
+            after_score:
+                interventionGR.getValue(
+                    'after_score'
+                ) || '',
+
+            effectiveness_score:
+                interventionGR.getValue(
+                    'effectiveness_score'
+                ) || '',
+
+            training_name:
+                interventionGR.getDisplayValue(
+                    'training'
+                ) || '',
+
+            trainer:
+                interventionGR.getDisplayValue(
+                    'trainer'
+                ) || '',
+
+            start_date:
+                interventionGR.getValue(
+                    'start_date'
+                ) || '',
+
+            completion_date:
+                interventionGR.getValue(
+                    'completion_date'
+                ) || ''
+        };
+    }
+
+
+    /* ========================================================
+       INTEREST ACTION
+       ======================================================== */
+
+    if (
+        input &&
+        input.action ===
+        'interested_training'
+    ) {
+
+        processInterestedTraining(
+            input.trainingSysId
+        );
+
+        return;
+    }
+
+
+    /* ========================================================
+       TRAININGS
+       ======================================================== */
+
+    loadRecommendedTrainings();
+
+
+    /* ========================================================
+       LOAD TRAININGS
+       ======================================================== */
+
+    function loadRecommendedTrainings() {
+
+        var trainingGR =
+            new GlideRecord(
+                'x_snc_campus360_training_program'
+            );
+
+
+        trainingGR.addQuery(
+            'status',
+            'IN',
+            'Open,Ongoing'
+        );
+
+
+        trainingGR.query();
+
+
+        var candidates = [];
+
+
+        while (trainingGR.next()) {
+
+            var training = {
+
+                sys_id:
+                    trainingGR.getUniqueValue(),
+
+                training_id:
+                    trainingGR.getValue(
+                        'training_id'
+                    ) || '',
+
+                training_name:
+                    trainingGR.getValue(
+                        'training_name'
+                    ) ||
+                    trainingGR.getDisplayValue(),
+
+                skill_area:
+                    trainingGR.getValue(
+                        'skill_area'
+                    ) || '',
+
+                batch:
+                    trainingGR.getValue(
+                        'batch'
+                    ) || '',
+
+                trainer:
+                    trainingGR.getDisplayValue(
+                        'trainer'
+                    ) || '',
+
+                status:
+                    trainingGR.getValue(
+                        'status'
+                    ) || '',
+
+                start_date:
+                    trainingGR.getValue(
+                        'start_date'
+                    ) || '',
+
+                end_date:
+                    trainingGR.getValue(
+                        'end_date'
+                    ) || '',
+
+                capacity:
+                    trainingGR.getValue(
+                        'capacity'
+                    ) || '',
+
+                score:
+                    0
+            };
+
+
+            training.score =
+                calculateTrainingMatch(
+                    data.primarySkillGap,
+                    data.intelligence.skill_gap_summary,
+                    data.intelligence.ai_insight,
+                    training.skill_area,
+                    training.training_name
+                );
+
+
+            if (
+                training.score > 0
+            ) {
+
+                candidates.push(
+                    training
+                );
+            }
+        }
+
+
+        candidates.sort(
+            function(a, b) {
+
+                return b.score - a.score;
+
+            }
+        );
+
+
+        var selected = [];
+
+
+        for (
+            var i = 0;
+            i < candidates.length &&
+            i < 2;
+            i++
+        ) {
+
+            selected.push(
+                candidates[i]
+            );
+        }
+
+
+        for (
+            var j = 0;
+            j < selected.length;
+            j++
+        ) {
+
+            selected[j].enrolled =
+                isAlreadyEnrolled(
+                    data.student.sys_id,
+                    selected[j].sys_id
+                );
+
+            selected[j].ignored = false;
+
+            delete selected[j].score;
+        }
+
+
+        data.trainings =
+            selected;
+    }
+
+
+    /* ========================================================
+       INTERESTED
+       ======================================================== */
+
+    function processInterestedTraining(
+        trainingSysId
+    ) {
+
+        if (!trainingSysId) {
+
+            data.success = false;
+
+            data.message =
+                'Training program was not provided.';
+
+            return;
+        }
+
+
+        if (!data.student.sys_id) {
+
+            data.success = false;
+
+            data.message =
+                'Student record could not be identified.';
+
+            return;
+        }
+
+
+        var trainingGR =
+            new GlideRecord(
+                'x_snc_campus360_training_program'
+            );
+
+
+        if (
+            !trainingGR.get(
+                trainingSysId
+            )
+        ) {
+
+            data.success = false;
+
+            data.message =
+                'Training program could not be found.';
+
+            return;
+        }
+
+
+        /* DUPLICATE CHECK */
+
+        var existing =
+            new GlideRecord(
+                'x_snc_campus360_training_enrollment'
+            );
+
+
+        existing.addQuery(
+            'student',
+            data.student.sys_id
+        );
+
+
+        existing.addQuery(
+            'training_program',
+            trainingSysId
+        );
+
+
+        existing.setLimit(1);
+
+        existing.query();
+
+
+        if (existing.next()) {
+
+            data.success = true;
+
+            data.message =
+                'Interest is already recorded. You will be enrolled by the TPO.';
+
+            loadRecommendedTrainings();
+
+            markTrainingAsEnrolled(
+                trainingSysId
+            );
+
+            return;
+        }
+
+
+        /* CREATE ENROLLMENT */
+
+        var enrollment =
+            new GlideRecord(
+                'x_snc_campus360_training_enrollment'
+            );
+
+
+        enrollment.initialize();
+
+
+        enrollment.setValue(
+            'enrollment_id',
+            'ENR' +
+            gs.generateGUID()
+                .replace(
+                    /-/g,
+                    ''
+                )
+                .substring(
+                    0,
+                    10
+                )
+                .toUpperCase()
+        );
+
+
+        enrollment.setValue(
+            'student',
+            data.student.sys_id
+        );
+
+
+        enrollment.setValue(
+            'training_program',
+            trainingSysId
+        );
+
+
+        enrollment.setValue(
+            'completion_status',
+            'Enrolled'
+        );
+
+
+        enrollment.setValue(
+            'attendance',
+            '0'
+        );
+
+
+        enrollment.setValue(
+            'assessment_score',
+            ''
+        );
+
+
+        enrollment.setValue(
+            'completion_date',
+            ''
+        );
+
+
+        var inserted =
+            enrollment.insert();
+
+
+        if (inserted) {
+
+            data.success = true;
+
+            data.message =
+                'Interest recorded successfully. You will be enrolled by the TPO.';
+
+        } else {
+
+            data.success = false;
+
+            data.message =
+                'Unable to create the training enrollment record.';
+        }
+
+
+        loadRecommendedTrainings();
+
+
+        markTrainingAsEnrolled(
+            trainingSysId
+        );
+    }
+
+
+    /* ========================================================
+       MARK ENROLLED
+       ======================================================== */
+
+    function markTrainingAsEnrolled(
+        trainingSysId
+    ) {
+
+        for (
+            var i = 0;
+            i < data.trainings.length;
+            i++
+        ) {
+
+            if (
+                data.trainings[i].sys_id ===
+                trainingSysId
+            ) {
+
+                data.trainings[i].enrolled = true;
+
+                data.trainings[i].ignored = false;
+            }
+        }
+    }
+
+
+    /* ========================================================
+       CHECK ENROLLMENT
+       ======================================================== */
+
+    function isAlreadyEnrolled(
+        studentSysId,
+        trainingSysId
+    ) {
+
+        if (
+            !studentSysId ||
+            !trainingSysId
+        ) {
+
+            return false;
+        }
+
+
+        var enrollment =
+            new GlideRecord(
+                'x_snc_campus360_training_enrollment'
+            );
+
+
+        enrollment.addQuery(
+            'student',
+            studentSysId
+        );
+
+
+        enrollment.addQuery(
+            'training_program',
+            trainingSysId
+        );
+
+
+        enrollment.setLimit(1);
+
+        enrollment.query();
+
+
+        return enrollment.hasNext();
+    }
+
+
+    /* ========================================================
+       TRAINING MATCHING
+       ======================================================== */
+
+    function calculateTrainingMatch(
+        primaryGap,
+        skillGapSummary,
+        aiInsight,
+        trainingSkillArea,
+        trainingName
+    ) {
+
+        var gap =
+            String(
+                primaryGap || ''
+            ).toLowerCase();
+
+
+        var summary =
+            String(
+                skillGapSummary || ''
+            ).toLowerCase();
+
+
+        var insight =
+            String(
+                aiInsight || ''
+            ).toLowerCase();
+
+
+        var skill =
+            String(
+                trainingSkillArea || ''
+            ).toLowerCase();
+
+
+        var name =
+            String(
+                trainingName || ''
+            ).toLowerCase();
+
+
+        var score = 0;
+
+
+        /* DIRECT MATCH */
+
+        if (
+            gap &&
+            skill &&
+            (
+                gap.indexOf(skill) !== -1 ||
+                skill.indexOf(gap) !== -1
+            )
+        ) {
+
+            score += 120;
+        }
+
+
+        /* SUMMARY */
+
+        if (
+            skill &&
+            summary.indexOf(skill) !== -1
+        ) {
+
+            score += 75;
+        }
+
+
+        /* AI INSIGHT */
+
+        if (
+            skill &&
+            insight.indexOf(skill) !== -1
+        ) {
+
+            score += 40;
+        }
+
+
+        /* RELATED FAMILIES */
+
+        var families = {
+
+            communication: [
+                'communication',
+                'presentation',
+                'interview performance',
+                'resume / profile',
+                'skill development'
+            ],
+
+            interview: [
+                'interview performance',
+                'communication',
+                'presentation',
+                'resume / profile'
+            ],
+
+            problem: [
+                'problem solving',
+                'aptitude',
+                'coding',
+                'technical knowledge'
+            ],
+
+            coding: [
+                'coding',
+                'python',
+                'sql',
+                'technical knowledge',
+                'problem solving'
+            ],
+
+            python: [
+                'python',
+                'coding',
+                'technical knowledge'
+            ],
+
+            sql: [
+                'sql',
+                'coding',
+                'technical knowledge'
+            ],
+
+            cloud: [
+                'cloud',
+                'technical knowledge',
+                'skill development'
+            ],
+
+            technical: [
+                'technical knowledge',
+                'coding',
+                'python',
+                'sql',
+                'cloud',
+                'problem solving'
+            ],
+
+            aptitude: [
+                'aptitude',
+                'problem solving',
+                'coding'
+            ],
+
+            presentation: [
+                'presentation',
+                'communication',
+                'interview performance'
+            ],
+
+            resume: [
+                'resume / profile',
+                'communication',
+                'presentation',
+                'interview performance'
+            ]
+        };
+
+
+        for (
+            var family in families
+        ) {
+
+            if (
+                gap.indexOf(
+                    family
+                ) !== -1
+            ) {
+
+                var related =
+                    families[family];
+
+
+                for (
+                    var i = 0;
+                    i < related.length;
+                    i++
+                ) {
+
+                    if (
+                        skill.indexOf(
+                            related[i]
+                        ) !== -1
+                    ) {
+
+                        score += 55;
+
+                        break;
+                    }
+                }
+
+
+                break;
+            }
+        }
+
+
+        /* TRAINING NAME */
+
+        if (
+            gap &&
+            name &&
+            name.indexOf(gap) !== -1
+        ) {
+
+            score += 45;
+        }
+
+
+        /* GENERIC TRAINING */
+
+        if (
+            score === 0 &&
+            (
+                skill.indexOf(
+                    'skill development'
+                ) !== -1 ||
+
+                skill.indexOf(
+                    'interview performance'
+                ) !== -1
+            )
+        ) {
+
+            score = 15;
+        }
+
+
+        return score;
+    }
+
+
+    /* ========================================================
+       PRIMARY SKILL
+       ======================================================== */
+
+    function findPrimarySkillGap(
+        skillGap,
+        aiInsight,
+        recommendation
+    ) {
+
+        var text =
+            (
+                String(skillGap || '') +
+                ' ' +
+                String(aiInsight || '') +
+                ' ' +
+                String(recommendation || '')
+            ).toLowerCase();
+
+
+        var candidates = [
+
+            'Communication',
+
+            'Interview Performance',
+
+            'Problem Solving',
+
+            'Coding',
+
+            'Python',
+
+            'SQL',
+
+            'Cloud',
+
+            'Technical Knowledge',
+
+            'Aptitude',
+
+            'Presentation',
+
+            'Resume / Profile',
+
+            'Skill Development'
+        ];
+
+
+        for (
+            var i = 0;
+            i < candidates.length;
+            i++
+        ) {
+
+            if (
+                text.indexOf(
+                    candidates[i].toLowerCase()
+                ) !== -1
+            ) {
+
+                return candidates[i];
+            }
+        }
+
+
+        var raw =
+            String(
+                skillGap || ''
+            ).trim();
+
+
+        if (raw) {
+
+            var pieces =
+                raw.split(
+                    /[,.;\n]/
+                );
+
+
+            for (
+                var p = 0;
+                p < pieces.length;
+                p++
+            ) {
+
+                var piece =
+                    String(
+                        pieces[p] || ''
+                    ).trim();
+
+
+                if (
+                    piece.length > 2
+                ) {
+
+                    return piece;
+                }
+            }
+        }
+
+
+        return 'Skill Development';
+    }
+
+
+    /* ========================================================
+       OPTIONAL FIELD
+       ======================================================== */
+
+    function getOptionalValue(
+        gr,
+        fields
+    ) {
+
+        for (
+            var i = 0;
+            i < fields.length;
+            i++
+        ) {
+
+            if (
+                gr.isValidField(
+                    fields[i]
+                )
+            ) {
+
+                var value =
+                    gr.getDisplayValue(
+                        fields[i]
+                    ) ||
+                    gr.getValue(
+                        fields[i]
+                    );
+
+
+                if (value) {
+
+                    return value;
+                }
+            }
+        }
+
+
+        return '';
+    }
+
+
+    /* ========================================================
+       NUMBER
+       ======================================================== */
+
+    function toNumber(value) {
+
+        var n =
+            parseFloat(value);
+
+
+        if (isNaN(n)) {
+
+            return 0;
+        }
+
+
+        return n;
+    }
+
+
+    /* ========================================================
+       INITIALS
+       ======================================================== */
+
+    function getInitials(name) {
+
+        var value =
+            String(
+                name || ''
+            ).trim();
+
+
+        if (!value) {
+
+            return 'TS';
+        }
+
+
+        var parts =
+            value.split(
+                /\s+/
+            );
+
+
+        if (
+            parts.length === 1
+        ) {
+
+            return parts[0]
+                .substring(
+                    0,
+                    2
+                )
+                .toUpperCase();
+        }
+
+
+        return (
+            parts[0].charAt(0) +
+            parts[
+                parts.length - 1
+            ].charAt(0)
+        ).toUpperCase();
+    }
+
+})();
+
+data.aiWidget = $sp.getWidget('campus360_ai_assistant');
+]]></script>
+        <servicenow>false</servicenow>
+        <sys_class_name>sp_widget</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-22 16:52:59</sys_created_on>
+        <sys_id>e70a4facf1e743107f44ff560373bb45</sys_id>
+        <sys_mod_count>25</sys_mod_count>
+        <sys_name>campus360_placement_readiness_widget</sys_name>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name>sp_widget_e70a4facf1e743107f44ff560373bb45</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-10-01 12:48:39</sys_updated_on>
+        <template><![CDATA[<div class="campus360-readiness-page"
+     ng-class="{
+       'sidebar-open': c.sidebarOpen,
+       'sidebar-closed': !c.sidebarOpen
+     }">
+
+  <!-- =====================================================
+       LEFT CAMPUS360 SIDEBAR
+       ===================================================== -->
+
+  <aside class="c360-left-sidebar">
+
+    <!-- BRAND -->
+
+    <div class="c360-sidebar-brand">
+
+      <div class="c360-brand-logo">
+        C
+      </div>
+
+      <div class="c360-brand-name">
+
+        <strong>
+          Campus360
+        </strong>
+
+        <span>
+          STUDENT PORTAL
+        </span>
+
+      </div>
+
+    </div>
+
+
+    <!-- STUDENT CARD -->
+
+    <a class="c360-sidebar-student"
+       ng-href="?id=campus360_profile&student={{c.data.student.id}}">
+
+      <div class="c360-sidebar-avatar">
+
+        {{
+          c.data.student.initials ||
+          'ST'
+        }}
+
+      </div>
+
+      <div class="c360-sidebar-student-info">
+
+        <strong>
+
+          {{
+            c.data.student.name ||
+            'Test Student Campus360'
+          }}
+
+        </strong>
+
+        <span>
+
+          {{
+            c.data.student.id ||
+            'STU_TEST_001'
+          }}
+
+        </span>
+
+      </div>
+
+      <span class="c360-student-arrow">
+        ›
+      </span>
+
+    </a>
+
+
+    <!-- =================================================
+         NAVIGATION
+         ================================================= -->
+
+    <nav class="c360-sidebar-nav">
+
+
+      <!-- OVERVIEW -->
+
+      <div class="c360-nav-group">
+
+        <div class="c360-nav-heading">
+          OVERVIEW
+        </div>
+
+        <button
+          type="button"
+          class="c360-nav-link"
+          ng-click="c.navigate('campus360_student_dashboard')">
+
+          <span class="c360-nav-icon">
+            <i class="fa fa-home"></i>
+          </span>
+
+          <span>
+            Dashboard
+          </span>
+
+        </button>
+
+      </div>
+
+
+      <!-- PLACEMENT JOURNEY -->
+
+      <div class="c360-nav-group">
+
+        <div class="c360-nav-heading">
+          PLACEMENT JOURNEY
+        </div>
+
+
+        <!-- OPPORTUNITIES -->
+
+        <button
+          type="button"
+          class="c360-nav-link"
+          ng-click="c.navigate('campus360_opportunities')">
+
+          <span class="c360-nav-icon">
+            <i class="fa fa-diamond"></i>
+          </span>
+
+          <span>
+            Opportunities
+          </span>
+
+        </button>
+
+
+        <!-- APPLICATIONS -->
+
+        <button
+          type="button"
+          class="c360-nav-link"
+          ng-click="c.navigate('campus360_applications')">
+
+          <span class="c360-nav-icon">
+            <i class="fa fa-list-alt"></i>
+          </span>
+
+          <span>
+            Applications
+          </span>
+
+        </button>
+
+
+        <!-- INTERVIEWS -->
+
+        <button
+          type="button"
+          class="c360-nav-link"
+          ng-click="c.navigate('campus360_interviews')">
+
+          <span class="c360-nav-icon">
+            <i class="fa fa-clock-o"></i>
+          </span>
+
+          <span>
+            Interviews
+          </span>
+
+        </button>
+
+
+        <!-- TRAINING -->
+
+        <button
+          type="button"
+          class="c360-nav-link"
+          ng-click="c.navigate('campus360_training')">
+
+          <span class="c360-nav-icon">
+            <i class="fa fa-graduation-cap"></i>
+          </span>
+
+          <span>
+            Training
+          </span>
+
+        </button>
+
+
+        <!-- MOCK INTERVIEW SLOT BOOKING -->
+
+        <button
+          type="button"
+          class="c360-nav-link"
+          ng-click="c.navigate('mock_interview_booking')">
+
+          <span class="c360-nav-icon">
+            <i class="fa fa-calendar-check-o"></i>
+          </span>
+
+          <span>
+            Mock Interview Slot Booking
+          </span>
+
+        </button>
+
+      </div>
+
+
+      <!-- INTELLIGENCE -->
+
+      <div class="c360-nav-group">
+
+        <div class="c360-nav-heading">
+          INTELLIGENCE
+        </div>
+
+
+        <!-- MY PROGRESS -->
+
+        <button
+          type="button"
+          class="c360-nav-link"
+          ng-click="c.navigate('campus360_progress')">
+
+          <span class="c360-nav-icon">
+            <i class="fa fa-bar-chart"></i>
+          </span>
+
+          <span>
+            Assessments
+          </span>
+
+        </button>
+
+
+        <!-- PLACEMENT READINESS ACTIVE -->
+
+        <button
+          type="button"
+          class="c360-nav-link active"
+         ng-click="c.navigate('placement_readiness')">>
+          
+
+          <span class="c360-nav-icon">
+            <i class="fa fa-star-o"></i>
+          </span>
+
+          <span>
+            Placement Readiness
+          </span>
+
+        </button>
+
+      </div>
+
+
+      <!-- ACCOUNT -->
+
+      <div class="c360-nav-group">
+
+        <div class="c360-nav-heading">
+          ACCOUNT
+        </div>
+
+
+        <!-- MY PROFILE -->
+
+        <button
+          type="button"
+          class="c360-nav-link"
+          ng-click="c.navigate('campus360_profile')">
+
+          <span class="c360-nav-icon">
+            <i class="fa fa-user-o"></i>
+          </span>
+
+          <span>
+            My Profile
+          </span>
+
+        </button>
+
+      </div>
+
+    </nav>
+
+
+    <!-- SIDEBAR FOOTER -->
+
+    <div class="c360-sidebar-footer">
+
+      <div class="c360-footer-title">
+        PLACEMENT READINESS
+      </div>
+
+      <div class="c360-readiness-track">
+
+        <div
+          class="c360-readiness-fill"
+          ng-style="{
+            'width':
+            (data.intelligence.readiness_score || 0) + '%'
+          }">
+        </div>
+
+      </div>
+
+      <div class="c360-readiness-text">
+
+        {{
+          data.intelligence.readiness_score || 0
+        }}% readiness
+
+      </div>
+
+    </div>
+
+  </aside>
+
+
+  <!-- MOBILE OVERLAY -->
+
+  <div
+    class="c360-sidebar-overlay"
+    ng-if="c.sidebarOpen"
+    ng-click="c.closeSidebar()">
+  </div>
+
+
+  <!-- =====================================================
+       RIGHT PAGE
+       ===================================================== -->
+
+  <main class="c360-right-page">
+
+
+    <!-- ===================================================
+         TOP NAVBAR
+         =================================================== -->
+
+    <header class="c360-topbar">
+
+
+      <!-- LEFT -->
+
+      <div class="c360-topbar-left">
+
+
+        <!-- HAMBURGER -->
+
+        <button
+          type="button"
+          class="c360-menu-button"
+          ng-click="c.toggleSidebar()"
+          aria-label="Toggle Campus360 sidebar"
+          ng-attr-aria-expanded="{{c.sidebarOpen}}">
+
+          <span></span>
+          <span></span>
+          <span></span>
+
+        </button>
+
+
+        <!-- PAGE TITLE -->
+
+        <div class="c360-page-heading">
+
+          <span>
+            CAMPUS360
+          </span>
+
+          <strong>
+            Placement Readiness
+          </strong>
+
+        </div>
+
+      </div>
+
+
+      <!-- RIGHT -->
+
+      <div class="c360-topbar-right">
+
+
+        <!-- REFRESH -->
+
+        <button
+          type="button"
+          class="c360-top-icon"
+          ng-click="c.refresh()"
+          ng-disabled="c.loading"
+          title="Refresh"
+          aria-label="Refresh">
+
+          <i
+            class="fa fa-refresh"
+            ng-class="{'fa-spin': c.loading}">
+          </i>
+
+        </button>
+
+
+        <!-- BELL -->
+
+        <button
+          type="button"
+          class="c360-top-icon c360-notification-button"
+          title="Notifications"
+          aria-label="Notifications">
+
+          <i class="fa fa-bell-o"></i>
+
+          <span class="c360-notification-dot"></span>
+
+        </button>
+
+
+        <!-- STUDENT PROFILE -->
+
+        <a
+          class="c360-top-student"
+          ng-href="?id=campus360_profile&student={{c.data.student.id}}">
+
+          <div class="c360-top-avatar">
+
+            {{
+              c.data.student.initials ||
+              'ST'
+            }}
+
+          </div>
+
+          <div class="c360-top-student-info">
+
+            <strong>
+
+              {{
+                c.data.student.name ||
+                'Test Student Campus360'
+              }}
+
+            </strong>
+
+            <span>
+
+              {{
+                c.data.student.id ||
+                'STU_TEST_001'
+              }}
+
+            </span>
+
+          </div>
+
+          <span class="c360-top-chevron">
+            ˅
+          </span>
+
+        </a>
+
+      </div>
+
+    </header>
+
+
+    <!-- ===================================================
+         PAGE CONTENT
+         =================================================== -->
+
+    <div class="c360-page-content">
+
+
+      <div class="cr-page-shell">
+
+
+        <!-- =================================================
+             LEFT MAIN CONTENT
+             ================================================= -->
+
+        <main class="cr-main-content">
+
+
+          <!-- STUDENT CARD -->
+
+          <section class="cr-student-header">
+
+
+            <div class="cr-student-left">
+
+
+              <div class="cr-student-avatar">
+
+                {{
+                  data.student.initials ||
+                  'ST'
+                }}
+
+              </div>
+
+
+              <div class="cr-student-information">
+
+
+                <div class="cr-student-name-row">
+
+                  <h1>
+                    {{data.student.name}}
+                  </h1>
+
+                  <span class="cr-student-id">
+                    {{data.student.id}}
+                  </span>
+
+                </div>
+
+
+                <div class="cr-student-meta">
+
+                  <span ng-if="data.student.program">
+                    {{data.student.program}}
+                  </span>
+
+                  <span ng-if="
+                    data.student.program &&
+                    data.student.batch
+                  ">
+                    •
+                  </span>
+
+                  <span ng-if="data.student.batch">
+                    Batch {{data.student.batch}}
+                  </span>
+
+                  <span ng-if="data.student.email">
+                    • {{data.student.email}}
+                  </span>
+
+                </div>
+
+
+              </div>
+
+
+            </div>
+
+
+            <div class="cr-risk-area">
+
+              <div class="cr-risk-label">
+                PLACEMENT RISK LEVEL
+              </div>
+
+
+              <div
+                class="cr-risk-badge"
+                ng-class="
+                  c.getRiskClass(
+                    data.intelligence.risk_level
+                  )
+                ">
+
+                <span class="cr-risk-dot"></span>
+
+                {{
+                  data.intelligence.risk_level ||
+                  'Not Available'
+                }}
+
+              </div>
+
+            </div>
+
+
+          </section>
+
+
+          <!-- =================================================
+               SUMMARY
+               ================================================= -->
+
+          <section class="cr-summary-grid">
+
+
+            <div class="cr-summary-card cr-readiness-card">
+
+              <div class="cr-summary-label">
+                OVERALL READINESS
+              </div>
+
+              <div class="cr-readiness-number">
+
+                {{
+                  data.intelligence.readiness_score ||
+                  0
+                }}
+
+                <span>
+                  /100
+                </span>
+
+              </div>
+
+              <div class="cr-summary-description">
+
+                Placement readiness across all
+                mocks &amp; rounds.
+
+              </div>
+
+              <div class="cr-mini-progress">
+
+                <div
+                  class="cr-mini-progress-fill"
+                  ng-style="{
+                    'width':
+                    (
+                      data.intelligence.readiness_score ||
+                      0
+                    ) + '%'
+                  }">
+                </div>
+
+              </div>
+
+            </div>
+
+
+            <div class="cr-summary-card cr-skill-card">
+
+              <div class="cr-summary-label">
+                PRIMARY SKILL GAP
+              </div>
+
+              <div class="cr-summary-main-value">
+
+                {{
+                  data.primarySkillGap ||
+                  'Skill Development'
+                }}
+
+              </div>
+
+              <div class="cr-summary-bottom skill-bottom">
+
+                <i class="fa fa-arrow-down"></i>
+
+                Focus area
+
+              </div>
+
+            </div>
+
+
+            <div class="cr-summary-card cr-bottleneck-card">
+
+              <div class="cr-summary-label">
+                BOTTLENECK STAGE
+              </div>
+
+              <div class="cr-summary-main-value">
+
+                {{
+                  data.intelligence.bottleneck_stage ||
+                  'Not Identified'
+                }}
+
+              </div>
+
+              <div class="cr-summary-bottom bottleneck-bottom">
+
+                <i class="fa fa-warning"></i>
+
+                Placement journey
+
+              </div>
+
+            </div>
+
+
+            <div class="cr-summary-card cr-participation-card">
+
+              <div class="cr-summary-label">
+                PARTICIPATION
+              </div>
+
+              <div class="cr-summary-number">
+
+                {{
+                  data.intelligence.participation_score ||
+                  0
+                }}
+
+                <span>
+                  /100
+                </span>
+
+              </div>
+
+              <div class="cr-summary-bottom participation-bottom">
+
+                <i class="fa fa-check-circle"></i>
+
+                Engagement score
+
+              </div>
+
+            </div>
+
+
+            <div class="cr-summary-card cr-missed-card">
+
+              <div class="cr-summary-label">
+                MISSED OPPORTUNITIES
+              </div>
+
+              <div class="cr-summary-number">
+
+                {{
+                  data.intelligence.missed_opportunities ||
+                  0
+                }}
+
+              </div>
+
+              <div class="cr-summary-bottom missed-bottom">
+
+                <i class="fa fa-exclamation-circle"></i>
+
+                Opportunities requiring attention
+
+              </div>
+
+            </div>
+
+
+          </section>
+
+
+          <!-- =================================================
+               AI ANALYSIS
+               ================================================= -->
+
+          <section class="cr-analysis-section">
+
+
+            <div class="cr-section-header">
+
+
+              <div>
+
+                <div class="cr-section-kicker">
+                  AI ANALYSIS
+                </div>
+
+                <h2 class="cr-section-title">
+                  Your Placement Intelligence
+                </h2>
+
+                <div class="cr-section-description">
+
+                  AI-generated analysis based on your placement
+                  performance, interview feedback, skill gaps and activity.
+
+                </div>
+
+              </div>
+
+
+              <div class="cr-analysis-status">
+
+                <span></span>
+
+                CampusAI Analysis
+
+              </div>
+
+
+            </div>
+
+
+            <div class="cr-analysis-cards">
+
+
+              <div class="cr-ai-card cr-ai-insight">
+
+                <div class="cr-ai-icon">
+                  <i class="fa fa-bolt"></i>
+                </div>
+
+                <div class="cr-ai-card-title">
+                  AI Insight
+                </div>
+
+                <div class="cr-ai-card-text">
+
+                  {{
+                    data.intelligence.ai_insight ||
+                    'The student placement profile is being analyzed.'
+                  }}
+
+                </div>
+
+              </div>
+
+
+              <div class="cr-ai-card cr-ai-gap">
+
+                <div class="cr-ai-icon">
+                  <i class="fa fa-exclamation-triangle"></i>
+                </div>
+
+                <div class="cr-ai-card-title">
+                  Skill Gap Summary
+                </div>
+
+                <div class="cr-ai-card-text">
+
+                  {{
+                    data.intelligence.skill_gap_summary ||
+                    'No major skill gap has been identified yet.'
+                  }}
+
+                </div>
+
+              </div>
+
+
+              <div class="cr-ai-card cr-ai-action">
+
+                <div class="cr-ai-icon">
+                  <i class="fa fa-check-circle"></i>
+                </div>
+
+                <div class="cr-ai-card-title">
+                  Recommended Action
+                </div>
+
+                <div class="cr-ai-card-text">
+
+                  {{
+                    data.intelligence.recommended_action ||
+                    'Continue developing placement skills through training and mock interviews.'
+                  }}
+
+                </div>
+
+              </div>
+
+
+            </div>
+
+          </section>
+
+
+          <!-- =================================================
+               PLACEMENT INTERVENTION
+               ================================================= -->
+
+          <section class="cr-section">
+
+
+            <div class="cr-section-header">
+
+              <div>
+
+                <div class="cr-section-kicker">
+                  PLACEMENT SUPPORT
+                </div>
+
+                <h2 class="cr-section-title">
+                  Placement Intervention
+                </h2>
+
+                <div class="cr-section-description">
+
+                  Current intervention created to improve your
+                  placement readiness.
+
+                </div>
+
+              </div>
+
+            </div>
+
+
+            <div
+              class="cr-intervention-card"
+              ng-if="data.intervention">
+
+
+              <div class="cr-intervention-top">
+
+                <div>
+
+                  <div class="cr-intervention-title">
+
+                    {{
+                      data.intervention.intervention_type ||
+                      'Placement Intervention'
+                    }}
+
+                  </div>
+
+                  <div class="cr-intervention-reason">
+
+                    {{
+                      data.intervention.reason ||
+                      'Intervention details are available below.'
+                    }}
+
+                  </div>
+
+                </div>
+
+
+                <div
+                  class="cr-intervention-status"
+                  ng-class="
+                    c.getStatusClass(
+                      data.intervention.status
+                    )
+                  ">
+
+                  {{
+                    data.intervention.status ||
+                    'Open'
+                  }}
+
+                </div>
+
+              </div>
+
+
+              <div class="cr-intervention-details">
+
+
+                <div class="cr-intervention-detail">
+
+                  <div class="cr-detail-label">
+                    TRAINING
+                  </div>
+
+                  <div class="cr-detail-value">
+
+                    {{
+                      data.intervention.training_name ||
+                      'Not Assigned'
+                    }}
+
+                  </div>
+
+                </div>
+
+
+                <div class="cr-intervention-detail">
+
+                  <div class="cr-detail-label">
+                    TRAINER
+                  </div>
+
+                  <div class="cr-detail-value">
+
+                    {{
+                      data.intervention.trainer ||
+                      'Not Assigned'
+                    }}
+
+                  </div>
+
+                </div>
+
+
+                <div
+                  class="cr-intervention-detail cr-score-detail">
+
+                  <div class="cr-detail-label">
+                    BEFORE SCORE
+                  </div>
+
+                  <div class="cr-score-value">
+
+                    {{
+                      data.intervention.before_score ||
+                      0
+                    }}
+
+                  </div>
+
+                </div>
+
+
+                <div
+                  class="cr-intervention-detail cr-score-detail">
+
+                  <div class="cr-detail-label">
+                    AFTER SCORE
+                  </div>
+
+                  <div class="cr-score-value">
+
+                    {{
+                      data.intervention.after_score ||
+                      '-'
+                    }}
+
+                  </div>
+
+                </div>
+
+
+                <div
+                  class="cr-intervention-detail cr-score-detail">
+
+                  <div class="cr-detail-label">
+                    EFFECTIVENESS
+                  </div>
+
+                  <div class="cr-score-value">
+
+                    {{
+                      data.intervention.effectiveness_score ||
+                      '-'
+                    }}
+
+                  </div>
+
+                </div>
+
+
+                <div class="cr-intervention-detail">
+
+                  <div class="cr-detail-label">
+                    START DATE
+                  </div>
+
+                  <div class="cr-detail-value">
+
+                    {{
+                      data.intervention.start_date ||
+                      '-'
+                    }}
+
+                  </div>
+
+                </div>
+
+
+                <div class="cr-intervention-detail">
+
+                  <div class="cr-detail-label">
+                    COMPLETION DATE
+                  </div>
+
+                  <div class="cr-detail-value">
+
+                    {{
+                      data.intervention.completion_date ||
+                      '-'
+                    }}
+
+                  </div>
+
+                </div>
+
+
+              </div>
+
+
+            </div>
+
+
+            <div
+              class="cr-empty-card"
+              ng-if="!data.intervention">
+
+              <i class="fa fa-info-circle"></i>
+
+              No active placement intervention is available
+              for this student.
+
+            </div>
+
+
+          </section>
+
+
+          <!-- =================================================
+               RECOMMENDED TRAINING
+               ================================================= -->
+
+          <section class="cr-section">
+
+
+            <div class="cr-section-header">
+
+              <div>
+
+                <div class="cr-section-kicker">
+                  PERSONALIZED LEARNING
+                </div>
+
+                <h2 class="cr-section-title">
+                  Recommended Training
+                </h2>
+
+                <div class="cr-section-description">
+
+                  Training programs matched with your
+                  identified skill gap.
+
+                </div>
+
+              </div>
+
+
+              <div
+                class="cr-match-badge"
+                ng-if="data.primarySkillGap">
+
+                <i class="fa fa-link"></i>
+
+                Based on:
+                {{data.primarySkillGap}}
+
+              </div>
+
+            </div>
+
+
+            <div
+              class="cr-training-loading"
+              ng-if="data.loadingTrainings">
+
+              <i class="fa fa-spinner fa-spin"></i>
+
+              Finding matching training programs...
+
+            </div>
+
+
+            <div
+              class="cr-training-grid"
+              ng-if="
+                !data.loadingTrainings &&
+                data.trainings.length
+              ">
+
+
+              <div
+                class="cr-training-card"
+                ng-repeat="
+                  training in data.trainings
+                  track by training.sys_id
+                "
+                ng-class="{
+                  'cr-training-ignored':
+                    training.ignored,
+
+                  'cr-training-enrolled':
+                    training.enrolled
+                }">
+
+
+                <div class="cr-training-card-top">
+
+                  <div class="cr-training-icon">
+
+                    <i class="fa fa-graduation-cap"></i>
+
+                  </div>
+
+                  <div class="cr-training-status">
+                    {{training.status}}
+                  </div>
+
+                </div>
+
+
+                <div class="cr-training-name">
+                  {{training.training_name}}
+                </div>
+
+
+                <div class="cr-training-id">
+                  {{training.training_id}}
+                </div>
+
+
+                <div class="cr-training-information">
+
+
+                  <div class="cr-training-information-item">
+
+                    <div class="cr-training-information-label">
+                      SKILL AREA
+                    </div>
+
+                    <div class="cr-training-information-value">
+
+                      {{
+                        training.skill_area ||
+                        'Skill Development'
+                      }}
+
+                    </div>
+
+                  </div>
+
+
+                  <div class="cr-training-information-item">
+
+                    <div class="cr-training-information-label">
+                      BATCH
+                    </div>
+
+                    <div class="cr-training-information-value">
+
+                      {{
+                        training.batch ||
+                        'Open Batch'
+                      }}
+
+                    </div>
+
+                  </div>
+
+
+                  <div class="cr-training-information-item">
+
+                    <div class="cr-training-information-label">
+                      TRAINER
+                    </div>
+
+                    <div class="cr-training-information-value">
+
+                      {{
+                        training.trainer ||
+                        'TPO Assigned'
+                      }}
+
+                    </div>
+
+                  </div>
+
+
+                  <div class="cr-training-information-item">
+
+                    <div class="cr-training-information-label">
+                      SCHEDULE
+                    </div>
+
+                    <div class="cr-training-information-value">
+
+                      {{training.start_date || '-'}}
+
+                      <span ng-if="training.end_date">
+                        - {{training.end_date}}
+                      </span>
+
+                    </div>
+
+                  </div>
+
+
+                </div>
+
+
+                <div
+                  class="cr-training-success"
+                  ng-if="training.enrolled">
+
+                  <i class="fa fa-check-circle"></i>
+
+                  <span>
+                    Interest recorded. You will be enrolled by the TPO.
+                  </span>
+
+                </div>
+
+
+                <div
+                  class="cr-training-ignored-message"
+                  ng-if="
+                    training.ignored &&
+                    !training.enrolled
+                  ">
+
+                  <i class="fa fa-eye-slash"></i>
+
+                  <span>
+                    This recommendation has been ignored.
+                  </span>
+
+                  <button
+                    type="button"
+                    ng-click="
+                      c.restoreTraining(training)
+                    ">
+
+                    Restore
+
+                  </button>
+
+                </div>
+
+
+                <div
+                  class="cr-training-actions"
+                  ng-if="
+                    !training.enrolled &&
+                    !training.ignored
+                  ">
+
+
+                  <button
+                    type="button"
+                    class="cr-interested-button"
+                    ng-click="
+                      c.interested(training)
+                    "
+                    ng-disabled="training.processing">
+
+                    <i
+                      class="fa"
+                      ng-class="
+                        training.processing
+                        ? 'fa-spinner fa-spin'
+                        : 'fa-check'
+                      ">
+                    </i>
+
+                    Interested
+
+                  </button>
+
+
+                  <button
+                    type="button"
+                    class="cr-ignore-button"
+                    ng-click="
+                      c.ignoreTraining(training)
+                    "
+                    ng-disabled="training.processing">
+
+                    <i class="fa fa-times"></i>
+
+                    Ignore
+
+                  </button>
+
+
+                </div>
+
+
+              </div>
+
+
+            </div>
+
+
+            <div
+              class="cr-no-training"
+              ng-if="
+                !data.loadingTrainings &&
+                !data.trainings.length
+              ">
+
+              <div class="cr-no-training-icon">
+
+                <i class="fa fa-search"></i>
+
+              </div>
+
+              <div class="cr-no-training-title">
+                No matching training found
+              </div>
+
+              <div class="cr-no-training-description">
+
+                No open or ongoing training program currently
+                matches the identified skill gap.
+
+              </div>
+
+            </div>
+
+
+          </section>
+
+
+          <!-- FOOTER -->
+
+          <div class="cr-footer">
+
+            <button
+              type="button"
+              class="cr-dashboard-footer"
+              ng-click="c.goToDashboard()">
+
+              <i class="fa fa-arrow-left"></i>
+
+              Back to Student Dashboard
+
+            </button>
+
+          </div>
+
+
+        </main>
+
+
+        <!-- =================================================
+             CAMPUSAI RIGHT SIDEBAR
+             ================================================= -->
+
+        <aside class="cr-ai-sidebar">
+
+
+          <div class="cr-ai-sidebar-inner">
+
+
+            <!-- AI HEADER -->
+
+            <div class="cr-ai-sidebar-header">
+
+              <div class="cr-ai-status-dot"></div>
+
+              <div class="cr-ai-sidebar-title">
+                CAMPUSAI ASSISTANT
+              </div>
+
+              <div class="cr-ai-version">
+                AI ACTIVE
+              </div>
+
+            </div>
+
+
+            <!-- ROBOT -->
+
+            <div class="cr-robot-stage">
+
+
+              <!-- FLOATING METRICS -->
+
+              <div class="cr-robot-metric metric-left-top">
+
+                <div class="cr-metric-title">
+
+                  <i class="fa fa-bolt"></i>
+
+                  ATS Score
+
+                </div>
+
+                <div class="cr-metric-value">
+                  94<span>/100</span>
+                </div>
+
+              </div>
+
+
+              <div class="cr-robot-metric metric-right-top">
+
+                <div class="cr-metric-title">
+                  Readiness Index
+                </div>
+
+                <div class="cr-metric-value">
+
+                  {{
+                    data.intelligence.readiness_score ||
+                    0
+                  }}%
+
+                </div>
+
+              </div>
+
+
+              <!-- ROBOT CARD -->
+
+              <div class="cr-robot-card">
+
+
+                <div class="cr-robot-image-wrap">
+
+                  <img
+                    class="cr-reference-robot"
+                    src="https://img.magnific.com/premium-photo/cute-chatbot-robots-interacting-with-digital-interfaces-robot-ai-digital-interaction-speech_1143726-22969.jpg?semt=ais_hybrid&w=740&q=80"
+                    alt="CampusAI Assistant"
+                  />
+
+                </div>
+
+
+                <div class="cr-robot-caption">
+
+                  <strong>
+                    CampusAI Assistant
+                  </strong>
+
+                  <span>
+                    Placement intelligence active
+                  </span>
+
+                </div>
+
+
+              </div>
+
+
+              <!-- BOTTOM METRICS -->
+
+              <div class="cr-robot-metric metric-left-bottom">
+
+                <div class="cr-metric-title">
+                  Voice Clarity
+                </div>
+
+                <div class="cr-metric-value">
+                  68%
+                </div>
+
+                <div class="cr-metric-small">
+                  DRILL
+                </div>
+
+              </div>
+
+
+              <div class="cr-robot-metric metric-right-bottom">
+
+                <div class="cr-metric-title">
+                  Skill Gap
+                </div>
+
+                <div class="cr-metric-value skill-metric">
+
+                  {{
+                    data.primarySkillGap ||
+                    'Training'
+                  }}
+
+                </div>
+
+              </div>
+
+
+            </div>
+
+
+            <!-- AI STATUS -->
+
+            <div class="cr-ai-status-card">
+
+
+              <div class="cr-ai-status-card-icon">
+
+                <i class="fa fa-line-chart"></i>
+
+              </div>
+
+
+              <div class="cr-ai-status-card-content">
+
+                <div class="cr-ai-status-card-title">
+
+                  Placement Intelligence
+
+                </div>
+
+                <div class="cr-ai-status-card-text">
+
+                  Your AI analysis is based on interview
+                  performance, skill gaps and placement activity.
+
+                </div>
+
+              </div>
+
+
+            </div>
+
+
+            <div class="cr-ai-sidebar-footer">
+
+              <span></span>
+
+              AI analysis active
+
+            </div>
+
+
+          </div>
+
+
+        </aside>
+
+
+      </div>
+
+
+    </div>
+
+
+  </main>
+
+
+
+  <!-- Campus360 AI Assistant Floating Widget -->
+  <sp-widget widget="data.aiWidget"></sp-widget>
+</div>]]></template>
+    </sp_widget>
+</record_update>

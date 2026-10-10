@@ -1,0 +1,6257 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_widget">
+    <sp_widget action="INSERT_OR_UPDATE">
+        <category>custom</category>
+        <client_script><![CDATA[api.controller = function($scope, $window, $timeout) {
+
+  var c = this;
+
+
+  /* =====================================================
+     SIDEBAR
+  ====================================================== */
+
+  c.sidebarCollapsed = false;
+
+
+  c.toggleSidebar = function() {
+
+    c.sidebarCollapsed = !c.sidebarCollapsed;
+
+    if (!$scope.$$phase) {
+      $scope.$applyAsync();
+    }
+
+  };
+
+
+  /* =====================================================
+     BASIC PAGE STATE
+  ====================================================== */
+
+  c.searchText = "";
+  c.globalSearch = "";
+
+
+  c.filters = {
+    industry: "",
+    companyType: "",
+    status: ""
+  };
+
+
+  c.filteredCompanies = [];
+  c.selectedCompany = null;
+
+
+  /* =====================================================
+     ADD COMPANY STATE
+  ====================================================== */
+
+  c.showAddCompany = false;
+
+  c.savingCompany = false;
+
+  c.addCompanyMessage = "";
+
+  c.newCompany = {
+    company_name: "",
+    company_id: "",
+    industry: "",
+    recruiter_name: "",
+    recruiter_email: "",
+    contact_number: "",
+    company_type: "",
+    status: "Active"
+  };
+
+
+  /* =====================================================
+     INITIALIZE
+  ====================================================== */
+
+  c.initialize = function() {
+
+    c.filteredCompanies =
+      angular.copy(
+        c.data.companies || []
+      );
+
+  };
+
+
+  /* =====================================================
+     NAVIGATION
+  ====================================================== */
+
+  
+
+
+  /* =====================================================
+     REFRESH
+  ====================================================== */
+
+  c.refresh = function() {
+
+    $window.location.reload();
+
+  };
+
+
+  /* =====================================================
+     GLOBAL SEARCH
+  ====================================================== */
+
+  c.syncGlobalSearch = function() {
+
+    c.searchText =
+      c.globalSearch || "";
+
+    c.applyFilters();
+
+  };
+
+
+  /* =====================================================
+     FILTERING
+  ====================================================== */
+
+  c.applyFilters = function() {
+
+    var search =
+      String(c.searchText || "")
+        .toLowerCase()
+        .trim();
+
+
+    c.filteredCompanies =
+      (c.data.companies || []).filter(
+        function(company) {
+
+          var matchesSearch = true;
+          var matchesIndustry = true;
+          var matchesCompanyType = true;
+          var matchesStatus = true;
+
+
+          /* SEARCH */
+
+          if (search) {
+
+            var searchableText = [
+
+              company.company_name,
+              company.company_id,
+              company.industry,
+              company.recruiter_name,
+              company.recruiter_email,
+              company.contact_number,
+              company.company_type,
+              company.status
+
+            ].join(" ").toLowerCase();
+
+
+            matchesSearch =
+              searchableText.indexOf(search) !== -1;
+
+          }
+
+
+          /* INDUSTRY */
+
+          if (c.filters.industry) {
+
+            matchesIndustry =
+              String(
+                company.industry || ""
+              ).toLowerCase().trim() ===
+              String(
+                c.filters.industry || ""
+              ).toLowerCase().trim();
+
+          }
+
+
+          /* COMPANY TYPE */
+
+          if (c.filters.companyType) {
+
+            matchesCompanyType =
+              String(
+                company.company_type || ""
+              ).toLowerCase().trim() ===
+              String(
+                c.filters.companyType || ""
+              ).toLowerCase().trim();
+
+          }
+
+
+          /* STATUS */
+
+          if (c.filters.status) {
+
+            matchesStatus =
+              String(
+                company.status || ""
+              ).toLowerCase().trim() ===
+              String(
+                c.filters.status || ""
+              ).toLowerCase().trim();
+
+          }
+
+
+          return (
+            matchesSearch &&
+            matchesIndustry &&
+            matchesCompanyType &&
+            matchesStatus
+          );
+
+        }
+      );
+
+  };
+
+
+  /* =====================================================
+     CLEAR FILTERS
+  ====================================================== */
+
+  c.clearFilters = function() {
+
+    c.searchText = "";
+    c.globalSearch = "";
+
+
+    c.filters = {
+      industry: "",
+      companyType: "",
+      status: ""
+    };
+
+
+    c.applyFilters();
+
+  };
+
+
+  /* =====================================================
+     COMPANY MODAL
+  ====================================================== */
+
+  c.openCompany = function(company) {
+
+    if (!company) {
+      return;
+    }
+
+
+    c.selectedCompany = company;
+
+
+    try {
+
+      document.body.style.overflow = "hidden";
+
+    } catch (e) {}
+
+  };
+
+
+  c.closeCompany = function() {
+
+    c.selectedCompany = null;
+
+
+    try {
+
+      document.body.style.overflow = "";
+
+    } catch (e) {}
+
+  };
+
+
+  /* =====================================================
+     ADD COMPANY
+     THIS WAS MISSING
+  ====================================================== */
+
+  c.openAddCompany = function() {
+
+    /*
+     * Close the View Company modal if it happens
+     * to be open.
+     */
+
+    c.selectedCompany = null;
+
+
+    /*
+     * Reset the form every time Add Company
+     * is opened.
+     */
+
+    c.newCompany = {
+
+      company_name: "",
+      company_id: "",
+      industry: "",
+      recruiter_name: "",
+      recruiter_email: "",
+      contact_number: "",
+      company_type: "",
+      status: "Active"
+
+    };
+
+
+    c.addCompanyMessage = "";
+
+    c.savingCompany = false;
+
+    c.showAddCompany = true;
+
+
+    /*
+     * Prevent background page scrolling
+     * while modal is open.
+     */
+
+    try {
+
+      document.body.style.overflow = "hidden";
+
+    } catch (e) {}
+
+  };
+
+
+  /* =====================================================
+     CLOSE ADD COMPANY
+  ====================================================== */
+
+  c.closeAddCompany = function() {
+
+    if (c.savingCompany) {
+      return;
+    }
+
+
+    c.showAddCompany = false;
+
+    c.addCompanyMessage = "";
+
+
+    try {
+
+      document.body.style.overflow = "";
+
+    } catch (e) {}
+
+  };
+
+
+  /* =====================================================
+     SAVE COMPANY
+  ====================================================== */
+
+  c.saveCompany = function() {
+
+    /*
+     * Prevent double clicking.
+     */
+
+    if (c.savingCompany) {
+      return;
+    }
+
+
+    var company =
+      angular.copy(
+        c.newCompany
+      );
+
+
+    /*
+     * Required validation
+     */
+
+    company.company_name =
+      String(
+        company.company_name || ""
+      ).trim();
+
+
+    company.company_id =
+      String(
+        company.company_id || ""
+      ).trim();
+
+
+    if (!company.company_name) {
+
+      c.addCompanyMessage =
+        "Company Name is required.";
+
+      return;
+
+    }
+
+
+    if (!company.company_id) {
+
+      c.addCompanyMessage =
+        "Company ID is required.";
+
+      return;
+
+    }
+
+
+    /*
+     * Default status
+     */
+
+    if (!company.status) {
+
+      company.status = "Active";
+
+    }
+
+
+    /*
+     * Start saving
+     */
+
+    c.savingCompany = true;
+
+    c.addCompanyMessage =
+      "Saving company...";
+
+
+    /*
+     * Send the record to the Server Script.
+     *
+     * The Server Script already handles:
+     * input.action === "add_company"
+     */
+
+    c.server.get({
+
+      action: "add_company",
+
+      company: company
+
+    }).then(
+      function(response) {
+
+        /*
+         * Replace current widget data with
+         * the refreshed server response.
+         */
+
+        if (
+          response &&
+          response.data
+        ) {
+
+          c.data =
+            response.data;
+
+        }
+
+
+        /*
+         * Check server result.
+         */
+
+        if (
+          response &&
+          response.data &&
+          response.data.success
+        ) {
+
+          /*
+           * Rebuild filtered list using
+           * the newly returned company data.
+           */
+
+          c.filteredCompanies =
+            angular.copy(
+              c.data.companies || []
+            );
+
+
+          /*
+           * Re-apply current search/filter
+           * selections.
+           */
+
+          c.applyFilters();
+
+
+          /*
+           * Close modal after successful insert.
+           */
+
+          c.showAddCompany = false;
+
+          c.addCompanyMessage = "";
+
+          c.savingCompany = false;
+
+
+          try {
+
+            document.body.style.overflow = "";
+
+          } catch (e) {}
+
+
+        } else {
+
+          /*
+           * Server rejected the record.
+           * Keep the modal open so the user
+           * can correct the data.
+           */
+
+          c.savingCompany = false;
+
+          c.addCompanyMessage =
+            (
+              response &&
+              response.data &&
+              response.data.message
+            )
+              ?
+              response.data.message
+              :
+              "Company could not be added.";
+
+        }
+
+      },
+      function(error) {
+
+        /*
+         * Request/server error.
+         */
+
+        c.savingCompany = false;
+
+        c.addCompanyMessage =
+          "Unable to save the company. Please try again.";
+
+        console.error(
+          "Campus360 Add Company Error:",
+          error
+        );
+
+      }
+    );
+
+  };
+
+
+  /* =====================================================
+     COMPANY INITIALS
+  ====================================================== */
+
+  c.getInitials = function(name) {
+
+    if (!name) {
+      return "?";
+    }
+
+
+    var parts =
+      String(name)
+        .trim()
+        .split(/\s+/);
+
+
+    if (parts.length === 1) {
+
+      return parts[0]
+        .substring(0, 2)
+        .toUpperCase();
+
+    }
+
+
+    return (
+      parts[0].charAt(0) +
+      parts[parts.length - 1].charAt(0)
+    ).toUpperCase();
+
+  };
+
+
+  /* =====================================================
+     STATUS CLASS
+  ====================================================== */
+
+  c.getStatusClass = function(status) {
+
+    var value =
+      String(status || "")
+        .toLowerCase()
+        .trim();
+
+
+    if (value === "active") {
+
+      return "company-status-active";
+
+    }
+
+
+    if (value === "inactive") {
+
+      return "company-status-inactive";
+
+    }
+
+
+    return "company-status-other";
+
+  };
+
+
+  /* =====================================================
+     ESCAPE KEY
+  ====================================================== */
+
+  angular.element(document).on(
+    "keydown.campus360CompanyManagement",
+    function(event) {
+
+      if (
+        event.key === "Escape"
+      ) {
+
+        if (c.showAddCompany) {
+
+          $scope.$applyAsync(
+            function() {
+
+              c.closeAddCompany();
+
+            }
+          );
+
+          return;
+
+        }
+
+
+        if (c.selectedCompany) {
+
+          $scope.$applyAsync(
+            function() {
+
+              c.closeCompany();
+
+            }
+          );
+
+        }
+
+      }
+
+    }
+  );
+
+
+  /* =====================================================
+     CLEANUP
+  ====================================================== */
+
+  $scope.$on(
+    "$destroy",
+    function() {
+
+      try {
+
+        angular.element(document).off(
+          "keydown.campus360CompanyManagement"
+        );
+
+        document.body.style.overflow = "";
+
+      } catch (e) {}
+
+    }
+  );
+
+
+  /* =====================================================
+     START
+  ====================================================== */
+
+  c.initialize();
+
+
+    c.goTo = function(pageId) {
+        if (!pageId) return;
+        var map = {
+            'dashboard': 'campus360_tpo_home',
+            'home': 'campus360_tpo_home',
+            'campus360_tpo_home': 'campus360_tpo_home',
+            'students': 'campus360_tpo_student_management',
+            'student_management': 'campus360_tpo_student_management',
+            'campus360_tpo_student_management': 'campus360_tpo_student_management',
+            'skills': 'campus360_tpo_skill_intelligence_new',
+            'skill_intelligence': 'campus360_tpo_skill_intelligence_new',
+            'campus360_tpo_skill_intelligence': 'campus360_tpo_skill_intelligence_new',
+            'campus360_tpo_skill_intelligence_new': 'campus360_tpo_skill_intelligence_new',
+            'assessments': 'student_assessments_new',
+            'student_assessments': 'student_assessments_new',
+            'student_assessments_new': 'student_assessments_new',
+            'companies': 'campus360_tpo_companies_new',
+            'campus360_tpo_companies': 'campus360_tpo_companies_new',
+            'campus360_tpo_companies_new': 'campus360_tpo_companies_new',
+            'opportunities': 'campus360_tpo_opportunities_new',
+            'campus360_tpo_opportunities': 'campus360_tpo_opportunities_new',
+            'campus360_tpo_opportunities_new': 'campus360_tpo_opportunities_new',
+            'applications': 'campus360_tpo_application_new',
+            'application': 'campus360_tpo_application_new',
+            'campus360_tpo_application': 'campus360_tpo_application_new',
+            'campus360_tpo_application_new': 'campus360_tpo_application_new',
+            'interviews': 'campus360_tpo_interviews_new',
+            'campus360_tpo_interviews': 'campus360_tpo_interviews_new',
+            'campus360_tpo_interviews_new': 'campus360_tpo_interviews_new',
+            'outcomes': 'campus360_tpo_placement_outcomes',
+            'placement_outcomes': 'campus360_tpo_placement_outcomes',
+            'campus360_tpo_placement_outcomes': 'campus360_tpo_placement_outcomes',
+            'training': 'campus360_tpo_training_programs',
+            'training_programs': 'campus360_tpo_training_programs',
+            'campus360_tpo_training_programs': 'campus360_tpo_training_programs',
+            'enrollments': 'campus360_tpo_training_programs',
+            'campus360_tpo_enrollments': 'campus360_tpo_training_programs',
+            'mock_interviews': 'campus360_tpo_interviews_new',
+            'campus360_tpo_mock_interviews': 'campus360_tpo_interviews_new',
+            'risk': 'campus360_tpo_student_management',
+            'campus360_tpo_risk_intelligence': 'campus360_tpo_student_management',
+            'interventions': 'campus360_tpo_student_management',
+            'campus360_tpo_interventions': 'campus360_tpo_student_management',
+            'readiness': 'campus360_tpo_skill_intelligence_new',
+            'ai_assistant': 'campus360_tpo_ai_assistant',
+            'campus360_tpo_ai_assistant': 'campus360_tpo_ai_assistant'
+        };
+        var target = map[pageId] || pageId;
+        if (typeof $window !== 'undefined' && $window.location) {
+            $window.location.href = '?id=' + encodeURIComponent(target);
+        } else {
+            window.location.href = '?id=' + encodeURIComponent(target);
+        }
+    };
+    c.goToPage = function(pageId) { c.goTo(pageId); };
+    c.navigate = function(pageId) { c.goTo(pageId); };
+
+};]]></client_script>
+        <controller_as>c</controller_as>
+        <css>/* =========================================================&#13;
+   CAMPUS360 COMPANY MANAGEMENT&#13;
+   COMPLETE FINAL CSS&#13;
+   FULL SCREEN&#13;
+   NATIVE SERVICENOW HEADER HIDDEN&#13;
+   CAMPUS360 NAVBAR PROPERLY STYLED&#13;
+   ========================================================= */&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   1. GLOBAL PAGE RESET&#13;
+   ========================================================= */&#13;
+&#13;
+html,&#13;
+body {&#13;
+  width:100% !important;&#13;
+  height:100% !important;&#13;
+&#13;
+  min-width:100% !important;&#13;
+  min-height:100% !important;&#13;
+&#13;
+  margin:0 !important;&#13;
+  padding:0 !important;&#13;
+&#13;
+  overflow:hidden !important;&#13;
+&#13;
+  background:#f5f7fb !important;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   2. REMOVE SERVICENOW OUTER CONSTRAINTS&#13;
+   ========================================================= */&#13;
+&#13;
+body:has(.campus360-company-app) #sp-page,&#13;
+body:has(.campus360-company-app) #sp-main,&#13;
+body:has(.campus360-company-app) .sp-page,&#13;
+body:has(.campus360-company-app) .sp-main,&#13;
+body:has(.campus360-company-app) .sp-page-container,&#13;
+body:has(.campus360-company-app) #page_content,&#13;
+body:has(.campus360-company-app) .page,&#13;
+body:has(.campus360-company-app) .page-wrapper,&#13;
+body:has(.campus360-company-app) .main-content,&#13;
+body:has(.campus360-company-app) .container,&#13;
+body:has(.campus360-company-app) .container-fluid,&#13;
+body:has(.campus360-company-app) .row {&#13;
+  width:100% !important;&#13;
+  max-width:none !important;&#13;
+  min-width:0 !important;&#13;
+&#13;
+  margin:0 !important;&#13;
+  padding:0 !important;&#13;
+&#13;
+  border:0 !important;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   3. COMPLETELY HIDE NATIVE SERVICENOW NAVBAR&#13;
+   ========================================================= */&#13;
+&#13;
+body:has(.campus360-company-app) #sp-header,&#13;
+body:has(.campus360-company-app) header#sp-header,&#13;
+body:has(.campus360-company-app) .sp-header,&#13;
+body:has(.campus360-company-app) .sp-header-wrapper,&#13;
+body:has(.campus360-company-app) .sp-header-content,&#13;
+&#13;
+body:has(.campus360-company-app) .sp-navbar,&#13;
+body:has(.campus360-company-app) .sp-navbar-wrapper,&#13;
+body:has(.campus360-company-app) .sp-navbar-container,&#13;
+&#13;
+body:has(.campus360-company-app) #sp-nav-bar,&#13;
+body:has(.campus360-company-app) .sp-nav-bar,&#13;
+body:has(.campus360-company-app) .sp-nav,&#13;
+&#13;
+body:has(.campus360-company-app) .portal-header,&#13;
+body:has(.campus360-company-app) .portal-navbar,&#13;
+body:has(.campus360-company-app) .portal-nav,&#13;
+body:has(.campus360-company-app) .header-nav,&#13;
+&#13;
+body:has(.campus360-company-app) .navpage-header,&#13;
+body:has(.campus360-company-app) .navpage-header-content,&#13;
+&#13;
+body:has(.campus360-company-app) .navbar,&#13;
+body:has(.campus360-company-app) nav.navbar,&#13;
+body:has(.campus360-company-app) header.navbar,&#13;
+body:has(.campus360-company-app) .navbar-default,&#13;
+body:has(.campus360-company-app) .navbar-inverse,&#13;
+body:has(.campus360-company-app) .navbar-header,&#13;
+body:has(.campus360-company-app) .navbar-collapse {&#13;
+  display:none !important;&#13;
+  visibility:hidden !important;&#13;
+&#13;
+  width:0 !important;&#13;
+  height:0 !important;&#13;
+&#13;
+  min-width:0 !important;&#13;
+  min-height:0 !important;&#13;
+&#13;
+  max-width:0 !important;&#13;
+  max-height:0 !important;&#13;
+&#13;
+  margin:0 !important;&#13;
+  padding:0 !important;&#13;
+&#13;
+  overflow:hidden !important;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   4. CAMPUS360 APPLICATION&#13;
+   ========================================================= */&#13;
+&#13;
+.campus360-company-app {&#13;
+  position:fixed !important;&#13;
+&#13;
+  top:0 !important;&#13;
+  left:0 !important;&#13;
+  right:0 !important;&#13;
+  bottom:0 !important;&#13;
+&#13;
+  width:100vw !important;&#13;
+  height:100vh !important;&#13;
+&#13;
+  min-width:0 !important;&#13;
+  min-height:0 !important;&#13;
+&#13;
+  max-width:none !important;&#13;
+&#13;
+  margin:0 !important;&#13;
+  padding:0 !important;&#13;
+&#13;
+  overflow:hidden !important;&#13;
+&#13;
+  background:#f5f7fb !important;&#13;
+&#13;
+  color:#172033 !important;&#13;
+&#13;
+  font-family:&#13;
+    -apple-system,&#13;
+    BlinkMacSystemFont,&#13;
+    "Segoe UI",&#13;
+    Roboto,&#13;
+    Helvetica,&#13;
+    Arial,&#13;
+    sans-serif;&#13;
+&#13;
+  font-size:14px;&#13;
+&#13;
+  z-index:2147483647 !important;&#13;
+&#13;
+  isolation:isolate;&#13;
+&#13;
+  box-sizing:border-box;&#13;
+}&#13;
+&#13;
+&#13;
+.campus360-company-app *,&#13;
+.campus360-company-app *::before,&#13;
+.campus360-company-app *::after {&#13;
+  box-sizing:border-box;&#13;
+}&#13;
+&#13;
+&#13;
+.campus360-company-app button,&#13;
+.campus360-company-app input,&#13;
+.campus360-company-app select,&#13;
+.campus360-company-app textarea,&#13;
+.campus360-company-app a {&#13;
+  font-family:inherit;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   5. SIDEBAR&#13;
+   ========================================================= */&#13;
+&#13;
+.company-sidebar {&#13;
+  position:absolute !important;&#13;
+&#13;
+  top:0 !important;&#13;
+  left:0 !important;&#13;
+  bottom:0 !important;&#13;
+&#13;
+  width:230px !important;&#13;
+  min-width:230px !important;&#13;
+  max-width:230px !important;&#13;
+&#13;
+  height:100vh !important;&#13;
+&#13;
+  margin:0 !important;&#13;
+  padding:0 !important;&#13;
+&#13;
+  display:flex !important;&#13;
+  flex-direction:column !important;&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      180deg,&#13;
+      #100c27 0%,&#13;
+      #15102f 52%,&#13;
+      #0d0921 100%&#13;
+    ) !important;&#13;
+&#13;
+  border-right:1px solid #251d45 !important;&#13;
+&#13;
+  color:#fff !important;&#13;
+&#13;
+  overflow-x:hidden !important;&#13;
+  overflow-y:auto !important;&#13;
+&#13;
+  scrollbar-width:none !important;&#13;
+  -ms-overflow-style:none !important;&#13;
+&#13;
+  z-index:200 !important;&#13;
+&#13;
+  transition:&#13;
+    width .25s ease,&#13;
+    min-width .25s ease,&#13;
+    transform .25s ease,&#13;
+    opacity .2s ease;&#13;
+}&#13;
+&#13;
+&#13;
+.company-sidebar::-webkit-scrollbar {&#13;
+  width:0 !important;&#13;
+  height:0 !important;&#13;
+  display:none !important;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   6. SIDEBAR BRAND&#13;
+   ========================================================= */&#13;
+&#13;
+.sidebar-brand {&#13;
+  height:76px !important;&#13;
+  min-height:76px !important;&#13;
+&#13;
+  padding:14px 18px !important;&#13;
+&#13;
+  display:flex !important;&#13;
+  align-items:center !important;&#13;
+&#13;
+  gap:11px;&#13;
+&#13;
+  border-bottom:1px solid #241c43 !important;&#13;
+&#13;
+  flex-shrink:0;&#13;
+}&#13;
+&#13;
+&#13;
+.brand-logo {&#13;
+  width:44px;&#13;
+  height:44px;&#13;
+&#13;
+  min-width:44px;&#13;
+&#13;
+  border-radius:12px;&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      135deg,&#13;
+      #8b5cf6,&#13;
+      #6d28d9&#13;
+    );&#13;
+&#13;
+  color:#fff;&#13;
+&#13;
+  display:flex;&#13;
+  align-items:center;&#13;
+  justify-content:center;&#13;
+&#13;
+  font-size:24px;&#13;
+  font-weight:900;&#13;
+&#13;
+  box-shadow:&#13;
+    0 7px 18px rgba(123,63,240,.30);&#13;
+}&#13;
+&#13;
+&#13;
+.brand-text {&#13;
+  min-width:0;&#13;
+}&#13;
+&#13;
+&#13;
+.brand-title {&#13;
+  color:#fff;&#13;
+&#13;
+  font-size:18px;&#13;
+&#13;
+  line-height:1.1;&#13;
+&#13;
+  font-weight:900;&#13;
+&#13;
+  white-space:nowrap;&#13;
+}&#13;
+&#13;
+&#13;
+.brand-subtitle {&#13;
+  margin-top:4px;&#13;
+&#13;
+  color:#b9a8f3;&#13;
+&#13;
+  font-size:10px;&#13;
+&#13;
+  font-weight:800;&#13;
+&#13;
+  letter-spacing:.65px;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   7. TPO PROFILE&#13;
+   ========================================================= */&#13;
+&#13;
+.tpo-profile {&#13;
+  margin:15px 11px !important;&#13;
+&#13;
+  padding:13px 11px !important;&#13;
+&#13;
+  border-radius:14px !important;&#13;
+&#13;
+  background:#1b1539 !important;&#13;
+&#13;
+  border:1px solid #302356 !important;&#13;
+&#13;
+  display:flex !important;&#13;
+&#13;
+  align-items:center !important;&#13;
+&#13;
+  gap:10px;&#13;
+&#13;
+  flex-shrink:0;&#13;
+}&#13;
+&#13;
+&#13;
+.profile-avatar {&#13;
+  width:44px;&#13;
+  height:44px;&#13;
+&#13;
+  min-width:44px;&#13;
+&#13;
+  border-radius:50%;&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      135deg,&#13;
+      #8b5cf6,&#13;
+      #6935df&#13;
+    );&#13;
+&#13;
+  color:#fff;&#13;
+&#13;
+  display:flex;&#13;
+&#13;
+  align-items:center;&#13;
+&#13;
+  justify-content:center;&#13;
+&#13;
+  font-size:13px;&#13;
+&#13;
+  font-weight:900;&#13;
+}&#13;
+&#13;
+&#13;
+.profile-info {&#13;
+  min-width:0;&#13;
+}&#13;
+&#13;
+&#13;
+.profile-name {&#13;
+  color:#fff;&#13;
+&#13;
+  font-size:13px;&#13;
+&#13;
+  font-weight:900;&#13;
+}&#13;
+&#13;
+&#13;
+.profile-role {&#13;
+  margin-top:3px;&#13;
+&#13;
+  color:#bba8f4;&#13;
+&#13;
+  font-size:10px;&#13;
+&#13;
+  font-weight:800;&#13;
+}&#13;
+&#13;
+&#13;
+.profile-office {&#13;
+  margin-top:3px;&#13;
+&#13;
+  color:#aaa3bd;&#13;
+&#13;
+  font-size:8px;&#13;
+&#13;
+  font-weight:600;&#13;
+&#13;
+  white-space:nowrap;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   8. SIDEBAR NAVIGATION&#13;
+   ========================================================= */&#13;
+&#13;
+.sidebar-navigation {&#13;
+  flex:1 1 auto;&#13;
+&#13;
+  min-height:0;&#13;
+&#13;
+  padding:2px 10px 25px !important;&#13;
+&#13;
+  overflow-y:auto !important;&#13;
+  overflow-x:hidden !important;&#13;
+&#13;
+  scrollbar-width:none !important;&#13;
+  -ms-overflow-style:none !important;&#13;
+}&#13;
+&#13;
+&#13;
+.sidebar-navigation::-webkit-scrollbar {&#13;
+  width:0 !important;&#13;
+  height:0 !important;&#13;
+  display:none !important;&#13;
+}&#13;
+&#13;
+&#13;
+.nav-section-title {&#13;
+  margin:15px 12px 7px;&#13;
+&#13;
+  color:#928ba6;&#13;
+&#13;
+  font-size:9px;&#13;
+&#13;
+  font-weight:900;&#13;
+&#13;
+  letter-spacing:1.3px;&#13;
+}&#13;
+&#13;
+&#13;
+.sidebar-nav-item {&#13;
+  width:100%;&#13;
+&#13;
+  min-height:39px;&#13;
+&#13;
+  margin:3px 0;&#13;
+&#13;
+  padding:0 11px;&#13;
+&#13;
+  display:flex;&#13;
+&#13;
+  align-items:center;&#13;
+&#13;
+  gap:9px;&#13;
+&#13;
+  border-radius:9px;&#13;
+&#13;
+  background:transparent !important;&#13;
+&#13;
+  color:#ebe8f5 !important;&#13;
+&#13;
+  text-decoration:none !important;&#13;
+&#13;
+  cursor:pointer;&#13;
+&#13;
+  font-size:12px;&#13;
+&#13;
+  font-weight:650;&#13;
+&#13;
+  transition:&#13;
+    background .16s ease,&#13;
+    color .16s ease,&#13;
+    transform .16s ease;&#13;
+}&#13;
+&#13;
+&#13;
+.sidebar-nav-item:hover {&#13;
+  background:#211a43 !important;&#13;
+&#13;
+  color:#fff !important;&#13;
+&#13;
+  transform:translateX(2px);&#13;
+&#13;
+  text-decoration:none !important;&#13;
+}&#13;
+&#13;
+&#13;
+.sidebar-nav-item.active {&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      90deg,&#13;
+      #7b3ff0,&#13;
+      #8643ed&#13;
+    ) !important;&#13;
+&#13;
+  color:#fff !important;&#13;
+&#13;
+  font-weight:900;&#13;
+&#13;
+  box-shadow:&#13;
+    0 6px 14px rgba(123,63,240,.24);&#13;
+}&#13;
+&#13;
+&#13;
+.nav-icon {&#13;
+  width:20px;&#13;
+&#13;
+  min-width:20px;&#13;
+&#13;
+  text-align:center;&#13;
+&#13;
+  color:#b8b0cb;&#13;
+&#13;
+  font-size:15px;&#13;
+}&#13;
+&#13;
+&#13;
+.sidebar-nav-item.active .nav-icon,&#13;
+.sidebar-nav-item:hover .nav-icon {&#13;
+  color:#fff;&#13;
+}&#13;
+&#13;
+&#13;
+.nav-label {&#13;
+  flex:1;&#13;
+&#13;
+  min-width:0;&#13;
+&#13;
+  white-space:nowrap;&#13;
+}&#13;
+&#13;
+&#13;
+.nav-count {&#13;
+  min-width:22px;&#13;
+&#13;
+  height:22px;&#13;
+&#13;
+  padding:0 6px;&#13;
+&#13;
+  border-radius:50%;&#13;
+&#13;
+  display:flex;&#13;
+&#13;
+  align-items:center;&#13;
+&#13;
+  justify-content:center;&#13;
+&#13;
+  background:#33235f;&#13;
+&#13;
+  color:#d8c9ff;&#13;
+&#13;
+  font-size:9px;&#13;
+&#13;
+  font-weight:900;&#13;
+&#13;
+  flex-shrink:0;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   9. MAIN APPLICATION AREA&#13;
+   ========================================================= */&#13;
+&#13;
+.company-main {&#13;
+  position:absolute !important;&#13;
+&#13;
+  top:0 !important;&#13;
+  right:0 !important;&#13;
+  bottom:0 !important;&#13;
+  left:230px !important;&#13;
+&#13;
+  width:calc(100vw - 230px) !important;&#13;
+&#13;
+  height:100vh !important;&#13;
+&#13;
+  min-width:0 !important;&#13;
+  max-width:none !important;&#13;
+&#13;
+  margin:0 !important;&#13;
+  padding:0 !important;&#13;
+&#13;
+  background:#f5f7fb !important;&#13;
+&#13;
+  overflow-x:hidden !important;&#13;
+  overflow-y:auto !important;&#13;
+&#13;
+  scrollbar-width:thin;&#13;
+&#13;
+  scrollbar-color:&#13;
+    #b9afd1&#13;
+    #f1f3f6;&#13;
+&#13;
+  z-index:50 !important;&#13;
+&#13;
+  transition:&#13;
+    left .25s ease,&#13;
+    width .25s ease;&#13;
+}&#13;
+&#13;
+&#13;
+/* RIGHT PAGE SCROLLBAR */&#13;
+&#13;
+.company-main::-webkit-scrollbar {&#13;
+  width:9px !important;&#13;
+}&#13;
+&#13;
+&#13;
+.company-main::-webkit-scrollbar-track {&#13;
+  background:#f1f3f6 !important;&#13;
+}&#13;
+&#13;
+&#13;
+.company-main::-webkit-scrollbar-thumb {&#13;
+  background:#b9afd1 !important;&#13;
+&#13;
+  border-radius:10px !important;&#13;
+&#13;
+  border:2px solid #f1f3f6 !important;&#13;
+}&#13;
+&#13;
+&#13;
+.company-main::-webkit-scrollbar-thumb:hover {&#13;
+  background:#9886bd !important;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   10. CUSTOM CAMPUS360 TOP NAVBAR&#13;
+   ========================================================= */&#13;
+&#13;
+.company-topbar {&#13;
+  position:sticky !important;&#13;
+&#13;
+  top:0 !important;&#13;
+&#13;
+  z-index:1000 !important;&#13;
+&#13;
+  width:100% !important;&#13;
+&#13;
+  height:72px !important;&#13;
+&#13;
+  min-height:72px !important;&#13;
+&#13;
+  margin:0 !important;&#13;
+&#13;
+  padding:0 24px !important;&#13;
+&#13;
+  display:flex !important;&#13;
+&#13;
+  align-items:center !important;&#13;
+&#13;
+  justify-content:space-between !important;&#13;
+&#13;
+  background:#ffffff !important;&#13;
+&#13;
+  border-bottom:1px solid #e4e8ef !important;&#13;
+&#13;
+  box-shadow:&#13;
+    0 1px 3px rgba(25,31,48,.025) !important;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   11. TOPBAR LEFT&#13;
+   ========================================================= */&#13;
+&#13;
+.topbar-left {&#13;
+  min-width:0;&#13;
+&#13;
+  display:flex;&#13;
+&#13;
+  align-items:center;&#13;
+&#13;
+  gap:16px;&#13;
+&#13;
+  flex-shrink:1;&#13;
+}&#13;
+&#13;
+&#13;
+.sidebar-toggle {&#13;
+  width:43px !important;&#13;
+&#13;
+  height:43px !important;&#13;
+&#13;
+  min-width:43px !important;&#13;
+&#13;
+  padding:0 !important;&#13;
+&#13;
+  border:1px solid #dfe3ea !important;&#13;
+&#13;
+  border-radius:11px !important;&#13;
+&#13;
+  background:#ffffff !important;&#13;
+&#13;
+  color:#58657a !important;&#13;
+&#13;
+  display:flex !important;&#13;
+&#13;
+  align-items:center !important;&#13;
+&#13;
+  justify-content:center !important;&#13;
+&#13;
+  font-size:19px !important;&#13;
+&#13;
+  line-height:1 !important;&#13;
+&#13;
+  cursor:pointer !important;&#13;
+&#13;
+  outline:none !important;&#13;
+&#13;
+  box-shadow:none !important;&#13;
+&#13;
+  transition:&#13;
+    background .15s ease,&#13;
+    border-color .15s ease,&#13;
+    color .15s ease,&#13;
+    transform .15s ease;&#13;
+}&#13;
+&#13;
+&#13;
+.sidebar-toggle:hover {&#13;
+  background:#f7f2ff !important;&#13;
+&#13;
+  border-color:#d0c1f2 !important;&#13;
+&#13;
+  color:#6837d6 !important;&#13;
+}&#13;
+&#13;
+&#13;
+.sidebar-toggle:active {&#13;
+  transform:scale(.95);&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   12. CAMPUS360 PAGE TITLE&#13;
+   ========================================================= */&#13;
+&#13;
+.breadcrumb {&#13;
+  min-width:0;&#13;
+&#13;
+  display:flex;&#13;
+&#13;
+  flex-direction:column;&#13;
+&#13;
+  justify-content:center;&#13;
+&#13;
+  gap:3px;&#13;
+&#13;
+  white-space:nowrap;&#13;
+}&#13;
+&#13;
+&#13;
+.breadcrumb-small {&#13;
+  color:#723bd7;&#13;
+&#13;
+  font-size:8px;&#13;
+&#13;
+  font-weight:950;&#13;
+&#13;
+  letter-spacing:1.65px;&#13;
+&#13;
+  line-height:1;&#13;
+}&#13;
+&#13;
+&#13;
+.breadcrumb-title {&#13;
+  color:#141d30;&#13;
+&#13;
+  font-size:17px;&#13;
+&#13;
+  font-weight:950;&#13;
+&#13;
+  line-height:1.1;&#13;
+&#13;
+  letter-spacing:-.2px;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   13. TOPBAR RIGHT&#13;
+   ========================================================= */&#13;
+&#13;
+.topbar-right {&#13;
+  min-width:0;&#13;
+&#13;
+  display:flex;&#13;
+&#13;
+  align-items:center;&#13;
+&#13;
+  justify-content:flex-end;&#13;
+&#13;
+  gap:9px;&#13;
+&#13;
+  margin-left:auto;&#13;
+&#13;
+  flex-shrink:0;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   14. NAVBAR SEARCH&#13;
+   ========================================================= */&#13;
+&#13;
+.global-search {&#13;
+  width:315px !important;&#13;
+&#13;
+  height:42px !important;&#13;
+&#13;
+  min-width:230px !important;&#13;
+&#13;
+  padding:0 13px !important;&#13;
+&#13;
+  border:1px solid #dfe4ec !important;&#13;
+&#13;
+  border-radius:11px !important;&#13;
+&#13;
+  background:#ffffff !important;&#13;
+&#13;
+  display:flex !important;&#13;
+&#13;
+  align-items:center !important;&#13;
+&#13;
+  gap:8px;&#13;
+&#13;
+  flex-shrink:1;&#13;
+&#13;
+  transition:&#13;
+    border-color .15s ease,&#13;
+    box-shadow .15s ease,&#13;
+    background .15s ease;&#13;
+}&#13;
+&#13;
+&#13;
+.global-search:hover {&#13;
+  border-color:#d7dce6 !important;&#13;
+}&#13;
+&#13;
+&#13;
+.global-search:focus-within {&#13;
+  background:#fff !important;&#13;
+&#13;
+  border-color:#a88be8 !important;&#13;
+&#13;
+  box-shadow:&#13;
+    0 0 0 3px rgba(123,63,240,.08) !important;&#13;
+}&#13;
+&#13;
+&#13;
+.global-search-icon {&#13;
+  color:#6f3ce0;&#13;
+&#13;
+  font-size:18px;&#13;
+&#13;
+  line-height:1;&#13;
+&#13;
+  flex-shrink:0;&#13;
+}&#13;
+&#13;
+&#13;
+.global-search input {&#13;
+  width:100% !important;&#13;
+&#13;
+  min-width:0 !important;&#13;
+&#13;
+  height:100% !important;&#13;
+&#13;
+  padding:0 !important;&#13;
+&#13;
+  margin:0 !important;&#13;
+&#13;
+  border:0 !important;&#13;
+&#13;
+  outline:0 !important;&#13;
+&#13;
+  background:transparent !important;&#13;
+&#13;
+  color:#29334a !important;&#13;
+&#13;
+  font-size:11px !important;&#13;
+&#13;
+  font-weight:600 !important;&#13;
+&#13;
+  box-shadow:none !important;&#13;
+}&#13;
+&#13;
+&#13;
+.global-search input::placeholder {&#13;
+  color:#929aaa;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   15. REFRESH BUTTON&#13;
+   ========================================================= */&#13;
+&#13;
+.topbar-circle-button {&#13;
+  position:relative;&#13;
+&#13;
+  width:42px !important;&#13;
+&#13;
+  height:42px !important;&#13;
+&#13;
+  min-width:42px !important;&#13;
+&#13;
+  padding:0 !important;&#13;
+&#13;
+  border-radius:50% !important;&#13;
+&#13;
+  border:1px solid #dfe3eb !important;&#13;
+&#13;
+  background:#ffffff !important;&#13;
+&#13;
+  color:#59667a !important;&#13;
+&#13;
+  display:flex !important;&#13;
+&#13;
+  align-items:center !important;&#13;
+&#13;
+  justify-content:center !important;&#13;
+&#13;
+  font-size:18px !important;&#13;
+&#13;
+  line-height:1 !important;&#13;
+&#13;
+  cursor:pointer !important;&#13;
+&#13;
+  outline:none !important;&#13;
+&#13;
+  box-shadow:none !important;&#13;
+&#13;
+  transition:&#13;
+    background .15s ease,&#13;
+    border-color .15s ease,&#13;
+    color .15s ease,&#13;
+    transform .15s ease;&#13;
+}&#13;
+&#13;
+&#13;
+.topbar-circle-button:hover {&#13;
+  background:#f7f2ff !important;&#13;
+&#13;
+  border-color:#d1c1f3 !important;&#13;
+&#13;
+  color:#6736d5 !important;&#13;
+}&#13;
+&#13;
+&#13;
+.topbar-circle-button:active {&#13;
+  transform:scale(.95);&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   16. BELL BUTTON&#13;
+   IMPORTANT:&#13;
+   HTML USES .topbar-icon-button&#13;
+   ========================================================= */&#13;
+&#13;
+.topbar-icon-button {&#13;
+  position:relative !important;&#13;
+&#13;
+  width:42px !important;&#13;
+&#13;
+  height:42px !important;&#13;
+&#13;
+  min-width:42px !important;&#13;
+&#13;
+  padding:0 !important;&#13;
+&#13;
+  margin:0 !important;&#13;
+&#13;
+  border-radius:50% !important;&#13;
+&#13;
+  border:1px solid #dfe3eb !important;&#13;
+&#13;
+  background:#ffffff !important;&#13;
+&#13;
+  color:#59667a !important;&#13;
+&#13;
+  display:flex !important;&#13;
+&#13;
+  align-items:center !important;&#13;
+&#13;
+  justify-content:center !important;&#13;
+&#13;
+  font-size:17px !important;&#13;
+&#13;
+  line-height:1 !important;&#13;
+&#13;
+  cursor:pointer !important;&#13;
+&#13;
+  outline:none !important;&#13;
+&#13;
+  box-shadow:none !important;&#13;
+&#13;
+  transition:&#13;
+    background .15s ease,&#13;
+    border-color .15s ease,&#13;
+    color .15s ease,&#13;
+    transform .15s ease;&#13;
+}&#13;
+&#13;
+&#13;
+.topbar-icon-button i {&#13;
+  margin:0 !important;&#13;
+&#13;
+  padding:0 !important;&#13;
+&#13;
+  color:inherit !important;&#13;
+&#13;
+  font-size:17px !important;&#13;
+&#13;
+  line-height:1 !important;&#13;
+}&#13;
+&#13;
+&#13;
+.topbar-icon-button:hover {&#13;
+  background:#f7f2ff !important;&#13;
+&#13;
+  border-color:#d1c1f3 !important;&#13;
+&#13;
+  color:#6736d5 !important;&#13;
+}&#13;
+&#13;
+&#13;
+.topbar-icon-button:active {&#13;
+  transform:scale(.95);&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   17. BELL NOTIFICATION DOT&#13;
+   YOUR HTML HAS AN EMPTY SPAN&#13;
+   ========================================================= */&#13;
+&#13;
+.notification-button span {&#13;
+  position:absolute !important;&#13;
+&#13;
+  top:7px !important;&#13;
+&#13;
+  right:7px !important;&#13;
+&#13;
+  width:7px !important;&#13;
+&#13;
+  height:7px !important;&#13;
+&#13;
+  min-width:7px !important;&#13;
+&#13;
+  min-height:7px !important;&#13;
+&#13;
+  padding:0 !important;&#13;
+&#13;
+  margin:0 !important;&#13;
+&#13;
+  border-radius:50% !important;&#13;
+&#13;
+  background:#ee4965 !important;&#13;
+&#13;
+  border:1.5px solid #ffffff !important;&#13;
+&#13;
+  display:block !important;&#13;
+&#13;
+  box-sizing:border-box !important;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   18. NAVBAR DIVIDER&#13;
+   ========================================================= */&#13;
+&#13;
+.topbar-divider {&#13;
+  width:1px !important;&#13;
+&#13;
+  height:34px !important;&#13;
+&#13;
+  margin:0 6px !important;&#13;
+&#13;
+  background:#e5e8ef !important;&#13;
+&#13;
+  flex-shrink:0 !important;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   19. USER PROFILE&#13;
+   ========================================================= */&#13;
+&#13;
+.topbar-user {&#13;
+  display:flex !important;&#13;
+&#13;
+  align-items:center !important;&#13;
+&#13;
+  gap:8px !important;&#13;
+&#13;
+  flex-shrink:0 !important;&#13;
+&#13;
+  margin-left:1px !important;&#13;
+}&#13;
+&#13;
+&#13;
+.topbar-avatar {&#13;
+  width:40px !important;&#13;
+&#13;
+  height:40px !important;&#13;
+&#13;
+  min-width:40px !important;&#13;
+&#13;
+  border-radius:50% !important;&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      135deg,&#13;
+      #7c45e8,&#13;
+      #6d35db&#13;
+    ) !important;&#13;
+&#13;
+  color:#ffffff !important;&#13;
+&#13;
+  display:flex !important;&#13;
+&#13;
+  align-items:center !important;&#13;
+&#13;
+  justify-content:center !important;&#13;
+&#13;
+  font-size:11px !important;&#13;
+&#13;
+  font-weight:950 !important;&#13;
+&#13;
+  box-shadow:&#13;
+    0 4px 10px rgba(123,63,240,.14) !important;&#13;
+}&#13;
+&#13;
+&#13;
+.topbar-user-details {&#13;
+  min-width:0;&#13;
+&#13;
+  display:flex !important;&#13;
+&#13;
+  flex-direction:column !important;&#13;
+&#13;
+  justify-content:center !important;&#13;
+&#13;
+  gap:2px !important;&#13;
+}&#13;
+&#13;
+&#13;
+.topbar-user-name {&#13;
+  color:#1d2738 !important;&#13;
+&#13;
+  font-size:11px !important;&#13;
+&#13;
+  font-weight:950 !important;&#13;
+&#13;
+  line-height:1.1 !important;&#13;
+&#13;
+  white-space:nowrap !important;&#13;
+}&#13;
+&#13;
+&#13;
+.topbar-user-role {&#13;
+  color:#929aaa !important;&#13;
+&#13;
+  font-size:9px !important;&#13;
+&#13;
+  font-weight:700 !important;&#13;
+&#13;
+  line-height:1 !important;&#13;
+&#13;
+  white-space:nowrap !important;&#13;
+}&#13;
+&#13;
+&#13;
+.topbar-chevron {&#13;
+  margin-left:2px !important;&#13;
+&#13;
+  color:#59667a !important;&#13;
+&#13;
+  font-size:15px !important;&#13;
+&#13;
+  line-height:1 !important;&#13;
+&#13;
+  display:flex !important;&#13;
+&#13;
+  align-items:center !important;&#13;
+&#13;
+  justify-content:center !important;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   20. PAGE CONTENT&#13;
+   ========================================================= */&#13;
+&#13;
+.company-page-content {&#13;
+  width:100% !important;&#13;
+&#13;
+  max-width:1480px !important;&#13;
+&#13;
+  min-width:0 !important;&#13;
+&#13;
+  margin:0 auto !important;&#13;
+&#13;
+  padding:27px 30px 45px !important;&#13;
+&#13;
+  background:#f5f7fb !important;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   21. PAGE HEADING&#13;
+   ========================================================= */&#13;
+&#13;
+.page-heading-row {&#13;
+  width:100%;&#13;
+&#13;
+  display:flex;&#13;
+&#13;
+  align-items:flex-end;&#13;
+&#13;
+  justify-content:space-between;&#13;
+&#13;
+  gap:25px;&#13;
+&#13;
+  margin-bottom:21px;&#13;
+}&#13;
+&#13;
+&#13;
+.page-kicker {&#13;
+  margin-bottom:8px;&#13;
+&#13;
+  color:#6e3ad8;&#13;
+&#13;
+  font-size:10px;&#13;
+&#13;
+  font-weight:950;&#13;
+&#13;
+  letter-spacing:1.2px;&#13;
+}&#13;
+&#13;
+&#13;
+.kicker-dot {&#13;
+  display:inline-block;&#13;
+&#13;
+  width:8px;&#13;
+&#13;
+  height:8px;&#13;
+&#13;
+  border-radius:50%;&#13;
+&#13;
+  background:#7a43e6;&#13;
+&#13;
+  margin-right:6px;&#13;
+}&#13;
+&#13;
+&#13;
+.page-heading-row h1 {&#13;
+  margin:0;&#13;
+&#13;
+  color:#121a2c;&#13;
+&#13;
+  font-size:29px;&#13;
+&#13;
+  font-weight:950;&#13;
+&#13;
+  letter-spacing:-.5px;&#13;
+}&#13;
+&#13;
+&#13;
+.page-heading-row p {&#13;
+  margin:7px 0 0;&#13;
+&#13;
+  max-width:800px;&#13;
+&#13;
+  color:#70798d;&#13;
+&#13;
+  font-size:12px;&#13;
+&#13;
+  font-weight:600;&#13;
+&#13;
+  line-height:1.5;&#13;
+}&#13;
+&#13;
+&#13;
+.page-heading-actions {&#13;
+  display:flex;&#13;
+&#13;
+  align-items:center;&#13;
+&#13;
+  gap:9px;&#13;
+&#13;
+  flex-shrink:0;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   22. PAGE ACTION BUTTONS&#13;
+   ========================================================= */&#13;
+&#13;
+.refresh-data-button,&#13;
+.add-company-button {&#13;
+  height:42px;&#13;
+&#13;
+  border-radius:9px;&#13;
+&#13;
+  padding:0 15px;&#13;
+&#13;
+  font-size:11px;&#13;
+&#13;
+  font-weight:900;&#13;
+&#13;
+  cursor:pointer;&#13;
+&#13;
+  white-space:nowrap;&#13;
+}&#13;
+&#13;
+&#13;
+.refresh-data-button {&#13;
+  background:#ffffff;&#13;
+&#13;
+  border:1px solid #d8caf7;&#13;
+&#13;
+  color:#6939d7;&#13;
+}&#13;
+&#13;
+&#13;
+.refresh-data-button:hover {&#13;
+  background:#f8f4ff;&#13;
+}&#13;
+&#13;
+&#13;
+.add-company-button {&#13;
+  background:#7639e6;&#13;
+&#13;
+  border:1px solid #7639e6;&#13;
+&#13;
+  color:#ffffff;&#13;
+&#13;
+  box-shadow:&#13;
+    0 6px 13px rgba(108,61,224,.20);&#13;
+}&#13;
+&#13;
+&#13;
+.add-company-button:hover {&#13;
+  background:#6630d3;&#13;
+&#13;
+  border-color:#6630d3;&#13;
+}&#13;
+&#13;
+&#13;
+.add-plus {&#13;
+  margin-right:4px;&#13;
+&#13;
+  font-size:17px;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   23. KPI CARDS&#13;
+   ========================================================= */&#13;
+&#13;
+.company-kpi-grid {&#13;
+  width:100%;&#13;
+&#13;
+  display:grid;&#13;
+&#13;
+  grid-template-columns:&#13;
+    repeat(4,minmax(0,1fr));&#13;
+&#13;
+  gap:15px;&#13;
+&#13;
+  margin-bottom:21px;&#13;
+}&#13;
+&#13;
+&#13;
+.company-kpi-card {&#13;
+  min-width:0;&#13;
+&#13;
+  min-height:137px;&#13;
+&#13;
+  padding:18px;&#13;
+&#13;
+  border-radius:16px;&#13;
+&#13;
+  display:flex;&#13;
+&#13;
+  align-items:center;&#13;
+&#13;
+  gap:15px;&#13;
+&#13;
+  border:1px solid;&#13;
+&#13;
+  position:relative;&#13;
+&#13;
+  overflow:hidden;&#13;
+&#13;
+  box-shadow:&#13;
+    0 4px 12px rgba(31,42,68,.035);&#13;
+}&#13;
+&#13;
+&#13;
+.total-card {&#13;
+  background:#f1edff;&#13;
+&#13;
+  border-color:#ddd2fb;&#13;
+}&#13;
+&#13;
+&#13;
+.active-card {&#13;
+  background:#ecfbf3;&#13;
+&#13;
+  border-color:#d0f0dd;&#13;
+}&#13;
+&#13;
+&#13;
+.inactive-card {&#13;
+  background:#fff8e6;&#13;
+&#13;
+  border-color:#f4e2b9;&#13;
+}&#13;
+&#13;
+&#13;
+.type-card {&#13;
+  background:#edf5ff;&#13;
+&#13;
+  border-color:#d7e8fb;&#13;
+}&#13;
+&#13;
+&#13;
+.kpi-icon {&#13;
+  width:54px;&#13;
+&#13;
+  height:54px;&#13;
+&#13;
+  min-width:54px;&#13;
+&#13;
+  border-radius:13px;&#13;
+&#13;
+  display:flex;&#13;
+&#13;
+  align-items:center;&#13;
+&#13;
+  justify-content:center;&#13;
+&#13;
+  font-size:22px;&#13;
+&#13;
+  font-weight:900;&#13;
+}&#13;
+&#13;
+&#13;
+.total-icon {&#13;
+  background:#e2d7ff;&#13;
+&#13;
+  color:#6a35d4;&#13;
+}&#13;
+&#13;
+&#13;
+.active-icon {&#13;
+  background:#cef2dd;&#13;
+&#13;
+  color:#169566;&#13;
+}&#13;
+&#13;
+&#13;
+.inactive-icon {&#13;
+  background:#ffe7b9;&#13;
+&#13;
+  color:#c78217;&#13;
+}&#13;
+&#13;
+&#13;
+.type-icon {&#13;
+  background:#d8eaff;&#13;
+&#13;
+  color:#367dca;&#13;
+}&#13;
+&#13;
+&#13;
+.kpi-content {&#13;
+  min-width:0;&#13;
+}&#13;
+&#13;
+&#13;
+.kpi-label {&#13;
+  color:#4e5262;&#13;
+&#13;
+  font-size:9px;&#13;
+&#13;
+  font-weight:900;&#13;
+&#13;
+  letter-spacing:.9px;&#13;
+}&#13;
+&#13;
+&#13;
+.kpi-value {&#13;
+  margin-top:3px;&#13;
+&#13;
+  color:#18213a;&#13;
+&#13;
+  font-size:31px;&#13;
+&#13;
+  line-height:1;&#13;
+&#13;
+  font-weight:950;&#13;
+}&#13;
+&#13;
+&#13;
+.total-card .kpi-value {&#13;
+  color:#5d2bc2;&#13;
+}&#13;
+&#13;
+&#13;
+.active-card .kpi-value {&#13;
+  color:#148052;&#13;
+}&#13;
+&#13;
+&#13;
+.inactive-card .kpi-value {&#13;
+  color:#b9780e;&#13;
+}&#13;
+&#13;
+&#13;
+.type-card .kpi-value {&#13;
+  color:#2d70b9;&#13;
+}&#13;
+&#13;
+&#13;
+.kpi-description {&#13;
+  margin-top:6px;&#13;
+&#13;
+  color:#687084;&#13;
+&#13;
+  font-size:9px;&#13;
+&#13;
+  font-weight:650;&#13;
+&#13;
+  line-height:1.3;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   24. FILTER BAR&#13;
+   ========================================================= */&#13;
+&#13;
+.company-filter-card {&#13;
+  width:100%;&#13;
+&#13;
+  min-height:69px;&#13;
+&#13;
+  padding:12px 16px;&#13;
+&#13;
+  margin-bottom:15px;&#13;
+&#13;
+  background:#fff;&#13;
+&#13;
+  border:1px solid #e0e4ec;&#13;
+&#13;
+  border-radius:14px;&#13;
+&#13;
+  box-shadow:&#13;
+    0 3px 12px rgba(32,45,80,.035);&#13;
+&#13;
+  display:flex;&#13;
+&#13;
+  align-items:center;&#13;
+}&#13;
+&#13;
+&#13;
+.filter-left {&#13;
+  width:100%;&#13;
+&#13;
+  display:grid;&#13;
+&#13;
+  grid-template-columns:&#13;
+    auto&#13;
+    minmax(250px,2fr)&#13;
+    minmax(150px,1fr)&#13;
+    minmax(150px,1fr)&#13;
+    minmax(140px,1fr)&#13;
+    auto;&#13;
+&#13;
+  gap:9px;&#13;
+&#13;
+  align-items:center;&#13;
+}&#13;
+&#13;
+&#13;
+.filter-company-count {&#13;
+  display:flex;&#13;
+&#13;
+  align-items:center;&#13;
+&#13;
+  gap:6px;&#13;
+&#13;
+  white-space:nowrap;&#13;
+}&#13;
+&#13;
+&#13;
+.filter-count-label {&#13;
+  color:#6f3bd8;&#13;
+&#13;
+  font-size:9px;&#13;
+&#13;
+  font-weight:900;&#13;
+&#13;
+  letter-spacing:.9px;&#13;
+}&#13;
+&#13;
+&#13;
+.filter-company-count strong {&#13;
+  color:#19223a;&#13;
+&#13;
+  font-size:17px;&#13;
+&#13;
+  font-weight:950;&#13;
+}&#13;
+&#13;
+&#13;
+.filter-company-count span:last-child {&#13;
+  color:#7d8494;&#13;
+&#13;
+  font-size:9px;&#13;
+&#13;
+  font-weight:600;&#13;
+}&#13;
+&#13;
+&#13;
+.directory-search {&#13;
+  height:40px;&#13;
+&#13;
+  border:1px solid #dfe4ec;&#13;
+&#13;
+  border-radius:8px;&#13;
+&#13;
+  background:#fff;&#13;
+&#13;
+  display:flex;&#13;
+&#13;
+  align-items:center;&#13;
+&#13;
+  gap:7px;&#13;
+&#13;
+  padding:0 10px;&#13;
+}&#13;
+&#13;
+&#13;
+.directory-search span {&#13;
+  color:#6f40df;&#13;
+&#13;
+  font-size:18px;&#13;
+}&#13;
+&#13;
+&#13;
+.directory-search input {&#13;
+  width:100%;&#13;
+&#13;
+  min-width:0;&#13;
+&#13;
+  border:0;&#13;
+&#13;
+  outline:0;&#13;
+&#13;
+  background:transparent;&#13;
+&#13;
+  color:#29334a;&#13;
+&#13;
+  font-size:10px;&#13;
+&#13;
+  font-weight:600;&#13;
+}&#13;
+&#13;
+&#13;
+.directory-search input::placeholder {&#13;
+  color:#9299a8;&#13;
+}&#13;
+&#13;
+&#13;
+.company-filter-select {&#13;
+  width:100%;&#13;
+&#13;
+  height:40px;&#13;
+&#13;
+  padding:0 9px;&#13;
+&#13;
+  border:1px solid #dfe4ec;&#13;
+&#13;
+  border-radius:8px;&#13;
+&#13;
+  background:#fff;&#13;
+&#13;
+  color:#29334a;&#13;
+&#13;
+  font-size:10px;&#13;
+&#13;
+  font-weight:700;&#13;
+&#13;
+  outline:0;&#13;
+&#13;
+  cursor:pointer;&#13;
+}&#13;
+&#13;
+&#13;
+.company-filter-select:focus {&#13;
+  border-color:#7745df;&#13;
+&#13;
+  box-shadow:&#13;
+    0 0 0 3px rgba(119,69,223,.08);&#13;
+}&#13;
+&#13;
+&#13;
+.clear-filter-button {&#13;
+  height:40px;&#13;
+&#13;
+  padding:0 13px;&#13;
+&#13;
+  border:1px solid #dfe4ec;&#13;
+&#13;
+  border-radius:8px;&#13;
+&#13;
+  background:#fff;&#13;
+&#13;
+  color:#626b7c;&#13;
+&#13;
+  font-size:10px;&#13;
+&#13;
+  font-weight:800;&#13;
+&#13;
+  cursor:pointer;&#13;
+}&#13;
+&#13;
+&#13;
+.clear-filter-button:hover {&#13;
+  background:#f7f3ff;&#13;
+&#13;
+  border-color:#d6c9f5;&#13;
+&#13;
+  color:#6435d0;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   25. COMPANY DIRECTORY&#13;
+   ========================================================= */&#13;
+&#13;
+.company-directory-card {&#13;
+  position:relative;&#13;
+&#13;
+  width:100%;&#13;
+&#13;
+  background:#fff;&#13;
+&#13;
+  border:1px solid #dddff0;&#13;
+&#13;
+  border-radius:16px;&#13;
+&#13;
+  overflow:hidden;&#13;
+&#13;
+  box-shadow:&#13;
+    0 5px 16px rgba(31,42,68,.045);&#13;
+}&#13;
+&#13;
+&#13;
+.company-directory-card::before {&#13;
+  content:"";&#13;
+&#13;
+  display:block;&#13;
+&#13;
+  width:100%;&#13;
+&#13;
+  height:5px;&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      90deg,&#13;
+      #7b3ff0 0%,&#13;
+      #7b3ff0 25%,&#13;
+      #367dcc 25%,&#13;
+      #367dcc 47%,&#13;
+      #18a56f 47%,&#13;
+      #18a56f 68%,&#13;
+      #f0a629 68%,&#13;
+      #f0a629 84%,&#13;
+      #e75570 84%,&#13;
+      #e75570 100%&#13;
+    );&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   26. DIRECTORY HEADER&#13;
+   ========================================================= */&#13;
+&#13;
+.directory-header {&#13;
+  min-height:78px;&#13;
+&#13;
+  padding:16px 19px;&#13;
+&#13;
+  display:flex;&#13;
+&#13;
+  align-items:center;&#13;
+&#13;
+  justify-content:space-between;&#13;
+&#13;
+  border-bottom:1px solid #e6e3f0;&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      90deg,&#13;
+      #faf7ff 0%,&#13;
+      #ffffff 75%&#13;
+    );&#13;
+}&#13;
+&#13;
+&#13;
+.directory-kicker {&#13;
+  margin-bottom:4px;&#13;
+&#13;
+  color:#6f39d9;&#13;
+&#13;
+  font-size:8px;&#13;
+&#13;
+  font-weight:950;&#13;
+&#13;
+  letter-spacing:1.2px;&#13;
+}&#13;
+&#13;
+&#13;
+.directory-header h2 {&#13;
+  margin:0;&#13;
+&#13;
+  color:#172033;&#13;
+&#13;
+  font-size:20px;&#13;
+&#13;
+  font-weight:950;&#13;
+}&#13;
+&#13;
+&#13;
+.directory-header-right {&#13;
+  display:flex;&#13;
+&#13;
+  align-items:center;&#13;
+&#13;
+  gap:12px;&#13;
+}&#13;
+&#13;
+&#13;
+.directory-record-count {&#13;
+  padding:7px 10px;&#13;
+&#13;
+  border-radius:8px;&#13;
+&#13;
+  background:#f0eaff;&#13;
+&#13;
+  border:1px solid #ddd0f7;&#13;
+&#13;
+  color:#6b38d2;&#13;
+&#13;
+  font-size:9px;&#13;
+&#13;
+  font-weight:900;&#13;
+}&#13;
+&#13;
+&#13;
+.directory-add-button {&#13;
+  height:36px;&#13;
+&#13;
+  padding:0 13px;&#13;
+&#13;
+  border:0;&#13;
+&#13;
+  border-radius:8px;&#13;
+&#13;
+  background:#7639e6;&#13;
+&#13;
+  color:#fff;&#13;
+&#13;
+  font-size:10px;&#13;
+&#13;
+  font-weight:900;&#13;
+&#13;
+  cursor:pointer;&#13;
+}&#13;
+&#13;
+&#13;
+.directory-add-button:hover {&#13;
+  background:#6630d3;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   27. COMPANY TABLE&#13;
+   ========================================================= */&#13;
+&#13;
+.company-table-container {&#13;
+  width:100%;&#13;
+&#13;
+  overflow-x:auto;&#13;
+&#13;
+  overflow-y:hidden;&#13;
+}&#13;
+&#13;
+&#13;
+.company-table {&#13;
+  width:100%;&#13;
+&#13;
+  min-width:1280px;&#13;
+&#13;
+  border-collapse:collapse;&#13;
+&#13;
+  table-layout:fixed;&#13;
+}&#13;
+&#13;
+&#13;
+.company-table th {&#13;
+  height:47px;&#13;
+&#13;
+  padding:0 14px;&#13;
+&#13;
+  background:#fafbfe;&#13;
+&#13;
+  border-bottom:1px solid #e3e5ee;&#13;
+&#13;
+  color:#70788d;&#13;
+&#13;
+  text-align:left;&#13;
+&#13;
+  font-size:8px;&#13;
+&#13;
+  font-weight:950;&#13;
+&#13;
+  letter-spacing:.8px;&#13;
+&#13;
+  white-space:nowrap;&#13;
+}&#13;
+&#13;
+&#13;
+.company-table th:nth-child(1) {&#13;
+  width:19%;&#13;
+&#13;
+  color:#6d36d9;&#13;
+}&#13;
+&#13;
+&#13;
+.company-table th:nth-child(2) {&#13;
+  width:9%;&#13;
+}&#13;
+&#13;
+&#13;
+.company-table th:nth-child(3) {&#13;
+  width:12%;&#13;
+&#13;
+  color:#2e73bd;&#13;
+}&#13;
+&#13;
+&#13;
+.company-table th:nth-child(4) {&#13;
+  width:11%;&#13;
+&#13;
+  color:#6d36d9;&#13;
+}&#13;
+&#13;
+&#13;
+.company-table th:nth-child(5) {&#13;
+  width:15%;&#13;
+&#13;
+  color:#367dcc;&#13;
+}&#13;
+&#13;
+&#13;
+.company-table th:nth-child(6) {&#13;
+  width:11%;&#13;
+}&#13;
+&#13;
+&#13;
+.company-table th:nth-child(7) {&#13;
+  width:10%;&#13;
+&#13;
+  color:#b7770d;&#13;
+}&#13;
+&#13;
+&#13;
+.company-table th:nth-child(8) {&#13;
+  width:8%;&#13;
+&#13;
+  color:#168456;&#13;
+}&#13;
+&#13;
+&#13;
+.company-table th:nth-child(9) {&#13;
+  width:5%;&#13;
+&#13;
+  color:#6d36d9;&#13;
+}&#13;
+&#13;
+&#13;
+.company-table td {&#13;
+  height:70px;&#13;
+&#13;
+  padding:10px 14px;&#13;
+&#13;
+  border-bottom:1px solid #eceef3;&#13;
+&#13;
+  vertical-align:middle;&#13;
+&#13;
+  color:#2b3449;&#13;
+&#13;
+  font-size:11px;&#13;
+&#13;
+  font-weight:600;&#13;
+&#13;
+  background:#fff;&#13;
+}&#13;
+&#13;
+&#13;
+.company-table tbody tr {&#13;
+  transition:&#13;
+    background .15s ease;&#13;
+}&#13;
+&#13;
+&#13;
+.company-table tbody tr:hover td {&#13;
+  background:#fbf9ff;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   28. COMPANY NAME&#13;
+   ========================================================= */&#13;
+&#13;
+.company-name-cell {&#13;
+  display:flex;&#13;
+&#13;
+  align-items:center;&#13;
+&#13;
+  gap:10px;&#13;
+&#13;
+  min-width:0;&#13;
+}&#13;
+&#13;
+&#13;
+.company-avatar {&#13;
+  width:40px;&#13;
+&#13;
+  height:40px;&#13;
+&#13;
+  min-width:40px;&#13;
+&#13;
+  border-radius:11px;&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      135deg,&#13;
+      #7b45e5,&#13;
+      #6331d7&#13;
+    );&#13;
+&#13;
+  color:#fff;&#13;
+&#13;
+  display:flex;&#13;
+&#13;
+  align-items:center;&#13;
+&#13;
+  justify-content:center;&#13;
+&#13;
+  font-size:11px;&#13;
+&#13;
+  font-weight:950;&#13;
+}&#13;
+&#13;
+&#13;
+.company-name {&#13;
+  color:#172033;&#13;
+&#13;
+  font-size:12px;&#13;
+&#13;
+  font-weight:950;&#13;
+&#13;
+  white-space:nowrap;&#13;
+&#13;
+  overflow:hidden;&#13;
+&#13;
+  text-overflow:ellipsis;&#13;
+}&#13;
+&#13;
+&#13;
+.company-subtitle {&#13;
+  margin-top:3px;&#13;
+&#13;
+  color:#8e95a5;&#13;
+&#13;
+  font-size:8px;&#13;
+&#13;
+  font-weight:650;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   29. COMPANY TABLE BADGES&#13;
+   ========================================================= */&#13;
+&#13;
+.company-id-value {&#13;
+  display:inline-block;&#13;
+&#13;
+  padding:5px 7px;&#13;
+&#13;
+  border-radius:6px;&#13;
+&#13;
+  background:#f3f5f9;&#13;
+&#13;
+  border:1px solid #e5e8ee;&#13;
+&#13;
+  color:#566177;&#13;
+&#13;
+  font-size:9px;&#13;
+&#13;
+  font-weight:850;&#13;
+}&#13;
+&#13;
+&#13;
+.industry-chip {&#13;
+  display:inline-flex;&#13;
+&#13;
+  align-items:center;&#13;
+&#13;
+  padding:6px 9px;&#13;
+&#13;
+  border-radius:8px;&#13;
+&#13;
+  background:#eaf4ff;&#13;
+&#13;
+  color:#2671bb;&#13;
+&#13;
+  border:1px solid #d2e6fb;&#13;
+&#13;
+  font-size:9px;&#13;
+&#13;
+  font-weight:900;&#13;
+}&#13;
+&#13;
+&#13;
+.industry-chip::before {&#13;
+  content:"";&#13;
+&#13;
+  width:5px;&#13;
+&#13;
+  height:5px;&#13;
+&#13;
+  margin-right:5px;&#13;
+&#13;
+  border-radius:50%;&#13;
+&#13;
+  background:#3d8bd5;&#13;
+}&#13;
+&#13;
+&#13;
+.recruiter-value {&#13;
+  display:inline-block;&#13;
+&#13;
+  color:#5232a9;&#13;
+&#13;
+  background:#f5f0ff;&#13;
+&#13;
+  border-radius:7px;&#13;
+&#13;
+  padding:5px 7px;&#13;
+&#13;
+  font-size:10px;&#13;
+&#13;
+  font-weight:850;&#13;
+}&#13;
+&#13;
+&#13;
+.email-value {&#13;
+  display:inline-block;&#13;
+&#13;
+  color:#4771a7;&#13;
+&#13;
+  background:#f1f7ff;&#13;
+&#13;
+  border-radius:7px;&#13;
+&#13;
+  padding:5px 7px;&#13;
+&#13;
+  font-size:9px;&#13;
+&#13;
+  font-weight:700;&#13;
+&#13;
+  word-break:break-word;&#13;
+}&#13;
+&#13;
+&#13;
+.contact-value {&#13;
+  display:inline-block;&#13;
+&#13;
+  color:#566177;&#13;
+&#13;
+  background:#f7f8fa;&#13;
+&#13;
+  border-radius:7px;&#13;
+&#13;
+  padding:5px 7px;&#13;
+&#13;
+  font-size:9px;&#13;
+&#13;
+  font-weight:800;&#13;
+}&#13;
+&#13;
+&#13;
+.company-type-chip {&#13;
+  display:inline-flex;&#13;
+&#13;
+  align-items:center;&#13;
+&#13;
+  padding:6px 9px;&#13;
+&#13;
+  border-radius:8px;&#13;
+&#13;
+  background:#fff3df;&#13;
+&#13;
+  color:#a9680c;&#13;
+&#13;
+  border:1px solid #f0dcb8;&#13;
+&#13;
+  font-size:9px;&#13;
+&#13;
+  font-weight:900;&#13;
+}&#13;
+&#13;
+&#13;
+.company-type-chip::before {&#13;
+  content:"";&#13;
+&#13;
+  width:5px;&#13;
+&#13;
+  height:5px;&#13;
+&#13;
+  margin-right:5px;&#13;
+&#13;
+  border-radius:50%;&#13;
+&#13;
+  background:#e29a2b;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   30. STATUS&#13;
+   ========================================================= */&#13;
+&#13;
+.company-status-chip {&#13;
+  display:inline-flex;&#13;
+&#13;
+  align-items:center;&#13;
+&#13;
+  gap:5px;&#13;
+&#13;
+  padding:6px 9px;&#13;
+&#13;
+  border-radius:20px;&#13;
+&#13;
+  font-size:9px;&#13;
+&#13;
+  font-weight:900;&#13;
+&#13;
+  white-space:nowrap;&#13;
+}&#13;
+&#13;
+&#13;
+.status-dot {&#13;
+  width:6px;&#13;
+&#13;
+  height:6px;&#13;
+&#13;
+  border-radius:50%;&#13;
+}&#13;
+&#13;
+&#13;
+.company-status-active {&#13;
+  background:#e4f8ed;&#13;
+&#13;
+  color:#168455;&#13;
+&#13;
+  border:1px solid #c7ead8;&#13;
+}&#13;
+&#13;
+&#13;
+.company-status-active .status-dot {&#13;
+  background:#1daf6c;&#13;
+}&#13;
+&#13;
+&#13;
+.company-status-inactive {&#13;
+  background:#fdebed;&#13;
+&#13;
+  color:#c44350;&#13;
+&#13;
+  border:1px solid #f2ced4;&#13;
+}&#13;
+&#13;
+&#13;
+.company-status-inactive .status-dot {&#13;
+  background:#df5260;&#13;
+}&#13;
+&#13;
+&#13;
+.company-status-other {&#13;
+  background:#fff1dc;&#13;
+&#13;
+  color:#a96a12;&#13;
+&#13;
+  border:1px solid #f0dcb8;&#13;
+}&#13;
+&#13;
+&#13;
+.company-status-other .status-dot {&#13;
+  background:#d98b20;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   31. VIEW BUTTON&#13;
+   ========================================================= */&#13;
+&#13;
+.view-company-button {&#13;
+  height:33px;&#13;
+&#13;
+  padding:0 11px;&#13;
+&#13;
+  border:1px solid #d5c8f5;&#13;
+&#13;
+  border-radius:8px;&#13;
+&#13;
+  background:#f8f4ff;&#13;
+&#13;
+  color:#6337cd;&#13;
+&#13;
+  font-size:9px;&#13;
+&#13;
+  font-weight:900;&#13;
+&#13;
+  cursor:pointer;&#13;
+&#13;
+  white-space:nowrap;&#13;
+&#13;
+  transition:&#13;
+    background .15s ease,&#13;
+    color .15s ease,&#13;
+    border-color .15s ease;&#13;
+}&#13;
+&#13;
+&#13;
+.view-company-button:hover {&#13;
+  background:#7639e6;&#13;
+&#13;
+  border-color:#7639e6;&#13;
+&#13;
+  color:#fff;&#13;
+}&#13;
+&#13;
+&#13;
+.view-company-button span {&#13;
+  margin-left:3px;&#13;
+&#13;
+  font-size:12px;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   32. EMPTY STATE&#13;
+   ========================================================= */&#13;
+&#13;
+.empty-state {&#13;
+  padding:55px 20px;&#13;
+&#13;
+  text-align:center;&#13;
+}&#13;
+&#13;
+&#13;
+.empty-state-icon {&#13;
+  width:52px;&#13;
+&#13;
+  height:52px;&#13;
+&#13;
+  margin:0 auto 12px;&#13;
+&#13;
+  border-radius:12px;&#13;
+&#13;
+  background:#eee8ff;&#13;
+&#13;
+  color:#7040d9;&#13;
+&#13;
+  display:flex;&#13;
+&#13;
+  align-items:center;&#13;
+&#13;
+  justify-content:center;&#13;
+&#13;
+  font-size:22px;&#13;
+&#13;
+  font-weight:900;&#13;
+}&#13;
+&#13;
+&#13;
+.empty-state h3 {&#13;
+  margin:0;&#13;
+&#13;
+  color:#20283b;&#13;
+&#13;
+  font-size:17px;&#13;
+&#13;
+  font-weight:950;&#13;
+}&#13;
+&#13;
+&#13;
+.empty-state p {&#13;
+  margin:6px 0 15px;&#13;
+&#13;
+  color:#81899a;&#13;
+&#13;
+  font-size:11px;&#13;
+&#13;
+  font-weight:600;&#13;
+}&#13;
+&#13;
+&#13;
+.empty-add-button {&#13;
+  height:36px;&#13;
+&#13;
+  padding:0 13px;&#13;
+&#13;
+  border:0;&#13;
+&#13;
+  border-radius:8px;&#13;
+&#13;
+  background:#7639e6;&#13;
+&#13;
+  color:#fff;&#13;
+&#13;
+  font-size:10px;&#13;
+&#13;
+  font-weight:900;&#13;
+&#13;
+  cursor:pointer;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   33. MODAL OVERLAY&#13;
+   ========================================================= */&#13;
+&#13;
+.company-modal-overlay {&#13;
+  position:fixed !important;&#13;
+&#13;
+  inset:0 !important;&#13;
+&#13;
+  z-index:50000 !important;&#13;
+&#13;
+  background:rgba(16,12,39,.58) !important;&#13;
+&#13;
+  display:flex !important;&#13;
+&#13;
+  align-items:center !important;&#13;
+&#13;
+  justify-content:center !important;&#13;
+&#13;
+  padding:20px !important;&#13;
+}&#13;
+&#13;
+&#13;
+.company-modal {&#13;
+  width:760px;&#13;
+&#13;
+  max-width:95vw;&#13;
+&#13;
+  max-height:90vh;&#13;
+&#13;
+  overflow-y:auto;&#13;
+&#13;
+  background:#fff;&#13;
+&#13;
+  border:1px solid #e2e5ed;&#13;
+&#13;
+  border-radius:15px;&#13;
+&#13;
+  box-shadow:&#13;
+    0 20px 55px rgba(16,12,39,.22);&#13;
+}&#13;
+&#13;
+&#13;
+.add-company-modal {&#13;
+  width:820px;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   34. MODAL HEADER&#13;
+   ========================================================= */&#13;
+&#13;
+.modal-header {&#13;
+  min-height:82px;&#13;
+&#13;
+  padding:15px 19px;&#13;
+&#13;
+  display:flex;&#13;
+&#13;
+  align-items:center;&#13;
+&#13;
+  justify-content:space-between;&#13;
+&#13;
+  border-bottom:1px solid #e7e9ef;&#13;
+&#13;
+  background:#faf8ff;&#13;
+}&#13;
+&#13;
+&#13;
+.add-modal-header {&#13;
+  background:#f8fbff;&#13;
+}&#13;
+&#13;
+&#13;
+.modal-company-title {&#13;
+  display:flex;&#13;
+&#13;
+  align-items:center;&#13;
+&#13;
+  gap:11px;&#13;
+}&#13;
+&#13;
+&#13;
+.modal-company-avatar {&#13;
+  width:46px;&#13;
+&#13;
+  height:46px;&#13;
+&#13;
+  min-width:46px;&#13;
+&#13;
+  border-radius:11px;&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      135deg,&#13;
+      #7a43e6,&#13;
+      #6330d4&#13;
+    );&#13;
+&#13;
+  color:#fff;&#13;
+&#13;
+  display:flex;&#13;
+&#13;
+  align-items:center;&#13;
+&#13;
+  justify-content:center;&#13;
+&#13;
+  font-size:12px;&#13;
+&#13;
+  font-weight:950;&#13;
+}&#13;
+&#13;
+&#13;
+.add-avatar {&#13;
+  background:#22a76b;&#13;
+&#13;
+  font-size:25px;&#13;
+}&#13;
+&#13;
+&#13;
+.modal-company-title h2 {&#13;
+  margin:0;&#13;
+&#13;
+  color:#172033;&#13;
+&#13;
+  font-size:18px;&#13;
+&#13;
+  font-weight:950;&#13;
+}&#13;
+&#13;
+&#13;
+.modal-company-title p {&#13;
+  margin:3px 0 0;&#13;
+&#13;
+  color:#7f8798;&#13;
+&#13;
+  font-size:10px;&#13;
+&#13;
+  font-weight:600;&#13;
+}&#13;
+&#13;
+&#13;
+.modal-close {&#13;
+  width:35px;&#13;
+&#13;
+  height:35px;&#13;
+&#13;
+  border:1px solid #dfe3eb;&#13;
+&#13;
+  border-radius:8px;&#13;
+&#13;
+  background:#fff;&#13;
+&#13;
+  color:#6a7284;&#13;
+&#13;
+  font-size:21px;&#13;
+&#13;
+  cursor:pointer;&#13;
+}&#13;
+&#13;
+&#13;
+.modal-close:hover {&#13;
+  background:#f4efff;&#13;
+&#13;
+  color:#6636d4;&#13;
+}&#13;
+&#13;
+&#13;
+.modal-body {&#13;
+  padding:20px;&#13;
+}&#13;
+&#13;
+&#13;
+.modal-section-heading {&#13;
+  margin-bottom:11px;&#13;
+&#13;
+  color:#6436d0;&#13;
+&#13;
+  font-size:12px;&#13;
+&#13;
+  font-weight:950;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   35. MODAL DETAILS&#13;
+   ========================================================= */&#13;
+&#13;
+.detail-grid {&#13;
+  display:grid;&#13;
+&#13;
+  grid-template-columns:&#13;
+    repeat(4,1fr);&#13;
+&#13;
+  gap:10px;&#13;
+&#13;
+  margin-bottom:22px;&#13;
+}&#13;
+&#13;
+&#13;
+.detail-card {&#13;
+  padding:12px;&#13;
+&#13;
+  border-radius:9px;&#13;
+&#13;
+  border-left:3px solid;&#13;
+}&#13;
+&#13;
+&#13;
+.detail-card span {&#13;
+  display:block;&#13;
+&#13;
+  color:#7b8496;&#13;
+&#13;
+  font-size:8px;&#13;
+&#13;
+  font-weight:800;&#13;
+&#13;
+  text-transform:uppercase;&#13;
+}&#13;
+&#13;
+&#13;
+.detail-card strong {&#13;
+  display:block;&#13;
+&#13;
+  margin-top:6px;&#13;
+&#13;
+  color:#263047;&#13;
+&#13;
+  font-size:11px;&#13;
+&#13;
+  font-weight:950;&#13;
+}&#13;
+&#13;
+&#13;
+.purple-detail {&#13;
+  background:#f0eaff;&#13;
+&#13;
+  border-color:#7242dc;&#13;
+}&#13;
+&#13;
+&#13;
+.blue-detail {&#13;
+  background:#e9f3ff;&#13;
+&#13;
+  border-color:#3985d2;&#13;
+}&#13;
+&#13;
+&#13;
+.orange-detail {&#13;
+  background:#fff2df;&#13;
+&#13;
+  border-color:#df8a1d;&#13;
+}&#13;
+&#13;
+&#13;
+.green-detail {&#13;
+  background:#e6f8ef;&#13;
+&#13;
+  border-color:#20a66b;&#13;
+}&#13;
+&#13;
+&#13;
+.recruiter-details {&#13;
+  border:1px solid #e1e5eb;&#13;
+&#13;
+  border-radius:9px;&#13;
+&#13;
+  overflow:hidden;&#13;
+}&#13;
+&#13;
+&#13;
+.detail-row {&#13;
+  min-height:46px;&#13;
+&#13;
+  padding:0 13px;&#13;
+&#13;
+  display:flex;&#13;
+&#13;
+  align-items:center;&#13;
+&#13;
+  justify-content:space-between;&#13;
+&#13;
+  gap:20px;&#13;
+&#13;
+  border-bottom:1px solid #e9ebef;&#13;
+}&#13;
+&#13;
+&#13;
+.detail-row:last-child {&#13;
+  border-bottom:0;&#13;
+}&#13;
+&#13;
+&#13;
+.detail-row span {&#13;
+  color:#7b8496;&#13;
+&#13;
+  font-size:10px;&#13;
+&#13;
+  font-weight:750;&#13;
+}&#13;
+&#13;
+&#13;
+.detail-row strong {&#13;
+  color:#263047;&#13;
+&#13;
+  font-size:10px;&#13;
+&#13;
+  font-weight:900;&#13;
+&#13;
+  text-align:right;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   36. MODAL FOOTER&#13;
+   ========================================================= */&#13;
+&#13;
+.modal-footer {&#13;
+  padding:13px 19px;&#13;
+&#13;
+  border-top:1px solid #e7e9ef;&#13;
+&#13;
+  display:flex;&#13;
+&#13;
+  justify-content:flex-end;&#13;
+&#13;
+  gap:8px;&#13;
+}&#13;
+&#13;
+&#13;
+.modal-close-button {&#13;
+  height:37px;&#13;
+&#13;
+  padding:0 14px;&#13;
+&#13;
+  border:1px solid #dfe3eb;&#13;
+&#13;
+  border-radius:8px;&#13;
+&#13;
+  background:#fff;&#13;
+&#13;
+  color:#596276;&#13;
+&#13;
+  font-size:10px;&#13;
+&#13;
+  font-weight:850;&#13;
+&#13;
+  cursor:pointer;&#13;
+}&#13;
+&#13;
+&#13;
+.modal-close-button:hover {&#13;
+  background:#f7f4ff;&#13;
+&#13;
+  color:#6335d0;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   37. ADD COMPANY FORM&#13;
+   ========================================================= */&#13;
+&#13;
+.add-company-form {&#13;
+  display:grid;&#13;
+&#13;
+  grid-template-columns:&#13;
+    repeat(2,1fr);&#13;
+&#13;
+  gap:14px;&#13;
+}&#13;
+&#13;
+&#13;
+.form-group {&#13;
+  display:flex;&#13;
+&#13;
+  flex-direction:column;&#13;
+}&#13;
+&#13;
+&#13;
+.form-group.full-width {&#13;
+  grid-column:1 / -1;&#13;
+}&#13;
+&#13;
+&#13;
+.form-group label {&#13;
+  margin-bottom:6px;&#13;
+&#13;
+  color:#3e475b;&#13;
+&#13;
+  font-size:10px;&#13;
+&#13;
+  font-weight:900;&#13;
+}&#13;
+&#13;
+&#13;
+.form-group label span {&#13;
+  color:#d8484e;&#13;
+}&#13;
+&#13;
+&#13;
+.form-group input,&#13;
+.form-group select {&#13;
+  width:100%;&#13;
+&#13;
+  height:40px;&#13;
+&#13;
+  padding:0 10px;&#13;
+&#13;
+  border:1px solid #d8dee8;&#13;
+&#13;
+  border-radius:8px;&#13;
+&#13;
+  background:#fff;&#13;
+&#13;
+  color:#283148;&#13;
+&#13;
+  font-size:10px;&#13;
+&#13;
+  font-weight:650;&#13;
+&#13;
+  outline:0;&#13;
+}&#13;
+&#13;
+&#13;
+.form-group input:focus,&#13;
+.form-group select:focus {&#13;
+  border-color:#7545df;&#13;
+&#13;
+  box-shadow:&#13;
+    0 0 0 3px rgba(117,69,223,.09);&#13;
+}&#13;
+&#13;
+&#13;
+.add-company-message {&#13;
+  margin-top:13px;&#13;
+&#13;
+  padding:10px 12px;&#13;
+&#13;
+  border-radius:8px;&#13;
+&#13;
+  background:#fff0dc;&#13;
+&#13;
+  color:#9a610c;&#13;
+&#13;
+  font-size:10px;&#13;
+&#13;
+  font-weight:800;&#13;
+}&#13;
+&#13;
+&#13;
+.save-company-button {&#13;
+  height:37px;&#13;
+&#13;
+  padding:0 15px;&#13;
+&#13;
+  border:0;&#13;
+&#13;
+  border-radius:8px;&#13;
+&#13;
+  background:#7639e6;&#13;
+&#13;
+  color:#fff;&#13;
+&#13;
+  font-size:10px;&#13;
+&#13;
+  font-weight:900;&#13;
+&#13;
+  cursor:pointer;&#13;
+}&#13;
+&#13;
+&#13;
+.save-company-button:hover {&#13;
+  background:#6630d3;&#13;
+}&#13;
+&#13;
+&#13;
+.save-company-button:disabled {&#13;
+  opacity:.55;&#13;
+&#13;
+  cursor:not-allowed;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   38. AI WIDGET&#13;
+   ========================================================= */&#13;
+&#13;
+.company-ai-widget {&#13;
+  position:fixed !important;&#13;
+&#13;
+  right:22px !important;&#13;
+&#13;
+  bottom:18px !important;&#13;
+&#13;
+  z-index:2147483646 !important;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   39. COLLAPSED SIDEBAR&#13;
+   ========================================================= */&#13;
+&#13;
+.campus360-company-app.sidebar-collapsed&#13;
+.company-sidebar {&#13;
+  width:0 !important;&#13;
+&#13;
+  min-width:0 !important;&#13;
+&#13;
+  max-width:0 !important;&#13;
+&#13;
+  transform:translateX(-100%) !important;&#13;
+&#13;
+  opacity:0 !important;&#13;
+&#13;
+  pointer-events:none !important;&#13;
+&#13;
+  overflow:hidden !important;&#13;
+&#13;
+  border-right:0 !important;&#13;
+}&#13;
+&#13;
+&#13;
+.campus360-company-app.sidebar-collapsed&#13;
+.company-main {&#13;
+  left:0 !important;&#13;
+&#13;
+  width:100vw !important;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   40. LARGE SCREEN&#13;
+   ========================================================= */&#13;
+&#13;
+@media (min-width:1500px) {&#13;
+&#13;
+  .company-page-content {&#13;
+    max-width:1480px !important;&#13;
+&#13;
+    padding-left:30px !important;&#13;
+&#13;
+    padding-right:30px !important;&#13;
+  }&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   41. MEDIUM DESKTOP&#13;
+   ========================================================= */&#13;
+&#13;
+@media (max-width:1250px) {&#13;
+&#13;
+  .company-page-content {&#13;
+    max-width:none !important;&#13;
+&#13;
+    width:100% !important;&#13;
+  }&#13;
+&#13;
+&#13;
+  .company-kpi-grid {&#13;
+    grid-template-columns:&#13;
+      repeat(2,minmax(0,1fr));&#13;
+  }&#13;
+&#13;
+&#13;
+  .filter-left {&#13;
+    grid-template-columns:&#13;
+      auto&#13;
+      minmax(220px,2fr)&#13;
+      minmax(140px,1fr)&#13;
+      minmax(140px,1fr)&#13;
+      auto;&#13;
+  }&#13;
+&#13;
+&#13;
+  .global-search {&#13;
+    width:260px !important;&#13;
+&#13;
+    min-width:190px !important;&#13;
+  }&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   42. TABLET&#13;
+   ========================================================= */&#13;
+&#13;
+@media (max-width:1000px) {&#13;
+&#13;
+  .company-sidebar {&#13;
+    width:210px !important;&#13;
+&#13;
+    min-width:210px !important;&#13;
+&#13;
+    max-width:210px !important;&#13;
+  }&#13;
+&#13;
+&#13;
+  .company-main {&#13;
+    left:210px !important;&#13;
+&#13;
+    width:calc(100vw - 210px) !important;&#13;
+  }&#13;
+&#13;
+&#13;
+  .company-page-content {&#13;
+    padding-left:20px !important;&#13;
+&#13;
+    padding-right:20px !important;&#13;
+  }&#13;
+&#13;
+&#13;
+  .page-heading-row {&#13;
+    align-items:flex-start;&#13;
+&#13;
+    flex-direction:column;&#13;
+  }&#13;
+&#13;
+&#13;
+  .page-heading-actions {&#13;
+    width:100%;&#13;
+&#13;
+    justify-content:flex-start;&#13;
+  }&#13;
+&#13;
+&#13;
+  .global-search {&#13;
+    width:220px !important;&#13;
+&#13;
+    min-width:150px !important;&#13;
+  }&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   43. SMALL TABLET&#13;
+   ========================================================= */&#13;
+&#13;
+@media (max-width:780px) {&#13;
+&#13;
+  .company-sidebar {&#13;
+    width:76px !important;&#13;
+&#13;
+    min-width:76px !important;&#13;
+&#13;
+    max-width:76px !important;&#13;
+  }&#13;
+&#13;
+&#13;
+  .company-main {&#13;
+    left:76px !important;&#13;
+&#13;
+    width:calc(100vw - 76px) !important;&#13;
+  }&#13;
+&#13;
+&#13;
+  .brand-text,&#13;
+  .profile-info,&#13;
+  .nav-section-title,&#13;
+  .nav-label,&#13;
+  .nav-count {&#13;
+    display:none !important;&#13;
+  }&#13;
+&#13;
+&#13;
+  .sidebar-brand {&#13;
+    justify-content:center;&#13;
+&#13;
+    padding-left:8px !important;&#13;
+&#13;
+    padding-right:8px !important;&#13;
+  }&#13;
+&#13;
+&#13;
+  .tpo-profile {&#13;
+    justify-content:center;&#13;
+&#13;
+    margin-left:8px !important;&#13;
+&#13;
+    margin-right:8px !important;&#13;
+&#13;
+    padding-left:8px !important;&#13;
+&#13;
+    padding-right:8px !important;&#13;
+  }&#13;
+&#13;
+&#13;
+  .sidebar-nav-item {&#13;
+    justify-content:center;&#13;
+&#13;
+    padding-left:8px !important;&#13;
+&#13;
+    padding-right:8px !important;&#13;
+  }&#13;
+&#13;
+&#13;
+  .company-page-content {&#13;
+    padding-left:12px !important;&#13;
+&#13;
+    padding-right:12px !important;&#13;
+  }&#13;
+&#13;
+&#13;
+  .global-search {&#13;
+    width:180px !important;&#13;
+&#13;
+    min-width:140px !important;&#13;
+  }&#13;
+&#13;
+&#13;
+  .topbar-user-details,&#13;
+  .topbar-chevron {&#13;
+    display:none !important;&#13;
+  }&#13;
+&#13;
+&#13;
+  .company-kpi-grid {&#13;
+    grid-template-columns:1fr;&#13;
+  }&#13;
+&#13;
+&#13;
+  .filter-left {&#13;
+    grid-template-columns:1fr;&#13;
+  }&#13;
+&#13;
+&#13;
+  .filter-company-count {&#13;
+    justify-content:flex-start;&#13;
+  }&#13;
+&#13;
+&#13;
+  .detail-grid {&#13;
+    grid-template-columns:&#13;
+      repeat(2,1fr);&#13;
+  }&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   44. MOBILE&#13;
+   ========================================================= */&#13;
+&#13;
+@media (max-width:560px) {&#13;
+&#13;
+  .company-sidebar {&#13;
+    width:0 !important;&#13;
+&#13;
+    min-width:0 !important;&#13;
+&#13;
+    max-width:0 !important;&#13;
+&#13;
+    transform:translateX(-100%) !important;&#13;
+&#13;
+    overflow:hidden !important;&#13;
+  }&#13;
+&#13;
+&#13;
+  .company-main {&#13;
+    left:0 !important;&#13;
+&#13;
+    width:100vw !important;&#13;
+  }&#13;
+&#13;
+&#13;
+  .company-topbar {&#13;
+    height:68px !important;&#13;
+&#13;
+    min-height:68px !important;&#13;
+&#13;
+    padding:0 12px !important;&#13;
+  }&#13;
+&#13;
+&#13;
+  .breadcrumb-small {&#13;
+    display:none !important;&#13;
+  }&#13;
+&#13;
+&#13;
+  .breadcrumb-title {&#13;
+    font-size:14px !important;&#13;
+  }&#13;
+&#13;
+&#13;
+  .global-search {&#13;
+    display:none !important;&#13;
+  }&#13;
+&#13;
+&#13;
+  .topbar-divider {&#13;
+    display:none !important;&#13;
+  }&#13;
+&#13;
+&#13;
+  .topbar-user-details,&#13;
+  .topbar-chevron {&#13;
+    display:none !important;&#13;
+  }&#13;
+&#13;
+&#13;
+  .company-page-content {&#13;
+    padding:&#13;
+      18px&#13;
+      10px&#13;
+      35px !important;&#13;
+  }&#13;
+&#13;
+&#13;
+  .page-heading-row h1 {&#13;
+    font-size:24px;&#13;
+  }&#13;
+&#13;
+&#13;
+  .page-heading-row p {&#13;
+    font-size:11px;&#13;
+  }&#13;
+&#13;
+&#13;
+  .page-heading-actions {&#13;
+    width:100%;&#13;
+&#13;
+    flex-wrap:wrap;&#13;
+  }&#13;
+&#13;
+&#13;
+  .refresh-data-button,&#13;
+  .add-company-button {&#13;
+    flex:1;&#13;
+  }&#13;
+&#13;
+&#13;
+  .directory-header {&#13;
+    align-items:flex-start;&#13;
+&#13;
+    flex-direction:column;&#13;
+&#13;
+    gap:10px;&#13;
+  }&#13;
+&#13;
+&#13;
+  .directory-header-right {&#13;
+    width:100%;&#13;
+&#13;
+    justify-content:space-between;&#13;
+  }&#13;
+&#13;
+&#13;
+  .detail-grid {&#13;
+    grid-template-columns:1fr;&#13;
+  }&#13;
+&#13;
+&#13;
+  .add-company-form {&#13;
+    grid-template-columns:1fr;&#13;
+  }&#13;
+&#13;
+&#13;
+  .form-group.full-width {&#13;
+    grid-column:auto;&#13;
+  }&#13;
+&#13;
+}</css>
+        <data_table>sp_instance</data_table>
+        <demo_data/>
+        <description/>
+        <docs/>
+        <field_list/>
+        <has_preview>false</has_preview>
+        <id>campus360_company_management_new</id>
+        <internal>false</internal>
+        <link><![CDATA[function link(scope, element, attrs, controller) {
+  
+}]]></link>
+        <name>Campus360 Company Management New</name>
+        <option_schema/>
+        <public>false</public>
+        <roles/>
+        <script><![CDATA[(function() {
+
+
+  /* =====================================================
+     COMPANY MASTER TABLE
+  ====================================================== */
+
+  var TABLE_NAME =
+    "x_snc_campus360_company_master";
+
+
+  var testGR =
+    new GlideRecord(TABLE_NAME);
+
+
+  if (!testGR.isValid()) {
+
+    TABLE_NAME =
+      "company_master";
+
+    testGR =
+      new GlideRecord(TABLE_NAME);
+
+  }
+
+
+  /* =====================================================
+     DEFAULT DATA
+  ====================================================== */
+
+  data.companies = [];
+
+  data.industries = [];
+
+  data.companyTypes = [];
+
+  data.statuses = [
+    "Active",
+    "Inactive"
+  ];
+
+
+  data.summary = {
+
+    totalCompanies: 0,
+
+    activeCompanies: 0,
+
+    inactiveCompanies: 0,
+
+    companyTypes: 0
+
+  };
+
+
+  data.success = false;
+
+  data.message = "";
+
+
+  /* =====================================================
+     HELPERS
+  ====================================================== */
+
+  function clean(value) {
+
+    if (
+      value === null ||
+      typeof value === "undefined"
+    ) {
+
+      return "";
+
+    }
+
+    return String(value).trim();
+
+  }
+
+
+  function getDisplay(gr, fieldName) {
+
+    try {
+
+      if (
+        gr[fieldName] &&
+        typeof
+          gr[fieldName].getDisplayValue ===
+          "function"
+      ) {
+
+        return clean(
+          gr[fieldName]
+            .getDisplayValue()
+        );
+
+      }
+
+    } catch (e) {}
+
+
+    try {
+
+      if (
+        gr[fieldName] &&
+        typeof
+          gr[fieldName].getValue ===
+          "function"
+      ) {
+
+        return clean(
+          gr[fieldName]
+            .getValue()
+        );
+
+      }
+
+    } catch (e2) {}
+
+
+    return "";
+
+  }
+
+
+  function addUnique(array, value) {
+
+    value = clean(value);
+
+    if (!value) {
+      return;
+    }
+
+
+    var exists = false;
+
+
+    for (
+      var i = 0;
+      i < array.length;
+      i++
+    ) {
+
+      if (
+        String(array[i]).toLowerCase() ===
+        String(value).toLowerCase()
+      ) {
+
+        exists = true;
+
+        break;
+
+      }
+
+    }
+
+
+    if (!exists) {
+
+      array.push(value);
+
+    }
+
+  }
+
+
+  function sortStrings(array) {
+
+    array.sort(
+      function(a, b) {
+
+        return String(a)
+          .toLowerCase()
+          .localeCompare(
+            String(b).toLowerCase()
+          );
+
+      }
+    );
+
+  }
+
+
+  /* =====================================================
+     LOAD COMPANIES
+  ====================================================== */
+
+  function loadCompanies() {
+
+    data.companies = [];
+
+    data.industries = [];
+
+    data.companyTypes = [];
+
+
+    var gr =
+      new GlideRecord(TABLE_NAME);
+
+
+    if (!gr.isValid()) {
+
+      data.success = false;
+
+      data.message =
+        "Company Master table was not found.";
+
+      return;
+
+    }
+
+
+    gr.orderBy("company_name");
+
+    gr.query();
+
+
+    while (gr.next()) {
+
+
+      var company = {
+
+        sys_id:
+          clean(
+            gr.getUniqueValue()
+          ),
+
+        company_name:
+          getDisplay(
+            gr,
+            "company_name"
+          ),
+
+        company_id:
+          getDisplay(
+            gr,
+            "company_id"
+          ),
+
+        industry:
+          getDisplay(
+            gr,
+            "industry"
+          ),
+
+        recruiter_name:
+          getDisplay(
+            gr,
+            "recruiter_name"
+          ),
+
+        recruiter_email:
+          getDisplay(
+            gr,
+            "recruiter_email"
+          ),
+
+        contact_number:
+          getDisplay(
+            gr,
+            "contact_number"
+          ),
+
+        company_type:
+          getDisplay(
+            gr,
+            "company_type"
+          ),
+
+        status:
+          getDisplay(
+            gr,
+            "status"
+          )
+
+      };
+
+
+      data.companies.push(
+        company
+      );
+
+
+      /* INDUSTRY */
+
+      addUnique(
+        data.industries,
+        company.industry
+      );
+
+
+      /* COMPANY TYPE */
+
+      addUnique(
+        data.companyTypes,
+        company.company_type
+      );
+
+
+      /* TOTAL */
+
+      data.summary.totalCompanies++;
+
+
+      /* ACTIVE */
+
+      if (
+        String(company.status)
+          .toLowerCase()
+          .trim() ===
+        "active"
+      ) {
+
+        data.summary.activeCompanies++;
+
+      }
+
+
+      /* INACTIVE */
+
+      if (
+        String(company.status)
+          .toLowerCase()
+          .trim() ===
+        "inactive"
+      ) {
+
+        data.summary.inactiveCompanies++;
+
+      }
+
+    }
+
+
+    sortStrings(
+      data.industries
+    );
+
+    sortStrings(
+      data.companyTypes
+    );
+
+
+    data.summary.companyTypes =
+      data.companyTypes.length;
+
+
+    data.success = true;
+
+  }
+
+
+  /* =====================================================
+     ADD COMPANY
+  ====================================================== */
+
+  if (
+    input &&
+    input.action ===
+      "add_company"
+  ) {
+
+
+    var incoming =
+      input.company || {};
+
+
+    var companyName =
+      clean(
+        incoming.company_name
+      );
+
+
+    var companyId =
+      clean(
+        incoming.company_id
+      );
+
+
+    /* REQUIRED COMPANY NAME */
+
+    if (!companyName) {
+
+      data.success = false;
+
+      data.message =
+        "Company Name is required.";
+
+      loadCompanies();
+
+      return;
+
+    }
+
+
+    /* REQUIRED COMPANY ID */
+
+    if (!companyId) {
+
+      data.success = false;
+
+      data.message =
+        "Company ID is required.";
+
+      loadCompanies();
+
+      return;
+
+    }
+
+
+    /* VALIDATE TABLE */
+
+    var insertGR =
+      new GlideRecord(
+        TABLE_NAME
+      );
+
+
+    if (!insertGR.isValid()) {
+
+      data.success = false;
+
+      data.message =
+        "Company Master table was not found.";
+
+      return;
+
+    }
+
+
+    /* =================================================
+       DUPLICATE COMPANY ID CHECK
+    ================================================= */
+
+    if (
+      insertGR.isValidField(
+        "company_id"
+      )
+    ) {
+
+      var duplicateGR =
+        new GlideRecord(
+          TABLE_NAME
+        );
+
+
+      duplicateGR.addQuery(
+        "company_id",
+        companyId
+      );
+
+
+      duplicateGR.setLimit(1);
+
+      duplicateGR.query();
+
+
+      if (duplicateGR.next()) {
+
+        data.success = false;
+
+        data.message =
+          "A company with this Company ID already exists.";
+
+        loadCompanies();
+
+        return;
+
+      }
+
+    }
+
+
+    /* =================================================
+       INITIALIZE
+    ================================================= */
+
+    insertGR.initialize();
+
+
+    /* COMPANY NAME */
+
+    if (
+      insertGR.isValidField(
+        "company_name"
+      )
+    ) {
+
+      insertGR.setValue(
+        "company_name",
+        companyName
+      );
+
+    }
+
+
+    /* COMPANY ID */
+
+    if (
+      insertGR.isValidField(
+        "company_id"
+      )
+    ) {
+
+      insertGR.setValue(
+        "company_id",
+        companyId
+      );
+
+    }
+
+
+    /* INDUSTRY */
+
+    if (
+      insertGR.isValidField(
+        "industry"
+      )
+    ) {
+
+      insertGR.setValue(
+        "industry",
+        clean(
+          incoming.industry
+        )
+      );
+
+    }
+
+
+    /* RECRUITER NAME */
+
+    if (
+      insertGR.isValidField(
+        "recruiter_name"
+      )
+    ) {
+
+      insertGR.setValue(
+        "recruiter_name",
+        clean(
+          incoming.recruiter_name
+        )
+      );
+
+    }
+
+
+    /* RECRUITER EMAIL */
+
+    if (
+      insertGR.isValidField(
+        "recruiter_email"
+      )
+    ) {
+
+      insertGR.setValue(
+        "recruiter_email",
+        clean(
+          incoming.recruiter_email
+        )
+      );
+
+    }
+
+
+    /* CONTACT NUMBER */
+
+    if (
+      insertGR.isValidField(
+        "contact_number"
+      )
+    ) {
+
+      insertGR.setValue(
+        "contact_number",
+        clean(
+          incoming.contact_number
+        )
+      );
+
+    }
+
+
+    /* COMPANY TYPE */
+
+    if (
+      insertGR.isValidField(
+        "company_type"
+      )
+    ) {
+
+      insertGR.setValue(
+        "company_type",
+        clean(
+          incoming.company_type
+        )
+      );
+
+    }
+
+
+    /* STATUS */
+
+    if (
+      insertGR.isValidField(
+        "status"
+      )
+    ) {
+
+      var companyStatus =
+        clean(
+          incoming.status
+        );
+
+
+      if (!companyStatus) {
+
+        companyStatus =
+          "Active";
+
+      }
+
+
+      insertGR.setValue(
+        "status",
+        companyStatus
+      );
+
+    }
+
+
+    /* INSERT */
+
+    var insertedSysId =
+      insertGR.insert();
+
+
+    if (insertedSysId) {
+
+      data.success = true;
+
+      data.message =
+        "Company added successfully.";
+
+    } else {
+
+      data.success = false;
+
+      data.message =
+        "Company could not be added.";
+
+    }
+
+
+    /* RELOAD */
+
+    loadCompanies();
+
+    return;
+
+  }
+
+
+  /* =====================================================
+     NORMAL PAGE LOAD
+  ====================================================== */
+
+  loadCompanies();
+
+
+})();
+(function() {
+    var tpoGR = new GlideRecord('x_snc_campus360_campus360_tpo_profile');
+    tpoGR.query();
+    if (tpoGR.next()) {
+        data.tpoName = tpoGR.getValue('tpo_name') || 'MD Ali';
+        data.tpoInitials = 'MA';
+        data.tpoTitle = tpoGR.getValue('designation') || 'Training & Placement Officer';
+        data.tpoOffice = tpoGR.getValue('college_name') || 'CMR Institute of Technology';
+    } else {
+        data.tpoName = 'MD Ali';
+        data.tpoInitials = 'MA';
+        data.tpoTitle = 'TPO';
+        data.tpoOffice = 'Training & Placement Office';
+    }
+})();
+
+
+(function() {
+    var tpoGR = new GlideRecord('x_snc_campus360_campus360_tpo_profile');
+    tpoGR.query();
+    var name = 'MD Ali';
+    var title = 'Training & Placement Officer';
+    var office = 'CMR Institute of Technology';
+    if (tpoGR.next()) {
+        name = tpoGR.getValue('tpo_name') || 'MD Ali';
+        title = tpoGR.getValue('designation') || title;
+        office = tpoGR.getValue('college_name') || office;
+    }
+    data.tpo = {
+        name: name,
+        firstName: name,
+        initials: 'MA',
+        title: title,
+        office: office
+    };
+    data.tpoName = name;
+    data.tpoInitials = 'MA';
+})();
+
+
+data.aiWidget = $sp.getWidget('c4ae634574e703107f4410c9fee0cde5');
+]]></script>
+        <servicenow>false</servicenow>
+        <sys_class_name>sp_widget</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-28 04:24:38</sys_created_on>
+        <sys_id>ed785b1e442303107f44301daf56c723</sys_id>
+        <sys_mod_count>27</sys_mod_count>
+        <sys_name>Campus360 Company Management New</sys_name>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name>sp_widget_ed785b1e442303107f44301daf56c723</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-10-01 10:54:19</sys_updated_on>
+        <template><![CDATA[<div class="campus360-company-app"
+     ng-class="{'sidebar-collapsed': c.sidebarCollapsed}">
+
+  <!-- =========================================================
+       LEFT SIDEBAR
+       ========================================================= -->
+
+  <aside class="company-sidebar">
+
+    <div class="sidebar-brand">
+
+      <div class="brand-logo">
+        C
+      </div>
+
+      <div class="brand-text">
+
+        <div class="brand-title">
+          Campus360
+        </div>
+
+        <div class="brand-subtitle">
+          TPO Portal
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- TPO PROFILE -->
+
+    <div class="tpo-profile">
+
+      <div class="profile-avatar">
+        MA
+      </div>
+
+      <div class="profile-info">
+
+        <div class="profile-name">
+          MD Ali
+        </div>
+
+        <div class="profile-role">
+          TPO
+        </div>
+
+        <div class="profile-office">
+          Training &amp; Placement Office
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- =======================================================
+         SIDEBAR NAVIGATION
+         ======================================================= -->
+
+    <nav class="sidebar-navigation">
+
+
+      <!-- OVERVIEW -->
+
+      <div class="nav-section-title">
+        OVERVIEW
+      </div>
+
+
+      <a
+        href="javascript:void(0)"
+        class="sidebar-nav-item"
+        ng-click="c.goTo('campus360_tpo_home')">
+
+        <span class="nav-icon">
+          ⌂
+        </span>
+
+        <span class="nav-label">
+          Dashboard
+        </span>
+
+      </a>
+
+
+      <!-- STUDENTS -->
+
+      <div class="nav-section-title">
+        STUDENTS
+      </div>
+
+
+      <a
+        href="javascript:void(0)"
+        class="sidebar-nav-item"
+        ng-click="c.goTo('campus360_tpo_student_management')">
+
+        <span class="nav-icon">
+          ♙
+        </span>
+
+        <span class="nav-label">
+          Students
+        </span>
+
+      </a>
+
+
+      <a
+        href="javascript:void(0)"
+        class="sidebar-nav-item"
+        ng-click="c.goTo('campus360_tpo_skill_intelligence_new')">
+
+        <span class="nav-icon">
+          ✣
+        </span>
+
+        <span class="nav-label">
+          Skill Intelligence
+        </span>
+
+      </a>
+
+
+      <a
+        href="javascript:void(0)"
+        class="sidebar-nav-item"
+        ng-click="c.goTo('student_assessments_new')">
+
+        <span class="nav-icon">
+          ▤
+        </span>
+
+        <span class="nav-label">
+          Assessments
+        </span>
+
+      </a>
+
+
+      <!-- PLACEMENTS -->
+
+      <div class="nav-section-title">
+        PLACEMENTS
+      </div>
+
+
+      <!-- ACTIVE COMPANY -->
+
+      <a
+        href="javascript:void(0)"
+        class="sidebar-nav-item active">
+
+        <span class="nav-icon">
+          ▤
+        </span>
+
+        <span class="nav-label">
+          Companies
+        </span>
+
+        <span class="nav-count">
+          {{data.summary.totalCompanies}}
+        </span>
+
+      </a>
+
+
+      <a
+        href="javascript:void(0)"
+        class="sidebar-nav-item"
+        ng-click="c.goTo('campus360_tpo_opportunities_new')">
+
+        <span class="nav-icon">
+          ◇
+        </span>
+
+        <span class="nav-label">
+          Opportunities
+        </span>
+
+      </a>
+
+
+      <a
+        href="javascript:void(0)"
+        class="sidebar-nav-item"
+        ng-click="c.goTo('campus360_tpo_application_new')">
+
+        <span class="nav-icon">
+          ▧
+        </span>
+
+        <span class="nav-label">
+          Applications
+        </span>
+
+      </a>
+
+
+      <a
+        href="javascript:void(0)"
+        class="sidebar-nav-item"
+        ng-click="c.goTo('campus360_tpo_interviews_new')">
+
+        <span class="nav-icon">
+          ◎
+        </span>
+
+        <span class="nav-label">
+          Interviews
+        </span>
+
+      </a>
+
+
+      <a
+        href="javascript:void(0)"
+        class="sidebar-nav-item"
+        ng-click="c.goTo('campus360_tpo_placement_outcomes')">
+
+        <span class="nav-icon">
+          ✓
+        </span>
+
+        <span class="nav-label">
+          Placement Outcomes
+        </span>
+
+      </a>
+
+
+      <!-- TRAINING -->
+
+      <div class="nav-section-title">
+        TRAINING
+      </div>
+
+
+      <a
+        href="javascript:void(0)"
+        class="sidebar-nav-item"
+        ng-click="c.goTo('campus360_tpo_training_programs')">
+
+        <span class="nav-icon">
+          ◇
+        </span>
+
+        <span class="nav-label">
+          Training Programs
+        </span>
+
+      </a>
+
+
+
+ 
+
+    </nav>
+
+  </aside>
+
+
+  <!-- =========================================================
+       MAIN CONTENT
+       ========================================================= -->
+
+  <main class="company-main">
+
+
+    <!-- =======================================================
+         CAMPUS360 CUSTOM TOP NAVBAR
+         ======================================================= -->
+
+    <header class="company-topbar">
+
+
+      <!-- LEFT SIDE -->
+
+      <div class="topbar-left">
+
+
+        <!-- SIDEBAR TOGGLE -->
+
+        <button
+          type="button"
+          class="sidebar-toggle"
+          ng-click="c.toggleSidebar()"
+          title="Toggle Sidebar"
+          aria-label="Toggle Sidebar">
+
+          ☰
+
+        </button>
+
+
+        <!-- PAGE TITLE -->
+
+        <div class="breadcrumb">
+
+          <div class="breadcrumb-small">
+            CAMPUS360
+          </div>
+
+          <div class="breadcrumb-title">
+            Company Management
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- RIGHT SIDE -->
+
+      <div class="topbar-right">
+
+
+        <!-- GLOBAL SEARCH -->
+
+        <div class="global-search">
+
+          <span class="global-search-icon">
+            ⌕
+          </span>
+
+          <input
+            type="text"
+            ng-model="c.globalSearch"
+            ng-change="c.syncGlobalSearch()"
+            placeholder="Search companies..."
+            aria-label="Search companies">
+
+        </div>
+
+
+        <!-- REFRESH -->
+
+        <button
+          type="button"
+          class="topbar-circle-button"
+          ng-click="c.refresh()"
+          title="Refresh">
+
+          ↻
+
+        </button>
+
+
+        <!-- NOTIFICATIONS -->
+
+        <button type="button"
+                class="topbar-icon-button notification-button">
+
+          <i class="fa fa-bell-o"></i>
+
+          <span></span>
+
+        </button>
+
+
+        <!-- DIVIDER -->
+
+        <div class="topbar-divider"></div>
+
+
+        <!-- USER -->
+
+        <div class="topbar-user">
+
+
+          <div class="topbar-avatar">
+            MA
+          </div>
+
+
+          <div class="topbar-user-details">
+
+            <div class="topbar-user-name">
+              MD Ali
+            </div>
+
+            <div class="topbar-user-role">
+              TPO
+            </div>
+
+          </div>
+
+
+          <span class="topbar-chevron">
+            ⌄
+          </span>
+
+
+        </div>
+
+      </div>
+
+    </header>
+
+
+    <!-- =========================================================
+         PAGE CONTENT
+         ========================================================= -->
+
+    <section class="company-page-content">
+
+
+      <!-- =======================================================
+           PAGE HEADING
+           ======================================================= -->
+
+      <div class="page-heading-row">
+
+        <div>
+
+          <div class="page-kicker">
+
+            <span class="kicker-dot"></span>
+
+            TPO COMPANY MANAGEMENT
+
+          </div>
+
+
+          <h1>
+            Company Directory
+          </h1>
+
+
+          <p>
+            Manage recruitment partners, company profiles,
+            recruiter information and placement relationships from one place.
+          </p>
+
+        </div>
+
+
+        <div class="page-heading-actions">
+
+
+          <button
+            type="button"
+            class="refresh-data-button"
+            ng-click="c.refresh()">
+
+            ↻ Refresh Data
+
+          </button>
+
+
+          <button
+            type="button"
+            class="add-company-button"
+            ng-click="c.openAddCompany()">
+
+            <span class="add-plus">
+              +
+            </span>
+
+            Add Company
+
+          </button>
+
+
+        </div>
+
+      </div>
+
+
+      <!-- =======================================================
+           KPI CARDS
+           ======================================================= -->
+
+      <div class="company-kpi-grid">
+
+
+        <!-- TOTAL -->
+
+        <div class="company-kpi-card total-card">
+
+          <div class="kpi-icon total-icon">
+            ▤
+          </div>
+
+          <div class="kpi-content">
+
+            <div class="kpi-label">
+              TOTAL<br>
+              COMPANIES
+            </div>
+
+            <div class="kpi-value">
+              {{data.summary.totalCompanies}}
+            </div>
+
+            <div class="kpi-description">
+              Registered companies
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- ACTIVE -->
+
+        <div class="company-kpi-card active-card">
+
+          <div class="kpi-icon active-icon">
+            ✓
+          </div>
+
+          <div class="kpi-content">
+
+            <div class="kpi-label">
+              ACTIVE<br>
+              COMPANIES
+            </div>
+
+            <div class="kpi-value">
+              {{data.summary.activeCompanies}}
+            </div>
+
+            <div class="kpi-description">
+              Active recruitment partners
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- INACTIVE -->
+
+        <div class="company-kpi-card inactive-card">
+
+          <div class="kpi-icon inactive-icon">
+            !
+          </div>
+
+          <div class="kpi-content">
+
+            <div class="kpi-label">
+              INACTIVE<br>
+              COMPANIES
+            </div>
+
+            <div class="kpi-value">
+              {{data.summary.inactiveCompanies}}
+            </div>
+
+            <div class="kpi-description">
+              Currently inactive
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- TYPES -->
+
+        <div class="company-kpi-card type-card">
+
+          <div class="kpi-icon type-icon">
+            ◇
+          </div>
+
+          <div class="kpi-content">
+
+            <div class="kpi-label">
+              COMPANY<br>
+              TYPES
+            </div>
+
+            <div class="kpi-value">
+              {{data.summary.companyTypes}}
+            </div>
+
+            <div class="kpi-description">
+              Different categories
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- =======================================================
+           FILTER BAR
+           ======================================================= -->
+
+      <div class="company-filter-card">
+
+        <div class="filter-left">
+
+
+          <div class="filter-company-count">
+
+            <span class="filter-count-label">
+              COMPANIES
+            </span>
+
+            <strong>
+              {{c.filteredCompanies.length}}
+            </strong>
+
+            <span>
+              records
+            </span>
+
+          </div>
+
+
+          <!-- SEARCH -->
+
+          <div class="directory-search">
+
+            <span>
+              ⌕
+            </span>
+
+            <input
+              type="text"
+              ng-model="c.searchText"
+              ng-change="c.applyFilters()"
+              placeholder="Search by name, ID, recruiter or email...">
+
+          </div>
+
+
+          <!-- INDUSTRY -->
+
+          <select
+            class="company-filter-select"
+            ng-model="c.filters.industry"
+            ng-change="c.applyFilters()">
+
+            <option value="">
+              All Industries
+            </option>
+
+            <option
+              ng-repeat="industry in data.industries track by $index"
+              value="{{industry}}">
+
+              {{industry}}
+
+            </option>
+
+          </select>
+
+
+          <!-- COMPANY TYPE -->
+
+          <select
+            class="company-filter-select"
+            ng-model="c.filters.companyType"
+            ng-change="c.applyFilters()">
+
+            <option value="">
+              All Company Types
+            </option>
+
+            <option
+              ng-repeat="type in data.companyTypes track by $index"
+              value="{{type}}">
+
+              {{type}}
+
+            </option>
+
+          </select>
+
+
+          <!-- STATUS -->
+
+          <select
+            class="company-filter-select"
+            ng-model="c.filters.status"
+            ng-change="c.applyFilters()">
+
+            <option value="">
+              All Status
+            </option>
+
+            <option value="Active">
+              Active
+            </option>
+
+            <option value="Inactive">
+              Inactive
+            </option>
+
+          </select>
+
+
+          <!-- CLEAR -->
+
+          <button
+            type="button"
+            class="clear-filter-button"
+            ng-click="c.clearFilters()">
+
+            Clear
+
+          </button>
+
+        </div>
+
+      </div>
+
+
+      <!-- =======================================================
+           COMPANY DIRECTORY
+           ======================================================= -->
+
+      <div class="company-directory-card">
+
+
+        <div class="directory-header">
+
+          <div>
+
+            <div class="directory-kicker">
+              COMPANY DIRECTORY
+            </div>
+
+            <h2>
+              All Companies
+            </h2>
+
+          </div>
+
+
+          <div class="directory-header-right">
+
+            <span class="directory-record-count">
+              {{c.filteredCompanies.length}} records
+            </span>
+
+            <button
+              type="button"
+              class="directory-add-button"
+              ng-click="c.openAddCompany()">
+
+              + Add Company
+
+            </button>
+
+          </div>
+
+        </div>
+
+
+        <!-- TABLE -->
+
+        <div class="company-table-container">
+
+          <table class="company-table">
+
+            <thead>
+
+              <tr>
+
+                <th>
+                  COMPANY
+                </th>
+
+                <th>
+                  COMPANY ID
+                </th>
+
+                <th>
+                  INDUSTRY
+                </th>
+
+                <th>
+                  RECRUITER
+                </th>
+
+                <th>
+                  RECRUITER EMAIL
+                </th>
+
+                <th>
+                  CONTACT NUMBER
+                </th>
+
+                <th>
+                  COMPANY TYPE
+                </th>
+
+                <th>
+                  STATUS
+                </th>
+
+                <th>
+                  VIEW
+                </th>
+
+              </tr>
+
+            </thead>
+
+
+            <tbody>
+
+
+              <tr
+                ng-repeat="company in c.filteredCompanies track by company.sys_id">
+
+
+                <!-- COMPANY -->
+
+                <td>
+
+                  <div class="company-name-cell">
+
+                    <div class="company-avatar">
+                      {{c.getInitials(company.company_name)}}
+                    </div>
+
+                    <div>
+
+                      <div class="company-name">
+                        {{company.company_name || 'Company'}}
+                      </div>
+
+                      <div class="company-subtitle">
+                        Recruitment Partner
+                      </div>
+
+                    </div>
+
+                  </div>
+
+                </td>
+
+
+                <!-- COMPANY ID -->
+
+                <td>
+
+                  <span class="company-id-value">
+                    {{company.company_id || '—'}}
+                  </span>
+
+                </td>
+
+
+                <!-- INDUSTRY -->
+
+                <td>
+
+                  <span class="industry-chip">
+                    {{company.industry || 'Not Specified'}}
+                  </span>
+
+                </td>
+
+
+                <!-- RECRUITER -->
+
+                <td>
+
+                  <span class="recruiter-value">
+                    {{company.recruiter_name || '—'}}
+                  </span>
+
+                </td>
+
+
+                <!-- EMAIL -->
+
+                <td>
+
+                  <span class="email-value">
+                    {{company.recruiter_email || '—'}}
+                  </span>
+
+                </td>
+
+
+                <!-- CONTACT -->
+
+                <td>
+
+                  <span class="contact-value">
+                    {{company.contact_number || '—'}}
+                  </span>
+
+                </td>
+
+
+                <!-- COMPANY TYPE -->
+
+                <td>
+
+                  <span class="company-type-chip">
+                    {{company.company_type || 'Not Specified'}}
+                  </span>
+
+                </td>
+
+
+                <!-- STATUS -->
+
+                <td>
+
+                  <span
+                    class="company-status-chip"
+                    ng-class="c.getStatusClass(company.status)">
+
+                    <span class="status-dot"></span>
+
+                    {{company.status || 'Not Specified'}}
+
+                  </span>
+
+                </td>
+
+
+                <!-- VIEW -->
+
+                <td>
+
+                  <button
+                    type="button"
+                    class="view-company-button"
+                    ng-click="c.openCompany(company)">
+
+                    View
+                    <span>→</span>
+
+                  </button>
+
+                </td>
+
+
+              </tr>
+
+
+              <!-- EMPTY -->
+
+              <tr ng-if="!c.filteredCompanies.length">
+
+                <td colspan="9">
+
+                  <div class="empty-state">
+
+                    <div class="empty-state-icon">
+                      ▤
+                    </div>
+
+                    <h3>
+                      No Companies Found
+                    </h3>
+
+                    <p>
+                      Try changing the search or filter criteria.
+                    </p>
+
+                    <button
+                      type="button"
+                      class="empty-add-button"
+                      ng-click="c.openAddCompany()">
+
+                      + Add Company
+
+                    </button>
+
+                  </div>
+
+                </td>
+
+              </tr>
+
+
+            </tbody>
+
+          </table>
+
+        </div>
+
+      </div>
+
+
+    </section>
+
+  </main>
+
+
+  <!-- =========================================================
+       VIEW COMPANY MODAL
+       ========================================================= -->
+
+  <div
+    class="company-modal-overlay"
+    ng-if="c.selectedCompany"
+    ng-click="c.closeCompany()">
+
+
+    <div
+      class="company-modal"
+      ng-click="$event.stopPropagation()">
+
+
+      <div class="modal-header">
+
+        <div class="modal-company-title">
+
+          <div class="modal-company-avatar">
+            {{c.getInitials(c.selectedCompany.company_name)}}
+          </div>
+
+          <div>
+
+            <h2>
+              {{c.selectedCompany.company_name}}
+            </h2>
+
+            <p>
+              {{c.selectedCompany.company_id || 'Company Profile'}}
+            </p>
+
+          </div>
+
+        </div>
+
+
+        <button
+          type="button"
+          class="modal-close"
+          ng-click="c.closeCompany()">
+
+          ×
+
+        </button>
+
+      </div>
+
+
+      <div class="modal-body">
+
+
+        <div class="modal-section-heading">
+          Company Information
+        </div>
+
+
+        <div class="detail-grid">
+
+
+          <div class="detail-card purple-detail">
+
+            <span>
+              Company ID
+            </span>
+
+            <strong>
+              {{c.selectedCompany.company_id || '—'}}
+            </strong>
+
+          </div>
+
+
+          <div class="detail-card blue-detail">
+
+            <span>
+              Industry
+            </span>
+
+            <strong>
+              {{c.selectedCompany.industry || '—'}}
+            </strong>
+
+          </div>
+
+
+          <div class="detail-card orange-detail">
+
+            <span>
+              Company Type
+            </span>
+
+            <strong>
+              {{c.selectedCompany.company_type || '—'}}
+            </strong>
+
+          </div>
+
+
+          <div class="detail-card green-detail">
+
+            <span>
+              Status
+            </span>
+
+            <strong>
+              {{c.selectedCompany.status || '—'}}
+            </strong>
+
+          </div>
+
+
+        </div>
+
+
+        <div class="modal-section-heading">
+          Recruiter Information
+        </div>
+
+
+        <div class="recruiter-details">
+
+
+          <div class="detail-row">
+
+            <span>
+              Recruiter Name
+            </span>
+
+            <strong>
+              {{c.selectedCompany.recruiter_name || '—'}}
+            </strong>
+
+          </div>
+
+
+          <div class="detail-row">
+
+            <span>
+              Recruiter Email
+            </span>
+
+            <strong>
+              {{c.selectedCompany.recruiter_email || '—'}}
+            </strong>
+
+          </div>
+
+
+          <div class="detail-row">
+
+            <span>
+              Contact Number
+            </span>
+
+            <strong>
+              {{c.selectedCompany.contact_number || '—'}}
+            </strong>
+
+          </div>
+
+
+        </div>
+
+      </div>
+
+
+      <div class="modal-footer">
+
+        <button
+          type="button"
+          class="modal-close-button"
+          ng-click="c.closeCompany()">
+
+          Close
+
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- =========================================================
+       ADD COMPANY MODAL
+       ========================================================= -->
+
+  <div
+    class="company-modal-overlay"
+    ng-if="c.showAddCompany"
+    ng-click="c.closeAddCompany()">
+
+
+    <div
+      class="company-modal add-company-modal"
+      ng-click="$event.stopPropagation()">
+
+
+      <div class="modal-header add-modal-header">
+
+        <div class="modal-company-title">
+
+          <div class="modal-company-avatar add-avatar">
+            +
+          </div>
+
+          <div>
+
+            <h2>
+              Add Company
+            </h2>
+
+            <p>
+              Add a new recruitment partner to Company Master
+            </p>
+
+          </div>
+
+        </div>
+
+
+        <button
+          type="button"
+          class="modal-close"
+          ng-click="c.closeAddCompany()">
+
+          ×
+
+        </button>
+
+      </div>
+
+
+      <div class="modal-body">
+
+
+        <div class="add-company-form">
+
+
+          <div class="form-group full-width">
+
+            <label>
+              Company Name <span>*</span>
+            </label>
+
+            <input
+              type="text"
+              ng-model="c.newCompany.company_name"
+              placeholder="Enter company name">
+
+          </div>
+
+
+          <div class="form-group">
+
+            <label>
+              Company ID <span>*</span>
+            </label>
+
+            <input
+              type="text"
+              ng-model="c.newCompany.company_id"
+              placeholder="Enter company ID">
+
+          </div>
+
+
+          <div class="form-group">
+
+            <label>
+              Industry
+            </label>
+
+            <select ng-model="c.newCompany.industry">
+
+              <option value="">
+                Select Industry
+              </option>
+
+              <option
+                ng-repeat="industry in data.industries track by $index"
+                value="{{industry}}">
+
+                {{industry}}
+
+              </option>
+
+            </select>
+
+          </div>
+
+
+          <div class="form-group">
+
+            <label>
+              Recruiter Name
+            </label>
+
+            <input
+              type="text"
+              ng-model="c.newCompany.recruiter_name"
+              placeholder="Enter recruiter name">
+
+          </div>
+
+
+          <div class="form-group">
+
+            <label>
+              Recruiter Email
+            </label>
+
+            <input
+              type="email"
+              ng-model="c.newCompany.recruiter_email"
+              placeholder="Enter recruiter email">
+
+          </div>
+
+
+          <div class="form-group">
+
+            <label>
+              Contact Number
+            </label>
+
+            <input
+              type="text"
+              ng-model="c.newCompany.contact_number"
+              placeholder="Enter contact number">
+
+          </div>
+
+
+          <div class="form-group">
+
+            <label>
+              Company Type
+            </label>
+
+            <select ng-model="c.newCompany.company_type">
+
+              <option value="">
+                Select Company Type
+              </option>
+
+              <option
+                ng-repeat="type in data.companyTypes track by $index"
+                value="{{type}}">
+
+                {{type}}
+
+              </option>
+
+            </select>
+
+          </div>
+
+
+          <div class="form-group">
+
+            <label>
+              Status
+            </label>
+
+            <select ng-model="c.newCompany.status">
+
+              <option value="Active">
+                Active
+              </option>
+
+              <option value="Inactive">
+                Inactive
+              </option>
+
+            </select>
+
+          </div>
+
+
+        </div>
+
+
+        <div
+          class="add-company-message"
+          ng-if="c.addCompanyMessage">
+
+          {{c.addCompanyMessage}}
+
+        </div>
+
+      </div>
+
+
+      <div class="modal-footer">
+
+
+        <button
+          type="button"
+          class="modal-close-button"
+          ng-click="c.closeAddCompany()">
+
+          Cancel
+
+        </button>
+
+
+        <button
+          type="button"
+          class="save-company-button"
+          ng-click="c.saveCompany()"
+          ng-disabled="c.savingCompany">
+
+          <span ng-if="!c.savingCompany">
+            ✓ Save Company
+          </span>
+
+          <span ng-if="c.savingCompany">
+            Saving...
+          </span>
+
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- =========================================================
+       AI WIDGET
+       ========================================================= -->
+
+  <div class="company-ai-widget">
+    <sp-widget widget="data.aiWidget"></sp-widget>
+  </div>
+
+</div>]]></template>
+    </sp_widget>
+</record_update>

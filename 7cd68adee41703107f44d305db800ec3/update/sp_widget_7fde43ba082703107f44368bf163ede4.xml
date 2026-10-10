@@ -1,0 +1,1454 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_widget">
+    <sp_widget action="INSERT_OR_UPDATE">
+        <category>custom</category>
+        <client_script><![CDATA[api.controller = function() {
+
+    var c = this;
+
+
+    // =====================================================
+    // FIND CURRENT STATUS OPTION
+    // =====================================================
+
+    function setCurrentStatus() {
+
+        if (
+            !c.data.company ||
+            !c.data.status_options ||
+            !c.data.status_options.length
+        ) {
+
+            return;
+
+        }
+
+
+        var currentValue =
+            c.data.company.status_value;
+
+
+        var currentLabel =
+            c.data.company.status;
+
+
+        // -------------------------------------------------
+        // First: match database value
+        // -------------------------------------------------
+
+        for (
+            var i = 0;
+            i < c.data.status_options.length;
+            i++
+        ) {
+
+            if (
+                String(
+                    c.data.status_options[i].value
+                ) ===
+                String(
+                    currentValue
+                )
+            ) {
+
+                c.editStatus =
+                    c.data.status_options[i].value;
+
+                return;
+
+            }
+
+        }
+
+
+        // -------------------------------------------------
+        // Second: match display label
+        // -------------------------------------------------
+
+        for (
+            var j = 0;
+            j < c.data.status_options.length;
+            j++
+        ) {
+
+            if (
+                String(
+                    c.data.status_options[j].label
+                ).toLowerCase() ===
+                String(
+                    currentLabel
+                ).toLowerCase()
+            ) {
+
+                c.editStatus =
+                    c.data.status_options[j].value;
+
+                return;
+
+            }
+
+        }
+
+
+        // -------------------------------------------------
+        // Final fallback
+        // -------------------------------------------------
+
+        c.editStatus =
+            c.data.status_options[0].value;
+
+    }
+
+
+    // =====================================================
+    // INITIAL LOAD
+    // =====================================================
+
+    setCurrentStatus();
+
+
+    // =====================================================
+    // UPDATE COMPANY STATUS
+    // =====================================================
+
+    c.updateStatus = function() {
+
+        if (
+            !c.editStatus
+        ) {
+
+            return;
+
+        }
+
+
+        c.updatingStatus =
+            true;
+
+
+        c.server.get({
+
+            action:
+                'update_status',
+
+            status:
+                c.editStatus
+
+        }).then(function(response) {
+
+            c.updatingStatus =
+                false;
+
+
+            // -------------------------------------------------
+            // Replace data with fresh server data
+            // -------------------------------------------------
+
+            c.data =
+                response.data;
+
+
+            // -------------------------------------------------
+            // Re-select updated status
+            // -------------------------------------------------
+
+            setCurrentStatus();
+
+        }).catch(function() {
+
+            c.updatingStatus =
+                false;
+
+        });
+
+    };
+
+};]]></client_script>
+        <controller_as>c</controller_as>
+        <css>.company-profile-page {&#13;
+    max-width: 1080px;&#13;
+    margin: 0 auto;&#13;
+    padding: 28px;&#13;
+    color: #102a56;&#13;
+}&#13;
+&#13;
+&#13;
+/* HEADER */&#13;
+&#13;
+.profile-header {&#13;
+    background: linear-gradient(&#13;
+        135deg,&#13;
+        #f4f3ff,&#13;
+        #eef1ff&#13;
+    );&#13;
+&#13;
+    border: 1px solid #dfe3ff;&#13;
+    border-radius: 18px;&#13;
+&#13;
+    padding: 30px;&#13;
+&#13;
+    display: flex;&#13;
+    justify-content: space-between;&#13;
+    align-items: center;&#13;
+&#13;
+    margin-bottom: 22px;&#13;
+}&#13;
+&#13;
+&#13;
+.eyebrow {&#13;
+    font-size: 11px;&#13;
+    letter-spacing: 2px;&#13;
+    font-weight: 700;&#13;
+    color: #5267e8;&#13;
+}&#13;
+&#13;
+&#13;
+.profile-header h1 {&#13;
+    margin: 8px 0 5px;&#13;
+    font-size: 28px;&#13;
+    color: #082b62;&#13;
+}&#13;
+&#13;
+&#13;
+.profile-header p {&#13;
+    margin: 0;&#13;
+    color: #66789b;&#13;
+}&#13;
+&#13;
+&#13;
+/* BUTTON */&#13;
+&#13;
+.btn {&#13;
+    display: inline-block;&#13;
+    padding: 11px 18px;&#13;
+    border-radius: 9px;&#13;
+    text-decoration: none;&#13;
+    font-size: 13px;&#13;
+    font-weight: 600;&#13;
+}&#13;
+&#13;
+&#13;
+.btn-secondary {&#13;
+    border: 1px solid #cbd5ef;&#13;
+    background: white;&#13;
+    color: #3156e8;&#13;
+}&#13;
+&#13;
+&#13;
+/* PROFILE CARD */&#13;
+&#13;
+.profile-card {&#13;
+    background: white;&#13;
+    border: 1px solid #dce3f0;&#13;
+    border-radius: 18px;&#13;
+&#13;
+    box-shadow:&#13;
+        0 8px 25px rgba(40, 65, 110, 0.06);&#13;
+&#13;
+    overflow: hidden;&#13;
+}&#13;
+&#13;
+&#13;
+/* COMPANY TOP */&#13;
+&#13;
+.company-top {&#13;
+    padding: 28px;&#13;
+&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    gap: 18px;&#13;
+&#13;
+    border-bottom: 1px solid #edf0f6;&#13;
+}&#13;
+&#13;
+&#13;
+.company-logo {&#13;
+    width: 62px;&#13;
+    height: 62px;&#13;
+&#13;
+    border-radius: 14px;&#13;
+&#13;
+    background: #5267e8;&#13;
+    color: white;&#13;
+&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+&#13;
+    font-size: 25px;&#13;
+    font-weight: 700;&#13;
+}&#13;
+&#13;
+&#13;
+.company-top h2 {&#13;
+    margin: 0 0 5px;&#13;
+    color: #092c62;&#13;
+    font-size: 23px;&#13;
+}&#13;
+&#13;
+&#13;
+.company-id {&#13;
+    font-size: 12px;&#13;
+    color: #71809c;&#13;
+}&#13;
+&#13;
+&#13;
+.company-status {&#13;
+    margin-left: auto;&#13;
+}&#13;
+&#13;
+&#13;
+.status-badge {&#13;
+    display: inline-block;&#13;
+&#13;
+    padding: 6px 13px;&#13;
+&#13;
+    border-radius: 20px;&#13;
+&#13;
+    background: #e8f8ef;&#13;
+    color: #16834a;&#13;
+&#13;
+    font-size: 12px;&#13;
+    font-weight: 600;&#13;
+}&#13;
+&#13;
+&#13;
+/* SECTION */&#13;
+&#13;
+.section {&#13;
+    padding: 28px;&#13;
+    border-bottom: 1px solid #edf0f6;&#13;
+}&#13;
+&#13;
+&#13;
+.section:last-child {&#13;
+    border-bottom: none;&#13;
+}&#13;
+&#13;
+&#13;
+.section-title {&#13;
+    font-size: 16px;&#13;
+    font-weight: 700;&#13;
+&#13;
+    color: #173b70;&#13;
+&#13;
+    margin-bottom: 20px;&#13;
+}&#13;
+&#13;
+&#13;
+/* DETAILS */&#13;
+&#13;
+.details-grid {&#13;
+    display: grid;&#13;
+&#13;
+    grid-template-columns:&#13;
+        repeat(2, 1fr);&#13;
+&#13;
+    gap: 22px 40px;&#13;
+}&#13;
+&#13;
+&#13;
+.detail-item {&#13;
+    display: flex;&#13;
+    flex-direction: column;&#13;
+    gap: 6px;&#13;
+}&#13;
+&#13;
+&#13;
+.detail-label {&#13;
+    font-size: 11px;&#13;
+&#13;
+    text-transform: uppercase;&#13;
+&#13;
+    letter-spacing: 0.7px;&#13;
+&#13;
+    color: #7a89a5;&#13;
+}&#13;
+&#13;
+&#13;
+.detail-value {&#13;
+    font-size: 14px;&#13;
+&#13;
+    color: #193964;&#13;
+&#13;
+    font-weight: 600;&#13;
+}&#13;
+&#13;
+&#13;
+/* RECRUITER */&#13;
+&#13;
+.recruiter-card {&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 18px;&#13;
+&#13;
+    background: #f8f9ff;&#13;
+&#13;
+    border: 1px solid #e4e8f8;&#13;
+&#13;
+    border-radius: 12px;&#13;
+&#13;
+    padding: 20px;&#13;
+}&#13;
+&#13;
+&#13;
+.recruiter-avatar {&#13;
+    width: 52px;&#13;
+    height: 52px;&#13;
+&#13;
+    border-radius: 50%;&#13;
+&#13;
+    background: #e9edff;&#13;
+&#13;
+    color: #5267e8;&#13;
+&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+&#13;
+    font-size: 20px;&#13;
+    font-weight: 700;&#13;
+}&#13;
+&#13;
+&#13;
+.recruiter-details {&#13;
+    display: grid;&#13;
+&#13;
+    grid-template-columns:&#13;
+        repeat(2, 1fr);&#13;
+&#13;
+    gap: 30px;&#13;
+&#13;
+    flex: 1;&#13;
+}&#13;
+&#13;
+&#13;
+/* ERROR */&#13;
+&#13;
+.error-message {&#13;
+    padding: 18px;&#13;
+&#13;
+    background: #fff2f2;&#13;
+&#13;
+    border: 1px solid #ffd2d2;&#13;
+&#13;
+    border-radius: 10px;&#13;
+&#13;
+    color: #c62828;&#13;
+&#13;
+    margin-bottom: 20px;&#13;
+}&#13;
+&#13;
+&#13;
+/* RESPONSIVE */&#13;
+&#13;
+@media (max-width: 700px) {&#13;
+&#13;
+    .profile-header {&#13;
+        flex-direction: column;&#13;
+        align-items: flex-start;&#13;
+        gap: 20px;&#13;
+    }&#13;
+&#13;
+    .details-grid {&#13;
+        grid-template-columns: 1fr;&#13;
+    }&#13;
+&#13;
+    .recruiter-details {&#13;
+        grid-template-columns: 1fr;&#13;
+    }&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   STATUS EDIT&#13;
+========================================= */&#13;
+&#13;
+.status-edit-row {&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 10px;&#13;
+&#13;
+    margin-top: 2px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.status-select {&#13;
+&#13;
+    height: 38px;&#13;
+&#13;
+    min-width: 125px;&#13;
+&#13;
+    padding:&#13;
+        0 34px 0 12px;&#13;
+&#13;
+    border:&#13;
+        1px solid #cbd5ef;&#13;
+&#13;
+    border-radius: 8px;&#13;
+&#13;
+    background: #ffffff;&#13;
+&#13;
+    color: #193964;&#13;
+&#13;
+    font-size: 13px;&#13;
+&#13;
+    font-weight: 600;&#13;
+&#13;
+    cursor: pointer;&#13;
+&#13;
+    outline: none;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.status-select:focus {&#13;
+&#13;
+    border-color: #5267e8;&#13;
+&#13;
+    box-shadow:&#13;
+        0 0 0 3px&#13;
+        rgba(82,103,232,0.10);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.update-status-btn {&#13;
+&#13;
+    height: 38px;&#13;
+&#13;
+    padding:&#13;
+        0 16px;&#13;
+&#13;
+    border-radius: 8px;&#13;
+&#13;
+    border: none;&#13;
+&#13;
+    font-size: 12px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.update-status-btn:disabled {&#13;
+&#13;
+    opacity: 0.6;&#13;
+&#13;
+    cursor: not-allowed;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   STATUS BADGES&#13;
+========================================= */&#13;
+&#13;
+.status-active {&#13;
+&#13;
+    background: #e8f8ef;&#13;
+&#13;
+    color: #16834a;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.status-inactive {&#13;
+&#13;
+    background: #fff1f1;&#13;
+&#13;
+    color: #c62828;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   SUCCESS MESSAGE&#13;
+========================================= */&#13;
+&#13;
+.success-message {&#13;
+&#13;
+    padding:&#13;
+        14px 18px;&#13;
+&#13;
+    background: #eaf8ef;&#13;
+&#13;
+    border:&#13;
+        1px solid #c9ecd8;&#13;
+&#13;
+    border-radius: 10px;&#13;
+&#13;
+    color: #16834a;&#13;
+&#13;
+    margin-bottom: 20px;&#13;
+&#13;
+    font-size: 13px;&#13;
+&#13;
+    font-weight: 600;&#13;
+&#13;
+}</css>
+        <data_table>sp_instance</data_table>
+        <demo_data/>
+        <description/>
+        <docs/>
+        <field_list/>
+        <has_preview>false</has_preview>
+        <id>campus360_recruiter_company_profile</id>
+        <internal>false</internal>
+        <link><![CDATA[function link(scope, element, attrs, controller) {
+  
+}]]></link>
+        <name>campus360_recruiter_company_profile</name>
+        <option_schema/>
+        <public>false</public>
+        <roles/>
+        <script><![CDATA[(function() {
+
+    // =====================================================
+    // CAMPUS360 RECRUITER - COMPANY PROFILE
+    // =====================================================
+    //
+    // Current Recruiter:
+    // Ananya Mehta
+    // Recruiter ID:
+    // RCR001
+    //
+    // Current Company:
+    // TechNova Solutions
+    // Company ID:
+    // CMP001
+    //
+    // This widget:
+    // 1. Loads company information
+    // 2. Loads company status choices
+    // 3. Allows recruiter to update company status
+    // 4. Saves the change to Company Master
+    // =====================================================
+
+
+    // =====================================================
+    // RECRUITER CONTEXT
+    // =====================================================
+
+    data.recruiter_name =
+        'Ananya Mehta';
+
+    data.recruiter_id =
+        'RCR001';
+
+
+    // =====================================================
+    // COMPANY CONTEXT
+    // =====================================================
+
+    // TechNova Solutions - CMP001
+    var companySysId =
+        'e9268662acd303107f44b432e349694b';
+
+
+    // =====================================================
+    // CLEAR MESSAGES
+    // =====================================================
+
+    data.error = '';
+    data.success = '';
+
+
+    // =====================================================
+    // UPDATE COMPANY STATUS
+    // =====================================================
+
+    if (
+        input &&
+        input.action == 'update_status'
+    ) {
+
+        var newStatus =
+            input.status;
+
+
+        // -------------------------------------------------
+        // Validate status
+        // -------------------------------------------------
+
+        if (!newStatus) {
+
+            data.error =
+                'Please select a valid company status.';
+
+        } else {
+
+            // -------------------------------------------------
+            // Get company record
+            // -------------------------------------------------
+
+            var updateCompany =
+                new GlideRecord(
+                    'x_snc_campus360_company_master'
+                );
+
+
+            if (
+                updateCompany.get(companySysId)
+            ) {
+
+                // -------------------------------------------------
+                // Verify that selected status exists
+                // in the Company Master choice list
+                // -------------------------------------------------
+
+                var validStatus = false;
+
+
+                var statusChoice =
+                    new GlideRecord('sys_choice');
+
+
+                statusChoice.addQuery(
+                    'name',
+                    'x_snc_campus360_company_master'
+                );
+
+
+                statusChoice.addQuery(
+                    'element',
+                    'status'
+                );
+
+
+                statusChoice.addQuery(
+                    'value',
+                    newStatus
+                );
+
+
+                statusChoice.addQuery(
+                    'inactive',
+                    false
+                );
+
+
+                statusChoice.query();
+
+
+                if (
+                    statusChoice.next()
+                ) {
+
+                    validStatus = true;
+
+                }
+
+
+                // -------------------------------------------------
+                // Update status
+                // -------------------------------------------------
+
+                if (validStatus) {
+
+                    updateCompany.setValue(
+                        'status',
+                        newStatus
+                    );
+
+
+                    updateCompany.update();
+
+
+                    data.success =
+                        'Company status updated successfully.';
+
+                } else {
+
+                    data.error =
+                        'Invalid company status selected.';
+
+                }
+
+            } else {
+
+                data.error =
+                    'Company record could not be found.';
+
+            }
+
+        }
+
+    }
+
+
+    // =====================================================
+    // GET COMPANY
+    // =====================================================
+
+    var companyGR =
+        new GlideRecord(
+            'x_snc_campus360_company_master'
+        );
+
+
+    if (
+        !companyGR.get(companySysId)
+    ) {
+
+        data.error =
+            'Company record could not be found.';
+
+        return;
+
+    }
+
+
+    // =====================================================
+    // CURRENT STATUS
+    // =====================================================
+
+    /*
+     * Actual value stored in the database.
+     *
+     * Example:
+     * active
+     * inactive
+     * or another ServiceNow choice value.
+     */
+
+    var currentStatus =
+        companyGR.getValue('status');
+
+
+    /*
+     * Display label.
+     *
+     * Example:
+     * Active
+     * Inactive
+     */
+
+    var currentStatusDisplay =
+        companyGR.getDisplayValue('status');
+
+
+    // =====================================================
+    // COMPANY INFORMATION
+    // =====================================================
+
+    data.company = {
+
+        // -------------------------------------------------
+        // SYS ID
+        // -------------------------------------------------
+
+        sys_id:
+            companyGR.getUniqueValue(),
+
+
+        // -------------------------------------------------
+        // COMPANY NAME
+        // -------------------------------------------------
+
+        company_name:
+            companyGR.getValue(
+                'company_name'
+            ),
+
+
+        // -------------------------------------------------
+        // COMPANY ID
+        // -------------------------------------------------
+
+        company_id:
+            companyGR.getValue(
+                'company_id'
+            ),
+
+
+        // -------------------------------------------------
+        // COMPANY TYPE
+        // -------------------------------------------------
+
+        company_type:
+            companyGR.getDisplayValue(
+                'company_type'
+            ),
+
+
+        // -------------------------------------------------
+        // INDUSTRY
+        // -------------------------------------------------
+
+        industry:
+            companyGR.getDisplayValue(
+                'industry'
+            ),
+
+
+        // -------------------------------------------------
+        // CONTACT NUMBER
+        // -------------------------------------------------
+
+        contact_number:
+            companyGR.getValue(
+                'contact_number'
+            ),
+
+
+        // -------------------------------------------------
+        // RECRUITER NAME
+        // -------------------------------------------------
+
+        recruiter_name:
+            companyGR.getValue(
+                'recruiter_name'
+            ),
+
+
+        // -------------------------------------------------
+        // RECRUITER EMAIL
+        // -------------------------------------------------
+
+        recruiter_email:
+            companyGR.getValue(
+                'recruiter_email'
+            ),
+
+
+        // -------------------------------------------------
+        // STATUS DISPLAY VALUE
+        // -------------------------------------------------
+
+        status:
+            currentStatusDisplay,
+
+
+        // -------------------------------------------------
+        // STATUS DATABASE VALUE
+        // -------------------------------------------------
+
+        status_value:
+            currentStatus
+
+    };
+
+
+    // =====================================================
+    // STATUS OPTIONS
+    // =====================================================
+
+    data.status_options = [];
+
+
+    // =====================================================
+    // READ STATUS CHOICES FROM SERVICENOW
+    // =====================================================
+
+    var choiceGR =
+        new GlideRecord('sys_choice');
+
+
+    choiceGR.addQuery(
+        'name',
+        'x_snc_campus360_company_master'
+    );
+
+
+    choiceGR.addQuery(
+        'element',
+        'status'
+    );
+
+
+    choiceGR.addQuery(
+        'inactive',
+        false
+    );
+
+
+    choiceGR.orderBy(
+        'sequence'
+    );
+
+
+    choiceGR.query();
+
+
+    while (
+        choiceGR.next()
+    ) {
+
+        data.status_options.push({
+
+            value:
+                choiceGR.getValue(
+                    'value'
+                ),
+
+            label:
+                choiceGR.getValue(
+                    'label'
+                )
+
+        });
+
+    }
+
+
+    // =====================================================
+    // FALLBACK STATUS OPTIONS
+    // =====================================================
+
+    /*
+     * If ServiceNow does not return any
+     * choices from sys_choice, create
+     * fallback choices.
+     */
+
+    if (
+        data.status_options.length == 0
+    ) {
+
+        // -------------------------------------------------
+        // Current status
+        // -------------------------------------------------
+
+        if (currentStatus) {
+
+            data.status_options.push({
+
+                value:
+                    currentStatus,
+
+                label:
+                    currentStatusDisplay
+
+            });
+
+        }
+
+
+        // -------------------------------------------------
+        // Add Active if current status isn't Active
+        // -------------------------------------------------
+
+        if (
+            currentStatus != 'active'
+        ) {
+
+            data.status_options.push({
+
+                value:
+                    'active',
+
+                label:
+                    'Active'
+
+            });
+
+        }
+
+
+        // -------------------------------------------------
+        // Add Inactive if current status isn't Inactive
+        // -------------------------------------------------
+
+        if (
+            currentStatus != 'inactive'
+        ) {
+
+            data.status_options.push({
+
+                value:
+                    'inactive',
+
+                label:
+                    'Inactive'
+
+            });
+
+        }
+
+    }
+
+
+    // =====================================================
+    // ENSURE CURRENT STATUS EXISTS IN DROPDOWN
+    // =====================================================
+
+    /*
+     * Sometimes the Company Master record can contain
+     * a value which is not currently available in
+     * sys_choice.
+     *
+     * We still want the current value to be visible.
+     */
+
+    var currentStatusExists =
+        false;
+
+
+    for (
+        var i = 0;
+        i < data.status_options.length;
+        i++
+    ) {
+
+        if (
+            String(
+                data.status_options[i].value
+            ) ===
+            String(
+                currentStatus
+            )
+        ) {
+
+            currentStatusExists =
+                true;
+
+            break;
+
+        }
+
+    }
+
+
+    // -----------------------------------------------------
+    // Add current status if missing
+    // -----------------------------------------------------
+
+    if (
+        currentStatus &&
+        !currentStatusExists
+    ) {
+
+        data.status_options.unshift({
+
+            value:
+                currentStatus,
+
+            label:
+                currentStatusDisplay
+
+        });
+
+    }
+
+
+    // =====================================================
+    // FINAL DEBUG INFORMATION
+    // =====================================================
+
+    /*
+     * Keep these while testing.
+     * You can remove them later.
+     */
+
+    data.debug_status_value =
+        currentStatus;
+
+
+    data.debug_status_display =
+        currentStatusDisplay;
+
+
+})();]]></script>
+        <servicenow>false</servicenow>
+        <sys_class_name>sp_widget</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-29 17:01:11</sys_created_on>
+        <sys_id>7fde43ba082703107f44368bf163ede4</sys_id>
+        <sys_mod_count>9</sys_mod_count>
+        <sys_name>campus360_recruiter_company_profile</sys_name>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name>sp_widget_7fde43ba082703107f44368bf163ede4</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-30 04:18:10</sys_updated_on>
+        <template><![CDATA[<div class="company-profile-page">
+
+  <!-- HEADER -->
+  <div class="profile-header">
+
+    <div>
+
+      <span class="eyebrow">
+        COMPANY
+      </span>
+
+      <h1>
+        Company Profile
+      </h1>
+
+      <p>
+        View and manage your company and recruiter information.
+      </p>
+
+    </div>
+
+    <div>
+
+      <a
+        class="btn btn-secondary"
+        href="?id=campus360_recruiter_dashboard_new">
+
+        ← Dashboard
+
+      </a>
+
+    </div>
+
+  </div>
+
+
+  <!-- ERROR -->
+  <div
+    class="error-message"
+    ng-if="c.data.error">
+
+    {{c.data.error}}
+
+  </div>
+
+
+  <!-- SUCCESS -->
+  <div
+    class="success-message"
+    ng-if="c.data.success">
+
+    {{c.data.success}}
+
+  </div>
+
+
+  <!-- COMPANY PROFILE -->
+  <div
+    class="profile-card"
+    ng-if="c.data.company">
+
+
+    <!-- COMPANY TOP -->
+    <div class="company-top">
+
+      <div class="company-logo">
+
+        {{c.data.company.company_name.charAt(0)}}
+
+      </div>
+
+
+      <div>
+
+        <h2>
+          {{c.data.company.company_name}}
+        </h2>
+
+        <div class="company-id">
+
+          {{c.data.company.company_id}}
+
+        </div>
+
+      </div>
+
+
+      <!-- STATUS -->
+      <div class="company-status">
+
+        <span
+          class="status-badge"
+          ng-class="{
+            'status-active':
+              c.data.company.status_value == 'active' ||
+              c.data.company.status == 'Active',
+
+            'status-inactive':
+              c.data.company.status_value == 'inactive' ||
+              c.data.company.status == 'Inactive'
+          }">
+
+          {{c.data.company.status}}
+
+        </span>
+
+      </div>
+
+    </div>
+
+
+    <!-- COMPANY DETAILS -->
+    <div class="section">
+
+      <div class="section-title">
+        Company Information
+      </div>
+
+
+      <div class="details-grid">
+
+
+        <div class="detail-item">
+
+          <span class="detail-label">
+            Company Name
+          </span>
+
+          <span class="detail-value">
+            {{c.data.company.company_name}}
+          </span>
+
+        </div>
+
+
+        <div class="detail-item">
+
+          <span class="detail-label">
+            Company ID
+          </span>
+
+          <span class="detail-value">
+            {{c.data.company.company_id}}
+          </span>
+
+        </div>
+
+
+        <div class="detail-item">
+
+          <span class="detail-label">
+            Company Type
+          </span>
+
+          <span class="detail-value">
+            {{c.data.company.company_type || '—'}}
+          </span>
+
+        </div>
+
+
+        <div class="detail-item">
+
+          <span class="detail-label">
+            Industry
+          </span>
+
+          <span class="detail-value">
+            {{c.data.company.industry || '—'}}
+          </span>
+
+        </div>
+
+
+        <div class="detail-item">
+
+          <span class="detail-label">
+            Contact Number
+          </span>
+
+          <span class="detail-value">
+            {{c.data.company.contact_number || '—'}}
+          </span>
+
+        </div>
+
+
+        <!-- EDITABLE STATUS -->
+        <div class="detail-item">
+
+          <span class="detail-label">
+            COMPANY STATUS
+          </span>
+
+
+          <div class="status-edit-row">
+
+            <select
+              class="status-select"
+              ng-model="c.editStatus"
+              ng-options="option.value as option.label for option in c.data.status_options">
+
+            </select>
+
+
+            <button
+              type="button"
+              class="btn btn-primary update-status-btn"
+              ng-click="c.updateStatus()"
+              ng-disabled="c.updatingStatus">
+
+              <span ng-if="!c.updatingStatus">
+                Update
+              </span>
+
+              <span ng-if="c.updatingStatus">
+                Updating...
+              </span>
+
+            </button>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- RECRUITER INFORMATION -->
+    <div class="section">
+
+      <div class="section-title">
+        Recruiter Information
+      </div>
+
+
+      <div class="recruiter-card">
+
+        <div class="recruiter-avatar">
+
+          {{c.data.company.recruiter_name.charAt(0)}}
+
+        </div>
+
+
+        <div class="recruiter-details">
+
+          <div class="detail-item">
+
+            <span class="detail-label">
+              Recruiter Name
+            </span>
+
+            <span class="detail-value">
+              {{c.data.company.recruiter_name || '—'}}
+            </span>
+
+          </div>
+
+
+          <div class="detail-item">
+
+            <span class="detail-label">
+              Recruiter Email
+            </span>
+
+            <span class="detail-value">
+              {{c.data.company.recruiter_email || '—'}}
+            </span>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+  </div>
+
+</div>]]></template>
+    </sp_widget>
+</record_update>

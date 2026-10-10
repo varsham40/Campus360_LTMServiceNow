@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?><database>
+    <element attributes="enforce_dot_walk_cross_scope_access=true" db_object_id="f3be5a30c4e703107f44164a4d246362" label="Trainer Interview Availability" max_length="40" name="x_snc_campus360_trainer_interview_availability" type="collection">
+        <element attributes="ignore_filter_on_new=true" default="javascript:global.getNextObjNumberPadded();" label="Availability ID" max_length="40" name="number" type="string"/>
+        <element label="Trainer" max_length="32" name="trainer" reference="x_snc_campus360_trainer_master" type="reference"/>
+        <element label="Active" max_length="255" name="active" type="boolean"/>
+        <element label="Created On" max_length="255" name="created_on" type="glide_date_time"/>
+        <element label="End Time" max_length="255" name="end_time" type="glide_time"/>
+        <element label="Start Time" max_length="255" name="start_time" type="glide_time"/>
+        <element label="Available Date" max_length="255" name="available_date" type="glide_date"/>
+        <element choice="3" label="Status" max_length="255" name="status" type="choice">
+            <choice>
+                <element inactive_on_update="false" label="Available" sequence="0" value="Available"/>
+                <element inactive_on_update="false" label="Cancelled" sequence="2" value="Cancelled"/>
+                <element inactive_on_update="false" label="Booked" sequence="1" value="Booked"/>
+            </choice>
+        </element>
+        <element label="Skill Area" max_length="40" name="skill_area" type="string"/>
+        <element choice="3" label="Interview Type" max_length="255" name="interview_type" type="choice">
+            <choice>
+                <element inactive_on_update="false" label="Technical" sequence="0" value="Technical"/>
+                <element inactive_on_update="false" label="Aptitude" sequence="2" value="Aptitude"/>
+                <element inactive_on_update="false" label="Group Discussion" sequence="6" value="Group Discussion"/>
+                <element inactive_on_update="false" label="Other" sequence="7" value="Other"/>
+                <element inactive_on_update="false" label="Behavioral" sequence="3" value="Behavioral"/>
+                <element inactive_on_update="false" label="Communication" sequence="4" value="Communication"/>
+                <element inactive_on_update="false" label="HR" sequence="1" value="HR"/>
+                <element inactive_on_update="false" label="Coding" sequence="5" value="Coding"/>
+            </choice>
+        </element>
+        <element label="Updated On" max_length="255" name="updated_on" type="glide_date_time"/>
+        <index name="index">
+            <element name="trainer"/>
+        </index>
+    </element>
+</database>

@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_page">
+    <sp_page action="DELETE">
+        <category>custom</category>
+        <css/>
+        <draft>false</draft>
+        <dynamic_title_structure/>
+        <human_readable_url_structure/>
+        <id>recruiter_talent_pool</id>
+        <internal>false</internal>
+        <omit_watcher>false</omit_watcher>
+        <public>false</public>
+        <roles/>
+        <seo_script/>
+        <short_description/>
+        <sys_class_name>sp_page</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-23 09:09:18</sys_created_on>
+        <sys_id>eaa96a78c42b03107f44164a4d2463fe</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>recruiter_talent_pool</sys_name>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name>sp_page_eaa96a78c42b03107f44164a4d2463fe</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-23 09:09:18</sys_updated_on>
+        <title>Recruiter Talent Pool</title>
+        <use_seo_script>false</use_seo_script>
+    </sp_page>
+    <sys_translated_text action="DELETE" query="documentkey=eaa96a78c42b03107f44164a4d2463fe"/>
+    <sys_update_version action="INSERT_OR_UPDATE">
+        <action>DELETE</action>
+        <application display_value="Campus360">7cd68adee41703107f44d305db800ec3</application>
+        <file_path/>
+        <instance_id>82d18dc7c38fcf94a03197af0501316c</instance_id>
+        <instance_name>ltm-hck-2876-0027</instance_name>
+        <name>sp_page_eaa96a78c42b03107f44164a4d2463fe</name>
+        <payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_page"><sp_page action="INSERT_OR_UPDATE"><category>custom</category><css/><draft>false</draft><dynamic_title_structure/><human_readable_url_structure/><id>recruiter_talent_pool</id><internal>false</internal><omit_watcher>false</omit_watcher><public>false</public><roles/><seo_script/><short_description/><sys_class_name>sp_page</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-23 09:09:18</sys_created_on><sys_id>eaa96a78c42b03107f44164a4d2463fe</sys_id><sys_mod_count>0</sys_mod_count><sys_name>recruiter_talent_pool</sys_name><sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package><sys_policy/><sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope><sys_update_name>sp_page_eaa96a78c42b03107f44164a4d2463fe</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-23 09:09:18</sys_updated_on><title>Recruiter Talent Pool</title><use_seo_script>false</use_seo_script></sp_page><sys_translated_text action="delete_multiple" query="documentkey=eaa96a78c42b03107f44164a4d2463fe"/></record_update>]]></payload>
+        <payload_hash>1725603295</payload_hash>
+        <record_name>recruiter_talent_pool</record_name>
+        <reverted_from/>
+        <source>70d68adee41703107f44d305db800ec8</source>
+        <source_table>sys_update_set</source_table>
+        <state>previous</state>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-23 09:09:18</sys_created_on>
+        <sys_id>16c9ae78c42b03107f44164a4d2463ca</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_recorded_at>1a0cd86cb170000001</sys_recorded_at>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-23 09:09:18</sys_updated_on>
+        <type>Page</type>
+        <update_guid>1ac9ae78c12b0310d5f8233c397180c9</update_guid>
+        <update_guid_history>1ac9ae78c12b0310d5f8233c397180c9:1725603295</update_guid_history>
+    </sys_update_version>
+    <sys_metadata_delete action="INSERT_OR_UPDATE">
+        <sys_audit_delete display_value="recruiter_talent_pool">a193af3cc46343107f44164a4d24635f</sys_audit_delete>
+        <sys_class_name>sys_metadata_delete</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-23 13:21:51</sys_created_on>
+        <sys_db_object display_value="" name="sp_page">sp_page</sys_db_object>
+        <sys_id>2efbfecc54bc4ec48de04ffed4e4b621</sys_id>
+        <sys_metadata>eaa96a78c42b03107f44164a4d2463fe</sys_metadata>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>recruiter_talent_pool</sys_name>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_parent/>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_scope_delete display_value="">1cde9626740d46978b846077c1615101</sys_scope_delete>
+        <sys_update_name>sp_page_eaa96a78c42b03107f44164a4d2463fe</sys_update_name>
+        <sys_update_version display_value="sp_page_eaa96a78c42b03107f44164a4d2463fe">16c9ae78c42b03107f44164a4d2463ca</sys_update_version>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-23 13:21:51</sys_updated_on>
+    </sys_metadata_delete>
+</record_update>

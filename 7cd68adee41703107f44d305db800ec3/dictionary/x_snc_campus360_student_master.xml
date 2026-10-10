@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?><database>
+    <element attributes="enforce_dot_walk_cross_scope_access=true" db_object_id="ac17c212e45703107f44d305db800eab" label="Student Master" max_length="40" name="x_snc_campus360_student_master" type="collection">
+        <element label="Email" max_length="100" name="email" type="string"/>
+        <element default="0" label="Backlogs" max_length="40" name="backlogs" type="integer"/>
+        <element choice="3" default="Active" label="Profile Status" max_length="20" name="profile_status" type="choice">
+            <choice>
+                <element inactive_on_update="false" label="Inactive" sequence="1" value="inactive"/>
+                <element inactive_on_update="false" label="Suspended" sequence="3" value="suspended"/>
+                <element inactive_on_update="false" label="Active" sequence="0" value="active"/>
+                <element inactive_on_update="false" label="Graduated" sequence="2" value="graduated"/>
+            </choice>
+        </element>
+        <element label="User" max_length="32" name="user" reference="sys_user" type="reference"/>
+        <element label="Student Name" max_length="100" name="student_name" type="string"/>
+        <element display="true" label="Student ID" max_length="20" name="student_id" type="string"/>
+        <element label="Phone Number" max_length="20" name="phone_number" type="string"/>
+        <element label="Batch" max_length="20" name="batch" type="string"/>
+        <element choice="3" label="Branch" max_length="50" name="branch" type="choice">
+            <choice>
+                <element inactive_on_update="false" label="Civil" sequence="7" value="civil"/>
+                <element inactive_on_update="false" label="IT" sequence="3" value="it"/>
+                <element inactive_on_update="false" label="CSE" sequence="0" value="cse"/>
+                <element inactive_on_update="false" label="Mechanical" sequence="6" value="mechanical"/>
+                <element inactive_on_update="false" label="CSE-DS" sequence="2" value="cse_ds"/>
+                <element inactive_on_update="false" label="EEE" sequence="5" value="eee"/>
+                <element inactive_on_update="false" label="CSE-AI" sequence="1" value="cse_ai"/>
+                <element inactive_on_update="false" label="Other" sequence="8" value="other"/>
+                <element inactive_on_update="false" label="ECE" sequence="4" value="ece"/>
+            </choice>
+        </element>
+        <element label="Resume" max_length="40" name="resume" type="file_attachment"/>
+        <element label="CGPA" max_length="20" name="cgpa" type="decimal"/>
+        <element choice="3" default="Not Placed" label="Placement Status" max_length="30" name="placement_status" type="choice">
+            <choice>
+                <element inactive_on_update="false" label="Higher Studies" sequence="4" value="higher_studies"/>
+                <element inactive_on_update="false" label="Placed" sequence="3" value="placed"/>
+                <element inactive_on_update="false" label="Not Placed" sequence="0" value="not_placed"/>
+                <element inactive_on_update="false" label="In Process" sequence="2" value="in_process"/>
+                <element inactive_on_update="false" label="Opted Out" sequence="5" value="opted_out"/>
+                <element inactive_on_update="false" label="Eligible" sequence="1" value="eligible"/>
+            </choice>
+        </element>
+        <element choice="3" label="Degree" max_length="30" name="degree" type="choice">
+            <choice>
+                <element inactive_on_update="false" label="Other" sequence="7" value="other"/>
+                <element inactive_on_update="false" label="M.Tech" sequence="3" value="m_tech"/>
+                <element inactive_on_update="false" label="Diploma" sequence="0" value="diploma"/>
+                <element inactive_on_update="false" label="MBA" sequence="6" value="mba"/>
+                <element inactive_on_update="false" label="B.E." sequence="2" value="b_e"/>
+                <element inactive_on_update="false" label="MCA" sequence="5" value="mca"/>
+                <element inactive_on_update="false" label="B.Tech" sequence="1" value="b_tech"/>
+                <element inactive_on_update="false" label="M.E." sequence="4" value="m_e"/>
+            </choice>
+        </element>
+        <index name="index">
+            <element name="user"/>
+        </index>
+    </element>
+</database>

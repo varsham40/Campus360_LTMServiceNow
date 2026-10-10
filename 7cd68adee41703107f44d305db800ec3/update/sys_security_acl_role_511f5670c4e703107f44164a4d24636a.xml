@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_security_acl_role">
+    <sys_security_acl_role action="INSERT_OR_UPDATE">
+        <sys_class_name>sys_security_acl_role</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-23 08:22:32</sys_created_on>
+        <sys_id>511f5670c4e703107f44164a4d24636a</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>x_snc_campus360_trainer_interview_availability.x_snc_campus360.trainer_interview_availability_user</sys_name>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_security_acl display_value="x_snc_campus360_trainer_interview_availability">591f5670c4e703107f44164a4d246360</sys_security_acl>
+        <sys_update_name>sys_security_acl_role_511f5670c4e703107f44164a4d24636a</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-23 08:22:32</sys_updated_on>
+        <sys_user_role display_value="x_snc_campus360.trainer_interview_availability_user" name="x_snc_campus360.trainer_interview_availability_user">ec1f9e30c4e703107f44164a4d246371</sys_user_role>
+    </sys_security_acl_role>
+</record_update>

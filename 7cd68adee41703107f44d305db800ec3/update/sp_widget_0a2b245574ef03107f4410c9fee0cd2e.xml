@@ -1,0 +1,842 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_widget">
+    <sp_widget action="INSERT_OR_UPDATE">
+        <category>custom</category>
+        <client_script><![CDATA[api.controller=function($scope, $window) {
+
+    var c = this;
+
+
+    /*
+     * =====================================================
+     * GO BACK TO RECRUITER DASHBOARD
+     * =====================================================
+     */
+
+    c.goBack = function() {
+
+        $window.location.href =
+            "?id=recruiter_dashboard";
+
+    };
+
+
+    /*
+     * =====================================================
+     * OPEN CANDIDATE DETAILS
+     * =====================================================
+     */
+
+    c.viewCandidate = function(sysId) {
+
+        if (!sysId) {
+            return;
+        }
+
+
+        $window.location.href =
+            "?id=campus360_recruiter_candidate_details" +
+            "&sys_id=" +
+            encodeURIComponent(sysId);
+
+    };
+
+}]]></client_script>
+        <controller_as>c</controller_as>
+        <css>.candidates-page {&#13;
+    background: #f6f8fc;&#13;
+    min-height: 100vh;&#13;
+    padding: 30px;&#13;
+    font-family: Arial, sans-serif;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================&#13;
+   HEADER&#13;
+========================= */&#13;
+&#13;
+.page-header {&#13;
+    background: #ffffff;&#13;
+    border: 1px solid #e1e6f0;&#13;
+    border-radius: 14px;&#13;
+    padding: 25px 28px;&#13;
+&#13;
+    display: flex;&#13;
+    justify-content: space-between;&#13;
+    align-items: center;&#13;
+&#13;
+    margin-bottom: 20px;&#13;
+}&#13;
+&#13;
+.eyebrow {&#13;
+    color: #5368d8;&#13;
+    font-size: 11px;&#13;
+    font-weight: bold;&#13;
+    letter-spacing: 1.5px;&#13;
+    margin-bottom: 6px;&#13;
+}&#13;
+&#13;
+.page-header h1 {&#13;
+    margin: 0;&#13;
+    color: #14213d;&#13;
+    font-size: 28px;&#13;
+}&#13;
+&#13;
+.page-header p {&#13;
+    margin: 7px 0 0;&#13;
+    color: #78839a;&#13;
+    font-size: 13px;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================&#13;
+   BACK BUTTON&#13;
+========================= */&#13;
+&#13;
+.back-btn {&#13;
+    background: #ffffff;&#13;
+    border: 1px solid #5368d8;&#13;
+    color: #5368d8;&#13;
+&#13;
+    padding: 10px 18px;&#13;
+    border-radius: 8px;&#13;
+&#13;
+    cursor: pointer;&#13;
+    font-size: 13px;&#13;
+}&#13;
+&#13;
+.back-btn:hover {&#13;
+    background: #5368d8;&#13;
+    color: #ffffff;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================&#13;
+   SEARCH&#13;
+========================= */&#13;
+&#13;
+.search-card {&#13;
+    background: #ffffff;&#13;
+    border: 1px solid #e1e6f0;&#13;
+    border-radius: 14px;&#13;
+&#13;
+    padding: 16px;&#13;
+&#13;
+    display: flex;&#13;
+    justify-content: space-between;&#13;
+    align-items: center;&#13;
+&#13;
+    margin-bottom: 20px;&#13;
+}&#13;
+&#13;
+.search-box {&#13;
+    width: 55%;&#13;
+&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+&#13;
+    border: 1px solid #dce2ed;&#13;
+    border-radius: 8px;&#13;
+&#13;
+    padding: 0 12px;&#13;
+&#13;
+    background: #ffffff;&#13;
+}&#13;
+&#13;
+.search-box span {&#13;
+    color: #5368d8;&#13;
+    font-size: 18px;&#13;
+    margin-right: 8px;&#13;
+}&#13;
+&#13;
+.search-box input {&#13;
+    width: 100%;&#13;
+    border: none;&#13;
+    outline: none;&#13;
+&#13;
+    padding: 11px 5px;&#13;
+&#13;
+    color: #29344e;&#13;
+    font-size: 13px;&#13;
+}&#13;
+&#13;
+.candidate-count {&#13;
+    color: #66728b;&#13;
+    font-size: 13px;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================&#13;
+   MAIN PANEL&#13;
+========================= */&#13;
+&#13;
+.candidate-panel {&#13;
+    background: #ffffff;&#13;
+    border: 1px solid #e1e6f0;&#13;
+    border-radius: 14px;&#13;
+&#13;
+    overflow: hidden;&#13;
+}&#13;
+&#13;
+.panel-header {&#13;
+    padding: 22px 25px;&#13;
+    border-bottom: 1px solid #edf0f5;&#13;
+}&#13;
+&#13;
+.panel-header h2 {&#13;
+    margin: 0;&#13;
+    color: #17213a;&#13;
+    font-size: 20px;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================&#13;
+   TABLE&#13;
+========================= */&#13;
+&#13;
+.candidate-table {&#13;
+    display: grid;&#13;
+&#13;
+    grid-template-columns:&#13;
+        1.5fr&#13;
+        1.4fr&#13;
+        1.3fr&#13;
+        1.1fr&#13;
+        1.2fr&#13;
+        0.7fr;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    column-gap: 15px;&#13;
+&#13;
+    padding: 15px 25px;&#13;
+}&#13;
+&#13;
+.header-row {&#13;
+    background: #fafbfe;&#13;
+&#13;
+    color: #8993a8;&#13;
+&#13;
+    font-size: 11px;&#13;
+    font-weight: bold;&#13;
+&#13;
+    text-transform: uppercase;&#13;
+}&#13;
+&#13;
+.candidate-row {&#13;
+    border-top: 1px solid #edf0f5;&#13;
+}&#13;
+&#13;
+.candidate-row:hover {&#13;
+    background: #fbfcff;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================&#13;
+   CANDIDATE&#13;
+========================= */&#13;
+&#13;
+.candidate-info {&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    gap: 10px;&#13;
+}&#13;
+&#13;
+.avatar {&#13;
+    width: 36px;&#13;
+    height: 36px;&#13;
+&#13;
+    border-radius: 50%;&#13;
+&#13;
+    background: #edf0ff;&#13;
+    color: #5368d8;&#13;
+&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+&#13;
+    font-size: 12px;&#13;
+    font-weight: bold;&#13;
+&#13;
+    flex-shrink: 0;&#13;
+}&#13;
+&#13;
+.candidate-info strong {&#13;
+    display: block;&#13;
+&#13;
+    color: #17213a;&#13;
+    font-size: 13px;&#13;
+&#13;
+    margin-bottom: 3px;&#13;
+}&#13;
+&#13;
+.candidate-info span {&#13;
+    display: block;&#13;
+&#13;
+    color: #8a94a7;&#13;
+    font-size: 10px;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================&#13;
+   ROLE&#13;
+========================= */&#13;
+&#13;
+.role {&#13;
+    color: #34405b;&#13;
+    font-size: 13px;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================&#13;
+   MATCH&#13;
+========================= */&#13;
+&#13;
+.match-container {&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    gap: 8px;&#13;
+}&#13;
+&#13;
+.match-bar {&#13;
+    width: 65px;&#13;
+    height: 6px;&#13;
+&#13;
+    background: #e9edf7;&#13;
+    border-radius: 10px;&#13;
+&#13;
+    overflow: hidden;&#13;
+}&#13;
+&#13;
+.match-progress {&#13;
+    height: 100%;&#13;
+    background: #5368d8;&#13;
+&#13;
+    border-radius: 10px;&#13;
+}&#13;
+&#13;
+.match-container span {&#13;
+    color: #5368d8;&#13;
+    font-size: 12px;&#13;
+    font-weight: bold;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================&#13;
+   STATUS&#13;
+========================= */&#13;
+&#13;
+.status {&#13;
+    display: inline-block;&#13;
+&#13;
+    padding: 5px 9px;&#13;
+&#13;
+    border-radius: 7px;&#13;
+&#13;
+    font-size: 10px;&#13;
+&#13;
+    text-transform: capitalize;&#13;
+}&#13;
+&#13;
+.status-success {&#13;
+    background: #e8f8ef;&#13;
+    color: #218653;&#13;
+}&#13;
+&#13;
+.status-warning {&#13;
+    background: #fff5dc;&#13;
+    color: #a86b00;&#13;
+}&#13;
+&#13;
+.status-danger {&#13;
+    background: #ffe9eb;&#13;
+    color: #c93643;&#13;
+}&#13;
+&#13;
+.status-info {&#13;
+    background: #eef1ff;&#13;
+    color: #5368d8;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================&#13;
+   STAGE&#13;
+========================= */&#13;
+&#13;
+.stage {&#13;
+    color: #5f6a82;&#13;
+    font-size: 12px;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================&#13;
+   VIEW BUTTON&#13;
+========================= */&#13;
+&#13;
+.view-btn {&#13;
+    border: none;&#13;
+&#13;
+    background: #e9edff;&#13;
+    color: #5368d8;&#13;
+&#13;
+    padding: 7px 13px;&#13;
+&#13;
+    border-radius: 6px;&#13;
+&#13;
+    cursor: pointer;&#13;
+&#13;
+    font-size: 11px;&#13;
+}&#13;
+&#13;
+.view-btn:hover {&#13;
+    background: #5368d8;&#13;
+    color: #ffffff;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================&#13;
+   EMPTY&#13;
+========================= */&#13;
+&#13;
+.empty-state {&#13;
+    padding: 60px 20px;&#13;
+    text-align: center;&#13;
+}&#13;
+&#13;
+.empty-state h3 {&#13;
+    color: #29344e;&#13;
+    margin-bottom: 8px;&#13;
+}&#13;
+&#13;
+.empty-state p {&#13;
+    color: #929bad;&#13;
+    font-size: 13px;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================&#13;
+   RESPONSIVE&#13;
+========================= */&#13;
+&#13;
+@media (max-width: 1000px) {&#13;
+&#13;
+    .candidate-table {&#13;
+        grid-template-columns:&#13;
+            1.5fr&#13;
+            1.2fr&#13;
+            1fr&#13;
+            1fr&#13;
+            0.8fr;&#13;
+    }&#13;
+&#13;
+    .candidate-table &gt; div:nth-child(5) {&#13;
+        display: none;&#13;
+    }&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+@media (max-width: 700px) {&#13;
+&#13;
+    .candidates-page {&#13;
+        padding: 15px;&#13;
+    }&#13;
+&#13;
+    .page-header {&#13;
+        flex-direction: column;&#13;
+        align-items: flex-start;&#13;
+        gap: 15px;&#13;
+    }&#13;
+&#13;
+    .search-card {&#13;
+        flex-direction: column;&#13;
+        align-items: stretch;&#13;
+        gap: 12px;&#13;
+    }&#13;
+&#13;
+    .search-box {&#13;
+        width: 100%;&#13;
+    }&#13;
+&#13;
+    .candidate-panel {&#13;
+        overflow-x: auto;&#13;
+    }&#13;
+&#13;
+    .candidate-table {&#13;
+        min-width: 850px;&#13;
+    }&#13;
+&#13;
+}</css>
+        <data_table>sp_instance</data_table>
+        <demo_data/>
+        <description/>
+        <docs/>
+        <field_list/>
+        <has_preview>false</has_preview>
+        <id>campus360_recruiter_candidates_list</id>
+        <internal>false</internal>
+        <link><![CDATA[function link(scope, element, attrs, controller) {
+  
+}]]></link>
+        <name>Campus360 Recruiter Candidates</name>
+        <option_schema/>
+        <public>false</public>
+        <roles/>
+        <script><![CDATA[(function() {
+
+    data.candidates = [];
+
+
+    /*
+     * =====================================================
+     * GET APPLICATIONS
+     * =====================================================
+     */
+
+    var applicationGR = new GlideRecord(
+        "x_snc_campus360_student_application"
+    );
+
+    applicationGR.orderByDesc("sys_created_on");
+    applicationGR.query();
+
+
+    /*
+     * =====================================================
+     * BUILD CANDIDATE LIST
+     * =====================================================
+     */
+
+    while (applicationGR.next()) {
+
+        var studentSysId =
+            applicationGR.getValue("student");
+
+        if (!studentSysId) {
+            continue;
+        }
+
+
+        /*
+         * LOAD STUDENT
+         */
+
+        var studentGR = new GlideRecord(
+            "x_snc_campus360_student_master"
+        );
+
+        if (!studentGR.get(studentSysId)) {
+            continue;
+        }
+
+
+        var studentName =
+            studentGR.getValue("student_name") || "Unknown";
+
+
+        /*
+         * MATCH SCORE
+         */
+
+        var matchScore =
+            parseInt(
+                applicationGR.getValue("ai_match_score"),
+                10
+            );
+
+        if (isNaN(matchScore)) {
+            matchScore = 0;
+        }
+
+
+        /*
+         * STATUS
+         */
+
+        var status =
+            applicationGR.getDisplayValue(
+                "application_status"
+            ) || "Pending";
+
+
+        /*
+         * STAGE
+         *
+         * Use application status as fallback because
+         * the existing application structure already
+         * provides this information.
+         */
+
+        var stage = status;
+
+
+        /*
+         * PUSH DATA
+         */
+
+        data.candidates.push({
+
+            sys_id:
+                studentGR.getUniqueValue(),
+
+            name:
+                studentName,
+
+            initials:
+                getInitials(studentName),
+
+            student_id:
+                studentGR.getValue("student_id") || "",
+
+            role:
+                applicationGR.getDisplayValue(
+                    "opportunity"
+                ) || "Not specified",
+
+            match_score:
+                matchScore,
+
+            status:
+                status,
+
+            stage:
+                stage
+
+        });
+
+    }
+
+
+    /*
+     * =====================================================
+     * INITIALS FUNCTION
+     * =====================================================
+     */
+
+    function getInitials(name) {
+
+        if (!name) {
+            return "ST";
+        }
+
+        var parts =
+            name.trim().split(/\s+/);
+
+
+        if (parts.length == 1) {
+
+            return parts[0]
+                .substring(0, 2)
+                .toUpperCase();
+
+        }
+
+
+        return (
+            parts[0].charAt(0) +
+            parts[parts.length - 1].charAt(0)
+        ).toUpperCase();
+
+    }
+
+})();]]></script>
+        <servicenow>false</servicenow>
+        <sys_class_name>sp_widget</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-24 13:17:59</sys_created_on>
+        <sys_id>0a2b245574ef03107f4410c9fee0cd2e</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>Campus360 Recruiter Candidates</sys_name>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name>sp_widget_0a2b245574ef03107f4410c9fee0cd2e</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-24 13:17:59</sys_updated_on>
+        <template><![CDATA[<div class="candidates-page">
+
+    <!-- HEADER -->
+    <div class="page-header">
+        <div>
+            <div class="eyebrow">TALENT INTELLIGENCE</div>
+            <h1>Recruiter Candidates</h1>
+            <p>View and manage candidates who have applied for campus opportunities.</p>
+        </div>
+
+        <button class="back-btn" ng-click="c.goBack()">
+            ← Back to Dashboard
+        </button>
+    </div>
+
+
+    <!-- SEARCH -->
+    <div class="search-card">
+
+        <div class="search-box">
+            <span>⌕</span>
+
+            <input
+                type="text"
+                ng-model="c.searchText"
+                placeholder="Search candidate, student ID or role..."
+            />
+        </div>
+
+        <div class="candidate-count">
+            {{data.candidates.length}} Candidates
+        </div>
+
+    </div>
+
+
+    <!-- CANDIDATES -->
+    <div class="candidate-panel">
+
+        <div class="panel-header">
+            <div>
+                <div class="eyebrow">RECRUITMENT</div>
+                <h2>All Candidates</h2>
+            </div>
+        </div>
+
+
+        <!-- TABLE HEADER -->
+
+        <div class="candidate-table header-row">
+
+            <div>Candidate</div>
+            <div>Role Applied</div>
+            <div>Skills Match</div>
+            <div>Status</div>
+            <div>Current Stage</div>
+            <div>Action</div>
+
+        </div>
+
+
+        <!-- TABLE ROW -->
+
+        <div
+            class="candidate-table candidate-row"
+            ng-repeat="candidate in data.candidates | filter:c.searchText">
+
+            <!-- CANDIDATE -->
+
+            <div class="candidate-info">
+
+                <div class="avatar">
+                    {{candidate.initials}}
+                </div>
+
+                <div>
+
+                    <strong>
+                        {{candidate.name}}
+                    </strong>
+
+                    <span>
+                        {{candidate.student_id}}
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <!-- ROLE -->
+
+            <div class="role">
+
+                {{candidate.role}}
+
+            </div>
+
+
+            <!-- MATCH SCORE -->
+
+            <div class="match">
+
+                <div class="match-container">
+
+                    <div class="match-bar">
+
+                        <div
+                            class="match-progress"
+                            ng-style="{'width': candidate.match_score + '%'}">
+                        </div>
+
+                    </div>
+
+                    <span>
+                        {{candidate.match_score}}%
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <!-- STATUS -->
+
+            <div>
+
+                <span
+                    class="status"
+                    ng-class="{
+                        'status-success': candidate.status == 'shortlisted' || candidate.status == 'selected',
+                        'status-warning': candidate.status == 'pending' || candidate.status == 'under_review',
+                        'status-danger': candidate.status == 'rejected',
+                        'status-info': candidate.status == 'submitted'
+                    }">
+
+                    {{candidate.status}}
+
+                </span>
+
+            </div>
+
+
+            <!-- CURRENT STAGE -->
+
+            <div class="stage">
+
+                {{candidate.stage}}
+
+            </div>
+
+
+            <!-- ACTION -->
+
+            <div>
+
+                <button
+                    class="view-btn"
+                    ng-click="c.viewCandidate(candidate.sys_id)">
+
+                    View
+
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <!-- EMPTY -->
+
+        <div
+            class="empty-state"
+            ng-if="data.candidates.length == 0">
+
+            <h3>No candidates found</h3>
+
+            <p>
+                There are currently no candidate applications.
+            </p>
+
+        </div>
+
+    </div>
+
+</div>]]></template>
+    </sp_widget>
+</record_update>

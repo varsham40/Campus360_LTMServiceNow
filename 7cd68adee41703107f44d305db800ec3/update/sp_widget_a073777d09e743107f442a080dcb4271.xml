@@ -1,0 +1,329 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_widget">
+    <sp_widget action="INSERT_OR_UPDATE">
+        <category>custom</category>
+        <client_script><![CDATA[api.controller=function() {
+  /* widget controller */
+  var c = this;
+};]]></client_script>
+        <controller_as>c</controller_as>
+        <css>.company-profile {&#13;
+  background: #ffffff;&#13;
+  border-radius: 12px;&#13;
+  overflow: hidden;&#13;
+  font-family: Arial, sans-serif;&#13;
+}&#13;
+&#13;
+.profile-header {&#13;
+  background: linear-gradient(135deg, #f5f3ff, #eef2ff);&#13;
+  padding: 28px 30px;&#13;
+  border: 1px solid #e4e1ff;&#13;
+  border-radius: 12px;&#13;
+  display: flex;&#13;
+  justify-content: space-between;&#13;
+  align-items: center;&#13;
+}&#13;
+&#13;
+.section-label {&#13;
+  color: #4f46e5;&#13;
+  font-size: 11px;&#13;
+  font-weight: 700;&#13;
+  letter-spacing: 1px;&#13;
+  margin-bottom: 6px;&#13;
+}&#13;
+&#13;
+.profile-header h1 {&#13;
+  margin: 0;&#13;
+  color: #111827;&#13;
+  font-size: 28px;&#13;
+  font-weight: 700;&#13;
+}&#13;
+&#13;
+.profile-header p {&#13;
+  margin: 7px 0 0;&#13;
+  color: #6b7280;&#13;
+  font-size: 14px;&#13;
+}&#13;
+&#13;
+.status-badge {&#13;
+  background: #dcfce7;&#13;
+  color: #15803d;&#13;
+  padding: 9px 15px;&#13;
+  border-radius: 20px;&#13;
+  font-size: 12px;&#13;
+  font-weight: 600;&#13;
+}&#13;
+&#13;
+.status-dot {&#13;
+  display: inline-block;&#13;
+  width: 7px;&#13;
+  height: 7px;&#13;
+  background: #22c55e;&#13;
+  border-radius: 50%;&#13;
+  margin-right: 6px;&#13;
+}&#13;
+&#13;
+.company-content {&#13;
+  margin-top: 18px;&#13;
+  border: 1px solid #e5e7eb;&#13;
+  border-radius: 12px;&#13;
+  padding: 28px;&#13;
+  background: #ffffff;&#13;
+}&#13;
+&#13;
+.company-title {&#13;
+  display: flex;&#13;
+  align-items: center;&#13;
+  gap: 15px;&#13;
+  padding-bottom: 24px;&#13;
+  border-bottom: 1px solid #eeeef5;&#13;
+}&#13;
+&#13;
+.company-icon {&#13;
+  width: 55px;&#13;
+  height: 55px;&#13;
+  border-radius: 14px;&#13;
+  background: #5b5ce2;&#13;
+  color: white;&#13;
+  display: flex;&#13;
+  align-items: center;&#13;
+  justify-content: center;&#13;
+  font-size: 23px;&#13;
+  font-weight: 700;&#13;
+}&#13;
+&#13;
+.company-title h2 {&#13;
+  margin: 0;&#13;
+  color: #111827;&#13;
+  font-size: 21px;&#13;
+}&#13;
+&#13;
+.company-title p {&#13;
+  margin: 5px 0 0;&#13;
+  color: #6b7280;&#13;
+  font-size: 13px;&#13;
+}&#13;
+&#13;
+.details-grid {&#13;
+  display: grid;&#13;
+  grid-template-columns: repeat(2, 1fr);&#13;
+  gap: 16px;&#13;
+  margin-top: 24px;&#13;
+}&#13;
+&#13;
+.detail-card {&#13;
+  background: #fafaff;&#13;
+  border: 1px solid #ececf7;&#13;
+  border-radius: 10px;&#13;
+  padding: 17px;&#13;
+}&#13;
+&#13;
+.detail-card span {&#13;
+  display: block;&#13;
+  color: #7c7c91;&#13;
+  font-size: 11px;&#13;
+  text-transform: uppercase;&#13;
+  letter-spacing: .5px;&#13;
+  margin-bottom: 7px;&#13;
+}&#13;
+&#13;
+.detail-card strong {&#13;
+  color: #1f2937;&#13;
+  font-size: 14px;&#13;
+}&#13;
+&#13;
+.not-found {&#13;
+  margin-top: 18px;&#13;
+  border: 1px solid #e5e7eb;&#13;
+  border-radius: 12px;&#13;
+  padding: 70px 20px;&#13;
+  text-align: center;&#13;
+}&#13;
+&#13;
+.not-found-icon {&#13;
+  width: 40px;&#13;
+  height: 40px;&#13;
+  margin: 0 auto 15px;&#13;
+  border-radius: 50%;&#13;
+  background: #ede9fe;&#13;
+  color: #6366f1;&#13;
+  display: flex;&#13;
+  align-items: center;&#13;
+  justify-content: center;&#13;
+  font-weight: bold;&#13;
+  font-size: 20px;&#13;
+}&#13;
+&#13;
+.not-found h2 {&#13;
+  margin: 0 0 8px;&#13;
+  color: #111827;&#13;
+  font-size: 17px;&#13;
+}&#13;
+&#13;
+.not-found p {&#13;
+  margin: 0;&#13;
+  color: #73738a;&#13;
+  font-size: 13px;&#13;
+}&#13;
+&#13;
+@media (max-width: 700px) {&#13;
+&#13;
+  .details-grid {&#13;
+    grid-template-columns: 1fr;&#13;
+  }&#13;
+&#13;
+  .profile-header {&#13;
+    flex-direction: column;&#13;
+    align-items: flex-start;&#13;
+    gap: 15px;&#13;
+  }&#13;
+&#13;
+}</css>
+        <data_table>sp_instance</data_table>
+        <demo_data/>
+        <description/>
+        <docs/>
+        <field_list/>
+        <has_preview>false</has_preview>
+        <id>campus360_company_profile</id>
+        <internal>false</internal>
+        <link><![CDATA[function link(scope, element, attrs, controller) {
+  
+}]]></link>
+        <name>Campus360 Company Profile</name>
+        <option_schema/>
+        <public>false</public>
+        <roles/>
+        <script><![CDATA[(function() {
+
+    data.company = null;
+
+    var email = gs.getUser().getEmail();
+
+    var gr = new GlideRecord('x_snc_campus360_company_master');
+    gr.addQuery('recruiter_email', email);
+    gr.addQuery('status', 'Active');
+    gr.query();
+
+    if (gr.next()) {
+
+        data.company = {
+            company_name: gr.getValue('company_name'),
+            company_id: gr.getValue('company_id'),
+            company_type: gr.getDisplayValue('company_type'),
+            industry: gr.getDisplayValue('industry'),
+            recruiter_name: gr.getValue('recruiter_name'),
+            recruiter_email: gr.getValue('recruiter_email'),
+            contact_number: gr.getValue('contact_number'),
+            status: gr.getDisplayValue('status')
+        };
+
+    }
+
+})();]]></script>
+        <servicenow>false</servicenow>
+        <sys_class_name>sp_widget</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-26 17:06:50</sys_created_on>
+        <sys_id>a073777d09e743107f442a080dcb4271</sys_id>
+        <sys_mod_count>2</sys_mod_count>
+        <sys_name>Campus360 Company Profile</sys_name>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name>sp_widget_a073777d09e743107f442a080dcb4271</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-26 17:21:49</sys_updated_on>
+        <template><![CDATA[<div class="company-profile">
+
+  <div class="profile-header">
+    <div>
+      <div class="section-label">COMPANY</div>
+      <h1>Company Profile</h1>
+      <p>View your company and recruiter information.</p>
+    </div>
+
+    <div class="status-badge" ng-if="data.company">
+      <span class="status-dot"></span>
+      {{data.company.status}}
+    </div>
+  </div>
+
+
+  <div class="not-found" ng-if="!data.company">
+
+    <div class="not-found-icon">
+      !
+    </div>
+
+    <h2>Company information not found</h2>
+
+    <p>
+      No active company is associated with the logged-in recruiter.
+    </p>
+
+  </div>
+
+
+  <div class="company-content" ng-if="data.company">
+
+    <div class="company-title">
+      <div class="company-icon">
+        {{data.company.company_name.charAt(0)}}
+      </div>
+
+      <div>
+        <h2>{{data.company.company_name}}</h2>
+        <p>{{data.company.company_id}}</p>
+      </div>
+    </div>
+
+
+    <div class="details-grid">
+
+      <div class="detail-card">
+        <span>Company Name</span>
+        <strong>{{data.company.company_name}}</strong>
+      </div>
+
+      <div class="detail-card">
+        <span>Company ID</span>
+        <strong>{{data.company.company_id}}</strong>
+      </div>
+
+      <div class="detail-card">
+        <span>Company Type</span>
+        <strong>{{data.company.company_type}}</strong>
+      </div>
+
+      <div class="detail-card">
+        <span>Industry</span>
+        <strong>{{data.company.industry}}</strong>
+      </div>
+
+      <div class="detail-card">
+        <span>Recruiter Name</span>
+        <strong>{{data.company.recruiter_name}}</strong>
+      </div>
+
+      <div class="detail-card">
+        <span>Recruiter Email</span>
+        <strong>{{data.company.recruiter_email}}</strong>
+      </div>
+
+      <div class="detail-card">
+        <span>Contact Number</span>
+        <strong>{{data.company.contact_number}}</strong>
+      </div>
+
+      <div class="detail-card">
+        <span>Status</span>
+        <strong>{{data.company.status}}</strong>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>]]></template>
+    </sp_widget>
+</record_update>

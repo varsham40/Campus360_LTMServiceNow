@@ -1,0 +1,1265 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update sys_domain="global" table="sys_hub_flow">
+    <sys_hub_flow action="INSERT_OR_UPDATE">
+        <access>public</access>
+        <acls/>
+        <active>true</active>
+        <allow_high_security_roles>false</allow_high_security_roles>
+        <annotation/>
+        <attributes>browserActivatedIn=chrome,integrationActivatedIn=standalone,labelCacheCleanUpExecuted=true,timeFromCreateToActivate=3992000,viewActivatedIn=naturalLanguage</attributes>
+        <authored_on_release_version>29000</authored_on_release_version>
+        <callable_by_client_api>false</callable_by_client_api>
+        <category/>
+        <copied_from/>
+        <copied_from_name/>
+        <description>Updates recruiter interview evaluation status, result, and candidate progression after evaluation.</description>
+        <display_name_after_preview/>
+        <flow_priority>MEDIUM</flow_priority>
+        <generation_source/>
+        <internal_name>recruiter_interview_evaluation</internal_name>
+        <label_cache>[{"name":"Updated_1.current","label":"Trigger - Record Updated➛Recruiter Interview Record","reference":"x_snc_campus360_recruiter_interview","reference_display":"Recruiter Interview","type":"reference","base_type":"reference","usedInstances":{"d17cca43-cea8-4cba-8fea-69a081e387e4":["record"],"21eadae2-4558-434f-8722-8260ef6424b6":["record"],"b9ae7d3c-a516-4656-bbc2-b41b9d264e08":["record"],"7dfe7cfb-024f-4308-86dc-4e30caba84e2":["record"],"8d3730b2-6229-4a0e-8fad-a288dfb7e2f3":["record"],"a9b74c08-80e6-4a41-aa5d-e0bd9a60ae5c":["record"]},"attributes":{}},{"name":"Updated_1.current.recommendation","label":"Trigger - Record Updated➛Recruiter Interview Record➛Recommendation","reference":"","reference_display":"Recommendation","type":"choice","base_type":"choice","parent_table_name":"x_snc_campus360_recruiter_interview","column_name":"recommendation","choices":[{"label":"-- None --","sequence":-1.0,"used":false,"image":"","rawLabel":"-- None --","selected":false,"missing":false,"reference":false,"value":""},{"sequence":0.0,"used":false,"image":"","label":"Select","rawLabel":"Select","selected":false,"missing":false,"reference":false,"value":"select","parameters":{"name":"x_snc_campus360_recruiter_interview","dependent_values":[""],"dependent_values_map":{"":"Select"}}},{"sequence":1.0,"used":false,"image":"","label":"Strongly Recommended","rawLabel":"Strongly Recommended","selected":false,"missing":false,"reference":false,"value":"strongly_recommended","parameters":{"name":"x_snc_campus360_recruiter_interview","dependent_values":[""],"dependent_values_map":{"":"Strongly Recommended"}}},{"sequence":2.0,"used":false,"image":"","label":"Recommended","rawLabel":"Recommended","selected":false,"missing":false,"reference":false,"value":"recommended","parameters":{"name":"x_snc_campus360_recruiter_interview","dependent_values":[""],"dependent_values_map":{"":"Recommended"}}},{"sequence":3.0,"used":false,"image":"","label":"Not Recommended","rawLabel":"Not Recommended","selected":false,"missing":false,"reference":false,"value":"not_recommended","parameters":{"name":"x_snc_campus360_recruiter_interview","dependent_values":[""],"dependent_values_map":{"":"Not Recommended"}}}],"usedInstances":{"d1370945-fe2f-4466-83fc-e5cc43a32b53":["condition"],"55f31cb9-07af-4607-a4dc-979cae15220f":["condition"],"2686a0f0-08ec-4833-a766-70e58c7fcba0":["condition"]}}]</label_cache>
+        <master_snapshot>a35be8a5a02b03107f44e28050a33bdd</master_snapshot>
+        <master_snapshot_digest/>
+        <name>Recruiter Interview Evaluation</name>
+        <natlang/>
+        <outputs/>
+        <pre_compiled>false</pre_compiled>
+        <remote_trigger_id>406b2ca5a02b03107f44e28050a33b88</remote_trigger_id>
+        <run_as>user</run_as>
+        <run_with_roles/>
+        <sc_callable>false</sc_callable>
+        <show_draft_actions>false</show_draft_actions>
+        <show_triggered_flows>false</show_triggered_flows>
+        <status>published</status>
+        <substatus/>
+        <sys_class_name>sys_hub_flow</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-25 06:45:52</sys_created_on>
+        <sys_domain>global</sys_domain>
+        <sys_domain_path>/</sys_domain_path>
+        <sys_id>342c90e5a0a703107f44e28050a33b88</sys_id>
+        <sys_mod_count>40</sys_mod_count>
+        <sys_name>Recruiter Interview Evaluation</sys_name>
+        <sys_overrides/>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name>sys_hub_flow_342c90e5a0a703107f44e28050a33b88</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-25 07:52:27</sys_updated_on>
+        <type>flow</type>
+        <updation_source/>
+        <version>2</version>
+        <version_record>206b2ca5a02b03107f44e28050a33bd1</version_record>
+    </sys_hub_flow>
+    <sys_translated_text action="delete_multiple" query="documentkey=342c90e5a0a703107f44e28050a33b88"/>
+    <sys_variable_value action="delete_multiple" query="document_key=342c90e5a0a703107f44e28050a33b88"/>
+    <sys_flow_record_trigger action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <condition table="x_snc_campus360_recruiter_interview">evaluation_status=evaluated^NQrecommendation!=select<item display_value="Evaluated" endquery="false" field="evaluation_status" goto="false" newquery="false" operator="=" or="false" value="evaluated"/>
+            <item display_value="Select" endquery="false" field="recommendation" goto="false" newquery="true" operator="!=" or="false" value="select"/>
+        </condition>
+        <name/>
+        <on_delete>false</on_delete>
+        <on_insert>false</on_insert>
+        <on_update>true</on_update>
+        <published_version/>
+        <run_flow_in>background</run_flow_in>
+        <run_on_extended>false</run_on_extended>
+        <run_when_setting>both</run_when_setting>
+        <run_when_user_list/>
+        <run_when_user_setting>any</run_when_user_setting>
+        <sys_class_name>sys_flow_record_trigger</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-25 07:52:27</sys_created_on>
+        <sys_domain>global</sys_domain>
+        <sys_domain_path>/</sys_domain_path>
+        <sys_id>406b2ca5a02b03107f44e28050a33b88</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_overrides/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-25 07:52:27</sys_updated_on>
+        <table>x_snc_campus360_recruiter_interview</table>
+        <trigger_definition/>
+    </sys_flow_record_trigger>
+    <sys_trigger_runner_mapping action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <data>{"run_flow_in":"background","run_when_user_list":[],"run_when_setting":"both","run_when_user_setting":"any","run_on_extended":"false"}</data>
+        <identifier>342c90e5a0a703107f44e28050a33b88</identifier>
+        <identifier_type>flow</identifier_type>
+        <runner>FDTriggerRunner</runner>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-25 07:52:27</sys_created_on>
+        <sys_id>886b2ca5a02b03107f44e28050a33b89</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-25 07:52:27</sys_updated_on>
+        <trigger display_value="">406b2ca5a02b03107f44e28050a33b88</trigger>
+    </sys_trigger_runner_mapping>
+    <sys_trigger_runner_mapping action="delete_multiple" query="identifier=342c90e5a0a703107f44e28050a33b88^sys_idNOT IN886b2ca5a02b03107f44e28050a33b89"/>
+    <sys_hub_flow_stage action="delete_multiple" query="flow=342c90e5a0a703107f44e28050a33b88"/>
+    <sys_flow_cat_variable_model action="delete_multiple" query="id=342c90e5a0a703107f44e28050a33b88^sys_idNOT INb42c14e5a0a703107f44e28050a33b64"/>
+    <sys_flow_cat_variable_model action="INSERT_OR_UPDATE">
+        <id>342c90e5a0a703107f44e28050a33b88</id>
+        <name>Recruiter Interview Evaluation</name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-25 06:45:53</sys_created_on>
+        <sys_id>b42c14e5a0a703107f44e28050a33b64</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_scope/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-25 06:45:53</sys_updated_on>
+    </sys_flow_cat_variable_model>
+    <sys_flow_cat_variable action="delete_multiple" query="flow_catalog_model=b42c14e5a0a703107f44e28050a33b64"/>
+    <sys_hub_flow_input action="delete_multiple" query="model=342c90e5a0a703107f44e28050a33b88^sys_idNOT IN18bc9429a0a703107f44e28050a33b14,1cbc9429a0a703107f44e28050a33b1f,f3ac5429a0a703107f44e28050a33ba4"/>
+    <sys_hub_flow_input action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <array>false</array>
+        <array_denormalized>false</array_denormalized>
+        <attributes>element_mapping_provider=com.glide.flow_design.action.data.FlowDesignVariableMapper,uiType=document_id,uiTypeLabel=Document ID</attributes>
+        <audit>false</audit>
+        <calculation><![CDATA[(function calculatedFieldValue(current) {
+
+	// Add your code here
+	return '';  // return the calculated value
+
+})(current);]]></calculation>
+        <choice/>
+        <choice_field/>
+        <choice_table/>
+        <column_label/>
+        <comments/>
+        <create_roles/>
+        <default_value/>
+        <defaultsort/>
+        <delete_roles/>
+        <dependent>table_name</dependent>
+        <dependent_on_field>table_name</dependent_on_field>
+        <display>false</display>
+        <dynamic_creation>false</dynamic_creation>
+        <dynamic_creation_script/>
+        <dynamic_default_value/>
+        <dynamic_ref_qual/>
+        <element>current</element>
+        <element_reference>false</element_reference>
+        <foreign_database/>
+        <formula/>
+        <function_definition/>
+        <function_field>false</function_field>
+        <help/>
+        <hint/>
+        <internal_type display_value="">document_id</internal_type>
+        <label>Record</label>
+        <mandatory>true</mandatory>
+        <max_length>200</max_length>
+        <model display_value="Recruiter Interview Evaluation">342c90e5a0a703107f44e28050a33b88</model>
+        <model_id>342c90e5a0a703107f44e28050a33b88</model_id>
+        <model_table>sys_hub_flow</model_table>
+        <name>var__m_sys_hub_flow_input_342c90e5a0a703107f44e28050a33b88</name>
+        <next_element/>
+        <order>100</order>
+        <primary>false</primary>
+        <read_only>false</read_only>
+        <read_only_option/>
+        <read_roles/>
+        <reference/>
+        <reference_cascade_rule/>
+        <reference_floats>false</reference_floats>
+        <reference_key/>
+        <reference_qual/>
+        <reference_qual_condition/>
+        <reference_type/>
+        <sizeclass/>
+        <spell_check>false</spell_check>
+        <staged>false</staged>
+        <sys_class_name>sys_hub_flow_input</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-25 06:48:17</sys_created_on>
+        <sys_id>18bc9429a0a703107f44e28050a33b14</sys_id>
+        <sys_mod_count>1</sys_mod_count>
+        <sys_name/>
+        <sys_package/>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-25 07:52:23</sys_updated_on>
+        <table_reference>false</table_reference>
+        <text_index>false</text_index>
+        <unique>false</unique>
+        <use_dependent_field>true</use_dependent_field>
+        <use_dynamic_default>false</use_dynamic_default>
+        <use_reference_qualifier>simple</use_reference_qualifier>
+        <virtual>false</virtual>
+        <virtual_type>script</virtual_type>
+        <widget/>
+        <write_roles/>
+        <xml_view>false</xml_view>
+    </sys_hub_flow_input>
+    <sys_hub_action_input_action_instance action="delete_multiple" query="action_input=18bc9429a0a703107f44e28050a33b14"/>
+    <sys_hub_flow_input action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <array>false</array>
+        <array_denormalized>false</array_denormalized>
+        <attributes>child_label=FDChangeDetails,child_name=FDChangeDetails,child_type=object,child_type_label=Object,co_type_name=FDCollection,element_mapping_provider=com.glide.flow_design.action.data.FlowDesignVariableMapper,pwd2droppable=true,uiType=array.object,uiTypeLabel=Array.Object</attributes>
+        <audit>false</audit>
+        <calculation><![CDATA[(function calculatedFieldValue(current) {
+
+	// Add your code here
+	return '';  // return the calculated value
+
+})(current);]]></calculation>
+        <choice/>
+        <choice_field/>
+        <choice_table/>
+        <column_label/>
+        <comments/>
+        <create_roles/>
+        <default_value/>
+        <defaultsort/>
+        <delete_roles/>
+        <dependent/>
+        <dependent_on_field/>
+        <display>false</display>
+        <dynamic_creation>false</dynamic_creation>
+        <dynamic_creation_script/>
+        <dynamic_default_value/>
+        <dynamic_ref_qual/>
+        <element>changed_fields</element>
+        <element_reference>false</element_reference>
+        <foreign_database/>
+        <formula/>
+        <function_definition/>
+        <function_field>false</function_field>
+        <help/>
+        <hint/>
+        <internal_type display_value="String">string</internal_type>
+        <label>Changed Fields</label>
+        <mandatory>false</mandatory>
+        <max_length>4000</max_length>
+        <model display_value="Recruiter Interview Evaluation">342c90e5a0a703107f44e28050a33b88</model>
+        <model_id>342c90e5a0a703107f44e28050a33b88</model_id>
+        <model_table>sys_hub_flow</model_table>
+        <name>var__m_sys_hub_flow_input_342c90e5a0a703107f44e28050a33b88</name>
+        <next_element/>
+        <order>100</order>
+        <primary>false</primary>
+        <read_only>false</read_only>
+        <read_only_option/>
+        <read_roles/>
+        <reference/>
+        <reference_cascade_rule/>
+        <reference_floats>false</reference_floats>
+        <reference_key/>
+        <reference_qual/>
+        <reference_qual_condition/>
+        <reference_type/>
+        <sizeclass/>
+        <spell_check>false</spell_check>
+        <staged>false</staged>
+        <sys_class_name>sys_hub_flow_input</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-25 06:48:18</sys_created_on>
+        <sys_id>1cbc9429a0a703107f44e28050a33b1f</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name/>
+        <sys_package/>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-25 06:48:18</sys_updated_on>
+        <table_reference>false</table_reference>
+        <text_index>false</text_index>
+        <unique>false</unique>
+        <use_dependent_field>false</use_dependent_field>
+        <use_dynamic_default>false</use_dynamic_default>
+        <use_reference_qualifier>simple</use_reference_qualifier>
+        <virtual>false</virtual>
+        <virtual_type>script</virtual_type>
+        <widget/>
+        <write_roles/>
+        <xml_view>false</xml_view>
+    </sys_hub_flow_input>
+    <sys_hub_action_input_action_instance action="delete_multiple" query="action_input=1cbc9429a0a703107f44e28050a33b1f"/>
+    <sys_hub_flow_input action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <array>false</array>
+        <array_denormalized>false</array_denormalized>
+        <attributes>element_mapping_provider=com.glide.flow_design.action.data.FlowDesignVariableMapper,test_input_hidden=true,uiType=table_name,uiTypeLabel=Table Name</attributes>
+        <audit>false</audit>
+        <calculation><![CDATA[(function calculatedFieldValue(current) {
+
+	// Add your code here
+	return '';  // return the calculated value
+
+})(current);]]></calculation>
+        <choice/>
+        <choice_field/>
+        <choice_table/>
+        <column_label/>
+        <comments/>
+        <create_roles/>
+        <default_value/>
+        <defaultsort/>
+        <delete_roles/>
+        <dependent/>
+        <dependent_on_field/>
+        <display>false</display>
+        <dynamic_creation>false</dynamic_creation>
+        <dynamic_creation_script/>
+        <dynamic_default_value/>
+        <dynamic_ref_qual/>
+        <element>table_name</element>
+        <element_reference>false</element_reference>
+        <foreign_database/>
+        <formula/>
+        <function_definition/>
+        <function_field>false</function_field>
+        <help/>
+        <hint/>
+        <internal_type display_value="">table_name</internal_type>
+        <label>Table Name</label>
+        <mandatory>false</mandatory>
+        <max_length>200</max_length>
+        <model display_value="Recruiter Interview Evaluation">342c90e5a0a703107f44e28050a33b88</model>
+        <model_id>342c90e5a0a703107f44e28050a33b88</model_id>
+        <model_table>sys_hub_flow</model_table>
+        <name>var__m_sys_hub_flow_input_342c90e5a0a703107f44e28050a33b88</name>
+        <next_element/>
+        <order>101</order>
+        <primary>false</primary>
+        <read_only>false</read_only>
+        <read_only_option/>
+        <read_roles/>
+        <reference/>
+        <reference_cascade_rule/>
+        <reference_floats>false</reference_floats>
+        <reference_key/>
+        <reference_qual/>
+        <reference_qual_condition/>
+        <reference_type/>
+        <sizeclass/>
+        <spell_check>false</spell_check>
+        <staged>false</staged>
+        <sys_class_name>sys_hub_flow_input</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-25 06:48:15</sys_created_on>
+        <sys_id>f3ac5429a0a703107f44e28050a33ba4</sys_id>
+        <sys_mod_count>1</sys_mod_count>
+        <sys_name/>
+        <sys_package/>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-25 07:52:23</sys_updated_on>
+        <table_reference>false</table_reference>
+        <text_index>false</text_index>
+        <unique>false</unique>
+        <use_dependent_field>false</use_dependent_field>
+        <use_dynamic_default>false</use_dynamic_default>
+        <use_reference_qualifier>simple</use_reference_qualifier>
+        <virtual>false</virtual>
+        <virtual_type>script</virtual_type>
+        <widget/>
+        <write_roles/>
+        <xml_view>false</xml_view>
+    </sys_hub_flow_input>
+    <sys_hub_action_input_action_instance action="delete_multiple" query="action_input=f3ac5429a0a703107f44e28050a33ba4"/>
+    <sys_hub_flow_output action="delete_multiple" query="model=342c90e5a0a703107f44e28050a33b88"/>
+    <sys_hub_alias_mapping action="delete_multiple" query="source_id=342c90e5a0a703107f44e28050a33b88"/>
+    <sys_hub_trigger_instance_v2 action="delete_multiple" query="flow=342c90e5a0a703107f44e28050a33b88^sys_idNOT IN8acc1829a0a703107f44e28050a33b98"/>
+    <sys_hub_trigger_instance_v2 action="INSERT_OR_UPDATE">
+        <comment/>
+        <display_text/>
+        <flow display_value="Recruiter Interview Evaluation">342c90e5a0a703107f44e28050a33b88</flow>
+        <generation_source/>
+        <name>Updated</name>
+        <published_version/>
+        <remote_sys_id/>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-25 06:48:41</sys_created_on>
+        <sys_id>8acc1829a0a703107f44e28050a33b98</sys_id>
+        <sys_mod_count>2</sys_mod_count>
+        <sys_scope/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-25 07:52:23</sys_updated_on>
+        <trigger_definition display_value="Updated">bb695e60c31322002841b63b12d3aea5</trigger_definition>
+        <trigger_inputs>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</trigger_inputs>
+        <trigger_outputs/>
+        <trigger_type>record_update</trigger_type>
+        <updation_source/>
+    </sys_hub_trigger_instance_v2>
+    <sys_hub_action_instance_v2 action="delete_multiple" query="flow=342c90e5a0a703107f44e28050a33b88^sys_idNOT INaec0e4a1a0e703107f44e28050a33bb0,6f06a82da0e703107f44e28050a33b36,beaa6065a02b03107f44e28050a33be9,26fa6c65a02b03107f44e28050a33b18"/>
+    <sys_hub_action_instance_v2 action="INSERT_OR_UPDATE">
+        <action_type display_value="Update Record">f9d01dd2c31332002841b63b12d3aea1</action_type>
+        <action_type_parent display_value="Update Record">baf174c8c3c232002841b63b12d3aee4</action_type_parent>
+        <attributes/>
+        <comment/>
+        <compiled_snapshot>f9d01dd2c31332002841b63b12d3aea1</compiled_snapshot>
+        <display_text/>
+        <flow display_value="Recruiter Interview Evaluation">342c90e5a0a703107f44e28050a33b88</flow>
+        <generation_source/>
+        <order>1</order>
+        <parent_ui_id/>
+        <sys_class_name>sys_hub_action_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-25 07:06:12</sys_created_on>
+        <sys_id>aec0e4a1a0e703107f44e28050a33bb0</sys_id>
+        <sys_mod_count>4</sys_mod_count>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-25 08:33:02</sys_updated_on>
+        <ui_id>d17cca43-cea8-4cba-8fea-69a081e387e4</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/+VVy2rjMBT9laC1MXachja7oSFQ6LSQzmTTKUaWrhuB/Bg98piQf59rW3ZM0nZS6CZMdvclnXN9TvS8I4KTCRkBD8KbcMyiMIqGQTC8HoXJOErCIY8oQEg8ktMMsFMBKxTHeEWlrRK73c+SUwM8Dn1mlYLc7PdY50KXkm4Xrg0zbCkkxzqZPL94pKQKTzSgyGR3VDoXkqQJSGydt5iOMZptWcW8YDZDXLFok/ducuoqg7spVnCoghMGHoGNgZwDAkmp1OCRjObIslBbMjHKYkIB5Y+53HYdS5GbhmhGN1r8wZtHQdWXAjJjbgldGLsFNel0Sg19wpOZsarbVyEY6GYnHFJqpbnt55qGx9KIIm9GDE1kO11Im+UPzUZId0Dve1iNIKCseFbIG1rp07JYz1uQM5HXK3EUZcGo7CJqjBKJNRWcHQEJ9Y4zWpYif41LVaxEPYxQMv9VYuCnsljjnVq85j5lFW4ft0r9GeandXpBlahIfMdjcHjvEb3Vt5JqfaCCO4x/2wpJQ8xRiOst1CuIayVUw0yJ0nzDq1bggO89J/rk6iOFsZuDoHpnHoS/iXXOYkaz0upoHMSoOmUFCjpGIYBaCVif2mDeNg3uek2fc8YZuFtn/Kj18DYPZ46T3H1/dvDQFJw1rr7MGteXZA1H4+K98S9HBMMP/3N7SqpNoHtu0IYaq3/ZIIg4ciolCpif6v+9ts854AycrQNmAiTXbwBv5Q8IAp+vuCFyZAFXHCxcsXshvswH4Tiofxfkhv/moXj5C62t7XMfCQAA</values>
+    </sys_hub_action_instance_v2>
+    <sys_hub_alias_mapping action="delete_multiple" query="source_id=aec0e4a1a0e703107f44e28050a33bb0"/>
+    <sys_hub_action_instance_v2 action="INSERT_OR_UPDATE">
+        <action_type display_value="Update Record">f9d01dd2c31332002841b63b12d3aea1</action_type>
+        <action_type_parent display_value="Update Record">baf174c8c3c232002841b63b12d3aee4</action_type_parent>
+        <attributes/>
+        <comment/>
+        <compiled_snapshot>f9d01dd2c31332002841b63b12d3aea1</compiled_snapshot>
+        <display_text/>
+        <flow display_value="Recruiter Interview Evaluation">342c90e5a0a703107f44e28050a33b88</flow>
+        <generation_source/>
+        <order>3</order>
+        <parent_ui_id>d1370945-fe2f-4466-83fc-e5cc43a32b53</parent_ui_id>
+        <sys_class_name>sys_hub_action_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-25 07:29:12</sys_created_on>
+        <sys_id>6f06a82da0e703107f44e28050a33b36</sys_id>
+        <sys_mod_count>3</sys_mod_count>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-25 08:33:02</sys_updated_on>
+        <ui_id>21eadae2-4558-434f-8722-8260ef6424b6</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/+VVy2rbQBT9FTNrISTLMYl3JcYQSBNwWm/SIEYzV/HA6NF5+FHjf++VNJKFnaQOZGPq3dzH6Jyjc6znHRGcTMgIeBDehGMWhVE0DILh9ShMxlESDnlEAULikZxmgJMKWKE4nldU2qqw2/0sOTXA49BnVinIzX6PfS50Kel24cawwpZCcuyTyfOLR0qq8EYDikx2R61zIUmagMTReYvpGKPZltWZF8xmiCsWbfHebU5dZ3A3xQ4uVXDCwCOwMZBzQCAplRo8ktEcWRZqSyZGWSwooPwxl9tuYily0xDN6EaLP/jkUVDNpYDMmBOhO8ZOoKacTqmhT3gzM1Z1ehWCgW404ZBSK81tv9YMPJZGFHmzYmgi2+1C2ix/aBQh3QW992E1goCy4lkhb2ilT8tiPW9BzkReS+IoyoJR2Z2oMUok1lRwdgQk1BpntCxF/hqXqliJehmhZP6rxIOfymKNz9TiNfcpq3D7qCr1Z1if1uUFVaIi8R2vweW9R/RW30qq9YEKahj/thWShpijENcq1BLEtROqZaZEab7ho1bggO89Z/rk6iOHsZuDoXp3Hoy/iXXOYkaz0upoHMToOmUFGjpGI4BaCVifxmDeDg3uekOfS8YZuNtk/Kj98DYPF46T2n1/d/DQNFw0rr4sGteXFA1H4+Kz8a9EBMMP/3N7TqpDoHtpUKBRwl82CCKukS/DL8Kp/d+Z+pz/z0DZ+n8mQHL9BuzW/JAhPANxQ+MoAK45WLhm9334shSE46D+XVAW/pvPxMtfKlxB6R0JAAA=</values>
+    </sys_hub_action_instance_v2>
+    <sys_hub_alias_mapping action="delete_multiple" query="source_id=6f06a82da0e703107f44e28050a33b36"/>
+    <sys_hub_action_instance_v2 action="INSERT_OR_UPDATE">
+        <action_type display_value="Update Record">f9d01dd2c31332002841b63b12d3aea1</action_type>
+        <action_type_parent display_value="Update Record">baf174c8c3c232002841b63b12d3aee4</action_type_parent>
+        <attributes/>
+        <comment/>
+        <compiled_snapshot>f9d01dd2c31332002841b63b12d3aea1</compiled_snapshot>
+        <display_text/>
+        <flow display_value="Recruiter Interview Evaluation">342c90e5a0a703107f44e28050a33b88</flow>
+        <generation_source/>
+        <order>5</order>
+        <parent_ui_id>55f31cb9-07af-4607-a4dc-979cae15220f</parent_ui_id>
+        <sys_class_name>sys_hub_action_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-25 07:49:21</sys_created_on>
+        <sys_id>beaa6065a02b03107f44e28050a33be9</sys_id>
+        <sys_mod_count>4</sys_mod_count>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-25 08:33:02</sys_updated_on>
+        <ui_id>8d3730b2-6229-4a0e-8fad-a288dfb7e2f3</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/+VVy2rbQBT9FTNrISTLMYl3JcYQSBNwWm/SIEYzV/HA6NF5+FHjf++VNJKFnaQOZGPq3dzH6Jyjc6znHRGcTMgIeBDehGMWhVE0DILh9ShMxlESDnlEAULikZxmgJMKWKE4nldU2qqw2/0sOTXA49BnVinIzX6PfS50Kel24cawwpZCcuyTyfOLR0qq8EYDikx2R61zIUmagMTReYvpGKPZltWZF8xmiCsWbfHebU5dZ3A3xQ4uVXDCwCOwMZBzQCAplRo8ktEcWRZqSyZGWSwooPwxl9tuYily0xDN6EaLP/jkUVDNpYDMmBOhO8ZOoKacTqmhT3gzM1Z1ehWCgW404ZBSK81tv9YMPJZGFHmzYmgi2+1C2ix/aBQh3QW992E1goCy4lkhb2ilT8tiPW9BzkReS+IoyoJR2Z2oMUok1lRwdgQk1BpntCxF/hqXqliJehmhZP6rxIOfymKNz9TiNfcpq3D7qCr1Z1if1uUFVaIi8R2vweW9R/RW30qq9YEKahj/thWShpijENcq1BLEtROqZaZEab7ho1bggO89Z/rk6iOHsZuDoXp3Hoy/iXXOYkaz0upoHMToOmUFGjpGI4BaCVifxmDeDg3uekOfS8YZuNtk/Kj98DYPF46T2n1/d/DQNFw0rr4sGteXFA1H4+Kz8a9EBMMP/3N7TqpDoHtpUKBRwl82CCKukS/DL8Kp/d+Z+pz/z0DZ+n8mQHL9BuzW/JAhPANxQ+MoAK45WLhm9334shSE46D+XVAW/pvPxMtfKlxB6R0JAAA=</values>
+    </sys_hub_action_instance_v2>
+    <sys_hub_alias_mapping action="delete_multiple" query="source_id=beaa6065a02b03107f44e28050a33be9"/>
+    <sys_hub_action_instance_v2 action="INSERT_OR_UPDATE">
+        <action_type display_value="Update Record">f9d01dd2c31332002841b63b12d3aea1</action_type>
+        <action_type_parent display_value="Update Record">baf174c8c3c232002841b63b12d3aee4</action_type_parent>
+        <attributes/>
+        <comment/>
+        <compiled_snapshot>f9d01dd2c31332002841b63b12d3aea1</compiled_snapshot>
+        <display_text/>
+        <flow display_value="Recruiter Interview Evaluation">342c90e5a0a703107f44e28050a33b88</flow>
+        <generation_source/>
+        <order>7</order>
+        <parent_ui_id>2686a0f0-08ec-4833-a766-70e58c7fcba0</parent_ui_id>
+        <sys_class_name>sys_hub_action_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-25 07:50:43</sys_created_on>
+        <sys_id>26fa6c65a02b03107f44e28050a33b18</sys_id>
+        <sys_mod_count>3</sys_mod_count>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-25 08:33:02</sys_updated_on>
+        <ui_id>a9b74c08-80e6-4a41-aa5d-e0bd9a60ae5c</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/+VVy2rbQBT9FTNrISTLMYl3JcYQSBNw2mzSIEYzV/aU0aPz8KPG/94raSQLO00dyMbUu7mP0TlH51gvOyI4mZAR8CC8CccsCqNoGATD61GYjKMkHPKIAoTEIznNACcVsEJxPK+otFVht/tecmqAx6HPrFKQm/0e+1zoUtLtsxvDClsKybFPJi+vHimpwhsNKDLZHbXOhSRpAhJH5y2mY4xmW1ZnXjCbIa5YtMV7tzl1ncHdFDu4VMEJA4/AxkDOAYGkVGrwSEZzZFmoLZkYZbGggPLHXG67iaXITUM0oxstfuOTR0E1lwIyY06E7hg7gZpyOqWGPuHNzFjV6VUIBrrRhENKrTS3/Voz8FgaUeTNiqGJbLcLabP8oVGEdBf03ofVCALKimeFvKGVPi2L9bwFORN5LYmjKAtGZXeixiiRWFPB2RGQUGuc0bIU+SIuVbES9TJCyfyFxIOfymKNz9RikfuUVbh9VJX6M6xP6/IzVaIi8RWvweW9R/RW30qq9YEKahj/shWShpijENcq1BLEtROqZaZEab7go1bggO89Z/rk6j2HsZuDoXp3Hoy/iXXOYkaz0upoHMToOmUFGjpGI4BaCVifxmDeDg3uekMfS8YZuNtkfKv98DYPF46T2n1/d/DQNFw0rj4tGteXFA1H4+Kz8a9EBMN3/3N7TqpDoHtpUKBRwh82CCK0609g+EU4tf9fpj7m/zNQtv6fCZBcvwG7NT9kCM9A3NA4CoBrDp5ds/s+fFoKwnFQ/y4oC//NZ+L1D7LZL7odCQAA</values>
+    </sys_hub_action_instance_v2>
+    <sys_hub_alias_mapping action="delete_multiple" query="source_id=26fa6c65a02b03107f44e28050a33b18"/>
+    <sys_hub_sub_flow_instance_v2 action="delete_multiple" query="flow=342c90e5a0a703107f44e28050a33b88"/>
+    <sys_hub_flow_logic_instance_v2 action="delete_multiple" query="flow=342c90e5a0a703107f44e28050a33b88^sys_idNOT IN29046429a0e703107f44e28050a33b69,db4a6825a02b03107f44e28050a33ba2,26ca2865a02b03107f44e28050a33b7d"/>
+    <sys_hub_flow_logic_instance_v2 action="INSERT_OR_UPDATE">
+        <attributes/>
+        <block display_value="">935be8a5a02b03107f44e28050a33bba</block>
+        <comment/>
+        <connected_to/>
+        <decision_table/>
+        <display_text/>
+        <flow display_value="Recruiter Interview Evaluation">342c90e5a0a703107f44e28050a33b88</flow>
+        <flow_variables_assigned/>
+        <generation_source/>
+        <logic_definition display_value="If">af4e1945c3e232002841b63b12d3ae3e</logic_definition>
+        <order>2</order>
+        <outputs_assigned/>
+        <parent_ui_id/>
+        <sys_class_name>sys_hub_flow_logic_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-25 07:20:20</sys_created_on>
+        <sys_id>29046429a0e703107f44e28050a33b69</sys_id>
+        <sys_mod_count>7</sys_mod_count>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-25 07:52:24</sys_updated_on>
+        <ui_id>d1370945-fe2f-4466-83fc-e5cc43a32b53</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/+1VXW/TMBT9K8jPUZSPtWJ9m0CTkIBJbOwFpujGvmktHNvYTrtS9b9znY+2Yp2YgEfekmPfe885OVfZMdMF2wV/Z668l0vNFl8eEiZ1xOh5x6RgC9Zk0OSXPOdlMS+LLCteX+T1vKzzQpSAULKEaWiRbnKjhQzS6KoHErYG1cUDehTSWwXb+yPCV1IJh+NUC45qAjq22P1yFLYWKwU1Kiq8DU7qJZW/lNtU+GYi9+p9jzzPOs4j3E+TjBORVp4lDB8DaoE0ugHlMWEtaAHBuO0BcQjiRqsjsJI6DIpbePTyB/UuZrN4sUHSyEc7Dq/VaNXkkpEcb2wkOCABajVZaFTX6o+DjmgyNtCpcGJy56kf2kg6shgpNbcrs/k0DbyWuhc4HirDQR3eIJANdRfQxw+DCltqVLVgLZlTWWfWsi8mLm26VPSSNspsaGhMVAo8Ek/JI0ivCX/bw/fgZFTxgdpQ8UCzBi951aeP2gVHEva9LdX3LhIaBI5SqsENuuC5kzZc0Zw1jqz3yRjdS5g1szybnY/HxfxMCE5Su9t9tkQcRZWnvHPkVUgdkk6ygHC6vN9/7bKsFBQVo5dqWx2OKSJPMv/X/f7FxrzAkicbc96mZ9ak+M2axA/7wi3Jsuz/mpyuifTVEPdRWz/8j7fkIUZ9mOCH3Ajk0hORu4i9m/4D8WBLAZD8FNoY9y1KOGL7nymBrSFRBgAA</values>
+        <workflow_reference/>
+    </sys_hub_flow_logic_instance_v2>
+    <sys_hub_flow_logic_instance_v2 action="INSERT_OR_UPDATE">
+        <attributes/>
+        <block display_value="">135be8a5a02b03107f44e28050a33bbd</block>
+        <comment/>
+        <connected_to>d1370945-fe2f-4466-83fc-e5cc43a32b53</connected_to>
+        <decision_table/>
+        <display_text/>
+        <flow display_value="Recruiter Interview Evaluation">342c90e5a0a703107f44e28050a33b88</flow>
+        <flow_variables_assigned/>
+        <generation_source/>
+        <logic_definition display_value="Else If">666e5545c3e232002841b63b12d3ae99</logic_definition>
+        <order>4</order>
+        <outputs_assigned/>
+        <parent_ui_id/>
+        <sys_class_name>sys_hub_flow_logic_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-25 07:47:46</sys_created_on>
+        <sys_id>db4a6825a02b03107f44e28050a33ba2</sys_id>
+        <sys_mod_count>5</sys_mod_count>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-25 07:52:24</sys_updated_on>
+        <ui_id>55f31cb9-07af-4607-a4dc-979cae15220f</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/+1UTW/UMBD9K8jnKMoHrWBvVVElJKASLb1AFU3sya6FYxvb2e0S7X9nnI/dFWzFqgdO3JJnz8x7L2/SM9MF2wV/b668l0vNFl8fEyZ1xOi5Z1KwBWsyaPK3POdlcVkWWVa8eZ3Xl2WdF6IEhIIlTEOLdJMbLWSQRlcDkLA1qC4e0KOQ3irYPhwQvpJKOJymWnBUE9CxRf/bUdharBTUqKjwLjipl1R+Lre58Hom9+rDgDzPOs4j3M+TjBORVp4lDJ8CaoE0ugHlMWEtaAHBuO0ecQjiVqsDsJI6jIpbePLyJ/UuLi7ixQZJI5/s2L9Wk1WzS0ZyvLWR4IgEqNVsoVFdqz+NOqLJ2ECnwpHJnad+aCPpyGKi1NytzObzPPBG6kHgdKgMB7V/g0A21F1AHz8MKmypUdWCtWROZZ1Zy6GYuLTpUtFL2iizoaExUSnwSDwljyC9IfzdAD+Ak1HFR2pDxSPNGrzk1ZA+ahccSdgNtlQ/ukhoFDhJqUY36ILnTtpwRXPWOLHeJedFNz8RgqPU9v0XS8RRVHnKO0dehdQh6SQLCKfLu923LstKsUcpGX9E/aVt/sF+5Kf247QpzyxF8ZeliJ/xzJ3Isuz/UhwvhfTVGO5J2zD8xTvxGIM9TvBjbgRy6YnIfcTez3/9eLClAEh+DG2M+x4lHLDdL+MjbOk/BgAA</values>
+        <workflow_reference/>
+    </sys_hub_flow_logic_instance_v2>
+    <sys_hub_flow_logic_instance_v2 action="INSERT_OR_UPDATE">
+        <attributes/>
+        <block display_value="">175be8a5a02b03107f44e28050a33bbf</block>
+        <comment/>
+        <connected_to>d1370945-fe2f-4466-83fc-e5cc43a32b53</connected_to>
+        <decision_table/>
+        <display_text/>
+        <flow display_value="Recruiter Interview Evaluation">342c90e5a0a703107f44e28050a33b88</flow>
+        <flow_variables_assigned/>
+        <generation_source/>
+        <logic_definition display_value="Else If">666e5545c3e232002841b63b12d3ae99</logic_definition>
+        <order>6</order>
+        <outputs_assigned/>
+        <parent_ui_id/>
+        <sys_class_name>sys_hub_flow_logic_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-25 07:49:54</sys_created_on>
+        <sys_id>26ca2865a02b03107f44e28050a33b7d</sys_id>
+        <sys_mod_count>5</sys_mod_count>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-25 07:52:24</sys_updated_on>
+        <ui_id>2686a0f0-08ec-4833-a766-70e58c7fcba0</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/+1UXY/TMBD8K8jPUZSk3An6djp0EhJwEnfcC5ysjb1pLRzb2E57pep/Z52PtoKeqEDiibdk7N2dmcxmy2wXXRfDvb0KQS0Mm39+zJgyCaPnLVOSzVlTQFO+FqWYVZezqiiqVy/L+nJWl5WcAULFMmagRboprJEqKmt4D2RsBbpLB/QoVXAaNg8HRCyVlh7HqQ481UT0bL796ShuHHINNWoqvItemQWVn8ttKryeyL141yPPs07zCA/TJOtlolUWGcOniEYijW5AB8xYC0ZCtH6zRzyCvDX6ACyViYPiFp6C+k69q4uLdLFB0ihGO/avfLRqcskqgbcuERyQCLWeLLS6a82HQUcyGRvodDwyuQvUD10inViMlJq7pV1/nAbeKNMLHA+1FaD3bxDJhrqLGNKHQY0tNeItOEfmcOftSvXFxKXNF5pe8kbbNQ1NicpBJOI5eQT5DeFvevgBvEoq3lMbKh5o1hCU4H36qF30JGHX28K/dYnQIHCUwgc36EIQXrl4RXNWOLLeZedFtzwRgqPUbrefHBFHyctcdJ68irlH0kkWEE6Xd7svXVHMpLGR708oHb/E/W9a/YM9KU/tyWlznlmO6jfLkT7nmbtRFMX/5TheDhX4EPJRWz/8j3fjMQV8mBCG3EgUKhCR+4S9nf7+6WBDAVDiGFpb/zVJOGC7H96Re/dHBgAA</values>
+        <workflow_reference/>
+    </sys_hub_flow_logic_instance_v2>
+    <sys_hub_pill_compound action="delete_multiple" query="attached_to=342c90e5a0a703107f44e28050a33b88"/>
+    <sys_hub_flow_variable action="delete_multiple" query="model=342c90e5a0a703107f44e28050a33b88"/>
+    <sys_documentation action="INSERT_OR_UPDATE">
+        <element>changed_fields</element>
+        <help/>
+        <hint/>
+        <label>Changed Fields</label>
+        <language>en</language>
+        <name>var__m_sys_hub_flow_input_342c90e5a0a703107f44e28050a33b88</name>
+        <plural/>
+        <sys_class_name>sys_documentation</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-25 06:48:18</sys_created_on>
+        <sys_id>10bc9429a0a703107f44e28050a33b27</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name/>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-25 06:48:18</sys_updated_on>
+        <url/>
+        <url_target/>
+    </sys_documentation>
+    <sys_documentation action="INSERT_OR_UPDATE">
+        <element>current</element>
+        <help/>
+        <hint/>
+        <label>Record</label>
+        <language>en</language>
+        <name>var__m_sys_hub_flow_input_342c90e5a0a703107f44e28050a33b88</name>
+        <plural/>
+        <sys_class_name>sys_documentation</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-25 06:48:18</sys_created_on>
+        <sys_id>54bc9429a0a703107f44e28050a33b1b</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name/>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-25 06:48:18</sys_updated_on>
+        <url/>
+        <url_target/>
+    </sys_documentation>
+    <sys_documentation action="INSERT_OR_UPDATE">
+        <element>table_name</element>
+        <help/>
+        <hint/>
+        <label>Table Name</label>
+        <language>en</language>
+        <name>var__m_sys_hub_flow_input_342c90e5a0a703107f44e28050a33b88</name>
+        <plural/>
+        <sys_class_name>sys_documentation</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-25 06:48:17</sys_created_on>
+        <sys_id>9cbc9429a0a703107f44e28050a33b02</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name/>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-25 06:48:17</sys_updated_on>
+        <url/>
+        <url_target/>
+    </sys_documentation>
+    <sys_choice action="delete_multiple" query="name=var__m_sys_hub_flow_input_342c90e5a0a703107f44e28050a33b88"/>
+    <sys_choice action="delete_multiple" query="name=var__m_sys_hub_flow_output_342c90e5a0a703107f44e28050a33b88"/>
+    <sys_hub_flow_snapshot action="INSERT_OR_UPDATE">
+        <access>public</access>
+        <acls/>
+        <active>true</active>
+        <allow_high_security_roles>false</allow_high_security_roles>
+        <annotation/>
+        <attributes>browserActivatedIn=chrome,integrationActivatedIn=standalone,labelCacheCleanUpExecuted=true,viewActivatedIn=naturalLanguage</attributes>
+        <authored_on_release_version>29000</authored_on_release_version>
+        <callable_by_client_api>false</callable_by_client_api>
+        <category/>
+        <copied_from/>
+        <copied_from_name/>
+        <description>Updates recruiter interview evaluation status, result, and candidate progression after evaluation.</description>
+        <flow_priority>MEDIUM</flow_priority>
+        <internal_name>recruiter_interview_evaluation</internal_name>
+        <label_cache>[{"name":"Updated_1.current","label":"Trigger - Record Updated➛Recruiter Interview Record","reference":"x_snc_campus360_recruiter_interview","reference_display":"Recruiter Interview","type":"reference","base_type":"reference","usedInstances":{"d17cca43-cea8-4cba-8fea-69a081e387e4":["record"],"21eadae2-4558-434f-8722-8260ef6424b6":["record"],"b9ae7d3c-a516-4656-bbc2-b41b9d264e08":["record"],"7dfe7cfb-024f-4308-86dc-4e30caba84e2":["record"],"8d3730b2-6229-4a0e-8fad-a288dfb7e2f3":["record"],"a9b74c08-80e6-4a41-aa5d-e0bd9a60ae5c":["record"]},"attributes":{}},{"name":"Updated_1.current.recommendation","label":"Trigger - Record Updated➛Recruiter Interview Record➛Recommendation","reference":"","reference_display":"Recommendation","type":"choice","base_type":"choice","parent_table_name":"x_snc_campus360_recruiter_interview","column_name":"recommendation","choices":[{"label":"-- None --","sequence":-1.0,"used":false,"image":"","rawLabel":"-- None --","selected":false,"missing":false,"reference":false,"value":""},{"sequence":0.0,"used":false,"image":"","label":"Select","rawLabel":"Select","selected":false,"missing":false,"reference":false,"value":"select","parameters":{"name":"x_snc_campus360_recruiter_interview","dependent_values":[""],"dependent_values_map":{"":"Select"}}},{"sequence":1.0,"used":false,"image":"","label":"Strongly Recommended","rawLabel":"Strongly Recommended","selected":false,"missing":false,"reference":false,"value":"strongly_recommended","parameters":{"name":"x_snc_campus360_recruiter_interview","dependent_values":[""],"dependent_values_map":{"":"Strongly Recommended"}}},{"sequence":2.0,"used":false,"image":"","label":"Recommended","rawLabel":"Recommended","selected":false,"missing":false,"reference":false,"value":"recommended","parameters":{"name":"x_snc_campus360_recruiter_interview","dependent_values":[""],"dependent_values_map":{"":"Recommended"}}},{"sequence":3.0,"used":false,"image":"","label":"Not Recommended","rawLabel":"Not Recommended","selected":false,"missing":false,"reference":false,"value":"not_recommended","parameters":{"name":"x_snc_campus360_recruiter_interview","dependent_values":[""],"dependent_values_map":{"":"Not Recommended"}}}],"usedInstances":{"d1370945-fe2f-4466-83fc-e5cc43a32b53":["condition"],"55f31cb9-07af-4607-a4dc-979cae15220f":["condition"],"2686a0f0-08ec-4833-a766-70e58c7fcba0":["condition"]}}]</label_cache>
+        <master>true</master>
+        <name>Recruiter Interview Evaluation</name>
+        <natlang/>
+        <outputs/>
+        <parent_flow display_value="Recruiter Interview Evaluation">342c90e5a0a703107f44e28050a33b88</parent_flow>
+        <remote_trigger_id/>
+        <run_as>user</run_as>
+        <run_with_roles/>
+        <sc_callable>false</sc_callable>
+        <status>published</status>
+        <sys_class_name>sys_hub_flow_snapshot</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-25 07:52:25</sys_created_on>
+        <sys_domain>global</sys_domain>
+        <sys_domain_path>/</sys_domain_path>
+        <sys_id>a35be8a5a02b03107f44e28050a33bdd</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name/>
+        <sys_overrides/>
+        <sys_package/>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-25 07:52:25</sys_updated_on>
+        <type>flow</type>
+        <version>2</version>
+    </sys_hub_flow_snapshot>
+    <sys_translated_text action="delete_multiple" query="documentkey=a35be8a5a02b03107f44e28050a33bdd"/>
+    <sys_variable_value action="delete_multiple" query="document_key=a35be8a5a02b03107f44e28050a33bdd"/>
+    <sys_hub_flow_stage action="delete_multiple" query="flow=a35be8a5a02b03107f44e28050a33bdd"/>
+    <sys_flow_cat_variable_model action="delete_multiple" query="id=a35be8a5a02b03107f44e28050a33bdd^sys_idNOT IN2b5be8a5a02b03107f44e28050a33beb"/>
+    <sys_flow_cat_variable_model action="INSERT_OR_UPDATE">
+        <id>a35be8a5a02b03107f44e28050a33bdd</id>
+        <name>Recruiter Interview Evaluation</name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-25 07:52:25</sys_created_on>
+        <sys_id>2b5be8a5a02b03107f44e28050a33beb</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_scope/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-25 07:52:25</sys_updated_on>
+    </sys_flow_cat_variable_model>
+    <sys_flow_cat_variable action="delete_multiple" query="flow_catalog_model=2b5be8a5a02b03107f44e28050a33beb"/>
+    <sys_hub_flow_input action="delete_multiple" query="model=a35be8a5a02b03107f44e28050a33bdd^sys_idNOT IN275be8a5a02b03107f44e28050a33bff,7b5b2ca5a02b03107f44e28050a33b48,e35be8a5a02b03107f44e28050a33bed"/>
+    <sys_hub_flow_input action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <array>false</array>
+        <array_denormalized>false</array_denormalized>
+        <attributes>child_label=FDChangeDetails,child_name=FDChangeDetails,child_type=object,child_type_label=Object,element_mapping_provider=com.glide.flow_design.action.data.FlowDesignVariableMapper,pwd2droppable=true,uiType=array.object,uiTypeLabel=Array.Object</attributes>
+        <audit>false</audit>
+        <calculation><![CDATA[(function calculatedFieldValue(current) {
+
+	// Add your code here
+	return '';  // return the calculated value
+
+})(current);]]></calculation>
+        <choice/>
+        <choice_field/>
+        <choice_table/>
+        <column_label/>
+        <comments/>
+        <create_roles/>
+        <default_value/>
+        <defaultsort/>
+        <delete_roles/>
+        <dependent/>
+        <dependent_on_field/>
+        <display>false</display>
+        <dynamic_creation>false</dynamic_creation>
+        <dynamic_creation_script/>
+        <dynamic_default_value/>
+        <dynamic_ref_qual/>
+        <element>changed_fields</element>
+        <element_reference>false</element_reference>
+        <foreign_database/>
+        <formula/>
+        <function_definition/>
+        <function_field>false</function_field>
+        <help/>
+        <hint/>
+        <internal_type display_value="String">string</internal_type>
+        <label>Changed Fields</label>
+        <mandatory>false</mandatory>
+        <max_length>4000</max_length>
+        <model display_value="Recruiter Interview Evaluation">a35be8a5a02b03107f44e28050a33bdd</model>
+        <model_id>a35be8a5a02b03107f44e28050a33bdd</model_id>
+        <model_table>sys_hub_flow_snapshot</model_table>
+        <name>var__m_sys_hub_flow_input_a35be8a5a02b03107f44e28050a33bdd</name>
+        <next_element/>
+        <order>100</order>
+        <primary>false</primary>
+        <read_only>false</read_only>
+        <read_only_option/>
+        <read_roles/>
+        <reference/>
+        <reference_cascade_rule/>
+        <reference_floats>false</reference_floats>
+        <reference_key/>
+        <reference_qual/>
+        <reference_qual_condition/>
+        <reference_type/>
+        <sizeclass/>
+        <spell_check>false</spell_check>
+        <staged>false</staged>
+        <sys_class_name>sys_hub_flow_input</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-25 07:52:25</sys_created_on>
+        <sys_id>275be8a5a02b03107f44e28050a33bff</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name/>
+        <sys_package/>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-25 07:52:25</sys_updated_on>
+        <table_reference>false</table_reference>
+        <text_index>false</text_index>
+        <unique>false</unique>
+        <use_dependent_field>false</use_dependent_field>
+        <use_dynamic_default>false</use_dynamic_default>
+        <use_reference_qualifier>simple</use_reference_qualifier>
+        <virtual>false</virtual>
+        <virtual_type>script</virtual_type>
+        <widget/>
+        <write_roles/>
+        <xml_view>false</xml_view>
+    </sys_hub_flow_input>
+    <sys_hub_action_input_action_instance action="delete_multiple" query="action_input=275be8a5a02b03107f44e28050a33bff"/>
+    <sys_hub_flow_input action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <array>false</array>
+        <array_denormalized>false</array_denormalized>
+        <attributes>element_mapping_provider=com.glide.flow_design.action.data.FlowDesignVariableMapper,test_input_hidden=true,uiType=table_name,uiTypeLabel=Table Name</attributes>
+        <audit>false</audit>
+        <calculation><![CDATA[(function calculatedFieldValue(current) {
+
+	// Add your code here
+	return '';  // return the calculated value
+
+})(current);]]></calculation>
+        <choice/>
+        <choice_field/>
+        <choice_table/>
+        <column_label/>
+        <comments/>
+        <create_roles/>
+        <default_value/>
+        <defaultsort/>
+        <delete_roles/>
+        <dependent/>
+        <dependent_on_field/>
+        <display>false</display>
+        <dynamic_creation>false</dynamic_creation>
+        <dynamic_creation_script/>
+        <dynamic_default_value/>
+        <dynamic_ref_qual/>
+        <element>table_name</element>
+        <element_reference>false</element_reference>
+        <foreign_database/>
+        <formula/>
+        <function_definition/>
+        <function_field>false</function_field>
+        <help/>
+        <hint/>
+        <internal_type display_value="">table_name</internal_type>
+        <label>Table Name</label>
+        <mandatory>false</mandatory>
+        <max_length>200</max_length>
+        <model display_value="Recruiter Interview Evaluation">a35be8a5a02b03107f44e28050a33bdd</model>
+        <model_id>a35be8a5a02b03107f44e28050a33bdd</model_id>
+        <model_table>sys_hub_flow_snapshot</model_table>
+        <name>var__m_sys_hub_flow_input_a35be8a5a02b03107f44e28050a33bdd</name>
+        <next_element/>
+        <order>101</order>
+        <primary>false</primary>
+        <read_only>false</read_only>
+        <read_only_option/>
+        <read_roles/>
+        <reference/>
+        <reference_cascade_rule/>
+        <reference_floats>false</reference_floats>
+        <reference_key/>
+        <reference_qual/>
+        <reference_qual_condition/>
+        <reference_type/>
+        <sizeclass/>
+        <spell_check>false</spell_check>
+        <staged>false</staged>
+        <sys_class_name>sys_hub_flow_input</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-25 07:52:25</sys_created_on>
+        <sys_id>7b5b2ca5a02b03107f44e28050a33b48</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name/>
+        <sys_package/>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-25 07:52:25</sys_updated_on>
+        <table_reference>false</table_reference>
+        <text_index>false</text_index>
+        <unique>false</unique>
+        <use_dependent_field>false</use_dependent_field>
+        <use_dynamic_default>false</use_dynamic_default>
+        <use_reference_qualifier>simple</use_reference_qualifier>
+        <virtual>false</virtual>
+        <virtual_type>script</virtual_type>
+        <widget/>
+        <write_roles/>
+        <xml_view>false</xml_view>
+    </sys_hub_flow_input>
+    <sys_hub_action_input_action_instance action="delete_multiple" query="action_input=7b5b2ca5a02b03107f44e28050a33b48"/>
+    <sys_hub_flow_input action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <array>false</array>
+        <array_denormalized>false</array_denormalized>
+        <attributes>element_mapping_provider=com.glide.flow_design.action.data.FlowDesignVariableMapper,uiType=document_id,uiTypeLabel=Document ID</attributes>
+        <audit>false</audit>
+        <calculation><![CDATA[(function calculatedFieldValue(current) {
+
+	// Add your code here
+	return '';  // return the calculated value
+
+})(current);]]></calculation>
+        <choice/>
+        <choice_field/>
+        <choice_table/>
+        <column_label/>
+        <comments/>
+        <create_roles/>
+        <default_value/>
+        <defaultsort/>
+        <delete_roles/>
+        <dependent>table_name</dependent>
+        <dependent_on_field>table_name</dependent_on_field>
+        <display>false</display>
+        <dynamic_creation>false</dynamic_creation>
+        <dynamic_creation_script/>
+        <dynamic_default_value/>
+        <dynamic_ref_qual/>
+        <element>current</element>
+        <element_reference>false</element_reference>
+        <foreign_database/>
+        <formula/>
+        <function_definition/>
+        <function_field>false</function_field>
+        <help/>
+        <hint/>
+        <internal_type display_value="">document_id</internal_type>
+        <label>Record</label>
+        <mandatory>true</mandatory>
+        <max_length>200</max_length>
+        <model display_value="Recruiter Interview Evaluation">a35be8a5a02b03107f44e28050a33bdd</model>
+        <model_id>a35be8a5a02b03107f44e28050a33bdd</model_id>
+        <model_table>sys_hub_flow_snapshot</model_table>
+        <name>var__m_sys_hub_flow_input_a35be8a5a02b03107f44e28050a33bdd</name>
+        <next_element/>
+        <order>100</order>
+        <primary>false</primary>
+        <read_only>false</read_only>
+        <read_only_option/>
+        <read_roles/>
+        <reference/>
+        <reference_cascade_rule/>
+        <reference_floats>false</reference_floats>
+        <reference_key/>
+        <reference_qual/>
+        <reference_qual_condition/>
+        <reference_type/>
+        <sizeclass/>
+        <spell_check>false</spell_check>
+        <staged>false</staged>
+        <sys_class_name>sys_hub_flow_input</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-25 07:52:25</sys_created_on>
+        <sys_id>e35be8a5a02b03107f44e28050a33bed</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name/>
+        <sys_package/>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-25 07:52:25</sys_updated_on>
+        <table_reference>false</table_reference>
+        <text_index>false</text_index>
+        <unique>false</unique>
+        <use_dependent_field>true</use_dependent_field>
+        <use_dynamic_default>false</use_dynamic_default>
+        <use_reference_qualifier>simple</use_reference_qualifier>
+        <virtual>false</virtual>
+        <virtual_type>script</virtual_type>
+        <widget/>
+        <write_roles/>
+        <xml_view>false</xml_view>
+    </sys_hub_flow_input>
+    <sys_hub_action_input_action_instance action="delete_multiple" query="action_input=e35be8a5a02b03107f44e28050a33bed"/>
+    <sys_hub_flow_output action="delete_multiple" query="model=a35be8a5a02b03107f44e28050a33bdd"/>
+    <sys_hub_alias_mapping action="delete_multiple" query="source_id=a35be8a5a02b03107f44e28050a33bdd"/>
+    <sys_hub_trigger_instance_v2 action="delete_multiple" query="flow=a35be8a5a02b03107f44e28050a33bdd^sys_idNOT INb75b2ca5a02b03107f44e28050a33b60"/>
+    <sys_hub_trigger_instance_v2 action="INSERT_OR_UPDATE">
+        <comment/>
+        <display_text/>
+        <flow display_value="Recruiter Interview Evaluation">a35be8a5a02b03107f44e28050a33bdd</flow>
+        <generation_source/>
+        <name>Updated</name>
+        <published_version/>
+        <remote_sys_id/>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-25 07:52:26</sys_created_on>
+        <sys_id>b75b2ca5a02b03107f44e28050a33b60</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_scope/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-25 07:52:26</sys_updated_on>
+        <trigger_definition display_value="Updated">bb695e60c31322002841b63b12d3aea5</trigger_definition>
+        <trigger_inputs>H4sIAAAAAAAA/9Va23LbNhD9FZRP7YzSIUVdLPfJle3GM449lZX0IXU5IABKnFKgQoC01Uz+vQteJIo3yxLlKC+JBYDA2d2zZxeiPn/VPGwzTzvXptj2mNbRXC5ZwLE3XS0ZDEs1bHG8UHMLzCmWfrDSzmUQso7mBP5iyhZLD0tY7GBPwKAfUBZo50ZHi7AXsoeVuKGwEzwfb5PuqaXT8PnZEpxYBC+WoTAHuhUwEoQuwLBiMJHLnmA1dQWcs/qUPjTJFqGb3CIydz0aMK6df37saEscwIlSoflamJJgnrVlO7pLjHQVWINSbHSZTkzD7HZ1vXvWM+yBaRtdamKGz2Bd0XEF42SF/zaeYc+Sccro2mkl1wYM03vurXIrnoX7H+x5pqtZh4EthCWOXX+0Ui8lw2Tuu4TdL6Xr82QkQZdM+l644HcJauVf5uDQk5l/YSQUsB9bKqBcrnE4D3P/aZIdeO3y2KZ00vMJ9tafsJSBa4eSCRUAx/VUTBOPCD8MYvSTq/H95NL662I6fn81sSZXD9PJzXh6dal9i+2yvoRqxwRhisVKzPm2JsW1yzwVNrESFsSvowkSuEt5QaQbZcT81tmQfexz6sZeKRGeZFNim/CZ9U2M1/VazpPciRnvmfoDq0FLSCxD8Xeo6yZNhxn95+5PSAV/sWAKBSz7KVkgmMeI3Jvt47yFMdtte4QpwzVsHwxzbM97rsI0WeHEvHeaeJ+O1BO/p+vfifqp2u3L/IVPmXe52U6Dydks1rdlKJWPMr9Y/pIFyh/wnPbp4nb8/uLuj6uH39L/ryf3H7K/p/fw3BPmUljStzClVs7r6giw5aUUSnxSzqOXMygIOWxhreNZzqM4AOtI3LoCDP8MKvDAvoRJ+N6BEDqZ0+MTYLlzm54wCTnygQfwDyJhAD6XKBNX52aBZ2moYEOVDjlOOR9F/tMHVwiXz3JG1GGIfVaCsD4dqIoygxMo4kAsj21KTDkkUcG3hRK6v4JksY3VY0Co0bOHA32otMPQTdsx9KHexw41dX1k5tSjDLEWuyzQqEUVeZ2GiJi23g6sLLo7hazn82YnSkXbfMxMV3RJpWrcDjSjJWhdBa0guearNHdN0WT4stDsNZjWcpeCaYThCbqrhKoFO2il4/lPIPeH66SNyb+zwA85LSqVOgK5HG1WoJ9Td/5yPM10/IA149lecUpquQlKRmvMV0fTyR4jdDjoDXSQRxOU0e6PRjbBXccZDoZMpwWd3ICrRHzC+vgCEaMqJtdpZSWJoiruvUIlDwBYUsxXAzxcK1OSViplMvdjaOLTnHELoAaWp1SvJI0zz6Usm2s380tHR5tcbyv7b1Oj1Ommc0b7/eGQDOF2Bbnv9JiNjV63j0fDgckGhdwvwWuCLiu8dcQ7l7pjq+NrdOFjMnVaXz0ck8CCSamK1MGVnUMDHG+BkzNz5VTFBsVq4wfozufvbjbr0AODKhnfvo9U4ncBpcKO3hSV7ct5qeUAJL/D+BYS1cjW+Ozk7m8FRkXbth6pLzkzR33qmNXaNOxWadMGYj34E+1QdsylqDYrq1qVXXMhqkyp2t5iDzoXKJNvOhq6oracYrTulO7xnGIe3IlleVl7ad0H7A9U++I2pMUCqCAwy3fyun7pI5hAcCZyHZR+c8oosldIzhl42IMOHM5HCsyhgt5Qb8rI1vz+rriSjr9UBmEYpW3a6VW4Am/e4vZNnJFNR2ZNB96v78DrS11h+kTr3avzJ6pKx8ai97p9i3tWlr0cfbfZsWNBa9Xq6qp2mNWVde0lqw+vWE3fHVSgOP1apEBPkzAcXoF8TgpXHHLE100hd2HcInPMZ8mrpOzca4gCw2SOkiUoWXLEGuI94ZXQirUNGK6SKP3GHQYgnXgidkcCwiIWrEqeUIMoXFJVbt68nDX8jiV9iytkAE/OVlvZTo73wo0Yo37XpGfENEZm+ccpRq6UbWdHPe7a2vXCb1Xqatfcjd9z545PoyjdBYuVcv2yGi2wJHMmOghCHb/kiYXUDYSMV/+qtXj1I6wcpKrSVpuAUV3u1paKhiSKiulXVRsqMiAqZEu+OjRe8hrMN1oxv9uG+eZ+5vcOLo5Z1lZWx9R77VbEfQvg4/9HiwU8uicAAA==</trigger_inputs>
+        <trigger_outputs/>
+        <trigger_type>record_update</trigger_type>
+        <updation_source/>
+    </sys_hub_trigger_instance_v2>
+    <sys_hub_action_instance_v2 action="delete_multiple" query="flow=a35be8a5a02b03107f44e28050a33bdd^sys_idNOT INfb5b2ca5a02b03107f44e28050a33b5d,b35b2ca5a02b03107f44e28050a33b5e,7b5b2ca5a02b03107f44e28050a33b5e,335b2ca5a02b03107f44e28050a33b5f"/>
+    <sys_hub_action_instance_v2 action="INSERT_OR_UPDATE">
+        <action_type display_value="Update Record">f9d01dd2c31332002841b63b12d3aea1</action_type>
+        <action_type_parent display_value="Update Record">baf174c8c3c232002841b63b12d3aee4</action_type_parent>
+        <attributes/>
+        <comment/>
+        <compiled_snapshot>f9d01dd2c31332002841b63b12d3aea1</compiled_snapshot>
+        <display_text/>
+        <flow display_value="Recruiter Interview Evaluation">a35be8a5a02b03107f44e28050a33bdd</flow>
+        <generation_source/>
+        <order>1</order>
+        <parent_ui_id/>
+        <sys_class_name>sys_hub_action_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-25 07:52:26</sys_created_on>
+        <sys_id>fb5b2ca5a02b03107f44e28050a33b5d</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-25 07:52:26</sys_updated_on>
+        <ui_id>d17cca43-cea8-4cba-8fea-69a081e387e4</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/+VVy2rjMBT9laC1MXachja7oSFQ6LSQzmTTKUaWrhuB/Bg98piQf59rW3ZM0nZS6CZMdvclnXN9TvS8I4KTCRkBD8KbcMyiMIqGQTC8HoXJOErCIY8oQEg8ktMMsFMBKxTHeEWlrRK73c+SUwM8Dn1mlYLc7PdY50KXkm4Xrg0zbCkkxzqZPL94pKQKTzSgyGR3VDoXkqQJSGydt5iOMZptWcW8YDZDXLFok/ducuoqg7spVnCoghMGHoGNgZwDAkmp1OCRjObIslBbMjHKYkIB5Y+53HYdS5GbhmhGN1r8wZtHQdWXAjJjbgldGLsFNel0Sg19wpOZsarbVyEY6GYnHFJqpbnt55qGx9KIIm9GDE1kO11Im+UPzUZId0Dve1iNIKCseFbIG1rp07JYz1uQM5HXK3EUZcGo7CJqjBKJNRWcHQEJ9Y4zWpYif41LVaxEPYxQMv9VYuCnsljjnVq85j5lFW4ft0r9GeandXpBlahIfMdjcHjvEb3Vt5JqfaCCO4x/2wpJQ8xRiOst1CuIayVUw0yJ0nzDq1bggO89J/rk6iOFsZuDoHpnHoS/iXXOYkaz0upoHMSoOmUFCjpGIYBaCVif2mDeNg3uek2fc8YZuFtn/Kj18DYPZ46T3H1/dvDQFJw1rr7MGteXZA1H4+K98S9HBMMP/3N7SqpNoHtu0IYaq3/ZIIg4ciolCpif6v+9ts854AycrQNmAiTXbwBv5Q8IAp+vuCFyZAFXHCxcsXshvswH4Tiofxfkhv/moXj5C62t7XMfCQAA</values>
+    </sys_hub_action_instance_v2>
+    <sys_hub_alias_mapping action="delete_multiple" query="source_id=fb5b2ca5a02b03107f44e28050a33b5d"/>
+    <sys_hub_action_instance_v2 action="INSERT_OR_UPDATE">
+        <action_type display_value="Update Record">f9d01dd2c31332002841b63b12d3aea1</action_type>
+        <action_type_parent display_value="Update Record">baf174c8c3c232002841b63b12d3aee4</action_type_parent>
+        <attributes/>
+        <comment/>
+        <compiled_snapshot>f9d01dd2c31332002841b63b12d3aea1</compiled_snapshot>
+        <display_text/>
+        <flow display_value="Recruiter Interview Evaluation">a35be8a5a02b03107f44e28050a33bdd</flow>
+        <generation_source/>
+        <order>3</order>
+        <parent_ui_id>d1370945-fe2f-4466-83fc-e5cc43a32b53</parent_ui_id>
+        <sys_class_name>sys_hub_action_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-25 07:52:26</sys_created_on>
+        <sys_id>b35b2ca5a02b03107f44e28050a33b5e</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-25 07:52:26</sys_updated_on>
+        <ui_id>21eadae2-4558-434f-8722-8260ef6424b6</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/+VVy2rbQBT9FTNrISTLMYl3JcYQSBNwWm/SIEYzV/HA6NF5+FHjf++VNJKFnaQOZGPq3dzH6Jyjc6znHRGcTMgIeBDehGMWhVE0DILh9ShMxlESDnlEAULikZxmgJMKWKE4nldU2qqw2/0sOTXA49BnVinIzX6PfS50Kel24cawwpZCcuyTyfOLR0qq8EYDikx2R61zIUmagMTReYvpGKPZltWZF8xmiCsWbfHebU5dZ3A3xQ4uVXDCwCOwMZBzQCAplRo8ktEcWRZqSyZGWSwooPwxl9tuYily0xDN6EaLP/jkUVDNpYDMmBOhO8ZOoKacTqmhT3gzM1Z1ehWCgW404ZBSK81tv9YMPJZGFHmzYmgi2+1C2ix/aBQh3QW992E1goCy4lkhb2ilT8tiPW9BzkReS+IoyoJR2Z2oMUok1lRwdgQk1BpntCxF/hqXqliJehmhZP6rxIOfymKNz9TiNfcpq3D7qCr1Z1if1uUFVaIi8R2vweW9R/RW30qq9YEKahj/thWShpijENcq1BLEtROqZaZEab7ho1bggO89Z/rk6iOHsZuDoXp3Hoy/iXXOYkaz0upoHMToOmUFGjpGI4BaCVifxmDeDg3uekOfS8YZuNtk/Kj98DYPF46T2n1/d/DQNFw0rr4sGteXFA1H4+Kz8a9EBMMP/3N7TqpDoHtpUKBRwl82CCKukS/DL8Kp/d+Z+pz/z0DZ+n8mQHL9BuzW/JAhPANxQ+MoAK45WLhm9334shSE46D+XVAW/pvPxMtfKlxB6R0JAAA=</values>
+    </sys_hub_action_instance_v2>
+    <sys_hub_alias_mapping action="delete_multiple" query="source_id=b35b2ca5a02b03107f44e28050a33b5e"/>
+    <sys_hub_action_instance_v2 action="INSERT_OR_UPDATE">
+        <action_type display_value="Update Record">f9d01dd2c31332002841b63b12d3aea1</action_type>
+        <action_type_parent display_value="Update Record">baf174c8c3c232002841b63b12d3aee4</action_type_parent>
+        <attributes/>
+        <comment/>
+        <compiled_snapshot>f9d01dd2c31332002841b63b12d3aea1</compiled_snapshot>
+        <display_text/>
+        <flow display_value="Recruiter Interview Evaluation">a35be8a5a02b03107f44e28050a33bdd</flow>
+        <generation_source/>
+        <order>5</order>
+        <parent_ui_id>55f31cb9-07af-4607-a4dc-979cae15220f</parent_ui_id>
+        <sys_class_name>sys_hub_action_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-25 07:52:26</sys_created_on>
+        <sys_id>7b5b2ca5a02b03107f44e28050a33b5e</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-25 07:52:26</sys_updated_on>
+        <ui_id>8d3730b2-6229-4a0e-8fad-a288dfb7e2f3</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/+VVy2rbQBT9FTNrISTLMYl3JcYQSBNwWm/SIEYzV/HA6NF5+FHjf++VNJKFnaQOZGPq3dzH6Jyjc6znHRGcTMgIeBDehGMWhVE0DILh9ShMxlESDnlEAULikZxmgJMKWKE4nldU2qqw2/0sOTXA49BnVinIzX6PfS50Kel24cawwpZCcuyTyfOLR0qq8EYDikx2R61zIUmagMTReYvpGKPZltWZF8xmiCsWbfHebU5dZ3A3xQ4uVXDCwCOwMZBzQCAplRo8ktEcWRZqSyZGWSwooPwxl9tuYily0xDN6EaLP/jkUVDNpYDMmBOhO8ZOoKacTqmhT3gzM1Z1ehWCgW404ZBSK81tv9YMPJZGFHmzYmgi2+1C2ix/aBQh3QW992E1goCy4lkhb2ilT8tiPW9BzkReS+IoyoJR2Z2oMUok1lRwdgQk1BpntCxF/hqXqliJehmhZP6rxIOfymKNz9TiNfcpq3D7qCr1Z1if1uUFVaIi8R2vweW9R/RW30qq9YEKahj/thWShpijENcq1BLEtROqZaZEab7ho1bggO89Z/rk6iOHsZuDoXp3Hoy/iXXOYkaz0upoHMToOmUFGjpGI4BaCVifxmDeDg3uekOfS8YZuNtk/Kj98DYPF46T2n1/d/DQNFw0rr4sGteXFA1H4+Kz8a9EBMMP/3N7TqpDoHtpUKBRwl82CCKukS/DL8Kp/d+Z+pz/z0DZ+n8mQHL9BuzW/JAhPANxQ+MoAK45WLhm9334shSE46D+XVAW/pvPxMtfKlxB6R0JAAA=</values>
+    </sys_hub_action_instance_v2>
+    <sys_hub_alias_mapping action="delete_multiple" query="source_id=7b5b2ca5a02b03107f44e28050a33b5e"/>
+    <sys_hub_action_instance_v2 action="INSERT_OR_UPDATE">
+        <action_type display_value="Update Record">f9d01dd2c31332002841b63b12d3aea1</action_type>
+        <action_type_parent display_value="Update Record">baf174c8c3c232002841b63b12d3aee4</action_type_parent>
+        <attributes/>
+        <comment/>
+        <compiled_snapshot>f9d01dd2c31332002841b63b12d3aea1</compiled_snapshot>
+        <display_text/>
+        <flow display_value="Recruiter Interview Evaluation">a35be8a5a02b03107f44e28050a33bdd</flow>
+        <generation_source/>
+        <order>7</order>
+        <parent_ui_id>2686a0f0-08ec-4833-a766-70e58c7fcba0</parent_ui_id>
+        <sys_class_name>sys_hub_action_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-25 07:52:26</sys_created_on>
+        <sys_id>335b2ca5a02b03107f44e28050a33b5f</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-25 07:52:26</sys_updated_on>
+        <ui_id>a9b74c08-80e6-4a41-aa5d-e0bd9a60ae5c</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/+VVy2rbQBT9FTNrISTLMYl3JcYQSBNw2mzSIEYzV/aU0aPz8KPG/94raSQLO00dyMbUu7mP0TlH51gvOyI4mZAR8CC8CccsCqNoGATD61GYjKMkHPKIAoTEIznNACcVsEJxPK+otFVht/tecmqAx6HPrFKQm/0e+1zoUtLtsxvDClsKybFPJi+vHimpwhsNKDLZHbXOhSRpAhJH5y2mY4xmW1ZnXjCbIa5YtMV7tzl1ncHdFDu4VMEJA4/AxkDOAYGkVGrwSEZzZFmoLZkYZbGggPLHXG67iaXITUM0oxstfuOTR0E1lwIyY06E7hg7gZpyOqWGPuHNzFjV6VUIBrrRhENKrTS3/Voz8FgaUeTNiqGJbLcLabP8oVGEdBf03ofVCALKimeFvKGVPi2L9bwFORN5LYmjKAtGZXeixiiRWFPB2RGQUGuc0bIU+SIuVbES9TJCyfyFxIOfymKNz9RikfuUVbh9VJX6M6xP6/IzVaIi8RWvweW9R/RW30qq9YEKahj/shWShpijENcq1BLEtROqZaZEab7go1bggO89Z/rk6j2HsZuDoXp3Hoy/iXXOYkaz0upoHMToOmUFGjpGI4BaCVifxmDeDg3uekMfS8YZuNtkfKv98DYPF46T2n1/d/DQNFw0rj4tGteXFA1H4+Kz8a9EBMN3/3N7TqpDoHtpUKBRwh82CCK0609g+EU4tf9fpj7m/zNQtv6fCZBcvwG7NT9kCM9A3NA4CoBrDp5ds/s+fFoKwnFQ/y4oC//NZ+L1D7LZL7odCQAA</values>
+    </sys_hub_action_instance_v2>
+    <sys_hub_alias_mapping action="delete_multiple" query="source_id=335b2ca5a02b03107f44e28050a33b5f"/>
+    <sys_hub_sub_flow_instance_v2 action="delete_multiple" query="flow=a35be8a5a02b03107f44e28050a33bdd"/>
+    <sys_hub_flow_logic_instance_v2 action="delete_multiple" query="flow=a35be8a5a02b03107f44e28050a33bdd^sys_idNOT IN3b5b2ca5a02b03107f44e28050a33b59,b35b2ca5a02b03107f44e28050a33b5b,bb5b2ca5a02b03107f44e28050a33b5c"/>
+    <sys_hub_flow_logic_instance_v2 action="INSERT_OR_UPDATE">
+        <attributes/>
+        <block display_value="">935be8a5a02b03107f44e28050a33bba</block>
+        <comment/>
+        <connected_to/>
+        <decision_table/>
+        <display_text/>
+        <flow display_value="Recruiter Interview Evaluation">a35be8a5a02b03107f44e28050a33bdd</flow>
+        <flow_variables_assigned/>
+        <generation_source/>
+        <logic_definition display_value="If">af4e1945c3e232002841b63b12d3ae3e</logic_definition>
+        <order>2</order>
+        <outputs_assigned/>
+        <parent_ui_id/>
+        <sys_class_name>sys_hub_flow_logic_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-25 07:52:26</sys_created_on>
+        <sys_id>3b5b2ca5a02b03107f44e28050a33b59</sys_id>
+        <sys_mod_count>1</sys_mod_count>
+        <sys_scope/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-25 07:52:26</sys_updated_on>
+        <ui_id>d1370945-fe2f-4466-83fc-e5cc43a32b53</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/+1Vy27bMBD8lYJnQdAjNhrfAgcBCqQN0KS5tIGwIimbKEWqfNhRBf97l5IsG42LOkiPvZlD7u7MaAfuiPau8c4+6CtrxUqRxdeniAgVMPzdEcHIglQJVOklTWmezfMsSbL3F2k5z8s0YzlwyElEFNQcX1KtmHBCq6IHIrIB6cMF/mTCNhLaxwNC10Iyw8epDRiscdyQRffb1bksJJRc4tPlnsa72x75Mz/XNgG3zgi1Gs+3Y5f7PagNC6zSJCL82XHFOPKpQFoekRoUA6dNOyGGA7tT8gCshXKD4BqerfiJA7PZLDysOEqkoxvTsRidGuDqGhwgFU+dN5NxWlBuB3MYr8BLtzzGhgd3TZA6lDgo5b5aS1+rT4MjZGpw9GG8RRK8CUoD9VFHdb/W2897ljdC9a6Ml1JTkNMJHHpXehf4dIRLXmOjooamQUeLxuiN6IuRSx2vJB7iSuotDg1bGAMNxGM0FuIbxK97+BGMCCo+YhssHmiWYAUt+o3FdmgTJ7uI2NYuJVh7EInuFj98oDhIHsUVgz+hhBrRuCucvOGjjl00BuASZtUsTWanV+9ifmLBjna/6740KIWzIo2pN+ieiw1H5WgK4vh4t/vmkyRnuIZarWRbTNe4aS+S8+Z+r8vdGeJf5O60Ia8JW/aXsIUvfWbWkiT5H7Y3h03YYojIqK0f/g+z9hQCM8ycvKbCIrWHgH3Y/yeFixaXS9BjaKvN9yDqgO1+AWqO7gndBgAA</values>
+        <workflow_reference/>
+    </sys_hub_flow_logic_instance_v2>
+    <sys_hub_flow_logic_instance_v2 action="INSERT_OR_UPDATE">
+        <attributes/>
+        <block display_value="">135be8a5a02b03107f44e28050a33bbd</block>
+        <comment/>
+        <connected_to>d1370945-fe2f-4466-83fc-e5cc43a32b53</connected_to>
+        <decision_table/>
+        <display_text/>
+        <flow display_value="Recruiter Interview Evaluation">a35be8a5a02b03107f44e28050a33bdd</flow>
+        <flow_variables_assigned/>
+        <generation_source/>
+        <logic_definition display_value="Else If">666e5545c3e232002841b63b12d3ae99</logic_definition>
+        <order>4</order>
+        <outputs_assigned/>
+        <parent_ui_id/>
+        <sys_class_name>sys_hub_flow_logic_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-25 07:52:26</sys_created_on>
+        <sys_id>b35b2ca5a02b03107f44e28050a33b5b</sys_id>
+        <sys_mod_count>1</sys_mod_count>
+        <sys_scope/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-25 07:52:26</sys_updated_on>
+        <ui_id>55f31cb9-07af-4607-a4dc-979cae15220f</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/+1VXW/TMBT9K8jPUZSkbIK9TZ0mIQ0msbEXmKIb22ktHNv4o12J+t+5jtO0GkUU2CNv9bHvveec3KP2RAdvgnf3+tI5sVDk4vNjRoSKGP7uiWDkgrQFtOVbWtJZdT6riqJ687pszmdNWbEZcKhIRhR0HF9SrZjwQqt6ADKyAhniBf5kwhkJm4c9QpdCMsvHqQYs1nhuyUX/7OpUFhIaLvHpfEfj1c2A/Jqf35iIO2+FWoznm7HL3Q7UlkVWZZER/uS5Yhz5tCAdz0gHioHXdjMhlgO7VXIPLIXySXAHT058x4HV2Vl82HKUSEc3pmM9OpXg9go8IJVAfbCTcVpQ7pI5jLcQpJ8fYunBrYlSU4mHRu6qtQyd+pAcIVODgw8THJLgJiqN1Ecd7d1Srz/uWF4LNbgyXkpNQU4n8OhdE3zk0xMueYeN6g6MQUdrY/VKDMXIpcsXEg95K/Uah8YtzIFG4jkaC/k14lcD/ABWRBXvsQ0WJ5oNOEHrYWOxHdrEyTYjbuPmEpzbi0R3628hUkySR3F18ieWUCuMv8TJKz7q2GanBaA8smAHu9/3nwxK4awucxosuudzy1E5moI4Pt5uv4SimLEJxQX7KTB/2+ZFU1YeS9lx+X8Sreo30Yrf9cRkFUXxP1r/HC3h6hSIUdsw/AWT9RjjkWZOXlPhkNp9xN7t/oHixQaXS9BDaK3t1yhqj21/APCcE2rLBgAA</values>
+        <workflow_reference/>
+    </sys_hub_flow_logic_instance_v2>
+    <sys_hub_flow_logic_instance_v2 action="INSERT_OR_UPDATE">
+        <attributes/>
+        <block display_value="">175be8a5a02b03107f44e28050a33bbf</block>
+        <comment/>
+        <connected_to>d1370945-fe2f-4466-83fc-e5cc43a32b53</connected_to>
+        <decision_table/>
+        <display_text/>
+        <flow display_value="Recruiter Interview Evaluation">a35be8a5a02b03107f44e28050a33bdd</flow>
+        <flow_variables_assigned/>
+        <generation_source/>
+        <logic_definition display_value="Else If">666e5545c3e232002841b63b12d3ae99</logic_definition>
+        <order>6</order>
+        <outputs_assigned/>
+        <parent_ui_id/>
+        <sys_class_name>sys_hub_flow_logic_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-25 07:52:26</sys_created_on>
+        <sys_id>bb5b2ca5a02b03107f44e28050a33b5c</sys_id>
+        <sys_mod_count>1</sys_mod_count>
+        <sys_scope/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-25 07:52:26</sys_updated_on>
+        <ui_id>2686a0f0-08ec-4833-a766-70e58c7fcba0</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/+1VXW/TMBT9K8jPUZSkbIK+TZ0mIQ0msbEXmKIb22ktHNv4o12J+t+5jtO0GkUMbY+81ce+955zco/aEx28Cd7d6QvnxFKR+deHjAgVMfzdE8HInLQFtOV7WtJZdT6riqJ697ZszmdNWbEZcKhIRhR0HF9SrZjwQqt6ADKyBhniBf5kwhkJ2/sDQldCMsvHqQYs1nhuybx/cvVcFhIaLvHpYk/jzfWA/Jmf35qIO2+FWo7n67HL7R7UlkVWZZER/ui5Yhz5tCAdz0gHioHXdjshlgO7UfIArITySXAHj078xIHV2Vl82HKUSEc3pmM9OpXg9hI8IJVAfbCTcVpQ7pI5jLcQpF8cY+nBjYlSU4mHRu6rtQyd+pQcIVODow8THJLgJiqN1Ecd7e1Kbz7vWV4JNbgyXkpNQU4n8OhdE3zk0xMueYeN6g6MQUdrY/VaDMXIpcuXEg95K/UGh8YtzIFG4jkaC/kV4pcDfA9WRBUfsQ0WJ5oNOEHrYWOxHdrEyS4jbusWEpw7iER36x8hUkySR3F18ieWUCuMv8DJaz7q2GXPC0B5YsGOdr/vvxiUwlld5jRYdM/nlqNyNAVxfLzbfQtFMWNK+3q6wSX7LTQvafWqaStPpe20Df8SseovEYvf95kJK4rif8ReHDHh6hSMUdsw/BUT9hBjkmZOXlPhkNpdxD7s/4nixRaXS9BjaKPt9yjqgO1+AXbVNX7TBgAA</values>
+        <workflow_reference/>
+    </sys_hub_flow_logic_instance_v2>
+    <sys_hub_pill_compound action="delete_multiple" query="attached_to=a35be8a5a02b03107f44e28050a33bdd"/>
+    <sys_hub_flow_variable action="delete_multiple" query="model=a35be8a5a02b03107f44e28050a33bdd"/>
+    <sys_documentation action="INSERT_OR_UPDATE">
+        <element>table_name</element>
+        <help/>
+        <hint/>
+        <label>Table Name</label>
+        <language>en</language>
+        <name>var__m_sys_hub_flow_input_a35be8a5a02b03107f44e28050a33bdd</name>
+        <plural/>
+        <sys_class_name>sys_documentation</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-25 07:52:26</sys_created_on>
+        <sys_id>335b2ca5a02b03107f44e28050a33b4f</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name/>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-25 07:52:26</sys_updated_on>
+        <url/>
+        <url_target/>
+    </sys_documentation>
+    <sys_documentation action="INSERT_OR_UPDATE">
+        <element>current</element>
+        <help/>
+        <hint/>
+        <label>Record</label>
+        <language>en</language>
+        <name>var__m_sys_hub_flow_input_a35be8a5a02b03107f44e28050a33bdd</name>
+        <plural/>
+        <sys_class_name>sys_documentation</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-25 07:52:25</sys_created_on>
+        <sys_id>6f5be8a5a02b03107f44e28050a33bfa</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name/>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-25 07:52:25</sys_updated_on>
+        <url/>
+        <url_target/>
+    </sys_documentation>
+    <sys_documentation action="INSERT_OR_UPDATE">
+        <element>changed_fields</element>
+        <help/>
+        <hint/>
+        <label>Changed Fields</label>
+        <language>en</language>
+        <name>var__m_sys_hub_flow_input_a35be8a5a02b03107f44e28050a33bdd</name>
+        <plural/>
+        <sys_class_name>sys_documentation</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-25 07:52:25</sys_created_on>
+        <sys_id>b35b2ca5a02b03107f44e28050a33b44</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name/>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-25 07:52:25</sys_updated_on>
+        <url/>
+        <url_target/>
+    </sys_documentation>
+    <sys_choice action="delete_multiple" query="name=var__m_sys_hub_flow_input_a35be8a5a02b03107f44e28050a33bdd"/>
+    <sys_choice action="delete_multiple" query="name=var__m_sys_hub_flow_output_a35be8a5a02b03107f44e28050a33bdd"/>
+    <sys_hub_flow action="UPDATE">
+        <sys_id>342c90e5a0a703107f44e28050a33b88</sys_id>
+        <latest_snapshot>a35be8a5a02b03107f44e28050a33bdd</latest_snapshot>
+        <compiler_build>glide-australia-02-11-2026__patch3-hotfix1-06-18-2026_06-19-2026_0938.zip</compiler_build>
+        <version_record/>
+    </sys_hub_flow>
+    <sys_flow_trigger_plan action="delete_multiple" query="plan_id=342c90e5a0a703107f44e28050a33b88^sys_idNOT IN886b2ca5a02b03107f44e28050a33b8a"/>
+    <sys_flow_trigger_plan action="INSERT_OR_UPDATE">
+        <binding_strategy>com.snc.process_flow.engine.binding.OncePerRecord</binding_strategy>
+        <plan>{"@class":"com.snc.process_flow.engine.serialization.plan_data.ChunkingPlanData","chunk_data":{"table":"sys_flow_trigger_plan","id":"886b2ca5a02b03107f44e28050a33b8a","name":"plan","plan_signature":null},"plan_data":"CHUNKING_PLAN"}</plan>
+        <plan_id>342c90e5a0a703107f44e28050a33b88</plan_id>
+        <snapshot>e6a434e9a06b03107f44e28050a33b8c</snapshot>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-25 07:52:27</sys_created_on>
+        <sys_domain>global</sys_domain>
+        <sys_domain_path>/</sys_domain_path>
+        <sys_id>886b2ca5a02b03107f44e28050a33b8a</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_overrides/>
+        <sys_scope/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-25 07:52:27</sys_updated_on>
+        <trigger display_value="">406b2ca5a02b03107f44e28050a33b88</trigger>
+    </sys_flow_trigger_plan>
+    <sys_flow_subflow_plan action="delete_multiple" query="plan_id=342c90e5a0a703107f44e28050a33b88"/>
+</record_update>

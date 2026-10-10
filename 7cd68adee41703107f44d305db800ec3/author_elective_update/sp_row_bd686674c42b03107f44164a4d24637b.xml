@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_row">
+    <sp_row action="DELETE">
+        <aria_label/>
+        <class_name/>
+        <order>1</order>
+        <semantic_tag/>
+        <sp_column/>
+        <sp_container display_value=" Campus 360 Recruiter Talent Pool - Container 1">2068eab4c42b03107f44164a4d24630f</sp_container>
+        <sys_class_name>sp_row</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-23 09:03:15</sys_created_on>
+        <sys_id>bd686674c42b03107f44164a4d24637b</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>1</sys_name>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name>sp_row_bd686674c42b03107f44164a4d24637b</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-23 09:03:15</sys_updated_on>
+    </sp_row>
+    <sys_update_version action="INSERT_OR_UPDATE">
+        <action>DELETE</action>
+        <application display_value="Campus360">7cd68adee41703107f44d305db800ec3</application>
+        <file_path/>
+        <instance_id>82d18dc7c38fcf94a03197af0501316c</instance_id>
+        <instance_name>ltm-hck-2876-0027</instance_name>
+        <name>sp_row_bd686674c42b03107f44164a4d24637b</name>
+        <payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_row"><sp_row action="INSERT_OR_UPDATE"><aria_label/><class_name/><order>1</order><semantic_tag/><sp_column/><sp_container display_value=" Campus 360 Recruiter Talent Pool - Container 1">2068eab4c42b03107f44164a4d24630f</sp_container><sys_class_name>sp_row</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-23 09:03:15</sys_created_on><sys_id>bd686674c42b03107f44164a4d24637b</sys_id><sys_mod_count>0</sys_mod_count><sys_name>1</sys_name><sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package><sys_policy/><sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope><sys_update_name>sp_row_bd686674c42b03107f44164a4d24637b</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-23 09:03:15</sys_updated_on></sp_row></record_update>]]></payload>
+        <payload_hash>1991113033</payload_hash>
+        <record_name>1</record_name>
+        <reverted_from/>
+        <source>70d68adee41703107f44d305db800ec8</source>
+        <source_table>sys_update_set</source_table>
+        <state>previous</state>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-23 09:03:16</sys_created_on>
+        <sys_id>ca686674c42b03107f44164a4d24637e</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_recorded_at>1a0cd8144230000001</sys_recorded_at>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-23 09:03:16</sys_updated_on>
+        <type>Row</type>
+        <update_guid>f9686674af2b03106f8a5c942c6cae7d</update_guid>
+        <update_guid_history>f9686674af2b03106f8a5c942c6cae7d:1991113033</update_guid_history>
+    </sys_update_version>
+    <sys_metadata_delete action="INSERT_OR_UPDATE">
+        <sys_audit_delete display_value="1">dda96a78c42b03107f44164a4d246348</sys_audit_delete>
+        <sys_class_name>sys_metadata_delete</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-23 09:08:41</sys_created_on>
+        <sys_db_object display_value="" name="sp_row">sp_row</sys_db_object>
+        <sys_id>2ecb7f80e5d347c7902b61fd7b461ca1</sys_id>
+        <sys_metadata>bd686674c42b03107f44164a4d24637b</sys_metadata>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>1</sys_name>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_parent/>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_scope_delete display_value="">1cde9626740d46978b846077c1615101</sys_scope_delete>
+        <sys_update_name>sp_row_bd686674c42b03107f44164a4d24637b</sys_update_name>
+        <sys_update_version display_value="sp_row_bd686674c42b03107f44164a4d24637b">ca686674c42b03107f44164a4d24637e</sys_update_version>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-23 09:08:41</sys_updated_on>
+    </sys_metadata_delete>
+</record_update>

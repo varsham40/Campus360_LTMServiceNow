@@ -1,0 +1,7037 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_widget">
+    <sp_widget action="INSERT_OR_UPDATE">
+        <category>custom</category>
+        <client_script><![CDATA[api.controller = function($scope, $window, $timeout) {
+
+    var c = this;
+
+
+    /* ============================================================
+       STATE
+       ============================================================ */
+
+    c.sidebarCollapsed = false;
+
+    c.searchText = "";
+
+    c.globalSearch = "";
+
+    c.filters = {
+
+        branch: "",
+
+        batch: "",
+
+        placement: ""
+
+    };
+
+    c.filteredStudents = [];
+
+    c.selectedStudent = null;
+
+
+    /* ============================================================
+       INITIALIZE
+       ============================================================ */
+
+    c.initialize = function() {
+
+        c.filteredStudents =
+            angular.copy(
+                c.data.students || []
+            );
+
+        c.applyFilters();
+
+    };
+
+
+    /* ============================================================
+       SIDEBAR TOGGLE
+       ============================================================ */
+
+    c.toggleSidebar = function() {
+
+        c.sidebarCollapsed =
+            !c.sidebarCollapsed;
+
+    };
+
+
+    /* ============================================================
+       REFRESH
+       ============================================================ */
+
+    c.refresh = function() {
+
+        $window.location.reload();
+
+    };
+
+
+    /* ============================================================
+       FILTER STUDENTS
+       ============================================================ */
+
+    c.applyFilters = function() {
+
+        var search =
+            String(
+                c.searchText || ""
+            )
+            .toLowerCase()
+            .trim();
+
+
+        c.filteredStudents =
+            (c.data.students || [])
+            .filter(
+                function(student) {
+
+                    var matchesSearch = true;
+
+                    var matchesBranch = true;
+
+                    var matchesBatch = true;
+
+                    var matchesPlacement = true;
+
+
+                    /* SEARCH */
+
+                    if (search) {
+
+                        var searchableText = [
+
+                            student.name,
+
+                            student.student_id,
+
+                            student.email,
+
+                            student.phone_number,
+
+                            student.branch,
+
+                            student.degree,
+
+                            student.batch,
+
+                            student.placement_status
+
+                        ]
+                        .join(" ")
+                        .toLowerCase();
+
+
+                        matchesSearch =
+                            searchableText.indexOf(
+                                search
+                            ) !== -1;
+
+                    }
+
+
+                    /* BRANCH */
+
+                    if (c.filters.branch) {
+
+                        matchesBranch =
+                            student.branch ===
+                            c.filters.branch;
+
+                    }
+
+
+                    /* BATCH */
+
+                    if (c.filters.batch) {
+
+                        matchesBatch =
+                            student.batch ===
+                            c.filters.batch;
+
+                    }
+
+
+                    /* PLACEMENT */
+
+                    if (c.filters.placement) {
+
+                        matchesPlacement =
+                            student.placement_status ===
+                            c.filters.placement;
+
+                    }
+
+
+                    return (
+
+                        matchesSearch &&
+
+                        matchesBranch &&
+
+                        matchesBatch &&
+
+                        matchesPlacement
+
+                    );
+
+                }
+            );
+
+    };
+
+
+    /* ============================================================
+       CLEAR FILTERS
+       ============================================================ */
+
+    c.clearFilters = function() {
+
+        c.searchText = "";
+
+        c.globalSearch = "";
+
+        c.filters = {
+
+            branch: "",
+
+            batch: "",
+
+            placement: ""
+
+        };
+
+        c.applyFilters();
+
+    };
+
+
+    /* ============================================================
+       OPEN STUDENT PROFILE
+       ============================================================ */
+
+    c.openStudent = function(student) {
+
+        if (!student) {
+
+            return;
+
+        }
+
+
+        c.selectedStudent = student;
+
+    };
+
+
+    /* ============================================================
+       CLOSE STUDENT PROFILE
+       ============================================================ */
+
+    c.closeStudent = function() {
+
+        c.selectedStudent = null;
+
+    };
+
+
+    /* ============================================================
+       PLACEMENT STATUS CLASS
+       ============================================================ */
+
+    c.getPlacementClass = function(status) {
+
+        switch (status) {
+
+            case "Placed":
+
+                return "status-placed";
+
+
+            case "Eligible":
+
+                return "status-eligible";
+
+
+            case "In Process":
+
+                return "status-process";
+
+
+            case "Higher Studies":
+
+                return "status-higher";
+
+
+            case "Opted Out":
+
+                return "status-opted";
+
+
+            case "Not Placed":
+
+            default:
+
+                return "status-not-placed";
+
+        }
+
+    };
+
+
+    /* ============================================================
+       BACKLOG CLASS
+       ============================================================ */
+
+    c.getBacklogClass = function(backlogs) {
+
+        var value =
+            parseInt(
+                backlogs || 0,
+                10
+            );
+
+
+        if (
+            !isNaN(value) &&
+            value > 0
+        ) {
+
+            return "has-backlogs";
+
+        }
+
+
+        return "no-backlogs";
+
+    };
+
+
+    /* ============================================================
+       CGPA
+       ============================================================ */
+
+    c.formatCGPA = function(value) {
+
+        if (
+            value === null ||
+            value === undefined ||
+            value === ""
+        ) {
+
+            return "—";
+
+        }
+
+
+        var number =
+            parseFloat(value);
+
+
+        if (isNaN(number)) {
+
+            return "—";
+
+        }
+
+
+        return number.toFixed(2);
+
+    };
+
+
+    /* ============================================================
+       SKILL PROGRESS
+       ============================================================ */
+
+    c.skillWidth = function(score) {
+
+        var value =
+            parseInt(
+                score || 0,
+                10
+            );
+
+
+        if (isNaN(value)) {
+
+            value = 0;
+
+        }
+
+
+        if (value < 0) {
+
+            value = 0;
+
+        }
+
+
+        if (value > 100) {
+
+            value = 100;
+
+        }
+
+
+        return value + "%";
+
+    };
+
+
+    /* ============================================================
+       RISK CLASS
+       ============================================================ */
+
+    c.getRiskClass = function(risk) {
+
+        var value =
+            String(
+                risk || ""
+            )
+            .toLowerCase();
+
+
+        if (
+            value.indexOf("high") !== -1
+        ) {
+
+            return "risk-high";
+
+        }
+
+
+        if (
+            value.indexOf("medium") !== -1
+        ) {
+
+            return "risk-medium";
+
+        }
+
+
+        return "";
+
+    };
+
+
+    /* ============================================================
+       GLOBAL SEARCH
+       ============================================================ */
+
+    $scope.$watch(
+        function() {
+
+            return c.globalSearch;
+
+        },
+
+        function(newValue, oldValue) {
+
+            if (
+                newValue === oldValue
+            ) {
+
+                return;
+
+            }
+
+
+            c.searchText =
+                newValue || "";
+
+
+            c.applyFilters();
+
+        }
+    );
+
+
+    /* ============================================================
+       ESCAPE CLOSE PROFILE
+       ============================================================ */
+
+    angular.element(document).on(
+        "keydown.campus360StudentManagement",
+
+        function(event) {
+
+            if (
+                event.key === "Escape" &&
+                c.selectedStudent
+            ) {
+
+                $scope.$applyAsync(
+                    function() {
+
+                        c.closeStudent();
+
+                    }
+                );
+
+            }
+
+        }
+    );
+
+
+    /* ============================================================
+       CLEANUP
+       ============================================================ */
+
+    $scope.$on(
+        "$destroy",
+
+        function() {
+
+            try {
+
+                angular.element(document).off(
+                    "keydown.campus360StudentManagement"
+                );
+
+            } catch (e) {}
+
+        }
+    );
+
+
+    /* ============================================================
+       START
+       ============================================================ */
+
+    c.initialize();
+
+
+    c.goTo = function(pageId) {
+        if (!pageId) return;
+        var map = {
+            'dashboard': 'campus360_tpo_home',
+            'home': 'campus360_tpo_home',
+            'campus360_tpo_home': 'campus360_tpo_home',
+            'students': 'campus360_tpo_student_management',
+            'student_management': 'campus360_tpo_student_management',
+            'campus360_tpo_student_management': 'campus360_tpo_student_management',
+            'skills': 'campus360_tpo_skill_intelligence_new',
+            'skill_intelligence': 'campus360_tpo_skill_intelligence_new',
+            'campus360_tpo_skill_intelligence': 'campus360_tpo_skill_intelligence_new',
+            'campus360_tpo_skill_intelligence_new': 'campus360_tpo_skill_intelligence_new',
+            'assessments': 'student_assessments_new',
+            'student_assessments': 'student_assessments_new',
+            'student_assessments_new': 'student_assessments_new',
+            'companies': 'campus360_tpo_companies_new',
+            'campus360_tpo_companies': 'campus360_tpo_companies_new',
+            'campus360_tpo_companies_new': 'campus360_tpo_companies_new',
+            'opportunities': 'campus360_tpo_opportunities_new',
+            'campus360_tpo_opportunities': 'campus360_tpo_opportunities_new',
+            'campus360_tpo_opportunities_new': 'campus360_tpo_opportunities_new',
+            'applications': 'campus360_tpo_application_new',
+            'application': 'campus360_tpo_application_new',
+            'campus360_tpo_application': 'campus360_tpo_application_new',
+            'campus360_tpo_application_new': 'campus360_tpo_application_new',
+            'interviews': 'campus360_tpo_interviews_new',
+            'campus360_tpo_interviews': 'campus360_tpo_interviews_new',
+            'campus360_tpo_interviews_new': 'campus360_tpo_interviews_new',
+            'outcomes': 'campus360_tpo_placement_outcomes',
+            'placement_outcomes': 'campus360_tpo_placement_outcomes',
+            'campus360_tpo_placement_outcomes': 'campus360_tpo_placement_outcomes',
+            'training': 'campus360_tpo_training_programs',
+            'training_programs': 'campus360_tpo_training_programs',
+            'campus360_tpo_training_programs': 'campus360_tpo_training_programs',
+            'enrollments': 'campus360_tpo_training_programs',
+            'campus360_tpo_enrollments': 'campus360_tpo_training_programs',
+            'mock_interviews': 'campus360_tpo_interviews_new',
+            'campus360_tpo_mock_interviews': 'campus360_tpo_interviews_new',
+            'risk': 'campus360_tpo_student_management',
+            'campus360_tpo_risk_intelligence': 'campus360_tpo_student_management',
+            'interventions': 'campus360_tpo_student_management',
+            'campus360_tpo_interventions': 'campus360_tpo_student_management',
+            'readiness': 'campus360_tpo_skill_intelligence_new',
+            'ai_assistant': 'campus360_tpo_ai_assistant',
+            'campus360_tpo_ai_assistant': 'campus360_tpo_ai_assistant'
+        };
+        var target = map[pageId] || pageId;
+        if (typeof $window !== 'undefined' && $window.location) {
+            $window.location.href = '?id=' + encodeURIComponent(target);
+        } else {
+            window.location.href = '?id=' + encodeURIComponent(target);
+        }
+    };
+    c.goToPage = function(pageId) { c.goTo(pageId); };
+    c.navigate = function(pageId) { c.goTo(pageId); };
+
+};]]></client_script>
+        <controller_as>c</controller_as>
+        <css>
+/* ==========================================================================
+   ULTIMATE FULLSCREEN EDGE-TO-EDGE RESET (HIDES SERVICENOW TOP BANNER)
+   ========================================================================== */
+
+/* HIDE SERVICENOW PORTAL HEADER FOR ALL TPO PAGE ROOT CONTAINERS */
+body:has(.campus360-company-app) #sp-header,
+body:has(.campus360-company-app) .sp-header,
+body:has(.campus360-company-app) .sp-navbar,
+body:has(.campus360-company-app) #sp-nav-bar,
+body:has(.campus360-company-app) .sp-nav-bar,
+body:has(.campus360-company-app) header#sp-header,
+body:has(.campus360-company-app) header.sp-header,
+body:has(.campus360-company-app) header.navbar,
+body:has(.campus360-company-app) nav.navbar,
+body:has(.campus360-company-app) .navbar.sp-navbar,
+body:has(.campus360-company-app) .navbar.navbar-default,
+body:has(.campus360-company-app) .navbar.navbar-inverse,
+body:has(.campus360-company-page) #sp-header,
+body:has(.campus360-company-page) .sp-header,
+body:has(.campus360-company-page) .sp-navbar,
+body:has(.campus360-company-page) #sp-nav-bar,
+body:has(.campus360-company-page) .sp-nav-bar,
+body:has(.campus360-company-page) header#sp-header,
+body:has(.campus360-company-page) header.sp-header,
+body:has(.campus360-company-page) header.navbar,
+body:has(.campus360-company-page) nav.navbar,
+body:has(.campus360-company-page) .navbar.sp-navbar,
+body:has(.campus360-company-page) .navbar.navbar-default,
+body:has(.campus360-company-page) .navbar.navbar-inverse,
+body:has(.campus360-interviews-app) #sp-header,
+body:has(.campus360-interviews-app) .sp-header,
+body:has(.campus360-interviews-app) .sp-navbar,
+body:has(.campus360-interviews-app) #sp-nav-bar,
+body:has(.campus360-interviews-app) .sp-nav-bar,
+body:has(.campus360-interviews-app) header#sp-header,
+body:has(.campus360-interviews-app) header.sp-header,
+body:has(.campus360-interviews-app) header.navbar,
+body:has(.campus360-interviews-app) nav.navbar,
+body:has(.campus360-interviews-app) .navbar.sp-navbar,
+body:has(.campus360-interviews-app) .navbar.navbar-default,
+body:has(.campus360-interviews-app) .navbar.navbar-inverse,
+body:has(.campus360-interviews-page) #sp-header,
+body:has(.campus360-interviews-page) .sp-header,
+body:has(.campus360-interviews-page) .sp-navbar,
+body:has(.campus360-interviews-page) #sp-nav-bar,
+body:has(.campus360-interviews-page) .sp-nav-bar,
+body:has(.campus360-interviews-page) header#sp-header,
+body:has(.campus360-interviews-page) header.sp-header,
+body:has(.campus360-interviews-page) header.navbar,
+body:has(.campus360-interviews-page) nav.navbar,
+body:has(.campus360-interviews-page) .navbar.sp-navbar,
+body:has(.campus360-interviews-page) .navbar.navbar-default,
+body:has(.campus360-interviews-page) .navbar.navbar-inverse,
+body:has(.c360-page) #sp-header,
+body:has(.c360-page) .sp-header,
+body:has(.c360-page) .sp-navbar,
+body:has(.c360-page) #sp-nav-bar,
+body:has(.c360-page) .sp-nav-bar,
+body:has(.c360-page) header#sp-header,
+body:has(.c360-page) header.sp-header,
+body:has(.c360-page) header.navbar,
+body:has(.c360-page) nav.navbar,
+body:has(.c360-page) .navbar.sp-navbar,
+body:has(.c360-page) .navbar.navbar-default,
+body:has(.c360-page) .navbar.navbar-inverse,
+body:has(.campus360-tpo-app) #sp-header,
+body:has(.campus360-tpo-app) .sp-header,
+body:has(.campus360-tpo-app) .sp-navbar,
+body:has(.campus360-tpo-app) #sp-nav-bar,
+body:has(.campus360-tpo-app) .sp-nav-bar,
+body:has(.campus360-tpo-app) header#sp-header,
+body:has(.campus360-tpo-app) header.sp-header,
+body:has(.campus360-tpo-app) header.navbar,
+body:has(.campus360-tpo-app) nav.navbar,
+body:has(.campus360-tpo-app) .navbar.sp-navbar,
+body:has(.campus360-tpo-app) .navbar.navbar-default,
+body:has(.campus360-tpo-app) .navbar.navbar-inverse,
+body:has(.campus360-tpo-layout) #sp-header,
+body:has(.campus360-tpo-layout) .sp-header,
+body:has(.campus360-tpo-layout) .sp-navbar,
+body:has(.campus360-tpo-layout) #sp-nav-bar,
+body:has(.campus360-tpo-layout) .sp-nav-bar,
+body:has(.campus360-tpo-layout) header#sp-header,
+body:has(.campus360-tpo-layout) header.sp-header,
+body:has(.campus360-tpo-layout) header.navbar,
+body:has(.campus360-tpo-layout) nav.navbar,
+body:has(.campus360-tpo-layout) .navbar.sp-navbar,
+body:has(.campus360-tpo-layout) .navbar.navbar-default,
+body:has(.campus360-tpo-layout) .navbar.navbar-inverse,
+body:has([class*="campus360"]) #sp-header,
+body:has([class*="campus360"]) .sp-header,
+body:has([class*="campus360"]) .sp-navbar,
+body:has([class*="campus360"]) #sp-nav-bar,
+body:has([class*="campus360"]) .sp-nav-bar,
+body:has([class*="campus360"]) header#sp-header,
+body:has([class*="campus360"]) header.sp-header,
+body:has([class*="campus360"]) header.navbar,
+body:has([class*="campus360"]) nav.navbar,
+body:has([class*="campus360"]) .navbar.sp-navbar,
+body:has([class*="campus360"]) .navbar.navbar-default,
+body:has([class*="campus360"]) .navbar.navbar-inverse {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  min-height: 0 !important;
+  max-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+}
+
+/* ZERO MARGIN &amp; PADDING ON SERVICENOW PAGE CONTAINERS WHEN ANY TPO WIDGET PRESENT */
+body:has([class*="campus360"]) .page,
+body:has([class*="campus360"]) #sp-page,
+body:has([class*="campus360"]) #sp-main,
+body:has([class*="campus360"]) .sp-page,
+body:has([class*="campus360"]) .sp-main,
+body:has([class*="campus360"]) .page-wrapper,
+body:has([class*="campus360"]) .main-content,
+body:has([class*="campus360"]) .container,
+body:has([class*="campus360"]) .container-fluid,
+body:has([class*="campus360"]) .row,
+body:has(.c360-page) .page,
+body:has(.c360-page) #sp-page,
+body:has(.c360-page) #sp-main,
+body:has(.c360-page) .sp-page,
+body:has(.c360-page) .sp-main,
+body:has(.c360-page) .page-wrapper,
+body:has(.c360-page) .main-content,
+body:has(.c360-page) .container,
+body:has(.c360-page) .container-fluid,
+body:has(.c360-page) .row {
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+}
+
+
+
+/* ==========================================================================
+   SIDEBAR USER PROFILE CARD - BRIGHT WHITE TEXT FIX (CRITICAL)
+   ========================================================================== */
+
+.tpo-sidebar .sidebar-user,
+.tpo-sidebar .tpo-profile,
+.tpo-sidebar .tpo-profile-card,
+.sidebar-user,
+.tpo-profile-card {
+  margin: 14px 12px 8px !important;
+  padding: 10px 12px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  border: 1px solid #35285b !important;
+  border-radius: 14px !important;
+  background: linear-gradient(145deg, #1c1340, #21174a) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+}
+
+.tpo-sidebar .user-avatar,
+.tpo-sidebar .tpo-avatar,
+.tpo-sidebar .tpo-profile-avatar,
+.sidebar-user .user-avatar,
+.tpo-profile-card .tpo-profile-avatar {
+  width: 40px !important;
+  height: 40px !important;
+  min-width: 40px !important;
+  border-radius: 50% !important;
+  background: linear-gradient(135deg, #7540f4, #944ff5) !important;
+  color: #ffffff !important;
+  font-size: 11px !important;
+  font-weight: 950 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-shadow: 0 4px 12px rgba(117, 64, 244, 0.4) !important;
+}
+
+.tpo-sidebar .user-info,
+.tpo-sidebar .tpo-profile-text,
+.tpo-sidebar .tpo-profile-info,
+.sidebar-user .user-info,
+.tpo-profile-card .tpo-profile-info {
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+}
+
+.tpo-sidebar .user-name,
+.tpo-sidebar .sidebar-user strong,
+.tpo-sidebar .tpo-profile-info strong,
+.tpo-sidebar .tpo-profile-text strong,
+.sidebar-user .user-name,
+.sidebar-user strong,
+.tpo-profile-card strong {
+  font-size: 13px !important;
+  font-weight: 800 !important;
+  color: #ffffff !important; /* CRITICAL BRIGHT WHITE COLOR */
+}
+
+.tpo-sidebar .user-role,
+.tpo-sidebar .user-dept,
+.tpo-sidebar .tpo-role,
+.tpo-sidebar .sidebar-user span,
+.tpo-sidebar .tpo-profile-info span,
+.tpo-sidebar .tpo-profile-text span,
+.sidebar-user .user-role,
+.sidebar-user span,
+.tpo-profile-card span {
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  color: #bcaeff !important; /* LIGHT LAVENDER PURPLE COLOR */
+}
+
+/* SCOPE TOPBAR USER PROFILE EXCLUSIVELY TO TOPBAR */
+.topbar-user .topbar-user-info strong,
+.topbar-user-info strong {
+  font-size: 13px !important;
+  font-weight: 800 !important;
+  color: #0f172a !important;
+}
+
+.topbar-user .topbar-user-info span,
+.topbar-user-info span {
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  color: #64748b !important;
+}
+
+
+
+/* ==========================================================================
+   STUDENT MANAGEMENT FULLSCREEN EDGE-TO-EDGE &amp; PURPLE SIDEBAR THEME
+   ========================================================================== */
+
+/* 1. HIDE SERVICENOW TOP HEADER / NAVBAR COMPLETELY FOR FULL SCREEN */
+body #sp-header,
+body .sp-header,
+body .sp-navbar,
+body .navbar.sp-navbar,
+body #sp-nav-bar,
+body .sp-nav-bar,
+body header#sp-header,
+body header.sp-header,
+body .nav.navbar-nav,
+#sp-header,
+.sp-header,
+.sp-navbar,
+header#sp-header {
+  display: none !important;
+  height: 0 !important;
+  visibility: hidden !important;
+  overflow: hidden !important;
+}
+
+html, body, #sp-page, .sp-page-container, #page_content, .page, main {
+  width: 100% !important;
+  height: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  background-color: #f8fafc !important;
+}
+
+/* 2. LAYOUT WRAPPER */
+.campus360-tpo-app,
+.campus360-tpo-layout,
+.tpo-layout,
+.tpo-container {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  z-index: 9999 !important;
+  overflow: hidden !important;
+  display: flex !important;
+  background: #f8fafc !important;
+}
+
+/* 3. DARK PURPLE SIDEBAR THEME (EXACT MATCHING ASSESSMENTS PAGE) */
+.campus360-sidebar,
+.tpo-sidebar,
+.skill-sidebar,
+aside.campus360-sidebar,
+aside.tpo-sidebar {
+  width: 242px !important;
+  min-width: 242px !important;
+  max-width: 242px !important;
+  height: 100vh !important;
+  flex: 0 0 242px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  position: relative !important;
+  overflow-y: auto !important;
+  background: linear-gradient(180deg, #10092a 0%, #130d31 55%, #0d0822 100%) !important;
+  border-right: 1px solid #2b2247 !important;
+  color: #ffffff !important;
+  z-index: 100 !important;
+  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.25) !important;
+}
+
+/* HIDE ALL SCROLLBARS ON SIDEBAR */
+.campus360-sidebar,
+.campus360-sidebar *,
+.tpo-sidebar,
+.tpo-sidebar *,
+.sidebar-navigation,
+.tpo-sidebar-nav {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+.campus360-sidebar::-webkit-scrollbar,
+.campus360-sidebar *::-webkit-scrollbar,
+.tpo-sidebar::-webkit-scrollbar,
+.sidebar-navigation::-webkit-scrollbar,
+.tpo-sidebar-nav::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+/* BRAND HEADER IN SIDEBAR */
+.sidebar-brand,
+.tpo-brand {
+  height: 84px !important;
+  min-height: 84px !important;
+  padding: 0 18px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 13px !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+  background: transparent !important;
+}
+
+.brand-logo,
+.tpo-brand-logo {
+  width: 44px !important;
+  height: 44px !important;
+  min-width: 44px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 12px !important;
+  background: linear-gradient(135deg, #723fff, #8c4cf2) !important;
+  color: #ffffff !important;
+  font-size: 20px !important;
+  font-weight: 950 !important;
+  box-shadow: 0 8px 20px rgba(106, 57, 235, 0.3) !important;
+}
+
+.brand-title,
+.tpo-brand-text strong {
+  color: #ffffff !important;
+  font-size: 17px !important;
+  font-weight: 900 !important;
+  line-height: 1.1 !important;
+}
+
+.brand-subtitle,
+.brand-sub,
+.tpo-brand-text span {
+  margin-top: 3px !important;
+  color: #bcaeff !important;
+  font-size: 9px !important;
+  font-weight: 850 !important;
+  letter-spacing: 0.8px !important;
+}
+
+/* PROFILE CARD IN SIDEBAR */
+.tpo-profile,
+.sidebar-user,
+.tpo-profile-card {
+  margin: 14px 12px 8px !important;
+  min-height: 68px !important;
+  padding: 10px 12px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  border: 1px solid #35285b !important;
+  border-radius: 14px !important;
+  background: linear-gradient(145deg, #1c1340, #21174a) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+}
+
+.tpo-avatar,
+.user-avatar,
+.tpo-profile-avatar {
+  width: 40px !important;
+  height: 40px !important;
+  min-width: 40px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 50% !important;
+  background: linear-gradient(135deg, #7540f4, #944ff5) !important;
+  color: #ffffff !important;
+  font-size: 11px !important;
+  font-weight: 950 !important;
+  box-shadow: 0 4px 12px rgba(117, 64, 244, 0.4) !important;
+}
+
+.tpo-profile-text strong,
+.user-name,
+.tpo-profile-info strong {
+  font-size: 13px !important;
+  font-weight: 800 !important;
+  color: #ffffff !important;
+}
+
+.tpo-role,
+.tpo-profile-text span,
+.user-role,
+.tpo-profile-info span {
+  font-size: 10px !important;
+  color: #bcaeff !important;
+  font-weight: 700 !important;
+}
+
+/* SIDEBAR NAVIGATION ITEMS */
+.sidebar-navigation,
+.sidebar-nav,
+.tpo-sidebar-nav {
+  flex: 1 !important;
+  min-height: 0 !important;
+  overflow-y: auto !important;
+  padding: 6px 10px 12px !important;
+}
+
+.nav-group-title,
+.nav-section-title,
+.tpo-nav-label {
+  font-size: 9px !important;
+  font-weight: 850 !important;
+  color: #83769d !important;
+  letter-spacing: 0.8px !important;
+  padding: 12px 10px 4px !important;
+  text-transform: uppercase !important;
+}
+
+.nav-link,
+.nav-item,
+.tpo-nav-item {
+  width: 100% !important;
+  min-height: 40px !important;
+  margin: 2px 0 !important;
+  padding: 8px 12px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 11px !important;
+  border: 0 !important;
+  border-radius: 10px !important;
+  background: transparent !important;
+  color: #e6e0f1 !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  text-align: left !important;
+  cursor: pointer !important;
+  transition: background 0.16s ease, color 0.16s ease !important;
+  text-decoration: none !important;
+  box-sizing: border-box !important;
+}
+
+.nav-link:hover,
+.nav-item:hover,
+.tpo-nav-item:hover {
+  background: #211743 !important;
+  color: #ffffff !important;
+}
+
+.nav-link.active,
+.nav-item.active,
+.tpo-nav-item.active {
+  background: linear-gradient(135deg, #793bef, #8b48f2) !important;
+  color: #ffffff !important;
+  box-shadow: 0 8px 18px rgba(103, 50, 224, 0.35) !important;
+}
+
+.nav-link-icon,
+.nav-icon,
+.tpo-nav-icon {
+  font-size: 14px !important;
+  width: 18px !important;
+  text-align: center !important;
+  color: inherit !important;
+}
+
+.nav-link-text,
+.nav-label {
+  color: inherit !important;
+}
+
+.nav-count,
+.nav-badge,
+.tpo-nav-count {
+  margin-left: auto !important;
+  min-width: 22px !important;
+  height: 20px !important;
+  padding: 0 7px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 999px !important;
+  background: rgba(255, 255, 255, 0.18) !important;
+  color: #ffffff !important;
+  font-size: 10px !important;
+  font-weight: 900 !important;
+}
+
+.nav-count.purple,
+.nav-badge.purple {
+  background: rgba(139, 92, 246, 0.35) !important;
+  color: #e0d7ff !important;
+}
+
+/* 4. MAIN CONTENT WRAPPER &amp; FAR-RIGHT SCROLLBAR */
+.campus360-main,
+.tpo-main-wrapper,
+.tpo-main,
+.main-content,
+.tpo-content {
+  flex: 1 1 auto !important;
+  height: 100vh !important;
+  max-height: 100vh !important;
+  overflow-y: scroll !important;
+  overflow-x: hidden !important;
+  background-color: #f8fafc !important;
+  min-width: 0 !important;
+  position: relative !important;
+}
+
+.campus360-main::-webkit-scrollbar,
+.tpo-main-wrapper::-webkit-scrollbar,
+.tpo-main::-webkit-scrollbar,
+.main-content::-webkit-scrollbar,
+.tpo-content::-webkit-scrollbar {
+  width: 10px !important;
+  display: block !important;
+}
+
+.campus360-main::-webkit-scrollbar-track,
+.tpo-main-wrapper::-webkit-scrollbar-track,
+.tpo-main::-webkit-scrollbar-track,
+.main-content::-webkit-scrollbar-track,
+.tpo-content::-webkit-scrollbar-track {
+  background: #f1f5f9 !important;
+  border-left: 1px solid #e2e8f0 !important;
+}
+
+.campus360-main::-webkit-scrollbar-thumb,
+.tpo-main-wrapper::-webkit-scrollbar-thumb,
+.tpo-main::-webkit-scrollbar-thumb,
+.main-content::-webkit-scrollbar-thumb,
+.tpo-content::-webkit-scrollbar-thumb {
+  background: #7c3aed !important;
+  border-radius: 5px !important;
+}
+
+.campus360-main::-webkit-scrollbar-thumb:hover,
+.tpo-main-wrapper::-webkit-scrollbar-thumb:hover,
+.tpo-main::-webkit-scrollbar-thumb:hover,
+.main-content::-webkit-scrollbar-thumb:hover,
+.tpo-content::-webkit-scrollbar-thumb:hover {
+  background: #6d28d9 !important;
+}
+
+
+
+/* =========================================================
+   CAMPUS360 TPO FULL SCREEN EDGE-TO-EDGE RESET
+   ========================================================= */
+
+body #sp-header,
+body .sp-header,
+body .sp-navbar,
+body .navbar.sp-navbar,
+body #sp-nav-bar,
+body .sp-nav-bar,
+body header#sp-header,
+body header.sp-header,
+body .nav.navbar-nav {
+    display: none !important;
+}
+
+html, body {
+    width: 100% !important;
+    height: 100% !important;
+    min-width: 100% !important;
+    min-height: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    background: #f8fafc !important;
+}
+
+body .page,
+body #sp-page,
+body #sp-main,
+body .sp-page,
+body .sp-main,
+body main,
+body .container,
+body .container-fluid,
+body .row,
+body [class*="col-"] {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    border: none !important;
+}
+
+/* ================================================================&#13;
+   CAMPUS360 TPO STUDENT MANAGEMENT&#13;
+   CONTAINER-SAFE VERSION FOR SERVICENOW WIDGET&#13;
+   ================================================================ */&#13;
+&#13;
+&#13;
+/* ================================================================&#13;
+   ROOT&#13;
+   ================================================================ */&#13;
+&#13;
+.campus360-tpo-app {&#13;
+    position: relative;&#13;
+&#13;
+    width: 100%;&#13;
+    min-height: 760px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    background: #f5f7fb;&#13;
+&#13;
+    color: #172033;&#13;
+&#13;
+    font-family:&#13;
+        Inter,&#13;
+        -apple-system,&#13;
+        BlinkMacSystemFont,&#13;
+        "Segoe UI",&#13;
+        Arial,&#13;
+        sans-serif;&#13;
+&#13;
+    box-sizing: border-box;&#13;
+&#13;
+    overflow: hidden;&#13;
+}&#13;
+&#13;
+&#13;
+.campus360-tpo-app *,&#13;
+.campus360-tpo-app *::before,&#13;
+.campus360-tpo-app *::after {&#13;
+    box-sizing: border-box;&#13;
+}&#13;
+&#13;
+&#13;
+/* ================================================================&#13;
+   SIDEBAR&#13;
+   ================================================================ */&#13;
+&#13;
+.campus360-sidebar {&#13;
+    position: relative;&#13;
+&#13;
+    width: 250px;&#13;
+    min-width: 250px;&#13;
+&#13;
+    height: 100%;&#13;
+&#13;
+    min-height: 760px;&#13;
+&#13;
+    background: #f4f0ff;&#13;
+&#13;
+    border-right: 1px solid #ded7ee;&#13;
+&#13;
+    display: flex;&#13;
+    flex-direction: column;&#13;
+&#13;
+    overflow: hidden;&#13;
+&#13;
+    z-index: 20;&#13;
+&#13;
+    transition:&#13;
+        width .25s ease,&#13;
+        min-width .25s ease,&#13;
+        transform .25s ease;&#13;
+}&#13;
+&#13;
+&#13;
+/* ================================================================&#13;
+   SIDEBAR COLLAPSED&#13;
+   ================================================================ */&#13;
+&#13;
+.campus360-sidebar-collapsed .campus360-sidebar {&#13;
+    width: 0;&#13;
+&#13;
+    min-width: 0;&#13;
+&#13;
+    border-right: 0;&#13;
+&#13;
+    transform: translateX(-1px);&#13;
+}&#13;
+&#13;
+&#13;
+.campus360-sidebar-collapsed .campus360-sidebar &gt; * {&#13;
+    opacity: 0;&#13;
+&#13;
+    pointer-events: none;&#13;
+}&#13;
+&#13;
+&#13;
+/* ================================================================&#13;
+   BRAND&#13;
+   ================================================================ */&#13;
+&#13;
+.sidebar-brand {&#13;
+    height: 90px;&#13;
+    min-height: 90px;&#13;
+&#13;
+    padding: 0 17px;&#13;
+&#13;
+    border-bottom: 1px solid #ded7ee;&#13;
+&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 12px;&#13;
+&#13;
+    white-space: nowrap;&#13;
+}&#13;
+&#13;
+&#13;
+.brand-logo {&#13;
+    width: 45px;&#13;
+    height: 45px;&#13;
+&#13;
+    min-width: 45px;&#13;
+&#13;
+    border-radius: 13px;&#13;
+&#13;
+    background:&#13;
+        linear-gradient(&#13;
+            135deg,&#13;
+            #7444e7,&#13;
+            #6331d4&#13;
+        );&#13;
+&#13;
+    color: #ffffff;&#13;
+&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+&#13;
+    font-size: 26px;&#13;
+&#13;
+    font-weight: 900;&#13;
+&#13;
+    box-shadow:&#13;
+        0 8px 20px rgba(102, 62, 215, .24);&#13;
+}&#13;
+&#13;
+&#13;
+.brand-title-wrap {&#13;
+    display: flex;&#13;
+    flex-direction: column;&#13;
+}&#13;
+&#13;
+&#13;
+.brand-title {&#13;
+    color: #172033;&#13;
+&#13;
+    font-size: 18px;&#13;
+&#13;
+    font-weight: 900;&#13;
+}&#13;
+&#13;
+&#13;
+.brand-subtitle {&#13;
+    margin-top: 3px;&#13;
+&#13;
+    color: #77758a;&#13;
+&#13;
+    font-size: 10px;&#13;
+}&#13;
+&#13;
+&#13;
+/* ================================================================&#13;
+   TPO PROFILE&#13;
+   ================================================================ */&#13;
+&#13;
+.tpo-profile {&#13;
+    margin: 15px 10px 7px;&#13;
+&#13;
+    min-height: 88px;&#13;
+&#13;
+    padding: 13px 12px;&#13;
+&#13;
+    border: 1px solid #d9d0ed;&#13;
+&#13;
+    border-radius: 14px;&#13;
+&#13;
+    background: #ffffff;&#13;
+&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 11px;&#13;
+}&#13;
+&#13;
+&#13;
+.tpo-avatar {&#13;
+    width: 45px;&#13;
+    height: 45px;&#13;
+&#13;
+    min-width: 45px;&#13;
+&#13;
+    border-radius: 50%;&#13;
+&#13;
+    background: #7441df;&#13;
+&#13;
+    color: #ffffff;&#13;
+&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+&#13;
+    font-size: 12px;&#13;
+&#13;
+    font-weight: 900;&#13;
+}&#13;
+&#13;
+&#13;
+.tpo-profile-text {&#13;
+    min-width: 0;&#13;
+&#13;
+    display: flex;&#13;
+    flex-direction: column;&#13;
+}&#13;
+&#13;
+&#13;
+.tpo-profile-text strong {&#13;
+    color: #182033;&#13;
+&#13;
+    font-size: 13px;&#13;
+&#13;
+    font-weight: 900;&#13;
+}&#13;
+&#13;
+&#13;
+.tpo-profile-text .tpo-role {&#13;
+    margin-top: 2px;&#13;
+&#13;
+    color: #6940d5;&#13;
+&#13;
+    font-size: 10px;&#13;
+&#13;
+    font-weight: 900;&#13;
+}&#13;
+&#13;
+&#13;
+.tpo-profile-text span:last-child {&#13;
+    margin-top: 3px;&#13;
+&#13;
+    color: #9291a1;&#13;
+&#13;
+    font-size: 7px;&#13;
+&#13;
+    white-space: nowrap;&#13;
+}&#13;
+&#13;
+&#13;
+/* ================================================================&#13;
+   NAVIGATION&#13;
+   ================================================================ */&#13;
+&#13;
+.sidebar-navigation {&#13;
+    flex: 1;&#13;
+&#13;
+    padding: 4px 9px 25px;&#13;
+&#13;
+    overflow-y: auto;&#13;
+}&#13;
+&#13;
+&#13;
+.nav-group-title {&#13;
+    margin: 14px 13px 7px;&#13;
+&#13;
+    color: #756c91;&#13;
+&#13;
+    font-size: 8px;&#13;
+&#13;
+    font-weight: 900;&#13;
+&#13;
+    letter-spacing: 1.4px;&#13;
+}&#13;
+&#13;
+&#13;
+.nav-link {&#13;
+    min-height: 37px;&#13;
+&#13;
+    padding: 7px 10px;&#13;
+&#13;
+    margin: 2px 0;&#13;
+&#13;
+    border-radius: 10px;&#13;
+&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 9px;&#13;
+&#13;
+    color: #4f5362;&#13;
+&#13;
+    text-decoration: none !important;&#13;
+&#13;
+    transition:&#13;
+        background .16s ease,&#13;
+        color .16s ease;&#13;
+}&#13;
+&#13;
+&#13;
+.nav-link:hover {&#13;
+    background: #ebe3ff;&#13;
+&#13;
+    color: #653dd7;&#13;
+}&#13;
+&#13;
+&#13;
+.nav-link.active {&#13;
+    background: #dfccff;&#13;
+&#13;
+    color: #5f35cf;&#13;
+&#13;
+    font-weight: 800;&#13;
+}&#13;
+&#13;
+&#13;
+.nav-link-icon {&#13;
+    width: 22px;&#13;
+    height: 22px;&#13;
+&#13;
+    min-width: 22px;&#13;
+&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+&#13;
+    color: #636979;&#13;
+}&#13;
+&#13;
+&#13;
+.nav-link.active .nav-link-icon {&#13;
+    color: #653dd7;&#13;
+}&#13;
+&#13;
+&#13;
+.nav-link-text {&#13;
+    flex: 1;&#13;
+&#13;
+    font-size: 10px;&#13;
+&#13;
+    font-weight: 600;&#13;
+&#13;
+    white-space: nowrap;&#13;
+}&#13;
+&#13;
+&#13;
+.nav-count {&#13;
+    min-width: 21px;&#13;
+    height: 21px;&#13;
+&#13;
+    padding: 0 6px;&#13;
+&#13;
+    border-radius: 50%;&#13;
+&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+&#13;
+    font-size: 8px;&#13;
+&#13;
+    font-weight: 900;&#13;
+}&#13;
+&#13;
+&#13;
+.nav-count.purple {&#13;
+    background: #e5d4ff;&#13;
+&#13;
+    color: #7540d7;&#13;
+}&#13;
+&#13;
+&#13;
+.nav-count.green {&#13;
+    background: #d8f6e4;&#13;
+&#13;
+    color: #22965c;&#13;
+}&#13;
+&#13;
+&#13;
+.nav-count.red {&#13;
+    background: #ffe0e3;&#13;
+&#13;
+    color: #dc5360;&#13;
+}&#13;
+&#13;
+&#13;
+.ai-link {&#13;
+    margin-top: 3px;&#13;
+&#13;
+    background: rgba(231, 218, 255, .42);&#13;
+}&#13;
+&#13;
+&#13;
+.ai-link .nav-link-icon {&#13;
+    color: #7540db;&#13;
+}&#13;
+&#13;
+&#13;
+/* ================================================================&#13;
+   MAIN&#13;
+   ================================================================ */&#13;
+&#13;
+.campus360-main {&#13;
+    flex: 1;&#13;
+&#13;
+    min-width: 0;&#13;
+&#13;
+    min-height: 760px;&#13;
+&#13;
+    display: flex;&#13;
+    flex-direction: column;&#13;
+&#13;
+    background: #f5f7fb;&#13;
+&#13;
+    transition:&#13;
+        width .25s ease,&#13;
+        flex .25s ease;&#13;
+}&#13;
+&#13;
+&#13;
+/* ================================================================&#13;
+   TOP BAR&#13;
+   ================================================================ */&#13;
+&#13;
+.campus360-topbar {&#13;
+    position: relative;&#13;
+&#13;
+    min-height: 76px;&#13;
+&#13;
+    padding: 0 24px;&#13;
+&#13;
+    background: #ffffff;&#13;
+&#13;
+    border-bottom: 1px solid #e3e6ec;&#13;
+&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    justify-content: space-between;&#13;
+&#13;
+    gap: 20px;&#13;
+&#13;
+    z-index: 10;&#13;
+}&#13;
+&#13;
+&#13;
+.topbar-left {&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 15px;&#13;
+&#13;
+    min-width: 0;&#13;
+}&#13;
+&#13;
+&#13;
+.menu-button {&#13;
+    width: 42px;&#13;
+    height: 42px;&#13;
+&#13;
+    min-width: 42px;&#13;
+&#13;
+    border: 1px solid #e0e3ea;&#13;
+&#13;
+    border-radius: 10px;&#13;
+&#13;
+    background: #ffffff;&#13;
+&#13;
+    color: #555f70;&#13;
+&#13;
+    cursor: pointer;&#13;
+&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+&#13;
+    transition:&#13;
+        background .15s ease,&#13;
+        color .15s ease;&#13;
+}&#13;
+&#13;
+&#13;
+.menu-button:hover {&#13;
+    background: #f1edff;&#13;
+&#13;
+    color: #653dd7;&#13;
+&#13;
+    border-color: #d7cdf1;&#13;
+}&#13;
+&#13;
+&#13;
+.page-heading {&#13;
+    display: flex;&#13;
+    flex-direction: column;&#13;
+}&#13;
+&#13;
+&#13;
+.page-heading span {&#13;
+    color: #7445d9;&#13;
+&#13;
+    font-size: 8px;&#13;
+&#13;
+    font-weight: 900;&#13;
+&#13;
+    letter-spacing: 1.6px;&#13;
+}&#13;
+&#13;
+&#13;
+.page-heading strong {&#13;
+    margin-top: 3px;&#13;
+&#13;
+    color: #182033;&#13;
+&#13;
+    font-size: 16px;&#13;
+&#13;
+    font-weight: 900;&#13;
+}&#13;
+&#13;
+&#13;
+.topbar-right {&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 10px;&#13;
+&#13;
+    min-width: 0;&#13;
+}&#13;
+&#13;
+&#13;
+.topbar-search {&#13;
+    width: 250px;&#13;
+    height: 40px;&#13;
+&#13;
+    border: 1px solid #dfe3e9;&#13;
+&#13;
+    border-radius: 10px;&#13;
+&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+&#13;
+    padding: 0 12px;&#13;
+&#13;
+    gap: 8px;&#13;
+}&#13;
+&#13;
+&#13;
+.topbar-search i {&#13;
+    color: #6941d5;&#13;
+}&#13;
+&#13;
+&#13;
+.topbar-search input {&#13;
+    width: 100%;&#13;
+&#13;
+    border: 0 !important;&#13;
+&#13;
+    outline: 0 !important;&#13;
+&#13;
+    background: transparent !important;&#13;
+&#13;
+    box-shadow: none !important;&#13;
+&#13;
+    font-size: 10px;&#13;
+}&#13;
+&#13;
+&#13;
+.topbar-icon-button {&#13;
+    width: 40px;&#13;
+    height: 40px;&#13;
+&#13;
+    min-width: 40px;&#13;
+&#13;
+    border: 1px solid #e0e3e9;&#13;
+&#13;
+    border-radius: 50%;&#13;
+&#13;
+    background: #ffffff;&#13;
+&#13;
+    color: #667083;&#13;
+&#13;
+    cursor: pointer;&#13;
+&#13;
+    position: relative;&#13;
+}&#13;
+&#13;
+&#13;
+.notification-button span {&#13;
+    position: absolute;&#13;
+&#13;
+    width: 7px;&#13;
+    height: 7px;&#13;
+&#13;
+    top: 7px;&#13;
+    right: 7px;&#13;
+&#13;
+    background: #ed5667;&#13;
+&#13;
+    border: 1px solid #ffffff;&#13;
+&#13;
+    border-radius: 50%;&#13;
+}&#13;
+&#13;
+&#13;
+.topbar-user {&#13;
+    min-width: 125px;&#13;
+&#13;
+    padding-left: 10px;&#13;
+&#13;
+    border-left: 1px solid #e5e7ec;&#13;
+&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 8px;&#13;
+}&#13;
+&#13;
+&#13;
+.topbar-user-avatar {&#13;
+    width: 36px;&#13;
+    height: 36px;&#13;
+&#13;
+    min-width: 36px;&#13;
+&#13;
+    border-radius: 50%;&#13;
+&#13;
+    background: #7441df;&#13;
+&#13;
+    color: #ffffff;&#13;
+&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+&#13;
+    font-size: 9px;&#13;
+&#13;
+    font-weight: 900;&#13;
+}&#13;
+&#13;
+&#13;
+.topbar-user-text {&#13;
+    display: flex;&#13;
+    flex-direction: column;&#13;
+}&#13;
+&#13;
+&#13;
+.topbar-user-text strong {&#13;
+    font-size: 9px;&#13;
+&#13;
+    color: #273044;&#13;
+}&#13;
+&#13;
+&#13;
+.topbar-user-text span {&#13;
+    margin-top: 2px;&#13;
+&#13;
+    color: #7f8796;&#13;
+&#13;
+    font-size: 8px;&#13;
+}&#13;
+&#13;
+&#13;
+/* ================================================================&#13;
+   CONTENT&#13;
+   ================================================================ */&#13;
+&#13;
+.campus360-content {&#13;
+    flex: 1;&#13;
+&#13;
+    min-width: 0;&#13;
+&#13;
+    overflow: auto;&#13;
+&#13;
+    padding: 26px 28px 40px;&#13;
+}&#13;
+&#13;
+&#13;
+/* ================================================================&#13;
+   ERROR&#13;
+   ================================================================ */&#13;
+&#13;
+.campus360-error {&#13;
+    margin-bottom: 20px;&#13;
+&#13;
+    padding: 15px;&#13;
+&#13;
+    border: 1px solid #fecaca;&#13;
+&#13;
+    border-radius: 12px;&#13;
+&#13;
+    background: #fff5f5;&#13;
+&#13;
+    color: #991b1b;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    gap: 10px;&#13;
+}&#13;
+&#13;
+&#13;
+.campus360-error p {&#13;
+    margin: 3px 0 0;&#13;
+&#13;
+    font-size: 10px;&#13;
+}&#13;
+&#13;
+&#13;
+/* ================================================================&#13;
+   PAGE HEADER&#13;
+   ================================================================ */&#13;
+&#13;
+.student-page-header {&#13;
+    margin-bottom: 22px;&#13;
+&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    justify-content: space-between;&#13;
+&#13;
+    gap: 20px;&#13;
+}&#13;
+&#13;
+&#13;
+.page-eyebrow {&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 7px;&#13;
+&#13;
+    color: #7042d8;&#13;
+&#13;
+    font-size: 9px;&#13;
+&#13;
+    font-weight: 900;&#13;
+&#13;
+    letter-spacing: 1.3px;&#13;
+}&#13;
+&#13;
+&#13;
+.page-eyebrow span {&#13;
+    width: 8px;&#13;
+    height: 8px;&#13;
+&#13;
+    border-radius: 50%;&#13;
+&#13;
+    background: #7140dc;&#13;
+}&#13;
+&#13;
+&#13;
+.student-page-header h1 {&#13;
+    margin: 7px 0 5px;&#13;
+&#13;
+    color: #172033;&#13;
+&#13;
+    font-size: 30px;&#13;
+&#13;
+    font-weight: 900;&#13;
+}&#13;
+&#13;
+&#13;
+.student-page-header p {&#13;
+    margin: 0;&#13;
+&#13;
+    color: #788398;&#13;
+&#13;
+    font-size: 11px;&#13;
+}&#13;
+&#13;
+&#13;
+.refresh-data-button {&#13;
+    height: 42px;&#13;
+&#13;
+    padding: 0 15px;&#13;
+&#13;
+    border: 1px solid #d7cff1;&#13;
+&#13;
+    border-radius: 10px;&#13;
+&#13;
+    background: #ffffff;&#13;
+&#13;
+    color: #6740d4;&#13;
+&#13;
+    font-size: 10px;&#13;
+&#13;
+    font-weight: 800;&#13;
+&#13;
+    cursor: pointer;&#13;
+}&#13;
+&#13;
+&#13;
+/* ================================================================&#13;
+   STAT CARDS&#13;
+   ================================================================ */&#13;
+&#13;
+.student-stat-grid {&#13;
+    display: grid;&#13;
+&#13;
+    grid-template-columns:&#13;
+        repeat(4, minmax(0, 1fr));&#13;
+&#13;
+    gap: 15px;&#13;
+&#13;
+    margin-bottom: 22px;&#13;
+}&#13;
+&#13;
+&#13;
+.student-stat-card {&#13;
+    min-height: 142px;&#13;
+&#13;
+    padding: 20px;&#13;
+&#13;
+    border-radius: 17px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 15px;&#13;
+}&#13;
+&#13;
+&#13;
+.total-card {&#13;
+    background: #eee6ff;&#13;
+&#13;
+    border: 1px solid #d8c8ff;&#13;
+}&#13;
+&#13;
+&#13;
+.ready-card {&#13;
+    background: #e2f0ff;&#13;
+&#13;
+    border: 1px solid #c7e1ff;&#13;
+}&#13;
+&#13;
+&#13;
+.placed-card {&#13;
+    background: #ddf6e8;&#13;
+&#13;
+    border: 1px solid #c4ecd5;&#13;
+}&#13;
+&#13;
+&#13;
+.not-placed-card {&#13;
+    background: #fff0d9;&#13;
+&#13;
+    border: 1px solid #f3dbb7;&#13;
+}&#13;
+&#13;
+&#13;
+.stat-card-icon {&#13;
+    width: 53px;&#13;
+    height: 53px;&#13;
+&#13;
+    min-width: 53px;&#13;
+&#13;
+    border-radius: 14px;&#13;
+&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+&#13;
+    font-size: 19px;&#13;
+}&#13;
+&#13;
+&#13;
+.total-card .stat-card-icon {&#13;
+    background: #d8c4ff;&#13;
+&#13;
+    color: #6635d4;&#13;
+}&#13;
+&#13;
+&#13;
+.ready-card .stat-card-icon {&#13;
+    background: #c6e3ff;&#13;
+&#13;
+    color: #2c82d0;&#13;
+}&#13;
+&#13;
+&#13;
+.placed-card .stat-card-icon {&#13;
+    background: #c2ebd3;&#13;
+&#13;
+    color: #16864f;&#13;
+}&#13;
+&#13;
+&#13;
+.not-placed-card .stat-card-icon {&#13;
+    background: #ffe0b0;&#13;
+&#13;
+    color: #d77c14;&#13;
+}&#13;
+&#13;
+&#13;
+.stat-card-content {&#13;
+    display: flex;&#13;
+    flex-direction: column;&#13;
+}&#13;
+&#13;
+&#13;
+.stat-card-content span {&#13;
+    color: #596377;&#13;
+&#13;
+    font-size: 9px;&#13;
+&#13;
+    font-weight: 900;&#13;
+&#13;
+    letter-spacing: 1px;&#13;
+}&#13;
+&#13;
+&#13;
+.stat-card-content strong {&#13;
+    margin-top: 6px;&#13;
+&#13;
+    color: #172033;&#13;
+&#13;
+    font-size: 31px;&#13;
+&#13;
+    line-height: 1;&#13;
+&#13;
+    font-weight: 950;&#13;
+}&#13;
+&#13;
+&#13;
+.stat-card-content small {&#13;
+    margin-top: 7px;&#13;
+&#13;
+    color: #707b8f;&#13;
+&#13;
+    font-size: 9px;&#13;
+&#13;
+    font-weight: 600;&#13;
+}&#13;
+&#13;
+&#13;
+/* ================================================================&#13;
+   TOOLBAR&#13;
+   ================================================================ */&#13;
+&#13;
+.directory-toolbar {&#13;
+    padding: 15px 18px;&#13;
+&#13;
+    margin-bottom: 15px;&#13;
+&#13;
+    border: 1px solid #e1e5eb;&#13;
+&#13;
+    border-radius: 14px;&#13;
+&#13;
+    background: #ffffff;&#13;
+&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    justify-content: space-between;&#13;
+&#13;
+    gap: 15px;&#13;
+}&#13;
+&#13;
+&#13;
+.directory-toolbar-title {&#13;
+    display: flex;&#13;
+    align-items: baseline;&#13;
+&#13;
+    gap: 5px;&#13;
+&#13;
+    white-space: nowrap;&#13;
+}&#13;
+&#13;
+&#13;
+.directory-toolbar-title &gt; span {&#13;
+    color: #6f46d4;&#13;
+&#13;
+    font-size: 8px;&#13;
+&#13;
+    font-weight: 900;&#13;
+&#13;
+    letter-spacing: 1px;&#13;
+}&#13;
+&#13;
+&#13;
+.directory-toolbar-title strong {&#13;
+    margin-left: 4px;&#13;
+&#13;
+    color: #182033;&#13;
+&#13;
+    font-size: 18px;&#13;
+&#13;
+    font-weight: 900;&#13;
+}&#13;
+&#13;
+&#13;
+.directory-toolbar-title em {&#13;
+    color: #8b94a5;&#13;
+&#13;
+    font-size: 9px;&#13;
+&#13;
+    font-style: normal;&#13;
+}&#13;
+&#13;
+&#13;
+.directory-toolbar-controls {&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 8px;&#13;
+&#13;
+    min-width: 0;&#13;
+}&#13;
+&#13;
+&#13;
+.directory-search {&#13;
+    width: 260px;&#13;
+    height: 38px;&#13;
+&#13;
+    border: 1px solid #dfe3e9;&#13;
+&#13;
+    border-radius: 9px;&#13;
+&#13;
+    padding: 0 10px;&#13;
+&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 7px;&#13;
+}&#13;
+&#13;
+&#13;
+.directory-search i {&#13;
+    color: #6b42d5;&#13;
+}&#13;
+&#13;
+&#13;
+.directory-search input {&#13;
+    width: 100%;&#13;
+&#13;
+    border: 0 !important;&#13;
+&#13;
+    outline: 0 !important;&#13;
+&#13;
+    background: transparent !important;&#13;
+&#13;
+    box-shadow: none !important;&#13;
+&#13;
+    font-size: 9px;&#13;
+}&#13;
+&#13;
+&#13;
+.directory-toolbar-controls select {&#13;
+    height: 38px;&#13;
+&#13;
+    min-width: 115px;&#13;
+&#13;
+    border: 1px solid #dfe3e9 !important;&#13;
+&#13;
+    border-radius: 9px;&#13;
+&#13;
+    background: #ffffff !important;&#13;
+&#13;
+    color: #525d70;&#13;
+&#13;
+    font-size: 9px;&#13;
+&#13;
+    padding: 0 9px;&#13;
+&#13;
+    outline: 0 !important;&#13;
+}&#13;
+&#13;
+&#13;
+.clear-button {&#13;
+    height: 38px;&#13;
+&#13;
+    padding: 0 11px;&#13;
+&#13;
+    border: 1px solid #dfe3e9;&#13;
+&#13;
+    border-radius: 9px;&#13;
+&#13;
+    background: #ffffff;&#13;
+&#13;
+    color: #737e90;&#13;
+&#13;
+    font-size: 9px;&#13;
+&#13;
+    cursor: pointer;&#13;
+}&#13;
+&#13;
+&#13;
+/* ================================================================&#13;
+   DIRECTORY&#13;
+   ================================================================ */&#13;
+&#13;
+.student-directory {&#13;
+    border: 1px solid #e0e4ea;&#13;
+&#13;
+    border-radius: 16px;&#13;
+&#13;
+    background: #ffffff;&#13;
+&#13;
+    overflow: hidden;&#13;
+}&#13;
+&#13;
+&#13;
+.directory-heading {&#13;
+    min-height: 68px;&#13;
+&#13;
+    padding: 15px 20px;&#13;
+&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    justify-content: space-between;&#13;
+&#13;
+    border-bottom: 1px solid #edf0f4;&#13;
+}&#13;
+&#13;
+&#13;
+.directory-heading &gt; div:first-child span {&#13;
+    color: #7043d5;&#13;
+&#13;
+    font-size: 8px;&#13;
+&#13;
+    font-weight: 900;&#13;
+&#13;
+    letter-spacing: 1px;&#13;
+}&#13;
+&#13;
+&#13;
+.directory-heading h2 {&#13;
+    margin: 3px 0 0;&#13;
+&#13;
+    color: #182033;&#13;
+&#13;
+    font-size: 18px;&#13;
+&#13;
+    font-weight: 900;&#13;
+}&#13;
+&#13;
+&#13;
+.directory-record-count {&#13;
+    color: #7f8999;&#13;
+&#13;
+    font-size: 9px;&#13;
+}&#13;
+&#13;
+&#13;
+.student-table-wrap {&#13;
+    width: 100%;&#13;
+&#13;
+    overflow-x: auto;&#13;
+}&#13;
+&#13;
+&#13;
+.student-table {&#13;
+    width: 100%;&#13;
+&#13;
+    min-width: 850px;&#13;
+&#13;
+    border-collapse: collapse;&#13;
+}&#13;
+&#13;
+&#13;
+.student-table th {&#13;
+    height: 45px;&#13;
+&#13;
+    padding: 0 17px;&#13;
+&#13;
+    background: #fafbfc;&#13;
+&#13;
+    border-bottom: 1px solid #e8ebef;&#13;
+&#13;
+    color: #7c8698;&#13;
+&#13;
+    text-align: left;&#13;
+&#13;
+    font-size: 8px;&#13;
+&#13;
+    font-weight: 900;&#13;
+&#13;
+    letter-spacing: .9px;&#13;
+}&#13;
+&#13;
+&#13;
+.student-table td {&#13;
+    padding: 15px 17px;&#13;
+&#13;
+    border-bottom: 1px solid #edf0f3;&#13;
+&#13;
+    vertical-align: middle;&#13;
+}&#13;
+&#13;
+&#13;
+.student-table tbody tr {&#13;
+    transition: background .15s ease;&#13;
+}&#13;
+&#13;
+&#13;
+.student-table tbody tr:hover {&#13;
+    background: #fbfaff;&#13;
+}&#13;
+&#13;
+&#13;
+.student-table tbody tr:last-child td {&#13;
+    border-bottom: 0;&#13;
+}&#13;
+&#13;
+&#13;
+/* ================================================================&#13;
+   STUDENT&#13;
+   ================================================================ */&#13;
+&#13;
+.directory-student {&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 11px;&#13;
+}&#13;
+&#13;
+&#13;
+.directory-avatar {&#13;
+    width: 40px;&#13;
+    height: 40px;&#13;
+&#13;
+    min-width: 40px;&#13;
+&#13;
+    border-radius: 11px;&#13;
+&#13;
+    color: #ffffff;&#13;
+&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+&#13;
+    font-size: 10px;&#13;
+&#13;
+    font-weight: 900;&#13;
+}&#13;
+&#13;
+&#13;
+.avatar-0 {&#13;
+    background: #7042dc;&#13;
+}&#13;
+&#13;
+&#13;
+.avatar-1 {&#13;
+    background: #348bd4;&#13;
+}&#13;
+&#13;
+&#13;
+.avatar-2 {&#13;
+    background: #24a16a;&#13;
+}&#13;
+&#13;
+&#13;
+.avatar-3 {&#13;
+    background: #e58d28;&#13;
+}&#13;
+&#13;
+&#13;
+.avatar-4 {&#13;
+    background: #d45a83;&#13;
+}&#13;
+&#13;
+&#13;
+.directory-student-text {&#13;
+    display: flex;&#13;
+    flex-direction: column;&#13;
+}&#13;
+&#13;
+&#13;
+.directory-student-text strong {&#13;
+    color: #202a3c;&#13;
+&#13;
+    font-size: 11px;&#13;
+&#13;
+    font-weight: 850;&#13;
+}&#13;
+&#13;
+&#13;
+.directory-student-text span {&#13;
+    margin-top: 3px;&#13;
+&#13;
+    color: #8c96a6;&#13;
+&#13;
+    font-size: 8px;&#13;
+}&#13;
+&#13;
+&#13;
+/* ================================================================&#13;
+   BRANCH&#13;
+   ================================================================ */&#13;
+&#13;
+.branch-cell {&#13;
+    display: flex;&#13;
+    flex-direction: column;&#13;
+}&#13;
+&#13;
+&#13;
+.branch-cell strong {&#13;
+    color: #3d4658;&#13;
+&#13;
+    font-size: 10px;&#13;
+&#13;
+    font-weight: 800;&#13;
+}&#13;
+&#13;
+&#13;
+.branch-cell span {&#13;
+    margin-top: 3px;&#13;
+&#13;
+    color: #8b95a5;&#13;
+&#13;
+    font-size: 8px;&#13;
+}&#13;
+&#13;
+&#13;
+/* ================================================================&#13;
+   APPLICATION&#13;
+   ================================================================ */&#13;
+&#13;
+.application-cell {&#13;
+    display: flex;&#13;
+    flex-direction: column;&#13;
+}&#13;
+&#13;
+&#13;
+.application-cell strong {&#13;
+    color: #202a3c;&#13;
+&#13;
+    font-size: 15px;&#13;
+&#13;
+    font-weight: 900;&#13;
+}&#13;
+&#13;
+&#13;
+.application-cell span {&#13;
+    margin-top: 2px;&#13;
+&#13;
+    color: #8c96a6;&#13;
+&#13;
+    font-size: 8px;&#13;
+}&#13;
+&#13;
+&#13;
+/* ================================================================&#13;
+   PLACEMENT&#13;
+   ================================================================ */&#13;
+&#13;
+.placement-pill {&#13;
+    display: inline-flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    min-height: 26px;&#13;
+&#13;
+    padding: 0 9px;&#13;
+&#13;
+    border-radius: 20px;&#13;
+&#13;
+    font-size: 8px;&#13;
+&#13;
+    font-weight: 900;&#13;
+&#13;
+    white-space: nowrap;&#13;
+}&#13;
+&#13;
+&#13;
+.status-not-placed {&#13;
+    background: #fff0d8;&#13;
+&#13;
+    color: #c87817;&#13;
+}&#13;
+&#13;
+&#13;
+.status-eligible {&#13;
+    background: #e0efff;&#13;
+&#13;
+    color: #267ac5;&#13;
+}&#13;
+&#13;
+&#13;
+.status-process {&#13;
+    background: #eee5ff;&#13;
+&#13;
+    color: #6842d4;&#13;
+}&#13;
+&#13;
+&#13;
+.status-placed {&#13;
+    background: #daf5e5;&#13;
+&#13;
+    color: #178750;&#13;
+}&#13;
+&#13;
+&#13;
+.status-higher {&#13;
+    background: #e7ebf0;&#13;
+&#13;
+    color: #5c6777;&#13;
+}&#13;
+&#13;
+&#13;
+.status-opted {&#13;
+    background: #f4e3e3;&#13;
+&#13;
+    color: #995050;&#13;
+}&#13;
+&#13;
+&#13;
+/* ================================================================&#13;
+   ACADEMICS&#13;
+   ================================================================ */&#13;
+&#13;
+.academic-cell {&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 13px;&#13;
+}&#13;
+&#13;
+&#13;
+.academic-cell &gt; div {&#13;
+    display: flex;&#13;
+    flex-direction: column;&#13;
+}&#13;
+&#13;
+&#13;
+.academic-cell strong {&#13;
+    color: #202a3c;&#13;
+&#13;
+    font-size: 13px;&#13;
+&#13;
+    font-weight: 900;&#13;
+}&#13;
+&#13;
+&#13;
+.academic-cell span {&#13;
+    margin-top: 2px;&#13;
+&#13;
+    color: #8c96a6;&#13;
+&#13;
+    font-size: 7px;&#13;
+}&#13;
+&#13;
+&#13;
+.academic-backlog.no-backlogs strong {&#13;
+    color: #22985c;&#13;
+}&#13;
+&#13;
+&#13;
+.academic-backlog.has-backlogs strong {&#13;
+    color: #d84e5b;&#13;
+}&#13;
+&#13;
+&#13;
+/* ================================================================&#13;
+   VIEW&#13;
+   ================================================================ */&#13;
+&#13;
+.view-student-button {&#13;
+    height: 33px;&#13;
+&#13;
+    padding: 0 11px;&#13;
+&#13;
+    border: 1px solid #d7cff0;&#13;
+&#13;
+    border-radius: 8px;&#13;
+&#13;
+    background: #faf8ff;&#13;
+&#13;
+    color: #6740d4;&#13;
+&#13;
+    font-size: 9px;&#13;
+&#13;
+    font-weight: 850;&#13;
+&#13;
+    cursor: pointer;&#13;
+&#13;
+    white-space: nowrap;&#13;
+}&#13;
+&#13;
+&#13;
+.view-student-button:hover {&#13;
+    background: #eee7ff;&#13;
+&#13;
+    border-color: #c6b8eb;&#13;
+}&#13;
+&#13;
+&#13;
+.view-student-button i {&#13;
+    margin-left: 5px;&#13;
+&#13;
+    font-size: 8px;&#13;
+}&#13;
+&#13;
+&#13;
+/* ================================================================&#13;
+   EMPTY&#13;
+   ================================================================ */&#13;
+&#13;
+.empty-directory {&#13;
+    padding: 60px 20px;&#13;
+&#13;
+    text-align: center;&#13;
+}&#13;
+&#13;
+&#13;
+.empty-directory &gt; i {&#13;
+    color: #7650d9;&#13;
+&#13;
+    font-size: 30px;&#13;
+}&#13;
+&#13;
+&#13;
+.empty-directory h3 {&#13;
+    margin: 10px 0 5px;&#13;
+&#13;
+    color: #283247;&#13;
+&#13;
+    font-size: 16px;&#13;
+}&#13;
+&#13;
+&#13;
+.empty-directory p {&#13;
+    margin: 0 0 15px;&#13;
+&#13;
+    color: #8993a4;&#13;
+&#13;
+    font-size: 10px;&#13;
+}&#13;
+&#13;
+&#13;
+.empty-directory button {&#13;
+    height: 34px;&#13;
+&#13;
+    padding: 0 12px;&#13;
+&#13;
+    border: 1px solid #d6cef0;&#13;
+&#13;
+    border-radius: 8px;&#13;
+&#13;
+    background: #faf8ff;&#13;
+&#13;
+    color: #6740d4;&#13;
+&#13;
+    font-size: 9px;&#13;
+}&#13;
+&#13;
+&#13;
+/* ================================================================&#13;
+   PROFILE OVERLAY&#13;
+   IMPORTANT:&#13;
+   NOT position: fixed&#13;
+   It stays INSIDE the widget.&#13;
+   ================================================================ */&#13;
+&#13;
+.student-profile-overlay {&#13;
+    position: absolute;&#13;
+&#13;
+    inset: 0;&#13;
+&#13;
+    z-index: 100;&#13;
+&#13;
+    padding: 20px;&#13;
+&#13;
+    background: rgba(17, 24, 39, .45);&#13;
+&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+&#13;
+    overflow: auto;&#13;
+}&#13;
+&#13;
+&#13;
+.student-profile-panel {&#13;
+    position: relative;&#13;
+&#13;
+    width: min(1000px, 100%);&#13;
+&#13;
+    max-height: calc(100% - 20px);&#13;
+&#13;
+    border-radius: 20px;&#13;
+&#13;
+    background: #f7f8fb;&#13;
+&#13;
+    overflow: hidden;&#13;
+&#13;
+    box-shadow:&#13;
+        0 25px 80px rgba(15, 23, 42, .28);&#13;
+&#13;
+    display: flex;&#13;
+    flex-direction: column;&#13;
+}&#13;
+&#13;
+&#13;
+/* ================================================================&#13;
+   PROFILE HEADER&#13;
+   ================================================================ */&#13;
+&#13;
+.profile-panel-header {&#13;
+    min-height: 105px;&#13;
+&#13;
+    padding: 20px 24px;&#13;
+&#13;
+    background: #ffffff;&#13;
+&#13;
+    border-bottom: 1px solid #e5e8ed;&#13;
+&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    justify-content: space-between;&#13;
+}&#13;
+&#13;
+&#13;
+.profile-header-left {&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 14px;&#13;
+}&#13;
+&#13;
+&#13;
+.profile-main-avatar {&#13;
+    width: 62px;&#13;
+    height: 62px;&#13;
+&#13;
+    min-width: 62px;&#13;
+&#13;
+    border-radius: 17px;&#13;
+&#13;
+    background:&#13;
+        linear-gradient(&#13;
+            135deg,&#13;
+            #7442df,&#13;
+            #5e35c9&#13;
+        );&#13;
+&#13;
+    color: #ffffff;&#13;
+&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+&#13;
+    font-size: 16px;&#13;
+&#13;
+    font-weight: 900;&#13;
+}&#13;
+&#13;
+&#13;
+.profile-main-info {&#13;
+    display: flex;&#13;
+    flex-direction: column;&#13;
+}&#13;
+&#13;
+&#13;
+.profile-main-info &gt; span {&#13;
+    color: #7144d5;&#13;
+&#13;
+    font-size: 8px;&#13;
+&#13;
+    font-weight: 900;&#13;
+&#13;
+    letter-spacing: 1.1px;&#13;
+}&#13;
+&#13;
+&#13;
+.profile-main-info h2 {&#13;
+    margin: 4px 0 3px;&#13;
+&#13;
+    color: #172033;&#13;
+&#13;
+    font-size: 21px;&#13;
+&#13;
+    font-weight: 900;&#13;
+}&#13;
+&#13;
+&#13;
+.profile-main-info p {&#13;
+    margin: 0;&#13;
+&#13;
+    color: #818b9c;&#13;
+&#13;
+    font-size: 9px;&#13;
+}&#13;
+&#13;
+&#13;
+.profile-close-button {&#13;
+    width: 37px;&#13;
+    height: 37px;&#13;
+&#13;
+    min-width: 37px;&#13;
+&#13;
+    border: 1px solid #dfe3e8;&#13;
+&#13;
+    border-radius: 9px;&#13;
+&#13;
+    background: #ffffff;&#13;
+&#13;
+    color: #687385;&#13;
+&#13;
+    cursor: pointer;&#13;
+}&#13;
+&#13;
+&#13;
+/* ================================================================&#13;
+   PROFILE BODY&#13;
+   ================================================================ */&#13;
+&#13;
+.profile-panel-body {&#13;
+    padding: 20px 23px 25px;&#13;
+&#13;
+    overflow-y: auto;&#13;
+}&#13;
+&#13;
+&#13;
+/* ================================================================&#13;
+   PROFILE SUMMARY&#13;
+   ================================================================ */&#13;
+&#13;
+.profile-summary-grid {&#13;
+    display: grid;&#13;
+&#13;
+    grid-template-columns:&#13;
+        repeat(4, minmax(0, 1fr));&#13;
+&#13;
+    gap: 12px;&#13;
+&#13;
+    margin-bottom: 16px;&#13;
+}&#13;
+&#13;
+&#13;
+.profile-summary-card {&#13;
+    min-height: 83px;&#13;
+&#13;
+    padding: 14px;&#13;
+&#13;
+    border-radius: 13px;&#13;
+&#13;
+    display: flex;&#13;
+    flex-direction: column;&#13;
+}&#13;
+&#13;
+&#13;
+.profile-summary-card span {&#13;
+    color: #667184;&#13;
+&#13;
+    font-size: 8px;&#13;
+&#13;
+    font-weight: 900;&#13;
+&#13;
+    letter-spacing: .7px;&#13;
+}&#13;
+&#13;
+&#13;
+.profile-summary-card strong {&#13;
+    margin-top: 8px;&#13;
+&#13;
+    color: #182033;&#13;
+&#13;
+    font-size: 20px;&#13;
+&#13;
+    font-weight: 950;&#13;
+}&#13;
+&#13;
+&#13;
+.purple-summary {&#13;
+    background: #eee6ff;&#13;
+}&#13;
+&#13;
+&#13;
+.blue-summary {&#13;
+    background: #e1efff;&#13;
+}&#13;
+&#13;
+&#13;
+.green-summary {&#13;
+    background: #ddf5e8;&#13;
+}&#13;
+&#13;
+&#13;
+.orange-summary {&#13;
+    background: #fff0d9;&#13;
+}&#13;
+&#13;
+&#13;
+/* ================================================================&#13;
+   TWO COLUMN&#13;
+   ================================================================ */&#13;
+&#13;
+.profile-two-column {&#13;
+    display: grid;&#13;
+&#13;
+    grid-template-columns:&#13;
+        repeat(2, minmax(0, 1fr));&#13;
+&#13;
+    gap: 15px;&#13;
+}&#13;
+&#13;
+&#13;
+.profile-section {&#13;
+    margin-bottom: 15px;&#13;
+&#13;
+    padding: 18px;&#13;
+&#13;
+    border: 1px solid #e1e5ea;&#13;
+&#13;
+    border-radius: 14px;&#13;
+&#13;
+    background: #ffffff;&#13;
+}&#13;
+&#13;
+&#13;
+.profile-two-column .profile-section {&#13;
+    margin-bottom: 0;&#13;
+}&#13;
+&#13;
+&#13;
+.profile-section-title {&#13;
+    margin-bottom: 14px;&#13;
+&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 8px;&#13;
+&#13;
+    color: #5c6677;&#13;
+&#13;
+    font-size: 8px;&#13;
+&#13;
+    font-weight: 900;&#13;
+&#13;
+    letter-spacing: .9px;&#13;
+}&#13;
+&#13;
+&#13;
+.profile-section-title i {&#13;
+    color: #6b42d4;&#13;
+&#13;
+    font-size: 11px;&#13;
+}&#13;
+&#13;
+&#13;
+.profile-section-title em {&#13;
+    min-width: 19px;&#13;
+    height: 19px;&#13;
+&#13;
+    margin-left: auto;&#13;
+&#13;
+    border-radius: 50%;&#13;
+&#13;
+    background: #eee5ff;&#13;
+&#13;
+    color: #6b42d4;&#13;
+&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+&#13;
+    font-size: 8px;&#13;
+&#13;
+    font-style: normal;&#13;
+}&#13;
+&#13;
+&#13;
+/* ================================================================&#13;
+   DETAILS&#13;
+   ================================================================ */&#13;
+&#13;
+.detail-grid {&#13;
+    display: grid;&#13;
+&#13;
+    grid-template-columns:&#13;
+        repeat(2, minmax(0, 1fr));&#13;
+&#13;
+    gap: 13px;&#13;
+}&#13;
+&#13;
+&#13;
+.detail-grid label {&#13;
+    display: block;&#13;
+&#13;
+    margin-bottom: 4px;&#13;
+&#13;
+    color: #9aa2b0;&#13;
+&#13;
+    font-size: 7px;&#13;
+&#13;
+    font-weight: 900;&#13;
+&#13;
+    letter-spacing: .6px;&#13;
+}&#13;
+&#13;
+&#13;
+.detail-grid strong {&#13;
+    color: #394457;&#13;
+&#13;
+    font-size: 9px;&#13;
+&#13;
+    word-break: break-word;&#13;
+}&#13;
+&#13;
+&#13;
+/* ================================================================&#13;
+   ACADEMICS&#13;
+   ================================================================ */&#13;
+&#13;
+.academic-profile-box {&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 20px;&#13;
+}&#13;
+&#13;
+&#13;
+.large-academic-score {&#13;
+    width: 85px;&#13;
+    height: 85px;&#13;
+&#13;
+    min-width: 85px;&#13;
+&#13;
+    border-radius: 50%;&#13;
+&#13;
+    background: #e5f1ff;&#13;
+&#13;
+    display: flex;&#13;
+    flex-direction: column;&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+}&#13;
+&#13;
+&#13;
+.large-academic-score strong {&#13;
+    color: #287bc5;&#13;
+&#13;
+    font-size: 21px;&#13;
+&#13;
+    font-weight: 950;&#13;
+}&#13;
+&#13;
+&#13;
+.large-academic-score span {&#13;
+    color: #7394b1;&#13;
+&#13;
+    font-size: 8px;&#13;
+}&#13;
+&#13;
+&#13;
+.academic-details {&#13;
+    flex: 1;&#13;
+&#13;
+    display: grid;&#13;
+&#13;
+    grid-template-columns:&#13;
+        repeat(2, minmax(0, 1fr));&#13;
+&#13;
+    gap: 12px;&#13;
+}&#13;
+&#13;
+&#13;
+.academic-details span {&#13;
+    display: block;&#13;
+&#13;
+    color: #9aa2b0;&#13;
+&#13;
+    font-size: 7px;&#13;
+&#13;
+    font-weight: 900;&#13;
+}&#13;
+&#13;
+&#13;
+.academic-details strong {&#13;
+    display: block;&#13;
+&#13;
+    margin-top: 4px;&#13;
+&#13;
+    color: #394457;&#13;
+&#13;
+    font-size: 10px;&#13;
+}&#13;
+&#13;
+&#13;
+/* ================================================================&#13;
+   SKILLS&#13;
+   ================================================================ */&#13;
+&#13;
+.skills-list {&#13;
+    display: grid;&#13;
+&#13;
+    grid-template-columns:&#13;
+        repeat(2, minmax(0, 1fr));&#13;
+&#13;
+    gap: 11px;&#13;
+}&#13;
+&#13;
+&#13;
+.skill-item {&#13;
+    padding: 12px;&#13;
+&#13;
+    border: 1px solid #edf0f3;&#13;
+&#13;
+    border-radius: 10px;&#13;
+&#13;
+    background: #fafbfc;&#13;
+}&#13;
+&#13;
+&#13;
+.skill-item-top {&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+    justify-content: space-between;&#13;
+}&#13;
+&#13;
+&#13;
+.skill-item-top strong {&#13;
+    color: #344054;&#13;
+&#13;
+    font-size: 10px;&#13;
+}&#13;
+&#13;
+&#13;
+.skill-item-top span {&#13;
+    padding: 3px 6px;&#13;
+&#13;
+    border-radius: 5px;&#13;
+&#13;
+    background: #eee6ff;&#13;
+&#13;
+    color: #6d40d5;&#13;
+&#13;
+    font-size: 7px;&#13;
+&#13;
+    font-weight: 800;&#13;
+}&#13;
+&#13;
+&#13;
+.skill-progress {&#13;
+    height: 5px;&#13;
+&#13;
+    margin: 9px 0 6px;&#13;
+&#13;
+    border-radius: 5px;&#13;
+&#13;
+    background: #e7e9ee;&#13;
+&#13;
+    overflow: hidden;&#13;
+}&#13;
+&#13;
+&#13;
+.skill-progress div {&#13;
+    height: 100%;&#13;
+&#13;
+    border-radius: 5px;&#13;
+&#13;
+    background: #7544db;&#13;
+}&#13;
+&#13;
+&#13;
+.skill-item-bottom {&#13;
+    display: flex;&#13;
+&#13;
+    justify-content: space-between;&#13;
+&#13;
+    color: #8d97a7;&#13;
+&#13;
+    font-size: 7px;&#13;
+}&#13;
+&#13;
+&#13;
+/* ================================================================&#13;
+   TRAINING&#13;
+   ================================================================ */&#13;
+&#13;
+.training-profile-list {&#13;
+    display: flex;&#13;
+&#13;
+    flex-direction: column;&#13;
+&#13;
+    gap: 9px;&#13;
+}&#13;
+&#13;
+&#13;
+.training-profile-item {&#13;
+    padding: 12px;&#13;
+&#13;
+    border: 1px solid #e9edf1;&#13;
+&#13;
+    border-radius: 10px;&#13;
+&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 10px;&#13;
+}&#13;
+&#13;
+&#13;
+.training-profile-icon {&#13;
+    width: 35px;&#13;
+    height: 35px;&#13;
+&#13;
+    min-width: 35px;&#13;
+&#13;
+    border-radius: 9px;&#13;
+&#13;
+    background: #fff0d9;&#13;
+&#13;
+    color: #db831c;&#13;
+&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+}&#13;
+&#13;
+&#13;
+.training-profile-main {&#13;
+    flex: 1;&#13;
+&#13;
+    display: flex;&#13;
+    flex-direction: column;&#13;
+}&#13;
+&#13;
+&#13;
+.training-profile-main strong {&#13;
+    color: #344054;&#13;
+&#13;
+    font-size: 10px;&#13;
+}&#13;
+&#13;
+&#13;
+.training-profile-main span {&#13;
+    margin-top: 3px;&#13;
+&#13;
+    color: #8993a3;&#13;
+&#13;
+    font-size: 8px;&#13;
+}&#13;
+&#13;
+&#13;
+.training-profile-status {&#13;
+    display: flex;&#13;
+    flex-direction: column;&#13;
+&#13;
+    align-items: flex-end;&#13;
+}&#13;
+&#13;
+&#13;
+.training-profile-status strong {&#13;
+    color: #168650;&#13;
+&#13;
+    font-size: 8px;&#13;
+}&#13;
+&#13;
+&#13;
+.training-profile-status span {&#13;
+    margin-top: 3px;&#13;
+&#13;
+    color: #8d96a5;&#13;
+&#13;
+    font-size: 7px;&#13;
+}&#13;
+&#13;
+&#13;
+/* ================================================================&#13;
+   READINESS&#13;
+   ================================================================ */&#13;
+&#13;
+.readiness-layout {&#13;
+    display: flex;&#13;
+&#13;
+    gap: 25px;&#13;
+&#13;
+    align-items: center;&#13;
+}&#13;
+&#13;
+&#13;
+.readiness-score {&#13;
+    min-width: 125px;&#13;
+&#13;
+    display: flex;&#13;
+    flex-direction: column;&#13;
+&#13;
+    align-items: center;&#13;
+}&#13;
+&#13;
+&#13;
+.readiness-circle {&#13;
+    width: 105px;&#13;
+    height: 105px;&#13;
+&#13;
+    border-radius: 50%;&#13;
+&#13;
+    background:&#13;
+        conic-gradient(&#13;
+            #7042d9 0deg,&#13;
+            #7042d9 calc(var(--score, 0) * 3.6deg),&#13;
+            #ebe8f4 calc(var(--score, 0) * 3.6deg),&#13;
+            #ebe8f4 360deg&#13;
+        );&#13;
+&#13;
+    display: flex;&#13;
+    flex-direction: column;&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+&#13;
+    position: relative;&#13;
+}&#13;
+&#13;
+&#13;
+.readiness-circle::before {&#13;
+    content: "";&#13;
+&#13;
+    position: absolute;&#13;
+&#13;
+    width: 83px;&#13;
+    height: 83px;&#13;
+&#13;
+    border-radius: 50%;&#13;
+&#13;
+    background: #ffffff;&#13;
+}&#13;
+&#13;
+&#13;
+.readiness-circle strong,&#13;
+.readiness-circle span {&#13;
+    position: relative;&#13;
+&#13;
+    z-index: 1;&#13;
+}&#13;
+&#13;
+&#13;
+.readiness-circle strong {&#13;
+    color: #5f36cf;&#13;
+&#13;
+    font-size: 25px;&#13;
+&#13;
+    font-weight: 950;&#13;
+}&#13;
+&#13;
+&#13;
+.readiness-circle span {&#13;
+    color: #929aab;&#13;
+&#13;
+    font-size: 8px;&#13;
+}&#13;
+&#13;
+&#13;
+.readiness-score label {&#13;
+    margin-top: 8px;&#13;
+&#13;
+    color: #8b94a4;&#13;
+&#13;
+    font-size: 7px;&#13;
+&#13;
+    font-weight: 900;&#13;
+&#13;
+    letter-spacing: .8px;&#13;
+}&#13;
+&#13;
+&#13;
+.readiness-details {&#13;
+    flex: 1;&#13;
+}&#13;
+&#13;
+&#13;
+.readiness-detail-row {&#13;
+    min-height: 32px;&#13;
+&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    justify-content: space-between;&#13;
+&#13;
+    gap: 15px;&#13;
+&#13;
+    border-bottom: 1px solid #f0f1f4;&#13;
+}&#13;
+&#13;
+&#13;
+.readiness-detail-row:last-child {&#13;
+    border-bottom: 0;&#13;
+}&#13;
+&#13;
+&#13;
+.readiness-detail-row span {&#13;
+    color: #818b9c;&#13;
+&#13;
+    font-size: 8px;&#13;
+}&#13;
+&#13;
+&#13;
+.readiness-detail-row strong {&#13;
+    color: #354054;&#13;
+&#13;
+    font-size: 9px;&#13;
+&#13;
+    text-align: right;&#13;
+}&#13;
+&#13;
+&#13;
+.risk-value {&#13;
+    padding: 3px 7px;&#13;
+&#13;
+    border-radius: 6px;&#13;
+&#13;
+    background: #e1f5e9;&#13;
+&#13;
+    color: #198751 !important;&#13;
+}&#13;
+&#13;
+&#13;
+.risk-high {&#13;
+    background: #ffe0e3 !important;&#13;
+&#13;
+    color: #d54f5d !important;&#13;
+}&#13;
+&#13;
+&#13;
+.risk-medium {&#13;
+    background: #fff0d9 !important;&#13;
+&#13;
+    color: #d27c18 !important;&#13;
+}&#13;
+&#13;
+&#13;
+.readiness-recommendation {&#13;
+    margin-top: 15px;&#13;
+&#13;
+    padding: 12px;&#13;
+&#13;
+    border-radius: 10px;&#13;
+&#13;
+    background: #f1edff;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    gap: 10px;&#13;
+}&#13;
+&#13;
+&#13;
+.readiness-recommendation &gt; i {&#13;
+    color: #7042d9;&#13;
+&#13;
+    font-size: 15px;&#13;
+}&#13;
+&#13;
+&#13;
+.readiness-recommendation strong {&#13;
+    color: #5e3cc7;&#13;
+&#13;
+    font-size: 9px;&#13;
+}&#13;
+&#13;
+&#13;
+.readiness-recommendation p {&#13;
+    margin: 4px 0 0;&#13;
+&#13;
+    color: #737d91;&#13;
+&#13;
+    font-size: 8px;&#13;
+&#13;
+    line-height: 1.5;&#13;
+}&#13;
+&#13;
+&#13;
+/* ================================================================&#13;
+   ACTIVITIES&#13;
+   ================================================================ */&#13;
+&#13;
+.activity-grid {&#13;
+    display: grid;&#13;
+&#13;
+    grid-template-columns:&#13;
+        repeat(3, minmax(0, 1fr));&#13;
+&#13;
+    gap: 10px;&#13;
+}&#13;
+&#13;
+&#13;
+.activity-card {&#13;
+    min-height: 70px;&#13;
+&#13;
+    padding: 10px;&#13;
+&#13;
+    border-radius: 10px;&#13;
+&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 9px;&#13;
+}&#13;
+&#13;
+&#13;
+.activity-icon {&#13;
+    width: 32px;&#13;
+    height: 32px;&#13;
+&#13;
+    min-width: 32px;&#13;
+&#13;
+    border-radius: 8px;&#13;
+&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+}&#13;
+&#13;
+&#13;
+.activity-card &gt; div:last-child {&#13;
+    display: flex;&#13;
+    flex-direction: column;&#13;
+}&#13;
+&#13;
+&#13;
+.activity-card strong {&#13;
+    color: #263044;&#13;
+&#13;
+    font-size: 15px;&#13;
+&#13;
+    font-weight: 950;&#13;
+}&#13;
+&#13;
+&#13;
+.activity-card span {&#13;
+    margin-top: 2px;&#13;
+&#13;
+    color: #747f91;&#13;
+&#13;
+    font-size: 7px;&#13;
+}&#13;
+&#13;
+&#13;
+.activity-purple {&#13;
+    background: #eee7ff;&#13;
+}&#13;
+&#13;
+&#13;
+.activity-purple .activity-icon {&#13;
+    background: #ddceff;&#13;
+&#13;
+    color: #6b3dd6;&#13;
+}&#13;
+&#13;
+&#13;
+.activity-blue {&#13;
+    background: #e4f1ff;&#13;
+}&#13;
+&#13;
+&#13;
+.activity-blue .activity-icon {&#13;
+    background: #cde5ff;&#13;
+&#13;
+    color: #327fc6;&#13;
+}&#13;
+&#13;
+&#13;
+.activity-green {&#13;
+    background: #e1f6e9;&#13;
+}&#13;
+&#13;
+&#13;
+.activity-green .activity-icon {&#13;
+    background: #c9efd9;&#13;
+&#13;
+    color: #238e58;&#13;
+}&#13;
+&#13;
+&#13;
+.activity-orange {&#13;
+    background: #fff0db;&#13;
+}&#13;
+&#13;
+&#13;
+.activity-orange .activity-icon {&#13;
+    background: #ffe0b4;&#13;
+&#13;
+    color: #d77e1a;&#13;
+}&#13;
+&#13;
+&#13;
+.activity-teal {&#13;
+    background: #e1f6f4;&#13;
+}&#13;
+&#13;
+&#13;
+.activity-teal .activity-icon {&#13;
+    background: #c8ebe7;&#13;
+&#13;
+    color: #198c84;&#13;
+}&#13;
+&#13;
+&#13;
+.activity-red {&#13;
+    background: #ffe7e9;&#13;
+}&#13;
+&#13;
+&#13;
+.activity-red .activity-icon {&#13;
+    background: #ffd1d5;&#13;
+&#13;
+    color: #d44f5c;&#13;
+}&#13;
+&#13;
+&#13;
+/* ================================================================&#13;
+   AI&#13;
+   ================================================================ */&#13;
+&#13;
+.ai-insight-box {&#13;
+    padding: 15px;&#13;
+&#13;
+    border-radius: 11px;&#13;
+&#13;
+    background: #f1edff;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    gap: 12px;&#13;
+}&#13;
+&#13;
+&#13;
+.ai-insight-icon {&#13;
+    width: 38px;&#13;
+    height: 38px;&#13;
+&#13;
+    min-width: 38px;&#13;
+&#13;
+    border-radius: 10px;&#13;
+&#13;
+    background: #dfd2ff;&#13;
+&#13;
+    color: #6b3ed5;&#13;
+&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+}&#13;
+&#13;
+&#13;
+.ai-insight-box strong {&#13;
+    color: #5837bd;&#13;
+&#13;
+    font-size: 10px;&#13;
+}&#13;
+&#13;
+&#13;
+.ai-insight-box p {&#13;
+    margin: 4px 0 0;&#13;
+&#13;
+    color: #727d90;&#13;
+&#13;
+    font-size: 8px;&#13;
+&#13;
+    line-height: 1.55;&#13;
+}&#13;
+&#13;
+&#13;
+.profile-empty-small {&#13;
+    padding: 14px;&#13;
+&#13;
+    border-radius: 9px;&#13;
+&#13;
+    background: #fafbfc;&#13;
+&#13;
+    color: #949dab;&#13;
+&#13;
+    font-size: 9px;&#13;
+&#13;
+    text-align: center;&#13;
+}&#13;
+&#13;
+&#13;
+/* ================================================================&#13;
+   PROFILE FOOTER&#13;
+   ================================================================ */&#13;
+&#13;
+.profile-panel-footer {&#13;
+    min-height: 58px;&#13;
+&#13;
+    padding: 10px 23px;&#13;
+&#13;
+    border-top: 1px solid #e4e7eb;&#13;
+&#13;
+    background: #ffffff;&#13;
+&#13;
+    display: flex;&#13;
+    justify-content: flex-end;&#13;
+}&#13;
+&#13;
+&#13;
+.profile-panel-footer button {&#13;
+    height: 35px;&#13;
+&#13;
+    padding: 0 15px;&#13;
+&#13;
+    border: 1px solid #d7cff0;&#13;
+&#13;
+    border-radius: 8px;&#13;
+&#13;
+    background: #faf8ff;&#13;
+&#13;
+    color: #6540d0;&#13;
+&#13;
+    font-size: 9px;&#13;
+&#13;
+    font-weight: 850;&#13;
+&#13;
+    cursor: pointer;&#13;
+}&#13;
+&#13;
+&#13;
+/* ================================================================&#13;
+   RESPONSIVE&#13;
+   ================================================================ */&#13;
+&#13;
+@media (max-width: 1200px) {&#13;
+&#13;
+    .student-stat-grid {&#13;
+        grid-template-columns:&#13;
+            repeat(2, minmax(0, 1fr));&#13;
+    }&#13;
+&#13;
+&#13;
+    .directory-toolbar {&#13;
+        align-items: flex-start;&#13;
+&#13;
+        flex-direction: column;&#13;
+    }&#13;
+&#13;
+&#13;
+    .directory-toolbar-controls {&#13;
+        width: 100%;&#13;
+    }&#13;
+&#13;
+&#13;
+    .directory-search {&#13;
+        flex: 1;&#13;
+    }&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+@media (max-width: 900px) {&#13;
+&#13;
+    .topbar-search {&#13;
+        display: none;&#13;
+    }&#13;
+&#13;
+&#13;
+    .profile-summary-grid {&#13;
+        grid-template-columns:&#13;
+            repeat(2, minmax(0, 1fr));&#13;
+    }&#13;
+&#13;
+&#13;
+    .profile-two-column {&#13;
+        grid-template-columns: 1fr;&#13;
+    }&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+@media (max-width: 700px) {&#13;
+&#13;
+    .campus360-tpo-app {&#13;
+        min-height: 650px;&#13;
+    }&#13;
+&#13;
+&#13;
+    .campus360-sidebar {&#13;
+        position: absolute;&#13;
+&#13;
+        left: 0;&#13;
+        top: 0;&#13;
+        bottom: 0;&#13;
+&#13;
+        width: 250px;&#13;
+        min-width: 250px;&#13;
+&#13;
+        box-shadow:&#13;
+            8px 0 25px rgba(30, 20, 60, .12);&#13;
+    }&#13;
+&#13;
+&#13;
+    .campus360-sidebar-collapsed .campus360-sidebar {&#13;
+        width: 0;&#13;
+        min-width: 0;&#13;
+    }&#13;
+&#13;
+&#13;
+    .campus360-content {&#13;
+        padding: 18px 14px 30px;&#13;
+    }&#13;
+&#13;
+&#13;
+    .student-page-header {&#13;
+        align-items: flex-start;&#13;
+&#13;
+        flex-direction: column;&#13;
+    }&#13;
+&#13;
+&#13;
+    .student-stat-grid {&#13;
+        grid-template-columns: 1fr;&#13;
+    }&#13;
+&#13;
+&#13;
+    .directory-toolbar-controls {&#13;
+        flex-wrap: wrap;&#13;
+    }&#13;
+&#13;
+&#13;
+    .directory-search {&#13;
+        width: 100%;&#13;
+&#13;
+        flex: auto;&#13;
+    }&#13;
+&#13;
+&#13;
+    .profile-summary-grid {&#13;
+        grid-template-columns:&#13;
+            1fr 1fr;&#13;
+    }&#13;
+&#13;
+&#13;
+    .skills-list {&#13;
+        grid-template-columns: 1fr;&#13;
+    }&#13;
+&#13;
+&#13;
+    .activity-grid {&#13;
+        grid-template-columns:&#13;
+            1fr 1fr;&#13;
+    }&#13;
+&#13;
+&#13;
+    .student-profile-overlay {&#13;
+        padding: 10px;&#13;
+    }&#13;
+&#13;
+&#13;
+    .student-profile-panel {&#13;
+        max-height: calc(100% - 10px);&#13;
+    }&#13;
+&#13;
+}
+.campus360-tpo-layout,
+.tpo-layout,
+.tpo-container,
+.campus360-skill-intel,
+.tpo-dashboard-center {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  z-index: 9999 !important;
+  overflow: hidden !important;
+  background: #f8fafc !important;
+}
+
+.campus360-tpo-layout,
+.tpo-layout,
+.tpo-container,
+.campus360-skill-intel,
+.tpo-dashboard-center {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  z-index: 9999 !important;
+  overflow: hidden !important;
+  background: #f8fafc !important;
+}
+</css>
+        <data_table>sp_instance</data_table>
+        <demo_data/>
+        <description/>
+        <docs/>
+        <field_list/>
+        <has_preview>false</has_preview>
+        <id>campus360_student_management</id>
+        <internal>false</internal>
+        <link><![CDATA[function link(scope, element, attrs, controller) {
+  
+}]]></link>
+        <name>Campus360 TPO Student Management</name>
+        <option_schema/>
+        <public>false</public>
+        <roles/>
+        <script><![CDATA[(function() {
+
+    /* ============================================================
+       CAMPUS360 STUDENT MANAGEMENT
+       SERVER SCRIPT
+       ============================================================ */
+
+
+    /* ============================================================
+       TABLES
+       ============================================================ */
+
+    var STUDENT_TABLE =
+        "x_snc_campus360_student_master";
+
+    var SKILLS_TABLE =
+        "x_snc_campus360_student_skills";
+
+    var APPLICATION_TABLE =
+        "x_snc_campus360_student_application";
+
+    var ASSESSMENT_TABLE =
+        "x_snc_campus360_student_assessment";
+
+    var ENROLLMENT_TABLE =
+        "x_snc_campus360_training_enrollment";
+
+    var INTERVIEW_TABLE =
+        "x_snc_campus360_mock_interview";
+
+    var INTELLIGENCE_TABLE =
+        "x_snc_campus360_placement_intelligence";
+
+    var INTERVENTION_TABLE =
+        "x_snc_campus360_placement_intervention";
+
+    var OUTCOME_TABLE =
+        "x_snc_campus360_placement_outcome";
+
+    var COMPANY_TABLE =
+        "x_snc_campus360_company_master";
+
+    var OPPORTUNITY_TABLE =
+        "x_snc_campus360_placement_opportunity";
+
+
+    /* ============================================================
+       INITIAL DATA
+       ============================================================ */
+
+    data.students = [];
+
+    data.branches = [];
+
+    data.batches = [];
+
+    data.error = "";
+
+
+    data.summary = {
+
+        totalStudents: 0,
+
+        placementReady: 0,
+
+        placed: 0,
+
+        notPlaced: 0,
+
+        eligible: 0,
+
+        inProcess: 0,
+
+        higherStudies: 0,
+
+        optedOut: 0,
+
+        applications: 0,
+
+        assessments: 0,
+
+        interviews: 0,
+
+        companies: 0,
+
+        opportunities: 0,
+
+        placementOutcomes: 0,
+
+        enrollments: 0,
+
+        interventions: 0,
+
+        riskStudents: 0
+
+    };
+
+
+    /* ============================================================
+       HELPERS
+       ============================================================ */
+
+    function tableExists(tableName) {
+
+        try {
+
+            var gr =
+                new GlideRecord(tableName);
+
+            return gr.isValid();
+
+        } catch (e) {
+
+            return false;
+
+        }
+
+    }
+
+
+    function fieldExists(gr, fieldName) {
+
+        try {
+
+            return (
+                gr &&
+                gr.isValidField(fieldName)
+            );
+
+        } catch (e) {
+
+            return false;
+
+        }
+
+    }
+
+
+    function value(gr, fieldName) {
+
+        if (
+            !fieldExists(
+                gr,
+                fieldName
+            )
+        ) {
+
+            return "";
+
+        }
+
+
+        var result =
+            gr.getValue(fieldName);
+
+
+        if (
+            result === null ||
+            result === undefined
+        ) {
+
+            return "";
+
+        }
+
+
+        return String(result);
+
+    }
+
+
+    function display(gr, fieldName) {
+
+        if (
+            !fieldExists(
+                gr,
+                fieldName
+            )
+        ) {
+
+            return "";
+
+        }
+
+
+        var result =
+            gr.getDisplayValue(fieldName);
+
+
+        if (
+            result === null ||
+            result === undefined
+        ) {
+
+            return "";
+
+        }
+
+
+        return String(result);
+
+    }
+
+
+    function integerValue(input) {
+
+        var number =
+            parseInt(
+                input || "0",
+                10
+            );
+
+
+        if (isNaN(number)) {
+
+            return 0;
+
+        }
+
+
+        return number;
+
+    }
+
+
+    function decimalValue(input) {
+
+        var number =
+            parseFloat(
+                input || "0"
+            );
+
+
+        if (isNaN(number)) {
+
+            return 0;
+
+        }
+
+
+        return number;
+
+    }
+
+
+    function getInitials(name) {
+
+        if (!name) {
+
+            return "ST";
+
+        }
+
+
+        var parts =
+            String(name)
+            .trim()
+            .split(/\s+/);
+
+
+        if (
+            parts.length === 1
+        ) {
+
+            return parts[0]
+                .substring(0, 2)
+                .toUpperCase();
+
+        }
+
+
+        return (
+
+            parts[0].charAt(0) +
+
+            parts[
+                parts.length - 1
+            ].charAt(0)
+
+        ).toUpperCase();
+
+    }
+
+
+    function addUnique(array, valueToAdd) {
+
+        if (!valueToAdd) {
+
+            return;
+
+        }
+
+
+        if (
+            array.indexOf(valueToAdd) === -1
+        ) {
+
+            array.push(valueToAdd);
+
+        }
+
+    }
+
+
+    /* ============================================================
+       GLOBAL COUNTS
+       ============================================================ */
+
+    if (
+        tableExists(
+            COMPANY_TABLE
+        )
+    ) {
+
+        var companyGR =
+            new GlideRecord(
+                COMPANY_TABLE
+            );
+
+        companyGR.query();
+
+        data.summary.companies =
+            companyGR.getRowCount();
+
+    }
+
+
+    if (
+        tableExists(
+            OPPORTUNITY_TABLE
+        )
+    ) {
+
+        var opportunityGR =
+            new GlideRecord(
+                OPPORTUNITY_TABLE
+            );
+
+        opportunityGR.query();
+
+        data.summary.opportunities =
+            opportunityGR.getRowCount();
+
+    }
+
+
+    if (
+        tableExists(
+            ASSESSMENT_TABLE
+        )
+    ) {
+
+        var assessmentGR =
+            new GlideRecord(
+                ASSESSMENT_TABLE
+            );
+
+        assessmentGR.query();
+
+        data.summary.assessments =
+            assessmentGR.getRowCount();
+
+    }
+
+
+    if (
+        tableExists(
+            INTERVIEW_TABLE
+        )
+    ) {
+
+        var interviewGR =
+            new GlideRecord(
+                INTERVIEW_TABLE
+            );
+
+        interviewGR.query();
+
+        data.summary.interviews =
+            interviewGR.getRowCount();
+
+    }
+
+
+    if (
+        tableExists(
+            OUTCOME_TABLE
+        )
+    ) {
+
+        var outcomeGR =
+            new GlideRecord(
+                OUTCOME_TABLE
+            );
+
+        outcomeGR.query();
+
+        data.summary.placementOutcomes =
+            outcomeGR.getRowCount();
+
+    }
+
+
+    if (
+        tableExists(
+            ENROLLMENT_TABLE
+        )
+    ) {
+
+        var enrollmentGR =
+            new GlideRecord(
+                ENROLLMENT_TABLE
+            );
+
+        enrollmentGR.query();
+
+        data.summary.enrollments =
+            enrollmentGR.getRowCount();
+
+    }
+
+
+    if (
+        tableExists(
+            INTERVENTION_TABLE
+        )
+    ) {
+
+        var interventionGR =
+            new GlideRecord(
+                INTERVENTION_TABLE
+            );
+
+        interventionGR.query();
+
+        data.summary.interventions =
+            interventionGR.getRowCount();
+
+    }
+
+
+    /* ============================================================
+       STUDENT TABLE
+       ============================================================ */
+
+    if (
+        !tableExists(
+            STUDENT_TABLE
+        )
+    ) {
+
+        data.error =
+            "Student Master table not found: " +
+            STUDENT_TABLE;
+
+        return;
+
+    }
+
+
+    var studentGR =
+        new GlideRecord(
+            STUDENT_TABLE
+        );
+
+
+    studentGR.orderBy(
+        "student_name"
+    );
+
+
+    studentGR.query();
+
+
+    while (
+        studentGR.next()
+    ) {
+
+        var studentSysId =
+            studentGR.getUniqueValue();
+
+
+        var studentName =
+            value(
+                studentGR,
+                "student_name"
+            );
+
+
+        if (!studentName) {
+
+            studentName =
+                display(
+                    studentGR,
+                    "student_name"
+                );
+
+        }
+
+
+        if (!studentName) {
+
+            studentName =
+                "Student";
+
+        }
+
+
+        var student = {
+
+            sys_id:
+                studentSysId,
+
+            name:
+                studentName,
+
+            initials:
+                getInitials(
+                    studentName
+                ),
+
+            student_id:
+                value(
+                    studentGR,
+                    "student_id"
+                ),
+
+            email:
+                value(
+                    studentGR,
+                    "email"
+                ),
+
+            phone_number:
+                value(
+                    studentGR,
+                    "phone_number"
+                ),
+
+            batch:
+                value(
+                    studentGR,
+                    "batch"
+                ),
+
+            degree:
+                display(
+                    studentGR,
+                    "degree"
+                ) ||
+                value(
+                    studentGR,
+                    "degree"
+                ),
+
+            branch:
+                display(
+                    studentGR,
+                    "branch"
+                ) ||
+                value(
+                    studentGR,
+                    "branch"
+                ),
+
+            cgpa:
+                value(
+                    studentGR,
+                    "cgpa"
+                ),
+
+            backlogs:
+                integerValue(
+                    value(
+                        studentGR,
+                        "backlogs"
+                    )
+                ),
+
+            placement_status:
+                display(
+                    studentGR,
+                    "placement_status"
+                ) ||
+                value(
+                    studentGR,
+                    "placement_status"
+                ) ||
+                "Not Placed",
+
+            profile_status:
+                display(
+                    studentGR,
+                    "profile_status"
+                ) ||
+                value(
+                    studentGR,
+                    "profile_status"
+                ) ||
+                "Active",
+
+            application_count: 0,
+
+            skills: [],
+
+            trainings: [],
+
+            readiness: {
+
+                score: 0,
+
+                risk: "Not Available",
+
+                skillGap:
+                    "No Significant Gap",
+
+                participation: 0,
+
+                missedOpportunities: 0,
+
+                recommendation: "",
+
+                aiInsight: ""
+
+            },
+
+            activity: {
+
+                applications: 0,
+
+                assessments: 0,
+
+                interviews: 0,
+
+                trainings: 0,
+
+                outcomes: 0,
+
+                interventions: 0
+
+            }
+
+        };
+
+
+        /* ========================================================
+           FILTER DATA
+           ======================================================== */
+
+        addUnique(
+            data.branches,
+            student.branch
+        );
+
+
+        addUnique(
+            data.batches,
+            student.batch
+        );
+
+
+        data.summary.totalStudents++;
+
+
+        /* ========================================================
+           PLACEMENT STATUS
+           ======================================================== */
+
+        switch (
+            student.placement_status
+        ) {
+
+            case "Placed":
+
+                data.summary.placed++;
+
+                break;
+
+
+            case "Eligible":
+
+                data.summary.eligible++;
+
+                break;
+
+
+            case "In Process":
+
+                data.summary.inProcess++;
+
+                break;
+
+
+            case "Higher Studies":
+
+                data.summary.higherStudies++;
+
+                break;
+
+
+            case "Opted Out":
+
+                data.summary.optedOut++;
+
+                break;
+
+
+            case "Not Placed":
+
+            default:
+
+                data.summary.notPlaced++;
+
+                break;
+
+        }
+
+
+        /* ========================================================
+           APPLICATIONS
+           ======================================================== */
+
+        if (
+            tableExists(
+                APPLICATION_TABLE
+            )
+        ) {
+
+            var studentApplicationGR =
+                new GlideRecord(
+                    APPLICATION_TABLE
+                );
+
+
+            studentApplicationGR.addQuery(
+                "student",
+                studentSysId
+            );
+
+
+            studentApplicationGR.query();
+
+
+            student.application_count =
+                studentApplicationGR.getRowCount();
+
+
+            student.activity.applications =
+                student.application_count;
+
+        }
+
+
+        /* ========================================================
+           ASSESSMENTS
+           ======================================================== */
+
+        if (
+            tableExists(
+                ASSESSMENT_TABLE
+            )
+        ) {
+
+            var studentAssessmentGR =
+                new GlideRecord(
+                    ASSESSMENT_TABLE
+                );
+
+
+            studentAssessmentGR.addQuery(
+                "student",
+                studentSysId
+            );
+
+
+            studentAssessmentGR.query();
+
+
+            student.activity.assessments =
+                studentAssessmentGR.getRowCount();
+
+        }
+
+
+        /* ========================================================
+           INTERVIEWS
+           ======================================================== */
+
+        if (
+            tableExists(
+                INTERVIEW_TABLE
+            )
+        ) {
+
+            var studentInterviewGR =
+                new GlideRecord(
+                    INTERVIEW_TABLE
+                );
+
+
+            studentInterviewGR.addQuery(
+                "student",
+                studentSysId
+            );
+
+
+            studentInterviewGR.query();
+
+
+            student.activity.interviews =
+                studentInterviewGR.getRowCount();
+
+        }
+
+
+        /* ========================================================
+           TRAINING
+           ======================================================== */
+
+        if (
+            tableExists(
+                ENROLLMENT_TABLE
+            )
+        ) {
+
+            var studentEnrollmentGR =
+                new GlideRecord(
+                    ENROLLMENT_TABLE
+                );
+
+
+            studentEnrollmentGR.addQuery(
+                "student",
+                studentSysId
+            );
+
+
+            studentEnrollmentGR.orderByDesc(
+                "sys_created_on"
+            );
+
+
+            studentEnrollmentGR.query();
+
+
+            while (
+                studentEnrollmentGR.next()
+            ) {
+
+                var training = {
+
+                    sys_id:
+                        studentEnrollmentGR.getUniqueValue(),
+
+                    name:
+                        display(
+                            studentEnrollmentGR,
+                            "training_program"
+                        ),
+
+                    skill_area: "",
+
+                    batch: "",
+
+                    attendance:
+                        value(
+                            studentEnrollmentGR,
+                            "attendance"
+                        ),
+
+                    completion_status:
+                        display(
+                            studentEnrollmentGR,
+                            "completion_status"
+                        ) ||
+                        value(
+                            studentEnrollmentGR,
+                            "completion_status"
+                        ),
+
+                    assessment_score:
+                        value(
+                            studentEnrollmentGR,
+                            "assessment_score"
+                        ),
+
+                    completion_date:
+                        display(
+                            studentEnrollmentGR,
+                            "completion_date"
+                        )
+
+                };
+
+
+                /* TRAINING PROGRAM REFERENCE */
+
+                if (
+                    fieldExists(
+                        studentEnrollmentGR,
+                        "training_program"
+                    )
+                ) {
+
+                    try {
+
+                        var programGR =
+                            studentEnrollmentGR
+                            .training_program
+                            .getRefRecord();
+
+
+                        if (
+                            programGR &&
+                            programGR.isValidRecord()
+                        ) {
+
+                            training.skill_area =
+                                value(
+                                    programGR,
+                                    "skill_area"
+                                );
+
+
+                            training.batch =
+                                value(
+                                    programGR,
+                                    "batch"
+                                );
+
+                        }
+
+                    } catch (
+                        trainingError
+                    ) {}
+
+                }
+
+
+                student.trainings.push(
+                    training
+                );
+
+            }
+
+
+            student.activity.trainings =
+                student.trainings.length;
+
+        }
+
+
+        /* ========================================================
+           SKILLS
+           ======================================================== */
+
+        if (
+            tableExists(
+                SKILLS_TABLE
+            )
+        ) {
+
+            var skillsGR =
+                new GlideRecord(
+                    SKILLS_TABLE
+                );
+
+
+            if (
+                fieldExists(
+                    skillsGR,
+                    "student"
+                )
+            ) {
+
+                skillsGR.addQuery(
+                    "student",
+                    studentSysId
+                );
+
+
+                skillsGR.query();
+
+
+                while (
+                    skillsGR.next()
+                ) {
+
+                    student.skills.push({
+
+                        sys_id:
+                            skillsGR.getUniqueValue(),
+
+                        skill_name:
+                            value(
+                                skillsGR,
+                                "skill_name"
+                            ),
+
+                        skill_category:
+                            display(
+                                skillsGR,
+                                "skill_category"
+                            ) ||
+                            value(
+                                skillsGR,
+                                "skill_category"
+                            ),
+
+                        skill_level:
+                            display(
+                                skillsGR,
+                                "skill_level"
+                            ) ||
+                            value(
+                                skillsGR,
+                                "skill_level"
+                            ),
+
+                        assessment_score:
+                            integerValue(
+                                value(
+                                    skillsGR,
+                                    "assessment_score"
+                                )
+                            ),
+
+                        certification:
+                            value(
+                                skillsGR,
+                                "certification"
+                            )
+
+                    });
+
+                }
+
+            }
+
+        }
+
+
+        /* ========================================================
+           PLACEMENT INTELLIGENCE
+           ======================================================== */
+
+        if (
+            tableExists(
+                INTELLIGENCE_TABLE
+            )
+        ) {
+
+            var intelligenceGR =
+                new GlideRecord(
+                    INTELLIGENCE_TABLE
+                );
+
+
+            intelligenceGR.addQuery(
+                "student",
+                studentSysId
+            );
+
+
+            intelligenceGR.orderByDesc(
+                "sys_created_on"
+            );
+
+
+            intelligenceGR.setLimit(1);
+
+
+            intelligenceGR.query();
+
+
+            if (
+                intelligenceGR.next()
+            ) {
+
+                student.readiness.score =
+                    integerValue(
+                        value(
+                            intelligenceGR,
+                            "readiness_score"
+                        )
+                    );
+
+
+                student.readiness.risk =
+                    display(
+                        intelligenceGR,
+                        "risk_level"
+                    ) ||
+                    value(
+                        intelligenceGR,
+                        "risk_level"
+                    ) ||
+                    "Not Available";
+
+
+                student.readiness.skillGap =
+                    value(
+                        intelligenceGR,
+                        "primary_skill_gap"
+                    ) ||
+                    value(
+                        intelligenceGR,
+                        "skill_gap_summary"
+                    ) ||
+                    "No Significant Gap";
+
+
+                student.readiness.participation =
+                    integerValue(
+                        value(
+                            intelligenceGR,
+                            "participation_score"
+                        )
+                    );
+
+
+                student.readiness.missedOpportunities =
+                    integerValue(
+                        value(
+                            intelligenceGR,
+                            "missed_opportunities"
+                        )
+                    );
+
+
+                student.readiness.recommendation =
+                    value(
+                        intelligenceGR,
+                        "recommended_action"
+                    );
+
+
+                student.readiness.aiInsight =
+                    value(
+                        intelligenceGR,
+                        "ai_insight"
+                    );
+
+            }
+
+        }
+
+
+        /* ========================================================
+           PLACEMENT OUTCOME
+           ======================================================== */
+
+        if (
+            tableExists(
+                OUTCOME_TABLE
+            )
+        ) {
+
+            var studentOutcomeGR =
+                new GlideRecord(
+                    OUTCOME_TABLE
+                );
+
+
+            studentOutcomeGR.addQuery(
+                "student",
+                studentSysId
+            );
+
+
+            studentOutcomeGR.query();
+
+
+            student.activity.outcomes =
+                studentOutcomeGR.getRowCount();
+
+        }
+
+
+        /* ========================================================
+           INTERVENTIONS
+           ======================================================== */
+
+        if (
+            tableExists(
+                INTERVENTION_TABLE
+            )
+        ) {
+
+            var studentInterventionGR =
+                new GlideRecord(
+                    INTERVENTION_TABLE
+                );
+
+
+            studentInterventionGR.addQuery(
+                "student",
+                studentSysId
+            );
+
+
+            studentInterventionGR.query();
+
+
+            student.activity.interventions =
+                studentInterventionGR.getRowCount();
+
+        }
+
+
+        /* ========================================================
+           PLACEMENT READY
+           ======================================================== */
+
+        var cgpa =
+            decimalValue(
+                student.cgpa
+            );
+
+
+        if (
+
+            student.profile_status ===
+                "Active"
+
+            &&
+
+            cgpa >= 7
+
+            &&
+
+            student.backlogs === 0
+
+            &&
+
+            student.placement_status !==
+                "Placed"
+
+            &&
+
+            student.placement_status !==
+                "Opted Out"
+
+            &&
+
+            student.placement_status !==
+                "Higher Studies"
+
+        ) {
+
+            data.summary.placementReady++;
+
+        }
+
+
+        /* ========================================================
+           RISK STUDENT
+           ======================================================== */
+
+        if (
+
+            student.placement_status ===
+                "Not Placed"
+
+            &&
+
+            (
+                student.backlogs > 0
+
+                ||
+
+                cgpa < 6.5
+
+                ||
+
+                student.profile_status !==
+                    "Active"
+            )
+
+        ) {
+
+            data.summary.riskStudents++;
+
+        }
+
+
+        /* ========================================================
+           ADD
+           ======================================================== */
+
+        data.students.push(
+            student
+        );
+
+    }
+
+
+    /* ============================================================
+       SORT FILTERS
+       ============================================================ */
+
+    data.branches.sort();
+
+    data.batches.sort();
+
+
+    /* ============================================================
+       TOTAL APPLICATION COUNT
+       ============================================================ */
+
+    if (
+        tableExists(
+            APPLICATION_TABLE
+        )
+    ) {
+
+        var totalApplicationGR =
+            new GlideRecord(
+                APPLICATION_TABLE
+            );
+
+
+        totalApplicationGR.query();
+
+
+        data.summary.applications =
+            totalApplicationGR.getRowCount();
+
+    }
+
+
+})();
+(function() {
+    var tpoGR = new GlideRecord('x_snc_campus360_campus360_tpo_profile');
+    tpoGR.query();
+    if (tpoGR.next()) {
+        data.tpoName = tpoGR.getValue('tpo_name') || 'MD Ali';
+        data.tpoInitials = 'MA';
+        data.tpoTitle = tpoGR.getValue('designation') || 'Training & Placement Officer';
+        data.tpoOffice = tpoGR.getValue('college_name') || 'CMR Institute of Technology';
+    } else {
+        data.tpoName = 'MD Ali';
+        data.tpoInitials = 'MA';
+        data.tpoTitle = 'TPO';
+        data.tpoOffice = 'Training & Placement Office';
+    }
+})();
+
+
+(function() {
+    var tpoGR = new GlideRecord('x_snc_campus360_campus360_tpo_profile');
+    tpoGR.query();
+    var name = 'MD Ali';
+    var title = 'Training & Placement Officer';
+    var office = 'CMR Institute of Technology';
+    if (tpoGR.next()) {
+        name = tpoGR.getValue('tpo_name') || 'MD Ali';
+        title = tpoGR.getValue('designation') || title;
+        office = tpoGR.getValue('college_name') || office;
+    }
+    data.tpo = {
+        name: name,
+        firstName: name,
+        initials: 'MA',
+        title: title,
+        office: office
+    };
+    data.tpoName = name;
+    data.tpoInitials = 'MA';
+})();
+
+
+data.aiWidget = $sp.getWidget('c4ae634574e703107f4410c9fee0cde5');
+]]></script>
+        <servicenow>false</servicenow>
+        <sys_class_name>sp_widget</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-27 16:00:38</sys_created_on>
+        <sys_id>ff1e645a09efc3107f442a080dcb428f</sys_id>
+        <sys_mod_count>29</sys_mod_count>
+        <sys_name>Campus360 TPO Student Management</sys_name>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name>sp_widget_ff1e645a09efc3107f442a080dcb428f</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-30 18:57:33</sys_updated_on>
+        <template><![CDATA[<div class="campus360-tpo-app"
+     ng-class="{'campus360-sidebar-collapsed': c.sidebarCollapsed}">
+
+  <!-- ============================================================
+       SIDEBAR
+       ============================================================ -->
+
+  <aside class="campus360-sidebar">
+
+    <!-- BRAND -->
+
+    <div class="sidebar-brand">
+
+      <div class="brand-logo">
+        C
+      </div>
+
+      <div class="brand-title-wrap">
+
+        <div class="brand-title">
+          Campus360
+        </div>
+
+        <div class="brand-subtitle">
+          TPO Portal
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- TPO PROFILE -->
+
+    <div class="tpo-profile">
+
+      <div class="tpo-avatar">
+        MA
+      </div>
+
+      <div class="tpo-profile-text">
+
+        <strong>
+          MD Ali
+        </strong>
+
+        <span class="tpo-role">
+          TPO
+        </span>
+
+        <span>
+          Training &amp; Placement Office
+        </span>
+
+      </div>
+
+    </div>
+
+
+    <!-- NAVIGATION -->
+
+    <nav class="sidebar-navigation">
+
+      <!-- OVERVIEW -->
+
+      <div class="nav-group-title">
+        OVERVIEW
+      </div>
+
+
+      <a class="nav-link"
+         ng-href="?id=campus360_tpo_home">
+
+        <span class="nav-link-icon">
+          <i class="fa fa-home"></i>
+        </span>
+
+        <span class="nav-link-text">
+          Dashboard
+        </span>
+
+      </a>
+
+
+      <!-- STUDENTS -->
+
+      <div class="nav-group-title">
+        STUDENTS
+      </div>
+
+
+      <a class="nav-link active"
+         ng-href="?id=campus360_tpo_student_management">
+
+        <span class="nav-link-icon">
+          <i class="fa fa-user-o"></i>
+        </span>
+
+        <span class="nav-link-text">
+          Students
+        </span>
+
+        <span class="nav-count purple">
+          {{c.data.summary.totalStudents || 0}}
+        </span>
+
+      </a>
+
+
+      <a class="nav-link"
+         ng-href="?id=campus360_tpo_skill_intelligence_new">
+
+        <span class="nav-link-icon">
+          <i class="fa fa-magic"></i>
+        </span>
+
+        <span class="nav-link-text">
+          Skill Intelligence
+        </span>
+
+      </a>
+
+
+      <a class="nav-link"
+         ng-href="?id=student_assessments_new">
+
+        <span class="nav-link-icon">
+          <i class="fa fa-list-alt"></i>
+        </span>
+
+        <span class="nav-link-text">
+          Assessments
+        </span>
+
+      </a>
+
+
+      <!-- PLACEMENTS -->
+
+      <div class="nav-group-title">
+        PLACEMENTS
+      </div>
+
+
+      <a class="nav-link"
+         ng-href="?id=campus360_tpo_companies_new">
+
+        <span class="nav-link-icon">
+          <i class="fa fa-building-o"></i>
+        </span>
+
+        <span class="nav-link-text">
+          Companies
+        </span>
+
+        <span class="nav-count purple">
+          {{c.data.summary.companies || 0}}
+        </span>
+
+      </a>
+
+
+      <a class="nav-link"
+         ng-href="?id=campus360_tpo_opportunities_new">
+
+        <span class="nav-link-icon">
+          <i class="fa fa-diamond"></i>
+        </span>
+
+        <span class="nav-link-text">
+          Opportunities
+        </span>
+
+        <span class="nav-count purple">
+          {{c.data.summary.opportunities || 0}}
+        </span>
+
+      </a>
+
+
+      <a class="nav-link"
+         ng-href="?id=campus360_tpo_application_new">
+
+        <span class="nav-link-icon">
+          <i class="fa fa-file-text-o"></i>
+        </span>
+
+        <span class="nav-link-text">
+          Applications
+        </span>
+
+        <span class="nav-count purple">
+          {{c.data.summary.applications || 0}}
+        </span>
+
+      </a>
+
+
+      <a class="nav-link"
+         ng-href="?id=campus360_tpo_interviews_new">
+
+        <span class="nav-link-icon">
+          <i class="fa fa-dot-circle-o"></i>
+        </span>
+
+        <span class="nav-link-text">
+          Interviews
+        </span>
+
+      </a>
+
+
+      <a class="nav-link"
+         ng-href="?id=campus360_tpo_placement_outcomes">
+
+        <span class="nav-link-icon">
+          <i class="fa fa-check"></i>
+        </span>
+
+        <span class="nav-link-text">
+          Placement Outcomes
+        </span>
+
+        <span class="nav-count green">
+          {{c.data.summary.placementOutcomes || 0}}
+        </span>
+
+      </a>
+
+
+      <!-- TRAINING -->
+
+      <div class="nav-group-title">
+        TRAINING
+      </div>
+
+
+      <a class="nav-link"
+         ng-href="?id=campus360_tpo_training_programs">
+
+        <span class="nav-link-icon">
+          <i class="fa fa-diamond"></i>
+        </span>
+
+        <span class="nav-link-text">
+          Training Programs
+        </span>
+
+      </a>
+
+
+  
+
+    </nav>
+
+  </aside>
+
+
+  <!-- ============================================================
+       MAIN CONTENT
+       ============================================================ -->
+
+  <main class="campus360-main">
+
+
+    <!-- TOP BAR -->
+
+    <header class="campus360-topbar">
+
+      <div class="topbar-left">
+
+        <!-- IMPORTANT:
+             This is now connected to c.sidebarCollapsed -->
+
+        <button type="button"
+                class="menu-button"
+                ng-click="c.toggleSidebar()"
+                aria-label="Toggle navigation">
+
+          <i class="fa"
+             ng-class="{
+               'fa-bars': !c.sidebarCollapsed,
+               'fa-angle-right': c.sidebarCollapsed
+             }">
+          </i>
+
+        </button>
+
+
+        <div class="page-heading">
+
+          <span>
+            CAMPUS360
+          </span>
+
+          <strong>
+            Student Management
+          </strong>
+
+        </div>
+
+      </div>
+
+
+      <div class="topbar-right">
+
+        <div class="topbar-search">
+
+          <i class="fa fa-search"></i>
+
+          <input type="text"
+                 ng-model="c.globalSearch"
+                 ng-change="c.applyFilters()"
+                 placeholder="Search students...">
+
+        </div>
+
+
+        <button type="button"
+                class="topbar-icon-button"
+                ng-click="c.refresh()">
+
+          <i class="fa fa-refresh"></i>
+
+        </button>
+
+
+        <button type="button"
+                class="topbar-icon-button notification-button">
+
+          <i class="fa fa-bell-o"></i>
+
+          <span></span>
+
+        </button>
+
+
+        <div class="topbar-user">
+
+          <div class="topbar-user-avatar">
+            MA
+          </div>
+
+          <div class="topbar-user-text">
+
+            <strong>
+              MD Ali
+            </strong>
+
+            <span>
+              TPO
+            </span>
+
+          </div>
+
+          <i class="fa fa-angle-down"></i>
+
+        </div>
+
+      </div>
+
+    </header>
+
+
+    <!-- ==========================================================
+         CONTENT
+         ========================================================== -->
+
+    <section class="campus360-content">
+
+
+      <!-- ERROR -->
+
+      <div class="campus360-error"
+           ng-if="c.data.error">
+
+        <i class="fa fa-exclamation-triangle"></i>
+
+        <div>
+
+          <strong>
+            Student Management could not load
+          </strong>
+
+          <p>
+            {{c.data.error}}
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <!-- ========================================================
+           PAGE HEADER
+           ======================================================== -->
+
+      <section class="student-page-header"
+               ng-if="!c.data.error">
+
+        <div>
+
+          <div class="page-eyebrow">
+            <span></span>
+            TPO STUDENT MANAGEMENT
+          </div>
+
+          <h1>
+            Student Directory
+          </h1>
+
+          <p>
+            Manage student profiles, academic performance,
+            placement activity and readiness from one place.
+          </p>
+
+        </div>
+
+
+        <button type="button"
+                class="refresh-data-button"
+                ng-click="c.refresh()">
+
+          <i class="fa fa-refresh"></i>
+
+          Refresh Data
+
+        </button>
+
+      </section>
+
+
+      <!-- ========================================================
+           FOUR CARDS
+           ======================================================== -->
+
+      <section class="student-stat-grid"
+               ng-if="!c.data.error">
+
+
+        <div class="student-stat-card total-card">
+
+          <div class="stat-card-icon">
+            <i class="fa fa-users"></i>
+          </div>
+
+          <div class="stat-card-content">
+
+            <span>
+              TOTAL STUDENTS
+            </span>
+
+            <strong>
+              {{c.data.summary.totalStudents || 0}}
+            </strong>
+
+            <small>
+              Registered students
+            </small>
+
+          </div>
+
+        </div>
+
+
+        <div class="student-stat-card ready-card">
+
+          <div class="stat-card-icon">
+            <i class="fa fa-line-chart"></i>
+          </div>
+
+          <div class="stat-card-content">
+
+            <span>
+              PLACEMENT READY
+            </span>
+
+            <strong>
+              {{c.data.summary.placementReady || 0}}
+            </strong>
+
+            <small>
+              Ready for opportunities
+            </small>
+
+          </div>
+
+        </div>
+
+
+        <div class="student-stat-card placed-card">
+
+          <div class="stat-card-icon">
+            <i class="fa fa-briefcase"></i>
+          </div>
+
+          <div class="stat-card-content">
+
+            <span>
+              PLACED
+            </span>
+
+            <strong>
+              {{c.data.summary.placed || 0}}
+            </strong>
+
+            <small>
+              Placement outcomes
+            </small>
+
+          </div>
+
+        </div>
+
+
+        <div class="student-stat-card not-placed-card">
+
+          <div class="stat-card-icon">
+            <i class="fa fa-clock-o"></i>
+          </div>
+
+          <div class="stat-card-content">
+
+            <span>
+              NOT PLACED
+            </span>
+
+            <strong>
+              {{c.data.summary.notPlaced || 0}}
+            </strong>
+
+            <small>
+              Need placement attention
+            </small>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- ========================================================
+           FILTER TOOLBAR
+           ======================================================== -->
+
+      <section class="directory-toolbar"
+               ng-if="!c.data.error">
+
+        <div class="directory-toolbar-title">
+
+          <span>
+            STUDENTS
+          </span>
+
+          <strong>
+            {{c.filteredStudents.length}}
+          </strong>
+
+          <em>
+            students
+          </em>
+
+        </div>
+
+
+        <div class="directory-toolbar-controls">
+
+          <div class="directory-search">
+
+            <i class="fa fa-search"></i>
+
+            <input type="text"
+                   ng-model="c.searchText"
+                   ng-change="c.applyFilters()"
+                   placeholder="Search by name, ID, branch or email...">
+
+          </div>
+
+
+          <select ng-model="c.filters.branch"
+                  ng-change="c.applyFilters()">
+
+            <option value="">
+              All Branches
+            </option>
+
+            <option ng-repeat="branch in c.data.branches"
+                    value="{{branch}}">
+              {{branch}}
+            </option>
+
+          </select>
+
+
+          <select ng-model="c.filters.batch"
+                  ng-change="c.applyFilters()">
+
+            <option value="">
+              All Batches
+            </option>
+
+            <option ng-repeat="batch in c.data.batches"
+                    value="{{batch}}">
+              {{batch}}
+            </option>
+
+          </select>
+
+
+          <select ng-model="c.filters.placement"
+                  ng-change="c.applyFilters()">
+
+            <option value="">
+              All Placements
+            </option>
+
+            <option value="Not Placed">
+              Not Placed
+            </option>
+
+            <option value="Eligible">
+              Eligible
+            </option>
+
+            <option value="In Process">
+              In Process
+            </option>
+
+            <option value="Placed">
+              Placed
+            </option>
+
+            <option value="Higher Studies">
+              Higher Studies
+            </option>
+
+            <option value="Opted Out">
+              Opted Out
+            </option>
+
+          </select>
+
+
+          <button type="button"
+                  class="clear-button"
+                  ng-click="c.clearFilters()">
+
+            Clear
+
+          </button>
+
+        </div>
+
+      </section>
+
+
+      <!-- ========================================================
+           STUDENT DIRECTORY
+           ======================================================== -->
+
+      <section class="student-directory"
+               ng-if="!c.data.error">
+
+
+        <div class="directory-heading">
+
+          <div>
+
+            <span>
+              STUDENT DIRECTORY
+            </span>
+
+            <h2>
+              All Students
+            </h2>
+
+          </div>
+
+          <div class="directory-record-count">
+            {{c.filteredStudents.length}} records
+          </div>
+
+        </div>
+
+
+        <!-- EMPTY -->
+
+        <div class="empty-directory"
+             ng-if="!c.filteredStudents.length">
+
+          <i class="fa fa-users"></i>
+
+          <h3>
+            No students found
+          </h3>
+
+          <p>
+            Change your search or filters and try again.
+          </p>
+
+          <button type="button"
+                  ng-click="c.clearFilters()">
+
+            Clear Filters
+
+          </button>
+
+        </div>
+
+
+        <!-- TABLE -->
+
+        <div class="student-table-wrap"
+             ng-if="c.filteredStudents.length">
+
+          <table class="student-table">
+
+            <thead>
+
+              <tr>
+
+                <th>
+                  STUDENT
+                </th>
+
+                <th>
+                  BRANCH
+                </th>
+
+                <th>
+                  APPLICATIONS
+                </th>
+
+                <th>
+                  PLACEMENT
+                </th>
+
+                <th>
+                  ACADEMICS
+                </th>
+
+                <th>
+                  VIEW
+                </th>
+
+              </tr>
+
+            </thead>
+
+
+            <tbody>
+
+              <tr ng-repeat="student in c.filteredStudents track by student.sys_id">
+
+
+                <td>
+
+                  <div class="directory-student">
+
+                    <div class="directory-avatar"
+                         ng-class="'avatar-' + ($index % 5)">
+
+                      {{student.initials}}
+
+                    </div>
+
+                    <div class="directory-student-text">
+
+                      <strong>
+                        {{student.name}}
+                      </strong>
+
+                      <span>
+                        {{student.student_id}}
+                      </span>
+
+                    </div>
+
+                  </div>
+
+                </td>
+
+
+                <td>
+
+                  <div class="branch-cell">
+
+                    <strong>
+                      {{student.branch || '—'}}
+                    </strong>
+
+                    <span>
+
+                      {{student.degree || ''}}
+
+                      <span ng-if="student.batch">
+                        • {{student.batch}}
+                      </span>
+
+                    </span>
+
+                  </div>
+
+                </td>
+
+
+                <td>
+
+                  <div class="application-cell">
+
+                    <strong>
+                      {{student.application_count || 0}}
+                    </strong>
+
+                    <span>
+                      applications
+                    </span>
+
+                  </div>
+
+                </td>
+
+
+                <td>
+
+                  <span class="placement-pill"
+                        ng-class="c.getPlacementClass(student.placement_status)">
+
+                    {{student.placement_status || 'Not Placed'}}
+
+                  </span>
+
+                </td>
+
+
+                <td>
+
+                  <div class="academic-cell">
+
+                    <div>
+
+                      <strong>
+                        {{c.formatCGPA(student.cgpa)}}
+                      </strong>
+
+                      <span>
+                        CGPA
+                      </span>
+
+                    </div>
+
+                    <div class="academic-backlog"
+                         ng-class="c.getBacklogClass(student.backlogs)">
+
+                      <strong>
+                        {{student.backlogs || 0}}
+                      </strong>
+
+                      <span>
+                        backlog{{student.backlogs == 1 ? '' : 's'}}
+                      </span>
+
+                    </div>
+
+                  </div>
+
+                </td>
+
+
+                <td>
+
+                  <button type="button"
+                          class="view-student-button"
+                          ng-click="c.openStudent(student)">
+
+                    View
+
+                    <i class="fa fa-arrow-right"></i>
+
+                  </button>
+
+                </td>
+
+              </tr>
+
+            </tbody>
+
+          </table>
+
+        </div>
+
+      </section>
+
+    </section>
+
+  </main>
+
+
+  <!-- ============================================================
+       STUDENT PROFILE
+       IMPORTANT:
+       This is ABSOLUTE inside the widget,
+       NOT FIXED to the browser viewport.
+       ============================================================ -->
+
+  <div class="student-profile-overlay"
+       ng-if="c.selectedStudent"
+       ng-click="c.closeStudent()">
+
+
+    <section class="student-profile-panel"
+             ng-click="$event.stopPropagation()">
+
+
+      <!-- PROFILE HEADER -->
+
+      <div class="profile-panel-header">
+
+        <div class="profile-header-left">
+
+          <div class="profile-main-avatar">
+            {{c.selectedStudent.initials}}
+          </div>
+
+          <div class="profile-main-info">
+
+            <span>
+              STUDENT PROFILE
+            </span>
+
+            <h2>
+              {{c.selectedStudent.name}}
+            </h2>
+
+            <p>
+
+              {{c.selectedStudent.student_id}}
+
+              <span ng-if="c.selectedStudent.branch">
+                • {{c.selectedStudent.branch}}
+              </span>
+
+              <span ng-if="c.selectedStudent.batch">
+                • {{c.selectedStudent.batch}}
+              </span>
+
+            </p>
+
+          </div>
+
+        </div>
+
+
+        <button type="button"
+                class="profile-close-button"
+                ng-click="c.closeStudent()">
+
+          <i class="fa fa-times"></i>
+
+        </button>
+
+      </div>
+
+
+      <!-- PROFILE BODY -->
+
+      <div class="profile-panel-body">
+
+
+        <!-- SUMMARY -->
+
+        <div class="profile-summary-grid">
+
+
+          <div class="profile-summary-card purple-summary">
+
+            <span>
+              PLACEMENT
+            </span>
+
+            <strong>
+              {{c.selectedStudent.placement_status || 'Not Placed'}}
+            </strong>
+
+          </div>
+
+
+          <div class="profile-summary-card blue-summary">
+
+            <span>
+              CGPA
+            </span>
+
+            <strong>
+              {{c.formatCGPA(c.selectedStudent.cgpa)}}
+            </strong>
+
+          </div>
+
+
+          <div class="profile-summary-card green-summary">
+
+            <span>
+              APPLICATIONS
+            </span>
+
+            <strong>
+              {{c.selectedStudent.application_count || 0}}
+            </strong>
+
+          </div>
+
+
+          <div class="profile-summary-card orange-summary">
+
+            <span>
+              READINESS
+            </span>
+
+            <strong>
+              {{c.selectedStudent.readiness.score || 0}}%
+            </strong>
+
+          </div>
+
+        </div>
+
+
+        <!-- PERSONAL + ACADEMICS -->
+
+        <div class="profile-two-column">
+
+
+          <div class="profile-section">
+
+            <div class="profile-section-title">
+
+              <i class="fa fa-user"></i>
+
+              <span>
+                PERSONAL DETAILS
+              </span>
+
+            </div>
+
+
+            <div class="detail-grid">
+
+              <div>
+
+                <label>
+                  EMAIL
+                </label>
+
+                <strong>
+                  {{c.selectedStudent.email || '—'}}
+                </strong>
+
+              </div>
+
+
+              <div>
+
+                <label>
+                  PHONE
+                </label>
+
+                <strong>
+                  {{c.selectedStudent.phone_number || '—'}}
+                </strong>
+
+              </div>
+
+
+              <div>
+
+                <label>
+                  DEGREE
+                </label>
+
+                <strong>
+                  {{c.selectedStudent.degree || '—'}}
+                </strong>
+
+              </div>
+
+
+              <div>
+
+                <label>
+                  BATCH
+                </label>
+
+                <strong>
+                  {{c.selectedStudent.batch || '—'}}
+                </strong>
+
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <div class="profile-section">
+
+            <div class="profile-section-title">
+
+              <i class="fa fa-graduation-cap"></i>
+
+              <span>
+                ACADEMICS
+              </span>
+
+            </div>
+
+
+            <div class="academic-profile-box">
+
+              <div class="large-academic-score">
+
+                <strong>
+                  {{c.formatCGPA(c.selectedStudent.cgpa)}}
+                </strong>
+
+                <span>
+                  CGPA
+                </span>
+
+              </div>
+
+
+              <div class="academic-details">
+
+                <div>
+
+                  <span>
+                    BRANCH
+                  </span>
+
+                  <strong>
+                    {{c.selectedStudent.branch || '—'}}
+                  </strong>
+
+                </div>
+
+
+                <div>
+
+                  <span>
+                    BACKLOGS
+                  </span>
+
+                  <strong ng-class="c.getBacklogClass(c.selectedStudent.backlogs)">
+
+                    {{c.selectedStudent.backlogs || 0}}
+
+                  </strong>
+
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- SKILLS -->
+
+        <div class="profile-section">
+
+          <div class="profile-section-title">
+
+            <i class="fa fa-star"></i>
+
+            <span>
+              SKILLS
+            </span>
+
+            <em>
+              {{c.selectedStudent.skills.length || 0}}
+            </em>
+
+          </div>
+
+
+          <div class="skills-list"
+               ng-if="c.selectedStudent.skills.length">
+
+            <div class="skill-item"
+                 ng-repeat="skill in c.selectedStudent.skills">
+
+              <div class="skill-item-top">
+
+                <strong>
+                  {{skill.skill_name}}
+                </strong>
+
+                <span>
+                  {{skill.skill_level || '—'}}
+                </span>
+
+              </div>
+
+
+              <div class="skill-progress">
+
+                <div ng-style="{
+                  'width': c.skillWidth(skill.assessment_score)
+                }"></div>
+
+              </div>
+
+
+              <div class="skill-item-bottom">
+
+                <span>
+                  {{skill.skill_category || 'Skill'}}
+                </span>
+
+                <span ng-if="skill.assessment_score">
+
+                  Score {{skill.assessment_score}}%
+
+                </span>
+
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <div class="profile-empty-small"
+               ng-if="!c.selectedStudent.skills.length">
+
+            No skill records available.
+
+          </div>
+
+        </div>
+
+
+        <!-- TRAINING -->
+
+        <div class="profile-section">
+
+          <div class="profile-section-title">
+
+            <i class="fa fa-book"></i>
+
+            <span>
+              TRAINING ENROLLED
+            </span>
+
+          </div>
+
+
+          <div class="training-profile-list"
+               ng-if="c.selectedStudent.trainings.length">
+
+
+            <div class="training-profile-item"
+                 ng-repeat="training in c.selectedStudent.trainings">
+
+              <div class="training-profile-icon">
+
+                <i class="fa fa-book"></i>
+
+              </div>
+
+
+              <div class="training-profile-main">
+
+                <strong>
+                  {{training.name || 'Training Program'}}
+                </strong>
+
+                <span>
+
+                  {{training.skill_area || 'Skill Development'}}
+
+                  <span ng-if="training.batch">
+                    • {{training.batch}}
+                  </span>
+
+                </span>
+
+              </div>
+
+
+              <div class="training-profile-status">
+
+                <strong>
+                  {{training.completion_status || 'Enrolled'}}
+                </strong>
+
+                <span>
+
+                  Attendance
+                  {{training.attendance || 0}}%
+
+                </span>
+
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <div class="profile-empty-small"
+               ng-if="!c.selectedStudent.trainings.length">
+
+            No training enrollment records found.
+
+          </div>
+
+        </div>
+
+
+        <!-- PLACEMENT READINESS -->
+
+        <div class="profile-section readiness-section">
+
+          <div class="profile-section-title">
+
+            <i class="fa fa-line-chart"></i>
+
+            <span>
+              PLACEMENT READINESS
+            </span>
+
+          </div>
+
+
+          <div class="readiness-layout">
+
+
+            <div class="readiness-score">
+
+              <div class="readiness-circle"
+                   ng-style="{
+                     '--score':
+                     (c.selectedStudent.readiness.score || 0)
+                   }">
+
+                <strong>
+                  {{c.selectedStudent.readiness.score || 0}}
+                </strong>
+
+                <span>
+                  /100
+                </span>
+
+              </div>
+
+              <label>
+                READINESS SCORE
+              </label>
+
+            </div>
+
+
+            <div class="readiness-details">
+
+
+              <div class="readiness-detail-row">
+
+                <span>
+                  Risk Level
+                </span>
+
+                <strong class="risk-value"
+                        ng-class="c.getRiskClass(c.selectedStudent.readiness.risk)">
+
+                  {{c.selectedStudent.readiness.risk || 'Not Available'}}
+
+                </strong>
+
+              </div>
+
+
+              <div class="readiness-detail-row">
+
+                <span>
+                  Skill Gap
+                </span>
+
+                <strong>
+                  {{c.selectedStudent.readiness.skillGap || 'No Significant Gap'}}
+                </strong>
+
+              </div>
+
+
+              <div class="readiness-detail-row">
+
+                <span>
+                  Participation
+                </span>
+
+                <strong>
+                  {{c.selectedStudent.readiness.participation || 0}}%
+                </strong>
+
+              </div>
+
+
+              <div class="readiness-detail-row">
+
+                <span>
+                  Missed Opportunities
+                </span>
+
+                <strong>
+                  {{c.selectedStudent.readiness.missedOpportunities || 0}}
+                </strong>
+
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <div class="readiness-recommendation"
+               ng-if="c.selectedStudent.readiness.recommendation">
+
+            <i class="fa fa-lightbulb-o"></i>
+
+            <div>
+
+              <strong>
+                Recommended Action
+              </strong>
+
+              <p>
+                {{c.selectedStudent.readiness.recommendation}}
+              </p>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- TOP ACTIVITIES -->
+
+        <div class="profile-section">
+
+          <div class="profile-section-title">
+
+            <i class="fa fa-history"></i>
+
+            <span>
+              TOP ACTIVITIES
+            </span>
+
+          </div>
+
+
+          <div class="activity-grid">
+
+
+            <div class="activity-card activity-purple">
+
+              <div class="activity-icon">
+                <i class="fa fa-file-text-o"></i>
+              </div>
+
+              <div>
+
+                <strong>
+                  {{c.selectedStudent.activity.applications || 0}}
+                </strong>
+
+                <span>
+                  Applications
+                </span>
+
+              </div>
+
+            </div>
+
+
+            <div class="activity-card activity-blue">
+
+              <div class="activity-icon">
+                <i class="fa fa-list-alt"></i>
+              </div>
+
+              <div>
+
+                <strong>
+                  {{c.selectedStudent.activity.assessments || 0}}
+                </strong>
+
+                <span>
+                  Assessments
+                </span>
+
+              </div>
+
+            </div>
+
+
+            <div class="activity-card activity-green">
+
+              <div class="activity-icon">
+                <i class="fa fa-comments-o"></i>
+              </div>
+
+              <div>
+
+                <strong>
+                  {{c.selectedStudent.activity.interviews || 0}}
+                </strong>
+
+                <span>
+                  Interviews
+                </span>
+
+              </div>
+
+            </div>
+
+
+            <div class="activity-card activity-orange">
+
+              <div class="activity-icon">
+                <i class="fa fa-graduation-cap"></i>
+              </div>
+
+              <div>
+
+                <strong>
+                  {{c.selectedStudent.activity.trainings || 0}}
+                </strong>
+
+                <span>
+                  Trainings
+                </span>
+
+              </div>
+
+            </div>
+
+
+            <div class="activity-card activity-teal">
+
+              <div class="activity-icon">
+                <i class="fa fa-check"></i>
+              </div>
+
+              <div>
+
+                <strong>
+                  {{c.selectedStudent.activity.outcomes || 0}}
+                </strong>
+
+                <span>
+                  Placement Outcomes
+                </span>
+
+              </div>
+
+            </div>
+
+
+            <div class="activity-card activity-red">
+
+              <div class="activity-icon">
+                <i class="fa fa-magic"></i>
+              </div>
+
+              <div>
+
+                <strong>
+                  {{c.selectedStudent.activity.interventions || 0}}
+                </strong>
+
+                <span>
+                  Interventions
+                </span>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- AI INSIGHT -->
+
+        <div class="profile-section ai-insight-section">
+
+          <div class="profile-section-title">
+
+            <i class="fa fa-sun-o"></i>
+
+            <span>
+              CAMPUS360 INTELLIGENCE
+            </span>
+
+          </div>
+
+
+          <div class="ai-insight-box">
+
+            <div class="ai-insight-icon">
+              <i class="fa fa-sun-o"></i>
+            </div>
+
+            <div>
+
+              <strong>
+                AI Insight
+              </strong>
+
+              <p>
+
+                {{c.selectedStudent.readiness.aiInsight ||
+                'No AI insight is available for this student yet.'}}
+
+              </p>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- PROFILE FOOTER -->
+
+      <div class="profile-panel-footer">
+
+        <button type="button"
+                ng-click="c.closeStudent()">
+
+          Close Profile
+
+        </button>
+
+      </div>
+
+    </section>
+
+  </div>
+
+</div>
+
+<!-- AI CHATBOT WIDGET -->
+<sp-widget widget="data.aiWidget"></sp-widget>
+
+<div style="position: fixed; bottom: 24px; right: 24px; z-index: 999999;">
+  
+</div>]]></template>
+    </sp_widget>
+</record_update>

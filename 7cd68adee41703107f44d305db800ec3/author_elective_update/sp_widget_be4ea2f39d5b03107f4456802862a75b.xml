@@ -1,0 +1,423 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_widget">
+    <sp_widget action="DELETE">
+        <category>custom</category>
+        <client_script><![CDATA[api.controller=function() {
+  /* widget controller */
+  var c = this;
+};]]></client_script>
+        <controller_as>c</controller_as>
+        <css/>
+        <data_table>sp_instance</data_table>
+        <demo_data/>
+        <description>Process mock interview QR attendance</description>
+        <docs/>
+        <field_list/>
+        <has_preview>false</has_preview>
+        <id>campus360_qr_attendance</id>
+        <internal>false</internal>
+        <link><![CDATA[function link(scope, element, attrs, controller) {
+  
+}]]></link>
+        <name>Campus360 QR Attendance Processor</name>
+        <option_schema/>
+        <public>false</public>
+        <roles/>
+        <script><![CDATA[(function() {
+
+    data.success = false;
+    data.message = '';
+    data.debug = '';
+
+    var inputId = $sp.getParameter('interview_id');
+
+    if (!inputId) {
+        data.message = 'ERROR: interview_id is missing from URL.';
+        return;
+    }
+
+    var gr = new GlideRecord('x_snc_campus360_mock_interview');
+
+    if (!gr.isValid()) {
+        data.message = 'ERROR: Mock Interview table is invalid.';
+        return;
+    }
+
+    /*
+     * First try sys_id
+     */
+    var found = false;
+
+    if (inputId.length == 32 && gr.get(inputId)) {
+        found = true;
+    }
+
+    /*
+     * If URL contains INT004 instead of sys_id,
+     * find the record using interview_id.
+     */
+    if (!found) {
+
+        gr = new GlideRecord('x_snc_campus360_mock_interview');
+
+        gr.addQuery('interview_id', inputId);
+        gr.query();
+
+        if (gr.next()) {
+            found = true;
+        }
+    }
+
+    if (!found) {
+        data.message =
+            'ERROR: No Mock Interview record found for: ' + inputId;
+        return;
+    }
+
+    /*
+     * Record information
+     */
+    data.debug =
+        'Record found successfully.' +
+        ' | Sys ID = ' + gr.getUniqueValue() +
+        ' | Interview ID = ' + gr.getValue('interview_id') +
+        ' | Attendance = ' + gr.getDisplayValue('attendance_status') +
+        ' | QR Status = ' + gr.getDisplayValue('qr_status') +
+        ' | Record Can Write = ' + gr.canWrite() +
+        ' | Attendance Can Write = ' +
+            gr.getElement('attendance_status').canWrite() +
+        ' | QR Can Write = ' +
+            gr.getElement('qr_status').canWrite();
+
+    /*
+     * Validate fields
+     */
+    if (!gr.isValidField('attendance_status')) {
+        data.message = 'ERROR: attendance_status field does not exist.';
+        return;
+    }
+
+    if (!gr.isValidField('qr_status')) {
+        data.message = 'ERROR: qr_status field does not exist.';
+        return;
+    }
+
+    /*
+     * Check field ACLs
+     */
+    if (!gr.getElement('attendance_status').canWrite()) {
+        data.message =
+            'ERROR: attendance_status field is NOT writable.';
+        return;
+    }
+
+    if (!gr.getElement('qr_status').canWrite()) {
+        data.message =
+            'ERROR: qr_status field is NOT writable.';
+        return;
+    }
+
+    /*
+     * Get actual choice values
+     */
+    var attendanceElement = gr.getElement('attendance_status');
+    var qrElement = gr.getElement('qr_status');
+
+    data.debug +=
+        ' | Current Attendance Value = ' +
+        attendanceElement.getValue();
+
+    data.debug +=
+        ' | Current QR Value = ' +
+        qrElement.getValue();
+
+    /*
+     * Set values
+     */
+    gr.setValue('attendance_status', 'Present');
+    gr.setValue('qr_status', 'Scanned');
+
+    /*
+     * Show what ServiceNow thinks we are setting
+     */
+    data.debug +=
+        ' | New Attendance Value = ' +
+        gr.getValue('attendance_status');
+
+    data.debug +=
+        ' | New QR Value = ' +
+        gr.getValue('qr_status');
+
+    /*
+     * Update
+     */
+    var result = gr.update();
+
+    if (!result) {
+
+        data.message =
+            'ERROR: gr.update() failed.' +
+            ' | Last Error = ' +
+            gr.getLastErrorMessage();
+
+        return;
+    }
+
+    data.success = true;
+
+    data.message =
+        'Attendance marked successfully.' +
+        ' Interview = ' +
+        gr.getValue('interview_id');
+
+})();]]></script>
+        <servicenow>false</servicenow>
+        <sys_class_name>sp_widget</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-20 06:55:58</sys_created_on>
+        <sys_id>be4ea2f39d5b03107f4456802862a75b</sys_id>
+        <sys_mod_count>2</sys_mod_count>
+        <sys_name>Campus360 QR Attendance Processor</sys_name>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name>sp_widget_be4ea2f39d5b03107f4456802862a75b</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-20 07:10:47</sys_updated_on>
+        <template><![CDATA[<div class="container text-center">
+
+    <h1>Campus360 QR Attendance</h1>
+
+    <div class="alert"
+         ng-class="data.success ? 'alert-success' : 'alert-danger'">
+
+        <h2>
+            {{data.success ? 'Attendance Successful' : 'Attendance Failed'}}
+        </h2>
+
+        <p>{{data.message}}</p>
+
+        <hr>
+
+        <small>{{data.debug}}</small>
+
+    </div>
+
+</div>]]></template>
+    </sp_widget>
+    <sys_update_version action="INSERT_OR_UPDATE">
+        <action>DELETE</action>
+        <application display_value="Campus360">7cd68adee41703107f44d305db800ec3</application>
+        <file_path/>
+        <instance_id>82d18dc7c38fcf94a03197af0501316c</instance_id>
+        <instance_name>ltm-hck-2876-0027</instance_name>
+        <name>sp_widget_be4ea2f39d5b03107f4456802862a75b</name>
+        <payload>&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;record_update table="sp_widget"&gt;&lt;sp_widget action="INSERT_OR_UPDATE"&gt;&lt;category&gt;custom&lt;/category&gt;&lt;client_script&gt;&lt;![CDATA[api.controller=function() {
+  /* widget controller */
+  var c = this;
+};]]&gt;&lt;/client_script&gt;&lt;controller_as&gt;c&lt;/controller_as&gt;&lt;css/&gt;&lt;data_table&gt;sp_instance&lt;/data_table&gt;&lt;demo_data/&gt;&lt;description&gt;Process mock interview QR attendance&lt;/description&gt;&lt;docs/&gt;&lt;field_list/&gt;&lt;has_preview&gt;false&lt;/has_preview&gt;&lt;id&gt;campus360_qr_attendance&lt;/id&gt;&lt;internal&gt;false&lt;/internal&gt;&lt;link&gt;&lt;![CDATA[function link(scope, element, attrs, controller) {
+  
+}]]&gt;&lt;/link&gt;&lt;name&gt;Campus360 QR Attendance Processor&lt;/name&gt;&lt;option_schema/&gt;&lt;public&gt;false&lt;/public&gt;&lt;roles/&gt;&lt;script&gt;&lt;![CDATA[(function() {
+
+    data.success = false;
+    data.message = '';
+    data.debug = '';
+
+    var inputId = $sp.getParameter('interview_id');
+
+    if (!inputId) {
+        data.message = 'ERROR: interview_id is missing from URL.';
+        return;
+    }
+
+    var gr = new GlideRecord('x_snc_campus360_mock_interview');
+
+    if (!gr.isValid()) {
+        data.message = 'ERROR: Mock Interview table is invalid.';
+        return;
+    }
+
+    /*
+     * First try sys_id
+     */
+    var found = false;
+
+    if (inputId.length == 32 &amp;&amp; gr.get(inputId)) {
+        found = true;
+    }
+
+    /*
+     * If URL contains INT004 instead of sys_id,
+     * find the record using interview_id.
+     */
+    if (!found) {
+
+        gr = new GlideRecord('x_snc_campus360_mock_interview');
+
+        gr.addQuery('interview_id', inputId);
+        gr.query();
+
+        if (gr.next()) {
+            found = true;
+        }
+    }
+
+    if (!found) {
+        data.message =
+            'ERROR: No Mock Interview record found for: ' + inputId;
+        return;
+    }
+
+    /*
+     * Record information
+     */
+    data.debug =
+        'Record found successfully.' +
+        ' | Sys ID = ' + gr.getUniqueValue() +
+        ' | Interview ID = ' + gr.getValue('interview_id') +
+        ' | Attendance = ' + gr.getDisplayValue('attendance_status') +
+        ' | QR Status = ' + gr.getDisplayValue('qr_status') +
+        ' | Record Can Write = ' + gr.canWrite() +
+        ' | Attendance Can Write = ' +
+            gr.getElement('attendance_status').canWrite() +
+        ' | QR Can Write = ' +
+            gr.getElement('qr_status').canWrite();
+
+    /*
+     * Validate fields
+     */
+    if (!gr.isValidField('attendance_status')) {
+        data.message = 'ERROR: attendance_status field does not exist.';
+        return;
+    }
+
+    if (!gr.isValidField('qr_status')) {
+        data.message = 'ERROR: qr_status field does not exist.';
+        return;
+    }
+
+    /*
+     * Check field ACLs
+     */
+    if (!gr.getElement('attendance_status').canWrite()) {
+        data.message =
+            'ERROR: attendance_status field is NOT writable.';
+        return;
+    }
+
+    if (!gr.getElement('qr_status').canWrite()) {
+        data.message =
+            'ERROR: qr_status field is NOT writable.';
+        return;
+    }
+
+    /*
+     * Get actual choice values
+     */
+    var attendanceElement = gr.getElement('attendance_status');
+    var qrElement = gr.getElement('qr_status');
+
+    data.debug +=
+        ' | Current Attendance Value = ' +
+        attendanceElement.getValue();
+
+    data.debug +=
+        ' | Current QR Value = ' +
+        qrElement.getValue();
+
+    /*
+     * Set values
+     */
+    gr.setValue('attendance_status', 'Present');
+    gr.setValue('qr_status', 'Scanned');
+
+    /*
+     * Show what ServiceNow thinks we are setting
+     */
+    data.debug +=
+        ' | New Attendance Value = ' +
+        gr.getValue('attendance_status');
+
+    data.debug +=
+        ' | New QR Value = ' +
+        gr.getValue('qr_status');
+
+    /*
+     * Update
+     */
+    var result = gr.update();
+
+    if (!result) {
+
+        data.message =
+            'ERROR: gr.update() failed.' +
+            ' | Last Error = ' +
+            gr.getLastErrorMessage();
+
+        return;
+    }
+
+    data.success = true;
+
+    data.message =
+        'Attendance marked successfully.' +
+        ' Interview = ' +
+        gr.getValue('interview_id');
+
+})();]]&gt;&lt;/script&gt;&lt;servicenow&gt;false&lt;/servicenow&gt;&lt;sys_class_name&gt;sp_widget&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-20 06:55:58&lt;/sys_created_on&gt;&lt;sys_id&gt;be4ea2f39d5b03107f4456802862a75b&lt;/sys_id&gt;&lt;sys_mod_count&gt;2&lt;/sys_mod_count&gt;&lt;sys_name&gt;Campus360 QR Attendance Processor&lt;/sys_name&gt;&lt;sys_package display_value="Campus360" source="x_snc_campus360"&gt;7cd68adee41703107f44d305db800ec3&lt;/sys_package&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="Campus360"&gt;7cd68adee41703107f44d305db800ec3&lt;/sys_scope&gt;&lt;sys_update_name&gt;sp_widget_be4ea2f39d5b03107f4456802862a75b&lt;/sys_update_name&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-20 07:10:47&lt;/sys_updated_on&gt;&lt;template&gt;&lt;![CDATA[&lt;div class="container text-center"&gt;
+
+    &lt;h1&gt;Campus360 QR Attendance&lt;/h1&gt;
+
+    &lt;div class="alert"
+         ng-class="data.success ? 'alert-success' : 'alert-danger'"&gt;
+
+        &lt;h2&gt;
+            {{data.success ? 'Attendance Successful' : 'Attendance Failed'}}
+        &lt;/h2&gt;
+
+        &lt;p&gt;{{data.message}}&lt;/p&gt;
+
+        &lt;hr&gt;
+
+        &lt;small&gt;{{data.debug}}&lt;/small&gt;
+
+    &lt;/div&gt;
+
+&lt;/div&gt;]]&gt;&lt;/template&gt;&lt;/sp_widget&gt;&lt;/record_update&gt;</payload>
+        <payload_hash>938120882</payload_hash>
+        <record_name>Campus360 QR Attendance Processor</record_name>
+        <reverted_from/>
+        <source>70d68adee41703107f44d305db800ec8</source>
+        <source_table>sys_update_set</source_table>
+        <state>previous</state>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-20 07:10:47</sys_created_on>
+        <sys_id>89e1fafb9d5b03107f4456802862a70c</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_recorded_at>1a0bda736f80000001</sys_recorded_at>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-20 07:10:47</sys_updated_on>
+        <type>Widget</type>
+        <update_guid>c1e1bebb625b031046218c94c30b1938</update_guid>
+        <update_guid_history>c1e1bebb625b031046218c94c30b1938:938120882,0251b6bbfb5b0310c9491fcc6d36bfd8:1794970706,c48e66f3c75b03106321cdca208d9e31:137319442</update_guid_history>
+    </sys_update_version>
+    <sys_metadata_delete action="INSERT_OR_UPDATE">
+        <sys_audit_delete display_value="Campus360 QR Attendance Processor">5c1b43ff9d1f03107f4456802862a77c</sys_audit_delete>
+        <sys_class_name>sys_metadata_delete</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-20 09:00:47</sys_created_on>
+        <sys_db_object display_value="" name="sp_widget">sp_widget</sys_db_object>
+        <sys_id>3faa0ed5a8f64de297ba02c9720544c4</sys_id>
+        <sys_metadata>be4ea2f39d5b03107f4456802862a75b</sys_metadata>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>Campus360 QR Attendance Processor</sys_name>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_parent/>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_scope_delete display_value="">1cde9626740d46978b846077c1615101</sys_scope_delete>
+        <sys_update_name>sp_widget_be4ea2f39d5b03107f4456802862a75b</sys_update_name>
+        <sys_update_version display_value="sp_widget_be4ea2f39d5b03107f4456802862a75b">89e1fafb9d5b03107f4456802862a70c</sys_update_version>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-20 09:00:47</sys_updated_on>
+    </sys_metadata_delete>
+</record_update>

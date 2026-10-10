@@ -1,0 +1,574 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_widget">
+    <sp_widget action="INSERT_OR_UPDATE">
+        <category>custom</category>
+        <client_script><![CDATA[api.controller = function($scope, $window) {
+
+    var c = this;
+
+    c.backToAssessments = function() {
+
+        $window.location.href =
+            '?id=campus360_assessments';
+
+    };
+
+
+	c.backToDashboard = function() {
+
+    $window.location.href =
+        '?id=campus360_recruiter_dashboard_new';
+
+};
+
+};]]></client_script>
+        <controller_as>c</controller_as>
+        <css>.c360-assessment-view {&#13;
+  min-height: 100vh;&#13;
+  background: #f6f8fc;&#13;
+  padding: 42px 6%;&#13;
+  color: #10184d;&#13;
+}&#13;
+&#13;
+.c360-assessment-container {&#13;
+  max-width: 1050px;&#13;
+  margin: 0 auto;&#13;
+}&#13;
+&#13;
+/* HEADER */&#13;
+&#13;
+.c360-page-header {&#13;
+  display: flex;&#13;
+  justify-content: space-between;&#13;
+  align-items: flex-start;&#13;
+  margin-bottom: 28px;&#13;
+}&#13;
+&#13;
+.c360-eyebrow {&#13;
+  color: #5548e8;&#13;
+  font-size: 10px;&#13;
+  font-weight: 700;&#13;
+  letter-spacing: 1px;&#13;
+  margin-bottom: 7px;&#13;
+}&#13;
+&#13;
+.c360-page-header h1 {&#13;
+  margin: 0;&#13;
+  font-size: 27px;&#13;
+  font-weight: 600;&#13;
+}&#13;
+&#13;
+.c360-page-header p {&#13;
+  margin: 7px 0 0;&#13;
+  color: #73799b;&#13;
+  font-size: 12px;&#13;
+}&#13;
+&#13;
+.c360-back {&#13;
+  border: none;&#13;
+  background: transparent;&#13;
+  color: #5548e8;&#13;
+  font-size: 11px;&#13;
+  font-weight: 500;&#13;
+  text-decoration: none;&#13;
+  margin-top: 5px;&#13;
+  padding: 0;&#13;
+  cursor: pointer;&#13;
+}&#13;
+&#13;
+.c360-back:hover {&#13;
+  text-decoration: underline;&#13;
+}&#13;
+&#13;
+.c360-secondary-button {&#13;
+  border: 1px solid #d8d9eb;&#13;
+  background: #ffffff;&#13;
+  color: #5550df;&#13;
+  padding: 9px 16px;&#13;
+  border-radius: 7px;&#13;
+  font-size: 11px;&#13;
+  text-decoration: none;&#13;
+  cursor: pointer;&#13;
+}&#13;
+&#13;
+.c360-secondary-button:hover {&#13;
+  background: #f7f6ff;&#13;
+}&#13;
+&#13;
+&#13;
+/* MAIN CARD */&#13;
+&#13;
+.c360-details-card {&#13;
+  background: #ffffff;&#13;
+  border: 1px solid #dedff0;&#13;
+  border-radius: 12px;&#13;
+  padding: 28px;&#13;
+  box-shadow: 0 3px 12px rgba(40, 45, 90, 0.04);&#13;
+}&#13;
+&#13;
+&#13;
+/* DETAILS HEADER */&#13;
+&#13;
+.c360-details-header {&#13;
+  display: flex;&#13;
+  justify-content: space-between;&#13;
+  align-items: flex-start;&#13;
+  padding-bottom: 22px;&#13;
+  border-bottom: 1px solid #ececf4;&#13;
+}&#13;
+&#13;
+.c360-details-header h2 {&#13;
+  margin: 0;&#13;
+  color: #11184f;&#13;
+  font-size: 21px;&#13;
+  font-weight: 600;&#13;
+}&#13;
+&#13;
+.c360-assessment-id {&#13;
+  display: block;&#13;
+  margin-top: 6px;&#13;
+  color: #8b8faa;&#13;
+  font-size: 10px;&#13;
+}&#13;
+&#13;
+&#13;
+/* STATUS */&#13;
+&#13;
+.c360-status {&#13;
+  padding: 6px 12px;&#13;
+  border-radius: 7px;&#13;
+  font-size: 10px;&#13;
+  font-weight: 600;&#13;
+}&#13;
+&#13;
+.status-published {&#13;
+  background: #dcf7ec;&#13;
+  color: #16845c;&#13;
+}&#13;
+&#13;
+.status-draft {&#13;
+  background: #f1f1f5;&#13;
+  color: #6d7087;&#13;
+}&#13;
+&#13;
+.status-pending {&#13;
+  background: #fff1d5;&#13;
+  color: #bd7900;&#13;
+}&#13;
+&#13;
+&#13;
+/* GRID */&#13;
+&#13;
+.c360-details-grid {&#13;
+  display: grid;&#13;
+  grid-template-columns: 1fr 1fr;&#13;
+  gap: 0;&#13;
+  margin-top: 10px;&#13;
+}&#13;
+&#13;
+.c360-detail-item {&#13;
+  padding: 18px 12px 18px 0;&#13;
+  border-bottom: 1px solid #eeeeF5;&#13;
+}&#13;
+&#13;
+.c360-detail-item label {&#13;
+  display: block;&#13;
+  color: #8589a5;&#13;
+  font-size: 10px;&#13;
+  font-weight: 600;&#13;
+  margin-bottom: 7px;&#13;
+  text-transform: uppercase;&#13;
+  letter-spacing: 0.3px;&#13;
+}&#13;
+&#13;
+.c360-detail-item strong {&#13;
+  color: #171d50;&#13;
+  font-size: 12px;&#13;
+  font-weight: 500;&#13;
+}&#13;
+&#13;
+&#13;
+/* INSTRUCTIONS */&#13;
+&#13;
+.c360-instructions {&#13;
+  margin-top: 25px;&#13;
+}&#13;
+&#13;
+.c360-instructions &gt; label {&#13;
+  display: block;&#13;
+  color: #8589a5;&#13;
+  font-size: 10px;&#13;
+  font-weight: 600;&#13;
+  text-transform: uppercase;&#13;
+  margin-bottom: 8px;&#13;
+}&#13;
+&#13;
+.c360-instructions-box {&#13;
+  background: #f8f8fc;&#13;
+  border: 1px solid #e7e7f0;&#13;
+  border-radius: 8px;&#13;
+  min-height: 80px;&#13;
+  padding: 14px;&#13;
+  color: #555b7d;&#13;
+  font-size: 12px;&#13;
+  line-height: 1.6;&#13;
+}&#13;
+&#13;
+&#13;
+/* ACTIONS */&#13;
+&#13;
+.c360-details-actions {&#13;
+  display: flex;&#13;
+  justify-content: flex-end;&#13;
+  margin-top: 25px;&#13;
+  padding-top: 18px;&#13;
+  border-top: 1px solid #eeeeF5;&#13;
+}&#13;
+&#13;
+.c360-secondary-button {&#13;
+  border: 1px solid #d8d9eb;&#13;
+  background: #ffffff;&#13;
+  color: #5550df;&#13;
+  padding: 9px 16px;&#13;
+  border-radius: 7px;&#13;
+  font-size: 11px;&#13;
+  text-decoration: none;&#13;
+}&#13;
+&#13;
+.c360-secondary-button:hover {&#13;
+  background: #f7f6ff;&#13;
+}&#13;
+&#13;
+&#13;
+/* LOADING */&#13;
+&#13;
+.c360-loading {&#13;
+  background: #ffffff;&#13;
+  border: 1px solid #dedff0;&#13;
+  border-radius: 12px;&#13;
+  padding: 50px;&#13;
+  text-align: center;&#13;
+  color: #777b99;&#13;
+  font-size: 12px;&#13;
+}&#13;
+&#13;
+&#13;
+/* NOT FOUND */&#13;
+&#13;
+.c360-not-found {&#13;
+  background: #ffffff;&#13;
+  border: 1px solid #dedff0;&#13;
+  border-radius: 12px;&#13;
+  padding: 50px;&#13;
+  text-align: center;&#13;
+}&#13;
+&#13;
+.c360-not-found h2 {&#13;
+  margin: 0 0 8px;&#13;
+  font-size: 18px;&#13;
+}&#13;
+&#13;
+.c360-not-found p {&#13;
+  color: #777b99;&#13;
+  font-size: 12px;&#13;
+}&#13;
+&#13;
+.c360-not-found a {&#13;
+  color: #5548e8;&#13;
+  font-size: 11px;&#13;
+}&#13;
+&#13;
+&#13;
+/* MOBILE */&#13;
+&#13;
+@media (max-width: 700px) {&#13;
+&#13;
+  .c360-assessment-view {&#13;
+    padding: 25px 18px;&#13;
+  }&#13;
+&#13;
+  .c360-page-header {&#13;
+    flex-direction: column;&#13;
+    gap: 15px;&#13;
+  }&#13;
+&#13;
+  .c360-details-grid {&#13;
+    grid-template-columns: 1fr;&#13;
+  }&#13;
+&#13;
+}</css>
+        <data_table>sp_instance</data_table>
+        <demo_data/>
+        <description/>
+        <docs/>
+        <field_list/>
+        <has_preview>false</has_preview>
+        <id>campus360_assessment_view</id>
+        <internal>false</internal>
+        <link><![CDATA[function link(scope, element, attrs, controller) {
+  
+}]]></link>
+        <name>Campus360 Assessment View</name>
+        <option_schema/>
+        <public>false</public>
+        <roles/>
+        <script><![CDATA[(function() {
+
+    data.loading = true;
+    data.assessment = null;
+
+    var sysId = $sp.getParameter('sys_id');
+
+    if (!sysId) {
+        data.loading = false;
+        return;
+    }
+
+    var gr = new GlideRecord('x_snc_campus360_student_assessment');
+
+    if (!gr.get(sysId)) {
+        data.loading = false;
+        return;
+    }
+
+    data.assessment = {
+
+        sys_id: gr.getUniqueValue(),
+
+        name: gr.getValue('assessment_name'),
+
+        assessment_id: gr.getValue('assessment_id'),
+
+        opportunity: gr.getDisplayValue('opportunity'),
+
+        type: gr.getValue('assessment_type'),
+
+        date: gr.getDisplayValue('assessment_date'),
+
+        duration: gr.getValue('duration'),
+
+        maximum_score: gr.getValue('maximum_score'),
+
+        status: gr.getValue('status'),
+
+        instructions: gr.getValue('instructions'),
+
+        created_by: gr.getDisplayValue('sys_created_by')
+
+    };
+
+    data.loading = false;
+
+})();]]></script>
+        <servicenow>false</servicenow>
+        <sys_class_name>sp_widget</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-27 13:18:09</sys_created_on>
+        <sys_id>ebd8445209ebc3107f442a080dcb42be</sys_id>
+        <sys_mod_count>5</sys_mod_count>
+        <sys_name>Campus360 Assessment View</sys_name>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name>sp_widget_ebd8445209ebc3107f442a080dcb42be</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-27 13:41:40</sys_updated_on>
+        <template><![CDATA[ to Dashboard<div class="c360-assessment-view">
+
+  <div class="c360-assessment-container">
+
+    <!-- HEADER -->
+    <div class="c360-page-header">
+
+      <div>
+        <div class="c360-eyebrow">
+          RECRUITMENT
+        </div>
+
+        <h1>
+          Assessment Details
+        </h1>
+
+        <p>
+          View assessment information and configuration.
+        </p>
+      </div>
+
+      <button type="button"
+              class="c360-back"
+              ng-click="c.backToDashboard()">
+        ← Back to Dashboard
+      </button>
+
+    </div>
+
+
+    <!-- LOADING -->
+    <div class="c360-loading"
+         ng-if="c.data.loading">
+
+      Loading assessment...
+
+    </div>
+
+
+    <!-- ASSESSMENT CARD -->
+    <div class="c360-details-card"
+         ng-if="!c.data.loading && c.data.assessment">
+
+      <!-- TITLE -->
+      <div class="c360-details-header">
+
+        <div>
+
+          <div class="c360-eyebrow">
+            ASSESSMENT
+          </div>
+
+          <h2>
+            {{c.data.assessment.name}}
+          </h2>
+
+          <span class="c360-assessment-id">
+            {{c.data.assessment.assessment_id}}
+          </span>
+
+        </div>
+
+        <span class="c360-status"
+              ng-class="{
+                'status-published': c.data.assessment.status == 'Published',
+                'status-draft': c.data.assessment.status == 'draft',
+                'status-pending': c.data.assessment.status == 'Pending'
+              }">
+
+          {{c.data.assessment.status}}
+
+        </span>
+
+      </div>
+
+
+      <!-- INFORMATION -->
+      <div class="c360-details-grid">
+
+        <div class="c360-detail-item">
+
+          <label>Placement Opportunity</label>
+
+          <strong>
+            {{c.data.assessment.opportunity}}
+          </strong>
+
+        </div>
+
+
+        <div class="c360-detail-item">
+
+          <label>Assessment Type</label>
+
+          <strong>
+            {{c.data.assessment.type}}
+          </strong>
+
+        </div>
+
+
+        <div class="c360-detail-item">
+
+          <label>Assessment Date</label>
+
+          <strong>
+            {{c.data.assessment.date}}
+          </strong>
+
+        </div>
+
+
+        <div class="c360-detail-item">
+
+          <label>Duration</label>
+
+          <strong>
+            {{c.data.assessment.duration}}
+          </strong>
+
+        </div>
+
+
+        <div class="c360-detail-item">
+
+          <label>Maximum Score</label>
+
+          <strong>
+            {{c.data.assessment.maximum_score}}
+          </strong>
+
+        </div>
+
+
+        <div class="c360-detail-item">
+
+          <label>Created By</label>
+
+          <strong>
+            {{c.data.assessment.created_by}}
+          </strong>
+
+        </div>
+
+      </div>
+
+
+      <!-- INSTRUCTIONS -->
+      <div class="c360-instructions">
+
+        <label>
+          Instructions
+        </label>
+
+        <div class="c360-instructions-box">
+
+          {{c.data.assessment.instructions || 'No instructions provided.'}}
+
+        </div>
+
+      </div>
+
+
+      <!-- ACTIONS -->
+      <div class="c360-details-actions">
+
+        <button type="button"
+                class="c360-secondary-button"
+                ng-click="c.backToAssessments()">
+
+          ← Back to Assessments
+
+        </button>
+
+      </div>
+
+    </div>
+
+
+    <!-- NOT FOUND -->
+    <div class="c360-not-found"
+         ng-if="!c.data.loading && !c.data.assessment">
+
+      <h2>Assessment not found</h2>
+
+      <p>
+        The requested assessment could not be found.
+      </p>
+
+      <a href="?id=campus360_assessments">
+        ← Back to Assessments
+      </a>
+
+    </div>
+
+  </div>
+
+</div>]]></template>
+    </sp_widget>
+</record_update>

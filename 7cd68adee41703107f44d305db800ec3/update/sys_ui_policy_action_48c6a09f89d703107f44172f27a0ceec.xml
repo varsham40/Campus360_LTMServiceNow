@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_ui_policy_action">
+    <sys_ui_policy_action action="INSERT_OR_UPDATE">
+        <cleared>false</cleared>
+        <disabled>ignore</disabled>
+        <field>verified_by</field>
+        <field_message/>
+        <field_message_type>none</field_message_type>
+        <mandatory>ignore</mandatory>
+        <sys_class_name>sys_ui_policy_action</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-18 07:46:07</sys_created_on>
+        <sys_id>48c6a09f89d703107f44172f27a0ceec</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>verified_by</sys_name>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name>sys_ui_policy_action_48c6a09f89d703107f44172f27a0ceec</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-18 07:46:07</sys_updated_on>
+        <table>x_snc_campus360_placement_outcome</table>
+        <ui_policy display_value="PO-04 - Verified">1e56645f89d703107f44172f27a0ce68</ui_policy>
+        <value/>
+        <value_action>ignore</value_action>
+        <visible>true</visible>
+    </sys_ui_policy_action>
+    <sys_translated_text action="delete_multiple" query="documentkey=48c6a09f89d703107f44172f27a0ceec"/>
+</record_update>

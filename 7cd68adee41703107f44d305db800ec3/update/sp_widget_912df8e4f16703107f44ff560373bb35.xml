@@ -1,0 +1,3928 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_widget">
+    <sp_widget action="INSERT_OR_UPDATE">
+        <category>custom</category>
+        <client_script><![CDATA[api.controller = function() {
+
+    var c = this;
+
+
+    /* =====================================================
+       STATE
+       ===================================================== */
+
+    c.loading = false;
+
+    c.editing = false;
+
+    c.saving = false;
+
+    c.saveError = '';
+
+
+    /* =====================================================
+       INITIALS
+       ===================================================== */
+
+    c.makeInitials = function(name) {
+
+        if (!name) {
+            return 'ST';
+        }
+
+        name = String(name).trim();
+
+        if (!name) {
+            return 'ST';
+        }
+
+        var parts = name.split(/\s+/);
+
+        if (parts.length === 1) {
+
+            return parts[0]
+                .substring(0, 2)
+                .toUpperCase();
+
+        }
+
+        return (
+            parts[0].charAt(0) +
+            parts[parts.length - 1].charAt(0)
+        ).toUpperCase();
+
+    };
+
+
+    /* =====================================================
+       INITIAL DATA
+       ===================================================== */
+
+    if (
+        c.data &&
+        c.data.student
+    ) {
+
+        c.data.initials =
+            c.makeInitials(
+                c.data.student.student_name
+            );
+
+    } else {
+
+        c.data.initials = 'ST';
+
+    }
+
+
+    /* =====================================================
+       OPEN EDIT
+       ===================================================== */
+
+    c.openEdit = function() {
+
+        if (
+            !c.data ||
+            !c.data.student
+        ) {
+            return;
+        }
+
+        c.saveError = '';
+
+        c.editForm = {
+
+            student_id:
+                c.data.student.student_id || '',
+
+            student_name:
+                c.data.student.student_name || '',
+
+            email:
+                c.data.student.email || '',
+
+            phone_number:
+                c.data.student.phone_number || '',
+
+            batch:
+                c.data.student.batch || '',
+
+            branch:
+                c.data.student.branch || '',
+
+            degree:
+                c.data.student.degree || '',
+
+            cgpa:
+                c.data.student.cgpa || '',
+
+            backlogs:
+                c.data.student.backlogs || 0,
+
+            placement_status:
+                c.data.student.placement_status || '',
+
+            profile_status:
+                c.data.student.profile_status || ''
+
+        };
+
+        c.editing = true;
+
+    };
+
+
+    /* =====================================================
+       CLOSE EDIT
+       ===================================================== */
+
+    c.closeEdit = function() {
+
+        if (c.saving) {
+            return;
+        }
+
+        c.editing = false;
+
+        c.saveError = '';
+
+    };
+
+
+    /* =====================================================
+       SAVE PROFILE
+       ===================================================== */
+
+    c.saveProfile = function() {
+
+        if (c.saving) {
+            return;
+        }
+
+        c.saveError = '';
+
+
+        if (
+            !c.editForm.student_name ||
+            !String(
+                c.editForm.student_name
+            ).trim()
+        ) {
+
+            c.saveError =
+                'Student name cannot be empty.';
+
+            return;
+
+        }
+
+
+        if (
+            c.editForm.email &&
+            String(
+                c.editForm.email
+            ).indexOf('@') === -1
+        ) {
+
+            c.saveError =
+                'Please enter a valid email address.';
+
+            return;
+
+        }
+
+
+        if (
+            c.editForm.cgpa !== '' &&
+            c.editForm.cgpa !== null &&
+            c.editForm.cgpa !== undefined
+        ) {
+
+            var cgpa =
+                parseFloat(
+                    c.editForm.cgpa
+                );
+
+            if (
+                isNaN(cgpa) ||
+                cgpa < 0 ||
+                cgpa > 10
+            ) {
+
+                c.saveError =
+                    'CGPA must be between 0 and 10.';
+
+                return;
+
+            }
+
+        }
+
+
+        if (
+            c.editForm.backlogs !== '' &&
+            c.editForm.backlogs !== null &&
+            c.editForm.backlogs !== undefined
+        ) {
+
+            var backlogs =
+                parseInt(
+                    c.editForm.backlogs,
+                    10
+                );
+
+            if (
+                isNaN(backlogs) ||
+                backlogs < 0
+            ) {
+
+                c.saveError =
+                    'Backlogs cannot be negative.';
+
+                return;
+
+            }
+
+        }
+
+
+        c.saving = true;
+
+
+        c.server.get({
+
+            action: 'save_profile',
+
+            profile: c.editForm
+
+        }).then(
+
+            function(response) {
+
+                c.saving = false;
+
+
+                if (
+                    response &&
+                    response.data &&
+                    response.data.saveSuccess
+                ) {
+
+                    c.editing = false;
+
+                    c.loading = true;
+
+
+                    c.server.refresh().then(
+
+                        function() {
+
+                            c.loading = false;
+
+
+                            if (
+                                c.data &&
+                                c.data.student
+                            ) {
+
+                                c.data.initials =
+                                    c.makeInitials(
+                                        c.data.student.student_name
+                                    );
+
+                            }
+
+                        },
+
+                        function() {
+
+                            c.loading = false;
+
+                        }
+
+                    );
+
+                } else {
+
+                    c.saveError =
+                        (
+                            response &&
+                            response.data &&
+                            response.data.saveMessage
+                        ) ||
+                        'Unable to save the profile.';
+
+                }
+
+            },
+
+            function() {
+
+                c.saving = false;
+
+                c.saveError =
+                    'Unable to save the profile. Please try again.';
+
+            }
+
+        );
+
+    };
+
+
+    /* =====================================================
+       REFRESH
+       ===================================================== */
+
+    c.refresh = function() {
+
+        if (c.loading) {
+            return;
+        }
+
+        c.loading = true;
+
+
+        c.server.refresh().then(
+
+            function() {
+
+                c.loading = false;
+
+
+                if (
+                    c.data &&
+                    c.data.student
+                ) {
+
+                    c.data.initials =
+                        c.makeInitials(
+                            c.data.student.student_name
+                        );
+
+                }
+
+            },
+
+            function() {
+
+                c.loading = false;
+
+            }
+
+        );
+
+    };
+
+
+    /* =====================================================
+       DASHBOARD NAVIGATION
+       ===================================================== */
+
+    c.goToDashboard = function() {
+
+        /*
+         * Your actual student dashboard page ID.
+         */
+
+        window.location.href =
+            '?id=campus360_student_dashboard';
+
+    };
+
+};]]></client_script>
+        <controller_as>c</controller_as>
+        <css>/* =========================================================&#13;
+   CAMPUS360 STUDENT PROFILE&#13;
+   FULL SCREEN / FULL WIDTH&#13;
+   PROFESSIONAL COLORED UI&#13;
+   ========================================================= */&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   MAIN PROFILE PAGE&#13;
+   ========================================================= */&#13;
+&#13;
+.campus360-profile {&#13;
+  width: 100vw !important;&#13;
+  max-width: none !important;&#13;
+&#13;
+  /*&#13;
+   * Full-bleed Service Portal layout.&#13;
+   * Removes the centered 1180px restriction.&#13;
+   */&#13;
+  position: relative !important;&#13;
+&#13;
+  left: 50% !important;&#13;
+&#13;
+  margin-left: -50vw !important;&#13;
+  margin-right: -50vw !important;&#13;
+&#13;
+  padding: 28px 32px 65px;&#13;
+&#13;
+  min-height: 100vh;&#13;
+&#13;
+  box-sizing: border-box;&#13;
+&#13;
+  /* PAGE BACKGROUND */&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      135deg,&#13;
+      #eef6ff 0%,&#13;
+      #f6f1ff 48%,&#13;
+      #eefaf6 100%&#13;
+    );&#13;
+&#13;
+  color: #172033;&#13;
+&#13;
+  font-family:&#13;
+    Arial,&#13;
+    Helvetica,&#13;
+    sans-serif;&#13;
+&#13;
+  overflow-x: hidden;&#13;
+}&#13;
+&#13;
+&#13;
+.campus360-profile *,&#13;
+.campus360-profile *::before,&#13;
+.campus360-profile *::after {&#13;
+  box-sizing: border-box;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   PROFILE HEADER&#13;
+   ========================================================= */&#13;
+&#13;
+.profile-top {&#13;
+  position: relative;&#13;
+&#13;
+  width: 100%;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  justify-content: space-between;&#13;
+&#13;
+  gap: 25px;&#13;
+&#13;
+  padding: 28px 30px;&#13;
+&#13;
+  margin-bottom: 22px;&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      120deg,&#13;
+      #e8ddff 0%,&#13;
+      #eee8ff 32%,&#13;
+      #e4f1ff 67%,&#13;
+      #e5f8f0 100%&#13;
+    );&#13;
+&#13;
+  border: 1px solid #d4c9f0;&#13;
+&#13;
+  border-radius: 20px;&#13;
+&#13;
+  box-shadow:&#13;
+    0 10px 30px rgba(67, 52, 112, .10);&#13;
+&#13;
+  overflow: hidden;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   COLORFUL TOP LINE&#13;
+   ========================================================= */&#13;
+&#13;
+.profile-top::before {&#13;
+  content: "";&#13;
+&#13;
+  position: absolute;&#13;
+&#13;
+  left: 0;&#13;
+&#13;
+  top: 0;&#13;
+&#13;
+  width: 100%;&#13;
+&#13;
+  height: 5px;&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      90deg,&#13;
+      #7040c8,&#13;
+      #4d82d9,&#13;
+      #2da878&#13;
+    );&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   STUDENT INFORMATION&#13;
+   ========================================================= */&#13;
+&#13;
+.profile-person {&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  gap: 18px;&#13;
+&#13;
+  min-width: 0;&#13;
+&#13;
+  position: relative;&#13;
+&#13;
+  z-index: 2;&#13;
+}&#13;
+&#13;
+&#13;
+.profile-avatar {&#13;
+  width: 78px;&#13;
+&#13;
+  height: 78px;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  justify-content: center;&#13;
+&#13;
+  flex-shrink: 0;&#13;
+&#13;
+  border-radius: 50%;&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      145deg,&#13;
+      #ffffff,&#13;
+      #eee5ff&#13;
+    );&#13;
+&#13;
+  border: 5px solid rgba(255,255,255,.9);&#13;
+&#13;
+  color: #6337c7;&#13;
+&#13;
+  font-size: 23px;&#13;
+&#13;
+  font-weight: 900;&#13;
+&#13;
+  box-shadow:&#13;
+    0 6px 20px rgba(82,55,150,.20);&#13;
+}&#13;
+&#13;
+&#13;
+.profile-person-info {&#13;
+  min-width: 0;&#13;
+}&#13;
+&#13;
+&#13;
+.profile-label {&#13;
+  margin-bottom: 5px;&#13;
+&#13;
+  color: #6736c4;&#13;
+&#13;
+  font-size: 10px;&#13;
+&#13;
+  letter-spacing: 1.7px;&#13;
+&#13;
+  font-weight: 900;&#13;
+}&#13;
+&#13;
+&#13;
+.profile-person-info h1 {&#13;
+  margin: 0;&#13;
+&#13;
+  color: #111a2e;&#13;
+&#13;
+  font-size: 28px;&#13;
+&#13;
+  line-height: 1.25;&#13;
+&#13;
+  font-weight: 850;&#13;
+}&#13;
+&#13;
+&#13;
+.profile-person-info p {&#13;
+  margin: 5px 0 0;&#13;
+&#13;
+  color: #4e6079;&#13;
+&#13;
+  font-size: 12px;&#13;
+}&#13;
+&#13;
+&#13;
+.profile-course {&#13;
+  margin-top: 6px;&#13;
+&#13;
+  color: #273c57;&#13;
+&#13;
+  font-size: 12px;&#13;
+&#13;
+  font-weight: 800;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   TOP ACTION BUTTONS&#13;
+   ========================================================= */&#13;
+&#13;
+.profile-top-actions {&#13;
+  position: relative;&#13;
+&#13;
+  z-index: 3;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  gap: 10px;&#13;
+&#13;
+  flex-shrink: 0;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   DASHBOARD BUTTON&#13;
+   BLUE&#13;
+   ========================================================= */&#13;
+&#13;
+.dashboard-button {&#13;
+  height: 43px;&#13;
+&#13;
+  padding: 0 16px;&#13;
+&#13;
+  border-radius: 9px;&#13;
+&#13;
+  background: #ffffff;&#13;
+&#13;
+  border: 1px solid #78a9e5;&#13;
+&#13;
+  color: #2463aa;&#13;
+&#13;
+  font-size: 12px;&#13;
+&#13;
+  font-weight: 850;&#13;
+&#13;
+  cursor: pointer;&#13;
+&#13;
+  box-shadow:&#13;
+    0 3px 8px rgba(39,99,170,.08);&#13;
+&#13;
+  transition:&#13;
+    all .18s ease;&#13;
+}&#13;
+&#13;
+&#13;
+.dashboard-button:hover {&#13;
+  background: #e8f2ff;&#13;
+&#13;
+  border-color: #4386d1;&#13;
+&#13;
+  color: #174e8c;&#13;
+&#13;
+  transform: translateY(-1px);&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   REFRESH BUTTON&#13;
+   GREEN&#13;
+   ========================================================= */&#13;
+&#13;
+.refresh-button {&#13;
+  height: 43px;&#13;
+&#13;
+  padding: 0 16px;&#13;
+&#13;
+  border-radius: 9px;&#13;
+&#13;
+  background: #ffffff;&#13;
+&#13;
+  border: 1px solid #70b99a;&#13;
+&#13;
+  color: #237b58;&#13;
+&#13;
+  font-size: 12px;&#13;
+&#13;
+  font-weight: 850;&#13;
+&#13;
+  cursor: pointer;&#13;
+&#13;
+  box-shadow:&#13;
+    0 3px 8px rgba(35,123,88,.07);&#13;
+&#13;
+  transition:&#13;
+    all .18s ease;&#13;
+}&#13;
+&#13;
+&#13;
+.refresh-button:hover {&#13;
+  background: #e8f7f0;&#13;
+&#13;
+  border-color: #48a47b;&#13;
+&#13;
+  color: #176342;&#13;
+&#13;
+  transform: translateY(-1px);&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   EDIT PROFILE BUTTON&#13;
+   PURPLE&#13;
+   ========================================================= */&#13;
+&#13;
+.edit-button {&#13;
+  height: 43px;&#13;
+&#13;
+  padding: 0 17px;&#13;
+&#13;
+  border-radius: 9px;&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      135deg,&#13;
+      #7040c8,&#13;
+      #5e35b1&#13;
+    );&#13;
+&#13;
+  border: 1px solid #6337b7;&#13;
+&#13;
+  color: #ffffff;&#13;
+&#13;
+  font-size: 12px;&#13;
+&#13;
+  font-weight: 850;&#13;
+&#13;
+  cursor: pointer;&#13;
+&#13;
+  box-shadow:&#13;
+    0 6px 14px rgba(99,55,183,.23);&#13;
+&#13;
+  transition:&#13;
+    all .18s ease;&#13;
+}&#13;
+&#13;
+&#13;
+.edit-button:hover {&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      135deg,&#13;
+      #6033b7,&#13;
+      #4f299e&#13;
+    );&#13;
+&#13;
+  transform: translateY(-1px);&#13;
+&#13;
+  box-shadow:&#13;
+    0 8px 17px rgba(99,55,183,.28);&#13;
+}&#13;
+&#13;
+&#13;
+.dashboard-icon,&#13;
+.refresh-icon,&#13;
+.edit-icon {&#13;
+  margin-right: 5px;&#13;
+&#13;
+  font-size: 13px;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   PROFILE CONTENT&#13;
+   ========================================================= */&#13;
+&#13;
+.profile-content {&#13;
+  width: 100%;&#13;
+&#13;
+  max-width: none;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   COMMON SECTION&#13;
+   ========================================================= */&#13;
+&#13;
+.profile-section {&#13;
+  position: relative;&#13;
+&#13;
+  width: 100%;&#13;
+&#13;
+  margin-bottom: 21px;&#13;
+&#13;
+  padding: 27px;&#13;
+&#13;
+  border-radius: 19px;&#13;
+&#13;
+  box-sizing: border-box;&#13;
+&#13;
+  box-shadow:&#13;
+    0 7px 22px rgba(35,48,75,.055);&#13;
+&#13;
+  overflow: hidden;&#13;
+&#13;
+  transition:&#13;
+    transform .18s ease,&#13;
+    box-shadow .18s ease;&#13;
+}&#13;
+&#13;
+&#13;
+.profile-section:hover {&#13;
+  transform: translateY(-1px);&#13;
+&#13;
+  box-shadow:&#13;
+    0 10px 28px rgba(35,48,75,.09);&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   PERSONAL&#13;
+   BLUE&#13;
+   ========================================================= */&#13;
+&#13;
+.personal-section {&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      135deg,&#13;
+      #ffffff 0%,&#13;
+      #f1f7ff 100%&#13;
+    );&#13;
+&#13;
+  border: 1px solid #c5dbf5;&#13;
+}&#13;
+&#13;
+&#13;
+.personal-section::before {&#13;
+  content: "";&#13;
+&#13;
+  position: absolute;&#13;
+&#13;
+  left: 0;&#13;
+&#13;
+  top: 0;&#13;
+&#13;
+  width: 5px;&#13;
+&#13;
+  height: 100%;&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      180deg,&#13;
+      #3478d4,&#13;
+      #63a0eb&#13;
+    );&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   ACADEMICS&#13;
+   ORANGE / GOLD&#13;
+   ========================================================= */&#13;
+&#13;
+.academic-section {&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      135deg,&#13;
+      #ffffff 0%,&#13;
+      #fff8e9 100%&#13;
+    );&#13;
+&#13;
+  border: 1px solid #efd8a3;&#13;
+}&#13;
+&#13;
+&#13;
+.academic-section::before {&#13;
+  content: "";&#13;
+&#13;
+  position: absolute;&#13;
+&#13;
+  left: 0;&#13;
+&#13;
+  top: 0;&#13;
+&#13;
+  width: 5px;&#13;
+&#13;
+  height: 100%;&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      180deg,&#13;
+      #d99420,&#13;
+      #edb94f&#13;
+    );&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   PLACEMENT&#13;
+   GREEN&#13;
+   ========================================================= */&#13;
+&#13;
+.placement-section {&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      135deg,&#13;
+      #ffffff 0%,&#13;
+      #effaf5 100%&#13;
+    );&#13;
+&#13;
+  border: 1px solid #c6e6d4;&#13;
+}&#13;
+&#13;
+&#13;
+.placement-section::before {&#13;
+  content: "";&#13;
+&#13;
+  position: absolute;&#13;
+&#13;
+  left: 0;&#13;
+&#13;
+  top: 0;&#13;
+&#13;
+  width: 5px;&#13;
+&#13;
+  height: 100%;&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      180deg,&#13;
+      #299967,&#13;
+      #5ac08d&#13;
+    );&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   RESUME&#13;
+   ROSE&#13;
+   ========================================================= */&#13;
+&#13;
+.resume-section {&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      135deg,&#13;
+      #ffffff 0%,&#13;
+      #fff5f6 100%&#13;
+    );&#13;
+&#13;
+  border: 1px solid #edcdd1;&#13;
+}&#13;
+&#13;
+&#13;
+.resume-section::before {&#13;
+  content: "";&#13;
+&#13;
+  position: absolute;&#13;
+&#13;
+  left: 0;&#13;
+&#13;
+  top: 0;&#13;
+&#13;
+  width: 5px;&#13;
+&#13;
+  height: 100%;&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      180deg,&#13;
+      #bd5661,&#13;
+      #df7b83&#13;
+    );&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   SECTION HEADINGS&#13;
+   ========================================================= */&#13;
+&#13;
+.section-heading {&#13;
+  display: flex;&#13;
+&#13;
+  justify-content: space-between;&#13;
+&#13;
+  align-items: flex-start;&#13;
+&#13;
+  margin-bottom: 22px;&#13;
+}&#13;
+&#13;
+&#13;
+.section-label {&#13;
+  margin-bottom: 5px;&#13;
+&#13;
+  font-size: 10px;&#13;
+&#13;
+  letter-spacing: 1.3px;&#13;
+&#13;
+  font-weight: 900;&#13;
+}&#13;
+&#13;
+&#13;
+.personal-label {&#13;
+  color: #2866b8;&#13;
+}&#13;
+&#13;
+&#13;
+.academic-label {&#13;
+  color: #ad6c08;&#13;
+}&#13;
+&#13;
+&#13;
+.placement-label {&#13;
+  color: #198051;&#13;
+}&#13;
+&#13;
+&#13;
+.resume-label {&#13;
+  color: #a9414c;&#13;
+}&#13;
+&#13;
+&#13;
+.section-heading h2 {&#13;
+  margin: 0;&#13;
+&#13;
+  color: #111c31;&#13;
+&#13;
+  font-size: 22px;&#13;
+&#13;
+  font-weight: 800;&#13;
+}&#13;
+&#13;
+&#13;
+.section-heading p {&#13;
+  margin: 5px 0 0;&#13;
+&#13;
+  color: #62718a;&#13;
+&#13;
+  font-size: 12px;&#13;
+}&#13;
+&#13;
+&#13;
+.section-icon {&#13;
+  width: 44px;&#13;
+&#13;
+  height: 44px;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  justify-content: center;&#13;
+&#13;
+  flex-shrink: 0;&#13;
+&#13;
+  border-radius: 12px;&#13;
+&#13;
+  font-size: 17px;&#13;
+&#13;
+  font-weight: 900;&#13;
+}&#13;
+&#13;
+&#13;
+.personal-icon {&#13;
+  background: #e5f0ff;&#13;
+&#13;
+  border: 1px solid #c4daf8;&#13;
+&#13;
+  color: #286bc2;&#13;
+}&#13;
+&#13;
+&#13;
+.academic-icon {&#13;
+  background: #fff0cc;&#13;
+&#13;
+  border: 1px solid #efd18d;&#13;
+&#13;
+  color: #b87308;&#13;
+}&#13;
+&#13;
+&#13;
+.placement-icon {&#13;
+  background: #e1f6ea;&#13;
+&#13;
+  border: 1px solid #bfe4cf;&#13;
+&#13;
+  color: #198051;&#13;
+}&#13;
+&#13;
+&#13;
+.resume-icon {&#13;
+  background: #fbe7e9;&#13;
+&#13;
+  border: 1px solid #edc7cc;&#13;
+&#13;
+  color: #ad3e49;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   PERSONAL INFORMATION CARDS&#13;
+   ========================================================= */&#13;
+&#13;
+.information-grid {&#13;
+  width: 100%;&#13;
+&#13;
+  display: grid;&#13;
+&#13;
+  grid-template-columns:&#13;
+    repeat(2, minmax(0, 1fr));&#13;
+&#13;
+  gap: 14px 17px;&#13;
+}&#13;
+&#13;
+&#13;
+.information-field {&#13;
+  min-height: 76px;&#13;
+&#13;
+  padding: 16px 18px;&#13;
+&#13;
+  box-sizing: border-box;&#13;
+&#13;
+  background: rgba(255,255,255,.88);&#13;
+&#13;
+  border: 1px solid #d5e2f1;&#13;
+&#13;
+  border-radius: 12px;&#13;
+&#13;
+  transition:&#13;
+    border-color .18s ease,&#13;
+    transform .18s ease,&#13;
+    box-shadow .18s ease;&#13;
+}&#13;
+&#13;
+&#13;
+.information-field:hover {&#13;
+  border-color: #8bb6e6;&#13;
+&#13;
+  box-shadow:&#13;
+    0 4px 12px rgba(45,102,180,.07);&#13;
+&#13;
+  transform: translateY(-1px);&#13;
+}&#13;
+&#13;
+&#13;
+.information-field label,&#13;
+.academic-field label,&#13;
+.placement-field label {&#13;
+  display: block;&#13;
+&#13;
+  margin-bottom: 8px;&#13;
+&#13;
+  color: #75849b;&#13;
+&#13;
+  font-size: 9px;&#13;
+&#13;
+  letter-spacing: 1px;&#13;
+&#13;
+  font-weight: 900;&#13;
+}&#13;
+&#13;
+&#13;
+.field-value {&#13;
+  color: #101c31;&#13;
+&#13;
+  font-size: 14px;&#13;
+&#13;
+  line-height: 1.4;&#13;
+&#13;
+  font-weight: 750;&#13;
+&#13;
+  word-break: break-word;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   ACADEMIC CARDS&#13;
+   ========================================================= */&#13;
+&#13;
+.academic-information-grid {&#13;
+  width: 100%;&#13;
+&#13;
+  display: grid;&#13;
+&#13;
+  grid-template-columns:&#13;
+    repeat(5, minmax(0, 1fr));&#13;
+&#13;
+  gap: 12px;&#13;
+}&#13;
+&#13;
+&#13;
+.academic-field {&#13;
+  min-height: 85px;&#13;
+&#13;
+  padding: 16px;&#13;
+&#13;
+  border-radius: 12px;&#13;
+&#13;
+  background: #ffffff;&#13;
+&#13;
+  border: 1px solid #e5e7eb;&#13;
+}&#13;
+&#13;
+&#13;
+.degree-field {&#13;
+  border-top: 4px solid #4389df;&#13;
+&#13;
+  background: #f3f8ff;&#13;
+}&#13;
+&#13;
+&#13;
+.branch-field {&#13;
+  border-top: 4px solid #d46a9a;&#13;
+&#13;
+  background: #fff4f9;&#13;
+}&#13;
+&#13;
+&#13;
+.batch-field {&#13;
+  border-top: 4px solid #36a18b;&#13;
+&#13;
+  background: #f0faf7;&#13;
+}&#13;
+&#13;
+&#13;
+.cgpa-field {&#13;
+  border-top: 4px solid #df9b37;&#13;
+&#13;
+  background: #fff8eb;&#13;
+}&#13;
+&#13;
+&#13;
+.backlog-field {&#13;
+  border-top: 4px solid #d76870;&#13;
+&#13;
+  background: #fff5f6;&#13;
+}&#13;
+&#13;
+&#13;
+.academic-value {&#13;
+  color: #172136;&#13;
+&#13;
+  font-size: 14px;&#13;
+&#13;
+  font-weight: 800;&#13;
+&#13;
+  line-height: 1.4;&#13;
+&#13;
+  word-break: break-word;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   PLACEMENT&#13;
+   ========================================================= */&#13;
+&#13;
+.placement-information-grid {&#13;
+  width: 100%;&#13;
+&#13;
+  display: grid;&#13;
+&#13;
+  grid-template-columns:&#13;
+    repeat(2, minmax(0, 1fr));&#13;
+&#13;
+  gap: 14px;&#13;
+}&#13;
+&#13;
+&#13;
+.placement-field {&#13;
+  min-height: 77px;&#13;
+&#13;
+  padding: 16px 18px;&#13;
+&#13;
+  background: rgba(255,255,255,.88);&#13;
+&#13;
+  border: 1px solid #cfe5d9;&#13;
+&#13;
+  border-radius: 12px;&#13;
+}&#13;
+&#13;
+&#13;
+.placement-value {&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  gap: 8px;&#13;
+&#13;
+  color: #214634;&#13;
+&#13;
+  font-size: 14px;&#13;
+&#13;
+  font-weight: 800;&#13;
+}&#13;
+&#13;
+&#13;
+.status-dot {&#13;
+  width: 9px;&#13;
+&#13;
+  height: 9px;&#13;
+&#13;
+  display: inline-block;&#13;
+&#13;
+  border-radius: 50%;&#13;
+&#13;
+  background: #e0a327;&#13;
+}&#13;
+&#13;
+&#13;
+.status-dot.placed,&#13;
+.active-dot {&#13;
+  background: #24955f;&#13;
+&#13;
+  box-shadow:&#13;
+    0 0 0 3px rgba(36,149,95,.12);&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   RESUME&#13;
+   ========================================================= */&#13;
+&#13;
+.resume-box {&#13;
+  width: 100%;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  gap: 14px;&#13;
+&#13;
+  padding: 17px;&#13;
+&#13;
+  background: rgba(255,255,255,.88);&#13;
+&#13;
+  border: 1px solid #ead9dc;&#13;
+&#13;
+  border-radius: 12px;&#13;
+}&#13;
+&#13;
+&#13;
+.resume-symbol {&#13;
+  width: 45px;&#13;
+&#13;
+  height: 45px;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  justify-content: center;&#13;
+&#13;
+  flex-shrink: 0;&#13;
+&#13;
+  border-radius: 10px;&#13;
+&#13;
+  background: #f4dfe2;&#13;
+&#13;
+  color: #a83d48;&#13;
+&#13;
+  font-size: 10px;&#13;
+&#13;
+  font-weight: 900;&#13;
+}&#13;
+&#13;
+&#13;
+.resume-text {&#13;
+  flex: 1;&#13;
+&#13;
+  min-width: 0;&#13;
+}&#13;
+&#13;
+&#13;
+.resume-text strong {&#13;
+  display: block;&#13;
+&#13;
+  color: #263144;&#13;
+&#13;
+  font-size: 13px;&#13;
+&#13;
+  font-weight: 800;&#13;
+}&#13;
+&#13;
+&#13;
+.resume-text span {&#13;
+  display: block;&#13;
+&#13;
+  margin-top: 4px;&#13;
+&#13;
+  color: #748094;&#13;
+&#13;
+  font-size: 11px;&#13;
+}&#13;
+&#13;
+&#13;
+.resume-status {&#13;
+  padding: 7px 12px;&#13;
+&#13;
+  border-radius: 16px;&#13;
+&#13;
+  background: #e1f5e9;&#13;
+&#13;
+  border: 1px solid #bce2cb;&#13;
+&#13;
+  color: #177747;&#13;
+&#13;
+  font-size: 10px;&#13;
+&#13;
+  font-weight: 900;&#13;
+}&#13;
+&#13;
+&#13;
+.resume-empty {&#13;
+  background: rgba(255,255,255,.72);&#13;
+&#13;
+  border-style: dashed;&#13;
+}&#13;
+&#13;
+&#13;
+.empty-symbol {&#13;
+  background: #eef0f4;&#13;
+&#13;
+  color: #697586;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   INFORMATION NOTE&#13;
+   ========================================================= */&#13;
+&#13;
+.profile-information-note {&#13;
+  width: 100%;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  gap: 11px;&#13;
+&#13;
+  padding: 15px 17px;&#13;
+&#13;
+  margin-top: 3px;&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      135deg,&#13;
+      #f1f4ff,&#13;
+      #f7f5ff&#13;
+    );&#13;
+&#13;
+  border: 1px solid #d7def7;&#13;
+&#13;
+  border-radius: 12px;&#13;
+}&#13;
+&#13;
+&#13;
+.note-symbol {&#13;
+  width: 28px;&#13;
+&#13;
+  height: 28px;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  justify-content: center;&#13;
+&#13;
+  flex-shrink: 0;&#13;
+&#13;
+  border-radius: 50%;&#13;
+&#13;
+  background: #6874d8;&#13;
+&#13;
+  color: #ffffff;&#13;
+&#13;
+  font-size: 11px;&#13;
+&#13;
+  font-weight: 900;&#13;
+}&#13;
+&#13;
+&#13;
+.profile-information-note strong {&#13;
+  display: block;&#13;
+&#13;
+  color: #3f498d;&#13;
+&#13;
+  font-size: 11px;&#13;
+}&#13;
+&#13;
+&#13;
+.profile-information-note p {&#13;
+  margin: 3px 0 0;&#13;
+&#13;
+  color: #69749b;&#13;
+&#13;
+  font-size: 10px;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   LOADING&#13;
+   ========================================================= */&#13;
+&#13;
+.profile-loading {&#13;
+  min-height: 260px;&#13;
+&#13;
+  width: 100%;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  flex-direction: column;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  justify-content: center;&#13;
+&#13;
+  gap: 12px;&#13;
+&#13;
+  background: #ffffff;&#13;
+&#13;
+  border: 1px solid #e0e5ed;&#13;
+&#13;
+  border-radius: 18px;&#13;
+&#13;
+  color: #64748b;&#13;
+&#13;
+  font-size: 12px;&#13;
+}&#13;
+&#13;
+&#13;
+.spinner {&#13;
+  width: 32px;&#13;
+&#13;
+  height: 32px;&#13;
+&#13;
+  border: 3px solid #e7eaf0;&#13;
+&#13;
+  border-top-color: #7040c8;&#13;
+&#13;
+  border-radius: 50%;&#13;
+&#13;
+  animation:&#13;
+    profileSpin .8s linear infinite;&#13;
+}&#13;
+&#13;
+&#13;
+@keyframes profileSpin {&#13;
+&#13;
+  from {&#13;
+    transform: rotate(0deg);&#13;
+  }&#13;
+&#13;
+  to {&#13;
+    transform: rotate(360deg);&#13;
+  }&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   ERROR&#13;
+   ========================================================= */&#13;
+&#13;
+.profile-error {&#13;
+  width: 100%;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  gap: 13px;&#13;
+&#13;
+  padding: 20px;&#13;
+&#13;
+  background: #fff6f7;&#13;
+&#13;
+  border: 1px solid #efc9cd;&#13;
+&#13;
+  border-radius: 13px;&#13;
+&#13;
+  color: #9f313b;&#13;
+}&#13;
+&#13;
+&#13;
+.error-icon {&#13;
+  width: 34px;&#13;
+&#13;
+  height: 34px;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  justify-content: center;&#13;
+&#13;
+  flex-shrink: 0;&#13;
+&#13;
+  border-radius: 50%;&#13;
+&#13;
+  background: #f8dfe2;&#13;
+&#13;
+  color: #ad3039;&#13;
+&#13;
+  font-weight: 900;&#13;
+}&#13;
+&#13;
+&#13;
+.profile-error strong {&#13;
+  font-size: 13px;&#13;
+}&#13;
+&#13;
+&#13;
+.profile-error p {&#13;
+  margin: 3px 0 0;&#13;
+&#13;
+  color: #806067;&#13;
+&#13;
+  font-size: 11px;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   EDIT PROFILE MODAL&#13;
+   ========================================================= */&#13;
+&#13;
+.edit-modal-overlay {&#13;
+  position: fixed;&#13;
+&#13;
+  z-index: 99999;&#13;
+&#13;
+  top: 0;&#13;
+&#13;
+  left: 0;&#13;
+&#13;
+  right: 0;&#13;
+&#13;
+  bottom: 0;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  justify-content: center;&#13;
+&#13;
+  padding: 20px;&#13;
+&#13;
+  box-sizing: border-box;&#13;
+&#13;
+  background: rgba(15,23,42,.58);&#13;
+&#13;
+  backdrop-filter: blur(3px);&#13;
+}&#13;
+&#13;
+&#13;
+.edit-modal {&#13;
+  width: 100%;&#13;
+&#13;
+  max-width: 820px;&#13;
+&#13;
+  max-height: 92vh;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  flex-direction: column;&#13;
+&#13;
+  background: #ffffff;&#13;
+&#13;
+  border-radius: 17px;&#13;
+&#13;
+  overflow: hidden;&#13;
+&#13;
+  box-shadow:&#13;
+    0 25px 70px rgba(15,23,42,.25);&#13;
+}&#13;
+&#13;
+&#13;
+.edit-modal-header {&#13;
+  display: flex;&#13;
+&#13;
+  justify-content: space-between;&#13;
+&#13;
+  align-items: flex-start;&#13;
+&#13;
+  gap: 15px;&#13;
+&#13;
+  padding: 22px 25px;&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      135deg,&#13;
+      #ffffff,&#13;
+      #f8f5ff&#13;
+    );&#13;
+&#13;
+  border-bottom: 1px solid #e5e9f0;&#13;
+}&#13;
+&#13;
+&#13;
+.modal-label {&#13;
+  margin-bottom: 4px;&#13;
+&#13;
+  color: #7040c8;&#13;
+&#13;
+  font-size: 9px;&#13;
+&#13;
+  letter-spacing: 1.4px;&#13;
+&#13;
+  font-weight: 900;&#13;
+}&#13;
+&#13;
+&#13;
+.edit-modal-header h2 {&#13;
+  margin: 0;&#13;
+&#13;
+  color: #182234;&#13;
+&#13;
+  font-size: 21px;&#13;
+&#13;
+  font-weight: 800;&#13;
+}&#13;
+&#13;
+&#13;
+.edit-modal-header p {&#13;
+  margin: 5px 0 0;&#13;
+&#13;
+  color: #697586;&#13;
+&#13;
+  font-size: 11px;&#13;
+}&#13;
+&#13;
+&#13;
+.modal-close {&#13;
+  width: 34px;&#13;
+&#13;
+  height: 34px;&#13;
+&#13;
+  border: 1px solid #dce1e8;&#13;
+&#13;
+  border-radius: 8px;&#13;
+&#13;
+  background: #ffffff;&#13;
+&#13;
+  color: #64748b;&#13;
+&#13;
+  font-size: 22px;&#13;
+&#13;
+  cursor: pointer;&#13;
+}&#13;
+&#13;
+&#13;
+.modal-close:hover {&#13;
+  background: #f5f6f8;&#13;
+&#13;
+  color: #1f2937;&#13;
+}&#13;
+&#13;
+&#13;
+.edit-modal-content {&#13;
+  overflow-y: auto;&#13;
+&#13;
+  padding: 23px 25px;&#13;
+}&#13;
+&#13;
+&#13;
+.edit-group {&#13;
+  margin-bottom: 24px;&#13;
+}&#13;
+&#13;
+&#13;
+.edit-group:last-child {&#13;
+  margin-bottom: 0;&#13;
+}&#13;
+&#13;
+&#13;
+.edit-group-heading {&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  gap: 10px;&#13;
+&#13;
+  padding-bottom: 10px;&#13;
+&#13;
+  margin-bottom: 15px;&#13;
+&#13;
+  border-bottom: 1px solid #e8ebf0;&#13;
+}&#13;
+&#13;
+&#13;
+.group-number {&#13;
+  width: 29px;&#13;
+&#13;
+  height: 29px;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  justify-content: center;&#13;
+&#13;
+  border-radius: 8px;&#13;
+&#13;
+  background: #eee8ff;&#13;
+&#13;
+  color: #6b3fc1;&#13;
+&#13;
+  font-size: 9px;&#13;
+&#13;
+  font-weight: 900;&#13;
+}&#13;
+&#13;
+&#13;
+.academic-number {&#13;
+  background: #fff2d5;&#13;
+&#13;
+  color: #ad6b0c;&#13;
+}&#13;
+&#13;
+&#13;
+.placement-number {&#13;
+  background: #e4f6ec;&#13;
+&#13;
+  color: #177a4a;&#13;
+}&#13;
+&#13;
+&#13;
+.edit-group-heading strong {&#13;
+  display: block;&#13;
+&#13;
+  color: #273142;&#13;
+&#13;
+  font-size: 12px;&#13;
+&#13;
+  font-weight: 900;&#13;
+}&#13;
+&#13;
+&#13;
+.edit-group-heading small {&#13;
+  display: block;&#13;
+&#13;
+  margin-top: 2px;&#13;
+&#13;
+  color: #7a8495;&#13;
+&#13;
+  font-size: 10px;&#13;
+}&#13;
+&#13;
+&#13;
+.edit-fields {&#13;
+  display: grid;&#13;
+&#13;
+  grid-template-columns:&#13;
+    repeat(2, minmax(0, 1fr));&#13;
+&#13;
+  gap: 14px;&#13;
+}&#13;
+&#13;
+&#13;
+.edit-field label {&#13;
+  display: block;&#13;
+&#13;
+  margin-bottom: 6px;&#13;
+&#13;
+  color: #475467;&#13;
+&#13;
+  font-size: 10px;&#13;
+&#13;
+  font-weight: 800;&#13;
+}&#13;
+&#13;
+&#13;
+.edit-field input,&#13;
+.edit-field select {&#13;
+  width: 100%;&#13;
+&#13;
+  height: 41px;&#13;
+&#13;
+  padding: 0 11px;&#13;
+&#13;
+  box-sizing: border-box;&#13;
+&#13;
+  background: #fbfcfd;&#13;
+&#13;
+  border: 1px solid #d4dae3;&#13;
+&#13;
+  border-radius: 8px;&#13;
+&#13;
+  color: #1d2939;&#13;
+&#13;
+  font-size: 12px;&#13;
+&#13;
+  font-weight: 600;&#13;
+&#13;
+  outline: none;&#13;
+}&#13;
+&#13;
+&#13;
+.edit-field input:focus,&#13;
+.edit-field select:focus {&#13;
+  background: #ffffff;&#13;
+&#13;
+  border-color: #7950ca;&#13;
+&#13;
+  box-shadow:&#13;
+    0 0 0 3px rgba(121,80,202,.10);&#13;
+}&#13;
+&#13;
+&#13;
+.edit-field input:disabled {&#13;
+  background: #f1f3f6;&#13;
+&#13;
+  color: #7a8495;&#13;
+&#13;
+  cursor: not-allowed;&#13;
+}&#13;
+&#13;
+&#13;
+.save-error {&#13;
+  margin-top: 15px;&#13;
+&#13;
+  padding: 10px 12px;&#13;
+&#13;
+  background: #fff1f2;&#13;
+&#13;
+  border: 1px solid #efc4c8;&#13;
+&#13;
+  border-radius: 8px;&#13;
+&#13;
+  color: #ad3039;&#13;
+&#13;
+  font-size: 11px;&#13;
+&#13;
+  font-weight: 700;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   EDIT MODAL FOOTER&#13;
+   ========================================================= */&#13;
+&#13;
+.edit-modal-footer {&#13;
+  display: flex;&#13;
+&#13;
+  justify-content: flex-end;&#13;
+&#13;
+  gap: 9px;&#13;
+&#13;
+  padding: 15px 25px;&#13;
+&#13;
+  background: #fafbfc;&#13;
+&#13;
+  border-top: 1px solid #e4e8ee;&#13;
+}&#13;
+&#13;
+&#13;
+.cancel-button,&#13;
+.save-button {&#13;
+  height: 39px;&#13;
+&#13;
+  padding: 0 17px;&#13;
+&#13;
+  border-radius: 8px;&#13;
+&#13;
+  font-size: 11px;&#13;
+&#13;
+  font-weight: 800;&#13;
+&#13;
+  cursor: pointer;&#13;
+}&#13;
+&#13;
+&#13;
+.cancel-button {&#13;
+  background: #ffffff;&#13;
+&#13;
+  border: 1px solid #d2d8e1;&#13;
+&#13;
+  color: #475467;&#13;
+}&#13;
+&#13;
+&#13;
+.save-button {&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      135deg,&#13;
+      #7040c8,&#13;
+      #6035b4&#13;
+    );&#13;
+&#13;
+  border: 1px solid #7040c8;&#13;
+&#13;
+  color: #ffffff;&#13;
+&#13;
+  box-shadow:&#13;
+    0 4px 10px rgba(109,63,194,.16);&#13;
+}&#13;
+&#13;
+&#13;
+.save-button:hover {&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      135deg,&#13;
+      #5d31ae,&#13;
+      #51299f&#13;
+    );&#13;
+}&#13;
+&#13;
+&#13;
+.cancel-button:disabled,&#13;
+.save-button:disabled {&#13;
+  opacity: .6;&#13;
+&#13;
+  cursor: not-allowed;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   RESPONSIVE&#13;
+   ========================================================= */&#13;
+&#13;
+@media (max-width: 1200px) {&#13;
+&#13;
+  .campus360-profile {&#13;
+    padding-left: 24px;&#13;
+&#13;
+    padding-right: 24px;&#13;
+  }&#13;
+&#13;
+&#13;
+  .academic-information-grid {&#13;
+    grid-template-columns:&#13;
+      repeat(4, minmax(0, 1fr));&#13;
+  }&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+@media (max-width: 1050px) {&#13;
+&#13;
+  .academic-information-grid {&#13;
+    grid-template-columns:&#13;
+      repeat(3, minmax(0, 1fr));&#13;
+  }&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+@media (max-width: 850px) {&#13;
+&#13;
+  .campus360-profile {&#13;
+    padding-left: 18px;&#13;
+&#13;
+    padding-right: 18px;&#13;
+  }&#13;
+&#13;
+&#13;
+  .profile-top {&#13;
+    flex-direction: column;&#13;
+&#13;
+    align-items: stretch;&#13;
+  }&#13;
+&#13;
+&#13;
+  .profile-top-actions {&#13;
+    width: 100%;&#13;
+&#13;
+    justify-content: flex-start;&#13;
+  }&#13;
+&#13;
+&#13;
+  .information-grid {&#13;
+    grid-template-columns:&#13;
+      repeat(2, minmax(0, 1fr));&#13;
+  }&#13;
+&#13;
+&#13;
+  .placement-information-grid {&#13;
+    grid-template-columns:&#13;
+      repeat(2, minmax(0, 1fr));&#13;
+  }&#13;
+&#13;
+&#13;
+  .academic-information-grid {&#13;
+    grid-template-columns:&#13;
+      repeat(2, minmax(0, 1fr));&#13;
+  }&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+@media (max-width: 780px) {&#13;
+&#13;
+  .campus360-profile {&#13;
+    width: 100vw !important;&#13;
+&#13;
+    max-width: none !important;&#13;
+&#13;
+    position: relative !important;&#13;
+&#13;
+    left: 50% !important;&#13;
+&#13;
+    margin-left: -50vw !important;&#13;
+&#13;
+    margin-right: -50vw !important;&#13;
+&#13;
+    padding: 18px 12px 45px;&#13;
+  }&#13;
+&#13;
+&#13;
+  .profile-top {&#13;
+    flex-direction: column;&#13;
+&#13;
+    align-items: stretch;&#13;
+  }&#13;
+&#13;
+&#13;
+  .profile-top-actions {&#13;
+    width: 100%;&#13;
+&#13;
+    display: grid;&#13;
+&#13;
+    grid-template-columns:&#13;
+      repeat(3, minmax(0, 1fr));&#13;
+&#13;
+    gap: 8px;&#13;
+  }&#13;
+&#13;
+&#13;
+  .dashboard-button,&#13;
+  .refresh-button,&#13;
+  .edit-button {&#13;
+    width: 100%;&#13;
+&#13;
+    padding-left: 8px;&#13;
+&#13;
+    padding-right: 8px;&#13;
+  }&#13;
+&#13;
+&#13;
+  .information-grid,&#13;
+  .placement-information-grid,&#13;
+  .edit-fields {&#13;
+    grid-template-columns: 1fr;&#13;
+  }&#13;
+&#13;
+&#13;
+  .academic-information-grid {&#13;
+    grid-template-columns:&#13;
+      repeat(2, minmax(0, 1fr));&#13;
+  }&#13;
+&#13;
+&#13;
+  .profile-section {&#13;
+    padding: 23px;&#13;
+  }&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+@media (max-width: 620px) {&#13;
+&#13;
+  .campus360-profile {&#13;
+    padding-left: 10px;&#13;
+&#13;
+    padding-right: 10px;&#13;
+  }&#13;
+&#13;
+&#13;
+  .profile-top {&#13;
+    padding: 21px;&#13;
+  }&#13;
+&#13;
+&#13;
+  .profile-person {&#13;
+    align-items: flex-start;&#13;
+  }&#13;
+&#13;
+&#13;
+  .profile-avatar {&#13;
+    width: 62px;&#13;
+&#13;
+    height: 62px;&#13;
+&#13;
+    font-size: 19px;&#13;
+  }&#13;
+&#13;
+&#13;
+  .profile-person-info h1 {&#13;
+    font-size: 23px;&#13;
+  }&#13;
+&#13;
+&#13;
+  .profile-top-actions {&#13;
+    grid-template-columns: 1fr;&#13;
+  }&#13;
+&#13;
+&#13;
+  .dashboard-button,&#13;
+  .refresh-button,&#13;
+  .edit-button {&#13;
+    width: 100%;&#13;
+  }&#13;
+&#13;
+&#13;
+  .profile-section {&#13;
+    padding: 21px;&#13;
+  }&#13;
+&#13;
+&#13;
+  .academic-information-grid {&#13;
+    grid-template-columns: 1fr;&#13;
+  }&#13;
+&#13;
+&#13;
+  .section-heading {&#13;
+    gap: 15px;&#13;
+  }&#13;
+&#13;
+&#13;
+  .section-heading h2 {&#13;
+    font-size: 20px;&#13;
+  }&#13;
+&#13;
+&#13;
+  .section-icon {&#13;
+    width: 40px;&#13;
+&#13;
+    height: 40px;&#13;
+  }&#13;
+&#13;
+&#13;
+  .resume-box {&#13;
+    align-items: flex-start;&#13;
+&#13;
+    flex-wrap: wrap;&#13;
+  }&#13;
+&#13;
+&#13;
+  .resume-status {&#13;
+    margin-left: 59px;&#13;
+  }&#13;
+&#13;
+&#13;
+  .edit-modal-overlay {&#13;
+    padding: 8px;&#13;
+  }&#13;
+&#13;
+&#13;
+  .edit-modal {&#13;
+    max-height: 96vh;&#13;
+  }&#13;
+&#13;
+&#13;
+  .edit-modal-header,&#13;
+  .edit-modal-content {&#13;
+    padding-left: 19px;&#13;
+&#13;
+    padding-right: 19px;&#13;
+  }&#13;
+&#13;
+&#13;
+  .edit-modal-footer {&#13;
+    padding-left: 19px;&#13;
+&#13;
+    padding-right: 19px;&#13;
+  }&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+@media (max-width: 430px) {&#13;
+&#13;
+  .campus360-profile {&#13;
+    padding-left: 7px;&#13;
+&#13;
+    padding-right: 7px;&#13;
+  }&#13;
+&#13;
+&#13;
+  .profile-top {&#13;
+    padding: 18px;&#13;
+  }&#13;
+&#13;
+&#13;
+  .profile-person {&#13;
+    gap: 11px;&#13;
+  }&#13;
+&#13;
+&#13;
+  .profile-avatar {&#13;
+    width: 55px;&#13;
+&#13;
+    height: 55px;&#13;
+&#13;
+    border-width: 4px;&#13;
+&#13;
+    font-size: 17px;&#13;
+  }&#13;
+&#13;
+&#13;
+  .profile-person-info h1 {&#13;
+    font-size: 20px;&#13;
+  }&#13;
+&#13;
+&#13;
+  .profile-person-info p,&#13;
+  .profile-course {&#13;
+    font-size: 11px;&#13;
+  }&#13;
+&#13;
+&#13;
+  .profile-section {&#13;
+    padding: 18px;&#13;
+  }&#13;
+&#13;
+&#13;
+  .information-field,&#13;
+  .academic-field,&#13;
+  .placement-field {&#13;
+    padding: 14px;&#13;
+  }&#13;
+&#13;
+&#13;
+  .field-value,&#13;
+  .academic-value,&#13;
+  .placement-value {&#13;
+    font-size: 13px;&#13;
+  }&#13;
+&#13;
+&#13;
+  .profile-information-note {&#13;
+    align-items: flex-start;&#13;
+  }&#13;
+&#13;
+&#13;
+  .resume-status {&#13;
+    margin-left: 0;&#13;
+&#13;
+    width: 100%;&#13;
+&#13;
+    text-align: center;&#13;
+  }&#13;
+&#13;
+}</css>
+        <data_table>sp_instance</data_table>
+        <demo_data/>
+        <description/>
+        <docs/>
+        <field_list/>
+        <has_preview>false</has_preview>
+        <id>campus360_student_profile</id>
+        <internal>false</internal>
+        <link><![CDATA[function link(scope, element, attrs, controller) {
+  
+}]]></link>
+        <name>Campus360 Student Profile</name>
+        <option_schema/>
+        <public>false</public>
+        <roles/>
+        <script><![CDATA[(function() {
+
+    /* =====================================================
+       INITIAL DATA
+       ===================================================== */
+
+    data.error = '';
+
+    data.student = null;
+
+    data.initials = 'ST';
+
+    data.saveSuccess = false;
+
+    data.saveMessage = '';
+
+    data.choices = {
+
+        degree: [],
+
+        branch: [],
+
+        placement_status: [],
+
+        profile_status: []
+
+    };
+
+
+    /* =====================================================
+       STUDENT ID
+       ===================================================== */
+
+    var studentId =
+        $sp.getParameter('student') ||
+        'STU_TEST_001';
+
+
+    /* =====================================================
+       FIND STUDENT MASTER
+       ===================================================== */
+
+    var studentGR =
+        new GlideRecord(
+            'x_snc_campus360_student_master'
+        );
+
+
+    studentGR.addQuery(
+        'student_id',
+        studentId
+    );
+
+    studentGR.setLimit(1);
+
+    studentGR.query();
+
+
+    if (!studentGR.next()) {
+
+        data.error =
+            'Student Master record was not found for Student ID: ' +
+            studentId;
+
+        return;
+
+    }
+
+
+    /* =====================================================
+       SAVE PROFILE ACTION
+       ===================================================== */
+
+    if (
+        input &&
+        input.action === 'save_profile'
+    ) {
+
+        saveProfile(studentGR);
+
+        return;
+
+    }
+
+
+    /* =====================================================
+       LOAD STUDENT
+       ===================================================== */
+
+    loadStudent(studentGR);
+
+
+    /* =====================================================
+       LOAD CHOICES
+       ===================================================== */
+
+    data.choices.degree =
+        loadChoices('degree');
+
+
+    data.choices.branch =
+        loadChoices('branch');
+
+
+    data.choices.placement_status =
+        loadChoices('placement_status');
+
+
+    data.choices.profile_status =
+        loadChoices('profile_status');
+
+
+    /* =====================================================
+       LOAD STUDENT DATA
+       ===================================================== */
+
+    function loadStudent(gr) {
+
+        var studentName =
+            gr.getDisplayValue(
+                'student_name'
+            );
+
+
+        data.student = {
+
+            sys_id:
+                gr.getUniqueValue(),
+
+            student_id:
+                gr.getDisplayValue(
+                    'student_id'
+                ),
+
+            student_name:
+                studentName,
+
+            email:
+                gr.getDisplayValue(
+                    'email'
+                ),
+
+            phone_number:
+                gr.getDisplayValue(
+                    'phone_number'
+                ),
+
+            batch:
+                gr.getDisplayValue(
+                    'batch'
+                ),
+
+            branch:
+                gr.getDisplayValue(
+                    'branch'
+                ),
+
+            degree:
+                gr.getDisplayValue(
+                    'degree'
+                ),
+
+            cgpa:
+                gr.getDisplayValue(
+                    'cgpa'
+                ),
+
+            backlogs:
+                gr.getDisplayValue(
+                    'backlogs'
+                ),
+
+            placement_status:
+                gr.getDisplayValue(
+                    'placement_status'
+                ),
+
+            profile_status:
+                gr.getDisplayValue(
+                    'profile_status'
+                ),
+
+            has_resume:
+                checkResume(gr)
+
+        };
+
+
+        data.initials =
+            makeInitials(
+                studentName
+            );
+
+    }
+
+
+    /* =====================================================
+       SAVE PROFILE
+       ===================================================== */
+
+    function saveProfile(gr) {
+
+        if (
+            !input.profile
+        ) {
+
+            data.saveMessage =
+                'No profile information was received.';
+
+            return;
+
+        }
+
+
+        var profile =
+            input.profile;
+
+
+        /* STUDENT NAME */
+
+        if (
+            gr.isValidField(
+                'student_name'
+            )
+        ) {
+
+            gr.setValue(
+                'student_name',
+                String(
+                    profile.student_name || ''
+                ).trim()
+            );
+
+        }
+
+
+        /* EMAIL */
+
+        if (
+            gr.isValidField(
+                'email'
+            )
+        ) {
+
+            gr.setValue(
+                'email',
+                profile.email || ''
+            );
+
+        }
+
+
+        /* PHONE */
+
+        if (
+            gr.isValidField(
+                'phone_number'
+            )
+        ) {
+
+            gr.setValue(
+                'phone_number',
+                profile.phone_number || ''
+            );
+
+        }
+
+
+        /* BATCH */
+
+        if (
+            gr.isValidField(
+                'batch'
+            )
+        ) {
+
+            gr.setValue(
+                'batch',
+                profile.batch || ''
+            );
+
+        }
+
+
+        /* DEGREE */
+
+        if (
+            gr.isValidField(
+                'degree'
+            )
+        ) {
+
+            gr.setValue(
+                'degree',
+                profile.degree || ''
+            );
+
+        }
+
+
+        /* BRANCH */
+
+        if (
+            gr.isValidField(
+                'branch'
+            )
+        ) {
+
+            gr.setValue(
+                'branch',
+                profile.branch || ''
+            );
+
+        }
+
+
+        /* CGPA */
+
+        if (
+            gr.isValidField(
+                'cgpa'
+            )
+        ) {
+
+            if (
+                profile.cgpa === '' ||
+                profile.cgpa === null ||
+                profile.cgpa === undefined
+            ) {
+
+                gr.setValue(
+                    'cgpa',
+                    ''
+                );
+
+            } else {
+
+                var cgpa =
+                    parseFloat(
+                        profile.cgpa
+                    );
+
+
+                if (
+                    !isNaN(cgpa) &&
+                    cgpa >= 0 &&
+                    cgpa <= 10
+                ) {
+
+                    gr.setValue(
+                        'cgpa',
+                        cgpa
+                    );
+
+                }
+
+            }
+
+        }
+
+
+        /* BACKLOGS */
+
+        if (
+            gr.isValidField(
+                'backlogs'
+            )
+        ) {
+
+            if (
+                profile.backlogs === '' ||
+                profile.backlogs === null ||
+                profile.backlogs === undefined
+            ) {
+
+                gr.setValue(
+                    'backlogs',
+                    0
+                );
+
+            } else {
+
+                var backlogs =
+                    parseInt(
+                        profile.backlogs,
+                        10
+                    );
+
+
+                if (
+                    !isNaN(backlogs) &&
+                    backlogs >= 0
+                ) {
+
+                    gr.setValue(
+                        'backlogs',
+                        backlogs
+                    );
+
+                }
+
+            }
+
+        }
+
+
+        /* PLACEMENT STATUS */
+
+        if (
+            gr.isValidField(
+                'placement_status'
+            )
+        ) {
+
+            gr.setValue(
+                'placement_status',
+                profile.placement_status || ''
+            );
+
+        }
+
+
+        /* PROFILE STATUS */
+
+        if (
+            gr.isValidField(
+                'profile_status'
+            )
+        ) {
+
+            gr.setValue(
+                'profile_status',
+                profile.profile_status || ''
+            );
+
+        }
+
+
+        /* UPDATE RECORD */
+
+        var updatedId =
+            gr.update();
+
+
+        if (updatedId) {
+
+            data.saveSuccess = true;
+
+            data.saveMessage =
+                'Profile updated successfully.';
+
+        } else {
+
+            data.saveSuccess = false;
+
+            data.saveMessage =
+                'The profile could not be updated.';
+
+        }
+
+    }
+
+
+    /* =====================================================
+       LOAD CHOICE VALUES
+       ===================================================== */
+
+    function loadChoices(fieldName) {
+
+        var choices = [];
+
+
+        try {
+
+            var choiceGR =
+                new GlideRecord(
+                    'sys_choice'
+                );
+
+
+            choiceGR.addQuery(
+                'name',
+                'x_snc_campus360_student_master'
+            );
+
+
+            choiceGR.addQuery(
+                'element',
+                fieldName
+            );
+
+
+            choiceGR.addQuery(
+                'inactive',
+                false
+            );
+
+
+            choiceGR.orderBy(
+                'sequence'
+            );
+
+
+            choiceGR.query();
+
+
+            while (
+                choiceGR.next()
+            ) {
+
+                choices.push({
+
+                    value:
+                        choiceGR.getValue(
+                            'value'
+                        ),
+
+                    label:
+                        choiceGR.getValue(
+                            'label'
+                        )
+
+                });
+
+            }
+
+        } catch (e) {
+
+            choices = [];
+
+        }
+
+
+        return choices;
+
+    }
+
+
+    /* =====================================================
+       CHECK RESUME
+       ===================================================== */
+
+    function checkResume(gr) {
+
+        if (
+            !gr.isValidField(
+                'resume'
+            )
+        ) {
+
+            return false;
+
+        }
+
+
+        return !!gr.getValue(
+            'resume'
+        );
+
+    }
+
+
+    /* =====================================================
+       MAKE INITIALS
+       ===================================================== */
+
+    function makeInitials(name) {
+
+        if (!name) {
+            return 'ST';
+        }
+
+
+        name =
+            String(name).trim();
+
+
+        if (!name) {
+            return 'ST';
+        }
+
+
+        var parts =
+            name.split(/\s+/);
+
+
+        if (
+            parts.length === 1
+        ) {
+
+            return parts[0]
+                .substring(0, 2)
+                .toUpperCase();
+
+        }
+
+
+        return (
+            parts[0].charAt(0) +
+            parts[parts.length - 1].charAt(0)
+        ).toUpperCase();
+
+    }
+
+})();
+
+data.aiWidget = $sp.getWidget('campus360_ai_assistant');
+]]></script>
+        <servicenow>false</servicenow>
+        <sys_class_name>sp_widget</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-22 06:36:28</sys_created_on>
+        <sys_id>912df8e4f16703107f44ff560373bb35</sys_id>
+        <sys_mod_count>14</sys_mod_count>
+        <sys_name>Campus360 Student Profile</sys_name>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name>sp_widget_912df8e4f16703107f44ff560373bb35</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-30 11:16:37</sys_updated_on>
+        <template><![CDATA[<div class="campus360-profile">
+
+  <!-- =====================================================
+       TOP PROFILE HEADER
+       ===================================================== -->
+
+  <section class="profile-top">
+
+    <div class="profile-person">
+
+      <div class="profile-avatar">
+        {{c.data.initials}}
+      </div>
+
+      <div class="profile-person-info">
+
+        <div class="profile-label">
+          CAMPUS360 STUDENT PROFILE
+        </div>
+
+        <h1>
+          {{c.data.student.student_name}}
+        </h1>
+
+        <p>
+          {{c.data.student.email}}
+        </p>
+
+        <div class="profile-course">
+
+          <span ng-if="c.data.student.degree">
+            {{c.data.student.degree}}
+          </span>
+
+          <span
+            ng-if="c.data.student.degree && c.data.student.branch">
+            •
+          </span>
+
+          <span ng-if="c.data.student.branch">
+            {{c.data.student.branch}}
+          </span>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- TOP ACTIONS -->
+
+    <div class="profile-top-actions">
+
+      <button
+        type="button"
+        class="dashboard-button"
+        ng-click="c.goToDashboard()">
+
+        <span class="dashboard-icon">
+          ←
+        </span>
+
+        Dashboard
+
+      </button>
+
+
+      <button
+        type="button"
+        class="refresh-button"
+        ng-click="c.refresh()"
+        ng-disabled="c.loading">
+
+        <span class="refresh-icon">
+          ↻
+        </span>
+
+        Refresh
+
+      </button>
+
+
+      <button
+        type="button"
+        class="edit-button"
+        ng-click="c.openEdit()">
+
+        <span class="edit-icon">
+          ✎
+        </span>
+
+        Edit Profile
+
+      </button>
+
+    </div>
+
+  </section>
+
+
+  <!-- =====================================================
+       LOADING
+       ===================================================== -->
+
+  <div
+    class="profile-loading"
+    ng-if="c.loading">
+
+    <div class="spinner"></div>
+
+    <span>
+      Loading profile...
+    </span>
+
+  </div>
+
+
+  <!-- =====================================================
+       ERROR
+       ===================================================== -->
+
+  <div
+    class="profile-error"
+    ng-if="!c.loading && c.data.error">
+
+    <div class="error-icon">
+      !
+    </div>
+
+    <div>
+
+      <strong>
+        Unable to load profile
+      </strong>
+
+      <p>
+        {{c.data.error}}
+      </p>
+
+    </div>
+
+  </div>
+
+
+  <!-- =====================================================
+       PROFILE CONTENT
+       ===================================================== -->
+
+  <main
+    class="profile-content"
+    ng-if="!c.loading && !c.data.error && c.data.student">
+
+
+    <!-- ===================================================
+         PERSONAL INFORMATION
+         =================================================== -->
+
+    <section class="profile-section personal-section">
+
+      <div class="section-heading">
+
+        <div>
+
+          <div class="section-label personal-label">
+            PERSONAL
+          </div>
+
+          <h2>
+            Personal Information
+          </h2>
+
+          <p>
+            Your basic student information.
+          </p>
+
+        </div>
+
+
+        <div class="section-icon personal-icon">
+          ♙
+        </div>
+
+      </div>
+
+
+      <div class="information-grid">
+
+
+        <div class="information-field">
+
+          <label>
+            STUDENT NAME
+          </label>
+
+          <div class="field-value">
+            {{c.data.student.student_name || 'Not provided'}}
+          </div>
+
+        </div>
+
+
+        <div class="information-field">
+
+          <label>
+            STUDENT ID
+          </label>
+
+          <div class="field-value">
+            {{c.data.student.student_id || 'Not provided'}}
+          </div>
+
+        </div>
+
+
+        <div class="information-field">
+
+          <label>
+            EMAIL
+          </label>
+
+          <div class="field-value">
+            {{c.data.student.email || 'Not provided'}}
+          </div>
+
+        </div>
+
+
+        <div class="information-field">
+
+          <label>
+            PHONE NUMBER
+          </label>
+
+          <div class="field-value">
+            {{c.data.student.phone_number || 'Not provided'}}
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- ===================================================
+         ACADEMIC INFORMATION
+         =================================================== -->
+
+    <section class="profile-section academic-section">
+
+      <div class="section-heading">
+
+        <div>
+
+          <div class="section-label academic-label">
+            ACADEMICS
+          </div>
+
+          <h2>
+            Academic Information
+          </h2>
+
+          <p>
+            Your academic details and performance information.
+          </p>
+
+        </div>
+
+
+        <div class="section-icon academic-icon">
+          ◈
+        </div>
+
+      </div>
+
+
+      <div class="academic-information-grid">
+
+
+        <div class="academic-field degree-field">
+
+          <label>
+            DEGREE
+          </label>
+
+          <div class="academic-value">
+            {{c.data.student.degree || 'Not provided'}}
+          </div>
+
+        </div>
+
+
+        <div class="academic-field branch-field">
+
+          <label>
+            BRANCH
+          </label>
+
+          <div class="academic-value">
+            {{c.data.student.branch || 'Not provided'}}
+          </div>
+
+        </div>
+
+
+        <div class="academic-field batch-field">
+
+          <label>
+            BATCH
+          </label>
+
+          <div class="academic-value">
+            {{c.data.student.batch || 'Not provided'}}
+          </div>
+
+        </div>
+
+
+        <div class="academic-field cgpa-field">
+
+          <label>
+            CGPA
+          </label>
+
+          <div class="academic-value">
+            {{c.data.student.cgpa || '—'}}
+          </div>
+
+        </div>
+
+
+        <div class="academic-field backlog-field">
+
+          <label>
+            BACKLOGS
+          </label>
+
+          <div class="academic-value">
+            {{c.data.student.backlogs || '0'}}
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- ===================================================
+         PLACEMENT INFORMATION
+         =================================================== -->
+
+    <section class="profile-section placement-section">
+
+      <div class="section-heading">
+
+        <div>
+
+          <div class="section-label placement-label">
+            PLACEMENT
+          </div>
+
+          <h2>
+            Placement Information
+          </h2>
+
+          <p>
+            Your current placement profile.
+          </p>
+
+        </div>
+
+
+        <div class="section-icon placement-icon">
+          ★
+        </div>
+
+      </div>
+
+
+      <div class="placement-information-grid">
+
+
+        <div class="placement-field">
+
+          <label>
+            PLACEMENT STATUS
+          </label>
+
+          <div class="placement-value">
+
+            <span
+              class="status-dot"
+              ng-class="{
+                'placed': c.data.student.placement_status === 'Placed'
+              }">
+            </span>
+
+            {{c.data.student.placement_status || 'Not Placed'}}
+
+          </div>
+
+        </div>
+
+
+        <div class="placement-field">
+
+          <label>
+            PROFILE STATUS
+          </label>
+
+          <div class="placement-value">
+
+            <span class="status-dot active-dot">
+            </span>
+
+            {{c.data.student.profile_status || 'Active'}}
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- ===================================================
+         RESUME
+         =================================================== -->
+
+    <section class="profile-section resume-section">
+
+      <div class="section-heading">
+
+        <div>
+
+          <div class="section-label resume-label">
+            DOCUMENT
+          </div>
+
+          <h2>
+            Resume
+          </h2>
+
+          <p>
+            Resume information associated with your profile.
+          </p>
+
+        </div>
+
+
+        <div class="section-icon resume-icon">
+          ▤
+        </div>
+
+      </div>
+
+
+      <div
+        class="resume-box"
+        ng-if="c.data.student.has_resume">
+
+        <div class="resume-symbol">
+          PDF
+        </div>
+
+        <div class="resume-text">
+
+          <strong>
+            Student Resume
+          </strong>
+
+          <span>
+            Resume is attached to your Student Master record.
+          </span>
+
+        </div>
+
+        <span class="resume-status">
+          Available
+        </span>
+
+      </div>
+
+
+      <div
+        class="resume-box resume-empty"
+        ng-if="!c.data.student.has_resume">
+
+        <div class="resume-symbol empty-symbol">
+          +
+        </div>
+
+        <div class="resume-text">
+
+          <strong>
+            No resume uploaded
+          </strong>
+
+          <span>
+            No resume is currently attached to your profile.
+          </span>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- ===================================================
+         PROFILE INFORMATION NOTE
+         =================================================== -->
+
+    <div class="profile-information-note">
+
+      <div class="note-symbol">
+        i
+      </div>
+
+      <div>
+
+        <strong>
+          Profile information
+        </strong>
+
+        <p>
+          Your profile information is maintained in the
+          Campus360 Student Master record.
+        </p>
+
+      </div>
+
+    </div>
+
+
+  </main>
+
+
+  <!-- =====================================================
+       EDIT PROFILE MODAL
+       ===================================================== -->
+
+  <div
+    class="edit-modal-overlay"
+    ng-if="c.editing"
+    ng-click="c.closeEdit()">
+
+
+    <div
+      class="edit-modal"
+      ng-click="$event.stopPropagation()">
+
+
+      <!-- MODAL HEADER -->
+
+      <div class="edit-modal-header">
+
+        <div>
+
+          <div class="modal-label">
+            EDIT PROFILE
+          </div>
+
+          <h2>
+            Update Your Profile
+          </h2>
+
+          <p>
+            Update your personal and academic information.
+          </p>
+
+        </div>
+
+
+        <button
+          type="button"
+          class="modal-close"
+          ng-click="c.closeEdit()">
+
+          ×
+
+        </button>
+
+      </div>
+
+
+      <!-- MODAL CONTENT -->
+
+      <div class="edit-modal-content">
+
+
+        <!-- PERSONAL -->
+
+        <div class="edit-group">
+
+          <div class="edit-group-heading">
+
+            <span class="group-number">
+              01
+            </span>
+
+            <div>
+
+              <strong>
+                Personal Information
+              </strong>
+
+              <small>
+                Your basic contact information.
+              </small>
+
+            </div>
+
+          </div>
+
+
+          <div class="edit-fields">
+
+
+            <div class="edit-field">
+
+              <label>
+                Student Name
+              </label>
+
+              <input
+                type="text"
+                ng-model="c.editForm.student_name"
+                placeholder="Enter student name">
+
+            </div>
+
+
+            <div class="edit-field">
+
+              <label>
+                Student ID
+              </label>
+
+              <input
+                type="text"
+                ng-model="c.editForm.student_id"
+                disabled>
+
+            </div>
+
+
+            <div class="edit-field">
+
+              <label>
+                Email
+              </label>
+
+              <input
+                type="email"
+                ng-model="c.editForm.email"
+                placeholder="Enter email address">
+
+            </div>
+
+
+            <div class="edit-field">
+
+              <label>
+                Phone Number
+              </label>
+
+              <input
+                type="text"
+                ng-model="c.editForm.phone_number"
+                placeholder="Enter phone number">
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- ACADEMICS -->
+
+        <div class="edit-group">
+
+          <div class="edit-group-heading">
+
+            <span class="group-number academic-number">
+              02
+            </span>
+
+            <div>
+
+              <strong>
+                Academic Information
+              </strong>
+
+              <small>
+                Your degree and academic performance.
+              </small>
+
+            </div>
+
+          </div>
+
+
+          <div class="edit-fields">
+
+
+            <div class="edit-field">
+
+              <label>
+                Degree
+              </label>
+
+              <select
+                ng-if="c.data.choices.degree.length"
+                ng-model="c.editForm.degree"
+                ng-options="choice.value as choice.label for choice in c.data.choices.degree">
+              </select>
+
+              <input
+                ng-if="!c.data.choices.degree.length"
+                type="text"
+                ng-model="c.editForm.degree"
+                placeholder="Enter degree">
+
+            </div>
+
+
+            <div class="edit-field">
+
+              <label>
+                Branch
+              </label>
+
+              <select
+                ng-if="c.data.choices.branch.length"
+                ng-model="c.editForm.branch"
+                ng-options="choice.value as choice.label for choice in c.data.choices.branch">
+              </select>
+
+              <input
+                ng-if="!c.data.choices.branch.length"
+                type="text"
+                ng-model="c.editForm.branch"
+                placeholder="Enter branch">
+
+            </div>
+
+
+            <div class="edit-field">
+
+              <label>
+                Batch
+              </label>
+
+              <input
+                type="text"
+                ng-model="c.editForm.batch"
+                placeholder="Example: 2023-2027">
+
+            </div>
+
+
+            <div class="edit-field">
+
+              <label>
+                CGPA
+              </label>
+
+              <input
+                type="number"
+                min="0"
+                max="10"
+                step="0.01"
+                ng-model="c.editForm.cgpa"
+                placeholder="Enter CGPA">
+
+            </div>
+
+
+            <div class="edit-field">
+
+              <label>
+                Backlogs
+              </label>
+
+              <input
+                type="number"
+                min="0"
+                step="1"
+                ng-model="c.editForm.backlogs"
+                placeholder="Enter number of backlogs">
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- PLACEMENT -->
+
+        <div class="edit-group">
+
+          <div class="edit-group-heading">
+
+            <span class="group-number placement-number">
+              03
+            </span>
+
+            <div>
+
+              <strong>
+                Placement Information
+              </strong>
+
+              <small>
+                Your current placement status.
+              </small>
+
+            </div>
+
+          </div>
+
+
+          <div class="edit-fields">
+
+
+            <div class="edit-field">
+
+              <label>
+                Placement Status
+              </label>
+
+              <select
+                ng-if="c.data.choices.placement_status.length"
+                ng-model="c.editForm.placement_status"
+                ng-options="choice.value as choice.label for choice in c.data.choices.placement_status">
+              </select>
+
+              <input
+                ng-if="!c.data.choices.placement_status.length"
+                type="text"
+                ng-model="c.editForm.placement_status"
+                placeholder="Enter placement status">
+
+            </div>
+
+
+            <div class="edit-field">
+
+              <label>
+                Profile Status
+              </label>
+
+              <select
+                ng-if="c.data.choices.profile_status.length"
+                ng-model="c.editForm.profile_status"
+                ng-options="choice.value as choice.label for choice in c.data.choices.profile_status">
+              </select>
+
+              <input
+                ng-if="!c.data.choices.profile_status.length"
+                type="text"
+                ng-model="c.editForm.profile_status"
+                placeholder="Enter profile status">
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <div
+          class="save-error"
+          ng-if="c.saveError">
+
+          {{c.saveError}}
+
+        </div>
+
+      </div>
+
+
+      <!-- MODAL FOOTER -->
+
+      <div class="edit-modal-footer">
+
+        <button
+          type="button"
+          class="cancel-button"
+          ng-click="c.closeEdit()"
+          ng-disabled="c.saving">
+
+          Cancel
+
+        </button>
+
+
+        <button
+          type="button"
+          class="save-button"
+          ng-click="c.saveProfile()"
+          ng-disabled="c.saving">
+
+          <span ng-if="!c.saving">
+            Save Changes
+          </span>
+
+          <span ng-if="c.saving">
+            Saving...
+          </span>
+
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+<!-- Campus360 AI Assistant Floating Widget -->
+<sp-widget widget="data.aiWidget"></sp-widget>
+]]></template>
+    </sp_widget>
+</record_update>

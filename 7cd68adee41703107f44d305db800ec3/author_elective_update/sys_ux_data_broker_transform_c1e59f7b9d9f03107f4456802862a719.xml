@@ -1,0 +1,426 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_ux_data_broker_transform">
+    <sys_ux_data_broker_transform action="DELETE">
+        <acl_failure_result/>
+        <api_name>x_snc_campus360.Campus360 - Student Dashboard Data</api_name>
+        <batch_exclude>false</batch_exclude>
+        <description/>
+        <mutates_server_data>false</mutates_server_data>
+        <name>Campus360 - Student Dashboard Data</name>
+        <output_schema>{&#13;
+  "type": "object",&#13;
+  "properties": {&#13;
+    "found": {&#13;
+      "type": "boolean"&#13;
+    },&#13;
+    "student_sys_id": {&#13;
+      "type": "string"&#13;
+    },&#13;
+    "student_id": {&#13;
+      "type": "string"&#13;
+    },&#13;
+    "student_name": {&#13;
+      "type": "string"&#13;
+    },&#13;
+    "email": {&#13;
+      "type": "string"&#13;
+    },&#13;
+    "readiness_score": {&#13;
+      "type": "number"&#13;
+    },&#13;
+    "risk_level": {&#13;
+      "type": "string"&#13;
+    },&#13;
+    "primary_skill_gap": {&#13;
+      "type": "string"&#13;
+    },&#13;
+    "skill_gap_summary": {&#13;
+      "type": "string"&#13;
+    },&#13;
+    "participation_score": {&#13;
+      "type": "number"&#13;
+    },&#13;
+    "missed_opportunities": {&#13;
+      "type": "number"&#13;
+    },&#13;
+    "intervention_count": {&#13;
+      "type": "number"&#13;
+    },&#13;
+    "active_interventions": {&#13;
+      "type": "number"&#13;
+    },&#13;
+    "training_count": {&#13;
+      "type": "number"&#13;
+    },&#13;
+    "placement_status": {&#13;
+      "type": "string"&#13;
+    }&#13;
+  }&#13;
+}</output_schema>
+        <private>false</private>
+        <props/>
+        <required_translations/>
+        <schema_version>1.0.0</schema_version>
+        <script><![CDATA[function transform(input) {
+
+    var result = {
+        found: false,
+        student_sys_id: "",
+        student_id: "",
+        student_name: "",
+        email: "",
+        readiness_score: 0,
+        risk_level: "",
+        primary_skill_gap: "",
+        skill_gap_summary: "",
+        participation_score: 0,
+        missed_opportunities: 0,
+        intervention_count: 0,
+        active_interventions: 0,
+        training_count: 0,
+        placement_status: ""
+    };
+
+    // --------------------------------------------------
+    // 1. Get the currently logged-in ServiceNow user
+    // --------------------------------------------------
+    var userId = gs.getUserID();
+
+    if (!userId) {
+        return result;
+    }
+
+    // --------------------------------------------------
+    // 2. Get the logged-in user's email
+    // --------------------------------------------------
+    var userGR = new GlideRecord('sys_user');
+
+    if (!userGR.get(userId)) {
+        return result;
+    }
+
+    var userEmail = userGR.getValue('email');
+
+    if (!userEmail) {
+        return result;
+    }
+
+    result.email = userEmail;
+
+    // --------------------------------------------------
+    // 3. Find the Student Master record by email
+    // --------------------------------------------------
+    var studentGR = new GlideRecord('x_snc_campus360_student_master');
+    studentGR.addQuery('email', userEmail);
+    studentGR.setLimit(1);
+    studentGR.query();
+
+    if (!studentGR.next()) {
+        return result;
+    }
+
+    result.found = true;
+    result.student_sys_id = studentGR.getUniqueValue();
+    result.student_id = studentGR.getValue('student_id') || "";
+    result.student_name = studentGR.getValue('student_name') || "";
+    result.placement_status = studentGR.getValue('placement_status') || "";
+
+    // --------------------------------------------------
+    // 4. Find Placement Intelligence
+    // --------------------------------------------------
+    var intelligenceGR = new GlideRecord(
+        'x_snc_campus360_placement_intelligence'
+    );
+
+    intelligenceGR.addQuery('student', studentGR.getUniqueValue());
+    intelligenceGR.orderByDesc('last_updated');
+    intelligenceGR.setLimit(1);
+    intelligenceGR.query();
+
+    if (intelligenceGR.next()) {
+
+        result.readiness_score =
+            parseInt(intelligenceGR.getValue('readiness_score'), 10) || 0;
+
+        result.risk_level =
+            intelligenceGR.getDisplayValue('risk_level') || "";
+
+        result.primary_skill_gap =
+            intelligenceGR.getDisplayValue('primary_skill_gap') || "";
+
+        result.skill_gap_summary =
+            intelligenceGR.getValue('skill_gap_summary') || "";
+
+        result.participation_score =
+            parseInt(intelligenceGR.getValue('participation_score'), 10) || 0;
+
+        result.missed_opportunities =
+            parseInt(intelligenceGR.getValue('missed_opportunities'), 10) || 0;
+    }
+
+    // --------------------------------------------------
+    // 5. Count Placement Interventions
+    // --------------------------------------------------
+    var interventionGR = new GlideRecord(
+        'x_snc_campus360_placement_intervention'
+    );
+
+    interventionGR.addQuery('student', studentGR.getUniqueValue());
+    interventionGR.query();
+
+    while (interventionGR.next()) {
+
+        result.intervention_count++;
+
+        var status = interventionGR.getValue('status');
+
+        if (
+            status != 'completed' &&
+            status != 'cancelled' &&
+            status != 'failed'
+        ) {
+            result.active_interventions++;
+        }
+
+        if (interventionGR.getValue('training')) {
+            result.training_count++;
+        }
+    }
+
+    return result;
+}]]></script>
+        <sys_class_name>sys_ux_data_broker_transform</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-20 09:50:09</sys_created_on>
+        <sys_id>c1e59f7b9d9f03107f4456802862a719</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>Campus360 - Student Dashboard Data</sys_name>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name>sys_ux_data_broker_transform_c1e59f7b9d9f03107f4456802862a719</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-20 09:50:09</sys_updated_on>
+    </sys_ux_data_broker_transform>
+    <sys_translated_text action="DELETE" query="documentkey=c1e59f7b9d9f03107f4456802862a719"/>
+    <sys_update_version action="INSERT_OR_UPDATE">
+        <action>DELETE</action>
+        <application display_value="Campus360">7cd68adee41703107f44d305db800ec3</application>
+        <file_path/>
+        <instance_id>82d18dc7c38fcf94a03197af0501316c</instance_id>
+        <instance_name>ltm-hck-2876-0027</instance_name>
+        <name>sys_ux_data_broker_transform_c1e59f7b9d9f03107f4456802862a719</name>
+        <payload>&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;record_update table="sys_ux_data_broker_transform"&gt;&lt;sys_ux_data_broker_transform action="INSERT_OR_UPDATE"&gt;&lt;acl_failure_result/&gt;&lt;api_name&gt;x_snc_campus360.Campus360 - Student Dashboard Data&lt;/api_name&gt;&lt;batch_exclude&gt;false&lt;/batch_exclude&gt;&lt;description/&gt;&lt;mutates_server_data&gt;false&lt;/mutates_server_data&gt;&lt;name&gt;Campus360 - Student Dashboard Data&lt;/name&gt;&lt;output_schema&gt;{&amp;#13;
+  "type": "object",&amp;#13;
+  "properties": {&amp;#13;
+    "found": {&amp;#13;
+      "type": "boolean"&amp;#13;
+    },&amp;#13;
+    "student_sys_id": {&amp;#13;
+      "type": "string"&amp;#13;
+    },&amp;#13;
+    "student_id": {&amp;#13;
+      "type": "string"&amp;#13;
+    },&amp;#13;
+    "student_name": {&amp;#13;
+      "type": "string"&amp;#13;
+    },&amp;#13;
+    "email": {&amp;#13;
+      "type": "string"&amp;#13;
+    },&amp;#13;
+    "readiness_score": {&amp;#13;
+      "type": "number"&amp;#13;
+    },&amp;#13;
+    "risk_level": {&amp;#13;
+      "type": "string"&amp;#13;
+    },&amp;#13;
+    "primary_skill_gap": {&amp;#13;
+      "type": "string"&amp;#13;
+    },&amp;#13;
+    "skill_gap_summary": {&amp;#13;
+      "type": "string"&amp;#13;
+    },&amp;#13;
+    "participation_score": {&amp;#13;
+      "type": "number"&amp;#13;
+    },&amp;#13;
+    "missed_opportunities": {&amp;#13;
+      "type": "number"&amp;#13;
+    },&amp;#13;
+    "intervention_count": {&amp;#13;
+      "type": "number"&amp;#13;
+    },&amp;#13;
+    "active_interventions": {&amp;#13;
+      "type": "number"&amp;#13;
+    },&amp;#13;
+    "training_count": {&amp;#13;
+      "type": "number"&amp;#13;
+    },&amp;#13;
+    "placement_status": {&amp;#13;
+      "type": "string"&amp;#13;
+    }&amp;#13;
+  }&amp;#13;
+}&lt;/output_schema&gt;&lt;private&gt;false&lt;/private&gt;&lt;props/&gt;&lt;required_translations/&gt;&lt;schema_version&gt;1.0.0&lt;/schema_version&gt;&lt;script&gt;&lt;![CDATA[function transform(input) {
+
+    var result = {
+        found: false,
+        student_sys_id: "",
+        student_id: "",
+        student_name: "",
+        email: "",
+        readiness_score: 0,
+        risk_level: "",
+        primary_skill_gap: "",
+        skill_gap_summary: "",
+        participation_score: 0,
+        missed_opportunities: 0,
+        intervention_count: 0,
+        active_interventions: 0,
+        training_count: 0,
+        placement_status: ""
+    };
+
+    // --------------------------------------------------
+    // 1. Get the currently logged-in ServiceNow user
+    // --------------------------------------------------
+    var userId = gs.getUserID();
+
+    if (!userId) {
+        return result;
+    }
+
+    // --------------------------------------------------
+    // 2. Get the logged-in user's email
+    // --------------------------------------------------
+    var userGR = new GlideRecord('sys_user');
+
+    if (!userGR.get(userId)) {
+        return result;
+    }
+
+    var userEmail = userGR.getValue('email');
+
+    if (!userEmail) {
+        return result;
+    }
+
+    result.email = userEmail;
+
+    // --------------------------------------------------
+    // 3. Find the Student Master record by email
+    // --------------------------------------------------
+    var studentGR = new GlideRecord('x_snc_campus360_student_master');
+    studentGR.addQuery('email', userEmail);
+    studentGR.setLimit(1);
+    studentGR.query();
+
+    if (!studentGR.next()) {
+        return result;
+    }
+
+    result.found = true;
+    result.student_sys_id = studentGR.getUniqueValue();
+    result.student_id = studentGR.getValue('student_id') || "";
+    result.student_name = studentGR.getValue('student_name') || "";
+    result.placement_status = studentGR.getValue('placement_status') || "";
+
+    // --------------------------------------------------
+    // 4. Find Placement Intelligence
+    // --------------------------------------------------
+    var intelligenceGR = new GlideRecord(
+        'x_snc_campus360_placement_intelligence'
+    );
+
+    intelligenceGR.addQuery('student', studentGR.getUniqueValue());
+    intelligenceGR.orderByDesc('last_updated');
+    intelligenceGR.setLimit(1);
+    intelligenceGR.query();
+
+    if (intelligenceGR.next()) {
+
+        result.readiness_score =
+            parseInt(intelligenceGR.getValue('readiness_score'), 10) || 0;
+
+        result.risk_level =
+            intelligenceGR.getDisplayValue('risk_level') || "";
+
+        result.primary_skill_gap =
+            intelligenceGR.getDisplayValue('primary_skill_gap') || "";
+
+        result.skill_gap_summary =
+            intelligenceGR.getValue('skill_gap_summary') || "";
+
+        result.participation_score =
+            parseInt(intelligenceGR.getValue('participation_score'), 10) || 0;
+
+        result.missed_opportunities =
+            parseInt(intelligenceGR.getValue('missed_opportunities'), 10) || 0;
+    }
+
+    // --------------------------------------------------
+    // 5. Count Placement Interventions
+    // --------------------------------------------------
+    var interventionGR = new GlideRecord(
+        'x_snc_campus360_placement_intervention'
+    );
+
+    interventionGR.addQuery('student', studentGR.getUniqueValue());
+    interventionGR.query();
+
+    while (interventionGR.next()) {
+
+        result.intervention_count++;
+
+        var status = interventionGR.getValue('status');
+
+        if (
+            status != 'completed' &amp;&amp;
+            status != 'cancelled' &amp;&amp;
+            status != 'failed'
+        ) {
+            result.active_interventions++;
+        }
+
+        if (interventionGR.getValue('training')) {
+            result.training_count++;
+        }
+    }
+
+    return result;
+}]]&gt;&lt;/script&gt;&lt;sys_class_name&gt;sys_ux_data_broker_transform&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-20 09:50:09&lt;/sys_created_on&gt;&lt;sys_id&gt;c1e59f7b9d9f03107f4456802862a719&lt;/sys_id&gt;&lt;sys_mod_count&gt;0&lt;/sys_mod_count&gt;&lt;sys_name&gt;Campus360 - Student Dashboard Data&lt;/sys_name&gt;&lt;sys_package display_value="Campus360" source="x_snc_campus360"&gt;7cd68adee41703107f44d305db800ec3&lt;/sys_package&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="Campus360"&gt;7cd68adee41703107f44d305db800ec3&lt;/sys_scope&gt;&lt;sys_update_name&gt;sys_ux_data_broker_transform_c1e59f7b9d9f03107f4456802862a719&lt;/sys_update_name&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-20 09:50:09&lt;/sys_updated_on&gt;&lt;/sys_ux_data_broker_transform&gt;&lt;sys_translated_text action="delete_multiple" query="documentkey=c1e59f7b9d9f03107f4456802862a719"/&gt;&lt;/record_update&gt;</payload>
+        <payload_hash>2142128724</payload_hash>
+        <record_name>Campus360 - Student Dashboard Data</record_name>
+        <reverted_from/>
+        <source>70d68adee41703107f44d305db800ec8</source>
+        <source_table>sys_update_set</source_table>
+        <state>previous</state>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-20 09:50:10</sys_created_on>
+        <sys_id>ef56dbbb9d9f03107f4456802862a7f0</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_recorded_at>1a0be39206f0000001</sys_recorded_at>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-20 09:50:10</sys_updated_on>
+        <type>Data Broker Server Script</type>
+        <update_guid>ef56dbbb459f0310c87acbc768058bef</update_guid>
+        <update_guid_history>ef56dbbb459f0310c87acbc768058bef:2142128724</update_guid_history>
+    </sys_update_version>
+    <sys_metadata_delete action="INSERT_OR_UPDATE">
+        <sys_audit_delete/>
+        <sys_class_name>sys_metadata_delete</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-20 11:59:50</sys_created_on>
+        <sys_db_object display_value="" name="sys_ux_data_broker_transform">sys_ux_data_broker_transform</sys_db_object>
+        <sys_id>14910b0dd29f43a583f866a89bc27d59</sys_id>
+        <sys_metadata>c1e59f7b9d9f03107f4456802862a719</sys_metadata>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>Campus360 - Student Dashboard Data</sys_name>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_parent/>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_scope_delete display_value="">1cde9626740d46978b846077c1615101</sys_scope_delete>
+        <sys_update_name>sys_ux_data_broker_transform_c1e59f7b9d9f03107f4456802862a719</sys_update_name>
+        <sys_update_version display_value="sys_ux_data_broker_transform_c1e59f7b9d9f03107f4456802862a719">ef56dbbb9d9f03107f4456802862a7f0</sys_update_version>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-20 11:59:50</sys_updated_on>
+    </sys_metadata_delete>
+</record_update>

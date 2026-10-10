@@ -1,0 +1,2134 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update sys_domain="global" table="sys_hub_flow">
+    <sys_hub_flow action="INSERT_OR_UPDATE">
+        <access>public</access>
+        <acls/>
+        <active>true</active>
+        <allow_high_security_roles>false</allow_high_security_roles>
+        <annotation/>
+        <attributes>browserActivatedIn=chrome,integrationActivatedIn=standalone,labelCacheCleanUpExecuted=true,timeFromCreateToActivate=20998000,viewActivatedIn=naturalLanguage</attributes>
+        <authored_on_release_version>29000</authored_on_release_version>
+        <callable_by_client_api>false</callable_by_client_api>
+        <category/>
+        <copied_from/>
+        <copied_from_name/>
+        <description>Placement Intervention</description>
+        <display_name_after_preview/>
+        <flow_priority>MEDIUM</flow_priority>
+        <generation_source/>
+        <internal_name>f10_placement_intervention</internal_name>
+        <label_cache>[{"name":"Created or Updated_1.current.primary_skill_gap","label":"Trigger - Record Created or Updated➛Placement Intelligence Record➛Primary Skill Gap","reference":"","reference_display":"Primary Skill Gap","type":"choice","base_type":"choice","parent_table_name":"x_snc_campus360_placement_intelligence","column_name":"primary_skill_gap","choices":[{"sequence":0.0,"reference":false,"used":false,"label":"Communication","image":"","rawLabel":"Communication","selected":false,"missing":false,"value":"Communication","parameters":{"name":"x_snc_campus360_placement_intelligence","dependent_values":[""],"dependent_values_map":{"":"Communication"}}},{"sequence":1.0,"reference":false,"used":false,"label":"Technical Knowledge","image":"","rawLabel":"Technical Knowledge","selected":false,"missing":false,"value":"Technical Knowledge","parameters":{"name":"x_snc_campus360_placement_intelligence","dependent_values":[""],"dependent_values_map":{"":"Technical Knowledge"}}},{"sequence":2.0,"reference":false,"used":false,"label":"Problem Solving","image":"","rawLabel":"Problem Solving","selected":false,"missing":false,"value":"Problem Solving","parameters":{"name":"x_snc_campus360_placement_intelligence","dependent_values":[""],"dependent_values_map":{"":"Problem Solving"}}},{"sequence":3.0,"reference":false,"used":false,"label":"Coding","image":"","rawLabel":"Coding","selected":false,"missing":false,"value":"Coding","parameters":{"name":"x_snc_campus360_placement_intelligence","dependent_values":[""],"dependent_values_map":{"":"Coding"}}},{"sequence":4.0,"reference":false,"used":false,"label":"Aptitude","image":"","rawLabel":"Aptitude","selected":false,"missing":false,"value":"Aptitude","parameters":{"name":"x_snc_campus360_placement_intelligence","dependent_values":[""],"dependent_values_map":{"":"Aptitude"}}},{"sequence":5.0,"reference":false,"used":false,"label":"Presentation","image":"","rawLabel":"Presentation","selected":false,"missing":false,"value":"Presentation","parameters":{"name":"x_snc_campus360_placement_intelligence","dependent_values":[""],"dependent_values_map":{"":"Presentation"}}},{"sequence":6.0,"reference":false,"used":false,"label":"Interview Performance","image":"","rawLabel":"Interview Performance","selected":false,"missing":false,"value":"Interview Performance","parameters":{"name":"x_snc_campus360_placement_intelligence","dependent_values":[""],"dependent_values_map":{"":"Interview Performance"}}},{"sequence":7.0,"reference":false,"used":false,"label":"Resume / Profile","image":"","rawLabel":"Resume / Profile","selected":false,"missing":false,"value":"Resume / Profile","parameters":{"name":"x_snc_campus360_placement_intelligence","dependent_values":[""],"dependent_values_map":{"":"Resume / Profile"}}},{"sequence":8.0,"reference":false,"used":false,"label":"Skill Development","image":"","rawLabel":"Skill Development","selected":false,"missing":false,"value":"Skill Development","parameters":{"name":"x_snc_campus360_placement_intelligence","dependent_values":[""],"dependent_values_map":{"":"Skill Development"}}},{"sequence":9.0,"reference":false,"used":false,"label":"No Significant Gap","image":"","rawLabel":"No Significant Gap","selected":false,"missing":false,"value":"No Significant Gap","parameters":{"name":"x_snc_campus360_placement_intelligence","dependent_values":[""],"dependent_values_map":{"":"No Significant Gap"}}}],"usedInstances":{"eafe5ec0-3672-420d-b75e-c32a4e7e7c86":["u_primary_skill_gap"]}},{"name":"8a2cf5c0-ef58-46e2-a1a4-2af807047efe.Count","label":"1 - Look Up Records➛Count","reference_display":"Count","type":"integer","base_type":"integer","usedInstances":{},"attributes":{"element_mapping_provider":"com.glide.flow_design.action.data.FlowDesignVariableMapper"}},{"name":"Created or Updated_1.current.recommended_action","label":"Trigger - Record Created or Updated➛Placement Intelligence Record➛Recommended Action","reference":"","reference_display":"Recommended Action","type":"string","base_type":"string","parent_table_name":"x_snc_campus360_placement_intelligence","column_name":"recommended_action","choices":[{"order":0.0}],"usedInstances":{"9c5f4c6d-3050-4089-9560-3d8245f9cc31":["reason"]}},{"name":"Created or Updated_1.current.student","label":"Trigger - Record Created or Updated➛Placement Intelligence Record➛Student","reference":"x_snc_campus360_student_master","reference_display":"Student Master","type":"reference","base_type":"reference","parent_table_name":"x_snc_campus360_placement_intelligence","column_name":"student","usedInstances":{"9c5f4c6d-3050-4089-9560-3d8245f9cc31":["student"],"c3f7f89a-5cef-41a8-aefc-4572277da4df":["student"]}},{"name":"8a2cf5c0-ef58-46e2-a1a4-2af807047efe.Records","label":"1 - Look Up Records➛ Placement Intervention Records","reference":"x_snc_campus360_placement_intervention","reference_display":" Placement Intervention","type":"records","base_type":"records","usedInstances":{},"attributes":{"element_mapping_provider":"com.glide.flow_design.action.data.FlowDesignVariableMapper"}},{"name":"eafe5ec0-3672-420d-b75e-c32a4e7e7c86.answer.result_elements.u_training_skill_area","label":"4➛sys_decision_multi_result Record➛Result elements➛Training Skill Area","reference":"","reference_display":"Training Skill Area","type":"string","base_type":"string","parent_table_name":"var__m_sys_decision_multi_result_element_ddc925eba89703107f44321b8bcb5609","column_name":"u_training_skill_area","choices":[{"order":0.0}],"usedInstances":{}},{"name":"Created or Updated_1.current.skill_gap_summary","label":"Trigger - Record Created or Updated➛Placement Intelligence Record➛Skill Gap Summary","reference":"","reference_display":"Skill Gap Summary","type":"string","base_type":"string","parent_table_name":"x_snc_campus360_placement_intelligence","column_name":"skill_gap_summary","choices":[{"order":0.0}],"usedInstances":{"9c5f4c6d-3050-4089-9560-3d8245f9cc31":["reason"],"c3f7f89a-5cef-41a8-aefc-4572277da4df":["reason"]}},{"name":"24bc33d2-f53d-4e1f-964b-91736615b8f0.Count","label":"20 - Look Up Records➛Count","reference_display":"Count","type":"integer","base_type":"integer","usedInstances":{},"attributes":{"element_mapping_provider":"com.glide.flow_design.action.data.FlowDesignVariableMapper"}},{"name":"41feb962-9240-465a-8630-f18fba31129e.Record","label":"7 - Look Up Record➛Training Program Record","reference":"x_snc_campus360_training_program","reference_display":"Training Program","type":"reference","base_type":"reference","usedInstances":{},"attributes":{"element_mapping_provider":"com.glide.flow_design.action.data.FlowDesignVariableMapper"}},{"name":"Created or Updated_1.current.risk_level","label":"Trigger - Record Created or Updated➛Placement Intelligence Record➛Risk Level","reference":"","reference_display":"Risk Level","type":"choice","base_type":"choice","parent_table_name":"x_snc_campus360_placement_intelligence","column_name":"risk_level","choices":[{"sequence":0.0,"reference":false,"used":false,"label":"Low","image":"","rawLabel":"Low","selected":false,"missing":false,"value":"low","parameters":{"name":"x_snc_campus360_placement_intelligence","dependent_values":[""],"dependent_values_map":{"":"Low"}}},{"sequence":1.0,"reference":false,"used":false,"label":"Medium","image":"","rawLabel":"Medium","selected":false,"missing":false,"value":"medium","parameters":{"name":"x_snc_campus360_placement_intelligence","dependent_values":[""],"dependent_values_map":{"":"Medium"}}},{"sequence":2.0,"reference":false,"used":false,"label":"High","image":"","rawLabel":"High","selected":false,"missing":false,"value":"high","parameters":{"name":"x_snc_campus360_placement_intelligence","dependent_values":[""],"dependent_values_map":{"":"High"}}},{"sequence":3.0,"reference":false,"used":false,"label":"Critical","image":"","rawLabel":"Critical","selected":false,"missing":false,"value":"critical","parameters":{"name":"x_snc_campus360_placement_intelligence","dependent_values":[""],"dependent_values_map":{"":"Critical"}}}],"usedInstances":{"eafe5ec0-3672-420d-b75e-c32a4e7e7c86":["u_risk_level"]}},{"name":"Created or Updated_1.run_start_date_time","label":"Trigger - Record Created or Updated➛Run Start Date/Time","type":"glide_date_time","base_type":"glide_date_time","choices":[{"order":0.0}],"usedInstances":{"c3f7f89a-5cef-41a8-aefc-4572277da4df":["start_date"]},"attributes":{"test_input_hidden":"true"}},{"name":"24bc33d2-f53d-4e1f-964b-91736615b8f0.Records","label":"20 - Look Up Records➛Training Program Records","reference":"x_snc_campus360_training_program","reference_display":"Training Program","type":"records","base_type":"records","usedInstances":{},"attributes":{"element_mapping_provider":"com.glide.flow_design.action.data.FlowDesignVariableMapper"}},{"name":"Created or Updated_1.current.readiness_score","label":"Trigger - Record Created or Updated➛Placement Intelligence Record➛Readiness Score","reference":"","reference_display":"Readiness Score","type":"integer","base_type":"integer","parent_table_name":"x_snc_campus360_placement_intelligence","column_name":"readiness_score","choices":[{"order":0.0}],"usedInstances":{"9c5f4c6d-3050-4089-9560-3d8245f9cc31":["before_score"],"c3f7f89a-5cef-41a8-aefc-4572277da4df":["before_score"]}},{"name":"eafe5ec0-3672-420d-b75e-c32a4e7e7c86.answer.result_elements.u_intervention_type","label":"4➛sys_decision_multi_result Record➛Result elements➛Intervention Type","reference":"","reference_display":"Intervention Type","type":"string","base_type":"string","parent_table_name":"var__m_sys_decision_multi_result_element_ddc925eba89703107f44321b8bcb5609","column_name":"u_intervention_type","choices":[{"order":0.0}],"usedInstances":{"9c5f4c6d-3050-4089-9560-3d8245f9cc31":["intervention_type"],"c3f7f89a-5cef-41a8-aefc-4572277da4df":["intervention_type"]}},{"name":"Created or Updated_1.current.bottleneck_stage","label":"Trigger - Record Created or Updated➛Placement Intelligence Record➛Bottleneck Stage","reference":"","reference_display":"Bottleneck Stage","type":"choice","base_type":"choice","parent_table_name":"x_snc_campus360_placement_intelligence","column_name":"bottleneck_stage","choices":[{"sequence":0.0,"reference":false,"used":false,"label":"Profile","image":"","rawLabel":"Profile","selected":false,"missing":false,"value":"profile","parameters":{"name":"x_snc_campus360_placement_intelligence","dependent_values":[""],"dependent_values_map":{"":"Profile"}}},{"sequence":1.0,"reference":false,"used":false,"label":"Skills","image":"","rawLabel":"Skills","selected":false,"missing":false,"value":"skills","parameters":{"name":"x_snc_campus360_placement_intelligence","dependent_values":[""],"dependent_values_map":{"":"Skills"}}},{"sequence":2.0,"reference":false,"used":false,"label":"Applications","image":"","rawLabel":"Applications","selected":false,"missing":false,"value":"applications","parameters":{"name":"x_snc_campus360_placement_intelligence","dependent_values":[""],"dependent_values_map":{"":"Applications"}}},{"sequence":3.0,"reference":false,"used":false,"label":"Assessments","image":"","rawLabel":"Assessments","selected":false,"missing":false,"value":"assessments","parameters":{"name":"x_snc_campus360_placement_intelligence","dependent_values":[""],"dependent_values_map":{"":"Assessments"}}},{"sequence":4.0,"reference":false,"used":false,"label":"Interviews","image":"","rawLabel":"Interviews","selected":false,"missing":false,"value":"interviews","parameters":{"name":"x_snc_campus360_placement_intelligence","dependent_values":[""],"dependent_values_map":{"":"Interviews"}}},{"sequence":5.0,"reference":false,"used":false,"label":"Training","image":"","rawLabel":"Training","selected":false,"missing":false,"value":"training","parameters":{"name":"x_snc_campus360_placement_intelligence","dependent_values":[""],"dependent_values_map":{"":"Training"}}},{"sequence":6.0,"reference":false,"used":false,"label":"Placement","image":"","rawLabel":"Placement","selected":false,"missing":false,"value":"placement","parameters":{"name":"x_snc_campus360_placement_intelligence","dependent_values":[""],"dependent_values_map":{"":"Placement"}}},{"sequence":7.0,"reference":false,"used":false,"label":"None","image":"","rawLabel":"None","selected":false,"missing":false,"value":"none","parameters":{"name":"x_snc_campus360_placement_intelligence","dependent_values":[""],"dependent_values_map":{"":"None"}}}],"usedInstances":{"eafe5ec0-3672-420d-b75e-c32a4e7e7c86":["u_bottleneck_stage"]}},{"name":"73e61bfd-6dc1-44aa-83ab-19e4e5bc406d.item","label":"22 - For Each➛Training Program Record","reference":"x_snc_campus360_training_program","reference_display":"Training Program","type":"reference","base_type":"reference","usedInstances":{},"attributes":{"pills_draggable_inside_block":"true","pills_draggable_outside_block":"false"}}]</label_cache>
+        <master_snapshot>d49fbe6fa89343107f44321b8bcb565e</master_snapshot>
+        <master_snapshot_digest/>
+        <name>F10- Placement Intervention</name>
+        <natlang/>
+        <outputs/>
+        <pre_compiled>false</pre_compiled>
+        <remote_trigger_id>749fbe6fa89343107f44321b8bcb56d2</remote_trigger_id>
+        <run_as>user</run_as>
+        <run_with_roles/>
+        <sc_callable>false</sc_callable>
+        <show_draft_actions>false</show_draft_actions>
+        <show_triggered_flows>false</show_triggered_flows>
+        <status>published</status>
+        <substatus/>
+        <sys_class_name>sys_hub_flow</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 07:42:05</sys_created_on>
+        <sys_domain>global</sys_domain>
+        <sys_domain_path>/</sys_domain_path>
+        <sys_id>e17fad67a8d703107f44321b8bcb5657</sys_id>
+        <sys_mod_count>43</sys_mod_count>
+        <sys_name>F10- Placement Intervention</sys_name>
+        <sys_overrides/>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name>sys_hub_flow_e17fad67a8d703107f44321b8bcb5657</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:32:06</sys_updated_on>
+        <type>flow</type>
+        <updation_source/>
+        <version>2</version>
+        <version_record>dd9ffe6fa89343107f44321b8bcb5650</version_record>
+    </sys_hub_flow>
+    <sys_translated_text action="delete_multiple" query="documentkey=e17fad67a8d703107f44321b8bcb5657"/>
+    <sys_variable_value action="delete_multiple" query="document_key=e17fad67a8d703107f44321b8bcb5657"/>
+    <sys_flow_record_trigger action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <condition table="x_snc_campus360_placement_intelligence">risk_level=high<item display_value="High" endquery="false" field="risk_level" goto="false" newquery="false" operator="=" or="false" value="high"/>
+        </condition>
+        <name/>
+        <on_delete>false</on_delete>
+        <on_insert>true</on_insert>
+        <on_update>true</on_update>
+        <published_version/>
+        <run_flow_in>background</run_flow_in>
+        <run_on_extended>false</run_on_extended>
+        <run_when_setting>both</run_when_setting>
+        <run_when_user_list/>
+        <run_when_user_setting>any</run_when_user_setting>
+        <sys_class_name>sys_flow_record_trigger</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 13:32:05</sys_created_on>
+        <sys_domain>global</sys_domain>
+        <sys_domain_path>/</sys_domain_path>
+        <sys_id>749fbe6fa89343107f44321b8bcb56d2</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_overrides/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:32:05</sys_updated_on>
+        <table>x_snc_campus360_placement_intelligence</table>
+        <trigger_definition/>
+    </sys_flow_record_trigger>
+    <sys_trigger_runner_mapping action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <data>{"run_flow_in":"background","run_when_user_list":[],"run_when_setting":"both","run_when_user_setting":"any","run_on_extended":"false"}</data>
+        <identifier>e17fad67a8d703107f44321b8bcb5657</identifier>
+        <identifier_type>flow</identifier_type>
+        <runner>FDTriggerRunner</runner>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 13:32:05</sys_created_on>
+        <sys_id>709fbe6fa89343107f44321b8bcb56d3</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:32:05</sys_updated_on>
+        <trigger display_value="">749fbe6fa89343107f44321b8bcb56d2</trigger>
+    </sys_trigger_runner_mapping>
+    <sys_trigger_runner_mapping action="delete_multiple" query="identifier=e17fad67a8d703107f44321b8bcb5657^sys_idNOT IN709fbe6fa89343107f44321b8bcb56d3"/>
+    <sys_hub_flow_stage action="delete_multiple" query="flow=e17fad67a8d703107f44321b8bcb5657"/>
+    <sys_flow_cat_variable_model action="delete_multiple" query="id=e17fad67a8d703107f44321b8bcb5657^sys_idNOT INe57fad67a8d703107f44321b8bcb5658"/>
+    <sys_flow_cat_variable_model action="INSERT_OR_UPDATE">
+        <id>e17fad67a8d703107f44321b8bcb5657</id>
+        <name>F10- Placement Intervention</name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 07:42:05</sys_created_on>
+        <sys_id>e57fad67a8d703107f44321b8bcb5658</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_scope/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 07:42:05</sys_updated_on>
+    </sys_flow_cat_variable_model>
+    <sys_flow_cat_variable action="delete_multiple" query="flow_catalog_model=e57fad67a8d703107f44321b8bcb5658"/>
+    <sys_hub_flow_input action="delete_multiple" query="model=e17fad67a8d703107f44321b8bcb5657^sys_idNOT INa88f61a7a8d703107f44321b8bcb5672,e08f61a7a8d703107f44321b8bcb569c,e48f61a7a8d703107f44321b8bcb56b3"/>
+    <sys_hub_flow_input action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <array>false</array>
+        <array_denormalized>false</array_denormalized>
+        <attributes>element_mapping_provider=com.glide.flow_design.action.data.FlowDesignVariableMapper,test_input_hidden=true,uiType=table_name,uiTypeLabel=Table Name</attributes>
+        <audit>false</audit>
+        <calculation><![CDATA[(function calculatedFieldValue(current) {
+
+	// Add your code here
+	return '';  // return the calculated value
+
+})(current);]]></calculation>
+        <choice/>
+        <choice_field/>
+        <choice_table/>
+        <column_label/>
+        <comments/>
+        <create_roles/>
+        <default_value/>
+        <defaultsort/>
+        <delete_roles/>
+        <dependent/>
+        <dependent_on_field/>
+        <display>false</display>
+        <dynamic_creation>false</dynamic_creation>
+        <dynamic_creation_script/>
+        <dynamic_default_value/>
+        <dynamic_ref_qual/>
+        <element>table_name</element>
+        <element_reference>false</element_reference>
+        <foreign_database/>
+        <formula/>
+        <function_definition/>
+        <function_field>false</function_field>
+        <help/>
+        <hint/>
+        <internal_type display_value="">table_name</internal_type>
+        <label>Table Name</label>
+        <mandatory>false</mandatory>
+        <max_length>200</max_length>
+        <model display_value="F10- Placement Intervention">e17fad67a8d703107f44321b8bcb5657</model>
+        <model_id>e17fad67a8d703107f44321b8bcb5657</model_id>
+        <model_table>sys_hub_flow</model_table>
+        <name>var__m_sys_hub_flow_input_e17fad67a8d703107f44321b8bcb5657</name>
+        <next_element/>
+        <order>101</order>
+        <primary>false</primary>
+        <read_only>false</read_only>
+        <read_only_option/>
+        <read_roles/>
+        <reference/>
+        <reference_cascade_rule/>
+        <reference_floats>false</reference_floats>
+        <reference_key/>
+        <reference_qual/>
+        <reference_qual_condition/>
+        <reference_type/>
+        <sizeclass/>
+        <spell_check>false</spell_check>
+        <staged>false</staged>
+        <sys_class_name>sys_hub_flow_input</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 07:42:17</sys_created_on>
+        <sys_id>a88f61a7a8d703107f44321b8bcb5672</sys_id>
+        <sys_mod_count>1</sys_mod_count>
+        <sys_name/>
+        <sys_package/>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 11:55:08</sys_updated_on>
+        <table_reference>false</table_reference>
+        <text_index>false</text_index>
+        <unique>false</unique>
+        <use_dependent_field>false</use_dependent_field>
+        <use_dynamic_default>false</use_dynamic_default>
+        <use_reference_qualifier>simple</use_reference_qualifier>
+        <virtual>false</virtual>
+        <virtual_type>script</virtual_type>
+        <widget/>
+        <write_roles/>
+        <xml_view>false</xml_view>
+    </sys_hub_flow_input>
+    <sys_hub_action_input_action_instance action="delete_multiple" query="action_input=a88f61a7a8d703107f44321b8bcb5672"/>
+    <sys_hub_flow_input action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <array>false</array>
+        <array_denormalized>false</array_denormalized>
+        <attributes>element_mapping_provider=com.glide.flow_design.action.data.FlowDesignVariableMapper,uiType=document_id,uiTypeLabel=Document ID</attributes>
+        <audit>false</audit>
+        <calculation><![CDATA[(function calculatedFieldValue(current) {
+
+	// Add your code here
+	return '';  // return the calculated value
+
+})(current);]]></calculation>
+        <choice/>
+        <choice_field/>
+        <choice_table/>
+        <column_label/>
+        <comments/>
+        <create_roles/>
+        <default_value/>
+        <defaultsort/>
+        <delete_roles/>
+        <dependent>table_name</dependent>
+        <dependent_on_field>table_name</dependent_on_field>
+        <display>false</display>
+        <dynamic_creation>false</dynamic_creation>
+        <dynamic_creation_script/>
+        <dynamic_default_value/>
+        <dynamic_ref_qual/>
+        <element>current</element>
+        <element_reference>false</element_reference>
+        <foreign_database/>
+        <formula/>
+        <function_definition/>
+        <function_field>false</function_field>
+        <help/>
+        <hint/>
+        <internal_type display_value="">document_id</internal_type>
+        <label>Record</label>
+        <mandatory>true</mandatory>
+        <max_length>200</max_length>
+        <model display_value="F10- Placement Intervention">e17fad67a8d703107f44321b8bcb5657</model>
+        <model_id>e17fad67a8d703107f44321b8bcb5657</model_id>
+        <model_table>sys_hub_flow</model_table>
+        <name>var__m_sys_hub_flow_input_e17fad67a8d703107f44321b8bcb5657</name>
+        <next_element/>
+        <order>100</order>
+        <primary>false</primary>
+        <read_only>false</read_only>
+        <read_only_option/>
+        <read_roles/>
+        <reference/>
+        <reference_cascade_rule/>
+        <reference_floats>false</reference_floats>
+        <reference_key/>
+        <reference_qual/>
+        <reference_qual_condition/>
+        <reference_type/>
+        <sizeclass/>
+        <spell_check>false</spell_check>
+        <staged>false</staged>
+        <sys_class_name>sys_hub_flow_input</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 07:42:17</sys_created_on>
+        <sys_id>e08f61a7a8d703107f44321b8bcb569c</sys_id>
+        <sys_mod_count>1</sys_mod_count>
+        <sys_name/>
+        <sys_package/>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 11:55:07</sys_updated_on>
+        <table_reference>false</table_reference>
+        <text_index>false</text_index>
+        <unique>false</unique>
+        <use_dependent_field>true</use_dependent_field>
+        <use_dynamic_default>false</use_dynamic_default>
+        <use_reference_qualifier>simple</use_reference_qualifier>
+        <virtual>false</virtual>
+        <virtual_type>script</virtual_type>
+        <widget/>
+        <write_roles/>
+        <xml_view>false</xml_view>
+    </sys_hub_flow_input>
+    <sys_hub_action_input_action_instance action="delete_multiple" query="action_input=e08f61a7a8d703107f44321b8bcb569c"/>
+    <sys_hub_flow_input action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <array>false</array>
+        <array_denormalized>false</array_denormalized>
+        <attributes>child_label=FDChangeDetails,child_name=FDChangeDetails,child_type=object,child_type_label=Object,co_type_name=FDCollection,element_mapping_provider=com.glide.flow_design.action.data.FlowDesignVariableMapper,pwd2droppable=true,uiType=array.object,uiTypeLabel=Array.Object</attributes>
+        <audit>false</audit>
+        <calculation><![CDATA[(function calculatedFieldValue(current) {
+
+	// Add your code here
+	return '';  // return the calculated value
+
+})(current);]]></calculation>
+        <choice/>
+        <choice_field/>
+        <choice_table/>
+        <column_label/>
+        <comments/>
+        <create_roles/>
+        <default_value/>
+        <defaultsort/>
+        <delete_roles/>
+        <dependent/>
+        <dependent_on_field/>
+        <display>false</display>
+        <dynamic_creation>false</dynamic_creation>
+        <dynamic_creation_script/>
+        <dynamic_default_value/>
+        <dynamic_ref_qual/>
+        <element>changed_fields</element>
+        <element_reference>false</element_reference>
+        <foreign_database/>
+        <formula/>
+        <function_definition/>
+        <function_field>false</function_field>
+        <help/>
+        <hint/>
+        <internal_type display_value="String">string</internal_type>
+        <label>Changed Fields</label>
+        <mandatory>false</mandatory>
+        <max_length>4000</max_length>
+        <model display_value="F10- Placement Intervention">e17fad67a8d703107f44321b8bcb5657</model>
+        <model_id>e17fad67a8d703107f44321b8bcb5657</model_id>
+        <model_table>sys_hub_flow</model_table>
+        <name>var__m_sys_hub_flow_input_e17fad67a8d703107f44321b8bcb5657</name>
+        <next_element/>
+        <order>100</order>
+        <primary>false</primary>
+        <read_only>false</read_only>
+        <read_only_option/>
+        <read_roles/>
+        <reference/>
+        <reference_cascade_rule/>
+        <reference_floats>false</reference_floats>
+        <reference_key/>
+        <reference_qual/>
+        <reference_qual_condition/>
+        <reference_type/>
+        <sizeclass/>
+        <spell_check>false</spell_check>
+        <staged>false</staged>
+        <sys_class_name>sys_hub_flow_input</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 07:42:17</sys_created_on>
+        <sys_id>e48f61a7a8d703107f44321b8bcb56b3</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name/>
+        <sys_package/>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 07:42:17</sys_updated_on>
+        <table_reference>false</table_reference>
+        <text_index>false</text_index>
+        <unique>false</unique>
+        <use_dependent_field>false</use_dependent_field>
+        <use_dynamic_default>false</use_dynamic_default>
+        <use_reference_qualifier>simple</use_reference_qualifier>
+        <virtual>false</virtual>
+        <virtual_type>script</virtual_type>
+        <widget/>
+        <write_roles/>
+        <xml_view>false</xml_view>
+    </sys_hub_flow_input>
+    <sys_hub_action_input_action_instance action="delete_multiple" query="action_input=e48f61a7a8d703107f44321b8bcb56b3"/>
+    <sys_hub_flow_output action="delete_multiple" query="model=e17fad67a8d703107f44321b8bcb5657"/>
+    <sys_hub_alias_mapping action="delete_multiple" query="source_id=e17fad67a8d703107f44321b8bcb5657"/>
+    <sys_hub_trigger_instance_v2 action="delete_multiple" query="flow=e17fad67a8d703107f44321b8bcb5657^sys_idNOT IN9c8f6567a89703107f44321b8bcb5679"/>
+    <sys_hub_trigger_instance_v2 action="INSERT_OR_UPDATE">
+        <comment/>
+        <display_text/>
+        <flow display_value="F10- Placement Intervention">e17fad67a8d703107f44321b8bcb5657</flow>
+        <generation_source/>
+        <name>Created or Updated</name>
+        <published_version/>
+        <remote_sys_id/>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 07:42:16</sys_created_on>
+        <sys_id>9c8f6567a89703107f44321b8bcb5679</sys_id>
+        <sys_mod_count>3</sys_mod_count>
+        <sys_scope/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:32:02</sys_updated_on>
+        <trigger_definition display_value="Created or Updated">a45d9180c32222002841b63b12d3aea7</trigger_definition>
+        <trigger_inputs>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</trigger_inputs>
+        <trigger_outputs/>
+        <trigger_type>record_create_or_update</trigger_type>
+        <updation_source/>
+    </sys_hub_trigger_instance_v2>
+    <sys_hub_action_instance_v2 action="delete_multiple" query="flow=e17fad67a8d703107f44321b8bcb5657^sys_idNOT INebbfa5eba85703107f44321b8bcb5613,d3f91ae3a89f03107f44321b8bcb56f8,b35bd2a7a89f03107f44321b8bcb567b"/>
+    <sys_hub_action_instance_v2 action="INSERT_OR_UPDATE">
+        <action_type display_value="Look Up Records">43400a1587003300663ca1bb36cb0b4b</action_type>
+        <action_type_parent/>
+        <attributes/>
+        <comment/>
+        <compiled_snapshot>43400a1587003300663ca1bb36cb0b4b</compiled_snapshot>
+        <display_text/>
+        <flow display_value="F10- Placement Intervention">e17fad67a8d703107f44321b8bcb5657</flow>
+        <generation_source/>
+        <order>1</order>
+        <parent_ui_id/>
+        <sys_class_name>sys_hub_action_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 07:43:18</sys_created_on>
+        <sys_id>ebbfa5eba85703107f44321b8bcb5613</sys_id>
+        <sys_mod_count>3</sys_mod_count>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-28 07:20:17</sys_updated_on>
+        <ui_id>8a2cf5c0-ef58-46e2-a1a4-2af807047efe</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/+VWbW/aMBD+K1E+I2QaSrt+m6gqVerL1Hb90lWWYztgzSSZ7fBSxH/fOXYChZRBR6VO+wS5O/vunnse20/zULDwLERJFyHSOT49QSiKEOr1Iko6cRz1aIzi4y9hK0zJiEOkzpTBZpZzMI2JLGob0RRMTOhcktmj95DAZMEL2OlQSKZ4Gp49PbfCnCjYzXAVns3XXLuWI0nMJYTeQ+7gwdXTUGL5cwY5MkGr7yu/tF8ZM8VsKVEr5FPDU8ahhoRIzVvhiKSMmEzNaovihN2mcmkYitTAbqENnmrxAvmiIxuXcOiKcuerP7GHyJmTc2LIvVEFNYXyoa5YDXjM6zZrIBsw9+WjRWsZ/2LjyXo846sLOgvAm/GEFNL035ezs2/OI5vTNXibG5HB1MPIzoXEsmo/k8UovXGzDOsKHxvI5jznb3Cu0AA2z+1A7YT8uJL7YTa5q6ZxIdKyLu+UGSWy/iLGKBEXxuIyDxOGE8ElwyKVIrWZYGyWPlzyEWTAI5LnIh3gXGVjUe4KvYzaAwkf7URmE4uFGKRtQm3nbSAWaV+A/bw0PxIlLArXsA0sbtmEQ1jq82FNlcgNngg24GaZvYpimZkQ+bPJ7xmHq0GV7YWLVqhnui+J1kuwgab4V2ExcNB79HA5qHJJWcVX6GDMPVCWA6Vs6clW2R6vSdQNeoUvm+fH3ifHDiVUKNxaRgbx7K2q/NHhZl5GvD4+LqwjuHGOit4HO0JO0WGOkCaJb0pwLwVuSstS7S+U9YECalLs/sR32PyB/d2tl1avs+QZDBkrrgFSvcL+DkJoUwGdljPvJ4MdaqlkcE2mwV1dTGOFXglAUj4ogV2VwWVt9RroHkwD3c+rgWpYjTdQNbMDX0AfI5PDXwOn219vaEkzmqVM2BpXdaBNYXP9KGA1m8/7wBTDWZCp4HvO7F/cadNCAXqm7WMXi03hvHeb/YS2Q6+V0PqrzTYBUL1V121XTRtUD7ADig19Xrn9I1fOB90s20nWjZd8ctsttTTFOqWYklFe6KiHMIyQusbtYa7G8M9OY0M8wbcqMLh8HXhIeZSVV/J48KWvdeJFUX42vcLKZWuvMPR/vsI+5/0CBQkJDMFuhDorVAnlGFNZ6NKhSKrdXge8jZ5/A7rxOjrcEAAA</values>
+    </sys_hub_action_instance_v2>
+    <sys_hub_alias_mapping action="delete_multiple" query="source_id=ebbfa5eba85703107f44321b8bcb5613"/>
+    <sys_hub_action_instance_v2 action="INSERT_OR_UPDATE">
+        <action_type display_value="Look Up Records">43400a1587003300663ca1bb36cb0b4b</action_type>
+        <action_type_parent/>
+        <attributes/>
+        <comment/>
+        <compiled_snapshot>43400a1587003300663ca1bb36cb0b4b</compiled_snapshot>
+        <display_text/>
+        <flow display_value="F10- Placement Intervention">e17fad67a8d703107f44321b8bcb5657</flow>
+        <generation_source/>
+        <order>20</order>
+        <parent_ui_id>f7cd1d34-9ce2-42f8-8858-674a3571299b</parent_ui_id>
+        <sys_class_name>sys_hub_action_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 10:47:53</sys_created_on>
+        <sys_id>d3f91ae3a89f03107f44321b8bcb56f8</sys_id>
+        <sys_mod_count>4</sys_mod_count>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-28 07:20:17</sys_updated_on>
+        <ui_id>24bc33d2-f53d-4e1f-964b-91736615b8f0</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/+VWXU/bMBT9K1WeS+U0/WC8TSCkSduYBuJlQ9aN4xRrbpLZDqVU/e+7jp2kawOjW5mY9hTl+tr3+NxzbH9ZBSIJTgKSjgiBcHw8JSSKCJlMIgZhHEcTFpN4/CboBxnMOWbqXBlqlgXH0B3IsomBZhhKhC4kLK/9CPRM3nvAOLsVMlE8C06+3PSDAhSuZrgKTlZbQ8+FIyHmElMvsXbvyuHpgFh9TrBGLlj9/95PPa2DuUoslKgf8HvDs4QjhhSk5v1gDlkCJlfLJqI4JBeZbAO3IjO4WmCT77V4wHrR0OalHHfFuBtrfqmnyIXTMzBwaVTJTKl8qgOrkY9Vs82GyA7OPXyy7rf5DzYftvMTvjkhXCPfCU+hlOb092qG+9Yc2ppugxeFETl2PYhsXyCW9fZzWc6zj66XQYPwukNsbuTsEc2VGsnmhW2o7ZBvV3p5my8+1904F1mFyw/KnIFs/sAYJeLSWF5WQZrQVHCZUJFJkdlK2DYrHy75HCvQORSFyGa0UPmdqFbFvcwHM4k/g1TmC8uFmGUDYHbnAxQWDM4xflaFr0EJy8IHXAYn923BW5zq61HNlCgMXYhkxk1bvc5KcrMA+a1r3CuO1o2qthes+4Fe6lMJWrdko0zp99Jy4Kj37NGqUdWUCsVb3MEd90RZDVS2ZdMnbTvesqhr9IZeds+PvU+OZ0CoWbiwiuzFy8dQ+aPD9bzK+Pn4OLcDvY9uoJb3wY6QY3KYI6TL4rsW3MuBu9ayUvsDZ72ggbocu7/wHTe/UP/oyUtrErY6wyZTxTVSqjfUH+7KP9xb/88AUev/A9z3PjcoOqF5C6A6+axidFP/75qoF//oYOIfvV7xh4SQR6+esO9GD3zzvIw/Dn/+Hz/9bCOtzFieJcJi3DSA/iakpIAC+VriAslqxSHlY87IUTSZDo9GQ5IcxdMxP2LREEZ8yqfseDKATC+4GjjVUs+VHpTUKBCZ5atdeL3eNdnfKrufkZ/BZW3k000yuwiuH8HbsfddC9QvuwOambxeO/8jd9kLXVlPi2wUt3pyy7Vevac6Y5TBvCh1NCGt6HG/M1T2rs2ufEbvU5NxSEdUYGtHXHm0W+C9D6rfrhddNW3rRUf+zxfd67yyEJCQqBDqWqjzUlVU3lEmS10NKDyX3VoHvOBufgBgv5QZKBEAAA==</values>
+    </sys_hub_action_instance_v2>
+    <sys_hub_alias_mapping action="delete_multiple" query="source_id=d3f91ae3a89f03107f44321b8bcb56f8"/>
+    <sys_hub_action_instance_v2 action="INSERT_OR_UPDATE">
+        <action_type display_value="Create Record">2de05916c31332002841b63b12d3aee1</action_type>
+        <action_type_parent/>
+        <attributes/>
+        <comment/>
+        <compiled_snapshot>2de05916c31332002841b63b12d3aee1</compiled_snapshot>
+        <display_text/>
+        <flow display_value="F10- Placement Intervention">e17fad67a8d703107f44321b8bcb5657</flow>
+        <generation_source/>
+        <order>23</order>
+        <parent_ui_id>73e61bfd-6dc1-44aa-83ab-19e4e5bc406d</parent_ui_id>
+        <sys_class_name>sys_hub_action_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 10:53:55</sys_created_on>
+        <sys_id>b35bd2a7a89f03107f44321b8bcb567b</sys_id>
+        <sys_mod_count>5</sys_mod_count>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-28 07:20:18</sys_updated_on>
+        <ui_id>c3f7f89a-5cef-41a8-aefc-4572277da4df</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/+1W31PjNhD+VzSePiSQGDsJ4dcTw5WWmbvQHpQXAh7ZWidqZdknyUDK5X/vSrKT8KOUdvpyM+eHxFrtfvq+1Wrl68eAs+AwGDOIDg7icTaMh8NBFA32R3E6HqbxgA0pxGnQCyQtAD3vqKhB49i9oIFLA+oOpOGlTMyigmkdRUP2+Ag0h13Iov5wvDfojwYR66d7u9DPhgM6gj3Yy/bHIZX6HlSoQNfCJCCgQCQd1skL2OXyVgHVpWzxT3BogJFSkd8qZl+TOMxqpTAo1H9wIZIZrRJdFwVVCxeelQXiM/RMFx6G8lujKJdczlrcvSGM4zRn/THL4v5oRGl/f0jTfnwAI9hNs1E0ZiE3UCBkCnmpINEZ/r6LF84xLkFrH4MQNEehmwi32lBTaz/Y4GztyiQW8c2lVC2TtWtieGGXQZhKgMvmGuEW8hwywzHPK0rNzJP8c+atmBSdKV4Zx6ZmOP2+3fC+yyXWDeO6EnRx9b18vpfPfyifbM4FypLB4fVNL6iowraESwWHj8+m3tvXBE1BoOspB8H0K43OVg+OccewbjEjvvF5+8cm+LKZJFfNZKmYJRX3AngwLv/BYU6Fhl5QUIkCS7UIDo2q0WA39VyKxcpjjtlD0MD6Pmj+Jy4fjyP3WO8cUGQG3mM1TJqD5c35B2roBeJnplaNazYveYaSXHoY5BTPzMmmzTucV3bTfIihqWijS1EXcuKTE6wA2nOMllojCaisWsvfi8sv5uX955bkKZcuL41QUWZUrEbUGMXT2lg6j0FzmJOCVhUer6RS5R13wUilCGcCB2EuyntcU/OZDGlmeYeYWxqeov2DM19Rxa2ITwiDwcteoBf6RFCt11Iwh8mX2jLxwhoJicuCS0HiisIGu/o9dkXfSvQ2y/lZ1VvTWwHBztZUbm0dZ7gDmljOO8dOBLEiSK1RNzFzIDlLnKVMf8fzFpILB0CKWhuiAHdYEkpcXYbEIp7b6iOyLlL845qUea7BkHRBtmPCJflRKTxoP2MhCrvEBfjUOTJ3lAsrmZSuDjRp6orUFRKrsNU6WtMgnAbEdZ+Wng2HB2obxSGyUUTPS2VwGzLij3nrGOI+z2bYt1cH3DrafXS6cNUji9UoW6FY485UWuSZaiEl3JOfbC18xlanWMeaB3sPiZZZkiGXWg/HUYICMl9Om1vkfbuIO1MhZWxSmkktxK81qEUD9EofW0V8cX524EnhYZ34lDfcIjd1j20JSAcDJPaCTrdLHqeS4GNjOGudcX4G/ji9uTb5+pX4V/97tAYrqMnmLR5noRt3dm7PJped6ZRtd3/Y8WxtAM9Jxzms+LQwsoXA7qrhTBrvdx3f9EgcdY/W3haj8Ya1/CeA9nmRGLmBsfSv+Le01JpN99qQuH8h26RJCvbAtWkNvE3ibjfUAvtXpz/sHgXL5bLXftzGEO3+7SUAo3XP3zjr6w/c99XSyy8b8kvrSM6eOv7LO+yf6bd32KVr16/Laa+x57aPm7Fk4iea6yv6v66v/W/p4mpkfPM318v7ytFd3vwF4p/C4/YNAAA=</values>
+    </sys_hub_action_instance_v2>
+    <sys_hub_alias_mapping action="delete_multiple" query="source_id=b35bd2a7a89f03107f44321b8bcb567b"/>
+    <sys_hub_sub_flow_instance_v2 action="delete_multiple" query="flow=e17fad67a8d703107f44321b8bcb5657"/>
+    <sys_hub_flow_logic_instance_v2 action="delete_multiple" query="flow=e17fad67a8d703107f44321b8bcb5657^sys_idNOT INe10071e7a8d703107f44321b8bcb565a,5330b5e7a8d703107f44321b8bcb56d7,6e90f12ba8d703107f44321b8bcb56f2,0c30b5e7a8d703107f44321b8bcb56aa,10692ea3a81343107f44321b8bcb5630,90692ea3a81343107f44321b8bcb5631,a0692ea3a81343107f44321b8bcb5632,a0692ea3a81343107f44321b8bcb5633,a0692ea3a81343107f44321b8bcb5634,a0692ea3a81343107f44321b8bcb5635,a0692ea3a81343107f44321b8bcb5636,a0692ea3a81343107f44321b8bcb5637,a0692ea3a81343107f44321b8bcb5638,a0692ea3a81343107f44321b8bcb5639,a0692ea3a81343107f44321b8bcb563a,20692ea3a81343107f44321b8bcb5654,20692ea3a81343107f44321b8bcb5655,20692ea3a81343107f44321b8bcb5656,c81b9267a89f03107f44321b8bcb566f,123b9e67a89f03107f44321b8bcb5617"/>
+    <sys_hub_flow_logic_instance_v2 action="INSERT_OR_UPDATE">
+        <attributes/>
+        <block display_value="">290071e7a8d703107f44321b8bcb5659</block>
+        <comment/>
+        <connected_to/>
+        <decision_table/>
+        <display_text/>
+        <flow display_value="F10- Placement Intervention">e17fad67a8d703107f44321b8bcb5657</flow>
+        <flow_variables_assigned/>
+        <generation_source/>
+        <logic_definition display_value="If">af4e1945c3e232002841b63b12d3ae3e</logic_definition>
+        <order>2</order>
+        <outputs_assigned/>
+        <parent_ui_id/>
+        <sys_class_name>sys_hub_flow_logic_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 07:44:32</sys_created_on>
+        <sys_id>e10071e7a8d703107f44321b8bcb565a</sys_id>
+        <sys_mod_count>7</sys_mod_count>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:32:02</sys_updated_on>
+        <ui_id>32164889-5007-4b14-a0b0-cfd04a06b0bb</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/+1UTW/bMAz9K4POiSHbcZrmVnQoMGBbgbXoZSsMWqYbYbLkSXLSLMh/H+WPNGgybNh23M18/Hokn7VjpvVN6929uXJOPmm2/Pw4YVIHjL53TEONbMmE0aX00mg2YWtQbcB2uwUkosoEn2KVLaazOSZTiGE2TaBa8As+u8AKo2vTar/ff2k5T5FTfildo2D78JdlxEqq0uJAuQFLTD1atty9cvltg7mCAhV1u/NW6idKlyVZl5BVWcwzkSbzNOE8WcziYp4WcVKmgLM5xY2J10cbOLOU0IQgN5Y3tgxcEj5h+OxRl0j9KlAOJ6wGXYI3dsuW3rYEWITyVqvtIWIltadqLMQ+O/kdQyXOQ2SFNJjA3nsw82GpPSxWRgq8bTpuHeKhUEOOMKqt9cd+hHAOrKBVfjwHIa2jetgE0oHGwKm6W5nNp7HhjdTdgINTGQHqYIGnNRStRxeugQprKpTX0DS0nLyxZi27ZOJSR0+KjKhSZkNNgwYjEIF4RDuC6Ibwtx38AFaGKT5QGUqmC7rcCSubcbauOdt3W8m/tYFPP98wSd4vgwL6tCtqs8aB9H5yqvW8A14Ef6rdfyTDikMVX4r4vAwhPSfDN+875FSMI+ufKDL+hSIH5LckmWX/FXmsyECzACdF3r2gVC78338syccgvb6F6zVUopCOmNwH7N34SgfHlq4uxTG0MfZrmOEF2/8Auw1V2u8FAAA=</values>
+        <workflow_reference/>
+    </sys_hub_flow_logic_instance_v2>
+    <sys_hub_flow_logic_instance_v2 action="INSERT_OR_UPDATE">
+        <attributes/>
+        <block display_value="">9b30b5e7a8d703107f44321b8bcb56d6</block>
+        <comment/>
+        <connected_to/>
+        <decision_table display_value="Campus360 - Intervention Recommendation">ddc925eba89703107f44321b8bcb5609</decision_table>
+        <display_text/>
+        <flow display_value="F10- Placement Intervention">e17fad67a8d703107f44321b8bcb5657</flow>
+        <flow_variables_assigned/>
+        <generation_source/>
+        <logic_definition display_value="Make a decision">578e90270b2313009002cab937673a7d</logic_definition>
+        <order>4</order>
+        <outputs_assigned/>
+        <parent_ui_id>f7cd1d34-9ce2-42f8-8858-674a3571299b</parent_ui_id>
+        <sys_class_name>sys_hub_flow_logic_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 07:45:28</sys_created_on>
+        <sys_id>5330b5e7a8d703107f44321b8bcb56d7</sys_id>
+        <sys_mod_count>9</sys_mod_count>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:32:02</sys_updated_on>
+        <ui_id>eafe5ec0-3672-420d-b75e-c32a4e7e7c86</ui_id>
+        <updation_source/>
+        <values>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</values>
+        <workflow_reference/>
+    </sys_hub_flow_logic_instance_v2>
+    <sys_hub_flow_logic_instance_v2 action="INSERT_OR_UPDATE">
+        <attributes/>
+        <block display_value="">a690f12ba8d703107f44321b8bcb56f2</block>
+        <comment/>
+        <connected_to/>
+        <decision_table/>
+        <display_text/>
+        <flow display_value="F10- Placement Intervention">e17fad67a8d703107f44321b8bcb5657</flow>
+        <flow_variables_assigned/>
+        <generation_source/>
+        <logic_definition display_value="Decision">b1f542d673331300612c273ffff6a7c7</logic_definition>
+        <order>19</order>
+        <outputs_assigned/>
+        <parent_ui_id>eafe5ec0-3672-420d-b75e-c32a4e7e7c86</parent_ui_id>
+        <sys_class_name>sys_hub_flow_logic_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 07:47:04</sys_created_on>
+        <sys_id>6e90f12ba8d703107f44321b8bcb56f2</sys_id>
+        <sys_mod_count>7</sys_mod_count>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:32:02</sys_updated_on>
+        <ui_id>892372e9-2c6c-4fa5-af9e-0d2c8d8a069f</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/9VUXYvbMBD8K0XPJvgjsXP3FggHB20Pese9lMOs5XUiKkuuJCeXhvz3rmw5CaF9Oyg1GKyRdnZmNfjIdO+63tkXvbJWbBS7//4WMaE8Rt9HpqBFds9A2T0aFrEdyN4DedxgmuQFLOsizpK4aObzLE2qZcWrRZ4u6WgtbCfh8BoqCOFbIWuDoUsHhsgd0d4fb7bcocNSQoWSCtea9y0q9+lxTRyiJqiIscmWi2WRxXFKb56kPC2yhp4cinxO56bq1aT81onvQes6sJdEHDFtaq8njeOI4btDVSP1a0BajFgLqganzeGMGIT6SckLsBXKjV5beLfiF3XIUn+uQTLHwxzOyzLMaBqPFhyfOie0GhEHlZxmp2Xfqq+jCT9dbKCX7mq6vSU+7LxmL8KZngQ1z1u9/zb1exBq8BfUSs1BnlfgnBFV79D6C0GJw1ha6DqhNmVn9E4MxSSlnW0kLWaN1Hvq6ZMzA+51z2hCMHsgfD3Ar2CEN/GFaKj4NJgvf/a+72gjCC4Hz6NhOmW5EZ1bEecOg8JTdI7jeLmXNH5g2p5pCGozBS2Gu7smzrHI5n8IWpFcBe1z0HQjMcTMTrQhYckHJixdLP5NxIKk/yxjf4vXm8/TyGTHYNTIhaWGLx57nH6KfuNAtyz4NbTX5oeXesFOvwEs7eaHXgUAAA==</values>
+        <workflow_reference/>
+    </sys_hub_flow_logic_instance_v2>
+    <sys_hub_flow_logic_instance_v2 action="INSERT_OR_UPDATE">
+        <attributes/>
+        <block display_value="">4430b5e7a8d703107f44321b8bcb56aa</block>
+        <comment/>
+        <connected_to>32164889-5007-4b14-a0b0-cfd04a06b0bb</connected_to>
+        <decision_table/>
+        <display_text/>
+        <flow display_value="F10- Placement Intervention">e17fad67a8d703107f44321b8bcb5657</flow>
+        <flow_variables_assigned/>
+        <generation_source/>
+        <logic_definition display_value="Else">1f781bf3c32232002841b63b12d3aee6</logic_definition>
+        <order>3</order>
+        <outputs_assigned/>
+        <parent_ui_id/>
+        <sys_class_name>sys_hub_flow_logic_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 07:45:15</sys_created_on>
+        <sys_id>0c30b5e7a8d703107f44321b8bcb56aa</sys_id>
+        <sys_mod_count>11</sys_mod_count>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:32:02</sys_updated_on>
+        <ui_id>f7cd1d34-9ce2-42f8-8858-674a3571299b</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/6tWyi8tKSgtKQ7JdywuzkzPU7KKjtVRyswDiUHYZYlFmYlJOalQbkpqcmZxZn5eCEjME0ldSmVeYm5mMrJQeX5RdlpOfjlCrBYAD1ouqHEAAAA=</values>
+        <workflow_reference/>
+    </sys_hub_flow_logic_instance_v2>
+    <sys_hub_flow_logic_instance_v2 action="INSERT_OR_UPDATE">
+        <attributes/>
+        <block display_value="">54692ea3a81343107f44321b8bcb562f</block>
+        <comment/>
+        <connected_to/>
+        <decision_table/>
+        <display_text/>
+        <flow display_value="F10- Placement Intervention">e17fad67a8d703107f44321b8bcb5657</flow>
+        <flow_variables_assigned/>
+        <generation_source/>
+        <logic_definition display_value="Decision">b1f542d673331300612c273ffff6a7c7</logic_definition>
+        <order>5</order>
+        <outputs_assigned/>
+        <parent_ui_id>eafe5ec0-3672-420d-b75e-c32a4e7e7c86</parent_ui_id>
+        <sys_class_name>sys_hub_flow_logic_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 11:55:08</sys_created_on>
+        <sys_id>10692ea3a81343107f44321b8bcb5630</sys_id>
+        <sys_mod_count>2</sys_mod_count>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:32:02</sys_updated_on>
+        <ui_id>ea71d407-7a85-4bfc-b02d-ddfec69eb217</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/9VUXYvbMBD8K0XPxvgrdi5vgXBwcO1B77iXcpi1vE7EyZIrycmlIf+9q9hOQkrfDkr95B1pZ2fWgw9M967rnX3RS2vFWrHFj7eACeUxej8wBS2yBZNQoWQB24LsfU2vtbCdhP3rBeEbIWuDI0kHhnodGrY43By5fYflQLlgz84ItaZ2UVMVwd1dE+VYpFmUpFGUxwlPirShJ4eiiOne1Pg4arqR6MmptBOtNrXXEEdRwPDDoaqRBjUgLQasBVWD02Z/RgxC/aTkBdgI5QZ/LXxY8YvIk9nMX2yQHPHR/Lksx8VMO9GC41PnhFYD4qCS08K07Fv1bdDvV4oN9NJdrbS3xIedF+1VjJKa543efZ8G3gt1cjgeSs1BnitwtIeqd2j9Z0CJLRGVLXQdbafsjN6KUzNpacO1pCJspN7RUB+HELgXHtKOILwnfHWCX8EI7+Ir0VDz8eS+/Nn7uYOPUXE5mKYLlhvRuSXRbXEUdwzO8QJld0R0yVccVXNI8hTmcZqlcVQ0WZYmcTWveDXLs+YT87fSvPdL+fKwmkJYRNik89m8oAD+GcI8uwrhclJ+62SMYT2yl0R8zmLyiVlMk38TRWf6/y+Jg+G/xPHNx2+gs0NOauTC0tQXjz1MP0V/sKfPLfg1tNPm3eu9YMffEU31jl4FAAA=</values>
+        <workflow_reference/>
+    </sys_hub_flow_logic_instance_v2>
+    <sys_hub_flow_logic_instance_v2 action="INSERT_OR_UPDATE">
+        <attributes/>
+        <block display_value="">d8692ea3a81343107f44321b8bcb5630</block>
+        <comment/>
+        <connected_to/>
+        <decision_table/>
+        <display_text/>
+        <flow display_value="F10- Placement Intervention">e17fad67a8d703107f44321b8bcb5657</flow>
+        <flow_variables_assigned/>
+        <generation_source/>
+        <logic_definition display_value="Decision">b1f542d673331300612c273ffff6a7c7</logic_definition>
+        <order>6</order>
+        <outputs_assigned/>
+        <parent_ui_id>eafe5ec0-3672-420d-b75e-c32a4e7e7c86</parent_ui_id>
+        <sys_class_name>sys_hub_flow_logic_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 11:55:08</sys_created_on>
+        <sys_id>90692ea3a81343107f44321b8bcb5631</sys_id>
+        <sys_mod_count>2</sys_mod_count>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:32:02</sys_updated_on>
+        <ui_id>b051d8a1-e95a-4526-b959-9799d332c32f</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/9VUXYvbMBD8K0XPIfgrdi5vgXBwcO1B77iXcpi1tE7EyZIrycmlIf+9q9hOQkrfDkr95B1pZ2fWgw/MdL7tvHsxS+fkWrPFj7cJkzpg9H5gGhpkC6agQsUmbAuqCzW9CulaBfvXC8I3UgmLA0kLlno9WrY43Bz5fYtlT7lgz95KvaZ2KaiK4O6ujnIs0ixK0ijK44QnRVrTk0NRxHRvbHwcNN1IDORUupHWWBE0xFE0YfjhUQukQTUohxPWgBbgjd2fEYsgnrS6ABupfe+vgQ8nfxF5MpuFizWSIz6YP5flsJhxJ0ZyfGq9NLpHPFRqXJhRXaO/9frDSrGGTvmrlXaO+LANooOKQVL9vDG77+PAe6lPDodDZTiocwWe9lB1Hl34DKiwIaKygbal7ZStNVt5aiYtzXStqJjWyuxoaIjDFHgQPqUdwfSe8NUJfgUrg4uvREPNx5P78mcX5vY+BsVlb5ouOG5l65dEt8VB3HFyjhdotyOiS77irJpDkqcwj9MsjaOizrI0iat5xatZPhOfmL+V4V1YypeH1RjCIsI6nc/mBQXwzxDm2VUIl6PyWydDDMXAXkpxyWLyiVlMk38TRW+7/y+JveG/xPEtxK+nc31OBHLpaOpLwB7Gn2I42NPnlvwa2hn7HvResONvJ3y+O14FAAA=</values>
+        <workflow_reference/>
+    </sys_hub_flow_logic_instance_v2>
+    <sys_hub_flow_logic_instance_v2 action="INSERT_OR_UPDATE">
+        <attributes/>
+        <block display_value="">d8692ea3a81343107f44321b8bcb5631</block>
+        <comment/>
+        <connected_to/>
+        <decision_table/>
+        <display_text/>
+        <flow display_value="F10- Placement Intervention">e17fad67a8d703107f44321b8bcb5657</flow>
+        <flow_variables_assigned/>
+        <generation_source/>
+        <logic_definition display_value="Decision">b1f542d673331300612c273ffff6a7c7</logic_definition>
+        <order>7</order>
+        <outputs_assigned/>
+        <parent_ui_id>eafe5ec0-3672-420d-b75e-c32a4e7e7c86</parent_ui_id>
+        <sys_class_name>sys_hub_flow_logic_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 11:55:08</sys_created_on>
+        <sys_id>a0692ea3a81343107f44321b8bcb5632</sys_id>
+        <sys_mod_count>2</sys_mod_count>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:32:02</sys_updated_on>
+        <ui_id>7e4f236d-1f06-4af8-b090-04b23c6d62ae</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/9VUTYvbMBD9K0XnEPwV25tbICwsbLvQXfZSFjOWx4lYWXIlOdk05L93FH8kpPS2UOqT50nz5r3xw0emO9d2zr7olbVio9jyx9uMCeUxej8yBQ2yJZNQomQztgPZ+ZpeK2FbCYfXC8K3QlYGB5IWDPU6NGx5vDlyhxaLnnLJnp0RakPtoqIqgLu7Okgxi5MgioMgDSMeZXFNTwpZFtK9sfFx0HQj0ZNTaUdabSqvIQyCGcMPh6pCGlSDtDhjDagKnDaHCTEI1ZOSF2ArlOv9NfBhxS8ijxYLf7FGcsQH81NZDIsZd6IFx6fWCa16xEEpx4Vp2TXqW6/frxRr6KS7WmlniQ9bL9qrGCTVz1u9/z4OvBfq7HA4lJqDnCpwtIeyc2j9Z0CJDREVDbQtbadojd6JczNpaeYbScW8lnpPQ30c5sC98DntCOb3hK/P8CsY4V18JRpqPp3dFz87P7f3MSguetN0wXIjWrciuh0O4k6zKV6g7J6ILvkKkzKHKI0hD+MkDoOsTpI4Csu85OUiTfkn5m+teeeX8uVhPYYwC7CO80WeUQD/DGGaXIVwNSq/dTLEsBrYCyKeshh9Yhbj6N9E0Znu/0tib/gvcXzz8evpbJ+TCrmwNPXFYw/jT9EfHOhzC34N7bV593ov2Ok31rgv5l4FAAA=</values>
+        <workflow_reference/>
+    </sys_hub_flow_logic_instance_v2>
+    <sys_hub_flow_logic_instance_v2 action="INSERT_OR_UPDATE">
+        <attributes/>
+        <block display_value="">e8692ea3a81343107f44321b8bcb5632</block>
+        <comment/>
+        <connected_to/>
+        <decision_table/>
+        <display_text/>
+        <flow display_value="F10- Placement Intervention">e17fad67a8d703107f44321b8bcb5657</flow>
+        <flow_variables_assigned/>
+        <generation_source/>
+        <logic_definition display_value="Decision">b1f542d673331300612c273ffff6a7c7</logic_definition>
+        <order>8</order>
+        <outputs_assigned/>
+        <parent_ui_id>eafe5ec0-3672-420d-b75e-c32a4e7e7c86</parent_ui_id>
+        <sys_class_name>sys_hub_flow_logic_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 11:55:08</sys_created_on>
+        <sys_id>a0692ea3a81343107f44321b8bcb5633</sys_id>
+        <sys_mod_count>2</sys_mod_count>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:32:02</sys_updated_on>
+        <ui_id>a02b5752-5e4d-46e0-af25-d13253a6db53</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/9VUTYvbMBD9K0XnEPwV28ktEBYW2i50l72UxYzlcSIqS64kJ5uG/PeO4o+ElN4WSn3yPGnevDd++MR059rO2Re9tlZsFVt9f5sxoTxG7yemoEG2YhJKlGzG9iA7X9NrJWwr4fh6RfhOyMrgQNKCoV6Hhq1Od0fu2GLRU67YszNCbaldVFQFsFzWQYpZnARRHARpGPEoi2t6UsiykO6NjZ8HTXcSPTmVdqTVpvIawiCYMXx3qCqkQTVIizPWgKrAaXOcEINQPSl5BXZCud5fA+9W/CLyaLHwF2skR3wwP5XFsJhxJ1pwfGqd0KpHHJRyXJiWXaO+9vr9SrGGTrqblXaW+LD1or2KQVL9vNOHb+PAB6EuDodDqTnIqQJHeyg7h9Z/BpTYEFHRQNvSdorW6L24NJOWZr6VVMxrqQ801MdhDtwLn9OOYP5A+OYCv4IR3sUXoqHm88V98bPzc3sfg+KiN00XLDeidWui2+Mg7jyb4gXKHojomq9lUOYQpTHkYZzEYZDVSRJHYZmXvFyki/QD87fRvPNL+fS4GUOYBVjH+SLPKIB/hjBNbkK4HpXfOxliWA3sBRFPWYw+MItx9G+i6Ez3/yWxN/yXOL75+PV0ts9JhVxYmvriscfxp+gPjvS5Bb+FDtr88Hqv2Pk3yo4DxV4FAAA=</values>
+        <workflow_reference/>
+    </sys_hub_flow_logic_instance_v2>
+    <sys_hub_flow_logic_instance_v2 action="INSERT_OR_UPDATE">
+        <attributes/>
+        <block display_value="">e8692ea3a81343107f44321b8bcb5633</block>
+        <comment/>
+        <connected_to/>
+        <decision_table/>
+        <display_text/>
+        <flow display_value="F10- Placement Intervention">e17fad67a8d703107f44321b8bcb5657</flow>
+        <flow_variables_assigned/>
+        <generation_source/>
+        <logic_definition display_value="Decision">b1f542d673331300612c273ffff6a7c7</logic_definition>
+        <order>9</order>
+        <outputs_assigned/>
+        <parent_ui_id>eafe5ec0-3672-420d-b75e-c32a4e7e7c86</parent_ui_id>
+        <sys_class_name>sys_hub_flow_logic_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 11:55:08</sys_created_on>
+        <sys_id>a0692ea3a81343107f44321b8bcb5634</sys_id>
+        <sys_mod_count>2</sys_mod_count>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:32:02</sys_updated_on>
+        <ui_id>d6b4a9ba-6a53-4518-b6ed-841dc7669e27</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/9VUXYvbMBD8K0XPwfjbubwFwsHBtQe9417KYdbyOhEnS64kJ5eG/PeuYjsJKX07KPWTd6SdnVkPPjDdu6539kUvrRVrxRY/3mZMKI/R+4EpaJEtmIQKJZuxLcje1/RaC9tJ2L9eEL4RsjY4knRgqNehYYvDzZHbd1gOlAv27IxQa2oXNVUh3N01YY5FkoZxEoZ5FPO4SBp6ciiKiO5NjY+jphuJnpxKO9FqU3sNURjOGH44VDXSoAakxRlrQdXgtNmfEYNQPyl5ATZCucFfCx9W/CLyOMv8xQbJER/Nn8tyXMy0Ey04PnVOaDUgDio5LUzLvlXfBv1+pdhAL93VSntLfNh50V7FKKl53ujd92ngvVAnh+Oh1BzkuQJHe6h6h9Z/BpTYElHZQtfRdsrO6K04NZOWNlhLKoJG6h0N9XEIgHvhAe0IgnvCVyf4FYzwLr4SDTUfT+7Ln72fO/gYFZeDabpguRGdWxLdFkdxx9k5XqDsjogu+crSag5xnsA8StIkCosmTZM4quYVr7I8TT8xfyvNe7+ULw+rKYRFiE0yz+YFBfDPEObpVQiXk/JbJ2MM65G9JOJzFuNPzGIS/5soOtP/f0kcDP8ljm8+fgOdHXJSIxeWpr547GH6KfqDPX1uwa+hnTbvXu8FO/4GT/DbpF4FAAA=</values>
+        <workflow_reference/>
+    </sys_hub_flow_logic_instance_v2>
+    <sys_hub_flow_logic_instance_v2 action="INSERT_OR_UPDATE">
+        <attributes/>
+        <block display_value="">e8692ea3a81343107f44321b8bcb5634</block>
+        <comment/>
+        <connected_to/>
+        <decision_table/>
+        <display_text/>
+        <flow display_value="F10- Placement Intervention">e17fad67a8d703107f44321b8bcb5657</flow>
+        <flow_variables_assigned/>
+        <generation_source/>
+        <logic_definition display_value="Decision">b1f542d673331300612c273ffff6a7c7</logic_definition>
+        <order>10</order>
+        <outputs_assigned/>
+        <parent_ui_id>eafe5ec0-3672-420d-b75e-c32a4e7e7c86</parent_ui_id>
+        <sys_class_name>sys_hub_flow_logic_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 11:55:08</sys_created_on>
+        <sys_id>a0692ea3a81343107f44321b8bcb5635</sys_id>
+        <sys_mod_count>2</sys_mod_count>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:32:02</sys_updated_on>
+        <ui_id>9793b7bd-e999-4b85-9f4e-88550c4bf81f</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/9VUTYvbMBD9K0XnYPwVO8ktEBYWtl3oLnspixnL40SsLLmSnGwa8t87ij+ypPS2UOqT50nz5r3xwyemO9d2zj7rtbViq9jqx+uMCeUxej8xBQ2yFZNQomQztgfZ+ZpeK2FbCceXK8J3QlYGB5IWDPU6NGx1ujlyxxaLnnLFnpwRakvtoqIqhOWyDjPMkzSMkzDMopjHeVLTk0GeR3RvbHwYNN1I9ORU2pFWm8priMJwxvDdoaqQBtUgLc5YA6oCp81xQgxC9ajkFdgJ5Xp/Dbxb8YvI4/ncX6yRHPHB/FQWw2LGnWjB8bF1QqsecVDKcWFado361uv3K8UaOuk+rLSzxIetF+1VDJLqp50+fB8H3gl1cTgcSs1BThU42kPZObT+M6DEhoiKBtqWtlO0Ru/FpZm0NMFWUhHUUh9oqI9DANwLD2hHENwRvrnAL2CEd/GVaKj5fHFf/Oz83N7HoLjoTdMFy41o3Zro9jiIO8+meIGyByK65muZlguIswQWUZImUZjXaZrEUbkoeTnPsvQT87fRvPNL+XK/GUOYh1gni/kipwD+GcLL9LF7PSq/dTLEsBrYCyKeshh/YhaT+N9E0Znu/0tib/gvcXz18evpbJ+TCrmwNPXZY/fjT9EfHOlzC/4ROmjz5vVesfNvNUsTgl4FAAA=</values>
+        <workflow_reference/>
+    </sys_hub_flow_logic_instance_v2>
+    <sys_hub_flow_logic_instance_v2 action="INSERT_OR_UPDATE">
+        <attributes/>
+        <block display_value="">e8692ea3a81343107f44321b8bcb5635</block>
+        <comment/>
+        <connected_to/>
+        <decision_table/>
+        <display_text/>
+        <flow display_value="F10- Placement Intervention">e17fad67a8d703107f44321b8bcb5657</flow>
+        <flow_variables_assigned/>
+        <generation_source/>
+        <logic_definition display_value="Decision">b1f542d673331300612c273ffff6a7c7</logic_definition>
+        <order>11</order>
+        <outputs_assigned/>
+        <parent_ui_id>eafe5ec0-3672-420d-b75e-c32a4e7e7c86</parent_ui_id>
+        <sys_class_name>sys_hub_flow_logic_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 11:55:08</sys_created_on>
+        <sys_id>a0692ea3a81343107f44321b8bcb5636</sys_id>
+        <sys_mod_count>2</sys_mod_count>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:32:02</sys_updated_on>
+        <ui_id>559fb21e-dfc2-4e6b-aab1-de99a4a493a2</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/9VUXYvbMBD8K0XPJvgrtpO3QDg4aHvQO+6lHGYtrxNRWXIlObk05L93FdtJSOnbQamfvCPt7Mx68JHp3nW9sy96Za3YKLb8/hYwoTxG70emoEW2ZBIqlCxgO5C9r+m1FraTcHi9InwrZG1wJOnAUK9Dw5bHuyN36LAcKJfs2RmhNtQuaqpCWCyaMMM8ScM4CcMsinmcJw09GeR5RPemxs+jpjuJnpxKO9FqU3sNURgGDN8dqhppUAPSYsBaUDU4bQ4XxCDUT0pega1QbvDXwrsVv4g8ns/9xQbJER/NX8pyXMy0Ey04PnVOaDUgDio5LUzLvlVfB/1+pdhAL93NSntLfNh50V7FKKl53ur9t2ngg1Bnh+Oh1BzkpQJHe6h6h9Z/BpTYElHZQtfRdsrO6J04N5OWdraRVMwaqfc01MdhBtwLn9GOYPZA+PoMv4IR3sUXoqHm09l9+bP3cwcfo+JyME0XLDeicyui2+Eo7hRc4gXK7onomq8FrwqIswSKKEmTKMybNE3iqCoqXs2zNP/A/K017/1SPj2upxDmITZJMS9yCuCfIczSmxCuJuX3TsYY1iN7ScSXLMYfmMUk/jdRdKb//5I4GP5LHN98/AY6O+SkRi4sTX3x2OP0U/QHB/rcgt9Ce21+eL1X7PQbOunZCF4FAAA=</values>
+        <workflow_reference/>
+    </sys_hub_flow_logic_instance_v2>
+    <sys_hub_flow_logic_instance_v2 action="INSERT_OR_UPDATE">
+        <attributes/>
+        <block display_value="">e8692ea3a81343107f44321b8bcb5636</block>
+        <comment/>
+        <connected_to/>
+        <decision_table/>
+        <display_text/>
+        <flow display_value="F10- Placement Intervention">e17fad67a8d703107f44321b8bcb5657</flow>
+        <flow_variables_assigned/>
+        <generation_source/>
+        <logic_definition display_value="Decision">b1f542d673331300612c273ffff6a7c7</logic_definition>
+        <order>12</order>
+        <outputs_assigned/>
+        <parent_ui_id>eafe5ec0-3672-420d-b75e-c32a4e7e7c86</parent_ui_id>
+        <sys_class_name>sys_hub_flow_logic_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 11:55:08</sys_created_on>
+        <sys_id>a0692ea3a81343107f44321b8bcb5637</sys_id>
+        <sys_mod_count>2</sys_mod_count>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:32:02</sys_updated_on>
+        <ui_id>1e14ae75-19d8-4b53-a58c-fda4e2c8f7bc</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/9VUTYvbMBD9K0XnEPwV28ktEBYW2i50l72UxYzlcSIqS64kJ5uG/PeO4o+ElN4WSn3yPGnevDd++MR059rO2Re9tlZsFVt9f5sxoTxG7yemoEG2YhJKlGzG9iA7X9NrJWwr4fh6RfhOyMrgQNKCoV6Hhq1Od0fu2GLRU67YszNCbaldVFQFsFzWQYpZnARRHARpGPEoi2t6UsiykO6NjZ8HTXcSPTmVdqTVpvIawiCYMXx3qCqkQTVIizPWgKrAaXOcEINQPSl5BXZCud5fA+9W/CLyaLHwF2skR3wwP5XFsJhxJ1pwfGqd0KpHHJRyXJiWXaO+9vr9SrGGTrqblXaW+LD1or2KQVL9vNOHb+PAB6EuDodDqTnIqQJHeyg7h9Z/BpTYEFHRQNvSdorW6L24NJOWZr6VVMxrqQ801MdhDtwLn9OOYP5A+OYCv4IR3sUXoqHm88V98bPzc3sfg+KiN00XLDeidWui2+Mg7jyb4gXKHojomi8IyhyiNIY8jJM4DLI6SeIoLPOSl4t0ufjA/G007/xSPj1uxhBmAdZxvsgzCuCfIUyTmxCuR+X3ToYYVgN7QcRTFqMPzGIc/ZsoOtP9f0nsDf8ljm8+fj2d7XNSIReWpr547HH8KfqDI31uwW+hgzY/vN4rdv4N1NycI14FAAA=</values>
+        <workflow_reference/>
+    </sys_hub_flow_logic_instance_v2>
+    <sys_hub_flow_logic_instance_v2 action="INSERT_OR_UPDATE">
+        <attributes/>
+        <block display_value="">e8692ea3a81343107f44321b8bcb5637</block>
+        <comment/>
+        <connected_to/>
+        <decision_table/>
+        <display_text/>
+        <flow display_value="F10- Placement Intervention">e17fad67a8d703107f44321b8bcb5657</flow>
+        <flow_variables_assigned/>
+        <generation_source/>
+        <logic_definition display_value="Decision">b1f542d673331300612c273ffff6a7c7</logic_definition>
+        <order>13</order>
+        <outputs_assigned/>
+        <parent_ui_id>eafe5ec0-3672-420d-b75e-c32a4e7e7c86</parent_ui_id>
+        <sys_class_name>sys_hub_flow_logic_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 11:55:08</sys_created_on>
+        <sys_id>a0692ea3a81343107f44321b8bcb5638</sys_id>
+        <sys_mod_count>2</sys_mod_count>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:32:02</sys_updated_on>
+        <ui_id>7fb315e1-0d26-48aa-9c64-5487c26ae71e</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/9VUXYvbMBD8K0XPxvgrdi5vgXBwcO1B77iXcpi1vE7EyZIrycmlIf+9q9hOQkrfDkr95B1pZ2fWgw9M967rnX3RS2vFWrHFj7eACeUxej8wBS2yBZNQoWQB24LsfU2vtbCdhP3rBeEbIWuDI0kHhnodGrY43By5fYflQLlgz84ItaZ2UVMVwd1dE+VYpFmUpFGUxwlPirShJ4eiiOne1Pg4arqR6MmptBOtNrXXEEdRwPDDoaqRBjUgLQasBVWD02Z/RgxC/aTkBdgI5QZ/LXxY8YvIk9nMX2yQHPHR/Lksx8VMO9GC41PnhFYD4qCS08K07Fv1bdDvV4oN9NJdrbS3xIedF+1VjJKa543efZ8G3gt1cjgeSs1BnitwtIeqd2j9Z0CJLRGVLXQdbafsjN6KUzNpacO1pCJspN7RUB+HELgXHtKOILwnfHWCX8EI7+Ir0VDz8eS+/Nn7uYOPUXE5mKYLlhvRuSXRbXEUdwzO8QJld0R0yVedVXNI8hTmcZqlcVQ0WZYmcTWveDXLs+oT87fSvPdL+fKwmkJYRNik89m8oAD+GcI8uwrhclJ+62SMYT2yl0R8zmLyiVlMk38TRWf6/y+Jg+G/xPHNx2+gs0NOauTC0tQXjz1MP0V/sKfPLfg1tNPm3eu9YMffoOkHOl4FAAA=</values>
+        <workflow_reference/>
+    </sys_hub_flow_logic_instance_v2>
+    <sys_hub_flow_logic_instance_v2 action="INSERT_OR_UPDATE">
+        <attributes/>
+        <block display_value="">e8692ea3a81343107f44321b8bcb5638</block>
+        <comment/>
+        <connected_to/>
+        <decision_table/>
+        <display_text/>
+        <flow display_value="F10- Placement Intervention">e17fad67a8d703107f44321b8bcb5657</flow>
+        <flow_variables_assigned/>
+        <generation_source/>
+        <logic_definition display_value="Decision">b1f542d673331300612c273ffff6a7c7</logic_definition>
+        <order>14</order>
+        <outputs_assigned/>
+        <parent_ui_id>eafe5ec0-3672-420d-b75e-c32a4e7e7c86</parent_ui_id>
+        <sys_class_name>sys_hub_flow_logic_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 11:55:08</sys_created_on>
+        <sys_id>a0692ea3a81343107f44321b8bcb5639</sys_id>
+        <sys_mod_count>2</sys_mod_count>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:32:02</sys_updated_on>
+        <ui_id>923c41dd-7d29-42e0-9c04-2506d83fab94</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/9VUXYvbMBD8K0XPIfjbTt4C4eCg7UHvuJdymLW8TkRlyZXk5NKQ/95VbCchpW8HpX7yjrSzM+vBR6Z71/XOvuiVtWKj2PL724wJ5TF6PzIFLbIlk1ChZDO2A9n7ml5rYTsJh9crwrdC1gZHkg4M9To0bHm8O3KHDsuBcsmenRFqQ+2ipiqAxaIJMszjJIjiIMjCiEd53NCTQZ6HdG9q/DxqupPoyam0E602tdcQBsGM4btDVSMNakBanLEWVA1Om8MFMQj1k5JXYCuUG/y18G7FLyKP0tRfbJAc8dH8pSzHxUw70YLjU+eEVgPioJLTwrTsW/V10O9Xig300t2stLfEh50X7VWMkprnrd5/mwY+CHV2OB5KzUFeKnC0h6p3aP1nQIktEZUtdB1tp+yM3olzM2lp5xtJxbyRek9DfRzmwL3wOe0I5g+Er8/wKxjhXXwhGmo+nd2XP3s/d/AxKi4H03TBciM6tyK6HY7iTrNLvEDZPRFd81UXVQFRFkMRxkkcBnmTJHEUVkXFqzRLFx+Yv7XmvV/Kp8f1FMI8wCYu0iKnAP4Zwiy5CeFqUn7vZIxhPbKXRHzJYvSBWYyjfxNFZ/r/L4mD4b/E8c3Hb6CzQ05q5MLS1BePPU4/RX9woM8t+C201+aH13vFTr8BrFQI7l4FAAA=</values>
+        <workflow_reference/>
+    </sys_hub_flow_logic_instance_v2>
+    <sys_hub_flow_logic_instance_v2 action="INSERT_OR_UPDATE">
+        <attributes/>
+        <block display_value="">e8692ea3a81343107f44321b8bcb5639</block>
+        <comment/>
+        <connected_to/>
+        <decision_table/>
+        <display_text/>
+        <flow display_value="F10- Placement Intervention">e17fad67a8d703107f44321b8bcb5657</flow>
+        <flow_variables_assigned/>
+        <generation_source/>
+        <logic_definition display_value="Decision">b1f542d673331300612c273ffff6a7c7</logic_definition>
+        <order>15</order>
+        <outputs_assigned/>
+        <parent_ui_id>eafe5ec0-3672-420d-b75e-c32a4e7e7c86</parent_ui_id>
+        <sys_class_name>sys_hub_flow_logic_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 11:55:08</sys_created_on>
+        <sys_id>a0692ea3a81343107f44321b8bcb563a</sys_id>
+        <sys_mod_count>2</sys_mod_count>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:32:02</sys_updated_on>
+        <ui_id>e6eb1eb5-c38d-4e72-b9c3-b93dbf4bb138</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/9VU24rbMBD9laLnEHyJL5u3QFhY2Hahu+xLWcxYHidiZcmV5GTTkH/vKL4kpPRtodRPniPNmXPGBx+Z7lzbOfuiV9aKjWLLH28zJpTH6P3IFDTIlkxCiZLN2A5k52t6rYRtJRxeLwjfClkZHEhaMNTr0LDl8ebIHVosesole3ZGqA21i4qqAO7u6iDFLF4EURwEaRjxKItrelLIspDujY2Pg6YbiZ6cSjvSalN5DWEQzBh+OFQV0qAapMUZa0BV4LQ5TIhBqJ6UvABboVzvr4EPK34ReZQk/mKN5IgP5qeyGBYz7kQLjk+tE1r1iINSjgvTsmvUt16/XynW0El3tdLOEh+2XrRXMUiqn7d6/30ceC/U2eFwKDUHOVXgaA9l59D6z4ASGyIqGmhb2k7RGr0T52bS0sw3kop5LfWehvo4zIF74XPaEczvCV+f4Vcwwrv4SjTUfDq7L352fm7vY1Bc9KbpguVGtG5FdDscxJ1mU7xA2T0RXfKV5GUOURpDHsaLOAyyerGIo7DMS14maRJ9Yv7Wmnd+KV8e1mMIswDrOE/yjAL4ZwjTxVUIV6PyWydDDKuBvSDiKYvRJ2Yxjv5NFJ3p/r8k9ob/Esc3H7+ezvY5qZALS1NfPPYw/hT9wYE+t+DX0F6bd6/3gp1+A51RLFJeBQAA</values>
+        <workflow_reference/>
+    </sys_hub_flow_logic_instance_v2>
+    <sys_hub_flow_logic_instance_v2 action="INSERT_OR_UPDATE">
+        <attributes/>
+        <block display_value="">e8692ea3a81343107f44321b8bcb563a</block>
+        <comment/>
+        <connected_to/>
+        <decision_table/>
+        <display_text/>
+        <flow display_value="F10- Placement Intervention">e17fad67a8d703107f44321b8bcb5657</flow>
+        <flow_variables_assigned/>
+        <generation_source/>
+        <logic_definition display_value="Decision">b1f542d673331300612c273ffff6a7c7</logic_definition>
+        <order>16</order>
+        <outputs_assigned/>
+        <parent_ui_id>eafe5ec0-3672-420d-b75e-c32a4e7e7c86</parent_ui_id>
+        <sys_class_name>sys_hub_flow_logic_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 11:55:08</sys_created_on>
+        <sys_id>20692ea3a81343107f44321b8bcb5654</sys_id>
+        <sys_mod_count>2</sys_mod_count>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:32:02</sys_updated_on>
+        <ui_id>3129642b-67ac-443b-9ae6-906b73a0e258</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/9VUTYvbMBD9K0VnE/wVO5tbICwsbLvQXfZSFjOWx4lYWXIlOdk05L93FH8kpPS2UOqT50nz5r3xw0emO9d2zr7olbVio9jyx1vAhPIYvR+ZggbZkkkoUbKA7UB2vqbXSthWwuH1gvCtkJXBgaQFQ70ODVseb47cocWip1yyZ2eE2lC7qKgK4e6uDjPMkzSMkzDMopjHeVLTk0GeR3RvbHwcNN1I9ORU2pFWm8priMIwYPjhUFVIg2qQFgPWgKrAaXOYEINQPSl5AbZCud5fAx9W/CLyeD73F2skR3wwP5XFsJhxJ1pwfGqd0KpHHJRyXJiWXaO+9fr9SrGGTrqrlXaW+LD1or2KQVL9vNX77+PAe6HODodDqTnIqQJHeyg7h9Z/BpTYEFHRQNvSdorW6J04N5OWZraRVMxqqfc01MdhBtwLn9GOYHZP+PoMv4IR3sVXoqHm09l98bPzc3sfg+KiN00XLDeidSui2+Eg7hRM8QJl90R0yVfFywXEWQKLKEmTKMzrNE3iqFyUvJxnSf2J+Vtr3vmlfHlYjyHMQ6yTxXyRUwD/DGGWXoVwNSq/dTLEsBrYCyKeshh/YhaT+N9E0Znu/0tib/gvcXzz8evpbJ+TCrmwNPXFYw/jT9EfHOhzC34N7bV593ov2Ok3RJTBoF4FAAA=</values>
+        <workflow_reference/>
+    </sys_hub_flow_logic_instance_v2>
+    <sys_hub_flow_logic_instance_v2 action="INSERT_OR_UPDATE">
+        <attributes/>
+        <block display_value="">68692ea3a81343107f44321b8bcb5654</block>
+        <comment/>
+        <connected_to/>
+        <decision_table/>
+        <display_text/>
+        <flow display_value="F10- Placement Intervention">e17fad67a8d703107f44321b8bcb5657</flow>
+        <flow_variables_assigned/>
+        <generation_source/>
+        <logic_definition display_value="Decision">b1f542d673331300612c273ffff6a7c7</logic_definition>
+        <order>17</order>
+        <outputs_assigned/>
+        <parent_ui_id>eafe5ec0-3672-420d-b75e-c32a4e7e7c86</parent_ui_id>
+        <sys_class_name>sys_hub_flow_logic_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 11:55:08</sys_created_on>
+        <sys_id>20692ea3a81343107f44321b8bcb5655</sys_id>
+        <sys_mod_count>2</sys_mod_count>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:32:02</sys_updated_on>
+        <ui_id>20b3b8b4-2631-48a2-a1a1-bfcf8b27bcbc</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/9VUTYvbMBD9K0VnE/wVO5tbICwsbLvQXfZSFjOWx4lYWXIlOdk05L93FH8kpPS2UOqT50nz5r3xw0emO9d2zr7olbVio9jyx1vAhPIYvR+ZggbZkkkoUbKA7UB2vqbXSthWwuH1gvCtkJXBgaQFQ70ODVseb47cocWip1yyZ2eE2lC7qKgK4e6uDjPMkzSMkzDMopjHeVLTk0GeR3RvbHwcNN1I9ORU2pFWm8priMIwYPjhUFVIg2qQFgPWgKrAaXOYEINQPSl5AbZCud5fAx9W/CLyeD73F2skR3wwP5XFsJhxJ1pwfGqd0KpHHJRyXJiWXaO+9fr9SrGGTrqrlXaW+LD1or2KQVL9vNX77+PAe6HODodDqTnIqQJHeyg7h9Z/BpTYEFHRQNvSdorW6J04N5OWZraRVMxqqfc01MdhBtwLn9GOYHZP+PoMv4IR3sVXoqHm09l98bPzc3sfg+KiN00XLDeidSui2+Eg7hRM8QJl90R0yVfFywXEWQKLKEmTKMzrNE3iqFyUvJxnWf6J+Vtr3vmlfHlYjyHMQ6yTxXyRUwD/DGGWXoVwNSq/dTLEsBrYCyKeshh/YhaT+N9E0Znu/0tib/gvcXzz8evpbJ+TCrmwNPXFYw/jT9EfHOhzC34N7bV593ov2Ok35w1RvV4FAAA=</values>
+        <workflow_reference/>
+    </sys_hub_flow_logic_instance_v2>
+    <sys_hub_flow_logic_instance_v2 action="INSERT_OR_UPDATE">
+        <attributes/>
+        <block display_value="">68692ea3a81343107f44321b8bcb5655</block>
+        <comment/>
+        <connected_to/>
+        <decision_table/>
+        <display_text/>
+        <flow display_value="F10- Placement Intervention">e17fad67a8d703107f44321b8bcb5657</flow>
+        <flow_variables_assigned/>
+        <generation_source/>
+        <logic_definition display_value="Decision">b1f542d673331300612c273ffff6a7c7</logic_definition>
+        <order>18</order>
+        <outputs_assigned/>
+        <parent_ui_id>eafe5ec0-3672-420d-b75e-c32a4e7e7c86</parent_ui_id>
+        <sys_class_name>sys_hub_flow_logic_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 11:55:08</sys_created_on>
+        <sys_id>20692ea3a81343107f44321b8bcb5656</sys_id>
+        <sys_mod_count>2</sys_mod_count>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:32:02</sys_updated_on>
+        <ui_id>37e1884d-7049-41e6-88f1-fce59351236e</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/9VUTYvbMBD9K0XnEPztbG6BsLCw7UJ32UtZzFgeJ2JlyZXkZNOQ/95R/JGQ0ttCqU+eJ82b98YPH5nuXNs5+6JX1oqNYssfbzMmlMfo/cgUNMiWTEKJks3YDmTna3qthG0lHF4vCN8KWRkcSFow1OvQsOXx5sgdWix6yiV7dkaoDbWLiqoA7u7qIMM8ToIoDoIsjHiUxzU9GeR5SPfGxsdB041ET06lHWm1qbyGMAhmDD8cqgppUA3S4ow1oCpw2hwmxCBUT0pegK1QrvfXwIcVv4g8SlN/sUZyxAfzU1kMixl3ogXHp9YJrXrEQSnHhWnZNepbr9+vFGvopLtaaWeJD1sv2qsYJNXPW73/Pg68F+rscDiUmoOcKnC0h7JzaP1nQIkNERUNtC1tp2iN3olzM2lp5htJxbyWek9DfRzmwL3wOe0I5veEr8/wKxjhXXwlGmo+nd0XPzs/t/cxKC5603TBciNatyK6HQ7iTrMpXqDsnogu+Up5uYAoi2ERxkkcBnmdJHEUlouSl2mWBZ+Yv7XmnV/Kl4f1GMI8wDpepIucAvhnCLPkKoSrUfmtkyGG1cBeEPGUxegTsxhH/yaKznT/XxJ7w3+J45uPX09n+5xUyIWlqS8eexh/iv7gQJ9b8Gtor82713vBTr8BPBtOlV4FAAA=</values>
+        <workflow_reference/>
+    </sys_hub_flow_logic_instance_v2>
+    <sys_hub_flow_logic_instance_v2 action="INSERT_OR_UPDATE">
+        <attributes/>
+        <block display_value="">001b9267a89f03107f44321b8bcb566f</block>
+        <comment/>
+        <connected_to/>
+        <decision_table/>
+        <display_text/>
+        <flow display_value="F10- Placement Intervention">e17fad67a8d703107f44321b8bcb5657</flow>
+        <flow_variables_assigned/>
+        <generation_source/>
+        <logic_definition display_value="If">af4e1945c3e232002841b63b12d3ae3e</logic_definition>
+        <order>21</order>
+        <outputs_assigned/>
+        <parent_ui_id>f7cd1d34-9ce2-42f8-8858-674a3571299b</parent_ui_id>
+        <sys_class_name>sys_hub_flow_logic_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 10:52:34</sys_created_on>
+        <sys_id>c81b9267a89f03107f44321b8bcb566f</sys_id>
+        <sys_mod_count>7</sys_mod_count>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:32:02</sys_updated_on>
+        <ui_id>93b79a93-ac0c-4bb0-9cec-9c41f5e20334</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/+1U247TMBD9FeTnNsqlCdu+rRathASsxK72BVaRY49bC8cOttNuqfLvjHPpVrQIBDzyljlzOzNz4gMxrW9a7x7MtXNyrcnq09OMSB0w/D4QTWsgK8KM5tJLo8mMbKlqA3Y4pIuKZRlP5yLP+HwBiZgvi0U1Xyavs6JI8upKxNGNabXvus9tHGcQYz6XrlF0//iXZdhGKm5hpNxQi0w9WLI6/ODy+wZKRStQ2O3eW6nXmC45WkuaizyJc5alRZbGcXq1SKoiq5KUZxQWBcZNiTcnG7iwlNAEITeVN5YHLmk8I/DsQXPAfoIqBzNSU82pN3ZPVt62CFig/E6r/TFiI7XHaiTEPjv5DUKlOA6RAnAwBoP3aJbjUgeYbYxkcNf03HrE00qNOcyottYfhhHCOUDQVvnpHIi0DutBE0gHGiMncb8xu49Tw1up+wFHpzKMqqNFPa6haj24cA1QUGOhsqZNg8spG2u2sk9GLnW0VmhEQpkdNg0ajCgLxCPcEY1uEX/Tw4/UyjDFeyyDyXhBVzpmZTPN1jcnXb+V8msb+AzzjZOUwzIwYEi7xjZbGEl3s3Otlz3wIvhz7f4jGYqYimTJkssypNklGb561yPnYpxY/0SRyS8UOSK/Jck8/6/IU0UGmhV1kpX9C4rlwv/9x5J8CtIbWrhBQxyYdMjkIWBvp1c6OPZ4dclOoZ2xX8IML1j3HXd/DMLvBQAA</values>
+        <workflow_reference/>
+    </sys_hub_flow_logic_instance_v2>
+    <sys_hub_flow_logic_instance_v2 action="INSERT_OR_UPDATE">
+        <attributes/>
+        <block display_value="">5a3b9e67a89f03107f44321b8bcb5616</block>
+        <comment/>
+        <connected_to/>
+        <decision_table/>
+        <display_text/>
+        <flow display_value="F10- Placement Intervention">e17fad67a8d703107f44321b8bcb5657</flow>
+        <flow_variables_assigned/>
+        <generation_source/>
+        <logic_definition display_value="For Each">098e1dc5c3e232002841b63b12d3ae33</logic_definition>
+        <order>22</order>
+        <outputs_assigned/>
+        <parent_ui_id>93b79a93-ac0c-4bb0-9cec-9c41f5e20334</parent_ui_id>
+        <sys_class_name>sys_hub_flow_logic_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 10:53:17</sys_created_on>
+        <sys_id>123b9e67a89f03107f44321b8bcb5617</sys_id>
+        <sys_mod_count>8</sys_mod_count>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:32:03</sys_updated_on>
+        <ui_id>73e61bfd-6dc1-44aa-83ab-19e4e5bc406d</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/51STU/jMBD9Lz63UT5KlvSGtELiAEgs4oJQ5Njj1lrH9tpOSzbKf2fcuAVx5JTMm5k373lmImYIdgj+2dx4L3eabF/fVkTqiOH/RDTtgWyJDNB7siIHqoYYT1O56VhV8XItriq+3kAh1k296dZN8auq6+KquxZ59gTMOO7nGVu59FbR8eXnDGwvFXeQRFrqUFsAR7bTt1QYLbSKdqBwUGLAfskxLBoumiJvWFXWVZnn5fWm6OqqK0peUeA11p0775Lpb28Q2TF0F178RBVlviLwHkBzwEGCKg8r0lPNaTBuJNvgBgQcUP6o1Xip2EsdkI7E2ncv/yN3keexUAA6YrAkL2GbHnKB2d5IBo82SKMXJNBOpR5m1NDrh0V+XAEIOqhwXgEig0c+sFFzVJEkiT97c3w6D7yV+uQvJZVhVF0iGoKT3RDAxzWAgh6J2p5aK/Wutc4c5KkZtfTZTmGQCWWOODSeW0ZZFJ7hE9HsFvHfJ/iFOhld3CMNNs8n9+2/Ic5dfCTF7WIaCzxz0oYbpDtAEje/xXtdmPxyGByY9DjwOWJ35yuPiRGXLNlX6Gjc3yj1E5s/ABtpVtkvAwAA</values>
+        <workflow_reference/>
+    </sys_hub_flow_logic_instance_v2>
+    <sys_hub_pill_compound action="delete_multiple" query="attached_to=e17fad67a8d703107f44321b8bcb5657"/>
+    <sys_hub_flow_variable action="delete_multiple" query="model=e17fad67a8d703107f44321b8bcb5657"/>
+    <sys_documentation action="INSERT_OR_UPDATE">
+        <element>current</element>
+        <help/>
+        <hint/>
+        <label>Record</label>
+        <language>en</language>
+        <name>var__m_sys_hub_flow_input_e17fad67a8d703107f44321b8bcb5657</name>
+        <plural/>
+        <sys_class_name>sys_documentation</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 07:42:17</sys_created_on>
+        <sys_id>208f61a7a8d703107f44321b8bcb56af</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name/>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 07:42:17</sys_updated_on>
+        <url/>
+        <url_target/>
+    </sys_documentation>
+    <sys_documentation action="INSERT_OR_UPDATE">
+        <element>table_name</element>
+        <help/>
+        <hint/>
+        <label>Table Name</label>
+        <language>en</language>
+        <name>var__m_sys_hub_flow_input_e17fad67a8d703107f44321b8bcb5657</name>
+        <plural/>
+        <sys_class_name>sys_documentation</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 07:42:17</sys_created_on>
+        <sys_id>6c8f61a7a8d703107f44321b8bcb5697</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name/>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 07:42:17</sys_updated_on>
+        <url/>
+        <url_target/>
+    </sys_documentation>
+    <sys_documentation action="INSERT_OR_UPDATE">
+        <element>changed_fields</element>
+        <help/>
+        <hint/>
+        <label>Changed Fields</label>
+        <language>en</language>
+        <name>var__m_sys_hub_flow_input_e17fad67a8d703107f44321b8bcb5657</name>
+        <plural/>
+        <sys_class_name>sys_documentation</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 07:42:17</sys_created_on>
+        <sys_id>e88f61a7a8d703107f44321b8bcb56ba</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name/>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 07:42:17</sys_updated_on>
+        <url/>
+        <url_target/>
+    </sys_documentation>
+    <sys_choice action="delete_multiple" query="name=var__m_sys_hub_flow_input_e17fad67a8d703107f44321b8bcb5657"/>
+    <sys_choice action="delete_multiple" query="name=var__m_sys_hub_flow_output_e17fad67a8d703107f44321b8bcb5657"/>
+    <sys_hub_flow_snapshot action="INSERT_OR_UPDATE">
+        <access>public</access>
+        <acls/>
+        <active>true</active>
+        <allow_high_security_roles>false</allow_high_security_roles>
+        <annotation/>
+        <attributes>browserActivatedIn=chrome,integrationActivatedIn=standalone,labelCacheCleanUpExecuted=true,viewActivatedIn=naturalLanguage</attributes>
+        <authored_on_release_version>29000</authored_on_release_version>
+        <callable_by_client_api>false</callable_by_client_api>
+        <category/>
+        <copied_from/>
+        <copied_from_name/>
+        <description>Placement Intervention</description>
+        <flow_priority>MEDIUM</flow_priority>
+        <internal_name>f10_placement_intervention</internal_name>
+        <label_cache>[{"name":"Created or Updated_1.current.primary_skill_gap","label":"Trigger - Record Created or Updated➛Placement Intelligence Record➛Primary Skill Gap","reference":"","reference_display":"Primary Skill Gap","type":"choice","base_type":"choice","parent_table_name":"x_snc_campus360_placement_intelligence","column_name":"primary_skill_gap","choices":[{"sequence":0.0,"reference":false,"used":false,"label":"Communication","image":"","rawLabel":"Communication","selected":false,"missing":false,"value":"Communication","parameters":{"name":"x_snc_campus360_placement_intelligence","dependent_values":[""],"dependent_values_map":{"":"Communication"}}},{"sequence":1.0,"reference":false,"used":false,"label":"Technical Knowledge","image":"","rawLabel":"Technical Knowledge","selected":false,"missing":false,"value":"Technical Knowledge","parameters":{"name":"x_snc_campus360_placement_intelligence","dependent_values":[""],"dependent_values_map":{"":"Technical Knowledge"}}},{"sequence":2.0,"reference":false,"used":false,"label":"Problem Solving","image":"","rawLabel":"Problem Solving","selected":false,"missing":false,"value":"Problem Solving","parameters":{"name":"x_snc_campus360_placement_intelligence","dependent_values":[""],"dependent_values_map":{"":"Problem Solving"}}},{"sequence":3.0,"reference":false,"used":false,"label":"Coding","image":"","rawLabel":"Coding","selected":false,"missing":false,"value":"Coding","parameters":{"name":"x_snc_campus360_placement_intelligence","dependent_values":[""],"dependent_values_map":{"":"Coding"}}},{"sequence":4.0,"reference":false,"used":false,"label":"Aptitude","image":"","rawLabel":"Aptitude","selected":false,"missing":false,"value":"Aptitude","parameters":{"name":"x_snc_campus360_placement_intelligence","dependent_values":[""],"dependent_values_map":{"":"Aptitude"}}},{"sequence":5.0,"reference":false,"used":false,"label":"Presentation","image":"","rawLabel":"Presentation","selected":false,"missing":false,"value":"Presentation","parameters":{"name":"x_snc_campus360_placement_intelligence","dependent_values":[""],"dependent_values_map":{"":"Presentation"}}},{"sequence":6.0,"reference":false,"used":false,"label":"Interview Performance","image":"","rawLabel":"Interview Performance","selected":false,"missing":false,"value":"Interview Performance","parameters":{"name":"x_snc_campus360_placement_intelligence","dependent_values":[""],"dependent_values_map":{"":"Interview Performance"}}},{"sequence":7.0,"reference":false,"used":false,"label":"Resume / Profile","image":"","rawLabel":"Resume / Profile","selected":false,"missing":false,"value":"Resume / Profile","parameters":{"name":"x_snc_campus360_placement_intelligence","dependent_values":[""],"dependent_values_map":{"":"Resume / Profile"}}},{"sequence":8.0,"reference":false,"used":false,"label":"Skill Development","image":"","rawLabel":"Skill Development","selected":false,"missing":false,"value":"Skill Development","parameters":{"name":"x_snc_campus360_placement_intelligence","dependent_values":[""],"dependent_values_map":{"":"Skill Development"}}},{"sequence":9.0,"reference":false,"used":false,"label":"No Significant Gap","image":"","rawLabel":"No Significant Gap","selected":false,"missing":false,"value":"No Significant Gap","parameters":{"name":"x_snc_campus360_placement_intelligence","dependent_values":[""],"dependent_values_map":{"":"No Significant Gap"}}}],"usedInstances":{"eafe5ec0-3672-420d-b75e-c32a4e7e7c86":["u_primary_skill_gap"]}},{"name":"8a2cf5c0-ef58-46e2-a1a4-2af807047efe.Count","label":"1 - Look Up Records➛Count","reference_display":"Count","type":"integer","base_type":"integer","usedInstances":{},"attributes":{"element_mapping_provider":"com.glide.flow_design.action.data.FlowDesignVariableMapper"}},{"name":"Created or Updated_1.current.recommended_action","label":"Trigger - Record Created or Updated➛Placement Intelligence Record➛Recommended Action","reference":"","reference_display":"Recommended Action","type":"string","base_type":"string","parent_table_name":"x_snc_campus360_placement_intelligence","column_name":"recommended_action","choices":[{"order":0.0}],"usedInstances":{"9c5f4c6d-3050-4089-9560-3d8245f9cc31":["reason"]}},{"name":"Created or Updated_1.current.student","label":"Trigger - Record Created or Updated➛Placement Intelligence Record➛Student","reference":"x_snc_campus360_student_master","reference_display":"Student Master","type":"reference","base_type":"reference","parent_table_name":"x_snc_campus360_placement_intelligence","column_name":"student","usedInstances":{"9c5f4c6d-3050-4089-9560-3d8245f9cc31":["student"],"c3f7f89a-5cef-41a8-aefc-4572277da4df":["student"]}},{"name":"8a2cf5c0-ef58-46e2-a1a4-2af807047efe.Records","label":"1 - Look Up Records➛ Placement Intervention Records","reference":"x_snc_campus360_placement_intervention","reference_display":" Placement Intervention","type":"records","base_type":"records","usedInstances":{},"attributes":{"element_mapping_provider":"com.glide.flow_design.action.data.FlowDesignVariableMapper"}},{"name":"eafe5ec0-3672-420d-b75e-c32a4e7e7c86.answer.result_elements.u_training_skill_area","label":"4➛sys_decision_multi_result Record➛Result elements➛Training Skill Area","reference":"","reference_display":"Training Skill Area","type":"string","base_type":"string","parent_table_name":"var__m_sys_decision_multi_result_element_ddc925eba89703107f44321b8bcb5609","column_name":"u_training_skill_area","choices":[{"order":0.0}],"usedInstances":{}},{"name":"Created or Updated_1.current.skill_gap_summary","label":"Trigger - Record Created or Updated➛Placement Intelligence Record➛Skill Gap Summary","reference":"","reference_display":"Skill Gap Summary","type":"string","base_type":"string","parent_table_name":"x_snc_campus360_placement_intelligence","column_name":"skill_gap_summary","choices":[{"order":0.0}],"usedInstances":{"9c5f4c6d-3050-4089-9560-3d8245f9cc31":["reason"],"c3f7f89a-5cef-41a8-aefc-4572277da4df":["reason"]}},{"name":"24bc33d2-f53d-4e1f-964b-91736615b8f0.Count","label":"20 - Look Up Records➛Count","reference_display":"Count","type":"integer","base_type":"integer","usedInstances":{},"attributes":{"element_mapping_provider":"com.glide.flow_design.action.data.FlowDesignVariableMapper"}},{"name":"41feb962-9240-465a-8630-f18fba31129e.Record","label":"7 - Look Up Record➛Training Program Record","reference":"x_snc_campus360_training_program","reference_display":"Training Program","type":"reference","base_type":"reference","usedInstances":{},"attributes":{"element_mapping_provider":"com.glide.flow_design.action.data.FlowDesignVariableMapper"}},{"name":"Created or Updated_1.current.risk_level","label":"Trigger - Record Created or Updated➛Placement Intelligence Record➛Risk Level","reference":"","reference_display":"Risk Level","type":"choice","base_type":"choice","parent_table_name":"x_snc_campus360_placement_intelligence","column_name":"risk_level","choices":[{"sequence":0.0,"reference":false,"used":false,"label":"Low","image":"","rawLabel":"Low","selected":false,"missing":false,"value":"low","parameters":{"name":"x_snc_campus360_placement_intelligence","dependent_values":[""],"dependent_values_map":{"":"Low"}}},{"sequence":1.0,"reference":false,"used":false,"label":"Medium","image":"","rawLabel":"Medium","selected":false,"missing":false,"value":"medium","parameters":{"name":"x_snc_campus360_placement_intelligence","dependent_values":[""],"dependent_values_map":{"":"Medium"}}},{"sequence":2.0,"reference":false,"used":false,"label":"High","image":"","rawLabel":"High","selected":false,"missing":false,"value":"high","parameters":{"name":"x_snc_campus360_placement_intelligence","dependent_values":[""],"dependent_values_map":{"":"High"}}},{"sequence":3.0,"reference":false,"used":false,"label":"Critical","image":"","rawLabel":"Critical","selected":false,"missing":false,"value":"critical","parameters":{"name":"x_snc_campus360_placement_intelligence","dependent_values":[""],"dependent_values_map":{"":"Critical"}}}],"usedInstances":{"eafe5ec0-3672-420d-b75e-c32a4e7e7c86":["u_risk_level"]}},{"name":"Created or Updated_1.run_start_date_time","label":"Trigger - Record Created or Updated➛Run Start Date/Time","type":"glide_date_time","base_type":"glide_date_time","choices":[{"order":0.0}],"usedInstances":{"c3f7f89a-5cef-41a8-aefc-4572277da4df":["start_date"]},"attributes":{"test_input_hidden":"true"}},{"name":"24bc33d2-f53d-4e1f-964b-91736615b8f0.Records","label":"20 - Look Up Records➛Training Program Records","reference":"x_snc_campus360_training_program","reference_display":"Training Program","type":"records","base_type":"records","usedInstances":{},"attributes":{"element_mapping_provider":"com.glide.flow_design.action.data.FlowDesignVariableMapper"}},{"name":"Created or Updated_1.current.readiness_score","label":"Trigger - Record Created or Updated➛Placement Intelligence Record➛Readiness Score","reference":"","reference_display":"Readiness Score","type":"integer","base_type":"integer","parent_table_name":"x_snc_campus360_placement_intelligence","column_name":"readiness_score","choices":[{"order":0.0}],"usedInstances":{"9c5f4c6d-3050-4089-9560-3d8245f9cc31":["before_score"],"c3f7f89a-5cef-41a8-aefc-4572277da4df":["before_score"]}},{"name":"eafe5ec0-3672-420d-b75e-c32a4e7e7c86.answer.result_elements.u_intervention_type","label":"4➛sys_decision_multi_result Record➛Result elements➛Intervention Type","reference":"","reference_display":"Intervention Type","type":"string","base_type":"string","parent_table_name":"var__m_sys_decision_multi_result_element_ddc925eba89703107f44321b8bcb5609","column_name":"u_intervention_type","choices":[{"order":0.0}],"usedInstances":{"9c5f4c6d-3050-4089-9560-3d8245f9cc31":["intervention_type"],"c3f7f89a-5cef-41a8-aefc-4572277da4df":["intervention_type"]}},{"name":"Created or Updated_1.current.bottleneck_stage","label":"Trigger - Record Created or Updated➛Placement Intelligence Record➛Bottleneck Stage","reference":"","reference_display":"Bottleneck Stage","type":"choice","base_type":"choice","parent_table_name":"x_snc_campus360_placement_intelligence","column_name":"bottleneck_stage","choices":[{"sequence":0.0,"reference":false,"used":false,"label":"Profile","image":"","rawLabel":"Profile","selected":false,"missing":false,"value":"profile","parameters":{"name":"x_snc_campus360_placement_intelligence","dependent_values":[""],"dependent_values_map":{"":"Profile"}}},{"sequence":1.0,"reference":false,"used":false,"label":"Skills","image":"","rawLabel":"Skills","selected":false,"missing":false,"value":"skills","parameters":{"name":"x_snc_campus360_placement_intelligence","dependent_values":[""],"dependent_values_map":{"":"Skills"}}},{"sequence":2.0,"reference":false,"used":false,"label":"Applications","image":"","rawLabel":"Applications","selected":false,"missing":false,"value":"applications","parameters":{"name":"x_snc_campus360_placement_intelligence","dependent_values":[""],"dependent_values_map":{"":"Applications"}}},{"sequence":3.0,"reference":false,"used":false,"label":"Assessments","image":"","rawLabel":"Assessments","selected":false,"missing":false,"value":"assessments","parameters":{"name":"x_snc_campus360_placement_intelligence","dependent_values":[""],"dependent_values_map":{"":"Assessments"}}},{"sequence":4.0,"reference":false,"used":false,"label":"Interviews","image":"","rawLabel":"Interviews","selected":false,"missing":false,"value":"interviews","parameters":{"name":"x_snc_campus360_placement_intelligence","dependent_values":[""],"dependent_values_map":{"":"Interviews"}}},{"sequence":5.0,"reference":false,"used":false,"label":"Training","image":"","rawLabel":"Training","selected":false,"missing":false,"value":"training","parameters":{"name":"x_snc_campus360_placement_intelligence","dependent_values":[""],"dependent_values_map":{"":"Training"}}},{"sequence":6.0,"reference":false,"used":false,"label":"Placement","image":"","rawLabel":"Placement","selected":false,"missing":false,"value":"placement","parameters":{"name":"x_snc_campus360_placement_intelligence","dependent_values":[""],"dependent_values_map":{"":"Placement"}}},{"sequence":7.0,"reference":false,"used":false,"label":"None","image":"","rawLabel":"None","selected":false,"missing":false,"value":"none","parameters":{"name":"x_snc_campus360_placement_intelligence","dependent_values":[""],"dependent_values_map":{"":"None"}}}],"usedInstances":{"eafe5ec0-3672-420d-b75e-c32a4e7e7c86":["u_bottleneck_stage"]}},{"name":"73e61bfd-6dc1-44aa-83ab-19e4e5bc406d.item","label":"22 - For Each➛Training Program Record","reference":"x_snc_campus360_training_program","reference_display":"Training Program","type":"reference","base_type":"reference","usedInstances":{},"attributes":{"pills_draggable_inside_block":"true","pills_draggable_outside_block":"false"}}]</label_cache>
+        <master>true</master>
+        <name>F10- Placement Intervention</name>
+        <natlang/>
+        <outputs/>
+        <parent_flow display_value="F10- Placement Intervention">e17fad67a8d703107f44321b8bcb5657</parent_flow>
+        <remote_trigger_id/>
+        <run_as>user</run_as>
+        <run_with_roles/>
+        <sc_callable>false</sc_callable>
+        <status>published</status>
+        <sys_class_name>sys_hub_flow_snapshot</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 13:32:04</sys_created_on>
+        <sys_domain>global</sys_domain>
+        <sys_domain_path>/</sys_domain_path>
+        <sys_id>d49fbe6fa89343107f44321b8bcb565e</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name/>
+        <sys_overrides/>
+        <sys_package/>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:32:04</sys_updated_on>
+        <type>flow</type>
+        <version>2</version>
+    </sys_hub_flow_snapshot>
+    <sys_translated_text action="delete_multiple" query="documentkey=d49fbe6fa89343107f44321b8bcb565e"/>
+    <sys_variable_value action="delete_multiple" query="document_key=d49fbe6fa89343107f44321b8bcb565e"/>
+    <sys_hub_flow_stage action="delete_multiple" query="flow=d49fbe6fa89343107f44321b8bcb565e"/>
+    <sys_flow_cat_variable_model action="delete_multiple" query="id=d49fbe6fa89343107f44321b8bcb565e^sys_idNOT IN549fbe6fa89343107f44321b8bcb565f"/>
+    <sys_flow_cat_variable_model action="INSERT_OR_UPDATE">
+        <id>d49fbe6fa89343107f44321b8bcb565e</id>
+        <name>F10- Placement Intervention</name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 13:32:04</sys_created_on>
+        <sys_id>549fbe6fa89343107f44321b8bcb565f</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_scope/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:32:04</sys_updated_on>
+    </sys_flow_cat_variable_model>
+    <sys_flow_cat_variable action="delete_multiple" query="flow_catalog_model=549fbe6fa89343107f44321b8bcb565f"/>
+    <sys_hub_flow_input action="delete_multiple" query="model=d49fbe6fa89343107f44321b8bcb565e^sys_idNOT IN549fbe6fa89343107f44321b8bcb5660,d09fbe6fa89343107f44321b8bcb5674,d49fbe6fa89343107f44321b8bcb567e"/>
+    <sys_hub_flow_input action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <array>false</array>
+        <array_denormalized>false</array_denormalized>
+        <attributes>element_mapping_provider=com.glide.flow_design.action.data.FlowDesignVariableMapper,uiType=document_id,uiTypeLabel=Document ID</attributes>
+        <audit>false</audit>
+        <calculation><![CDATA[(function calculatedFieldValue(current) {
+
+	// Add your code here
+	return '';  // return the calculated value
+
+})(current);]]></calculation>
+        <choice/>
+        <choice_field/>
+        <choice_table/>
+        <column_label/>
+        <comments/>
+        <create_roles/>
+        <default_value/>
+        <defaultsort/>
+        <delete_roles/>
+        <dependent>table_name</dependent>
+        <dependent_on_field>table_name</dependent_on_field>
+        <display>false</display>
+        <dynamic_creation>false</dynamic_creation>
+        <dynamic_creation_script/>
+        <dynamic_default_value/>
+        <dynamic_ref_qual/>
+        <element>current</element>
+        <element_reference>false</element_reference>
+        <foreign_database/>
+        <formula/>
+        <function_definition/>
+        <function_field>false</function_field>
+        <help/>
+        <hint/>
+        <internal_type display_value="">document_id</internal_type>
+        <label>Record</label>
+        <mandatory>true</mandatory>
+        <max_length>200</max_length>
+        <model display_value="F10- Placement Intervention">d49fbe6fa89343107f44321b8bcb565e</model>
+        <model_id>d49fbe6fa89343107f44321b8bcb565e</model_id>
+        <model_table>sys_hub_flow_snapshot</model_table>
+        <name>var__m_sys_hub_flow_input_d49fbe6fa89343107f44321b8bcb565e</name>
+        <next_element/>
+        <order>100</order>
+        <primary>false</primary>
+        <read_only>false</read_only>
+        <read_only_option/>
+        <read_roles/>
+        <reference/>
+        <reference_cascade_rule/>
+        <reference_floats>false</reference_floats>
+        <reference_key/>
+        <reference_qual/>
+        <reference_qual_condition/>
+        <reference_type/>
+        <sizeclass/>
+        <spell_check>false</spell_check>
+        <staged>false</staged>
+        <sys_class_name>sys_hub_flow_input</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 13:32:04</sys_created_on>
+        <sys_id>549fbe6fa89343107f44321b8bcb5660</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name/>
+        <sys_package/>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:32:04</sys_updated_on>
+        <table_reference>false</table_reference>
+        <text_index>false</text_index>
+        <unique>false</unique>
+        <use_dependent_field>true</use_dependent_field>
+        <use_dynamic_default>false</use_dynamic_default>
+        <use_reference_qualifier>simple</use_reference_qualifier>
+        <virtual>false</virtual>
+        <virtual_type>script</virtual_type>
+        <widget/>
+        <write_roles/>
+        <xml_view>false</xml_view>
+    </sys_hub_flow_input>
+    <sys_hub_action_input_action_instance action="delete_multiple" query="action_input=549fbe6fa89343107f44321b8bcb5660"/>
+    <sys_hub_flow_input action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <array>false</array>
+        <array_denormalized>false</array_denormalized>
+        <attributes>child_label=FDChangeDetails,child_name=FDChangeDetails,child_type=object,child_type_label=Object,element_mapping_provider=com.glide.flow_design.action.data.FlowDesignVariableMapper,pwd2droppable=true,uiType=array.object,uiTypeLabel=Array.Object</attributes>
+        <audit>false</audit>
+        <calculation><![CDATA[(function calculatedFieldValue(current) {
+
+	// Add your code here
+	return '';  // return the calculated value
+
+})(current);]]></calculation>
+        <choice/>
+        <choice_field/>
+        <choice_table/>
+        <column_label/>
+        <comments/>
+        <create_roles/>
+        <default_value/>
+        <defaultsort/>
+        <delete_roles/>
+        <dependent/>
+        <dependent_on_field/>
+        <display>false</display>
+        <dynamic_creation>false</dynamic_creation>
+        <dynamic_creation_script/>
+        <dynamic_default_value/>
+        <dynamic_ref_qual/>
+        <element>changed_fields</element>
+        <element_reference>false</element_reference>
+        <foreign_database/>
+        <formula/>
+        <function_definition/>
+        <function_field>false</function_field>
+        <help/>
+        <hint/>
+        <internal_type display_value="String">string</internal_type>
+        <label>Changed Fields</label>
+        <mandatory>false</mandatory>
+        <max_length>4000</max_length>
+        <model display_value="F10- Placement Intervention">d49fbe6fa89343107f44321b8bcb565e</model>
+        <model_id>d49fbe6fa89343107f44321b8bcb565e</model_id>
+        <model_table>sys_hub_flow_snapshot</model_table>
+        <name>var__m_sys_hub_flow_input_d49fbe6fa89343107f44321b8bcb565e</name>
+        <next_element/>
+        <order>100</order>
+        <primary>false</primary>
+        <read_only>false</read_only>
+        <read_only_option/>
+        <read_roles/>
+        <reference/>
+        <reference_cascade_rule/>
+        <reference_floats>false</reference_floats>
+        <reference_key/>
+        <reference_qual/>
+        <reference_qual_condition/>
+        <reference_type/>
+        <sizeclass/>
+        <spell_check>false</spell_check>
+        <staged>false</staged>
+        <sys_class_name>sys_hub_flow_input</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 13:32:04</sys_created_on>
+        <sys_id>d09fbe6fa89343107f44321b8bcb5674</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name/>
+        <sys_package/>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:32:04</sys_updated_on>
+        <table_reference>false</table_reference>
+        <text_index>false</text_index>
+        <unique>false</unique>
+        <use_dependent_field>false</use_dependent_field>
+        <use_dynamic_default>false</use_dynamic_default>
+        <use_reference_qualifier>simple</use_reference_qualifier>
+        <virtual>false</virtual>
+        <virtual_type>script</virtual_type>
+        <widget/>
+        <write_roles/>
+        <xml_view>false</xml_view>
+    </sys_hub_flow_input>
+    <sys_hub_action_input_action_instance action="delete_multiple" query="action_input=d09fbe6fa89343107f44321b8bcb5674"/>
+    <sys_hub_flow_input action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <array>false</array>
+        <array_denormalized>false</array_denormalized>
+        <attributes>element_mapping_provider=com.glide.flow_design.action.data.FlowDesignVariableMapper,test_input_hidden=true,uiType=table_name,uiTypeLabel=Table Name</attributes>
+        <audit>false</audit>
+        <calculation><![CDATA[(function calculatedFieldValue(current) {
+
+	// Add your code here
+	return '';  // return the calculated value
+
+})(current);]]></calculation>
+        <choice/>
+        <choice_field/>
+        <choice_table/>
+        <column_label/>
+        <comments/>
+        <create_roles/>
+        <default_value/>
+        <defaultsort/>
+        <delete_roles/>
+        <dependent/>
+        <dependent_on_field/>
+        <display>false</display>
+        <dynamic_creation>false</dynamic_creation>
+        <dynamic_creation_script/>
+        <dynamic_default_value/>
+        <dynamic_ref_qual/>
+        <element>table_name</element>
+        <element_reference>false</element_reference>
+        <foreign_database/>
+        <formula/>
+        <function_definition/>
+        <function_field>false</function_field>
+        <help/>
+        <hint/>
+        <internal_type display_value="">table_name</internal_type>
+        <label>Table Name</label>
+        <mandatory>false</mandatory>
+        <max_length>200</max_length>
+        <model display_value="F10- Placement Intervention">d49fbe6fa89343107f44321b8bcb565e</model>
+        <model_id>d49fbe6fa89343107f44321b8bcb565e</model_id>
+        <model_table>sys_hub_flow_snapshot</model_table>
+        <name>var__m_sys_hub_flow_input_d49fbe6fa89343107f44321b8bcb565e</name>
+        <next_element/>
+        <order>101</order>
+        <primary>false</primary>
+        <read_only>false</read_only>
+        <read_only_option/>
+        <read_roles/>
+        <reference/>
+        <reference_cascade_rule/>
+        <reference_floats>false</reference_floats>
+        <reference_key/>
+        <reference_qual/>
+        <reference_qual_condition/>
+        <reference_type/>
+        <sizeclass/>
+        <spell_check>false</spell_check>
+        <staged>false</staged>
+        <sys_class_name>sys_hub_flow_input</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 13:32:04</sys_created_on>
+        <sys_id>d49fbe6fa89343107f44321b8bcb567e</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name/>
+        <sys_package/>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:32:04</sys_updated_on>
+        <table_reference>false</table_reference>
+        <text_index>false</text_index>
+        <unique>false</unique>
+        <use_dependent_field>false</use_dependent_field>
+        <use_dynamic_default>false</use_dynamic_default>
+        <use_reference_qualifier>simple</use_reference_qualifier>
+        <virtual>false</virtual>
+        <virtual_type>script</virtual_type>
+        <widget/>
+        <write_roles/>
+        <xml_view>false</xml_view>
+    </sys_hub_flow_input>
+    <sys_hub_action_input_action_instance action="delete_multiple" query="action_input=d49fbe6fa89343107f44321b8bcb567e"/>
+    <sys_hub_flow_output action="delete_multiple" query="model=d49fbe6fa89343107f44321b8bcb565e"/>
+    <sys_hub_alias_mapping action="delete_multiple" query="source_id=d49fbe6fa89343107f44321b8bcb565e"/>
+    <sys_hub_trigger_instance_v2 action="delete_multiple" query="flow=d49fbe6fa89343107f44321b8bcb565e^sys_idNOT IN2c9fbe6fa89343107f44321b8bcb56a7"/>
+    <sys_hub_trigger_instance_v2 action="INSERT_OR_UPDATE">
+        <comment/>
+        <display_text/>
+        <flow display_value="F10- Placement Intervention">d49fbe6fa89343107f44321b8bcb565e</flow>
+        <generation_source/>
+        <name>Created or Updated</name>
+        <published_version/>
+        <remote_sys_id/>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 13:32:05</sys_created_on>
+        <sys_id>2c9fbe6fa89343107f44321b8bcb56a7</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_scope/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:32:05</sys_updated_on>
+        <trigger_definition display_value="Created or Updated">a45d9180c32222002841b63b12d3aea7</trigger_definition>
+        <trigger_inputs>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</trigger_inputs>
+        <trigger_outputs/>
+        <trigger_type>record_create_or_update</trigger_type>
+        <updation_source/>
+    </sys_hub_trigger_instance_v2>
+    <sys_hub_action_instance_v2 action="delete_multiple" query="flow=d49fbe6fa89343107f44321b8bcb565e^sys_idNOT IN249fbe6fa89343107f44321b8bcb56a5,e89fbe6fa89343107f44321b8bcb56a5,e49fbe6fa89343107f44321b8bcb56a6"/>
+    <sys_hub_action_instance_v2 action="INSERT_OR_UPDATE">
+        <action_type display_value="Look Up Records">43400a1587003300663ca1bb36cb0b4b</action_type>
+        <action_type_parent display_value="Look Up Records">d1c56ec50b30030085c083eb37673a50</action_type_parent>
+        <attributes/>
+        <comment/>
+        <compiled_snapshot>43400a1587003300663ca1bb36cb0b4b</compiled_snapshot>
+        <display_text/>
+        <flow display_value="F10- Placement Intervention">d49fbe6fa89343107f44321b8bcb565e</flow>
+        <generation_source/>
+        <order>1</order>
+        <parent_ui_id/>
+        <sys_class_name>sys_hub_action_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 13:32:05</sys_created_on>
+        <sys_id>249fbe6fa89343107f44321b8bcb56a5</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:32:05</sys_updated_on>
+        <ui_id>8a2cf5c0-ef58-46e2-a1a4-2af807047efe</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/+VWbW/aMBD+K1E+I2QaSrt+m6gqVerL1Hb90lWWYztgzSSZ7fBSxH/fOXYChZRBR6VO+wS5O/vunnse20/zULDwLERJFyHSOT49QSiKEOr1Iko6cRz1aIzi4y9hK0zJiEOkzpTBZpZzMI2JLGob0RRMTOhcktmj95DAZMEL2OlQSKZ4Gp49PbfCnCjYzXAVns3XXLuWI0nMJYTeQ+7gwdXTUGL5cwY5MkGr7yu/tF8ZM8VsKVEr5FPDU8ahhoRIzVvhiKSMmEzNaovihN2mcmkYitTAbqENnmrxAvmiIxuXcOiKcuerP7GHyJmTc2LIvVEFNYXyoa5YDXjM6zZrIBsw9+WjRWsZ/2LjyXo846sLOgvAm/GEFNL035ezs2/OI5vTNXibG5HB1MPIzoXEsmo/k8UovXGzDOsKHxvI5jznb3Cu0AA2z+1A7YT8uJL7YTa5q6ZxIdKyLu+UGSWy/iLGKBEXxuIyDxOGE8ElwyKVIrWZYGyWPlzyEWTAI5LnIh3gXGVjUe4KvYzaAwkf7URmE4uFGKRtQm3nbSAWaV+A/bw0PxIlLArXsA0sbtmEQ1jq82FNlcgNngg24GaZvYpimZkQ+bPJ7xmHq0GV7YWLVqhnui+J1kuwgab4V2ExcNB79HA5qHJJWcVX6GDMPVCWA6Vs6clW2R6vSdQNeoUvm+fH3ifHDiVUKNxaRgbx7K2q/NHhZl5GvD4+LqwjuHGOit4HO0JO0WGOkCaJb0pwLwVuSstS7S+U9YECalLs/sR32PyB/d2tl1avs+QZDBkrrgFSvcL+DkJoUwGdljPvJ4MdaqlkcE2mwV1dTGOFXglAUj4ogV2VwWVt9RroHkwD3c+rgWpYjTdQNbMDX0AfI5PDXwOn219vaEkzmqVM2BpXdaBNYXP9KGA1m8/7wBTDWZCp4HvO7F/cadNCAXqm7WMXi03hvHeb/YS2Q6+V0PqrzTYBUL1V121XTRtUD7ADig19Xrn9I1fOB90s20nWjZd8ctsttTTFOqWYklFe6KiHMIyQusbtYa7G8M9OY0M8wbcqMLh8HXhIeZSVV/J48KWvdeJFUX42vcLKZWuvMPR/vsI+5/0CBQkJDMFuhDorVAnlGFNZ6NKhSKrdXge8jZ5/A7rxOjrcEAAA</values>
+    </sys_hub_action_instance_v2>
+    <sys_hub_alias_mapping action="delete_multiple" query="source_id=249fbe6fa89343107f44321b8bcb56a5"/>
+    <sys_hub_action_instance_v2 action="INSERT_OR_UPDATE">
+        <action_type display_value="Look Up Records">43400a1587003300663ca1bb36cb0b4b</action_type>
+        <action_type_parent display_value="Look Up Records">d1c56ec50b30030085c083eb37673a50</action_type_parent>
+        <attributes/>
+        <comment/>
+        <compiled_snapshot>43400a1587003300663ca1bb36cb0b4b</compiled_snapshot>
+        <display_text/>
+        <flow display_value="F10- Placement Intervention">d49fbe6fa89343107f44321b8bcb565e</flow>
+        <generation_source/>
+        <order>20</order>
+        <parent_ui_id>f7cd1d34-9ce2-42f8-8858-674a3571299b</parent_ui_id>
+        <sys_class_name>sys_hub_action_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 13:32:05</sys_created_on>
+        <sys_id>e89fbe6fa89343107f44321b8bcb56a5</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:32:05</sys_updated_on>
+        <ui_id>24bc33d2-f53d-4e1f-964b-91736615b8f0</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/+VWXU/bMBT9K1WeS+U0/WC8TSCkSduYBuJlQ9aN4xRrbpLZDqVU/e+7jp2kawOjW5mY9hTl+tr3+NxzbH9ZBSIJTgKSjgiBcHw8JSSKCJlMIgZhHEcTFpN4/CboBxnMOWbqXBlqlgXH0B3IsomBZhhKhC4kLK/9CPRM3nvAOLsVMlE8C06+3PSDAhSuZrgKTlZbQ8+FIyHmElMvsXbvyuHpgFh9TrBGLlj9/95PPa2DuUoslKgf8HvDs4QjhhSk5v1gDlkCJlfLJqI4JBeZbAO3IjO4WmCT77V4wHrR0OalHHfFuBtrfqmnyIXTMzBwaVTJTKl8qgOrkY9Vs82GyA7OPXyy7rf5DzYftvMTvjkhXCPfCU+hlOb092qG+9Yc2ppugxeFETl2PYhsXyCW9fZzWc6zj66XQYPwukNsbuTsEc2VGsnmhW2o7ZBvV3p5my8+1904F1mFyw/KnIFs/sAYJeLSWF5WQZrQVHCZUJFJkdlK2DYrHy75HCvQORSFyGa0UPmdqFbFvcwHM4k/g1TmC8uFmGUDYHbnAxQWDM4xflaFr0EJy8IHXAYn923BW5zq61HNlCgMXYhkxk1bvc5KcrMA+a1r3CuO1o2qthes+4Fe6lMJWrdko0zp99Jy4Kj37NGqUdWUCsVb3MEd90RZDVS2ZdMnbTvesqhr9IZeds+PvU+OZ0CoWbiwiuzFy8dQ+aPD9bzK+Pn4OLcDvY9uoJb3wY6QY3KYI6TL4rsW3MuBu9ayUvsDZ72ggbocu7/wHTe/UP/oyUtrErY6wyZTxTVSqjfUH+7KP9xb/88AUev/A9z3PjcoOqF5C6A6+axidFP/75qoF//oYOIfvV7xh4SQR6+esO9GD3zzvIw/Dn/+Hz/9bCOtzFieJcJi3DSA/iakpIAC+VriAslqxSHlY87IUTSZDo9GQ5IcxdMxP2LREEZ8yqfseDKATC+4GjjVUs+VHpTUKBCZ5atdeL3eNdnfKrufkZ/BZW3k000yuwiuH8HbsfddC9QvuwOambxeO/8jd9kLXVlPi2wUt3pyy7Vevac6Y5TBvCh1NCGt6HG/M1T2rs2ufEbvU5NxSEdUYGtHXHm0W+C9D6rfrhddNW3rRUf+zxfd67yyEJCQqBDqWqjzUlVU3lEmS10NKDyX3VoHvOBufgBgv5QZKBEAAA==</values>
+    </sys_hub_action_instance_v2>
+    <sys_hub_alias_mapping action="delete_multiple" query="source_id=e89fbe6fa89343107f44321b8bcb56a5"/>
+    <sys_hub_action_instance_v2 action="INSERT_OR_UPDATE">
+        <action_type display_value="Create Record">2de05916c31332002841b63b12d3aee1</action_type>
+        <action_type_parent display_value="Create Record">02f0b88cc3c632002841b63b12d3aeff</action_type_parent>
+        <attributes/>
+        <comment/>
+        <compiled_snapshot>2de05916c31332002841b63b12d3aee1</compiled_snapshot>
+        <display_text/>
+        <flow display_value="F10- Placement Intervention">d49fbe6fa89343107f44321b8bcb565e</flow>
+        <generation_source/>
+        <order>23</order>
+        <parent_ui_id>73e61bfd-6dc1-44aa-83ab-19e4e5bc406d</parent_ui_id>
+        <sys_class_name>sys_hub_action_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 13:32:05</sys_created_on>
+        <sys_id>e49fbe6fa89343107f44321b8bcb56a6</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:32:05</sys_updated_on>
+        <ui_id>c3f7f89a-5cef-41a8-aefc-4572277da4df</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/+1W31PjNhD+VzSePiSQGDsJ4dcTw5WWmbvQHpQXAh7ZWidqZdknyUDK5X/vSrKT8KOUdvpyM+eHxFrtfvq+1Wrl68eAs+AwGDOIDg7icTaMh8NBFA32R3E6HqbxgA0pxGnQCyQtAD3vqKhB49i9oIFLA+oOpOGlTMyigmkdRUP2+Ag0h13Iov5wvDfojwYR66d7u9DPhgM6gj3Yy/bHIZX6HlSoQNfCJCCgQCQd1skL2OXyVgHVpWzxT3BogJFSkd8qZl+TOMxqpTAo1H9wIZIZrRJdFwVVCxeelQXiM/RMFx6G8lujKJdczlrcvSGM4zRn/THL4v5oRGl/f0jTfnwAI9hNs1E0ZiE3UCBkCnmpINEZ/r6LF84xLkFrH4MQNEehmwi32lBTaz/Y4GztyiQW8c2lVC2TtWtieGGXQZhKgMvmGuEW8hwywzHPK0rNzJP8c+atmBSdKV4Zx6ZmOP2+3fC+yyXWDeO6EnRx9b18vpfPfyifbM4FypLB4fVNL6iowraESwWHj8+m3tvXBE1BoOspB8H0K43OVg+OccewbjEjvvF5+8cm+LKZJFfNZKmYJRX3AngwLv/BYU6Fhl5QUIkCS7UIDo2q0WA39VyKxcpjjtlD0MD6Pmj+Jy4fjyP3WO8cUGQG3mM1TJqD5c35B2roBeJnplaNazYveYaSXHoY5BTPzMmmzTucV3bTfIihqWijS1EXcuKTE6wA2nOMllojCaisWsvfi8sv5uX955bkKZcuL41QUWZUrEbUGMXT2lg6j0FzmJOCVhUer6RS5R13wUilCGcCB2EuyntcU/OZDGlmeYeYWxqeov2DM19Rxa2ITwiDwcteoBf6RFCt11Iwh8mX2jLxwhoJicuCS0HiisIGu/o9dkXfSvQ2y/lZ1VvTWwHBztZUbm0dZ7gDmljOO8dOBLEiSK1RNzFzIDlLnKVMf8fzFpILB0CKWhuiAHdYEkpcXYbEIp7b6iOyLlL845qUea7BkHRBtmPCJflRKTxoP2MhCrvEBfjUOTJ3lAsrmZSuDjRp6orUFRKrsNU6WtMgnAbEdZ+Wng2HB2obxSGyUUTPS2VwGzLij3nrGOI+z2bYt1cH3DrafXS6cNUji9UoW6FY485UWuSZaiEl3JOfbC18xlanWMeaB3sPiZZZkiGXWg/HUYICMl9Om1vkfbuIO1MhZWxSmkktxK81qEUD9EofW0V8cX524EnhYZ34lDfcIjd1j20JSAcDJPaCTrdLHqeS4GNjOGudcX4G/ji9uTb5+pX4V/97tAYrqMnmLR5noRt3dm7PJped6ZRtd3/Y8WxtAM9Jxzms+LQwsoXA7qrhTBrvdx3f9EgcdY/W3haj8Ya1/CeA9nmRGLmBsfSv+Le01JpN99qQuH8h26RJCvbAtWkNvE3ibjfUAvtXpz/sHgXL5bLXftzGEO3+7SUAo3XP3zjr6w/c99XSyy8b8kvrSM6eOv7LO+yf6bd32KVr16/Laa+x57aPm7Fk4iea6yv6v66v/W/p4mpkfPM318v7ytFd3vwF4p/C4/YNAAA=</values>
+    </sys_hub_action_instance_v2>
+    <sys_hub_alias_mapping action="delete_multiple" query="source_id=e49fbe6fa89343107f44321b8bcb56a6"/>
+    <sys_hub_sub_flow_instance_v2 action="delete_multiple" query="flow=d49fbe6fa89343107f44321b8bcb565e"/>
+    <sys_hub_flow_logic_instance_v2 action="delete_multiple" query="flow=d49fbe6fa89343107f44321b8bcb565e^sys_idNOT INd09fbe6fa89343107f44321b8bcb568e,d89fbe6fa89343107f44321b8bcb568f,5c9fbe6fa89343107f44321b8bcb5690,d89fbe6fa89343107f44321b8bcb5692,509fbe6fa89343107f44321b8bcb5694,909fbe6fa89343107f44321b8bcb5695,e09fbe6fa89343107f44321b8bcb5696,249fbe6fa89343107f44321b8bcb5697,649fbe6fa89343107f44321b8bcb5698,a49fbe6fa89343107f44321b8bcb5699,e49fbe6fa89343107f44321b8bcb569a,289fbe6fa89343107f44321b8bcb569b,689fbe6fa89343107f44321b8bcb569c,a89fbe6fa89343107f44321b8bcb569d,e89fbe6fa89343107f44321b8bcb569e,2c9fbe6fa89343107f44321b8bcb569f,6c9fbe6fa89343107f44321b8bcb56a0,ac9fbe6fa89343107f44321b8bcb56a1,ec9fbe6fa89343107f44321b8bcb56a2,209fbe6fa89343107f44321b8bcb56a4"/>
+    <sys_hub_flow_logic_instance_v2 action="INSERT_OR_UPDATE">
+        <attributes/>
+        <block display_value="">290071e7a8d703107f44321b8bcb5659</block>
+        <comment/>
+        <connected_to/>
+        <decision_table/>
+        <display_text/>
+        <flow display_value="F10- Placement Intervention">d49fbe6fa89343107f44321b8bcb565e</flow>
+        <flow_variables_assigned/>
+        <generation_source/>
+        <logic_definition display_value="If">af4e1945c3e232002841b63b12d3ae3e</logic_definition>
+        <order>2</order>
+        <outputs_assigned/>
+        <parent_ui_id/>
+        <sys_class_name>sys_hub_flow_logic_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 13:32:04</sys_created_on>
+        <sys_id>d09fbe6fa89343107f44321b8bcb568e</sys_id>
+        <sys_mod_count>1</sys_mod_count>
+        <sys_scope/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:32:04</sys_updated_on>
+        <ui_id>32164889-5007-4b14-a0b0-cfd04a06b0bb</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/+1VXW/aMBT9K5OfATmBUMpbRVVp0rZKa9WXrYoujg3WHDvzB5RF/Pdd5wNQQdqq7nFv8fG91+ecHCc1McFXwbtHc+OcXGky//Y8IFJHDJ9roqHkZE6Y0YX00mgyIBtQIWJ1PYOUiYzRIRfZbDiZ8nQICUyGKYgZvaKTKy74aGGC9vv990DpmFPsL6SrFOye3jmGraUqLO8oV2CRqeeWzOtXW7LAU64hE1lCMzZOp+OU0nQ2SZbT8TJJizHwyRQHKlhyhaWLE60X5PtdFSHnrdSrbv2pa33oQWOLSCWlA8JfPNcFRxIClOMDUoIuwBu7I3NvAwKWQ3Gv1e5QsZba4zQSa1+c/MXjJEpjpeCoi/F297DMO09bWNyCB6QSmA+2K2VrIxl3rSMFFxCUX5xibcF91ahsWjwsVd9tVCj1l9YMchjQv0JEgkMSvIpKI/dOiHhYm+3XnuWd1I0r3aYyDNRhBR69WwYf+dSEK17ioLyEqkJH88qajWyakUs5WilcjIQyWzw05nYELBIfobEwukP8toGfwMqo4jOOwWbMgssds7LqtTWHk/2AuJ1bKHDuqBHNzX+GyLBV3GnLW3tiSzPoBg/e8E7GfnB+Y/IGOF6b8xvw5jALCiK5ZsnlMMP4Upg/tBk9j3TP7y25Tv6Q6w75q2Bn2f9cvzvXkeYSnGR58+3GcfHT8g+D/RwD3B56MJtJh9weI/ax/2PEjR0mSrJTaGvsj6jqiO1/A5YxGSd7BgAA</values>
+        <workflow_reference/>
+    </sys_hub_flow_logic_instance_v2>
+    <sys_hub_flow_logic_instance_v2 action="INSERT_OR_UPDATE">
+        <attributes/>
+        <block display_value="">4430b5e7a8d703107f44321b8bcb56aa</block>
+        <comment/>
+        <connected_to>32164889-5007-4b14-a0b0-cfd04a06b0bb</connected_to>
+        <decision_table/>
+        <display_text/>
+        <flow display_value="F10- Placement Intervention">d49fbe6fa89343107f44321b8bcb565e</flow>
+        <flow_variables_assigned/>
+        <generation_source/>
+        <logic_definition display_value="Else">1f781bf3c32232002841b63b12d3aee6</logic_definition>
+        <order>3</order>
+        <outputs_assigned/>
+        <parent_ui_id/>
+        <sys_class_name>sys_hub_flow_logic_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 13:32:04</sys_created_on>
+        <sys_id>d89fbe6fa89343107f44321b8bcb568f</sys_id>
+        <sys_mod_count>1</sys_mod_count>
+        <sys_scope/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:32:04</sys_updated_on>
+        <ui_id>f7cd1d34-9ce2-42f8-8858-674a3571299b</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/6tWyi8tKSgtKQ7JdywuzkzPU7KKjtVRyswDiUHYZYlFmYlJOalQbkpqcmZxZn5eCEjME0ldSmVeYm5mMrJQeX5RdlpOfjlCrBYAD1ouqHEAAAA=</values>
+        <workflow_reference/>
+    </sys_hub_flow_logic_instance_v2>
+    <sys_hub_flow_logic_instance_v2 action="INSERT_OR_UPDATE">
+        <attributes/>
+        <block display_value="">9b30b5e7a8d703107f44321b8bcb56d6</block>
+        <comment/>
+        <connected_to/>
+        <decision_table display_value="Campus360 - Intervention Recommendation">ddc925eba89703107f44321b8bcb5609</decision_table>
+        <display_text/>
+        <flow display_value="F10- Placement Intervention">d49fbe6fa89343107f44321b8bcb565e</flow>
+        <flow_variables_assigned/>
+        <generation_source/>
+        <logic_definition display_value="Make a decision">578e90270b2313009002cab937673a7d</logic_definition>
+        <order>4</order>
+        <outputs_assigned/>
+        <parent_ui_id>f7cd1d34-9ce2-42f8-8858-674a3571299b</parent_ui_id>
+        <sys_class_name>sys_hub_flow_logic_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 13:32:04</sys_created_on>
+        <sys_id>5c9fbe6fa89343107f44321b8bcb5690</sys_id>
+        <sys_mod_count>1</sys_mod_count>
+        <sys_scope/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:32:04</sys_updated_on>
+        <ui_id>eafe5ec0-3672-420d-b75e-c32a4e7e7c86</ui_id>
+        <updation_source/>
+        <values>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</values>
+        <workflow_reference/>
+    </sys_hub_flow_logic_instance_v2>
+    <sys_hub_flow_logic_instance_v2 action="INSERT_OR_UPDATE">
+        <attributes/>
+        <block display_value="">54692ea3a81343107f44321b8bcb562f</block>
+        <comment/>
+        <connected_to/>
+        <decision_table/>
+        <display_text/>
+        <flow display_value="F10- Placement Intervention">d49fbe6fa89343107f44321b8bcb565e</flow>
+        <flow_variables_assigned/>
+        <generation_source/>
+        <logic_definition display_value="Decision">b1f542d673331300612c273ffff6a7c7</logic_definition>
+        <order>5</order>
+        <outputs_assigned/>
+        <parent_ui_id>eafe5ec0-3672-420d-b75e-c32a4e7e7c86</parent_ui_id>
+        <sys_class_name>sys_hub_flow_logic_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 13:32:04</sys_created_on>
+        <sys_id>d89fbe6fa89343107f44321b8bcb5692</sys_id>
+        <sys_mod_count>1</sys_mod_count>
+        <sys_scope/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:32:04</sys_updated_on>
+        <ui_id>ea71d407-7a85-4bfc-b02d-ddfec69eb217</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/91Uy27bMBD8lYJnwdDLkuObESNAgLQBmiCXIjBWFGkToUiVpOy4hv+9S4uWXBe95dLoxB1qd2dGAx2I7lzbOfusF9aKtSLzH68REcpjeD4QBQ0jcyKhYpJEZAuy8zUea2FbCfuXEaEbIWvDwpAWDPY6Zsj8cHUlamyI4eaGxwUrszxOszgukpSmZcbxKaAsExzYb52Th7D9iozbt760zgi1DvVDaHk6g9rUnkISxxFh746pmuF2DtKyiDSganDa7AfEMKgflRyBjVCul9fAuxW/cGM6nfoXOUNBNGgfylXwpYf5Ehwgl466zgw2aUGZ7a2oGYdOuttLrH/hsXVCq77FQSXP3Vp2jfrWO0GGARefobNIgrVeqacedPCnjd59P7O8E+pkS7iUmoIcKnBoXtU5z+dAmGQNDlo10LZo6ao1eitOzcilmawlFhMu9Q6X+ghNgHriEzQWJneIL0/wCxjhVXzFMdh8jIjd21sJ1o5a0MTVz84z6ZUFDaveBt9CjWjdAhdsWaB7jIaQgrI7HD2mNImrGaRFBrMky7MkLnmeZ2lSzSpaTYucf0CKy5jxbDadlZjgv1Nc5BcpXpzpXdMNOa417U5O4+A/w7wMN1/ul2Oi0w9MdJb+R4HG5Z8hz70F/wj1qw9xv2DwlQqLPJ49dn/+QfuLPeZJ0Etop82bVzBix999/Z7l6gUAAA==</values>
+        <workflow_reference/>
+    </sys_hub_flow_logic_instance_v2>
+    <sys_hub_flow_logic_instance_v2 action="INSERT_OR_UPDATE">
+        <attributes/>
+        <block display_value="">d8692ea3a81343107f44321b8bcb5630</block>
+        <comment/>
+        <connected_to/>
+        <decision_table/>
+        <display_text/>
+        <flow display_value="F10- Placement Intervention">d49fbe6fa89343107f44321b8bcb565e</flow>
+        <flow_variables_assigned/>
+        <generation_source/>
+        <logic_definition display_value="Decision">b1f542d673331300612c273ffff6a7c7</logic_definition>
+        <order>6</order>
+        <outputs_assigned/>
+        <parent_ui_id>eafe5ec0-3672-420d-b75e-c32a4e7e7c86</parent_ui_id>
+        <sys_class_name>sys_hub_flow_logic_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 13:32:04</sys_created_on>
+        <sys_id>509fbe6fa89343107f44321b8bcb5694</sys_id>
+        <sys_mod_count>1</sys_mod_count>
+        <sys_scope/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:32:04</sys_updated_on>
+        <ui_id>b051d8a1-e95a-4526-b959-9799d332c32f</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/91UTWvjMBD9K4vOJvgrdppbaCgUulvYll6WEsaynIjKklcfSbMh/31HsWKHlL31svVJ8+SZee/54QNRznbOmme1MIavJZn/eo0Ilx7D84FIaBmZEwEVEyQiWxDO13isuekE7F9GhG64qDULQzrQ2GuZJvPD1RWvsSGGm5smLliZ5XGaxXGRpDQtswafAsoywYH91jl5CNuvyNh950tjNZfrUD+ElqczqHTtKSRxHBH2bpmsGW5vQBgWkRZkDVbp/YBoBvWjFCOw4dL28lp4N/wPbkynU/9iw1AQDdqHchV86eFmCRaQi6PW6cEmxSkzvRU1a8AJe3uJ9S88dpYr2bdYqMS5WwnXyh+9E2QYcPEZnEESrPNKPfWgo3naqN3PM8s7Lk+2hEuhKIihAovmVc56PgfCBGtx0KqFrkNLV51WW35qRi7tZC2wmDRC7XCpj9AEqCc+QWNhcof48gS/gOZexXccg83HiJi9uRVgzKgFTVz9dp5JryxoWPU2+BaqeWcXuGDLAt1jNIQUpNnh6DGlSV7NIC0ymCVZniVx2eR5libVrKLVtJjWn5DiMmZNNpvOSkzwxxQX+UWKF2d613RDjmtF3clpXl+FeRluvt0vx0Snn5joLP2PAo3Lv0Keewv+EepXH+J+weAr5QZ5PHvs/vyD9hd7zBOnl9BO6TevYMSOfwGcLUEF6gUAAA==</values>
+        <workflow_reference/>
+    </sys_hub_flow_logic_instance_v2>
+    <sys_hub_flow_logic_instance_v2 action="INSERT_OR_UPDATE">
+        <attributes/>
+        <block display_value="">d8692ea3a81343107f44321b8bcb5631</block>
+        <comment/>
+        <connected_to/>
+        <decision_table/>
+        <display_text/>
+        <flow display_value="F10- Placement Intervention">d49fbe6fa89343107f44321b8bcb565e</flow>
+        <flow_variables_assigned/>
+        <generation_source/>
+        <logic_definition display_value="Decision">b1f542d673331300612c273ffff6a7c7</logic_definition>
+        <order>7</order>
+        <outputs_assigned/>
+        <parent_ui_id>eafe5ec0-3672-420d-b75e-c32a4e7e7c86</parent_ui_id>
+        <sys_class_name>sys_hub_flow_logic_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 13:32:04</sys_created_on>
+        <sys_id>909fbe6fa89343107f44321b8bcb5695</sys_id>
+        <sys_mod_count>1</sys_mod_count>
+        <sys_scope/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:32:04</sys_updated_on>
+        <ui_id>7e4f236d-1f06-4af8-b090-04b23c6d62ae</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/91Uy27bMBD8lYJnwdDLkuObESNAgLQBmiCXIjBWFGUToUiVpOy4hv+9S5OWXBe95dLoxB1qd2dGAx2I6m3XW/OsFsbwtSTzH68R4dJheD4QCS0jcyKgYoJEZAuidzUea246AfuXEaEbLmrNwpAONPZapsn8cHXFa2yI4eamiQtWZnmcZnFcJClNy6zBp4CyTHCg3zonD2H7FRm771xprOZyHeqH0PJ0BpWuHYUkjiPC3i2TNcPtDQjDItKCrMEqvR8QzaB+lGIENlxaL6+Fd8N/4cZ0OnUvNgwF0aB9KFfBFw83S7CAXHpqez3YpDhlxltRswZ6YW8vMf/CY2e5kr7FQiXO3Ur0rfzmnSDDgIvP0BskwTqn1FEPOpqnjdp9P7O84/JkS7gUioIYKrBoXtVbx+dAmGAtDlq10HVo6arTastPzcilnawFFpNGqB0udRGaAHXEJ2gsTO4QX57gF9DcqfiKY7D5GBGzN7cCjBm1oImrn71j4pUFDStvg2uhmnd2gQu2LNA9RkNIQZodjh5TmuTVDNIig1mS5VkSl02eZ2lSzSpaTYuCfkCKy5g12Ww6KzHBf6e4yC9SvDjTu6Ybclwr2p+cxsF/hnkZbr7cL8dEpx+Y6Cz9jwKNyz9Dnr0F/wj1qwuxXzD4SrlBHs8Ouz//oN3FHvPE6SW0U/rNKRix428Gsiod6gUAAA==</values>
+        <workflow_reference/>
+    </sys_hub_flow_logic_instance_v2>
+    <sys_hub_flow_logic_instance_v2 action="INSERT_OR_UPDATE">
+        <attributes/>
+        <block display_value="">e8692ea3a81343107f44321b8bcb5632</block>
+        <comment/>
+        <connected_to/>
+        <decision_table/>
+        <display_text/>
+        <flow display_value="F10- Placement Intervention">d49fbe6fa89343107f44321b8bcb565e</flow>
+        <flow_variables_assigned/>
+        <generation_source/>
+        <logic_definition display_value="Decision">b1f542d673331300612c273ffff6a7c7</logic_definition>
+        <order>8</order>
+        <outputs_assigned/>
+        <parent_ui_id>eafe5ec0-3672-420d-b75e-c32a4e7e7c86</parent_ui_id>
+        <sys_class_name>sys_hub_flow_logic_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 13:32:04</sys_created_on>
+        <sys_id>e09fbe6fa89343107f44321b8bcb5696</sys_id>
+        <sys_mod_count>1</sys_mod_count>
+        <sys_scope/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:32:04</sys_updated_on>
+        <ui_id>a02b5752-5e4d-46e0-af25-d13253a6db53</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/91Uy27bMBD8lYJnwdDDlmzfjBgBAqQN0AS5FIGxoiibKEWqJGXHNfzvXZqU5LroLZdWJ+5QuzszGuhEVGfbzpoXtTKGbyVZfnuLCJcOw/OJSGgYWRIBJRMkInsQnavxWHHTCji+jgjdcVFpFoa0oLHXMk2Wp5srXmFDDItFHeesyKZxmsVxnqQ0LbIanxyKIsGBfuuSPIbtN2TssXWlsZrLbagfQ8tzDypdOQpJHEeEvVsmK4bbaxCGRaQBWYFV+jggmkH1JMUI7Li0Xl4D74b/xI3pbOZerBkKokH7UG6CLx6u12ABuXTUdnqwSXHKjLeiYjV0wt5dY/6Fp9ZyJX2LhVL03Up0jfzinSDDgKvP0BkkwVqn1FEPOurnnTp87Vnec3mxJVwKRUEMFVg0r+ys43MiTLAGB20aaFu0dNNqteeXZuTSTLYCi0kt1AGXughNgDriEzQWJveIry/wK2juVHzGMdh8jog5mjsBxoxa0MTNj84x8cqCho23wbVQzVu7wgV7FuieoyGkIM0BR48pXcTlHNI8g3mSTbMkLurpNEuTcl7ScpbP8g9IcRGzOpvP5gUm+M8U59OrFK96erd0Q44rRbuL0zj49zCvw82nh/WY6PQDE52l/1Cgcfn/kGdvwV9C/eZC7BcMvlJukMeLwx76H7S7OGKeOL2GDkp/dwpG7PwLsGs6Y+oFAAA=</values>
+        <workflow_reference/>
+    </sys_hub_flow_logic_instance_v2>
+    <sys_hub_flow_logic_instance_v2 action="INSERT_OR_UPDATE">
+        <attributes/>
+        <block display_value="">e8692ea3a81343107f44321b8bcb5633</block>
+        <comment/>
+        <connected_to/>
+        <decision_table/>
+        <display_text/>
+        <flow display_value="F10- Placement Intervention">d49fbe6fa89343107f44321b8bcb565e</flow>
+        <flow_variables_assigned/>
+        <generation_source/>
+        <logic_definition display_value="Decision">b1f542d673331300612c273ffff6a7c7</logic_definition>
+        <order>9</order>
+        <outputs_assigned/>
+        <parent_ui_id>eafe5ec0-3672-420d-b75e-c32a4e7e7c86</parent_ui_id>
+        <sys_class_name>sys_hub_flow_logic_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 13:32:04</sys_created_on>
+        <sys_id>249fbe6fa89343107f44321b8bcb5697</sys_id>
+        <sys_mod_count>1</sys_mod_count>
+        <sys_scope/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:32:04</sys_updated_on>
+        <ui_id>d6b4a9ba-6a53-4518-b6ed-841dc7669e27</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/91Uy27bMBD8lYJnwdDLkuObESNAgLQBmiCXIjBWFGUToUiVpOy4hv+9S5OWXBe95dLoxB1qd2dGAx2I6m3XW/OsFsbwtSTzH68R4dJheD4QCS0jcyKgYoJEZAuidzUea246AfuXEaEbLmrNwpAONPZapsn8cHXFa2yI4eamiQtWZnmcZnFcJClNy6zBp4CyTHCg3zonD2H7FRm771xprOZyHeqH0PJ0BpWuHYUkjiPC3i2TNcPtDQjDItKCrMEqvR8QzaB+lGIENlxaL6+Fd8N/4cZ0OnUvNgwF0aB9KFfBFw83S7CAXHpqez3YpDhlxltRswZ6YW8vMf/CY2e5kr7FQiXO3Ur0rfzmnSDDgIvP0BskwTqn1FEPOpqnjdp9P7O84/JkS7gUioIYKrBoXtVbx+dAmGAtDlq10HVo6arTastPzcilnawFFpNGqB0udRGaAHXEJ2gsTO4QX57gF9DcqfiKY7D5GBGzN7cCjBm1oImrn71j4pUFDStvg2uhmnd2gQu2LNA9RkNIQZodjh5TOs2rGaRFBrMky7MkLps8z9KkmlW0mhZ5/gEpLmPWZLPprMQE/53iIr9I8eJM75puyHGtaH9yGgf/GeZluPlyvxwTnX5gorP0Pwo0Lv8MefYW/CPUry7EfsHgK+UGeTw77P78g3YXe8wTp5fQTuk3p2DEjr8BKVpuYuoFAAA=</values>
+        <workflow_reference/>
+    </sys_hub_flow_logic_instance_v2>
+    <sys_hub_flow_logic_instance_v2 action="INSERT_OR_UPDATE">
+        <attributes/>
+        <block display_value="">e8692ea3a81343107f44321b8bcb5634</block>
+        <comment/>
+        <connected_to/>
+        <decision_table/>
+        <display_text/>
+        <flow display_value="F10- Placement Intervention">d49fbe6fa89343107f44321b8bcb565e</flow>
+        <flow_variables_assigned/>
+        <generation_source/>
+        <logic_definition display_value="Decision">b1f542d673331300612c273ffff6a7c7</logic_definition>
+        <order>10</order>
+        <outputs_assigned/>
+        <parent_ui_id>eafe5ec0-3672-420d-b75e-c32a4e7e7c86</parent_ui_id>
+        <sys_class_name>sys_hub_flow_logic_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 13:32:04</sys_created_on>
+        <sys_id>649fbe6fa89343107f44321b8bcb5698</sys_id>
+        <sys_mod_count>1</sys_mod_count>
+        <sys_scope/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:32:04</sys_updated_on>
+        <ui_id>9793b7bd-e999-4b85-9f4e-88550c4bf81f</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/91Uy27bMBD8lYJnQdDLku2bESNAgLQBmiCXIjBWFGUTpUiVpOy4hv+9S4uSXBe95dLqxB1qd2dGA52I6mzbWfOiVsbwrSTLb28B4dJheD4RCQ0jSyKgZIIEZA+iczUeK25aAcfXCaE7LirN/JAWNPZapsnydHPFK2yIYLGoo5wVaRYlaRTlcUKTIq3xyaEoYhzYb12SR7/9how9tq40VnO59fWjb3keQKUrRyGOooCwd8tkxXB7DcKwgDQgK7BKH0dEM6iepJiAHZe2l9fAu+E/cWMym7kXa4aCqNc+lhvvSw/Xa7CAXDpqOz3apDhlpreiYjV0wt5dY/0LT63lSvYtFkoxdCvRNfJL7wQZB1x9hs4gCdY6pY6611E/79Th68DynsuLLf5SKApirMCieWVnHZ8TYYI1OGjTQNuipZtWqz2/NCOXJtwKLMJaqAMudREKgTriIRoL4T3i6wv8Cpo7FZ9xDDafA2KO5k6AMZMWNHHzo3NMemVew6a3wbVQzVu7wgV75umegzGkIM0BR08pXWTlHJI8hXmcZmkcFXWWpUlczktazvI8+4AUFxGr0/lsXmCC/0zxZcWQ4tVA75auz3GlaHdxGgf/Hua1v/n0sJ4SnXxgotPkHwo0Lv8f8txb8JdQv7kQ9wtGXyk3yOPFYQ/DD9pdHDFPnF5DB6W/OwUTdv4FLXj6J+oFAAA=</values>
+        <workflow_reference/>
+    </sys_hub_flow_logic_instance_v2>
+    <sys_hub_flow_logic_instance_v2 action="INSERT_OR_UPDATE">
+        <attributes/>
+        <block display_value="">e8692ea3a81343107f44321b8bcb5635</block>
+        <comment/>
+        <connected_to/>
+        <decision_table/>
+        <display_text/>
+        <flow display_value="F10- Placement Intervention">d49fbe6fa89343107f44321b8bcb565e</flow>
+        <flow_variables_assigned/>
+        <generation_source/>
+        <logic_definition display_value="Decision">b1f542d673331300612c273ffff6a7c7</logic_definition>
+        <order>11</order>
+        <outputs_assigned/>
+        <parent_ui_id>eafe5ec0-3672-420d-b75e-c32a4e7e7c86</parent_ui_id>
+        <sys_class_name>sys_hub_flow_logic_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 13:32:04</sys_created_on>
+        <sys_id>a49fbe6fa89343107f44321b8bcb5699</sys_id>
+        <sys_mod_count>1</sys_mod_count>
+        <sys_scope/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:32:04</sys_updated_on>
+        <ui_id>559fb21e-dfc2-4e6b-aab1-de99a4a493a2</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/91Uy27bMBD8lYJnwdDLku2bESNAgLQBmiCXIjBWFGUTpUiVpOy4hv+9S5OWXBe95dLqxB1qd2dGAx2J6m3XW/OilsbwjSSLb28R4dJheD4SCS0jCyKgYoJEZAeidzUea246AYfXEaFbLmrNwpAONPZapsnieHPFa2yIYT5v4oKVWR6nWRwXSUrTMmvwKaAsExzoty7IY9h+Q8YeOlcaq7nchPoxtDxfQKVrRyGJ44iwd8tkzXB7A8KwiLQga7BKHwZEM6ifpBiBLZfWy2vh3fCfuDGdTt2LDUNBNGgfynXwxcPNCiwgl57aXg82KU6Z8VbUrIFe2LtrzL/w1FmupG+xUIlLtxJ9K794J8gw4Ooz9AZJsM4pddSDjuZ5q/ZfLyzvuTzbEi6FoiCGCiyaV/XW8TkSJliLg9YtdB1auu602vFzM3JpJxuBxaQRao9LXYQmQB3xCRoLk3vEV2f4FTR3Kj7jGGw+RcQczJ0AY0YtaOL6R++YeGVBw9rb4Fqo5p1d4oIdC3RP0RBSkGaPo8eUzmk1g7TIYJZkeZbEZZPnWZpUs4pW0yIvPyDFZcyabDadlZjgP1Nc5FcpXl7o3dINOa4V7c9O4+Dfw7wKN58eVmOi0w9MdJb+Q4HG5f9Dnr0Ffwn1mwuxXzD4SrlBHi8Oe7j8oN3FAfPE6TW0V/q7UzBip18uBJdk6gUAAA==</values>
+        <workflow_reference/>
+    </sys_hub_flow_logic_instance_v2>
+    <sys_hub_flow_logic_instance_v2 action="INSERT_OR_UPDATE">
+        <attributes/>
+        <block display_value="">e8692ea3a81343107f44321b8bcb5636</block>
+        <comment/>
+        <connected_to/>
+        <decision_table/>
+        <display_text/>
+        <flow display_value="F10- Placement Intervention">d49fbe6fa89343107f44321b8bcb565e</flow>
+        <flow_variables_assigned/>
+        <generation_source/>
+        <logic_definition display_value="Decision">b1f542d673331300612c273ffff6a7c7</logic_definition>
+        <order>12</order>
+        <outputs_assigned/>
+        <parent_ui_id>eafe5ec0-3672-420d-b75e-c32a4e7e7c86</parent_ui_id>
+        <sys_class_name>sys_hub_flow_logic_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 13:32:04</sys_created_on>
+        <sys_id>e49fbe6fa89343107f44321b8bcb569a</sys_id>
+        <sys_mod_count>1</sys_mod_count>
+        <sys_scope/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:32:04</sys_updated_on>
+        <ui_id>1e14ae75-19d8-4b53-a58c-fda4e2c8f7bc</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/91Uy27bMBD8lYJnwdDDlmzfjBgBAqQN0AS5FIGxoiibKEWqJGXHNfzvXZqU5LroLZdWJ+5QuzszGuhEVGfbzpoXtTKGbyVZfnuLCJcOw/OJSGgYWRIBJRMkInsQnavxWHHTCji+jgjdcVFpFoa0oLHXMk2Wp5srXmFDDItFHeesyKZxmsVxnqQ0LbIanxyKIsGBfuuSPIbtN2TssXWlsZrLbagfQ8tzDypdOQpJHEeEvVsmK4bbaxCGRaQBWYFV+jggmkH1JMUI7Li0Xl4D74b/xI3pbOZerBkKokH7UG6CLx6u12ABuXTUdnqwSXHKjLeiYjV0wt5dY/6Fp9ZyJX2LhVL03Up0jfzinSDDgKvP0BkkwVqn1FEPOurnnTp87Vnec3mxJVwKRUEMFVg0r+ys43MiTLAGB20aaFu0dNNqteeXZuTSTLYCi0kt1AGXughNgDriEzQWJveIry/wK2juVHzGMdh8jog5mjsBxoxa0MTNj84x8cqCho23wbVQzVu7wgV7FuieoyGkIM0BR48phbicQ5pnME+yaZbERT2dZmlSzktazvLF7ANSXMSszuazeYEJ/jPF+fQqxaue3i3dkONK0e7iNA7+PczrcPPpYT0mOv3ARGfpPxRoXP4/5Nlb8JdQv7kQ+wWDr5Qb5PHisIf+B+0ujpgnTq+hg9LfnYIRO/8CGVA4S+oFAAA=</values>
+        <workflow_reference/>
+    </sys_hub_flow_logic_instance_v2>
+    <sys_hub_flow_logic_instance_v2 action="INSERT_OR_UPDATE">
+        <attributes/>
+        <block display_value="">e8692ea3a81343107f44321b8bcb5637</block>
+        <comment/>
+        <connected_to/>
+        <decision_table/>
+        <display_text/>
+        <flow display_value="F10- Placement Intervention">d49fbe6fa89343107f44321b8bcb565e</flow>
+        <flow_variables_assigned/>
+        <generation_source/>
+        <logic_definition display_value="Decision">b1f542d673331300612c273ffff6a7c7</logic_definition>
+        <order>13</order>
+        <outputs_assigned/>
+        <parent_ui_id>eafe5ec0-3672-420d-b75e-c32a4e7e7c86</parent_ui_id>
+        <sys_class_name>sys_hub_flow_logic_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 13:32:04</sys_created_on>
+        <sys_id>289fbe6fa89343107f44321b8bcb569b</sys_id>
+        <sys_mod_count>1</sys_mod_count>
+        <sys_scope/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:32:04</sys_updated_on>
+        <ui_id>7fb315e1-0d26-48aa-9c64-5487c26ae71e</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/91Uy27bMBD8lYJnwdDLkuObESNAgLQBmiCXIjBWFGUToUiVpOy4hv+9S5OWXBe95dLoxB1qd2dGAx2I6m3XW/OsFsbwtSTzH68R4dJheD4QCS0jcyKgYoJEZAuidzUea246AfuXEaEbLmrNwpAONPZapsn8cHXFa2yI4eamiQtWZnmcZnFcJClNy6zBp4CyTHCg3zonD2H7FRm771xprOZyHeqH0PJ0BpWuHYUkjiPC3i2TNcPtDQjDItKCrMEqvR8QzaB+lGIENlxaL6+Fd8N/4cZ0OnUvNgwF0aB9KFfBFw83S7CAXHpqez3YpDhlxltRswZ6YW8vMf/CY2e5kr7FQiXO3Ur0rfzmnSDDgIvP0BskwTqn1FEPOpqnjdp9P7O84/JkS7gUioIYKrBoXtVbx+dAmGAtDlq10HVo6arTastPzcilnawFFpNGqB0udRGaAHXEJ2gsTO4QX57gF9DcqfiKY7D5GBGzN7cCjBm1oImrn71j4pUFDStvg2uhmnd2gQu2LNA9RkNIQZodjh5TWufVDNIig1mS5VkSl02eZ2lSzSpaTYu8+oAUlzFrstl0VmKC/05xkV+keHGmd0035LhWtD85jYP/DPMy3Hy5X46JTj8w0Vn6HwUal3+GPHsL/hHqVxdiv2DwlXKDPJ4ddn/+QbuLPeaJ00top/SbUzBix9+NasfH6gUAAA==</values>
+        <workflow_reference/>
+    </sys_hub_flow_logic_instance_v2>
+    <sys_hub_flow_logic_instance_v2 action="INSERT_OR_UPDATE">
+        <attributes/>
+        <block display_value="">e8692ea3a81343107f44321b8bcb5638</block>
+        <comment/>
+        <connected_to/>
+        <decision_table/>
+        <display_text/>
+        <flow display_value="F10- Placement Intervention">d49fbe6fa89343107f44321b8bcb565e</flow>
+        <flow_variables_assigned/>
+        <generation_source/>
+        <logic_definition display_value="Decision">b1f542d673331300612c273ffff6a7c7</logic_definition>
+        <order>14</order>
+        <outputs_assigned/>
+        <parent_ui_id>eafe5ec0-3672-420d-b75e-c32a4e7e7c86</parent_ui_id>
+        <sys_class_name>sys_hub_flow_logic_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 13:32:04</sys_created_on>
+        <sys_id>689fbe6fa89343107f44321b8bcb569c</sys_id>
+        <sys_mod_count>1</sys_mod_count>
+        <sys_scope/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:32:04</sys_updated_on>
+        <ui_id>923c41dd-7d29-42e0-9c04-2506d83fab94</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/91Uy27bMBD8lYJnwdDDlmTfjBgBAqQN0AS5FIGxoiibKEWqJGXHNfzvXZq05LroLZdWJ+5QuzszGuhIVG+73poXtTSGbyRZfHuLCJcOw/ORSGgZWRABFRMkIjsQvavxWHPTCTi8jgjdclFrFoZ0oLHXMk0Wx5srXmNDDPN5E+esyKZxmsVxnqQ0LbIGnxyKIsGBfuuCPIbtN2TsoXOlsZrLTagfQ8vzBVS6dhSSOI4Ie7dM1gy3NyAMi0gLsgar9GFANIP6SYoR2HJpvbwW3g3/iRvT2cy92DAURIP2oVwHXzzcrMACcump7fVgk+KUGW9FzRrohb27xvwLT53lSvoWC5W4dCvRt/KLd4IMA64+Q2+QBOucUkc96Giet2r/9cLynsuzLeFSKApiqMCieVVvHZ8jYYK1OGjdQtehpetOqx0/NyOXdrIRWEwaofa41EVoAtQRn6CxMLlHfHWGX0Fzp+IzjsHmU0TMwdwJMGbUgiauf/SOiVcWNKy9Da6Fat7ZJS7YsUD3FA0hBWn2OHpMaV1WJaR5BmWSTbMkLprpNEuTqqxoNctn8w9IcRGzJitnZYEJ/jPF+fQqxcsLvVu6Ice1ov3ZaRz8e5hX4ebTw2pMdPqBic7SfyjQuPx/yLO34C+hfnMh9gsGXyk3yOPFYQ+XH7S7OGCeOL2G9kp/dwpG7PQLlPISXeoFAAA=</values>
+        <workflow_reference/>
+    </sys_hub_flow_logic_instance_v2>
+    <sys_hub_flow_logic_instance_v2 action="INSERT_OR_UPDATE">
+        <attributes/>
+        <block display_value="">e8692ea3a81343107f44321b8bcb5639</block>
+        <comment/>
+        <connected_to/>
+        <decision_table/>
+        <display_text/>
+        <flow display_value="F10- Placement Intervention">d49fbe6fa89343107f44321b8bcb565e</flow>
+        <flow_variables_assigned/>
+        <generation_source/>
+        <logic_definition display_value="Decision">b1f542d673331300612c273ffff6a7c7</logic_definition>
+        <order>15</order>
+        <outputs_assigned/>
+        <parent_ui_id>eafe5ec0-3672-420d-b75e-c32a4e7e7c86</parent_ui_id>
+        <sys_class_name>sys_hub_flow_logic_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 13:32:04</sys_created_on>
+        <sys_id>a89fbe6fa89343107f44321b8bcb569d</sys_id>
+        <sys_mod_count>1</sys_mod_count>
+        <sys_scope/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:32:04</sys_updated_on>
+        <ui_id>e6eb1eb5-c38d-4e72-b9c3-b93dbf4bb138</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/91Uy27bMBD8lYJnwdDDesQ3I0aAAGkDNEEuRWCsKMomSpEqH3ZcI//epUVLrovecml14g61uzOjgY5EOds7a57V0hi+kWTx7TUiXHoMz0cioWNkQQTUTJCI7EA4X+Ox4aYXcHiZELrlotEsDOlBY69lmiyOV1e8wYYYbm7auGBlNo/TLI6LJKVpmbX4FFCWCQ4cti7IQ9h+RcYeel8aq7nchPohtDydQaUbTyGJ44iwN8tkw3B7C8KwiHQgG7BKH0ZEM2gepZiALZd2kNfBm+E/cWOa5/7FlqEgGrSP5Tr4MsDtCiwgF0et06NNilNmBisa1oIT9vYSG1547C1XcmixUItztxKuk18GJ8g44OIzOIMkWO+VeupBR/u0VfuvZ5Z3XJ5sCZdCURBjBRbNq531fI6ECdbhoHUHfY+WrnutdvzUjFy62UZgMWuF2uNSH6EZUE98hsbC7A7x1Ql+Ac29is84BpvfI2IO5laAMZMWNHH9w3kmg7KgYT3Y4Fuo5r1d4oIdC3TfozGkIM0eR08pzau6grTIoEqyeZbEZTufZ2lSVzWt8yJPPyDFZczarMqrEhP8Z4qL+UWKl2d613RDjhtF3clpHPx7mFfh5tP9akp0+oGJztJ/KNC4/H/I82DBX0L96kM8LBh9pdwgj2eP3Z9/0P7igHni9BLaK/3dK5iw91837mA86gUAAA==</values>
+        <workflow_reference/>
+    </sys_hub_flow_logic_instance_v2>
+    <sys_hub_flow_logic_instance_v2 action="INSERT_OR_UPDATE">
+        <attributes/>
+        <block display_value="">e8692ea3a81343107f44321b8bcb563a</block>
+        <comment/>
+        <connected_to/>
+        <decision_table/>
+        <display_text/>
+        <flow display_value="F10- Placement Intervention">d49fbe6fa89343107f44321b8bcb565e</flow>
+        <flow_variables_assigned/>
+        <generation_source/>
+        <logic_definition display_value="Decision">b1f542d673331300612c273ffff6a7c7</logic_definition>
+        <order>16</order>
+        <outputs_assigned/>
+        <parent_ui_id>eafe5ec0-3672-420d-b75e-c32a4e7e7c86</parent_ui_id>
+        <sys_class_name>sys_hub_flow_logic_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 13:32:04</sys_created_on>
+        <sys_id>e89fbe6fa89343107f44321b8bcb569e</sys_id>
+        <sys_mod_count>1</sys_mod_count>
+        <sys_scope/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:32:05</sys_updated_on>
+        <ui_id>3129642b-67ac-443b-9ae6-906b73a0e258</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/91Uy27bMBD8lYJnwdDDlhzfjBgBAqQN0AS5FIGxokibKEWqJGXHNfLvXZq05LroLZdWJ+5QuzszGuhIdO+63tlnvbRWbBRZfHtNiFAew/ORKGgZWRAJNZMkITuQva/x2AjbSTi8jAjdCtkYFod0YLDXMUMWx6sr0WBDCjc3PC1ZVUzTvEjTMstpXhUcnxKqKsOBYeuCPMTtV2TcofOldUaoTawfYsvTGdSm8RSyNE0Ie3NMNQy3c5CWJaQF1YDT5jAghkHzqOQIbIVyQV4Lb1b8xI35bOZf5AwF0ah9KNfRlwDzFThALj11vRls0oIyG6xoGIdeuttLLLzw2DmhVWhxUMtzt5Z9q74EJ8gw4OIz9BZJsM4r9dSjDv601fuvZ5Z3Qp1siZdSU5BDBQ7Nq3vn+RwJk6zFQesWug4tXXdG78SpGbm0k43EYsKl3uNSH6EJUE98gsbC5A7x1Ql+ASO8is84BpvfE2IP9laCtaMWNHH9o/dMgrKoYR1s8C3UiM4tccGORbrvyRBSUHaPo8eUNrSeQ14WMM+KaZGlFZ9Oizyr5zWtZ2XBPyDFVcp4MZ/NK0zwnykupxcpXp7pXdONOW407U9O4+Dfw7yKN5/uV2Oi8w9MdJH/Q4HG5f9DnoMFfwn1qw9xWDD4SoVFHs8euz//oP3FAfMk6CW01+a7VzBi778A0cqQq+oFAAA=</values>
+        <workflow_reference/>
+    </sys_hub_flow_logic_instance_v2>
+    <sys_hub_flow_logic_instance_v2 action="INSERT_OR_UPDATE">
+        <attributes/>
+        <block display_value="">68692ea3a81343107f44321b8bcb5654</block>
+        <comment/>
+        <connected_to/>
+        <decision_table/>
+        <display_text/>
+        <flow display_value="F10- Placement Intervention">d49fbe6fa89343107f44321b8bcb565e</flow>
+        <flow_variables_assigned/>
+        <generation_source/>
+        <logic_definition display_value="Decision">b1f542d673331300612c273ffff6a7c7</logic_definition>
+        <order>17</order>
+        <outputs_assigned/>
+        <parent_ui_id>eafe5ec0-3672-420d-b75e-c32a4e7e7c86</parent_ui_id>
+        <sys_class_name>sys_hub_flow_logic_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 13:32:05</sys_created_on>
+        <sys_id>2c9fbe6fa89343107f44321b8bcb569f</sys_id>
+        <sys_mod_count>1</sys_mod_count>
+        <sys_scope/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:32:05</sys_updated_on>
+        <ui_id>20b3b8b4-2631-48a2-a1a1-bfcf8b27bcbc</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/91Uy27bMBD8lYJnwdDDlhzfjBgBAqQN0AS5FIGxoiibKEWqfNhxjfx7lyYtuS56y6XViTvU7s6MBjoS5WzvrHlWS2P4RpLFt9eEcOkxPB+JhI6RBRFQM0ESsgPhfI3HhptewOFlROiWi0azOKQHjb2WabI4Xl3xBhtSuLlp05JVxTTNizQts5zmVdHiU0JVZTgwbF2Qh7j9iow99L40VnO5ifVDbHk6g0o3nkKWpglhb5bJhuH2FoRhCelANmCVPgyIZtA8SjECWy5tkNfBm+E/cWM+m/kXW4aCaNQ+lOvoS4DbFVhALo5apwebFKfMBCsa1oIT9vYSCy889pYrGVos1OLcrYTr5JfgBBkGXHwGZ5AE671STz3qaJ+2av/1zPKOy5Mt8VIoCmKowKJ5tbOez5EwwToctO6g79HSda/Vjp+akUs32QgsJq1Qe1zqIzQB6olP0FiY3CG+OsEvoLlX8RnHYPN7QszB3AowZtSCJq5/OM8kKIsa1sEG30I17+0SF+xYpPueDCEFafY4ekxpQ+s55GUB86yYFllatdNpkWf1vKb1rCyrD0hxlbK2mM/mFSb4zxSX04sUL8/0runGHDeKupPTOPj3MK/izaf71Zjo/AMTXeT/UKBx+f+Q52DBX0L96kMcFgy+Um6Qx7PH7s8/aH9xwDxxegntlf7uFYzY+y9G6otn6gUAAA==</values>
+        <workflow_reference/>
+    </sys_hub_flow_logic_instance_v2>
+    <sys_hub_flow_logic_instance_v2 action="INSERT_OR_UPDATE">
+        <attributes/>
+        <block display_value="">68692ea3a81343107f44321b8bcb5655</block>
+        <comment/>
+        <connected_to/>
+        <decision_table/>
+        <display_text/>
+        <flow display_value="F10- Placement Intervention">d49fbe6fa89343107f44321b8bcb565e</flow>
+        <flow_variables_assigned/>
+        <generation_source/>
+        <logic_definition display_value="Decision">b1f542d673331300612c273ffff6a7c7</logic_definition>
+        <order>18</order>
+        <outputs_assigned/>
+        <parent_ui_id>eafe5ec0-3672-420d-b75e-c32a4e7e7c86</parent_ui_id>
+        <sys_class_name>sys_hub_flow_logic_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 13:32:05</sys_created_on>
+        <sys_id>6c9fbe6fa89343107f44321b8bcb56a0</sys_id>
+        <sys_mod_count>1</sys_mod_count>
+        <sys_scope/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:32:05</sys_updated_on>
+        <ui_id>37e1884d-7049-41e6-88f1-fce59351236e</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/91Uy27bMBD8lYJnwdDDlhzfjBgBAqQN0AS5FIGxoiibKEWqfNhxjfx7lyYtuS56y6XViTvU7s6MBjoS5WzvrHlWS2P4RpLFt9eEcOkxPB+JhI6RBRFQM0ESsgPhfI3HhptewOFlROiWi0azOKQHjb2WabI4Xl3xBhtSuLlp05JVxTTNizQts5zmVdHiU0JVZTgwbF2Qh7j9iow99L40VnO5ifVDbHk6g0o3nkKWpglhb5bJhuH2FoRhCelANmCVPgyIZtA8SjECWy5tkNfBm+E/cWM+m/kXW4aCaNQ+lOvoS4DbFVhALo5apwebFKfMBCsa1oIT9vYSCy889pYrGVos1OLcrYTr5JfgBBkGXHwGZ5AE671STz3qaJ+2av/1zPKOy5Mt8VIoCmKowKJ5tbOez5EwwToctO6g79HSda/Vjp+akUs32QgsJq1Qe1zqIzQB6olP0FiY3CG+OsEvoLlX8RnHYPN7QszB3AowZtSCJq5/OM8kKIsa1sEG30I17+0SF+xYpPueDCEFafY4ekzpjNZzyMsC5lkxLbK0aqfTIs/qeU3rWVmmH5DiKmVtMZ/NK0zwnykupxcpXp7pXdONOW4UdSencfDvYV7Fm0/3qzHR+Qcmusj/oUDj8v8hz8GCv4T61Yc4LBh8pdwgj2eP3Z9/0P7igHni9BLaK/3dKxix919ym3jP6gUAAA==</values>
+        <workflow_reference/>
+    </sys_hub_flow_logic_instance_v2>
+    <sys_hub_flow_logic_instance_v2 action="INSERT_OR_UPDATE">
+        <attributes/>
+        <block display_value="">a690f12ba8d703107f44321b8bcb56f2</block>
+        <comment/>
+        <connected_to/>
+        <decision_table/>
+        <display_text/>
+        <flow display_value="F10- Placement Intervention">d49fbe6fa89343107f44321b8bcb565e</flow>
+        <flow_variables_assigned/>
+        <generation_source/>
+        <logic_definition display_value="Decision">b1f542d673331300612c273ffff6a7c7</logic_definition>
+        <order>19</order>
+        <outputs_assigned/>
+        <parent_ui_id>eafe5ec0-3672-420d-b75e-c32a4e7e7c86</parent_ui_id>
+        <sys_class_name>sys_hub_flow_logic_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 13:32:05</sys_created_on>
+        <sys_id>ac9fbe6fa89343107f44321b8bcb56a1</sys_id>
+        <sys_mod_count>1</sys_mod_count>
+        <sys_scope/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:32:05</sys_updated_on>
+        <ui_id>892372e9-2c6c-4fa5-af9e-0d2c8d8a069f</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/9VUXWvjMBD8K4eeTfBHYqd5Cw2FQu8Kl9KXo4S1LCXiZMknyUlzIf/9VpHihNB760sDhuxIuzszHnwgundd7+yLnlsr1orMfr0lRCiP4f8DUdAyMiOg7I4ZkpAtyN4DZcpZnpUVTJsqLbK04uNxkWf1tKb1pMyneLURtpOwf40diNCNkI1hcUsHBoc7HDs73ByJBhuqlPFiOplWRZrm+JRZTvOq4PgroSrHOFBCzSRenZ/p3dJ1+87XjaZ9y5Rb4eAAPsXORTz59rjAE20aTydP04Swd8dUw5AJB2lZQlpQDTht9gNiGDTPSl6AjVAuSG3h3Yq/uLvI/T3OUBuNNgzlKloUYL4AB0tneup6MzimBWU2uNIwDr1099dYuPDcOaFVaHFQy3O3ln2rfgRPyDDg6o30Fkmwzgv1zHE5quDLjd79PJN8EOpkSpQoNQU5VOCcEXXvPJ0DYZKdXG6h64Rarzqjt+LUjFTa0VpiMeJS73CnT9sIqOc9Qlth9ID44gS/ghFexHccg83HhNi9vZdg7UUKerj603smQViUsDq5ECzwfdSIzs1xy5ZFzsdkCHVIzyXTn5DZFO7ueFqyqhh/kNkqu8rsU9x+QyYm1qKvan0T1uUZjDnNPjGn+WTyhYIadXz5pP4vpG8+lWH24CkVFim8eOzx/IH2B3tMkKDX0E6b3578BTv+A3dc2P/qBQAA</values>
+        <workflow_reference/>
+    </sys_hub_flow_logic_instance_v2>
+    <sys_hub_flow_logic_instance_v2 action="INSERT_OR_UPDATE">
+        <attributes/>
+        <block display_value="">001b9267a89f03107f44321b8bcb566f</block>
+        <comment/>
+        <connected_to/>
+        <decision_table/>
+        <display_text/>
+        <flow display_value="F10- Placement Intervention">d49fbe6fa89343107f44321b8bcb565e</flow>
+        <flow_variables_assigned/>
+        <generation_source/>
+        <logic_definition display_value="If">af4e1945c3e232002841b63b12d3ae3e</logic_definition>
+        <order>21</order>
+        <outputs_assigned/>
+        <parent_ui_id>f7cd1d34-9ce2-42f8-8858-674a3571299b</parent_ui_id>
+        <sys_class_name>sys_hub_flow_logic_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 13:32:05</sys_created_on>
+        <sys_id>ec9fbe6fa89343107f44321b8bcb56a2</sys_id>
+        <sys_mod_count>1</sys_mod_count>
+        <sys_scope/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:32:05</sys_updated_on>
+        <ui_id>93b79a93-ac0c-4bb0-9cec-9c41f5e20334</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/+1Vy27bMBD8lYJnW9DDUmPfAgcBCrQN0AS5tIGwoiibKEWqfDhRBf97l3rYRm2gDdJjb+JwdzkzGkodUc42zpoHdW0M30iy+vo0I1x6DJ87IqFmZEWokiW3XEkyIzsQzmNdFy8KmiRlPK/SpJwvWFTNl9mimC+j90mWRWlxVYXBWjlp9/tvLgwTFmJ/yU0joH184xi65aLUbKTcgEamlmmy6n7b4iWesoS0SqMwpUmcJXEYxleLqMiSIorLBNgiw4ECCiawdH2i9YJ82zYeMlZzuRnXH8fW+wlUuvRU4nBG2ItlsmRIogJh2IzUIEuwSrdkZbVDQDMo76RoDxVbLi1OI772xfCfzE8KQ19ZMdRF2bB7WOajpwNc3YAFpOKodXospVvFKTODIyWrwAm7PsWGgrumV9m3WCjE1K2Eq+XnwQxyGDC9QkScQRKs8Uo991FIdb9Vz18mlrdc9q6Mm0JREIcVWPSucNbz6QgTrMZBeQ1Ng47mjVY73jcjlzrYCFwElVDPeKjPbQDUEw/QWAhuEb/p4UfQ3Kv4hGOwGbNgckM1byZt/eFkPyOmNWsBxhw1orn5D+cZDopHbflgj2/pB13jwTs2ytjPzm9M3gPHa3N+A14d5iqEKlrS6HKYIbkU5ndDRs8jPfF7Ta6jP+R6RP4q2Gn6P9dvzrWnWYDhNO+/3TjOf1r+YbCffICHQw9mU26Q24PHPkx/DL/RYqI4PYWelf7uVR2x/S8ENaeBewYAAA==</values>
+        <workflow_reference/>
+    </sys_hub_flow_logic_instance_v2>
+    <sys_hub_flow_logic_instance_v2 action="INSERT_OR_UPDATE">
+        <attributes/>
+        <block display_value="">5a3b9e67a89f03107f44321b8bcb5616</block>
+        <comment/>
+        <connected_to/>
+        <decision_table/>
+        <display_text/>
+        <flow display_value="F10- Placement Intervention">d49fbe6fa89343107f44321b8bcb565e</flow>
+        <flow_variables_assigned/>
+        <generation_source/>
+        <logic_definition display_value="For Each">098e1dc5c3e232002841b63b12d3ae33</logic_definition>
+        <order>22</order>
+        <outputs_assigned/>
+        <parent_ui_id>93b79a93-ac0c-4bb0-9cec-9c41f5e20334</parent_ui_id>
+        <sys_class_name>sys_hub_flow_logic_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 13:32:05</sys_created_on>
+        <sys_id>209fbe6fa89343107f44321b8bcb56a4</sys_id>
+        <sys_mod_count>1</sys_mod_count>
+        <sys_scope/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:32:05</sys_updated_on>
+        <ui_id>73e61bfd-6dc1-44aa-83ab-19e4e5bc406d</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/51TXW+jMBD8L34miI+UK3mrWlWq1F6ltOrLqYoWe0msMzZnm6Qc4r/fOhBa9fGeYMe7szODGZjpfNt592punJN7zTa/3iMmdcDofWAaGmQbJj02jkXsCKoL9TBk64rnuchW9VUuVmtM61VZrKtVmf7IiyK9qq7rJN4iN1a4caRRIV2roH/7fwZ+kEpYnEW2YEmbR8s2w7cjKWhBWoq6TJOS51mRZ0mSXa/TqsirNBM5oCiIUEGFilofZnffzPq+DaWdJMzA4zyzXVB6BBFZEjH88KgF0voalMOINaAFeGN7tvG2I8AiiGet+qXjILUnOhZ6P5z8SxvTJAmNNZIhjtPhUu7mHCe4vgMPL0TNfWfnVn4wkqObohBYQ6f87VdsanhuvTR6GvFQqcu0UV2jf05JsIXg8tkI6RyJwDYYDdJnH/XLwZy2F5X3Up9DmQ+V4aCWCry3sup80DMwVNgQ0a6BtpV6v2utOcrzMGlp4r2iIq6VOdHScEVj4EF4TLlCfE/43Rl+AyuDiyeioeExYq53twqc+/RCIe7+dEHJ5Gz2sJtiCCPcytbf0IIjznLH93DrJ+4lUy4dSXgN2MPlXwkHPd0gyb9CJ2N/B/Gf2PgPgFtuRnUDAAA=</values>
+        <workflow_reference/>
+    </sys_hub_flow_logic_instance_v2>
+    <sys_hub_pill_compound action="delete_multiple" query="attached_to=d49fbe6fa89343107f44321b8bcb565e"/>
+    <sys_hub_flow_variable action="delete_multiple" query="model=d49fbe6fa89343107f44321b8bcb565e"/>
+    <sys_documentation action="INSERT_OR_UPDATE">
+        <element>current</element>
+        <help/>
+        <hint/>
+        <label>Record</label>
+        <language>en</language>
+        <name>var__m_sys_hub_flow_input_d49fbe6fa89343107f44321b8bcb565e</name>
+        <plural/>
+        <sys_class_name>sys_documentation</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 13:32:04</sys_created_on>
+        <sys_id>509fbe6fa89343107f44321b8bcb5670</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name/>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:32:04</sys_updated_on>
+        <url/>
+        <url_target/>
+    </sys_documentation>
+    <sys_documentation action="INSERT_OR_UPDATE">
+        <element>changed_fields</element>
+        <help/>
+        <hint/>
+        <label>Changed Fields</label>
+        <language>en</language>
+        <name>var__m_sys_hub_flow_input_d49fbe6fa89343107f44321b8bcb565e</name>
+        <plural/>
+        <sys_class_name>sys_documentation</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 13:32:04</sys_created_on>
+        <sys_id>549fbe6fa89343107f44321b8bcb567a</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name/>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:32:04</sys_updated_on>
+        <url/>
+        <url_target/>
+    </sys_documentation>
+    <sys_documentation action="INSERT_OR_UPDATE">
+        <element>table_name</element>
+        <help/>
+        <hint/>
+        <label>Table Name</label>
+        <language>en</language>
+        <name>var__m_sys_hub_flow_input_d49fbe6fa89343107f44321b8bcb565e</name>
+        <plural/>
+        <sys_class_name>sys_documentation</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 13:32:04</sys_created_on>
+        <sys_id>549fbe6fa89343107f44321b8bcb5684</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name/>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:32:04</sys_updated_on>
+        <url/>
+        <url_target/>
+    </sys_documentation>
+    <sys_choice action="delete_multiple" query="name=var__m_sys_hub_flow_input_d49fbe6fa89343107f44321b8bcb565e"/>
+    <sys_choice action="delete_multiple" query="name=var__m_sys_hub_flow_output_d49fbe6fa89343107f44321b8bcb565e"/>
+    <sys_hub_flow action="UPDATE">
+        <sys_id>e17fad67a8d703107f44321b8bcb5657</sys_id>
+        <latest_snapshot>d49fbe6fa89343107f44321b8bcb565e</latest_snapshot>
+        <compiler_build>glide-australia-02-11-2026__patch3-hotfix1-06-18-2026_06-19-2026_0938.zip</compiler_build>
+        <version_record/>
+    </sys_hub_flow>
+    <sys_flow_trigger_plan action="delete_multiple" query="plan_id=e17fad67a8d703107f44321b8bcb5657^sys_idNOT IN789fbe6fa89343107f44321b8bcb56d3"/>
+    <sys_flow_trigger_plan action="INSERT_OR_UPDATE">
+        <binding_strategy>com.snc.process_flow.engine.binding.OncePerRecord</binding_strategy>
+        <plan>{"@class":"com.snc.process_flow.engine.serialization.plan_data.ChunkingPlanData","chunk_data":{"table":"sys_flow_trigger_plan","id":"789fbe6fa89343107f44321b8bcb56d3","name":"plan","plan_signature":null},"plan_data":"CHUNKING_PLAN"}</plan>
+        <plan_id>e17fad67a8d703107f44321b8bcb5657</plan_id>
+        <snapshot>fdc0ccee446703107f44301daf56c7ad</snapshot>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 13:32:05</sys_created_on>
+        <sys_domain>global</sys_domain>
+        <sys_domain_path>/</sys_domain_path>
+        <sys_id>789fbe6fa89343107f44321b8bcb56d3</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_overrides/>
+        <sys_scope/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:32:05</sys_updated_on>
+        <trigger display_value="">749fbe6fa89343107f44321b8bcb56d2</trigger>
+    </sys_flow_trigger_plan>
+    <sys_flow_subflow_plan action="delete_multiple" query="plan_id=e17fad67a8d703107f44321b8bcb5657"/>
+</record_update>

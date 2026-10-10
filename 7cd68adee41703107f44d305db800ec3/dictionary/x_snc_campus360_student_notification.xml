@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?><database>
+    <element attributes="enforce_dot_walk_cross_scope_access=true" db_object_id="246a92d6e4d703107f44d305db800e49" label="Student Notification" max_length="40" name="x_snc_campus360_student_notification" type="collection">
+        <element choice="1" label="Notification Type" max_length="255" name="notification_typ0" type="choice">
+            <choice>
+                <element inactive_on_update="false" label="Opportunity" sequence="0" value="Opportunity"/>
+            </choice>
+        </element>
+        <element label="Opportunity" max_length="32" name="opportunit0" reference="x_snc_campus360_placement_opportunity" type="reference"/>
+        <element default="0" label="Reminder Count" max_length="40" name="reminder_count" type="integer"/>
+        <element label="Message" max_length="2000" name="message" type="string"/>
+        <element choice="3" default="Opportunity" label="Notification Type" max_length="30" name="notification_type" type="choice">
+            <choice>
+                <element inactive_on_update="false" label="Placement" sequence="5" value="placement"/>
+                <element inactive_on_update="false" label="Assessment" sequence="1" value="assessment"/>
+                <element inactive_on_update="false" label="Interview" sequence="2" value="interview"/>
+                <element inactive_on_update="false" label="System" sequence="6" value="system"/>
+                <element inactive_on_update="false" label="Training" sequence="3" value="training"/>
+                <element inactive_on_update="false" label="Opportunity" sequence="0" value="opportunity"/>
+                <element inactive_on_update="false" label="Reminder" sequence="4" value="reminder"/>
+            </choice>
+        </element>
+        <element label="Reminder Count" max_length="255" name="reminder_coun0" type="integer"/>
+        <element default="javascript:gs.nowDateTime()" dynamic_default_value="79cb83a85f220100a9ad2572f2b4773c" label="Sent Date" max_length="255" name="sent_dat0" type="glide_date_time" use_dynamic_default="true"/>
+        <element label="Message" max_length="2000" name="messag0" type="string"/>
+        <element label="Action Required" max_length="255" name="action_require0" type="boolean"/>
+        <element default="False" label="Action Taken" max_length="255" name="action_take0" type="boolean"/>
+        <element choice="1" label="Status" max_length="255" name="statu0" type="choice">
+            <choice>
+                <element inactive_on_update="false" label="read" sequence="2" value="read"/>
+                <element inactive_on_update="false" label="closed" sequence="3" value="closed"/>
+                <element inactive_on_update="false" label="Pending" sequence="0" value="Pending"/>
+                <element inactive_on_update="false" label="sent" sequence="1" value="sent"/>
+            </choice>
+        </element>
+        <element display="true" label="Notification ID" max_length="20" name="notification_id" type="string"/>
+        <element label="Sent Date" max_length="40" name="sent_date" type="glide_date_time"/>
+        <element default="true" label="Action Required" max_length="40" name="action_required" type="boolean"/>
+        <element label="Notification ID" max_length="20" name="notification_i0" type="string"/>
+        <element label="Student" max_length="32" name="studen0" reference="x_snc_campus360_student_master" type="reference"/>
+        <element label="Action Taken" max_length="40" name="action_taken" type="boolean"/>
+        <element label="Student" max_length="32" name="student" reference="x_snc_campus360_student_master" type="reference"/>
+        <element label="Opportunity" max_length="32" name="opportunity" reference="x_snc_campus360_placement_opportunity" type="reference"/>
+        <element choice="3" default="Pending" label="Status" max_length="20" name="status" type="choice">
+            <choice>
+                <element inactive_on_update="false" label="Pending" sequence="0" value="pending"/>
+                <element inactive_on_update="false" label="Delivered" sequence="2" value="delivered"/>
+                <element inactive_on_update="false" label="Read" sequence="3" value="read"/>
+                <element inactive_on_update="false" label="Failed" sequence="4" value="failed"/>
+                <element inactive_on_update="false" label="Sent" sequence="1" value="sent"/>
+            </choice>
+        </element>
+        <index name="index">
+            <element name="student"/>
+        </index>
+        <index name="index2">
+            <element name="opportunit0"/>
+        </index>
+        <index name="index3">
+            <element name="opportunity"/>
+        </index>
+        <index name="index4">
+            <element name="studen0"/>
+        </index>
+    </element>
+</database>

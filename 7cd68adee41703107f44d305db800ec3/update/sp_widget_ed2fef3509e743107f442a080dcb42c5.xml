@@ -1,0 +1,5570 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_widget">
+    <sp_widget action="INSERT_OR_UPDATE">
+        <category>custom</category>
+        <client_script><![CDATA[api.controller=function($scope, $location) {
+
+    var c = this;
+
+
+	// =====================================================
+	// SIDEBAR TOGGLE
+	// =====================================================
+
+	c.sidebarCollapsed = false;
+
+
+	c.toggleSidebar = function() {
+
+		c.sidebarCollapsed =
+			!c.sidebarCollapsed;
+
+	};
+
+	// =====================================================
+    // SEARCH
+    // =====================================================
+
+    c.searchText = '';
+    c.searchResults = [];
+    c.showSearchResults = false;
+    c.searchLoading = false;
+
+
+    c.search = function() {
+
+        var searchText = (c.searchText || '').trim();
+
+
+        // Empty search
+        if (!searchText) {
+
+            c.searchResults = [];
+            c.showSearchResults = false;
+
+            return;
+
+        }
+
+
+        c.showSearchResults = true;
+        c.searchLoading = true;
+
+
+        c.server.get({
+
+            action: 'search',
+            search_text: searchText
+
+        }).then(function(response) {
+
+            c.searchResults =
+                response.data.search_results || [];
+
+            c.searchLoading = false;
+
+        });
+
+    };
+
+
+    // =====================================================
+    // CLEAR SEARCH
+    // =====================================================
+
+    c.clearSearch = function() {
+
+        c.searchText = '';
+        c.searchResults = [];
+        c.showSearchResults = false;
+
+    };
+
+
+    // =====================================================
+    // OPEN SEARCH RESULT
+    // =====================================================
+
+    c.openSearchResult = function(result) {
+
+        if (!result || !result.page) {
+            return;
+        }
+
+
+        window.location.href =
+            '?id=' + result.page;
+
+    };
+
+
+    // =====================================================
+    // CLOSE SEARCH WHEN CLICKING OUTSIDE
+    // =====================================================
+
+    $scope.$on('$document', function() {
+
+        c.showSearchResults = false;
+
+    });
+
+
+    // ============================================
+    // REFRESH ENTIRE DASHBOARD
+    // ============================================
+
+    c.refreshDashboard = function() {
+
+        window.location.reload();
+
+    };
+
+
+    // ============================================
+    // NOTIFICATIONS
+    // ============================================
+
+    c.showNotifications = false;
+
+    c.notificationCount = 2;
+
+
+    c.toggleNotifications = function() {
+
+        c.showNotifications =
+            !c.showNotifications;
+
+    };
+
+
+    // ============================================
+    // COMPANY PROFILE
+    // ============================================
+
+    c.openCompanyProfile = function() {
+
+        window.location.href =
+            '?id=campus360_recruiter_company_profile';
+
+    };
+
+
+    c.createOpportunity = function() {
+
+        window.location.href =
+            '?id=campus360_create_opportunity';
+
+    };
+
+    // CREATE ASSESSMENT
+    c.createAssessment = function() {
+
+        $location.search({
+            id: 'campus360_create_assessment'
+        });
+
+    };
+
+	c.goToAssessments = function() {
+
+		window.location.href =
+			'?id=campus360_assessments';
+
+	};
+
+    c.scheduleInterview = function() {
+
+		window.location.href =
+			'?id=campus360_recruiter_schedule_new';
+
+	};
+
+	c.goToInterviews = function() {
+
+		window.location.href =
+			'?id=campus360_recruiter_interviews_new';
+
+	};
+
+
+
+}]]></client_script>
+        <controller_as>c</controller_as>
+        <css>/* =========================================================&#13;
+   CAMPUS360 RECRUITER DASHBOARD&#13;
+   Fresh dashboard theme&#13;
+   ========================================================= */&#13;
+&#13;
+.c360-recruiter {&#13;
+  min-height: 100vh;&#13;
+  display: flex;&#13;
+  background: #f6f5ff;&#13;
+  color: #101b45;&#13;
+  font-family: "Inter", "Segoe UI", Arial, sans-serif;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   SIDEBAR&#13;
+   ========================================================= */&#13;
+&#13;
+.c360-sidebar {&#13;
+  width: 245px;&#13;
+  min-width: 245px;&#13;
+  min-height: 100vh;&#13;
+  background: #111b45;&#13;
+  color: #ffffff;&#13;
+  padding: 18px 14px;&#13;
+  box-sizing: border-box;&#13;
+}&#13;
+&#13;
+&#13;
+.c360-brand {&#13;
+  display: flex;&#13;
+  align-items: center;&#13;
+  gap: 10px;&#13;
+  padding: 4px 8px 22px;&#13;
+}&#13;
+&#13;
+&#13;
+.c360-logo {&#13;
+  width: 38px;&#13;
+  height: 38px;&#13;
+  border-radius: 10px;&#13;
+  background: #ffffff;&#13;
+  color: #5146e5;&#13;
+  display: flex;&#13;
+  align-items: center;&#13;
+  justify-content: center;&#13;
+  font-size: 21px;&#13;
+  font-weight: 800;&#13;
+}&#13;
+&#13;
+&#13;
+.c360-brand-name {&#13;
+  font-size: 16px;&#13;
+  font-weight: 800;&#13;
+}&#13;
+&#13;
+&#13;
+.c360-brand-sub {&#13;
+  font-size: 9px;&#13;
+  margin-top: 2px;&#13;
+  color: #b8c1ed;&#13;
+}&#13;
+&#13;
+&#13;
+.c360-user-card {&#13;
+  display: flex;&#13;
+  align-items: center;&#13;
+  gap: 10px;&#13;
+  padding: 11px;&#13;
+  margin-bottom: 25px;&#13;
+  border-radius: 13px;&#13;
+  background: rgba(255,255,255,0.09);&#13;
+}&#13;
+&#13;
+&#13;
+.c360-avatar {&#13;
+  width: 34px;&#13;
+  height: 34px;&#13;
+  border-radius: 50%;&#13;
+  background: #5968f5;&#13;
+  display: flex;&#13;
+  align-items: center;&#13;
+  justify-content: center;&#13;
+  font-size: 11px;&#13;
+  font-weight: 700;&#13;
+}&#13;
+&#13;
+&#13;
+.c360-user-name {&#13;
+  font-size: 12px;&#13;
+  font-weight: 700;&#13;
+}&#13;
+&#13;
+&#13;
+.c360-user-role {&#13;
+  font-size: 9px;&#13;
+  color: #b8c1ed;&#13;
+  margin-top: 3px;&#13;
+}&#13;
+&#13;
+&#13;
+.c360-section-title {&#13;
+  font-size: 9px;&#13;
+  letter-spacing: 1.3px;&#13;
+  color: #8f9bd1;&#13;
+  font-weight: 700;&#13;
+  margin: 20px 8px 8px;&#13;
+}&#13;
+&#13;
+&#13;
+.c360-nav-item {&#13;
+  height: 40px;&#13;
+  padding: 0 12px;&#13;
+  margin-bottom: 4px;&#13;
+  border-radius: 9px;&#13;
+  display: flex;&#13;
+  align-items: center;&#13;
+  gap: 11px;&#13;
+  color: #dce1ff;&#13;
+  font-size: 12px;&#13;
+  cursor: pointer;&#13;
+  transition: 0.2s;&#13;
+}&#13;
+&#13;
+&#13;
+.c360-nav-item:hover {&#13;
+  background: rgba(255,255,255,0.08);&#13;
+}&#13;
+&#13;
+&#13;
+.c360-nav-item.active {&#13;
+  background: #5968f5;&#13;
+  color: #ffffff;&#13;
+  box-shadow: 0 5px 15px rgba(89,104,245,0.25);&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   MAIN&#13;
+   ========================================================= */&#13;
+&#13;
+.c360-main {&#13;
+  flex: 1;&#13;
+  min-width: 0;&#13;
+}&#13;
+&#13;
+&#13;
+.c360-topbar {&#13;
+  height: 65px;&#13;
+  background: #ffffff;&#13;
+  border-bottom: 1px solid #e6e5f4;&#13;
+  display: flex;&#13;
+  align-items: center;&#13;
+  justify-content: space-between;&#13;
+  padding: 0 24px;&#13;
+  box-sizing: border-box;&#13;
+}&#13;
+&#13;
+&#13;
+.c360-search {&#13;
+  width: 360px;&#13;
+  height: 38px;&#13;
+  border: 1px solid #e2e4f2;&#13;
+  border-radius: 8px;&#13;
+  background: #f8f9fd;&#13;
+  display: flex;&#13;
+  align-items: center;&#13;
+  gap: 8px;&#13;
+  padding: 0 12px;&#13;
+  color: #7d87a8;&#13;
+}&#13;
+&#13;
+&#13;
+.c360-search input {&#13;
+  border: 0;&#13;
+  outline: 0;&#13;
+  background: transparent;&#13;
+  width: 100%;&#13;
+  font-size: 11px;&#13;
+  color: #27315a;&#13;
+}&#13;
+&#13;
+&#13;
+.c360-top-actions {&#13;
+  display: flex;&#13;
+  align-items: center;&#13;
+  gap: 8px;&#13;
+}&#13;
+&#13;
+&#13;
+.c360-icon-btn {&#13;
+  width: 34px;&#13;
+  height: 34px;&#13;
+  border: 1px solid #e5e6f3;&#13;
+  border-radius: 9px;&#13;
+  background: #ffffff;&#13;
+  color: #5661e9;&#13;
+  cursor: pointer;&#13;
+}&#13;
+&#13;
+&#13;
+.c360-profile {&#13;
+  display: flex;&#13;
+  align-items: center;&#13;
+  gap: 8px;&#13;
+  margin-left: 8px;&#13;
+}&#13;
+&#13;
+&#13;
+.c360-profile-avatar {&#13;
+  width: 32px;&#13;
+  height: 32px;&#13;
+  border-radius: 50%;&#13;
+  background: #5968f5;&#13;
+  color: #ffffff;&#13;
+  display: flex;&#13;
+  align-items: center;&#13;
+  justify-content: center;&#13;
+  font-size: 10px;&#13;
+  font-weight: 700;&#13;
+}&#13;
+&#13;
+&#13;
+.c360-profile-name {&#13;
+  font-size: 11px;&#13;
+  font-weight: 700;&#13;
+}&#13;
+&#13;
+&#13;
+.c360-profile-role {&#13;
+  font-size: 9px;&#13;
+  color: #8991ac;&#13;
+  margin-top: 2px;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   CONTENT&#13;
+   ========================================================= */&#13;
+&#13;
+.c360-content {&#13;
+  padding: 22px;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   WELCOME&#13;
+   ========================================================= */&#13;
+&#13;
+.c360-welcome {&#13;
+  min-height: 125px;&#13;
+  padding: 22px 24px;&#13;
+  box-sizing: border-box;&#13;
+  border-radius: 12px;&#13;
+  background: linear-gradient(&#13;
+    100deg,&#13;
+    #f3f1ff,&#13;
+    #f7f6ff&#13;
+  );&#13;
+  border: 1px solid #e6e2ff;&#13;
+  display: flex;&#13;
+  align-items: center;&#13;
+  justify-content: space-between;&#13;
+  margin-bottom: 16px;&#13;
+}&#13;
+&#13;
+&#13;
+.c360-eyebrow,&#13;
+.panel-eyebrow {&#13;
+  font-size: 9px;&#13;
+  font-weight: 800;&#13;
+  letter-spacing: 1px;&#13;
+  color: #5957e8;&#13;
+}&#13;
+&#13;
+&#13;
+.c360-welcome h1 {&#13;
+  margin: 6px 0;&#13;
+  font-size: 22px;&#13;
+  color: #0e183e;&#13;
+}&#13;
+&#13;
+&#13;
+.c360-welcome p {&#13;
+  margin: 0;&#13;
+  color: #66708f;&#13;
+  font-size: 11px;&#13;
+}&#13;
+&#13;
+&#13;
+.c360-company-badge {&#13;
+  background: #ffffff;&#13;
+  border: 1px solid #e3e4ef;&#13;
+  border-radius: 10px;&#13;
+  padding: 13px 22px;&#13;
+  text-align: right;&#13;
+}&#13;
+&#13;
+&#13;
+.company-label {&#13;
+  font-size: 8px;&#13;
+  color: #8b93ad;&#13;
+  font-weight: 700;&#13;
+}&#13;
+&#13;
+&#13;
+.company-name {&#13;
+  margin-top: 5px;&#13;
+  font-size: 12px;&#13;
+  font-weight: 800;&#13;
+  color: #2833a8;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   STAT CARDS&#13;
+   ========================================================= */&#13;
+&#13;
+.c360-stats {&#13;
+  display: grid;&#13;
+  grid-template-columns: repeat(4, 1fr);&#13;
+  gap: 12px;&#13;
+  margin-bottom: 16px;&#13;
+}&#13;
+&#13;
+&#13;
+.c360-stat-card {&#13;
+  min-height: 125px;&#13;
+  padding: 16px;&#13;
+  box-sizing: border-box;&#13;
+  border-radius: 11px;&#13;
+  background: #ffffff;&#13;
+  border: 1px solid #e4e5f1;&#13;
+  box-shadow: 0 2px 8px rgba(31, 41, 85, 0.03);&#13;
+}&#13;
+&#13;
+&#13;
+.stat-top {&#13;
+  display: flex;&#13;
+  align-items: center;&#13;
+  justify-content: space-between;&#13;
+  color: #65708f;&#13;
+  font-size: 10px;&#13;
+  font-weight: 600;&#13;
+}&#13;
+&#13;
+&#13;
+.stat-icon {&#13;
+  width: 30px;&#13;
+  height: 30px;&#13;
+  border-radius: 9px;&#13;
+  display: flex;&#13;
+  align-items: center;&#13;
+  justify-content: center;&#13;
+  font-size: 13px;&#13;
+}&#13;
+&#13;
+&#13;
+.stat-purple .stat-icon {&#13;
+  background: #ecebff;&#13;
+  color: #5b55e8;&#13;
+}&#13;
+&#13;
+&#13;
+.stat-blue .stat-icon {&#13;
+  background: #e6f0ff;&#13;
+  color: #4684e8;&#13;
+}&#13;
+&#13;
+&#13;
+.stat-violet .stat-icon {&#13;
+  background: #f0e8ff;&#13;
+  color: #8a55df;&#13;
+}&#13;
+&#13;
+&#13;
+.stat-green .stat-icon {&#13;
+  background: #e4f8ee;&#13;
+  color: #27a46b;&#13;
+}&#13;
+&#13;
+&#13;
+.stat-number {&#13;
+  font-size: 25px;&#13;
+  font-weight: 800;&#13;
+  color: #101a42;&#13;
+  margin-top: 12px;&#13;
+}&#13;
+&#13;
+&#13;
+.stat-bottom {&#13;
+  font-size: 9px;&#13;
+  color: #929ab1;&#13;
+  margin-top: 4px;&#13;
+}&#13;
+&#13;
+&#13;
+.stat-bottom span {&#13;
+  float: right;&#13;
+  color: #514fe1;&#13;
+  font-weight: 700;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   PANELS&#13;
+   ========================================================= */&#13;
+&#13;
+.c360-grid-two {&#13;
+  display: grid;&#13;
+  grid-template-columns: 1.3fr 1fr;&#13;
+  gap: 16px;&#13;
+  margin-bottom: 16px;&#13;
+}&#13;
+&#13;
+&#13;
+.c360-panel {&#13;
+  background: #ffffff;&#13;
+  border: 1px solid #e4e5f1;&#13;
+  border-radius: 11px;&#13;
+  padding: 18px;&#13;
+  box-sizing: border-box;&#13;
+  box-shadow: 0 2px 8px rgba(31,41,85,0.025);&#13;
+}&#13;
+&#13;
+&#13;
+.panel-header {&#13;
+  display: flex;&#13;
+  align-items: flex-start;&#13;
+  justify-content: space-between;&#13;
+}&#13;
+&#13;
+&#13;
+.panel-header h2 {&#13;
+  margin: 5px 0 0;&#13;
+  font-size: 14px;&#13;
+  color: #101a42;&#13;
+}&#13;
+&#13;
+&#13;
+.view-all {&#13;
+  border: 0;&#13;
+  background: transparent;&#13;
+  color: #5554e6;&#13;
+  font-size: 9px;&#13;
+  font-weight: 700;&#13;
+  cursor: pointer;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   OPPORTUNITY PLACEHOLDER&#13;
+   ========================================================= */&#13;
+&#13;
+.opportunity-placeholder {&#13;
+  min-height: 145px;&#13;
+  display: flex;&#13;
+  align-items: center;&#13;
+  justify-content: center;&#13;
+  gap: 13px;&#13;
+  color: #858da7;&#13;
+  text-align: left;&#13;
+}&#13;
+&#13;
+&#13;
+.placeholder-icon {&#13;
+  width: 42px;&#13;
+  height: 42px;&#13;
+  border-radius: 12px;&#13;
+  background: #eeedff;&#13;
+  color: #5a58e8;&#13;
+  display: flex;&#13;
+  align-items: center;&#13;
+  justify-content: center;&#13;
+  font-size: 18px;&#13;
+}&#13;
+&#13;
+&#13;
+.opportunity-placeholder strong,&#13;
+.empty-interviews strong {&#13;
+  color: #39415f;&#13;
+  font-size: 11px;&#13;
+}&#13;
+&#13;
+&#13;
+.opportunity-placeholder p,&#13;
+.empty-interviews p {&#13;
+  margin: 5px 0 0;&#13;
+  font-size: 9px;&#13;
+  color: #9299ae;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   PIPELINE&#13;
+   ========================================================= */&#13;
+&#13;
+.pipeline {&#13;
+  min-height: 145px;&#13;
+  display: flex;&#13;
+  align-items: center;&#13;
+  justify-content: center;&#13;
+  gap: 28px;&#13;
+}&#13;
+&#13;
+&#13;
+.pipeline-circle {&#13;
+  width: 105px;&#13;
+  height: 105px;&#13;
+  border-radius: 50%;&#13;
+  border: 10px solid #e8eaff;&#13;
+  display: flex;&#13;
+  flex-direction: column;&#13;
+  align-items: center;&#13;
+  justify-content: center;&#13;
+}&#13;
+&#13;
+&#13;
+.pipeline-circle strong {&#13;
+  font-size: 22px;&#13;
+  color: #171f49;&#13;
+}&#13;
+&#13;
+&#13;
+.pipeline-circle span {&#13;
+  font-size: 8px;&#13;
+  color: #9299ae;&#13;
+  margin-top: 2px;&#13;
+}&#13;
+&#13;
+&#13;
+.pipeline-legend {&#13;
+  font-size: 10px;&#13;
+  color: #6e7690;&#13;
+}&#13;
+&#13;
+&#13;
+.pipeline-legend div {&#13;
+  margin: 11px 0;&#13;
+  display: flex;&#13;
+  align-items: center;&#13;
+  gap: 7px;&#13;
+}&#13;
+&#13;
+&#13;
+.pipeline-legend strong {&#13;
+  margin-left: 15px;&#13;
+  color: #323b5c;&#13;
+}&#13;
+&#13;
+&#13;
+.legend-dot {&#13;
+  width: 7px;&#13;
+  height: 7px;&#13;
+  border-radius: 50%;&#13;
+}&#13;
+&#13;
+&#13;
+.pending {&#13;
+  background: #f2ae38;&#13;
+}&#13;
+&#13;
+&#13;
+.submitted {&#13;
+  background: #929aaf;&#13;
+}&#13;
+&#13;
+&#13;
+.selected {&#13;
+  background: #5b5ce8;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   TABLE&#13;
+   ========================================================= */&#13;
+&#13;
+.empty-table {&#13;
+  margin-top: 18px;&#13;
+}&#13;
+&#13;
+&#13;
+.table-header {&#13;
+  display: grid;&#13;
+  grid-template-columns: 1.5fr 1.2fr 1fr .6fr;&#13;
+  padding: 10px 4px;&#13;
+  border-bottom: 1px solid #ececf5;&#13;
+  font-size: 8px;&#13;
+  color: #8c94aa;&#13;
+  font-weight: 700;&#13;
+}&#13;
+&#13;
+&#13;
+.empty-row {&#13;
+  min-height: 90px;&#13;
+  display: flex;&#13;
+  align-items: center;&#13;
+  justify-content: center;&#13;
+  font-size: 10px;&#13;
+  color: #969db1;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   INTERVIEWS&#13;
+   ========================================================= */&#13;
+&#13;
+.empty-interviews {&#13;
+  min-height: 130px;&#13;
+  display: flex;&#13;
+  flex-direction: column;&#13;
+  align-items: center;&#13;
+  justify-content: center;&#13;
+  text-align: center;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   QUICK ACTIONS&#13;
+   ========================================================= */&#13;
+&#13;
+.quick-actions {&#13;
+  margin-bottom: 20px;&#13;
+}&#13;
+&#13;
+&#13;
+.action-grid {&#13;
+  display: grid;&#13;
+  grid-template-columns: repeat(3, 1fr);&#13;
+  gap: 10px;&#13;
+  margin-top: 15px;&#13;
+}&#13;
+&#13;
+&#13;
+.action-card {&#13;
+  display: flex;&#13;
+  align-items: center;&#13;
+  gap: 12px;&#13;
+  padding: 13px;&#13;
+  background: #f8f8ff;&#13;
+  border: 1px solid #e8e7f6;&#13;
+  border-radius: 10px;&#13;
+  text-align: left;&#13;
+  cursor: pointer;&#13;
+}&#13;
+&#13;
+&#13;
+.action-card:hover {&#13;
+  border-color: #b9b6f6;&#13;
+  background: #f4f3ff;&#13;
+}&#13;
+&#13;
+&#13;
+.action-icon {&#13;
+  width: 34px;&#13;
+  height: 34px;&#13;
+  flex-shrink: 0;&#13;
+  border-radius: 9px;&#13;
+  background: #e8e7ff;&#13;
+  color: #5755e6;&#13;
+  display: flex;&#13;
+  align-items: center;&#13;
+  justify-content: center;&#13;
+  font-size: 17px;&#13;
+  font-weight: 700;&#13;
+}&#13;
+&#13;
+&#13;
+.action-card strong {&#13;
+  display: block;&#13;
+  color: #283153;&#13;
+  font-size: 10px;&#13;
+}&#13;
+&#13;
+&#13;
+.action-card span {&#13;
+  display: block;&#13;
+  margin-top: 3px;&#13;
+  color: #8a92a9;&#13;
+  font-size: 8px;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   RESPONSIVE&#13;
+   ========================================================= */&#13;
+&#13;
+@media (max-width: 1100px) {&#13;
+&#13;
+  .c360-sidebar {&#13;
+    width: 210px;&#13;
+    min-width: 210px;&#13;
+  }&#13;
+&#13;
+  .c360-stats {&#13;
+    grid-template-columns: repeat(2, 1fr);&#13;
+  }&#13;
+&#13;
+  .c360-grid-two {&#13;
+    grid-template-columns: 1fr;&#13;
+  }&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+@media (max-width: 700px) {&#13;
+&#13;
+  .c360-sidebar {&#13;
+    display: none;&#13;
+  }&#13;
+&#13;
+  .c360-content {&#13;
+    padding: 12px;&#13;
+  }&#13;
+&#13;
+  .c360-topbar {&#13;
+    padding: 0 12px;&#13;
+  }&#13;
+&#13;
+  .c360-search {&#13;
+    width: 220px;&#13;
+  }&#13;
+&#13;
+  .c360-welcome {&#13;
+    flex-direction: column;&#13;
+    align-items: flex-start;&#13;
+    gap: 15px;&#13;
+  }&#13;
+&#13;
+  .c360-company-badge {&#13;
+    text-align: left;&#13;
+  }&#13;
+&#13;
+  .c360-stats {&#13;
+    grid-template-columns: 1fr;&#13;
+  }&#13;
+&#13;
+  .action-grid {&#13;
+    grid-template-columns: 1fr;&#13;
+  }&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   CAMPUS360 STUDENT THEME&#13;
+   Recruiter Dashboard Color Override&#13;
+   ========================================================= */&#13;
+&#13;
+/* ---------- MAIN BACKGROUND ---------- */&#13;
+&#13;
+.c360-recruiter {&#13;
+  background: #f5f7fb !important;&#13;
+  color: #101b45 !important;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   SIDEBAR - LIGHT STUDENT DASHBOARD STYLE&#13;
+   ========================================================= */&#13;
+&#13;
+.c360-sidebar {&#13;
+  background: #efedff !important;&#13;
+  color: #20244f !important;&#13;
+  border-right: 1px solid #dedcff;&#13;
+}&#13;
+&#13;
+/* Logo */&#13;
+&#13;
+.c360-logo {&#13;
+  background: #5548e8 !important;&#13;
+  color: #ffffff !important;&#13;
+}&#13;
+&#13;
+/* Brand */&#13;
+&#13;
+.c360-brand-name {&#13;
+  color: #20244f !important;&#13;
+}&#13;
+&#13;
+.c360-brand-sub {&#13;
+  color: #625e91 !important;&#13;
+}&#13;
+&#13;
+&#13;
+/* Recruiter user card */&#13;
+&#13;
+.c360-user-card {&#13;
+  background: #ffffff !important;&#13;
+  border: 1px solid #dddafe;&#13;
+  box-shadow: 0 2px 8px rgba(70, 65, 160, 0.05);&#13;
+}&#13;
+&#13;
+.c360-user-name {&#13;
+  color: #20244f !important;&#13;
+}&#13;
+&#13;
+.c360-user-role {&#13;
+  color: #77739a !important;&#13;
+}&#13;
+&#13;
+.c360-avatar {&#13;
+  background: #5a54e8 !important;&#13;
+  color: #ffffff !important;&#13;
+}&#13;
+&#13;
+&#13;
+/* Section headings */&#13;
+&#13;
+.c360-section-title {&#13;
+  color: #7771a8 !important;&#13;
+}&#13;
+&#13;
+&#13;
+/* Navigation */&#13;
+&#13;
+.c360-nav-item {&#13;
+  color: #34365f !important;&#13;
+}&#13;
+&#13;
+.c360-nav-item:hover {&#13;
+  background: #e4e1ff !important;&#13;
+  color: #5148df !important;&#13;
+}&#13;
+&#13;
+&#13;
+/* Active navigation */&#13;
+&#13;
+.c360-nav-item.active {&#13;
+  background: #ffffff !important;&#13;
+  color: #5148df !important;&#13;
+  box-shadow: 0 2px 8px rgba(80, 72, 220, 0.08) !important;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   TOP BAR&#13;
+   ========================================================= */&#13;
+&#13;
+.c360-topbar {&#13;
+  background: #ffffff !important;&#13;
+  border-bottom: 1px solid #e3e4ef !important;&#13;
+}&#13;
+&#13;
+.c360-search {&#13;
+  background: #f8f9fd !important;&#13;
+  border-color: #dddff0 !important;&#13;
+}&#13;
+&#13;
+.c360-search input {&#13;
+  color: #30345c !important;&#13;
+}&#13;
+&#13;
+.c360-icon-btn {&#13;
+  background: #ffffff !important;&#13;
+  border-color: #e1e2ef !important;&#13;
+  color: #554de3 !important;&#13;
+}&#13;
+&#13;
+.c360-profile-avatar {&#13;
+  background: #5a54e8 !important;&#13;
+}&#13;
+&#13;
+.c360-profile-name {&#13;
+  color: #25294f !important;&#13;
+}&#13;
+&#13;
+.c360-profile-role {&#13;
+  color: #858aa3 !important;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   CONTENT&#13;
+   ========================================================= */&#13;
+&#13;
+.c360-content {&#13;
+  background: #f5f7fb !important;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   WELCOME CARD&#13;
+   ========================================================= */&#13;
+&#13;
+.c360-welcome {&#13;
+  background: linear-gradient(&#13;
+    100deg,&#13;
+    #f2f0ff,&#13;
+    #f7f6ff&#13;
+  ) !important;&#13;
+&#13;
+  border: 1px solid #dedbff !important;&#13;
+}&#13;
+&#13;
+.c360-eyebrow,&#13;
+.panel-eyebrow {&#13;
+  color: #5148e5 !important;&#13;
+}&#13;
+&#13;
+.c360-welcome h1 {&#13;
+  color: #10183d !important;&#13;
+}&#13;
+&#13;
+.c360-welcome p {&#13;
+  color: #68718e !important;&#13;
+}&#13;
+&#13;
+.c360-company-badge {&#13;
+  background: #ffffff !important;&#13;
+  border-color: #e0e1ee !important;&#13;
+}&#13;
+&#13;
+.company-label {&#13;
+  color: #858ba5 !important;&#13;
+}&#13;
+&#13;
+.company-name {&#13;
+  color: #403bc2 !important;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   STAT CARDS&#13;
+   MATCH STUDENT DASHBOARD COLORS&#13;
+   ========================================================= */&#13;
+&#13;
+.c360-stat-card {&#13;
+  border-radius: 11px !important;&#13;
+  box-shadow: none !important;&#13;
+}&#13;
+&#13;
+&#13;
+/* 1 - Placement Opportunities&#13;
+   Student dashboard = GREEN / MINT */&#13;
+&#13;
+.c360-stat-card.stat-purple {&#13;
+  background: #ddfbf0 !important;&#13;
+  border-color: #a9efda !important;&#13;
+}&#13;
+&#13;
+.c360-stat-card.stat-purple .stat-icon {&#13;
+  background: #ffffff !important;&#13;
+  color: #514de5 !important;&#13;
+}&#13;
+&#13;
+&#13;
+/* 2 - Applications&#13;
+   Student dashboard = BLUE */&#13;
+&#13;
+.c360-stat-card.stat-blue {&#13;
+  background: #e3efff !important;&#13;
+  border-color: #bdd8ff !important;&#13;
+}&#13;
+&#13;
+.c360-stat-card.stat-blue .stat-icon {&#13;
+  background: #ffffff !important;&#13;
+  color: #4b83e8 !important;&#13;
+}&#13;
+&#13;
+&#13;
+/* 3 - Interviews&#13;
+   Student dashboard = LIGHT PURPLE */&#13;
+&#13;
+.c360-stat-card.stat-violet {&#13;
+  background: #eee5ff !important;&#13;
+  border-color: #d7c3ff !important;&#13;
+}&#13;
+&#13;
+.c360-stat-card.stat-violet .stat-icon {&#13;
+  background: #ffffff !important;&#13;
+  color: #8755dd !important;&#13;
+}&#13;
+&#13;
+&#13;
+/* 4 - Offers&#13;
+   Student dashboard = PEACH */&#13;
+&#13;
+.c360-stat-card.stat-green {&#13;
+  background: #ffe9e1 !important;&#13;
+  border-color: #ffcfc0 !important;&#13;
+}&#13;
+&#13;
+.c360-stat-card.stat-green .stat-icon {&#13;
+  background: #ffffff !important;&#13;
+  color: #f06c55 !important;&#13;
+}&#13;
+&#13;
+&#13;
+/* Stat text */&#13;
+&#13;
+.stat-top {&#13;
+  color: #56617e !important;&#13;
+}&#13;
+&#13;
+.stat-number {&#13;
+  color: #101a42 !important;&#13;
+}&#13;
+&#13;
+.stat-bottom {&#13;
+  color: #7d86a0 !important;&#13;
+}&#13;
+&#13;
+.stat-bottom span {&#13;
+  color: #514de1 !important;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   MAIN PANELS&#13;
+   ========================================================= */&#13;
+&#13;
+.c360-panel {&#13;
+  background: #ffffff !important;&#13;
+  border-color: #e1e3ef !important;&#13;
+  box-shadow: 0 2px 8px rgba(35, 43, 85, 0.025) !important;&#13;
+}&#13;
+&#13;
+.panel-header h2 {&#13;
+  color: #101a42 !important;&#13;
+}&#13;
+&#13;
+.view-all {&#13;
+  color: #514de1 !important;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   OPPORTUNITY PLACEHOLDER&#13;
+   ========================================================= */&#13;
+&#13;
+.placeholder-icon {&#13;
+  background: #eeecff !important;&#13;
+  color: #5853e5 !important;&#13;
+}&#13;
+&#13;
+.opportunity-placeholder strong,&#13;
+.empty-interviews strong {&#13;
+  color: #343b5c !important;&#13;
+}&#13;
+&#13;
+.opportunity-placeholder p,&#13;
+.empty-interviews p {&#13;
+  color: #9299ae !important;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   APPLICATION PIPELINE&#13;
+   ========================================================= */&#13;
+&#13;
+.pipeline-circle {&#13;
+  border-color: #e6e8ff !important;&#13;
+}&#13;
+&#13;
+.pipeline-circle strong {&#13;
+  color: #171f49 !important;&#13;
+}&#13;
+&#13;
+.pipeline-circle span {&#13;
+  color: #9299ae !important;&#13;
+}&#13;
+&#13;
+.pipeline-legend {&#13;
+  color: #6e7690 !important;&#13;
+}&#13;
+&#13;
+.pipeline-legend strong {&#13;
+  color: #323b5c !important;&#13;
+}&#13;
+&#13;
+.pending {&#13;
+  background: #f2ae38 !important;&#13;
+}&#13;
+&#13;
+.submitted {&#13;
+  background: #929aaf !important;&#13;
+}&#13;
+&#13;
+.selected {&#13;
+  background: #5b5ce8 !important;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   RECENT APPLICATIONS&#13;
+   ========================================================= */&#13;
+&#13;
+.table-header {&#13;
+  border-bottom-color: #e7e8f1 !important;&#13;
+  color: #8c94aa !important;&#13;
+}&#13;
+&#13;
+.empty-row {&#13;
+  color: #969db1 !important;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   QUICK ACTIONS&#13;
+   ========================================================= */&#13;
+&#13;
+.action-card {&#13;
+  background: #f9f9ff !important;&#13;
+  border-color: #e5e4f5 !important;&#13;
+}&#13;
+&#13;
+.action-card:hover {&#13;
+  background: #f2f0ff !important;&#13;
+  border-color: #c7c3fa !important;&#13;
+}&#13;
+&#13;
+.action-icon {&#13;
+  background: #e9e7ff !important;&#13;
+  color: #5753e5 !important;&#13;
+}&#13;
+&#13;
+.action-card strong {&#13;
+  color: #283153 !important;&#13;
+}&#13;
+&#13;
+.action-card span {&#13;
+  color: #8a92a9 !important;&#13;
+}&#13;
+&#13;
+&#13;
+.interview-list {&#13;
+    display: flex;&#13;
+    flex-direction: column;&#13;
+    gap: 10px;&#13;
+    margin-top: 15px;&#13;
+}&#13;
+&#13;
+.interview-item {&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    gap: 12px;&#13;
+    padding: 12px;&#13;
+    border: 1px solid #eee;&#13;
+    border-radius: 10px;&#13;
+    background: #fff;&#13;
+}&#13;
+&#13;
+.interview-icon {&#13;
+    width: 38px;&#13;
+    height: 38px;&#13;
+    border-radius: 10px;&#13;
+    background: #f0edff;&#13;
+    color: #5b4bdb;&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+    font-size: 18px;&#13;
+}&#13;
+&#13;
+.interview-info {&#13;
+    flex: 1;&#13;
+    display: flex;&#13;
+    flex-direction: column;&#13;
+    gap: 3px;&#13;
+}&#13;
+&#13;
+.interview-info strong {&#13;
+    font-size: 13px;&#13;
+    color: #111827;&#13;
+}&#13;
+&#13;
+.interview-info span {&#13;
+    font-size: 12px;&#13;
+    color: #4b5563;&#13;
+}&#13;
+&#13;
+.interview-info small {&#13;
+    font-size: 11px;&#13;
+    color: #8b8fa3;&#13;
+}&#13;
+&#13;
+.interview-status {&#13;
+    font-size: 11px;&#13;
+    color: #5b4bdb;&#13;
+    background: #f0edff;&#13;
+    padding: 5px 8px;&#13;
+    border-radius: 6px;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   RECENT APPLICATIONS&#13;
+========================================= */&#13;
+&#13;
+.application-table {&#13;
+  width: 100%;&#13;
+  margin-top: 18px;&#13;
+}&#13;
+&#13;
+&#13;
+/* TABLE HEADER */&#13;
+&#13;
+.application-table .table-header {&#13;
+  display: grid;&#13;
+  grid-template-columns: 1.3fr 1.4fr 1fr 0.7fr;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  padding: 0 8px 10px;&#13;
+&#13;
+  border-bottom: 1px solid #e8e8f5;&#13;
+&#13;
+  color: #7c7ca0;&#13;
+&#13;
+  font-size: 9px;&#13;
+  font-weight: 700;&#13;
+&#13;
+  letter-spacing: 0.08em;&#13;
+}&#13;
+&#13;
+&#13;
+/* APPLICATION ROW */&#13;
+&#13;
+.application-row {&#13;
+  display: grid;&#13;
+&#13;
+  grid-template-columns: 1.3fr 1.4fr 1fr 0.7fr;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  min-height: 48px;&#13;
+&#13;
+  padding: 8px;&#13;
+&#13;
+  border-bottom: 1px solid #f0f0f7;&#13;
+}&#13;
+&#13;
+&#13;
+/* STUDENT */&#13;
+&#13;
+.student-cell strong {&#13;
+  font-size: 12px;&#13;
+  font-weight: 600;&#13;
+  color: #11113d;&#13;
+}&#13;
+&#13;
+&#13;
+/* ROLE */&#13;
+&#13;
+.role-cell {&#13;
+  font-size: 11px;&#13;
+  color: #55557a;&#13;
+&#13;
+  white-space: nowrap;&#13;
+  overflow: hidden;&#13;
+  text-overflow: ellipsis;&#13;
+}&#13;
+&#13;
+&#13;
+/* STATUS */&#13;
+&#13;
+.status-cell {&#13;
+  display: flex;&#13;
+  align-items: center;&#13;
+}&#13;
+&#13;
+&#13;
+/* STATUS BADGE */&#13;
+&#13;
+.application-status {&#13;
+  display: inline-flex;&#13;
+&#13;
+  align-items: center;&#13;
+  justify-content: center;&#13;
+&#13;
+  padding: 4px 9px;&#13;
+&#13;
+  border-radius: 6px;&#13;
+&#13;
+  font-size: 9px;&#13;
+  font-weight: 600;&#13;
+}&#13;
+&#13;
+&#13;
+/* PENDING */&#13;
+&#13;
+.status-pending {&#13;
+  background: #fff4dc;&#13;
+  color: #c47b00;&#13;
+}&#13;
+&#13;
+&#13;
+/* SUBMITTED */&#13;
+&#13;
+.status-submitted {&#13;
+  background: #eeeaff;&#13;
+  color: #6254e8;&#13;
+}&#13;
+&#13;
+&#13;
+/* SELECTED */&#13;
+&#13;
+.status-selected {&#13;
+  background: #dcf8ee;&#13;
+  color: #16845e;&#13;
+}&#13;
+&#13;
+&#13;
+/* REJECTED */&#13;
+&#13;
+.status-rejected {&#13;
+  background: #ffe7e4;&#13;
+  color: #d6534b;&#13;
+}&#13;
+&#13;
+&#13;
+/* ACTION */&#13;
+&#13;
+.action-cell {&#13;
+  display: flex;&#13;
+  justify-content: flex-end;&#13;
+}&#13;
+&#13;
+&#13;
+/* VIEW BUTTON */&#13;
+&#13;
+.application-view {&#13;
+  border: none;&#13;
+&#13;
+  background: transparent;&#13;
+&#13;
+  color: #5546e8;&#13;
+&#13;
+  font-size: 10px;&#13;
+  font-weight: 600;&#13;
+&#13;
+  cursor: pointer;&#13;
+&#13;
+  padding: 4px 0;&#13;
+}&#13;
+&#13;
+.application-view:hover {&#13;
+  text-decoration: underline;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   EMPTY STATE&#13;
+========================================= */&#13;
+&#13;
+.empty-table {&#13;
+  width: 100%;&#13;
+  margin-top: 18px;&#13;
+}&#13;
+&#13;
+.empty-table .table-header {&#13;
+  display: grid;&#13;
+&#13;
+  grid-template-columns: 1.3fr 1.4fr 1fr 0.7fr;&#13;
+&#13;
+  padding: 0 8px 10px;&#13;
+&#13;
+  border-bottom: 1px solid #e8e8f5;&#13;
+&#13;
+  color: #7c7ca0;&#13;
+&#13;
+  font-size: 9px;&#13;
+  font-weight: 700;&#13;
+&#13;
+  letter-spacing: 0.08em;&#13;
+}&#13;
+&#13;
+.empty-row {&#13;
+  text-align: center;&#13;
+&#13;
+  padding: 35px 10px;&#13;
+&#13;
+  color: #9292b2;&#13;
+&#13;
+  font-size: 11px;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   PLACEMENT OPPORTUNITIES&#13;
+   ========================================= */&#13;
+&#13;
+.opportunity-list {&#13;
+  display: flex;&#13;
+  flex-direction: column;&#13;
+  gap: 12px;&#13;
+  margin-top: 14px;&#13;
+}&#13;
+&#13;
+.opportunity-item {&#13;
+  display: flex;&#13;
+  align-items: flex-start;&#13;
+  gap: 14px;&#13;
+  padding: 14px 16px;&#13;
+  border: 1px solid #e8e7f5;&#13;
+  border-radius: 12px;&#13;
+  background: #ffffff;&#13;
+  transition: all 0.2s ease;&#13;
+}&#13;
+&#13;
+.opportunity-item:hover {&#13;
+  border-color: #d8d4ff;&#13;
+  box-shadow: 0 4px 14px rgba(79, 70, 229, 0.08);&#13;
+  transform: translateY(-1px);&#13;
+}&#13;
+&#13;
+/* Opportunity icon */&#13;
+&#13;
+.opportunity-icon {&#13;
+  width: 40px;&#13;
+  height: 40px;&#13;
+  min-width: 40px;&#13;
+&#13;
+  display: flex;&#13;
+  align-items: center;&#13;
+  justify-content: center;&#13;
+&#13;
+  border-radius: 10px;&#13;
+  background: #f0edff;&#13;
+  color: #5b4df6;&#13;
+&#13;
+  font-size: 17px;&#13;
+}&#13;
+&#13;
+/* Opportunity information */&#13;
+&#13;
+.opportunity-info {&#13;
+  flex: 1;&#13;
+  min-width: 0;&#13;
+}&#13;
+&#13;
+.opportunity-info strong {&#13;
+  display: block;&#13;
+&#13;
+  font-size: 15px;&#13;
+  font-weight: 600;&#13;
+  color: #111827;&#13;
+&#13;
+  margin-bottom: 4px;&#13;
+}&#13;
+&#13;
+.opportunity-info p {&#13;
+  margin: 3px 0;&#13;
+&#13;
+  font-size: 12px;&#13;
+  line-height: 1.5;&#13;
+  color: #64748b;&#13;
+}&#13;
+&#13;
+/* Opportunity ID / type */&#13;
+&#13;
+.opportunity-info p:first-of-type {&#13;
+  color: #6366f1;&#13;
+  font-size: 11px;&#13;
+  font-weight: 500;&#13;
+}&#13;
+&#13;
+/* Location / CTC */&#13;
+&#13;
+.opportunity-info p:nth-of-type(2) {&#13;
+  color: #475569;&#13;
+}&#13;
+&#13;
+/* Deadline */&#13;
+&#13;
+.opportunity-info p:nth-of-type(3) {&#13;
+  color: #64748b;&#13;
+}&#13;
+&#13;
+/* Status */&#13;
+&#13;
+.opportunity-status {&#13;
+  flex-shrink: 0;&#13;
+&#13;
+  padding: 5px 10px;&#13;
+&#13;
+  border-radius: 20px;&#13;
+&#13;
+  background: #ecfdf5;&#13;
+  color: #059669;&#13;
+&#13;
+  font-size: 11px;&#13;
+  font-weight: 600;&#13;
+&#13;
+  white-space: nowrap;&#13;
+}&#13;
+&#13;
+/* =========================================&#13;
+   EMPTY STATE&#13;
+   ========================================= */&#13;
+&#13;
+.opportunity-placeholder {&#13;
+  display: flex;&#13;
+  align-items: center;&#13;
+  justify-content: center;&#13;
+  gap: 14px;&#13;
+&#13;
+  min-height: 130px;&#13;
+&#13;
+  text-align: left;&#13;
+  color: #64748b;&#13;
+}&#13;
+&#13;
+.opportunity-placeholder .placeholder-icon {&#13;
+  width: 42px;&#13;
+  height: 42px;&#13;
+&#13;
+  display: flex;&#13;
+  align-items: center;&#13;
+  justify-content: center;&#13;
+&#13;
+  border-radius: 12px;&#13;
+&#13;
+  background: #f0edff;&#13;
+  color: #5b4df6;&#13;
+&#13;
+  font-size: 18px;&#13;
+}&#13;
+&#13;
+.opportunity-placeholder strong {&#13;
+  display: block;&#13;
+&#13;
+  color: #334155;&#13;
+  font-size: 14px;&#13;
+&#13;
+  margin-bottom: 4px;&#13;
+}&#13;
+&#13;
+.opportunity-placeholder p {&#13;
+  margin: 0;&#13;
+&#13;
+  font-size: 12px;&#13;
+  color: #94a3b8;&#13;
+}&#13;
+&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   RECENT APPLICATIONS TABLE&#13;
+   ========================================= */&#13;
+&#13;
+.application-table {&#13;
+  width: 100%;&#13;
+  margin-top: 18px;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   TABLE HEADER&#13;
+   ========================================= */&#13;
+&#13;
+.table-header {&#13;
+  display: grid;&#13;
+&#13;
+  /* Student | Role | Status | Action */&#13;
+  grid-template-columns: 1.5fr 1.2fr 1fr 0.8fr;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  padding: 0 8px 10px;&#13;
+&#13;
+  border-bottom: 1px solid #e6e7f2;&#13;
+&#13;
+  color: #777b9a;&#13;
+&#13;
+  font-size: 10px;&#13;
+  font-weight: 600;&#13;
+&#13;
+  letter-spacing: 0.5px;&#13;
+}&#13;
+&#13;
+&#13;
+/* Student header */&#13;
+.table-header span:nth-child(1) {&#13;
+  text-align: left;&#13;
+}&#13;
+&#13;
+&#13;
+/* Role, Status and Action headers */&#13;
+.table-header span:nth-child(2),&#13;
+.table-header span:nth-child(3),&#13;
+.table-header span:nth-child(4) {&#13;
+  text-align: center;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   APPLICATION ROW&#13;
+   ========================================= */&#13;
+&#13;
+.application-row {&#13;
+  display: grid;&#13;
+&#13;
+  /* Must match table-header exactly */&#13;
+  grid-template-columns: 1.5fr 1.2fr 1fr 0.8fr;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  min-height: 46px;&#13;
+&#13;
+  padding: 0 8px;&#13;
+&#13;
+  border-bottom: 1px solid #eeeeF5;&#13;
+&#13;
+  font-size: 12px;&#13;
+}&#13;
+&#13;
+&#13;
+/* Remove border from last row */&#13;
+.application-row:last-child {&#13;
+  border-bottom: none;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   STUDENT&#13;
+   ========================================= */&#13;
+&#13;
+.student-cell {&#13;
+  text-align: left;&#13;
+}&#13;
+&#13;
+.student-cell strong {&#13;
+  color: #111a4d;&#13;
+&#13;
+  font-size: 12px;&#13;
+&#13;
+  font-weight: 600;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   ROLE&#13;
+   ========================================= */&#13;
+&#13;
+.role-cell {&#13;
+  color: #4e5680;&#13;
+&#13;
+  font-size: 11px;&#13;
+&#13;
+  text-align: center;&#13;
+&#13;
+  white-space: nowrap;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   STATUS&#13;
+   ========================================= */&#13;
+&#13;
+.status-cell {&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  justify-content: center;&#13;
+}&#13;
+&#13;
+&#13;
+/* Status badge */&#13;
+.application-status {&#13;
+  display: inline-flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  justify-content: center;&#13;
+&#13;
+  padding: 4px 9px;&#13;
+&#13;
+  border-radius: 6px;&#13;
+&#13;
+  font-size: 10px;&#13;
+&#13;
+  font-weight: 500;&#13;
+&#13;
+  line-height: 1;&#13;
+&#13;
+  white-space: nowrap;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   PENDING&#13;
+   ========================================= */&#13;
+&#13;
+.status-pending {&#13;
+  background: #fff3d6;&#13;
+&#13;
+  color: #c98200;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   SUBMITTED&#13;
+   ========================================= */&#13;
+&#13;
+.status-submitted {&#13;
+  background: #eee9ff;&#13;
+&#13;
+  color: #635bdb;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   SELECTED&#13;
+   ========================================= */&#13;
+&#13;
+.status-selected {&#13;
+  background: #dcf8ed;&#13;
+&#13;
+  color: #16845c;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   REJECTED&#13;
+   ========================================= */&#13;
+&#13;
+.status-rejected {&#13;
+  background: #ffe5e5;&#13;
+&#13;
+  color: #d84b4b;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   ACTION&#13;
+   ========================================= */&#13;
+&#13;
+.action-cell {&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  justify-content: center;&#13;
+}&#13;
+&#13;
+&#13;
+/* View button */&#13;
+.application-view {&#13;
+  border: none;&#13;
+&#13;
+  background: transparent;&#13;
+&#13;
+  color: #5b52e8;&#13;
+&#13;
+  font-size: 10px;&#13;
+&#13;
+  font-weight: 500;&#13;
+&#13;
+  cursor: pointer;&#13;
+&#13;
+  padding: 4px 0;&#13;
+&#13;
+  text-align: center;&#13;
+&#13;
+  white-space: nowrap;&#13;
+}&#13;
+&#13;
+&#13;
+/* Hover */&#13;
+.application-view:hover {&#13;
+  color: #3f36c9;&#13;
+&#13;
+  text-decoration: underline;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   EMPTY TABLE&#13;
+   ========================================= */&#13;
+&#13;
+.empty-table {&#13;
+  width: 100%;&#13;
+&#13;
+  margin-top: 18px;&#13;
+}&#13;
+&#13;
+&#13;
+.empty-row {&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  justify-content: center;&#13;
+&#13;
+  min-height: 90px;&#13;
+&#13;
+  color: #9a9db5;&#13;
+&#13;
+  font-size: 11px;&#13;
+&#13;
+  text-align: center;&#13;
+}&#13;
+&#13;
+&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   UPCOMING INTERVIEWS&#13;
+   ========================================= */&#13;
+&#13;
+.upcoming-interviews-panel {&#13;
+  min-height: 250px;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   INTERVIEW LIST&#13;
+   ========================================= */&#13;
+&#13;
+.interview-list {&#13;
+  width: 100%;&#13;
+  margin-top: 18px;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   INTERVIEW CARD&#13;
+   ========================================= */&#13;
+&#13;
+.interview-card {&#13;
+  display: flex;&#13;
+  align-items: center;&#13;
+&#13;
+  width: 100%;&#13;
+  min-height: 78px;&#13;
+&#13;
+  padding: 12px 14px;&#13;
+&#13;
+  background: #ffffff;&#13;
+&#13;
+  border: 1px solid #eeeef6;&#13;
+  border-radius: 10px;&#13;
+&#13;
+  box-sizing: border-box;&#13;
+&#13;
+  transition: all 0.2s ease;&#13;
+}&#13;
+&#13;
+&#13;
+/* Multiple interview cards */&#13;
+.interview-card + .interview-card {&#13;
+  margin-top: 10px;&#13;
+}&#13;
+&#13;
+&#13;
+/* Hover */&#13;
+.interview-card:hover {&#13;
+  border-color: #dcd9ff;&#13;
+  box-shadow: 0 4px 12px rgba(75, 70, 180, 0.06);&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   INTERVIEW ICON&#13;
+   ========================================= */&#13;
+&#13;
+.interview-icon {&#13;
+  width: 38px;&#13;
+  height: 38px;&#13;
+&#13;
+  flex-shrink: 0;&#13;
+&#13;
+  display: flex;&#13;
+  align-items: center;&#13;
+  justify-content: center;&#13;
+&#13;
+  margin-right: 12px;&#13;
+&#13;
+  border-radius: 9px;&#13;
+&#13;
+  background: #f0edff;&#13;
+&#13;
+  color: #5b52e8;&#13;
+&#13;
+  font-size: 19px;&#13;
+  font-weight: 500;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   INTERVIEW INFORMATION&#13;
+   ========================================= */&#13;
+&#13;
+.interview-info {&#13;
+  flex: 1;&#13;
+  min-width: 0;&#13;
+}&#13;
+&#13;
+&#13;
+/* Student */&#13;
+.interview-student {&#13;
+  color: #111a4d;&#13;
+&#13;
+  font-size: 13px;&#13;
+  font-weight: 600;&#13;
+&#13;
+  line-height: 1.3;&#13;
+}&#13;
+&#13;
+&#13;
+/* Opportunity */&#13;
+.interview-role {&#13;
+  margin-top: 3px;&#13;
+&#13;
+  color: #596080;&#13;
+&#13;
+  font-size: 11px;&#13;
+&#13;
+  line-height: 1.3;&#13;
+}&#13;
+&#13;
+&#13;
+/* Date */&#13;
+.interview-date {&#13;
+  margin-top: 5px;&#13;
+&#13;
+  color: #777b9a;&#13;
+&#13;
+  font-size: 10px;&#13;
+&#13;
+  line-height: 1.3;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   INTERVIEW MODE&#13;
+   ========================================= */&#13;
+&#13;
+.interview-mode {&#13;
+  flex-shrink: 0;&#13;
+&#13;
+  margin-left: 12px;&#13;
+&#13;
+  padding: 5px 9px;&#13;
+&#13;
+  border-radius: 6px;&#13;
+&#13;
+  background: #f5f4ff;&#13;
+&#13;
+  color: #5b52e8;&#13;
+&#13;
+  font-size: 10px;&#13;
+  font-weight: 500;&#13;
+&#13;
+  white-space: nowrap;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   INTERVIEW STATUS&#13;
+   ========================================= */&#13;
+&#13;
+.interview-status {&#13;
+  flex-shrink: 0;&#13;
+&#13;
+  min-width: 70px;&#13;
+&#13;
+  margin-left: 10px;&#13;
+&#13;
+  padding: 6px 10px;&#13;
+&#13;
+  border-radius: 6px;&#13;
+&#13;
+  background: #eee9ff;&#13;
+&#13;
+  color: #635bdb;&#13;
+&#13;
+  font-size: 10px;&#13;
+&#13;
+  font-weight: 500;&#13;
+&#13;
+  text-align: center;&#13;
+&#13;
+  white-space: nowrap;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   EMPTY STATE&#13;
+   ========================================= */&#13;
+&#13;
+.empty-interviews {&#13;
+  min-height: 160px;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  flex-direction: column;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  justify-content: center;&#13;
+&#13;
+  text-align: center;&#13;
+}&#13;
+&#13;
+&#13;
+/* Empty icon */&#13;
+.empty-interviews .placeholder-icon {&#13;
+  width: 42px;&#13;
+  height: 42px;&#13;
+&#13;
+  display: flex;&#13;
+  align-items: center;&#13;
+  justify-content: center;&#13;
+&#13;
+  margin-bottom: 10px;&#13;
+&#13;
+  border-radius: 10px;&#13;
+&#13;
+  background: #f0edff;&#13;
+&#13;
+  color: #5b52e8;&#13;
+&#13;
+  font-size: 20px;&#13;
+}&#13;
+&#13;
+&#13;
+/* Empty title */&#13;
+.empty-interviews strong {&#13;
+  color: #111a4d;&#13;
+&#13;
+  font-size: 12px;&#13;
+}&#13;
+&#13;
+&#13;
+/* Empty description */&#13;
+.empty-interviews p {&#13;
+  margin: 5px 0 0;&#13;
+&#13;
+  color: #9a9db5;&#13;
+&#13;
+  font-size: 10px;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   RESPONSIVE&#13;
+   ========================================= */&#13;
+&#13;
+@media (max-width: 700px) {&#13;
+&#13;
+  .interview-card {&#13;
+    flex-wrap: wrap;&#13;
+  }&#13;
+&#13;
+  .interview-info {&#13;
+    width: calc(100% - 50px);&#13;
+  }&#13;
+&#13;
+  .interview-mode {&#13;
+    margin-left: 50px;&#13;
+    margin-top: 8px;&#13;
+  }&#13;
+&#13;
+  .interview-status {&#13;
+    margin-top: 8px;&#13;
+  }&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =====================================================&#13;
+   QUICK ACTIONS PANEL&#13;
+===================================================== */&#13;
+&#13;
+.quick-actions-panel {&#13;
+    width: 100%;&#13;
+    height: auto !important;&#13;
+    min-height: 0 !important;&#13;
+&#13;
+    padding: 14px 16px !important;&#13;
+&#13;
+    box-sizing: border-box;&#13;
+&#13;
+    overflow: hidden;&#13;
+}&#13;
+&#13;
+&#13;
+/* =====================================================&#13;
+   QUICK ACTIONS HEADER&#13;
+===================================================== */&#13;
+&#13;
+.quick-actions-panel .panel-header {&#13;
+    margin-bottom: 10px;&#13;
+    padding: 0;&#13;
+}&#13;
+&#13;
+.quick-actions-panel .panel-eyebrow {&#13;
+    font-size: 8px;&#13;
+    font-weight: 700;&#13;
+    letter-spacing: 1px;&#13;
+    color: #5267e8;&#13;
+}&#13;
+&#13;
+.quick-actions-panel .panel-header h2 {&#13;
+    margin: 3px 0 0;&#13;
+&#13;
+    font-size: 13px;&#13;
+    font-weight: 700;&#13;
+&#13;
+    color: #102a56;&#13;
+}&#13;
+&#13;
+&#13;
+/* =====================================================&#13;
+   QUICK ACTIONS GRID&#13;
+===================================================== */&#13;
+&#13;
+.quick-actions-grid {&#13;
+    display: grid !important;&#13;
+&#13;
+    grid-template-columns:&#13;
+        repeat(3, minmax(0, 1fr)) !important;&#13;
+&#13;
+    gap: 10px !important;&#13;
+&#13;
+    width: 100%;&#13;
+&#13;
+    align-items: stretch;&#13;
+}&#13;
+&#13;
+&#13;
+/* =====================================================&#13;
+   QUICK ACTION CARD&#13;
+===================================================== */&#13;
+&#13;
+.quick-action-card {&#13;
+    width: 100% !important;&#13;
+&#13;
+    min-width: 0 !important;&#13;
+&#13;
+    height: 58px !important;&#13;
+    min-height: 58px !important;&#13;
+&#13;
+    box-sizing: border-box;&#13;
+&#13;
+    padding: 9px 11px !important;&#13;
+&#13;
+    border: 1px solid #dfe4f2 !important;&#13;
+    border-radius: 8px !important;&#13;
+&#13;
+    background: #ffffff !important;&#13;
+&#13;
+    display: flex !important;&#13;
+    align-items: center !important;&#13;
+&#13;
+    gap: 9px !important;&#13;
+&#13;
+    text-align: left;&#13;
+&#13;
+    cursor: pointer;&#13;
+&#13;
+    overflow: hidden;&#13;
+&#13;
+    transition: 0.15s ease;&#13;
+}&#13;
+&#13;
+&#13;
+/* =====================================================&#13;
+   HOVER&#13;
+===================================================== */&#13;
+&#13;
+.quick-action-card:hover {&#13;
+    background: #f8f9ff !important;&#13;
+&#13;
+    border-color: #cbd4f5 !important;&#13;
+}&#13;
+&#13;
+&#13;
+/* =====================================================&#13;
+   ICON&#13;
+===================================================== */&#13;
+&#13;
+.quick-action-icon {&#13;
+    width: 28px !important;&#13;
+    height: 28px !important;&#13;
+&#13;
+    min-width: 28px !important;&#13;
+    flex-shrink: 0 !important;&#13;
+&#13;
+    border-radius: 7px;&#13;
+&#13;
+    background: #f0efff;&#13;
+&#13;
+    color: #5267e8;&#13;
+&#13;
+    display: flex !important;&#13;
+    align-items: center !important;&#13;
+    justify-content: center !important;&#13;
+&#13;
+    font-size: 14px;&#13;
+}&#13;
+&#13;
+&#13;
+/* =====================================================&#13;
+   CONTENT&#13;
+===================================================== */&#13;
+&#13;
+.quick-action-content {&#13;
+    min-width: 0 !important;&#13;
+&#13;
+    flex: 1 !important;&#13;
+&#13;
+    display: flex !important;&#13;
+    flex-direction: column !important;&#13;
+&#13;
+    justify-content: center;&#13;
+&#13;
+    overflow: hidden;&#13;
+}&#13;
+&#13;
+&#13;
+.quick-action-content strong {&#13;
+    display: block;&#13;
+&#13;
+    font-size: 9px;&#13;
+&#13;
+    font-weight: 700;&#13;
+&#13;
+    color: #173b70;&#13;
+&#13;
+    white-space: nowrap;&#13;
+&#13;
+    overflow: hidden;&#13;
+&#13;
+    text-overflow: ellipsis;&#13;
+}&#13;
+&#13;
+&#13;
+.quick-action-content span {&#13;
+    display: block;&#13;
+&#13;
+    margin-top: 2px;&#13;
+&#13;
+    font-size: 7px;&#13;
+&#13;
+    line-height: 1.3;&#13;
+&#13;
+    color: #8a96aa;&#13;
+&#13;
+    white-space: nowrap;&#13;
+&#13;
+    overflow: hidden;&#13;
+&#13;
+    text-overflow: ellipsis;&#13;
+}&#13;
+&#13;
+&#13;
+/* =====================================================&#13;
+   ARROW&#13;
+===================================================== */&#13;
+&#13;
+.quick-action-arrow {&#13;
+    flex-shrink: 0;&#13;
+&#13;
+    font-size: 11px;&#13;
+&#13;
+    color: #5267e8;&#13;
+}&#13;
+&#13;
+&#13;
+/* =====================================================&#13;
+   MOBILE&#13;
+===================================================== */&#13;
+&#13;
+@media (max-width: 768px) {&#13;
+&#13;
+    .quick-actions-grid {&#13;
+        grid-template-columns: 1fr !important;&#13;
+    }&#13;
+&#13;
+    .quick-action-card {&#13;
+        height: 58px !important;&#13;
+    }&#13;
+&#13;
+}&#13;
+/* =====================================================&#13;
+   DASHBOARD PANEL&#13;
+===================================================== */&#13;
+&#13;
+.c360-panel {&#13;
+    background: #ffffff;&#13;
+    border: 1px solid #dfe4f2;&#13;
+    border-radius: 10px;&#13;
+    overflow: hidden;&#13;
+&#13;
+    height: 380px;&#13;
+    display: flex;&#13;
+    flex-direction: column;&#13;
+}&#13;
+&#13;
+&#13;
+/* =====================================================&#13;
+   PANEL HEADER&#13;
+===================================================== */&#13;
+&#13;
+.c360-panel-header {&#13;
+    padding: 14px 16px 10px;&#13;
+&#13;
+    display: flex;&#13;
+    align-items: flex-start;&#13;
+    justify-content: space-between;&#13;
+&#13;
+    flex-shrink: 0;&#13;
+}&#13;
+&#13;
+&#13;
+.c360-panel-eyebrow {&#13;
+    font-size: 8px;&#13;
+    font-weight: 700;&#13;
+    letter-spacing: 1px;&#13;
+    color: #5267e8;&#13;
+}&#13;
+&#13;
+&#13;
+.c360-panel-header h3 {&#13;
+    margin: 3px 0 0;&#13;
+&#13;
+    font-size: 13px;&#13;
+    font-weight: 700;&#13;
+&#13;
+    color: #102a56;&#13;
+}&#13;
+&#13;
+&#13;
+/* =====================================================&#13;
+   VIEW ALL&#13;
+===================================================== */&#13;
+&#13;
+.c360-view-all {&#13;
+    font-size: 8px;&#13;
+    font-weight: 600;&#13;
+&#13;
+    color: #5267e8;&#13;
+&#13;
+    text-decoration: none;&#13;
+&#13;
+    white-space: nowrap;&#13;
+}&#13;
+&#13;
+&#13;
+.c360-view-all:hover {&#13;
+    color: #3047c8;&#13;
+    text-decoration: none;&#13;
+}&#13;
+&#13;
+&#13;
+/* =====================================================&#13;
+   PANEL BODY&#13;
+===================================================== */&#13;
+&#13;
+.c360-panel-body {&#13;
+    flex: 1;&#13;
+&#13;
+    padding: 0 12px 12px;&#13;
+&#13;
+    overflow: hidden;&#13;
+}&#13;
+&#13;
+&#13;
+&#13;
+&#13;
+&#13;
+&#13;
+&#13;
+&#13;
+&#13;
+&#13;
+&#13;
+&#13;
+&#13;
+&#13;
+&#13;
+&#13;
+&#13;
+&#13;
+&#13;
+&#13;
+&#13;
+&#13;
+&#13;
+&#13;
+/* =====================================================&#13;
+   QUICK ACTION TEXT — INCREASED SIZE&#13;
+===================================================== */&#13;
+&#13;
+.quick-action-content strong {&#13;
+    display: block;&#13;
+&#13;
+    font-size: 12px !important;&#13;
+    line-height: 1.25;&#13;
+&#13;
+    font-weight: 700;&#13;
+&#13;
+    color: #173b70;&#13;
+&#13;
+    white-space: nowrap;&#13;
+&#13;
+    overflow: hidden;&#13;
+&#13;
+    text-overflow: ellipsis;&#13;
+}&#13;
+&#13;
+&#13;
+.quick-action-content span {&#13;
+    display: block;&#13;
+&#13;
+    margin-top: 3px;&#13;
+&#13;
+    font-size: 9px !important;&#13;
+    line-height: 1.3;&#13;
+&#13;
+    color: #71809c;&#13;
+&#13;
+    white-space: nowrap;&#13;
+&#13;
+    overflow: hidden;&#13;
+&#13;
+    text-overflow: ellipsis;&#13;
+}&#13;
+&#13;
+&#13;
+.quick-action-arrow {&#13;
+    flex-shrink: 0;&#13;
+&#13;
+    font-size: 13px !important;&#13;
+&#13;
+    color: #5267e8;&#13;
+}&#13;
+&#13;
+&#13;
+&#13;
+&#13;
+&#13;
+&#13;
+&#13;
+&#13;
+&#13;
+&#13;
+&#13;
+&#13;
+&#13;
+&#13;
+&#13;
+&#13;
+&#13;
+&#13;
+&#13;
+&#13;
+&#13;
+&#13;
+&#13;
+&#13;
+&#13;
+&#13;
+&#13;
+/* =====================================================&#13;
+   APPLICATION STATUS PANEL&#13;
+===================================================== */&#13;
+&#13;
+.application-status-panel {&#13;
+    height: 380px;&#13;
+    min-height: 380px;&#13;
+&#13;
+    display: flex;&#13;
+    flex-direction: column;&#13;
+&#13;
+    box-sizing: border-box;&#13;
+}&#13;
+&#13;
+&#13;
+/* =====================================================&#13;
+   HEADER&#13;
+===================================================== */&#13;
+&#13;
+.application-status-panel .panel-header {&#13;
+    padding: 16px 18px 0;&#13;
+&#13;
+    display: flex;&#13;
+    align-items: flex-start;&#13;
+    justify-content: space-between;&#13;
+&#13;
+    flex-shrink: 0;&#13;
+}&#13;
+&#13;
+&#13;
+.application-status-panel .panel-eyebrow {&#13;
+    font-size: 9px;&#13;
+&#13;
+    font-weight: 700;&#13;
+&#13;
+    letter-spacing: 1px;&#13;
+&#13;
+    color: #5267e8;&#13;
+}&#13;
+&#13;
+&#13;
+.application-status-panel .panel-header h2 {&#13;
+    margin: 4px 0 0;&#13;
+&#13;
+    font-size: 15px;&#13;
+&#13;
+    font-weight: 700;&#13;
+&#13;
+    color: #102a56;&#13;
+}&#13;
+&#13;
+&#13;
+/* =====================================================&#13;
+   VIEW DETAILS&#13;
+===================================================== */&#13;
+&#13;
+.application-view-details {&#13;
+    margin-top: 1px;&#13;
+&#13;
+    font-size: 10px;&#13;
+&#13;
+    font-weight: 600;&#13;
+&#13;
+    color: #5267e8;&#13;
+&#13;
+    text-decoration: none;&#13;
+&#13;
+    white-space: nowrap;&#13;
+&#13;
+    cursor: pointer;&#13;
+}&#13;
+&#13;
+&#13;
+.application-view-details:hover {&#13;
+    color: #3047c8;&#13;
+&#13;
+    text-decoration: none;&#13;
+}&#13;
+&#13;
+&#13;
+/* =====================================================&#13;
+   STATUS CONTENT&#13;
+===================================================== */&#13;
+&#13;
+.application-status-content {&#13;
+&#13;
+    flex: 1;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    justify-content: center;&#13;
+&#13;
+    gap: 30px;&#13;
+&#13;
+    padding: 10px 20px 25px;&#13;
+}&#13;
+&#13;
+&#13;
+/* =====================================================&#13;
+   DONUT&#13;
+===================================================== */&#13;
+&#13;
+.application-donut {&#13;
+&#13;
+    width: 105px;&#13;
+    height: 105px;&#13;
+&#13;
+    flex-shrink: 0;&#13;
+&#13;
+    border-radius: 50%;&#13;
+&#13;
+    background:&#13;
+        conic-gradient(&#13;
+            #6268e8 0deg,&#13;
+            #6268e8 360deg&#13;
+        );&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    flex-direction: column;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    justify-content: center;&#13;
+&#13;
+    position: relative;&#13;
+}&#13;
+&#13;
+&#13;
+/* WHITE INNER CIRCLE */&#13;
+&#13;
+.application-donut::after {&#13;
+&#13;
+    content: "";&#13;
+&#13;
+    position: absolute;&#13;
+&#13;
+    width: 81px;&#13;
+    height: 81px;&#13;
+&#13;
+    background: #ffffff;&#13;
+&#13;
+    border-radius: 50%;&#13;
+}&#13;
+&#13;
+&#13;
+/* NUMBER */&#13;
+&#13;
+.donut-number {&#13;
+&#13;
+    position: relative;&#13;
+&#13;
+    z-index: 2;&#13;
+&#13;
+    font-size: 24px;&#13;
+&#13;
+    font-weight: 700;&#13;
+&#13;
+    line-height: 1;&#13;
+&#13;
+    color: #102a56;&#13;
+}&#13;
+&#13;
+&#13;
+/* LABEL */&#13;
+&#13;
+.donut-label {&#13;
+&#13;
+    position: relative;&#13;
+&#13;
+    z-index: 2;&#13;
+&#13;
+    margin-top: 6px;&#13;
+&#13;
+    font-size: 9px;&#13;
+&#13;
+    color: #8793aa;&#13;
+}&#13;
+&#13;
+&#13;
+/* =====================================================&#13;
+   LEGEND&#13;
+===================================================== */&#13;
+&#13;
+.application-status-legend {&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    flex-direction: column;&#13;
+&#13;
+    gap: 14px;&#13;
+&#13;
+    min-width: 125px;&#13;
+}&#13;
+&#13;
+&#13;
+.status-legend-row {&#13;
+&#13;
+    display: grid;&#13;
+&#13;
+    grid-template-columns:&#13;
+        9px 1fr auto;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    column-gap: 8px;&#13;
+}&#13;
+&#13;
+&#13;
+.status-dot {&#13;
+&#13;
+    width: 8px;&#13;
+    height: 8px;&#13;
+&#13;
+    border-radius: 50%;&#13;
+}&#13;
+&#13;
+&#13;
+.pending-dot {&#13;
+    background: #f5a623;&#13;
+}&#13;
+&#13;
+&#13;
+.submitted-dot {&#13;
+    background: #98a2b5;&#13;
+}&#13;
+&#13;
+&#13;
+.selected-dot {&#13;
+    background: #5c63e8;&#13;
+}&#13;
+&#13;
+&#13;
+.status-name {&#13;
+&#13;
+    font-size: 11px;&#13;
+&#13;
+    color: #66758f;&#13;
+}&#13;
+&#13;
+&#13;
+.status-legend-row strong {&#13;
+&#13;
+    font-size: 11px;&#13;
+&#13;
+    font-weight: 700;&#13;
+&#13;
+    color: #193964;&#13;
+}&#13;
+&#13;
+&#13;
+.shortlisted-dot {&#13;
+    background: #8a55df;&#13;
+}&#13;
+&#13;
+.rejected-dot {&#13;
+    background: #e45b5b;&#13;
+}&#13;
+&#13;
+&#13;
+&#13;
+&#13;
+/* ============================================&#13;
+   TOP HEADER&#13;
+============================================ */&#13;
+&#13;
+.c360-topbar {&#13;
+    position: relative;&#13;
+&#13;
+    height: 76px;&#13;
+&#13;
+    background: #ffffff;&#13;
+&#13;
+    border-bottom: 1px solid #e3e7f2;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    justify-content: space-between;&#13;
+&#13;
+    padding: 0 28px;&#13;
+&#13;
+    box-sizing: border-box;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================&#13;
+   SEARCH&#13;
+============================================ */&#13;
+&#13;
+.c360-search {&#13;
+&#13;
+    width: 430px;&#13;
+&#13;
+    height: 44px;&#13;
+&#13;
+    border: 1px solid #d9def0;&#13;
+&#13;
+    border-radius: 10px;&#13;
+&#13;
+    background: #fafbff;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    padding: 0 14px;&#13;
+&#13;
+    box-sizing: border-box;&#13;
+}&#13;
+&#13;
+&#13;
+.search-icon {&#13;
+&#13;
+    font-size: 21px;&#13;
+&#13;
+    color: #5267e8;&#13;
+&#13;
+    margin-right: 10px;&#13;
+}&#13;
+&#13;
+&#13;
+.c360-search input {&#13;
+&#13;
+    border: none;&#13;
+&#13;
+    outline: none;&#13;
+&#13;
+    background: transparent;&#13;
+&#13;
+    width: 100%;&#13;
+&#13;
+    font-size: 14px;&#13;
+&#13;
+    color: #18345f;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-search input::placeholder {&#13;
+&#13;
+    color: #7b89a5;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================&#13;
+   RIGHT SIDE&#13;
+============================================ */&#13;
+&#13;
+.c360-topbar-right {&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 12px;&#13;
+&#13;
+    position: relative;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================&#13;
+   ICON BUTTON&#13;
+============================================ */&#13;
+&#13;
+.topbar-icon-btn {&#13;
+&#13;
+    position: relative;&#13;
+&#13;
+    width: 44px;&#13;
+&#13;
+    height: 44px;&#13;
+&#13;
+    border: 1px solid #dce2f2;&#13;
+&#13;
+    border-radius: 10px;&#13;
+&#13;
+    background: #ffffff;&#13;
+&#13;
+    color: #5267e8;&#13;
+&#13;
+    font-size: 21px;&#13;
+&#13;
+    cursor: pointer;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    justify-content: center;&#13;
+&#13;
+    transition: 0.2s;&#13;
+}&#13;
+&#13;
+&#13;
+.topbar-icon-btn:hover {&#13;
+&#13;
+    background: #f3f4ff;&#13;
+&#13;
+    border-color: #cbd2ff;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================&#13;
+   NOTIFICATION BADGE&#13;
+============================================ */&#13;
+&#13;
+.notification-badge {&#13;
+&#13;
+    position: absolute;&#13;
+&#13;
+    top: -5px;&#13;
+&#13;
+    right: -5px;&#13;
+&#13;
+    min-width: 17px;&#13;
+&#13;
+    height: 17px;&#13;
+&#13;
+    padding: 0 4px;&#13;
+&#13;
+    border-radius: 20px;&#13;
+&#13;
+    background: #e74c5b;&#13;
+&#13;
+    color: white;&#13;
+&#13;
+    font-size: 9px;&#13;
+&#13;
+    font-weight: 700;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    justify-content: center;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================&#13;
+   RECRUITER PROFILE&#13;
+============================================ */&#13;
+&#13;
+.recruiter-profile-btn {&#13;
+&#13;
+    border: none;&#13;
+&#13;
+    background: transparent;&#13;
+&#13;
+    cursor: pointer;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 11px;&#13;
+&#13;
+    padding: 5px 8px;&#13;
+&#13;
+    border-radius: 10px;&#13;
+&#13;
+    text-align: left;&#13;
+}&#13;
+&#13;
+&#13;
+.recruiter-profile-btn:hover {&#13;
+&#13;
+    background: #f5f6ff;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* AVATAR */&#13;
+&#13;
+.recruiter-avatar {&#13;
+&#13;
+    width: 40px;&#13;
+&#13;
+    height: 40px;&#13;
+&#13;
+    border-radius: 50%;&#13;
+&#13;
+    background: #5a55e8;&#13;
+&#13;
+    color: white;&#13;
+&#13;
+    font-size: 13px;&#13;
+&#13;
+    font-weight: 700;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    justify-content: center;&#13;
+}&#13;
+&#13;
+&#13;
+/* RECRUITER TEXT */&#13;
+&#13;
+.recruiter-info {&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    flex-direction: column;&#13;
+&#13;
+    gap: 3px;&#13;
+}&#13;
+&#13;
+&#13;
+.recruiter-info strong {&#13;
+&#13;
+    color: #122b59;&#13;
+&#13;
+    font-size: 14px;&#13;
+&#13;
+    line-height: 1.2;&#13;
+}&#13;
+&#13;
+&#13;
+.recruiter-info span {&#13;
+&#13;
+    color: #7c89a5;&#13;
+&#13;
+    font-size: 11px;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================&#13;
+   NOTIFICATION DROPDOWN&#13;
+============================================ */&#13;
+&#13;
+.notification-dropdown {&#13;
+&#13;
+    position: absolute;&#13;
+&#13;
+    top: 66px;&#13;
+&#13;
+    right: 145px;&#13;
+&#13;
+    width: 330px;&#13;
+&#13;
+    background: white;&#13;
+&#13;
+    border: 1px solid #dfe4f2;&#13;
+&#13;
+    border-radius: 12px;&#13;
+&#13;
+    box-shadow:&#13;
+        0 12px 30px rgba(30, 50, 100, 0.14);&#13;
+&#13;
+    z-index: 1000;&#13;
+&#13;
+    overflow: hidden;&#13;
+}&#13;
+&#13;
+&#13;
+/* HEADER */&#13;
+&#13;
+.notification-header {&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    justify-content: space-between;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    padding: 15px 17px;&#13;
+&#13;
+    border-bottom: 1px solid #edf0f6;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.notification-header strong {&#13;
+&#13;
+    font-size: 14px;&#13;
+&#13;
+    color: #173766;&#13;
+}&#13;
+&#13;
+&#13;
+.notification-header span {&#13;
+&#13;
+    background: #eeeefe;&#13;
+&#13;
+    color: #5752e8;&#13;
+&#13;
+    border-radius: 12px;&#13;
+&#13;
+    padding: 3px 8px;&#13;
+&#13;
+    font-size: 10px;&#13;
+&#13;
+    font-weight: 700;&#13;
+}&#13;
+&#13;
+&#13;
+/* ITEM */&#13;
+&#13;
+.notification-item {&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    gap: 11px;&#13;
+&#13;
+    padding: 14px 17px;&#13;
+&#13;
+    border-bottom: 1px solid #f0f2f7;&#13;
+}&#13;
+&#13;
+&#13;
+.notification-dot {&#13;
+&#13;
+    width: 8px;&#13;
+&#13;
+    height: 8px;&#13;
+&#13;
+    background: #5a55e8;&#13;
+&#13;
+    border-radius: 50%;&#13;
+&#13;
+    margin-top: 5px;&#13;
+&#13;
+    flex-shrink: 0;&#13;
+}&#13;
+&#13;
+&#13;
+.notification-item strong {&#13;
+&#13;
+    display: block;&#13;
+&#13;
+    font-size: 12px;&#13;
+&#13;
+    color: #193762;&#13;
+&#13;
+    margin-bottom: 4px;&#13;
+}&#13;
+&#13;
+&#13;
+.notification-item span {&#13;
+&#13;
+    display: block;&#13;
+&#13;
+    font-size: 10px;&#13;
+&#13;
+    line-height: 1.5;&#13;
+&#13;
+    color: #7b89a4;&#13;
+}&#13;
+&#13;
+&#13;
+/* EMPTY */&#13;
+&#13;
+.notification-empty {&#13;
+&#13;
+    padding: 25px;&#13;
+&#13;
+    text-align: center;&#13;
+&#13;
+    font-size: 12px;&#13;
+&#13;
+    color: #7d89a3;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================&#13;
+   SEARCH WRAPPER&#13;
+============================================ */&#13;
+&#13;
+.c360-search-wrapper {&#13;
+&#13;
+    position: relative;&#13;
+&#13;
+    width: 430px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================&#13;
+   SEARCH RESULTS&#13;
+============================================ */&#13;
+&#13;
+.c360-search-results {&#13;
+&#13;
+    position: absolute;&#13;
+&#13;
+    top: 52px;&#13;
+&#13;
+    left: 0;&#13;
+&#13;
+    width: 100%;&#13;
+&#13;
+    background: #ffffff;&#13;
+&#13;
+    border: 1px solid #dfe4f2;&#13;
+&#13;
+    border-radius: 12px;&#13;
+&#13;
+    box-shadow:&#13;
+        0 12px 30px rgba(30, 50, 100, 0.14);&#13;
+&#13;
+    overflow: hidden;&#13;
+&#13;
+    z-index: 2000;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================&#13;
+   RESULT&#13;
+============================================ */&#13;
+&#13;
+.search-result {&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 12px;&#13;
+&#13;
+    padding: 12px 14px;&#13;
+&#13;
+    cursor: pointer;&#13;
+&#13;
+    border-bottom: 1px solid #f0f2f7;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.search-result:hover {&#13;
+&#13;
+    background: #f7f8ff;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.search-result:last-child {&#13;
+&#13;
+    border-bottom: none;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================&#13;
+   RESULT ICON&#13;
+============================================ */&#13;
+&#13;
+.search-result-icon {&#13;
+&#13;
+    width: 34px;&#13;
+&#13;
+    height: 34px;&#13;
+&#13;
+    border-radius: 8px;&#13;
+&#13;
+    background: #eeeeff;&#13;
+&#13;
+    color: #5752e8;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    justify-content: center;&#13;
+&#13;
+    font-size: 14px;&#13;
+&#13;
+    flex-shrink: 0;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================&#13;
+   RESULT CONTENT&#13;
+============================================ */&#13;
+&#13;
+.search-result-content {&#13;
+&#13;
+    flex: 1;&#13;
+&#13;
+    min-width: 0;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.search-result-content strong {&#13;
+&#13;
+    display: block;&#13;
+&#13;
+    font-size: 12px;&#13;
+&#13;
+    color: #173766;&#13;
+&#13;
+    margin-bottom: 3px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.search-result-content span {&#13;
+&#13;
+    display: block;&#13;
+&#13;
+    font-size: 10px;&#13;
+&#13;
+    color: #7b89a4;&#13;
+&#13;
+    white-space: nowrap;&#13;
+&#13;
+    overflow: hidden;&#13;
+&#13;
+    text-overflow: ellipsis;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================&#13;
+   RESULT TYPE&#13;
+============================================ */&#13;
+&#13;
+.search-result-type {&#13;
+&#13;
+    font-size: 9px;&#13;
+&#13;
+    font-weight: 600;&#13;
+&#13;
+    color: #5752e8;&#13;
+&#13;
+    background: #eeeeff;&#13;
+&#13;
+    padding: 4px 7px;&#13;
+&#13;
+    border-radius: 10px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================&#13;
+   NO RESULTS&#13;
+============================================ */&#13;
+&#13;
+.search-no-results {&#13;
+&#13;
+    padding: 22px;&#13;
+&#13;
+    text-align: center;&#13;
+&#13;
+    font-size: 11px;&#13;
+&#13;
+    color: #7b89a4;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.search-no-results strong {&#13;
+&#13;
+    color: #173766;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =====================================================&#13;
+   SEARCH&#13;
+===================================================== */&#13;
+&#13;
+.c360-search-wrapper {&#13;
+    position: relative;&#13;
+    width: 430px;&#13;
+}&#13;
+&#13;
+&#13;
+.c360-search-box {&#13;
+    height: 48px;&#13;
+&#13;
+    background: #ffffff;&#13;
+&#13;
+    border: 1px solid #d9def3;&#13;
+&#13;
+    border-radius: 10px;&#13;
+&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+&#13;
+    padding: 0 14px;&#13;
+&#13;
+    box-sizing: border-box;&#13;
+}&#13;
+&#13;
+&#13;
+.c360-search-box:focus-within {&#13;
+    border-color: #5267e8;&#13;
+&#13;
+    box-shadow:&#13;
+        0 0 0 3px rgba(82, 103, 232, 0.08);&#13;
+}&#13;
+&#13;
+&#13;
+.c360-search-icon {&#13;
+    font-size: 22px;&#13;
+&#13;
+    color: #5267e8;&#13;
+&#13;
+    margin-right: 10px;&#13;
+}&#13;
+&#13;
+&#13;
+.c360-search-input {&#13;
+    border: none !important;&#13;
+&#13;
+    outline: none !important;&#13;
+&#13;
+    box-shadow: none !important;&#13;
+&#13;
+    background: transparent !important;&#13;
+&#13;
+    width: 100%;&#13;
+&#13;
+    height: 100%;&#13;
+&#13;
+    font-size: 15px;&#13;
+&#13;
+    color: #173b70;&#13;
+}&#13;
+&#13;
+&#13;
+.c360-search-input::placeholder {&#13;
+    color: #8793ad;&#13;
+}&#13;
+&#13;
+&#13;
+.c360-search-clear {&#13;
+    border: none;&#13;
+&#13;
+    background: transparent;&#13;
+&#13;
+    color: #7b88a5;&#13;
+&#13;
+    font-size: 20px;&#13;
+&#13;
+    cursor: pointer;&#13;
+&#13;
+    padding: 0 4px;&#13;
+}&#13;
+&#13;
+&#13;
+/* =====================================================&#13;
+   SEARCH RESULTS&#13;
+===================================================== */&#13;
+&#13;
+.c360-search-results {&#13;
+&#13;
+    position: absolute;&#13;
+&#13;
+    top: 55px;&#13;
+&#13;
+    left: 0;&#13;
+&#13;
+    width: 100%;&#13;
+&#13;
+    background: #ffffff;&#13;
+&#13;
+    border: 1px solid #dce2f2;&#13;
+&#13;
+    border-radius: 12px;&#13;
+&#13;
+    box-shadow:&#13;
+        0 12px 30px rgba(30, 50, 100, 0.12);&#13;
+&#13;
+    overflow: hidden;&#13;
+&#13;
+    z-index: 9999;&#13;
+}&#13;
+&#13;
+&#13;
+.search-result {&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 12px;&#13;
+&#13;
+    padding: 13px 15px;&#13;
+&#13;
+    cursor: pointer;&#13;
+&#13;
+    border-bottom: 1px solid #f0f2f8;&#13;
+}&#13;
+&#13;
+&#13;
+.search-result:last-child {&#13;
+    border-bottom: none;&#13;
+}&#13;
+&#13;
+&#13;
+.search-result:hover {&#13;
+    background: #f7f8ff;&#13;
+}&#13;
+&#13;
+&#13;
+.search-result-icon {&#13;
+&#13;
+    width: 34px;&#13;
+&#13;
+    height: 34px;&#13;
+&#13;
+    border-radius: 8px;&#13;
+&#13;
+    background: #eeedff;&#13;
+&#13;
+    color: #5267e8;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    justify-content: center;&#13;
+&#13;
+    flex-shrink: 0;&#13;
+}&#13;
+&#13;
+&#13;
+.search-result-content {&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    flex-direction: column;&#13;
+&#13;
+    gap: 4px;&#13;
+&#13;
+    flex: 1;&#13;
+&#13;
+    min-width: 0;&#13;
+}&#13;
+&#13;
+&#13;
+.search-result-content strong {&#13;
+&#13;
+    font-size: 14px;&#13;
+&#13;
+    color: #102a56;&#13;
+}&#13;
+&#13;
+&#13;
+.search-result-content span {&#13;
+&#13;
+    font-size: 11px;&#13;
+&#13;
+    color: #7a89a5;&#13;
+}&#13;
+&#13;
+&#13;
+.search-result-type {&#13;
+&#13;
+    font-size: 10px;&#13;
+&#13;
+    font-weight: 600;&#13;
+&#13;
+    color: #5267e8;&#13;
+&#13;
+    background: #f0efff;&#13;
+&#13;
+    padding: 5px 8px;&#13;
+&#13;
+    border-radius: 10px;&#13;
+}&#13;
+&#13;
+&#13;
+.search-message {&#13;
+&#13;
+    padding: 20px;&#13;
+&#13;
+    text-align: center;&#13;
+&#13;
+    font-size: 13px;&#13;
+&#13;
+    color: #8491ad;&#13;
+}&#13;
+&#13;
+&#13;
+.search-message strong {&#13;
+    color: #173b70;&#13;
+}&#13;
+&#13;
+&#13;
+&#13;
+&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   SIDEBAR TOGGLE BUTTON&#13;
+========================================================= */&#13;
+&#13;
+.c360-menu-btn {&#13;
+&#13;
+    width: 42px;&#13;
+    height: 42px;&#13;
+&#13;
+    border: 1px solid #dce3ef;&#13;
+&#13;
+    border-radius: 9px;&#13;
+&#13;
+    background: #ffffff;&#13;
+&#13;
+    color: #182a4d;&#13;
+&#13;
+    font-size: 21px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    justify-content: center;&#13;
+&#13;
+    cursor: pointer;&#13;
+&#13;
+    transition: all 0.2s ease;&#13;
+&#13;
+    flex-shrink: 0;&#13;
+}&#13;
+&#13;
+&#13;
+.c360-menu-btn:hover {&#13;
+&#13;
+    background: #f3f6ff;&#13;
+&#13;
+    border-color: #536dfe;&#13;
+&#13;
+    color: #536dfe;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   SIDEBAR TRANSITION&#13;
+========================================================= */&#13;
+&#13;
+.c360-sidebar {&#13;
+&#13;
+    width: 250px;&#13;
+&#13;
+    flex-shrink: 0;&#13;
+&#13;
+    transition:&#13;
+        width 0.25s ease,&#13;
+        padding 0.25s ease;&#13;
+&#13;
+    overflow: hidden;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   MAIN CONTENT TRANSITION&#13;
+========================================================= */&#13;
+&#13;
+.c360-main {&#13;
+&#13;
+    flex: 1;&#13;
+&#13;
+    min-width: 0;&#13;
+&#13;
+    transition:&#13;
+        margin-left 0.25s ease,&#13;
+        width 0.25s ease;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   COLLAPSED SIDEBAR&#13;
+========================================================= */&#13;
+&#13;
+.c360-recruiter.sidebar-collapsed&#13;
+.c360-sidebar {&#13;
+&#13;
+    width: 0;&#13;
+&#13;
+    padding-left: 0;&#13;
+&#13;
+    padding-right: 0;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   KEEP MAIN CONTENT FULL WIDTH&#13;
+========================================================= */&#13;
+&#13;
+.c360-recruiter.sidebar-collapsed&#13;
+.c360-main {&#13;
+&#13;
+    width: 100%;&#13;
+&#13;
+}</css>
+        <data_table>sp_instance</data_table>
+        <demo_data/>
+        <description>Fresh recruiter dashboard for Campus360</description>
+        <docs/>
+        <field_list/>
+        <has_preview>false</has_preview>
+        <id>campus360_recruiter_dashboard_new</id>
+        <internal>false</internal>
+        <link><![CDATA[function link(scope, element, attrs, controller) {
+  
+}]]></link>
+        <name>Campus360 Recruiter Dashboard New</name>
+        <option_schema/>
+        <public>false</public>
+        <roles/>
+        <script><![CDATA[(function() {
+
+    // Test recruiter/company
+    data.recruiter_name = 'Ananya Mehta';
+    data.recruiter_id = 'RCR001';
+
+    // TechNova Solutions - CMP001
+    var companySysId = 'e9268662acd303107f44b432e349694b';
+
+    // Company
+    var company = new GlideRecord('x_snc_campus360_company_master');
+
+    if (company.get(companySysId)) {
+        data.company_name = company.getValue('company_name');
+        data.company_id = company.getValue('company_id');
+    }
+
+	// =====================================================
+	// GLOBAL SEARCH
+	// =====================================================
+
+	if (input && input.action == 'search') {
+
+		data.search_results = [];
+
+		var searchText =
+			(input.search_text || '').trim();
+
+
+		if (!searchText) {
+			return;
+		}
+
+
+		var keyword =
+			'%' + searchText + '%';
+
+
+		// =================================================
+		// SEARCH PLACEMENT OPPORTUNITIES
+		// =================================================
+
+		var opportunities =
+			new GlideRecord(
+				'x_snc_campus360_placement_opportunity'
+			);
+
+
+		opportunities.addQuery(
+			'company',
+			companySysId
+		);
+
+
+		var opportunityQuery =
+			opportunities.addQuery(
+				'opportunity_title',
+				'LIKE',
+				searchText
+			);
+
+		opportunityQuery.addOrCondition(
+			'opportunity_id',
+			'LIKE',
+			searchText
+		);
+
+		opportunityQuery.addOrCondition(
+			'job_description',
+			'LIKE',
+			searchText
+		);
+
+		opportunityQuery.addOrCondition(
+			'location',
+			'LIKE',
+			searchText
+		);
+
+
+		opportunities.orderByDesc(
+			'sys_created_on'
+		);
+
+		opportunities.setLimit(5);
+
+		opportunities.query();
+
+
+		while (opportunities.next()) {
+
+			data.search_results.push({
+
+				type: 'Opportunity',
+
+				title:
+					opportunities.getValue(
+						'opportunity_title'
+					),
+
+				subtitle:
+					opportunities.getValue(
+						'opportunity_id'
+					) +
+					' • ' +
+					opportunities.getDisplayValue(
+						'status'
+					),
+
+				page:
+					'campus360_recruiter_opportunities_new'
+
+			});
+
+		}
+
+
+		// =================================================
+		// SEARCH APPLICATIONS
+		// =================================================
+
+		var applications =
+			new GlideRecord(
+				'x_snc_campus360_student_application'
+			);
+
+
+		applications.addQuery(
+			'opportunity.company',
+			companySysId
+		);
+
+
+		var applicationQuery =
+			applications.addQuery(
+				'application_id',
+				'LIKE',
+				searchText
+			);
+
+
+		applicationQuery.addOrCondition(
+			'student.name',
+			'LIKE',
+			searchText
+		);
+
+
+		applications.setLimit(5);
+
+		applications.query();
+
+
+		while (applications.next()) {
+
+			var studentName = 'Student';
+
+			if (applications.student) {
+
+				studentName =
+					applications.student.getDisplayValue();
+
+			}
+
+
+			data.search_results.push({
+
+				type: 'Application',
+
+				title:
+					studentName,
+
+				subtitle:
+					applications.getValue(
+						'application_id'
+					) +
+					' • ' +
+					applications.getDisplayValue(
+						'application_status'
+					),
+
+				page:
+					'campus360_recruiter_applications_new'
+
+			});
+
+		}
+
+
+		// =================================================
+		// SEARCH STUDENTS
+		// =================================================
+
+		var students =
+			new GlideRecord(
+				'x_snc_campus360_student'
+			);
+
+
+		if (students.isValid()) {
+
+			var studentQuery =
+				students.addQuery(
+					'name',
+					'LIKE',
+					searchText
+				);
+
+			studentQuery.addOrCondition(
+				'student_id',
+				'LIKE',
+				searchText
+			);
+
+
+			students.setLimit(5);
+
+			students.query();
+
+
+			while (students.next()) {
+
+				data.search_results.push({
+
+					type: 'Student',
+
+					title:
+						students.getValue('name'),
+
+					subtitle:
+						students.getValue(
+							'student_id'
+						),
+
+					page:
+						'campus360_applications'
+
+				});
+
+			}
+
+		}
+
+
+		return;
+
+	}
+
+    // -----------------------------------------
+    // PLACEMENT OPPORTUNITIES
+    // -----------------------------------------
+
+    var opportunities = new GlideRecord(
+        'x_snc_campus360_placement_opportunity'
+    );
+
+    opportunities.addQuery('company', companySysId);
+    opportunities.addQuery('status', 'Open');
+    opportunities.query();
+
+    data.opportunity_count = opportunities.getRowCount();
+
+	// -----------------------------------------
+	// PLACEMENT OPPORTUNITIES LIST
+	// -----------------------------------------
+
+	data.opportunities = [];
+
+	var opportunityList = new GlideRecord(
+		'x_snc_campus360_placement_opportunity'
+	);
+
+	opportunityList.addQuery('company', companySysId);
+	opportunityList.addQuery('status', 'Open');
+	opportunityList.orderByDesc('sys_created_on');
+	opportunityList.setLimit(2);
+	opportunityList.query();
+
+	while (opportunityList.next()) {
+
+		var opportunity = {};
+
+		opportunity.opportunity_id =
+			opportunityList.getValue('opportunity_id');
+
+		opportunity.title =
+			opportunityList.getValue('opportunity_title');
+
+		opportunity.type =
+			opportunityList.getDisplayValue('opportunity_type');
+
+		opportunity.location =
+			opportunityList.getValue('location');
+
+		opportunity.ctc =
+			opportunityList.getValue('ctc_stipend');
+
+		var deadline = opportunityList.getValue('application_deadline');
+
+		if (deadline) {
+			var deadlineGDT = new GlideDateTime(deadline);
+			opportunity.deadline = deadlineGDT.getDate().getByFormat('dd MMM yyyy');
+		} else {
+			opportunity.deadline = '';
+		}
+
+		opportunity.status =
+			opportunityList.getDisplayValue('status');
+
+		data.opportunities.push(opportunity);
+	}
+
+
+    // -----------------------------------------
+    // STUDENT APPLICATIONS
+    // -----------------------------------------
+
+    var applications = new GlideRecord(
+        'x_snc_campus360_student_application'
+    );
+
+    // Application -> Opportunity -> Company
+    applications.addQuery(
+        'opportunity.company',
+        companySysId
+    );
+
+    applications.query();
+
+    data.application_count = applications.getRowCount();
+
+	// -----------------------------------------
+	// APPLICATION PIPELINE
+	// -----------------------------------------
+
+	// PENDING
+	var pending = new GlideAggregate(
+		'x_snc_campus360_student_application'
+	);
+
+	pending.addQuery(
+		'opportunity.company',
+		companySysId
+	);
+
+	pending.addQuery(
+		'application_status',
+		'Pending'
+	);
+
+	pending.addAggregate('COUNT');
+	pending.query();
+
+	data.pending_count = 0;
+
+	if (pending.next()) {
+		data.pending_count = parseInt(
+			pending.getAggregate('COUNT'),
+			10
+		);
+	}
+
+
+	// SUBMITTED
+	var submitted = new GlideAggregate(
+		'x_snc_campus360_student_application'
+	);
+
+	submitted.addQuery(
+		'opportunity.company',
+		companySysId
+	);
+
+	submitted.addQuery(
+		'application_status',
+		'Submitted'
+	);
+
+	submitted.addAggregate('COUNT');
+	submitted.query();
+
+	data.submitted_count = 0;
+
+	if (submitted.next()) {
+		data.submitted_count = parseInt(
+			submitted.getAggregate('COUNT'),
+			10
+		);
+	}
+
+
+	// SHORTLISTED
+	var shortlisted = new GlideAggregate(
+		'x_snc_campus360_student_application'
+	);
+
+	shortlisted.addQuery(
+		'opportunity.company',
+		companySysId
+	);
+
+	shortlisted.addQuery(
+		'application_status',
+		'Shortlisted'
+	);
+
+	shortlisted.addAggregate('COUNT');
+	shortlisted.query();
+
+	data.shortlisted_count = 0;
+
+	if (shortlisted.next()) {
+		data.shortlisted_count = parseInt(
+			shortlisted.getAggregate('COUNT'),
+			10
+		);
+	}
+
+
+	// SELECTED
+	var selected = new GlideAggregate(
+		'x_snc_campus360_student_application'
+	);
+
+	selected.addQuery(
+		'opportunity.company',
+		companySysId
+	);
+
+	selected.addQuery(
+		'application_status',
+		'Selected'
+	);
+
+	selected.addAggregate('COUNT');
+	selected.query();
+
+	data.selected_count = 0;
+
+	if (selected.next()) {
+		data.selected_count = parseInt(
+			selected.getAggregate('COUNT'),
+			10
+		);
+	}
+
+
+	// REJECTED
+	var rejected = new GlideAggregate(
+		'x_snc_campus360_student_application'
+	);
+
+	rejected.addQuery(
+		'opportunity.company',
+		companySysId
+	);
+
+	rejected.addQuery(
+		'application_status',
+		'Rejected'
+	);
+
+	rejected.addAggregate('COUNT');
+	rejected.query();
+
+	data.rejected_count = 0;
+
+	if (rejected.next()) {
+		data.rejected_count = parseInt(
+			rejected.getAggregate('COUNT'),
+			10
+		);
+	}
+
+
+	// -----------------------------------------
+	// TOTAL APPLICATIONS
+	// -----------------------------------------
+
+	// Always use the actual application record count
+	data.total_application_count =
+		data.application_count;
+	// -----------------------------------------
+	// RECENT APPLICATIONS
+	// -----------------------------------------
+
+	var recentApplications = new GlideRecord(
+		'x_snc_campus360_student_application'
+	);
+
+	recentApplications.addQuery(
+		'opportunity.company',
+		companySysId
+	);
+
+	recentApplications.orderByDesc('applied_date');
+	recentApplications.setLimit(5);
+	recentApplications.query();
+
+	data.recent_applications = [];
+
+	while (recentApplications.next()) {
+
+		var application = {};
+
+		// Application ID
+		application.application_id =
+			recentApplications.getValue('application_id');
+
+		// Student
+		if (recentApplications.student) {
+			application.student_name =
+				recentApplications.student.getDisplayValue();
+		} else {
+			application.student_name = 'Student';
+		}
+
+		// Opportunity / Role
+		if (recentApplications.opportunity) {
+
+			var opportunityGR = recentApplications.opportunity.getRefRecord();
+
+			if (opportunityGR.isValidRecord()) {
+				application.role =
+					opportunityGR.getValue('opportunity_title');
+			} else {
+				application.role = 'Placement Opportunity';
+			}
+
+		} else {
+			application.role = 'Placement Opportunity';
+		}
+
+		// Application status
+		application.status =
+			recentApplications.getDisplayValue('application_status');
+
+		// Applied date
+		application.applied_date =
+			recentApplications.getDisplayValue('applied_date');
+
+		data.recent_applications.push(application);
+	}
+
+	// -----------------------------------------
+	// RECRUITER INTERVIEWS
+	// -----------------------------------------
+
+	var interviews = new GlideRecord(
+		'x_snc_campus360_recruiter_interview'
+	);
+
+	// Interview -> Opportunity -> Company
+	interviews.addQuery(
+		'opportunity.company',
+		companySysId
+	);
+
+	// Count only scheduled interviews
+	interviews.addQuery('status', 'scheduled');
+
+	interviews.query();
+
+	data.interview_count = interviews.getRowCount();
+
+	// -----------------------------------------
+	// UPCOMING INTERVIEWS
+	// -----------------------------------------
+
+	var interviews = new GlideRecord('x_snc_campus360_recruiter_interview');
+
+	interviews.addQuery('opportunity.company', companySysId);
+	interviews.addQuery('interview_date', '>=', new GlideDateTime());
+	interviews.orderBy('interview_date');
+	interviews.setLimit(2);
+	interviews.query();
+
+	data.upcoming_interviews = [];
+
+	while (interviews.next()) {
+
+		var interview = {};
+
+		interview.interview_id = interviews.getValue('interview_id');
+		interview.interview_date = interviews.getValue('interview_date');
+		interview.interviewer = interviews.getValue('interviewer');
+		interview.interview_mode = interviews.getDisplayValue('interview_mode');
+		interview.meeting_link = interviews.getValue('meeting_link');
+		interview.status = interviews.getDisplayValue('status');
+
+		// Student
+		if (interviews.student) {
+			interview.student_name =
+				interviews.student.getDisplayValue();
+		} else {
+			interview.student_name = 'Student';
+		}
+
+		// Opportunity
+		if (interviews.opportunity) {
+			interview.opportunity_title =
+				interviews.opportunity.getDisplayValue();
+		} else {
+			interview.opportunity_title = 'Placement Interview';
+		}
+
+		data.upcoming_interviews.push(interview);
+	}
+
+	// -----------------------------------------
+	// OFFERS MADE
+	// -----------------------------------------
+
+	var offers = new GlideAggregate(
+		'x_snc_campus360_student_application'
+	);
+
+	offers.addQuery(
+		'opportunity.company',
+		companySysId
+	);
+
+	offers.addQuery(
+		'offer_status',
+		'Offered'
+	);
+
+	offers.addAggregate('COUNT');
+
+	offers.query();
+
+	data.offer_count = 0;
+
+	if (offers.next()) {
+
+		data.offer_count =
+			parseInt(
+				offers.getAggregate('COUNT'),
+				10
+			);
+
+	}
+
+
+})();]]></script>
+        <servicenow>false</servicenow>
+        <sys_class_name>sp_widget</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-26 16:46:59</sys_created_on>
+        <sys_id>ed2fef3509e743107f442a080dcb42c5</sys_id>
+        <sys_mod_count>87</sys_mod_count>
+        <sys_name>Campus360 Recruiter Dashboard New</sys_name>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name>sp_widget_ed2fef3509e743107f442a080dcb42c5</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-10-02 05:39:55</sys_updated_on>
+        <template><![CDATA[<div
+  class="c360-recruiter"
+  ng-class="{'sidebar-collapsed': c.sidebarCollapsed}">
+
+  <!-- SIDEBAR -->
+  <aside class="c360-sidebar">
+
+    <div class="c360-brand">
+      <div class="c360-logo">C</div>
+      <div>
+        <div class="c360-brand-name">Campus360</div>
+        <div class="c360-brand-sub">Recruiter Portal</div>
+      </div>
+    </div>
+
+    <div class="c360-user-card">
+      <div class="c360-avatar">CR</div>
+      <div>
+        <div class="c360-user-name">Campus Recruiter</div>
+        <div class="c360-user-role">Recruiter</div>
+      </div>
+    </div>
+
+    <div class="c360-section-title">OVERVIEW</div>
+
+    <div class="c360-nav-item active">
+      <span>]]>🏠<![CDATA[️</span>
+      <span>Dashboard</span>
+    </div>
+
+    <div class="c360-section-title">RECRUITMENT</div>
+
+    <a
+      class="c360-nav-item"
+      href="?id=campus360_recruiter_opportunities_new">
+
+      <span>]]>💼<![CDATA[</span>
+
+      <span>
+        Opportunities
+      </span>
+
+    </a>
+
+    <a
+      class="c360-nav-item"
+      href="?id=campus360_recruiter_applications_new">
+
+      <span>]]>👥<![CDATA[</span>
+
+      <span>
+        Applications
+      </span>
+
+    </a>
+    <div class="c360-nav-item"
+         ng-click="c.goToAssessments()">
+
+      <span>✍]]>🏼<![CDATA[</span>
+      <span>Assessments</span>
+
+    </div>
+
+    <a class="c360-nav-item"
+       href="?id=campus360_recruiter_interviews_new">
+
+      <span>]]>👩🏻<![CDATA[‍]]>💻<![CDATA[</span>
+      <span>Interviews</span>
+
+    </a>
+
+    <a
+        class="c360-nav-item"
+        href="?id=campus360_recruiter_offers_new">
+
+        <span>]]>📩<![CDATA[</span>
+        <span>Offers</span>
+
+    </a>
+
+    <div class="c360-section-title">COMPANY</div>
+
+    <a
+      class="c360-nav-item"
+      href="?id=campus360_recruiter_company_profile">
+
+      <span> ]]>🏢<![CDATA[</span>
+      <span>Company Profile</span>
+
+    </a>
+
+    <a
+      class="c360-nav-item"
+      href="?id=campus360_recruiter_analytics">
+
+      <span>]]>📊<![CDATA[</span>
+      <span>Analytics</span>
+
+    </a>
+
+  </aside>
+
+
+  <!-- MAIN CONTENT -->
+  <main class="c360-main">
+
+    <!-- TOP BAR -->
+    <!-- TOP HEADER -->
+    <div class="c360-topbar">
+      
+       <!-- SIDEBAR TOGGLE -->
+      <button
+        type="button"
+        class="c360-menu-btn"
+        ng-click="c.toggleSidebar()"
+        title="Toggle sidebar">
+
+        ☰
+
+      </button>
+
+      <!-- SEARCH -->
+      <!-- GLOBAL SEARCH -->
+      <div class="c360-search-wrapper">
+
+        <div class="c360-search-box">
+
+          <span class="c360-search-icon">
+            ⌕
+          </span>
+
+          <input
+            type="text"
+            class="c360-search-input"
+            placeholder="Search opportunities, students, applications..."
+            ng-model="c.searchText"
+            ng-change="c.search()"
+            ng-focus="c.showSearchResults = true"
+            autocomplete="off"
+          />
+
+          <button
+            type="button"
+            class="c360-search-clear"
+            ng-if="c.searchText"
+            ng-click="c.clearSearch()">
+            ×
+          </button>
+
+        </div>
+
+
+        <!-- SEARCH RESULTS -->
+        <div
+          class="c360-search-results"
+          ng-if="c.showSearchResults && c.searchText">
+
+          <!-- LOADING -->
+          <div
+            class="search-message"
+            ng-if="c.searchLoading">
+
+            Searching...
+
+          </div>
+
+
+          <!-- RESULTS -->
+          <div
+            class="search-result"
+            ng-repeat="result in c.searchResults"
+            ng-click="c.openSearchResult(result)">
+
+            <div class="search-result-icon">
+
+              <span ng-if="result.type == 'Opportunity'">
+                ]]>💼
+<![CDATA[              </span>
+
+              <span ng-if="result.type == 'Application'">
+                ]]>👥
+<![CDATA[              </span>
+
+              <span ng-if="result.type == 'Student'">
+                ●
+              </span>
+
+            </div>
+
+
+            <div class="search-result-content">
+
+              <strong>
+                {{result.title}}
+              </strong>
+
+              <span>
+                {{result.subtitle}}
+              </span>
+
+            </div>
+
+
+            <div class="search-result-type">
+
+              {{result.type}}
+
+            </div>
+
+          </div>
+
+
+          <!-- NO RESULTS -->
+
+          <div
+            class="search-message"
+            ng-if="!c.searchLoading && c.searchResults.length == 0">
+
+            No results found for
+            <strong>"{{c.searchText}}"</strong>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- RIGHT SIDE -->
+      <div class="c360-topbar-right">
+
+
+        <!-- REFRESH -->
+        <button
+          class="topbar-icon-btn"
+          type="button"
+          ng-click="c.refreshDashboard()"
+          title="Refresh">
+
+          ↻
+
+        </button>
+
+
+        <!-- NOTIFICATIONS -->
+        <button
+          class="topbar-icon-btn notification-btn"
+          type="button"
+          ng-click="c.toggleNotifications()"
+          title="Notifications">
+
+          ]]>🕭
+
+<![CDATA[          <!-- Notification count -->
+          <span
+            class="notification-badge"
+            ng-if="c.notificationCount > 0">
+
+            {{c.notificationCount}}
+
+          </span>
+
+        </button>
+
+
+        <!-- RECRUITER PROFILE -->
+        <button
+          class="recruiter-profile-btn"
+          type="button"
+          ng-click="c.openCompanyProfile()">
+
+          <div class="recruiter-avatar">
+            CR
+          </div>
+
+          <div class="recruiter-info">
+
+            <strong>
+              Campus Recruiter
+            </strong>
+
+            <span>
+              Recruiter
+            </span>
+
+          </div>
+
+        </button>
+
+
+      </div>
+
+
+      <!-- NOTIFICATION DROPDOWN -->
+      <div
+        class="notification-dropdown"
+        ng-if="c.showNotifications">
+
+        <div class="notification-header">
+
+          <strong>Notifications</strong>
+
+          <span>
+            {{c.notificationCount}}
+          </span>
+
+        </div>
+
+
+        <div class="notification-item">
+
+          <div class="notification-dot"></div>
+
+          <div>
+
+            <strong>
+              New student application
+            </strong>
+
+            <span>
+              A student applied for Software Developer.
+            </span>
+
+          </div>
+
+        </div>
+
+
+        <div class="notification-item">
+
+          <div class="notification-dot"></div>
+
+          <div>
+
+            <strong>
+              Interview scheduled
+            </strong>
+
+            <span>
+              An upcoming interview is scheduled.
+            </span>
+
+          </div>
+
+        </div>
+
+
+        <div
+          class="notification-empty"
+          ng-if="c.notificationCount == 0">
+
+          No new notifications.
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- CONTENT -->
+    <div class="c360-content">
+
+      <!-- WELCOME -->
+      <section class="c360-welcome">
+
+        <div>
+          <div class="c360-eyebrow">RECRUITER DASHBOARD</div>
+
+          <h1>
+            Welcome back, {{data.recruiter_name}}! ]]>👋
+<![CDATA[          </h1>
+
+          <p>
+            Manage placement opportunities, evaluate candidates,
+            schedule interviews and track recruitment progress.
+          </p>
+        </div>
+
+        <div class="company-box">
+            <div class="company-label">COMPANY</div>
+            <div class="company-name">{{data.company_name}}</div>
+            <div class="company-id">{{data.company_id}}</div>
+        </div>
+
+      </section>
+
+
+      <!-- SUMMARY CARDS -->
+      <section class="c360-stats">
+
+          <!-- ================================
+               OPPORTUNITIES
+          ================================= -->
+
+          <a
+              class="c360-stat-card stat-purple"
+              href="?id=campus360_recruiter_opportunities_new">
+
+              <div class="stat-top">
+
+                  <span>
+                      Placement Opportunities
+                  </span>
+
+                  <div class="stat-icon">
+                      ]]>💼
+<![CDATA[                  </div>
+
+              </div>
+
+              <div class="stat-number">
+                  {{data.opportunity_count}}
+              </div>
+
+              <div class="stat-bottom">
+
+                  <span>
+                      Active opportunities
+                  </span>
+
+                  <span>
+                      View →
+                  </span>
+
+              </div>
+
+          </a>
+
+
+          <!-- ================================
+               APPLICATIONS
+          ================================= -->
+
+          <a
+              class="c360-stat-card stat-blue"
+              href="?id=campus360_recruiter_applications_new">
+
+              <div class="stat-top">
+
+                  <span>
+                      Applications
+                  </span>
+
+                  <div class="stat-icon">
+                      ]]>👥
+<![CDATA[                  </div>
+
+              </div>
+
+              <div class="stat-number">
+                  {{data.application_count}}
+              </div>
+
+              <div class="stat-bottom">
+
+                  <span>
+                      Student applications
+                  </span>
+
+                  <span>
+                      View →
+                  </span>
+
+              </div>
+
+          </a>
+
+
+          <!-- ================================
+               INTERVIEWS
+          ================================= -->
+
+          <a
+              class="c360-stat-card stat-purple"
+              href="?id=campus360_recruiter_interviews_new">
+
+              <div class="stat-top">
+
+                  <span>
+                      Interviews
+                  </span>
+
+                  <div class="stat-icon">
+                      ]]>👩🏻<![CDATA[‍]]>💻
+<![CDATA[                  </div>
+
+              </div>
+
+              <div class="stat-number">
+                  {{data.interview_count}}
+              </div>
+
+              <div class="stat-bottom">
+
+                  <span>
+                      Scheduled interviews
+                  </span>
+
+                  <span>
+                      View →
+                  </span>
+
+              </div>
+
+          </a>
+
+
+          <!-- ================================
+               OFFERS
+          ================================= -->
+
+          <a
+              class="c360-stat-card stat-green"
+              href="?id=campus360_recruiter_offers_new">
+
+              <div class="stat-top">
+
+                  <span>
+                      Offers Made
+                  </span>
+
+                  <div class="stat-icon">
+                      ]]>📩
+<![CDATA[                  </div>
+
+              </div>
+
+              <div class="stat-number">
+                  {{data.offer_count}}
+              </div>
+
+              <div class="stat-bottom">
+
+                  <span>
+                      Placement offers
+                  </span>
+
+                  <span>
+                      View →
+                  </span>
+
+              </div>
+
+          </a>
+
+      </section>
+
+
+      <!-- SECOND ROW -->
+      <section class="c360-grid-two">
+
+        <!-- OPPORTUNITIES -->
+        <div class="c360-panel">
+
+          <div class="panel-header">
+            <div>
+              <div class="panel-eyebrow">RECRUITMENT</div>
+              <h2>Placement Opportunities</h2>
+            </div>
+
+            <a
+                href="?id=campus360_recruiter_opportunities_new"
+                class="c360-view-all">
+                View All →
+            </a>
+          </div>
+
+          <!-- OPPORTUNITY LIST -->
+          <div class="opportunity-list">
+
+            <div
+              class="opportunity-item"
+              ng-repeat="opportunity in data.opportunities"
+            >
+
+              <div class="opportunity-icon">
+                ▣
+              </div>
+
+              <div class="opportunity-info">
+
+                <strong>
+                  {{opportunity.title || opportunity.opportunity_id}}
+                </strong>
+
+                <p>
+                  {{opportunity.opportunity_id}}
+                  · {{opportunity.type}}
+                </p>
+
+                <p>
+                  ]]>📍<![CDATA[ {{opportunity.location}}
+                  <span ng-if="opportunity.ctc">
+                    · ]]>💰<![CDATA[ {{opportunity.ctc}}
+                  </span>
+                </p>
+
+                <p ng-if="opportunity.deadline">
+                  ]]>📅<![CDATA[ Deadline: {{opportunity.deadline}}
+                </p>
+
+              </div>
+
+              <div class="opportunity-status">
+                {{opportunity.status}}
+              </div>
+
+            </div>
+
+            <!-- EMPTY STATE -->
+            <div
+              class="opportunity-placeholder"
+              ng-if="!data.opportunities || data.opportunities.length === 0"
+            >
+
+              <div class="placeholder-icon">
+                ▣
+              </div>
+
+              <div>
+                <strong>No opportunities displayed yet</strong>
+
+                <p>
+                  Your placement opportunities will appear here.
+                </p>
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- APPLICATION STATUS -->
+        <div class="c360-panel application-status-panel">
+
+        <!-- HEADER -->
+        <div class="panel-header">
+
+            <div>
+                <div class="panel-eyebrow">
+                    APPLICATION PIPELINE
+                </div>
+
+                <h2>
+                    Application Status
+                </h2>
+            </div>
+
+            <a
+                href="?id=campus360_recruiter_applications_new"
+                class="application-view-details">
+
+                View Details →
+
+            </a>
+
+        </div>
+
+
+        <!-- STATUS CONTENT -->
+        <div class="application-status-content">
+
+            <!-- DONUT -->
+            <div class="application-donut">
+
+                <div class="donut-number">
+                    {{data.total_application_count}}
+                </div>
+
+                <div class="donut-label">
+                    Applications
+                </div>
+
+            </div>
+
+
+            <!-- LEGEND -->
+            <div class="application-status-legend">
+
+                <!-- PENDING -->
+                <div class="status-legend-row">
+
+                    <span class="status-dot pending-dot"></span>
+
+                    <span class="status-name">
+                        Pending
+                    </span>
+
+                    <strong>
+                        {{data.pending_count}}
+                    </strong>
+
+                </div>
+
+
+                <!-- SUBMITTED -->
+                <div class="status-legend-row">
+
+                    <span class="status-dot submitted-dot"></span>
+
+                    <span class="status-name">
+                        Submitted
+                    </span>
+
+                    <strong>
+                        {{data.submitted_count}}
+                    </strong>
+
+                </div>
+
+
+                <!-- SHORTLISTED -->
+                <div class="status-legend-row">
+
+                    <span class="status-dot shortlisted-dot"></span>
+
+                    <span class="status-name">
+                        Shortlisted
+                    </span>
+
+                    <strong>
+                        {{data.shortlisted_count}}
+                    </strong>
+
+                </div>
+
+
+                <!-- SELECTED -->
+                <div class="status-legend-row">
+
+                    <span class="status-dot selected-dot"></span>
+
+                    <span class="status-name">
+                        Selected
+                    </span>
+
+                    <strong>
+                        {{data.selected_count}}
+                    </strong>
+
+                </div>
+
+
+                <!-- REJECTED -->
+                <div class="status-legend-row">
+
+                    <span class="status-dot rejected-dot"></span>
+
+                    <span class="status-name">
+                        Rejected
+                    </span>
+
+                    <strong>
+                        {{data.rejected_count}}
+                    </strong>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+      </section>
+
+
+      <!-- THIRD ROW -->
+      <section class="c360-grid-two">
+
+        <!-- RECENT APPLICATIONS -->
+        <div class="c360-panel">
+
+          <div class="panel-header">
+            <div>
+              <div class="panel-eyebrow">TALENT INTELLIGENCE</div>
+              <h2>Recent Applications</h2>
+            </div>
+
+            <a
+                href="?id=campus360_recruiter_applications_new"
+                class="c360-view-all">
+                View All →
+            </a>
+          </div>
+
+
+          <!-- APPLICATION TABLE -->
+          <div class="application-table"
+               ng-if="data.recent_applications &&
+                      data.recent_applications.length > 0">
+
+            <!-- TABLE HEADER -->
+            <div class="table-header">
+              <span>STUDENT</span>
+              <span>ROLE</span>
+              <span>STATUS</span>
+              <span>ACTION</span>
+            </div>
+
+
+            <!-- APPLICATION ROWS -->
+            <div class="application-row"
+                 ng-repeat="application in data.recent_applications">
+
+              <!-- STUDENT -->
+              <div class="student-cell">
+                <strong>
+                  {{application.student_name}}
+                </strong>
+              </div>
+
+
+              <!-- ROLE -->
+              <div class="role-cell">
+                {{application.role}}
+              </div>
+
+
+              <!-- STATUS -->
+              <div class="status-cell">
+
+                <span class="application-status"
+                      ng-class="{
+                        'status-pending': application.status == 'Pending',
+                        'status-submitted': application.status == 'Submitted',
+                        'status-selected': application.status == 'Selected',
+                        'status-rejected': application.status == 'Rejected'
+                      }">
+
+                  {{application.status}}
+
+                </span>
+
+              </div>
+
+
+              <!-- ACTION -->
+              <div class="action-cell">
+
+                <button class="application-view">
+                  View →
+                </button>
+
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <!-- EMPTY STATE -->
+          <div class="empty-table"
+               ng-if="!data.recent_applications ||
+                      data.recent_applications.length == 0">
+
+            <div class="table-header">
+              <span>STUDENT</span>
+              <span>ROLE</span>
+              <span>STATUS</span>
+              <span>ACTION</span>
+            </div>
+
+            <div class="empty-row">
+              No student applications to display.
+            </div>
+
+          </div>
+
+        </div>
+
+        <!-- UPCOMING INTERVIEWS -->
+        <div class="c360-panel upcoming-interviews-panel">
+
+          <!-- HEADER -->
+          <div class="panel-header">
+            <div>
+              <div class="panel-eyebrow">SCHEDULE</div>
+              <h2>Upcoming Interviews</h2>
+            </div>
+
+            <button
+                class="view-all"
+                ng-click="c.goToInterviews()">
+
+                View All →
+
+            </button>
+          </div>
+
+
+          <!-- INTERVIEW LIST -->
+          <div class="interview-list"
+               ng-if="data.upcoming_interviews &&
+                      data.upcoming_interviews.length > 0">
+
+            <div class="interview-card"
+                 ng-repeat="interview in data.upcoming_interviews">
+
+              <!-- ICON -->
+              <div class="interview-icon">
+                ◎
+              </div>
+
+
+              <!-- MAIN INFORMATION -->
+              <div class="interview-info">
+
+                <div class="interview-student">
+                  {{interview.student_name}}
+                </div>
+
+                <div class="interview-role">
+                  {{interview.opportunity_title}}
+                </div>
+
+                <div class="interview-date">
+                  ]]>📅<![CDATA[ {{interview.interview_date}}
+                </div>
+
+              </div>
+
+
+              <!-- MODE -->
+              <div class="interview-mode">
+                {{interview.interview_mode}}
+              </div>
+
+
+              <!-- STATUS -->
+              <div class="interview-status">
+                {{interview.status}}
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <!-- EMPTY STATE -->
+          <div class="empty-interviews"
+               ng-if="!data.upcoming_interviews ||
+                      data.upcoming_interviews.length == 0">
+
+            <div class="placeholder-icon">
+              ◎
+            </div>
+
+            <strong>No upcoming interviews</strong>
+
+            <p>
+              Scheduled student interviews will appear here.
+            </p>
+
+          </div>
+
+		</div>
+
+      </section>
+
+
+      <!-- QUICK ACTIONS -->
+      <div class="c360-panel quick-actions-panel">
+
+        <div class="panel-header">
+          <div>
+            <div class="panel-eyebrow">RECRUITER ACTIONS</div>
+            <h2>Quick Actions</h2>
+          </div>
+        </div>
+
+        <div class="quick-actions-grid">
+
+          <!-- CREATE OPPORTUNITY -->
+          <button class="quick-action-card"
+                  ng-click="c.createOpportunity()"
+                  type="button">
+
+            <div class="quick-action-icon">
+              +
+            </div>
+
+            <div class="quick-action-content">
+              <strong>Create Opportunity</strong>
+              <span>Publish a new placement opportunity</span>
+            </div>
+
+            <div class="quick-action-arrow">
+              →
+            </div>
+
+          </button>
+
+
+          <!-- CREATE ASSESSMENT -->
+          <button class="quick-action-card"
+                  ng-click="c.createAssessment()">
+
+            <div class="quick-action-icon assessment-icon">
+              ◎
+            </div>
+
+            <div class="quick-action-content">
+              <strong>Create Assessment</strong>
+              <span>Create an assessment for an opportunity</span>
+            </div>
+
+            <div class="quick-action-arrow">
+              →
+            </div>
+
+          </button>
+
+
+          <!-- SCHEDULE INTERVIEW -->
+          <!-- SCHEDULE INTERVIEW -->
+          <button class="quick-action-card"
+                  ng-click="c.scheduleInterview()">
+
+            <div class="quick-action-icon interview-icon">
+              ◎
+            </div>
+
+            <div class="quick-action-content">
+              <strong>Schedule Interview</strong>
+              <span>Schedule interviews for shortlisted students</span>
+            </div>
+
+            <div class="quick-action-arrow">
+              →
+            </div>
+
+          </button>
+
+        </div>
+
+      </div>
+
+  </main>
+
+</div>]]></template>
+    </sp_widget>
+</record_update>

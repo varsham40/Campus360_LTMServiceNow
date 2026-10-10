@@ -1,0 +1,2123 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_widget">
+    <sp_widget action="INSERT_OR_UPDATE">
+        <category>custom</category>
+        <client_script><![CDATA[api.controller = function($scope, $location) {
+
+    var c = this;
+
+
+    // =====================================================
+    // FILTERS
+    // =====================================================
+
+    c.filters = {
+
+        search: "",
+
+        status: "",
+
+        opportunity: ""
+
+    };
+
+
+    // =====================================================
+    // FILTERED APPLICATIONS
+    // =====================================================
+
+    c.filteredApplications = [];
+
+
+    // =====================================================
+    // OPPORTUNITY FILTER OPTIONS
+    // =====================================================
+
+    c.opportunities = [];
+
+
+    // =====================================================
+    // BUILD OPPORTUNITY LIST
+    // =====================================================
+
+    c.buildOpportunityList = function() {
+
+        var applications =
+            c.data.applications || [];
+
+
+        var opportunityMap = {};
+
+
+        applications.forEach(function(application) {
+
+            var opportunityId =
+                application.opportunity_id || "";
+
+            var opportunityTitle =
+                application.opportunity_title ||
+                "Placement Opportunity";
+
+
+            if (
+                opportunityId &&
+                !opportunityMap[opportunityId]
+            ) {
+
+                opportunityMap[opportunityId] = true;
+
+
+                c.opportunities.push({
+
+                    id: opportunityId,
+
+                    title: opportunityTitle
+
+                });
+
+            }
+
+        });
+
+
+        // Sort opportunities alphabetically
+
+        c.opportunities.sort(function(a, b) {
+
+            return a.title.localeCompare(
+                b.title
+            );
+
+        });
+
+    };
+
+
+    // =====================================================
+    // APPLY FILTERS
+    // =====================================================
+
+    c.applyFilters = function() {
+
+        var applications =
+            c.data.applications || [];
+
+
+        var search =
+            (c.filters.search || "")
+            .toLowerCase()
+            .trim();
+
+
+        var status =
+            c.filters.status || "";
+
+
+        var opportunity =
+            c.filters.opportunity || "";
+
+
+        c.filteredApplications =
+            applications.filter(
+                function(application) {
+
+
+                    // =================================
+                    // SEARCH
+                    // =================================
+
+                    var student =
+                        (
+                            application.student_name ||
+                            ""
+                        )
+                        .toLowerCase();
+
+
+                    var applicationId =
+                        (
+                            application.application_id ||
+                            ""
+                        )
+                        .toLowerCase();
+
+
+                    var opportunityTitle =
+                        (
+                            application.opportunity_title ||
+                            ""
+                        )
+                        .toLowerCase();
+
+
+                    var location =
+                        (
+                            application.location ||
+                            ""
+                        )
+                        .toLowerCase();
+
+
+                    var opportunityId =
+                        (
+                            application.opportunity_id ||
+                            ""
+                        )
+                        .toLowerCase();
+
+
+                    var matchesSearch =
+                        !search ||
+
+                        student.indexOf(search) !== -1 ||
+
+                        applicationId.indexOf(search) !== -1 ||
+
+                        opportunityTitle.indexOf(search) !== -1 ||
+
+                        opportunityId.indexOf(search) !== -1 ||
+
+                        location.indexOf(search) !== -1;
+
+
+                    // =================================
+                    // STATUS
+                    // =================================
+
+                    var matchesStatus =
+                        !status ||
+
+                        application.status === status;
+
+
+                    // =================================
+                    // OPPORTUNITY
+                    // =================================
+
+                    var matchesOpportunity =
+                        !opportunity ||
+
+                        application.opportunity_id ===
+                        opportunity;
+
+
+                    // =================================
+                    // FINAL RESULT
+                    // =================================
+
+                    return (
+
+                        matchesSearch &&
+
+                        matchesStatus &&
+
+                        matchesOpportunity
+
+                    );
+
+                }
+            );
+
+    };
+
+
+    // =====================================================
+    // CLEAR FILTERS
+    // =====================================================
+
+    c.clearFilters = function() {
+
+        c.filters.search = "";
+
+        c.filters.status = "";
+
+        c.filters.opportunity = "";
+
+        c.applyFilters();
+
+    };
+
+
+    // =====================================================
+    // INITIALIZE
+    // =====================================================
+
+    $scope.$watch(
+
+        function() {
+
+            return c.data.applications;
+
+        },
+
+        function(newValue) {
+
+            if (newValue) {
+
+                // Prevent duplicate opportunity options
+
+                c.opportunities = [];
+
+                c.buildOpportunityList();
+
+                c.applyFilters();
+
+            }
+
+        },
+
+        true
+
+    );
+
+
+    // =====================================================
+    // DASHBOARD
+    // =====================================================
+
+    c.goDashboard = function() {
+
+        window.location.href =
+            "?id=campus360_recruiter_dashboard_new";
+
+    };
+
+	c.viewStudent = function(studentSysId) {
+
+		if (!studentSysId) {
+
+			return;
+
+		}
+
+		window.location.href =
+			'?id=campus360_recruiter_student_view&sys_id=' +
+			encodeURIComponent(studentSysId);
+
+	};
+
+};]]></client_script>
+        <controller_as>c</controller_as>
+        <css>.applications-page {&#13;
+&#13;
+  max-width: 1200px;&#13;
+&#13;
+  margin: 30px auto;&#13;
+&#13;
+  padding:&#13;
+    0 20px 50px;&#13;
+&#13;
+  color: #102a56;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   HEADER&#13;
+========================================= */&#13;
+&#13;
+.page-header {&#13;
+&#13;
+  background: #ffffff;&#13;
+&#13;
+  border:&#13;
+    1px solid #e1e7f2;&#13;
+&#13;
+  border-radius: 18px;&#13;
+&#13;
+  padding: 30px 34px;&#13;
+&#13;
+  margin-bottom: 24px;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  justify-content: space-between;&#13;
+&#13;
+  gap: 25px;&#13;
+&#13;
+  box-shadow:&#13;
+    0 8px 25px&#13;
+    rgba(30,55,90,0.08);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.eyebrow {&#13;
+&#13;
+  font-size: 12px;&#13;
+&#13;
+  font-weight: 700;&#13;
+&#13;
+  letter-spacing: 2px;&#13;
+&#13;
+  color: #4d63e8;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.page-header h1 {&#13;
+&#13;
+  margin:&#13;
+    8px 0 6px;&#13;
+&#13;
+  font-size: 30px;&#13;
+&#13;
+  font-weight: 700;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.page-header p {&#13;
+&#13;
+  margin: 0;&#13;
+&#13;
+  color: #70809d;&#13;
+&#13;
+  font-size: 14px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.company-info {&#13;
+&#13;
+  display: inline-block;&#13;
+&#13;
+  margin-top: 12px;&#13;
+&#13;
+  padding:&#13;
+    7px 12px;&#13;
+&#13;
+  background: #f2f4ff;&#13;
+&#13;
+  border-radius: 7px;&#13;
+&#13;
+  color: #5368e8;&#13;
+&#13;
+  font-size: 12px;&#13;
+&#13;
+  font-weight: 600;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.header-actions {&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  gap: 10px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   BUTTON&#13;
+========================================= */&#13;
+&#13;
+.btn {&#13;
+&#13;
+  display: inline-flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  justify-content: center;&#13;
+&#13;
+  text-decoration: none;&#13;
+&#13;
+  height: 42px;&#13;
+&#13;
+  padding:&#13;
+    0 18px;&#13;
+&#13;
+  border-radius: 8px;&#13;
+&#13;
+  font-size: 13px;&#13;
+&#13;
+  font-weight: 600;&#13;
+&#13;
+  cursor: pointer;&#13;
+&#13;
+  box-sizing: border-box;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.btn-secondary {&#13;
+&#13;
+  background: #ffffff;&#13;
+&#13;
+  color: #5368e8;&#13;
+&#13;
+  border:&#13;
+    1px solid #ccd5e5;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.btn-secondary:hover {&#13;
+&#13;
+  background: #f5f7ff;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   STATISTICS&#13;
+========================================= */&#13;
+&#13;
+.stats-grid {&#13;
+&#13;
+  display: grid;&#13;
+&#13;
+  grid-template-columns:&#13;
+    repeat(4, 1fr);&#13;
+&#13;
+  gap: 18px;&#13;
+&#13;
+  margin-bottom: 24px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.stat-card {&#13;
+&#13;
+  background: #ffffff;&#13;
+&#13;
+  border:&#13;
+    1px solid #e1e7f2;&#13;
+&#13;
+  border-radius: 15px;&#13;
+&#13;
+  padding: 20px;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  gap: 15px;&#13;
+&#13;
+  box-shadow:&#13;
+    0 5px 18px&#13;
+    rgba(30,55,90,0.05);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.stat-icon {&#13;
+&#13;
+  width: 45px;&#13;
+&#13;
+  height: 45px;&#13;
+&#13;
+  border-radius: 11px;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  justify-content: center;&#13;
+&#13;
+  background: #f1f3ff;&#13;
+&#13;
+  color: #5368e8;&#13;
+&#13;
+  font-size: 20px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.stat-icon.pending {&#13;
+&#13;
+  background: #fff8e9;&#13;
+&#13;
+  color: #c58a18;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.stat-icon.submitted {&#13;
+&#13;
+  background: #eff6ff;&#13;
+&#13;
+  color: #3473c5;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.stat-icon.selected {&#13;
+&#13;
+  background: #effaf3;&#13;
+&#13;
+  color: #25804a;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.stat-label {&#13;
+&#13;
+  color: #7a89a2;&#13;
+&#13;
+  font-size: 12px;&#13;
+&#13;
+  margin-bottom: 5px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.stat-value {&#13;
+&#13;
+  font-size: 24px;&#13;
+&#13;
+  font-weight: 700;&#13;
+&#13;
+  color: #20385f;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   LIST CARD&#13;
+========================================= */&#13;
+&#13;
+.list-card {&#13;
+&#13;
+  background: #ffffff;&#13;
+&#13;
+  border:&#13;
+    1px solid #e1e7f2;&#13;
+&#13;
+  border-radius: 18px;&#13;
+&#13;
+  overflow: hidden;&#13;
+&#13;
+  box-shadow:&#13;
+    0 8px 25px&#13;
+    rgba(30,55,90,0.06);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.list-header {&#13;
+&#13;
+  padding:&#13;
+    24px 28px;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  justify-content: space-between;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  border-bottom:&#13;
+    1px solid #e8edf5;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.list-header h2 {&#13;
+&#13;
+  margin:&#13;
+    0 0 5px;&#13;
+&#13;
+  font-size: 20px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.list-header p {&#13;
+&#13;
+  margin: 0;&#13;
+&#13;
+  color: #7888a3;&#13;
+&#13;
+  font-size: 13px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.record-count {&#13;
+&#13;
+  padding:&#13;
+    7px 12px;&#13;
+&#13;
+  background: #f2f4ff;&#13;
+&#13;
+  color: #5368e8;&#13;
+&#13;
+  border-radius: 7px;&#13;
+&#13;
+  font-size: 12px;&#13;
+&#13;
+  font-weight: 600;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   TABLE&#13;
+========================================= */&#13;
+&#13;
+.table-wrapper {&#13;
+&#13;
+  width: 100%;&#13;
+&#13;
+  overflow-x: auto;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.application-table {&#13;
+&#13;
+  width: 100%;&#13;
+&#13;
+  border-collapse: collapse;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.application-table th {&#13;
+&#13;
+  padding:&#13;
+    14px 18px;&#13;
+&#13;
+  text-align: left;&#13;
+&#13;
+  background: #f8faff;&#13;
+&#13;
+  border-bottom:&#13;
+    1px solid #e4eaf3;&#13;
+&#13;
+  color: #71809a;&#13;
+&#13;
+  font-size: 11px;&#13;
+&#13;
+  font-weight: 700;&#13;
+&#13;
+  text-transform: uppercase;&#13;
+&#13;
+  letter-spacing: .4px;&#13;
+&#13;
+  white-space: nowrap;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.application-table td {&#13;
+&#13;
+  padding:&#13;
+    17px 18px;&#13;
+&#13;
+  border-bottom:&#13;
+    1px solid #edf1f6;&#13;
+&#13;
+  font-size: 13px;&#13;
+&#13;
+  color: #405575;&#13;
+&#13;
+  white-space: nowrap;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.application-table tbody tr:hover {&#13;
+&#13;
+  background: #fafbff;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   STUDENT&#13;
+========================================= */&#13;
+&#13;
+.student-cell {&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  gap: 10px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.student-avatar {&#13;
+&#13;
+  width: 34px;&#13;
+&#13;
+  height: 34px;&#13;
+&#13;
+  border-radius: 50%;&#13;
+&#13;
+  background: #f1f3ff;&#13;
+&#13;
+  color: #5368e8;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  justify-content: center;&#13;
+&#13;
+  font-weight: 700;&#13;
+&#13;
+  font-size: 12px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.student-cell strong {&#13;
+&#13;
+  color: #20385f;&#13;
+&#13;
+  font-size: 13px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   APPLICATION ID&#13;
+========================================= */&#13;
+&#13;
+.application-id {&#13;
+&#13;
+  color: #5368e8;&#13;
+&#13;
+  font-size: 12px;&#13;
+&#13;
+  font-weight: 600;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   OPPORTUNITY&#13;
+========================================= */&#13;
+&#13;
+.opportunity-cell {&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  flex-direction: column;&#13;
+&#13;
+  gap: 4px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.opportunity-cell strong {&#13;
+&#13;
+  color: #20385f;&#13;
+&#13;
+  font-size: 13px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.opportunity-cell span {&#13;
+&#13;
+  color: #8a97aa;&#13;
+&#13;
+  font-size: 11px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   STATUS&#13;
+========================================= */&#13;
+&#13;
+.status-badge {&#13;
+&#13;
+  display: inline-block;&#13;
+&#13;
+  padding:&#13;
+    5px 10px;&#13;
+&#13;
+  border-radius: 20px;&#13;
+&#13;
+  font-size: 11px;&#13;
+&#13;
+  font-weight: 700;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.status-pending {&#13;
+&#13;
+  background: #fff5dc;&#13;
+&#13;
+  color: #a9740b;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.status-submitted {&#13;
+&#13;
+  background: #eaf2ff;&#13;
+&#13;
+  color: #346eb9;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.status-selected {&#13;
+&#13;
+  background: #eaf8ef;&#13;
+&#13;
+  color: #25804a;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.status-other {&#13;
+&#13;
+  background: #f1f3f6;&#13;
+&#13;
+  color: #68758a;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   EMPTY STATE&#13;
+========================================= */&#13;
+&#13;
+.empty-state {&#13;
+&#13;
+  text-align: center;&#13;
+&#13;
+  padding:&#13;
+    70px 30px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.empty-icon {&#13;
+&#13;
+  width: 55px;&#13;
+&#13;
+  height: 55px;&#13;
+&#13;
+  margin:&#13;
+    0 auto 15px;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  justify-content: center;&#13;
+&#13;
+  background: #f2f4ff;&#13;
+&#13;
+  border-radius: 14px;&#13;
+&#13;
+  color: #5368e8;&#13;
+&#13;
+  font-size: 24px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.empty-state h3 {&#13;
+&#13;
+  margin:&#13;
+    0 0 8px;&#13;
+&#13;
+  font-size: 18px;&#13;
+&#13;
+  color: #20385f;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.empty-state p {&#13;
+&#13;
+  max-width: 450px;&#13;
+&#13;
+  margin:&#13;
+    0 auto;&#13;
+&#13;
+  color: #7c8ba2;&#13;
+&#13;
+  font-size: 13px;&#13;
+&#13;
+  line-height: 1.6;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   ERROR&#13;
+========================================= */&#13;
+&#13;
+.error-message {&#13;
+&#13;
+  margin-bottom: 20px;&#13;
+&#13;
+  padding:&#13;
+    13px 16px;&#13;
+&#13;
+  border-radius: 8px;&#13;
+&#13;
+  background: #fff1f1;&#13;
+&#13;
+  border:&#13;
+    1px solid #ffd1d1;&#13;
+&#13;
+  color: #c63f3f;&#13;
+&#13;
+  font-size: 13px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   MOBILE&#13;
+========================================= */&#13;
+&#13;
+@media (max-width: 900px) {&#13;
+&#13;
+  .stats-grid {&#13;
+&#13;
+    grid-template-columns:&#13;
+      repeat(2, 1fr);&#13;
+&#13;
+  }&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+@media (max-width: 600px) {&#13;
+&#13;
+  .page-header {&#13;
+&#13;
+    flex-direction: column;&#13;
+&#13;
+    align-items: flex-start;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .stats-grid {&#13;
+&#13;
+    grid-template-columns: 1fr;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .list-header {&#13;
+&#13;
+    flex-direction: column;&#13;
+&#13;
+    align-items: flex-start;&#13;
+&#13;
+    gap: 12px;&#13;
+&#13;
+  }&#13;
+&#13;
+}&#13;
+&#13;
+/* ==========================================&#13;
+   APPLICATION FILTERS&#13;
+========================================== */&#13;
+&#13;
+.application-filters {&#13;
+&#13;
+    margin-top: 22px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 12px;&#13;
+&#13;
+    padding: 15px;&#13;
+&#13;
+    background: #f8faff;&#13;
+&#13;
+    border: 1px solid #e2e8f5;&#13;
+&#13;
+    border-radius: 12px;&#13;
+}&#13;
+&#13;
+&#13;
+/* SEARCH */&#13;
+&#13;
+.search-box {&#13;
+&#13;
+    flex: 1;&#13;
+&#13;
+    height: 44px;&#13;
+&#13;
+    position: relative;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.search-box input {&#13;
+&#13;
+    width: 100%;&#13;
+&#13;
+    height: 44px;&#13;
+&#13;
+    box-sizing: border-box;&#13;
+&#13;
+    border: 1px solid #d5deee;&#13;
+&#13;
+    border-radius: 8px;&#13;
+&#13;
+    background: #ffffff;&#13;
+&#13;
+    padding: 0 15px 0 38px;&#13;
+&#13;
+    font-size: 13px;&#13;
+&#13;
+    color: #24395f;&#13;
+&#13;
+    outline: none;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.search-box input:focus {&#13;
+&#13;
+    border-color: #5368e8;&#13;
+&#13;
+    box-shadow:&#13;
+        0 0 0 3px rgba(83,104,232,0.10);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.search-icon {&#13;
+&#13;
+    position: absolute;&#13;
+&#13;
+    left: 13px;&#13;
+&#13;
+    top: 12px;&#13;
+&#13;
+    color: #70809d;&#13;
+&#13;
+    font-size: 17px;&#13;
+&#13;
+    z-index: 2;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* STATUS FILTER */&#13;
+&#13;
+.filter-box {&#13;
+&#13;
+    width: 180px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.filter-box select {&#13;
+&#13;
+    width: 100%;&#13;
+&#13;
+    height: 44px;&#13;
+&#13;
+    border: 1px solid #d5deee;&#13;
+&#13;
+    border-radius: 8px;&#13;
+&#13;
+    background: #ffffff;&#13;
+&#13;
+    padding: 0 12px;&#13;
+&#13;
+    font-size: 13px;&#13;
+&#13;
+    color: #24395f;&#13;
+&#13;
+    outline: none;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.filter-box select:focus {&#13;
+&#13;
+    border-color: #5368e8;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* CLEAR BUTTON */&#13;
+&#13;
+.clear-filter-btn {&#13;
+&#13;
+    height: 44px;&#13;
+&#13;
+    padding: 0 18px;&#13;
+&#13;
+    border-radius: 8px;&#13;
+&#13;
+    border: 1px solid #d2daea;&#13;
+&#13;
+    background: #ffffff;&#13;
+&#13;
+    color: #5368e8;&#13;
+&#13;
+    font-size: 13px;&#13;
+&#13;
+    font-weight: 600;&#13;
+&#13;
+    cursor: pointer;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.clear-filter-btn:hover {&#13;
+&#13;
+    background: #f1f4ff;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* RESULT COUNT */&#13;
+&#13;
+.filter-result {&#13;
+&#13;
+    margin: 12px 2px 0;&#13;
+&#13;
+    font-size: 12px;&#13;
+&#13;
+    color: #7b8aa4;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.filter-result strong {&#13;
+&#13;
+    color: #30466d;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* ==========================================&#13;
+   NO RESULTS&#13;
+========================================== */&#13;
+&#13;
+.no-results {&#13;
+&#13;
+    text-align: center;&#13;
+&#13;
+    padding: 50px 20px !important;&#13;
+&#13;
+    color: #6f7f99;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.no-results-icon {&#13;
+&#13;
+    font-size: 28px;&#13;
+&#13;
+    margin-bottom: 10px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.no-results strong {&#13;
+&#13;
+    display: block;&#13;
+&#13;
+    color: #30466d;&#13;
+&#13;
+    font-size: 14px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.no-results p {&#13;
+&#13;
+    margin-top: 6px;&#13;
+&#13;
+    font-size: 12px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* ==========================================&#13;
+   MOBILE&#13;
+========================================== */&#13;
+&#13;
+@media (max-width: 768px) {&#13;
+&#13;
+    .application-filters {&#13;
+&#13;
+        flex-direction: column;&#13;
+&#13;
+        align-items: stretch;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .search-box {&#13;
+&#13;
+        width: 100%;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .filter-box {&#13;
+&#13;
+        width: 100%;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .clear-filter-btn {&#13;
+&#13;
+        width: 100%;&#13;
+&#13;
+    }&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.view-student-btn {&#13;
+    border: 1px solid #4f63e8;&#13;
+    background: #ffffff;&#13;
+    color: #4f63e8;&#13;
+    padding: 7px 14px;&#13;
+    border-radius: 7px;&#13;
+    font-size: 12px;&#13;
+    font-weight: 600;&#13;
+    cursor: pointer;&#13;
+    transition: all 0.2s ease;&#13;
+}&#13;
+&#13;
+.view-student-btn:hover {&#13;
+    background: #4f63e8;&#13;
+    color: #ffffff;&#13;
+}</css>
+        <data_table>sp_instance</data_table>
+        <demo_data/>
+        <description/>
+        <docs/>
+        <field_list/>
+        <has_preview>false</has_preview>
+        <id>recruiter_applications_new</id>
+        <internal>false</internal>
+        <link><![CDATA[function link(scope, element, attrs, controller) {
+  
+}]]></link>
+        <name>Campus360 Recruiter Applications New</name>
+        <option_schema/>
+        <public>false</public>
+        <roles/>
+        <script><![CDATA[(function() {
+
+    // =====================================================
+    // CAMPUS360 RECRUITER APPLICATIONS
+    // =====================================================
+
+    // Current recruiter
+    data.recruiter_name = 'Ananya Mehta';
+    data.recruiter_id = 'RCR001';
+
+
+    // =====================================================
+    // CURRENT COMPANY
+    // =====================================================
+
+    var companySysId =
+        'e9268662acd303107f44b432e349694b';
+
+
+    // =====================================================
+    // GET COMPANY
+    // =====================================================
+
+    var companyGR =
+        new GlideRecord(
+            'x_snc_campus360_company_master'
+        );
+
+
+    if (!companyGR.get(companySysId)) {
+
+        data.error =
+            'Company record could not be found.';
+
+        return;
+
+    }
+
+
+    data.company_name =
+        companyGR.getValue('company_name');
+
+    data.company_id =
+        companyGR.getValue('company_id');
+
+
+    // =====================================================
+    // INITIAL VALUES
+    // =====================================================
+
+    data.total_count = 0;
+    data.pending_count = 0;
+    data.submitted_count = 0;
+    data.selected_count = 0;
+
+
+    data.applications = [];
+
+
+    // =====================================================
+    // APPLICATIONS
+    // =====================================================
+
+    var applicationGR =
+        new GlideRecord(
+            'x_snc_campus360_student_application'
+        );
+
+
+    /*
+     * IMPORTANT
+     *
+     * Application
+     *      ↓
+     * Opportunity
+     *      ↓
+     * Company
+     *
+     * Only retrieve applications belonging
+     * to the current company.
+     */
+
+    applicationGR.addQuery(
+        'opportunity.company',
+        companySysId
+    );
+
+
+    applicationGR.orderByDesc(
+        'sys_created_on'
+    );
+
+
+    applicationGR.query();
+
+
+    while (applicationGR.next()) {
+
+
+        var application = {};
+
+
+        // =================================================
+        // BASIC INFORMATION
+        // =================================================
+
+        application.sys_id =
+            applicationGR.getUniqueValue();
+
+
+        application.application_id =
+            applicationGR.getValue(
+                'application_id'
+            );
+
+
+        // =================================================
+        // STUDENT
+        // =================================================
+
+        if (applicationGR.student) {
+
+			application.student_name =
+				applicationGR.student.getDisplayValue();
+
+			// Student Master sys_id
+			application.student_sys_id =
+				applicationGR.getValue('student');
+
+		} else {
+
+			application.student_name =
+				'Student';
+
+			application.student_sys_id =
+				'';
+
+		}
+
+
+        // =================================================
+        // OPPORTUNITY
+        // =================================================
+
+        if (applicationGR.opportunity) {
+
+            var opportunityGR =
+                applicationGR.opportunity.getRefRecord();
+
+
+            if (
+                opportunityGR &&
+                opportunityGR.isValidRecord()
+            ) {
+
+                application.opportunity_title =
+                    opportunityGR.getValue(
+                        'opportunity_title'
+                    );
+
+
+                application.opportunity_id =
+                    opportunityGR.getValue(
+                        'opportunity_id'
+                    );
+
+
+                application.location =
+                    opportunityGR.getValue(
+                        'location'
+                    );
+
+
+                application.ctc =
+                    opportunityGR.getValue(
+                        'ctc_stipend'
+                    );
+
+            } else {
+
+                application.opportunity_title =
+                    'Placement Opportunity';
+
+                application.opportunity_id =
+                    '';
+
+                application.location =
+                    '';
+
+                application.ctc =
+                    '';
+
+            }
+
+        } else {
+
+            application.opportunity_title =
+                'Placement Opportunity';
+
+            application.opportunity_id =
+                '';
+
+            application.location =
+                '';
+
+            application.ctc =
+                '';
+
+        }
+
+
+        // =================================================
+        // APPLICATION STATUS
+        // =================================================
+
+        application.status =
+            applicationGR.getDisplayValue(
+                'application_status'
+            );
+
+
+        // =================================================
+        // APPLIED DATE
+        // =================================================
+
+        application.applied_date =
+            applicationGR.getDisplayValue(
+                'applied_date'
+            );
+
+
+        // =================================================
+        // UPDATE COUNTS
+        // =================================================
+
+        data.total_count++;
+
+
+        var status =
+            applicationGR.getValue(
+                'application_status'
+            );
+
+
+        if (status == 'Pending') {
+
+            data.pending_count++;
+
+        }
+
+
+        if (status == 'Submitted') {
+
+            data.submitted_count++;
+
+        }
+
+
+        if (status == 'Selected') {
+
+            data.selected_count++;
+
+        }
+
+
+        // =================================================
+        // ADD APPLICATION
+        // =================================================
+
+        data.applications.push(
+            application
+        );
+
+    }
+
+
+})();]]></script>
+        <servicenow>false</servicenow>
+        <sys_class_name>sp_widget</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-28 15:24:49</sys_created_on>
+        <sys_id>f24f652e442743107f44301daf56c7cd</sys_id>
+        <sys_mod_count>4</sys_mod_count>
+        <sys_name>Campus360 Recruiter Applications New</sys_name>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name>sp_widget_f24f652e442743107f44301daf56c7cd</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-29 04:26:11</sys_updated_on>
+        <template><![CDATA[<div class="applications-page">
+
+
+  <!-- =========================================
+       HEADER
+  ========================================== -->
+
+  <div class="page-header">
+
+    <div>
+
+      <span class="eyebrow">
+        RECRUITMENT
+      </span>
+
+      <h1>
+        Student Applications
+      </h1>
+
+      <p>
+        Review applications received for
+        {{c.data.company_name}}.
+      </p>
+
+      <div class="company-info">
+
+        {{c.data.company_name}}
+        ·
+        {{c.data.company_id}}
+
+      </div>
+
+    </div>
+
+
+    <div class="header-actions">
+
+      <a
+        class="btn btn-secondary"
+        href="?id=campus360_recruiter_dashboard_new">
+
+        ← Dashboard
+
+      </a>
+
+    </div>
+
+  </div>
+
+
+  <!-- =========================================
+       ERROR
+  ========================================== -->
+
+  <div
+    class="error-message"
+    ng-if="c.data.error">
+
+    {{c.data.error}}
+
+  </div>
+
+
+  <!-- =========================================
+       STATISTICS
+  ========================================== -->
+
+  <div class="stats-grid">
+
+
+    <!-- TOTAL -->
+
+    <div class="stat-card">
+
+      <div class="stat-icon">
+        ♙
+      </div>
+
+      <div>
+
+        <div class="stat-label">
+          Total Applications
+        </div>
+
+        <div class="stat-value">
+          {{c.data.total_count}}
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- PENDING -->
+
+    <div class="stat-card">
+
+      <div class="stat-icon pending">
+        ◷
+      </div>
+
+      <div>
+
+        <div class="stat-label">
+          Pending
+        </div>
+
+        <div class="stat-value">
+          {{c.data.pending_count}}
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- SUBMITTED -->
+
+    <div class="stat-card">
+
+      <div class="stat-icon submitted">
+        ✓
+      </div>
+
+      <div>
+
+        <div class="stat-label">
+          Submitted
+        </div>
+
+        <div class="stat-value">
+          {{c.data.submitted_count}}
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- SELECTED -->
+
+    <div class="stat-card">
+
+      <div class="stat-icon selected">
+        ★
+      </div>
+
+      <div>
+
+        <div class="stat-label">
+          Selected
+        </div>
+
+        <div class="stat-value">
+          {{c.data.selected_count}}
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  
+  <!-- =========================================
+       SEARCH & FILTER BAR
+  ========================================== -->
+
+  <div class="application-filters">
+
+    <!-- SEARCH -->
+    <div class="search-box">
+
+      <span class="search-icon">⌕</span>
+
+      <input
+        type="text"
+        ng-model="c.filters.search"
+        ng-change="c.applyFilters()"
+        placeholder="Search student, application ID or opportunity...">
+
+    </div>
+
+
+    <!-- STATUS FILTER -->
+    <div class="filter-box">
+
+      <select
+        ng-model="c.filters.status"
+        ng-change="c.applyFilters()">
+
+        <option value="">All Status</option>
+
+        <option value="Pending">
+          Pending
+        </option>
+
+        <option value="Submitted">
+          Submitted
+        </option>
+
+        <option value="Selected">
+          Selected
+        </option>
+
+      </select>
+
+    </div>
+
+
+    <!-- OPPORTUNITY FILTER -->
+    <div class="filter-box">
+
+      <select
+        ng-model="c.filters.opportunity"
+        ng-change="c.applyFilters()">
+
+        <option value="">
+          All Opportunities
+        </option>
+
+        <option
+          ng-repeat="opportunity in c.opportunities"
+          value="{{opportunity.id}}">
+
+          {{opportunity.title}}
+
+        </option>
+
+      </select>
+
+    </div>
+
+
+    <!-- CLEAR -->
+    <button
+      type="button"
+      class="clear-filter-btn"
+      ng-click="c.clearFilters()">
+
+      Clear
+
+    </button>
+
+  </div>
+
+
+  <!-- FILTER RESULT COUNT -->
+
+  <div class="filter-result">
+
+    Showing
+    <strong>{{c.filteredApplications.length}}</strong>
+    of
+    <strong>{{c.data.applications.length}}</strong>
+    applications
+
+  </div>
+
+
+
+
+
+
+
+  <!-- =========================================
+       APPLICATION LIST
+  ========================================== -->
+
+  <div class="list-card">
+
+
+    <div class="list-header">
+
+      <div>
+
+        <h2>
+          Applications
+        </h2>
+
+        <p>
+          Students who applied to
+          {{c.data.company_name}} opportunities
+        </p>
+
+      </div>
+
+
+      <div class="record-count">
+
+        {{c.data.applications.length}}
+        records
+
+      </div>
+
+    </div>
+
+
+    <!-- =======================================
+         EMPTY STATE
+    ======================================== -->
+
+    <div
+      class="empty-state"
+      ng-if="!c.data.applications.length">
+
+      <div class="empty-icon">
+        ♙
+      </div>
+
+      <h3>
+        No applications found
+      </h3>
+
+      <p>
+        No students have applied to your company's
+        placement opportunities yet.
+      </p>
+
+    </div>
+
+
+    <!-- =======================================
+         TABLE
+    ======================================== -->
+
+    <div
+      class="table-wrapper"
+      ng-if="c.data.applications.length">
+
+      <table class="application-table">
+
+        <thead>
+
+          <tr>
+
+            <th>
+              Student
+            </th>
+
+            <th>
+              Application ID
+            </th>
+
+            <th>
+              Opportunity
+            </th>
+
+            <th>
+              Location
+            </th>
+
+            <th>
+              CTC / Stipend
+            </th>
+
+            <th>
+              Applied Date
+            </th>
+
+            <th>
+              Status
+            </th>
+            
+            <th>
+              Action
+            </th>
+
+          </tr>
+
+        </thead>
+
+
+        <tbody>
+
+          <tr
+            ng-repeat="application in c.filteredApplications">
+
+
+            <!-- STUDENT -->
+
+            <td>
+
+              <div class="student-cell">
+
+                <div class="student-avatar">
+
+                  {{application.student_name.charAt(0)}}
+
+                </div>
+
+                <div>
+
+                  <strong>
+                    {{application.student_name}}
+                  </strong>
+
+                </div>
+
+              </div>
+
+            </td>
+
+
+            <!-- APPLICATION ID -->
+
+            <td>
+
+              <span class="application-id">
+
+                {{application.application_id}}
+
+              </span>
+
+            </td>
+
+
+            <!-- OPPORTUNITY -->
+
+            <td>
+
+              <div class="opportunity-cell">
+
+                <strong>
+                  {{application.opportunity_title}}
+                </strong>
+
+                <span>
+                  {{application.opportunity_id}}
+                </span>
+
+              </div>
+
+            </td>
+
+
+            <!-- LOCATION -->
+
+            <td>
+
+              {{application.location || '—'}}
+
+            </td>
+
+
+            <!-- CTC -->
+
+            <td>
+
+              {{application.ctc || '—'}}
+
+            </td>
+
+
+            <!-- DATE -->
+
+            <td>
+
+              {{application.applied_date || '—'}}
+
+            </td>
+
+
+            <!-- STATUS -->
+
+            <td>
+
+              <span
+                class="status-badge"
+                ng-class="{
+                  'status-pending':
+                    application.status == 'Pending',
+
+                  'status-submitted':
+                    application.status == 'Submitted',
+
+                  'status-selected':
+                    application.status == 'Selected',
+
+                  'status-other':
+                    application.status != 'Pending' &&
+                    application.status != 'Submitted' &&
+                    application.status != 'Selected'
+                }">
+
+                {{application.status}}
+
+              </span>
+
+            </td>
+            
+            <!-- ACTION -->
+
+            <td>
+
+              <button
+                type="button"
+                class="view-student-btn"
+                ng-click="c.viewStudent(application.student_sys_id)">
+
+                View
+
+              </button>
+
+            </td>
+
+
+          </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </div>
+
+</div>]]></template>
+    </sp_widget>
+</record_update>

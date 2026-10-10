@@ -1,0 +1,1868 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_widget">
+    <sp_widget action="INSERT_OR_UPDATE">
+        <category>custom</category>
+        <client_script><![CDATA[api.controller = function($scope, $window, $location) {
+
+    var c = this;
+
+
+    // ============================================================
+    // INTERVIEW SYS_ID
+    // ============================================================
+
+    c.interviewSysId =
+        $location.search().interview_sys_id;
+
+
+    // ============================================================
+    // FORM
+    // ============================================================
+
+    c.form = {
+
+        technical_score: "",
+
+        problem_solving_score: "",
+
+        communication_score: "",
+
+        recommendation: "",
+
+        evaluation_feedback: ""
+
+    };
+
+
+    // ============================================================
+    // UI STATE
+    // ============================================================
+
+    c.saving = false;
+
+    c.error = "";
+
+    c.success = "";
+
+    c.overallScore = 0;
+
+
+    // ============================================================
+    // CALCULATE OVERALL SCORE
+    // ============================================================
+
+    c.calculateScore = function() {
+
+        var technical =
+            parseInt(
+                c.form.technical_score || 0,
+                10
+            );
+
+
+        var problemSolving =
+            parseInt(
+                c.form.problem_solving_score || 0,
+                10
+            );
+
+
+        var communication =
+            parseInt(
+                c.form.communication_score || 0,
+                10
+            );
+
+
+        var total =
+            technical +
+            problemSolving +
+            communication;
+
+
+        /*
+         * No scores selected
+         */
+
+        if (
+            technical === 0 &&
+            problemSolving === 0 &&
+            communication === 0
+        ) {
+
+            c.overallScore = 0;
+
+            return;
+
+        }
+
+
+        /*
+         * 3 categories × 5 = 15
+         *
+         * Convert to 100
+         */
+
+        c.overallScore =
+            Math.round(
+                (total / 15) * 100
+            );
+
+    };
+
+
+    // ============================================================
+    // WATCH SCORE CHANGES
+    // ============================================================
+
+    $scope.$watchGroup(
+        [
+            "c.form.technical_score",
+            "c.form.problem_solving_score",
+            "c.form.communication_score"
+        ],
+        function() {
+
+            c.calculateScore();
+
+        }
+    );
+
+
+    // ============================================================
+    // BACK
+    // ============================================================
+
+    c.goBack = function() {
+
+        $window.location.href =
+            "?id=campus360_recruiter_interviews";
+
+    };
+
+
+    // ============================================================
+    // SUBMIT EVALUATION
+    // ============================================================
+
+    c.submitEvaluation = function() {
+
+        /*
+         * Prevent duplicate clicks
+         */
+
+        if (c.saving) {
+
+            return;
+
+        }
+
+
+        /*
+         * Clear previous messages
+         */
+
+        c.error = "";
+
+        c.success = "";
+
+
+        // ========================================================
+        // VALIDATE SYS_ID
+        // ========================================================
+
+        if (!c.interviewSysId) {
+
+            c.error =
+                "Interview record ID is missing.";
+
+            return;
+
+        }
+
+
+        // ========================================================
+        // VALIDATE TECHNICAL SCORE
+        // ========================================================
+
+        if (
+            !c.form.technical_score ||
+            c.form.technical_score < 1 ||
+            c.form.technical_score > 5
+        ) {
+
+            c.error =
+                "Please provide a Technical Skills rating.";
+
+            return;
+
+        }
+
+
+        // ========================================================
+        // VALIDATE PROBLEM SOLVING
+        // ========================================================
+
+        if (
+            !c.form.problem_solving_score ||
+            c.form.problem_solving_score < 1 ||
+            c.form.problem_solving_score > 5
+        ) {
+
+            c.error =
+                "Please provide a Problem Solving rating.";
+
+            return;
+
+        }
+
+
+        // ========================================================
+        // VALIDATE COMMUNICATION
+        // ========================================================
+
+        if (
+            !c.form.communication_score ||
+            c.form.communication_score < 1 ||
+            c.form.communication_score > 5
+        ) {
+
+            c.error =
+                "Please provide a Communication Skills rating.";
+
+            return;
+
+        }
+
+
+        // ========================================================
+        // VALIDATE RECOMMENDATION
+        // ========================================================
+
+        if (
+            !c.form.recommendation ||
+            c.form.recommendation === "select"
+        ) {
+
+            c.error =
+                "Please select a recommendation.";
+
+            return;
+
+        }
+
+
+        // ========================================================
+        // VALIDATE FEEDBACK
+        // ========================================================
+
+        if (
+            !c.form.evaluation_feedback ||
+            !String(
+                c.form.evaluation_feedback
+            ).trim()
+        ) {
+
+            c.error =
+                "Please enter interview feedback.";
+
+            return;
+
+        }
+
+
+        // ========================================================
+        // CALCULATE SCORE
+        // ========================================================
+
+        c.calculateScore();
+
+
+        // ========================================================
+        // START SAVING
+        // ========================================================
+
+        c.saving = true;
+
+
+        // ========================================================
+        // SEND TO SERVER
+        // ========================================================
+
+        c.data.action =
+            "save_evaluation";
+
+
+        c.data.interview_sys_id =
+            c.interviewSysId;
+
+
+        c.data.form =
+            angular.copy(c.form);
+
+
+        // ========================================================
+        // SERVER UPDATE
+        // ========================================================
+
+        c.server.update().then(
+
+            function(response) {
+
+                c.saving = false;
+
+
+                /*
+                 * Safety check
+                 */
+
+                if (!response) {
+
+                    c.error =
+                        "No response received from ServiceNow.";
+
+                    return;
+
+                }
+
+
+                /*
+                 * Successful save
+                 */
+
+                if (
+                    response.data &&
+                    response.data.success === true
+                ) {
+
+                    c.success =
+                        response.data.message ||
+                        "Interview evaluation saved successfully.";
+
+
+                    /*
+                     * Update displayed score
+                     */
+
+                    if (
+                        response.data.overall_score !==
+                        undefined
+                    ) {
+
+                        c.overallScore =
+                            response.data.overall_score;
+
+                    }
+
+
+                    /*
+                     * Redirect after short delay
+                     */
+
+                    setTimeout(
+                        function() {
+
+                            $window.location.href =
+                                "?id=campus360_recruiter_interviews";
+
+                        },
+                        1200
+                    );
+
+                }
+
+                else {
+
+                    c.error =
+                        (
+                            response.data &&
+                            response.data.error
+                        ) ||
+                        "Unable to save evaluation.";
+
+                }
+
+            },
+
+            function(error) {
+
+                c.saving = false;
+
+
+                c.error =
+                    "Server error while saving evaluation.";
+
+            }
+
+        );
+
+    };
+
+};]]></client_script>
+        <controller_as>c</controller_as>
+        <css>.evaluation-page {&#13;
+  max-width: 1100px;&#13;
+  margin: 30px auto;&#13;
+  padding: 0 20px 60px;&#13;
+  color: #102a56;&#13;
+}&#13;
+&#13;
+&#13;
+/* HEADER */&#13;
+&#13;
+.page-header {&#13;
+  background: #ffffff;&#13;
+  border: 1px solid #e1e7f2;&#13;
+  border-radius: 18px;&#13;
+  padding: 30px;&#13;
+  margin-bottom: 22px;&#13;
+&#13;
+  display: flex;&#13;
+  justify-content: space-between;&#13;
+  align-items: center;&#13;
+&#13;
+  box-shadow: 0 8px 25px rgba(30,55,90,.06);&#13;
+}&#13;
+&#13;
+.eyebrow {&#13;
+  font-size: 11px;&#13;
+  font-weight: 700;&#13;
+  letter-spacing: 2px;&#13;
+  color: #5368e8;&#13;
+}&#13;
+&#13;
+.page-header h1 {&#13;
+  margin: 8px 0 5px;&#13;
+  font-size: 28px;&#13;
+}&#13;
+&#13;
+.page-header p {&#13;
+  margin: 0;&#13;
+  color: #7888a3;&#13;
+  font-size: 14px;&#13;
+}&#13;
+&#13;
+&#13;
+/* CARD */&#13;
+&#13;
+.card {&#13;
+  background: #ffffff;&#13;
+  border: 1px solid #e1e7f2;&#13;
+  border-radius: 18px;&#13;
+  padding: 28px;&#13;
+  margin-bottom: 22px;&#13;
+&#13;
+  box-shadow: 0 8px 25px rgba(30,55,90,.05);&#13;
+}&#13;
+&#13;
+&#13;
+/* SECTION TITLE */&#13;
+&#13;
+.section-title {&#13;
+  border-bottom: 1px solid #e8edf5;&#13;
+  padding-bottom: 20px;&#13;
+  margin-bottom: 25px;&#13;
+}&#13;
+&#13;
+.section-title h2 {&#13;
+  margin: 7px 0 5px;&#13;
+  font-size: 20px;&#13;
+}&#13;
+&#13;
+.section-title p {&#13;
+  margin: 0;&#13;
+  color: #7888a3;&#13;
+  font-size: 13px;&#13;
+}&#13;
+&#13;
+&#13;
+/* DETAILS */&#13;
+&#13;
+.details-grid {&#13;
+  display: grid;&#13;
+  grid-template-columns: 1fr 1fr;&#13;
+  gap: 15px;&#13;
+}&#13;
+&#13;
+.detail-box {&#13;
+  background: #f8faff;&#13;
+  border: 1px solid #e1e7f2;&#13;
+  border-radius: 10px;&#13;
+  padding: 18px;&#13;
+}&#13;
+&#13;
+.detail-box .label {&#13;
+  display: block;&#13;
+  font-size: 9px;&#13;
+  letter-spacing: 1px;&#13;
+  color: #71809b;&#13;
+  margin-bottom: 8px;&#13;
+}&#13;
+&#13;
+.detail-box strong {&#13;
+  font-size: 14px;&#13;
+  color: #183561;&#13;
+}&#13;
+&#13;
+&#13;
+/* RATING */&#13;
+&#13;
+.rating-group {&#13;
+  margin-bottom: 28px;&#13;
+}&#13;
+&#13;
+.rating-group label,&#13;
+.form-group label {&#13;
+  display: block;&#13;
+  font-size: 13px;&#13;
+  font-weight: 600;&#13;
+  margin-bottom: 10px;&#13;
+}&#13;
+&#13;
+.rating-group label span,&#13;
+.form-group label span {&#13;
+  color: #e05252;&#13;
+}&#13;
+&#13;
+.rating-buttons {&#13;
+  display: flex;&#13;
+  gap: 10px;&#13;
+}&#13;
+&#13;
+.rating-buttons button {&#13;
+  width: 40px;&#13;
+  height: 40px;&#13;
+&#13;
+  border-radius: 8px;&#13;
+&#13;
+  border: 1px solid #d5deed;&#13;
+  background: #ffffff;&#13;
+&#13;
+  color: #24395f;&#13;
+&#13;
+  cursor: pointer;&#13;
+}&#13;
+&#13;
+.rating-buttons button:hover {&#13;
+  border-color: #5368e8;&#13;
+}&#13;
+&#13;
+.rating-buttons button.selected {&#13;
+  background: #5368e8;&#13;
+  border-color: #5368e8;&#13;
+  color: #ffffff;&#13;
+}&#13;
+&#13;
+.rating-group small {&#13;
+  display: block;&#13;
+  margin-top: 7px;&#13;
+  color: #8794aa;&#13;
+  font-size: 10px;&#13;
+}&#13;
+&#13;
+&#13;
+/* SCORE */&#13;
+&#13;
+.score-box {&#13;
+  display: flex;&#13;
+  justify-content: space-between;&#13;
+  align-items: center;&#13;
+&#13;
+  padding: 22px;&#13;
+&#13;
+  background: #f7f9ff;&#13;
+&#13;
+  border: 1px solid #dce3f5;&#13;
+  border-radius: 12px;&#13;
+&#13;
+  margin: 25px 0;&#13;
+}&#13;
+&#13;
+.score-title {&#13;
+  font-weight: 700;&#13;
+  font-size: 15px;&#13;
+}&#13;
+&#13;
+.score-description {&#13;
+  margin-top: 5px;&#13;
+  font-size: 11px;&#13;
+  color: #7b89a2;&#13;
+}&#13;
+&#13;
+.score-value {&#13;
+  font-size: 27px;&#13;
+  font-weight: 700;&#13;
+  color: #5368e8;&#13;
+}&#13;
+&#13;
+.score-value span {&#13;
+  font-size: 13px;&#13;
+  color: #8a96aa;&#13;
+}&#13;
+&#13;
+&#13;
+/* FORM */&#13;
+&#13;
+.form-group {&#13;
+  margin-bottom: 22px;&#13;
+}&#13;
+&#13;
+.form-group select,&#13;
+.form-group input,&#13;
+.form-group textarea {&#13;
+  width: 100%;&#13;
+  box-sizing: border-box;&#13;
+&#13;
+  border: 1px solid #d6deeb;&#13;
+  border-radius: 8px;&#13;
+&#13;
+  padding: 12px;&#13;
+&#13;
+  font-size: 13px;&#13;
+&#13;
+  color: #24395f;&#13;
+&#13;
+  background: #ffffff;&#13;
+}&#13;
+&#13;
+.form-group select,&#13;
+.form-group input {&#13;
+  height: 44px;&#13;
+}&#13;
+&#13;
+.form-group textarea {&#13;
+  min-height: 120px;&#13;
+  resize: vertical;&#13;
+}&#13;
+&#13;
+.form-group input[readonly] {&#13;
+  background: #f7f9fc;&#13;
+}&#13;
+&#13;
+&#13;
+/* BUTTONS */&#13;
+&#13;
+.form-actions {&#13;
+  display: flex;&#13;
+  justify-content: flex-end;&#13;
+  gap: 12px;&#13;
+&#13;
+  border-top: 1px solid #e8edf5;&#13;
+&#13;
+  padding-top: 22px;&#13;
+&#13;
+  margin-top: 25px;&#13;
+}&#13;
+&#13;
+.btn {&#13;
+  height: 42px;&#13;
+  padding: 0 18px;&#13;
+&#13;
+  border-radius: 8px;&#13;
+&#13;
+  font-size: 13px;&#13;
+  font-weight: 600;&#13;
+&#13;
+  cursor: pointer;&#13;
+}&#13;
+&#13;
+.btn-primary {&#13;
+  background: #5368e8;&#13;
+  color: #ffffff;&#13;
+  border: 1px solid #5368e8;&#13;
+}&#13;
+&#13;
+.btn-primary:hover {&#13;
+  background: #4056d5;&#13;
+}&#13;
+&#13;
+.btn-secondary {&#13;
+  background: #ffffff;&#13;
+  color: #5368e8;&#13;
+  border: 1px solid #ccd5e5;&#13;
+}&#13;
+&#13;
+&#13;
+/* MESSAGES */&#13;
+&#13;
+.error-message {&#13;
+  margin-top: 20px;&#13;
+&#13;
+  padding: 13px 15px;&#13;
+&#13;
+  background: #fff1f1;&#13;
+&#13;
+  border: 1px solid #ffd0d0;&#13;
+&#13;
+  color: #c33d3d;&#13;
+&#13;
+  border-radius: 8px;&#13;
+&#13;
+  font-size: 13px;&#13;
+}&#13;
+&#13;
+.success-message {&#13;
+  margin-top: 20px;&#13;
+&#13;
+  padding: 13px 15px;&#13;
+&#13;
+  background: #effaf3;&#13;
+&#13;
+  border: 1px solid #c9ecd5;&#13;
+&#13;
+  color: #25804a;&#13;
+&#13;
+  border-radius: 8px;&#13;
+&#13;
+  font-size: 13px;&#13;
+}&#13;
+&#13;
+&#13;
+/* MOBILE */&#13;
+&#13;
+@media(max-width:768px) {&#13;
+&#13;
+  .page-header {&#13;
+    flex-direction: column;&#13;
+    align-items: flex-start;&#13;
+    gap: 18px;&#13;
+  }&#13;
+&#13;
+  .details-grid {&#13;
+    grid-template-columns: 1fr;&#13;
+  }&#13;
+&#13;
+  .score-box {&#13;
+    flex-direction: column;&#13;
+    align-items: flex-start;&#13;
+    gap: 12px;&#13;
+  }&#13;
+&#13;
+  .form-actions {&#13;
+    flex-direction: column;&#13;
+  }&#13;
+&#13;
+  .btn {&#13;
+    width: 100%;&#13;
+  }&#13;
+&#13;
+}</css>
+        <data_table>sp_instance</data_table>
+        <demo_data/>
+        <description>Recruiter-side interview evaluation form</description>
+        <docs/>
+        <field_list/>
+        <has_preview>false</has_preview>
+        <id>campus360_recruiter_interview_evaluation</id>
+        <internal>false</internal>
+        <link><![CDATA[function link(scope, element, attrs, controller) {
+  
+}]]></link>
+        <name>Recruiter Interview Evaluation</name>
+        <option_schema/>
+        <public>false</public>
+        <roles>admin,x_snc_campus360.recruiter,x_snc_campus360.recruiter_interview_user,x_snc_campus360.tpo</roles>
+        <script><![CDATA[(function() {
+
+    // ============================================================
+    // INITIAL DATA
+    // ============================================================
+
+    data.interview = null;
+
+    data.success = false;
+
+    data.error = "";
+
+    data.message = "";
+
+    data.overall_score = 0;
+
+    data.loading = false;
+
+
+    // ============================================================
+    // TABLE
+    // ============================================================
+
+    var TABLE =
+        "x_snc_campus360_recruiter_interview";
+
+
+    // ============================================================
+    // GET INTERVIEW SYS_ID
+    // ============================================================
+
+    var interviewSysId =
+        $sp.getParameter("interview_sys_id");
+
+
+    // ============================================================
+    // LOAD INTERVIEW
+    // ============================================================
+
+    if (interviewSysId) {
+
+        var interviewGR =
+            new GlideRecord(TABLE);
+
+
+        if (interviewGR.get(interviewSysId)) {
+
+            data.interview = {
+
+                sys_id:
+                    interviewGR.getUniqueValue(),
+
+
+                student:
+                    interviewGR.getValue(
+                        "student"
+                    ),
+
+
+                student_display:
+                    interviewGR.getDisplayValue(
+                        "student"
+                    ),
+
+
+                opportunity:
+                    interviewGR.getValue(
+                        "opportunity"
+                    ),
+
+
+                opportunity_display:
+                    interviewGR.getDisplayValue(
+                        "opportunity"
+                    ),
+
+
+                application:
+                    interviewGR.getValue(
+                        "application"
+                    ),
+
+
+                application_display:
+                    interviewGR.getDisplayValue(
+                        "application"
+                    ),
+
+
+                interview_round:
+                    interviewGR.getValue(
+                        "interview_round"
+                    ),
+
+
+                interview_round_display:
+                    interviewGR.getDisplayValue(
+                        "interview_round"
+                    ),
+
+
+                interview_date:
+                    interviewGR.getDisplayValue(
+                        "interview_date"
+                    ),
+
+
+                interviewer:
+                    interviewGR.getDisplayValue(
+                        "interviewer"
+                    )
+
+            };
+
+        }
+
+        else {
+
+            data.error =
+                "Interview record could not be found.";
+
+        }
+
+    }
+
+    else {
+
+        data.error =
+            "Interview record ID is missing.";
+
+    }
+
+
+    // ============================================================
+    // SAVE EVALUATION
+    // ============================================================
+
+    if (
+        input &&
+        input.action === "save_evaluation"
+    ) {
+
+
+        // ========================================================
+        // INPUT
+        // ========================================================
+
+        var form =
+            input.form;
+
+
+        var sysId =
+            input.interview_sys_id;
+
+
+        // ========================================================
+        // VALIDATE SYS_ID
+        // ========================================================
+
+        if (!sysId) {
+
+            data.success = false;
+
+            data.error =
+                "Interview record ID is missing.";
+
+            return;
+
+        }
+
+
+        // ========================================================
+        // VALIDATE FORM
+        // ========================================================
+
+        if (!form) {
+
+            data.success = false;
+
+            data.error =
+                "Evaluation data is missing.";
+
+            return;
+
+        }
+
+
+        // ========================================================
+        // GET RECORD
+        // ========================================================
+
+        var gr =
+            new GlideRecord(TABLE);
+
+
+        if (!gr.get(sysId)) {
+
+            data.success = false;
+
+            data.error =
+                "Interview record not found.";
+
+            return;
+
+        }
+
+
+        // ========================================================
+        // CHECK DATABASE FIELDS
+        // ========================================================
+
+        var requiredFields = [
+
+            "technical_score",
+
+            "problem_solving_score",
+
+            "communication_score",
+
+            "overall_score",
+
+            "recommendation",
+
+            "evaluation_feedback",
+
+            "evaluation_status",
+
+            "status",
+
+            "result"
+
+        ];
+
+
+        for (
+            var i = 0;
+            i < requiredFields.length;
+            i++
+        ) {
+
+            var fieldName =
+                requiredFields[i];
+
+
+            if (
+                !gr.isValidField(
+                    fieldName
+                )
+            ) {
+
+                data.success = false;
+
+                data.error =
+                    "Database field does not exist: " +
+                    fieldName;
+
+                return;
+
+            }
+
+        }
+
+
+        // ========================================================
+        // READ SCORES
+        // ========================================================
+
+        var technical =
+            parseInt(
+                form.technical_score,
+                10
+            );
+
+
+        var problemSolving =
+            parseInt(
+                form.problem_solving_score,
+                10
+            );
+
+
+        var communication =
+            parseInt(
+                form.communication_score,
+                10
+            );
+
+
+        // ========================================================
+        // VALIDATE SCORES
+        // ========================================================
+
+        if (
+            isNaN(technical) ||
+            isNaN(problemSolving) ||
+            isNaN(communication)
+        ) {
+
+            data.success = false;
+
+            data.error =
+                "Evaluation scores must be valid numbers.";
+
+            return;
+
+        }
+
+
+        if (
+            technical < 1 ||
+            technical > 5 ||
+            problemSolving < 1 ||
+            problemSolving > 5 ||
+            communication < 1 ||
+            communication > 5
+        ) {
+
+            data.success = false;
+
+            data.error =
+                "All evaluation scores must be between 1 and 5.";
+
+            return;
+
+        }
+
+
+        // ========================================================
+        // CALCULATE OVERALL SCORE
+        // ========================================================
+
+        var total =
+            technical +
+            problemSolving +
+            communication;
+
+
+        var overallScore =
+            Math.round(
+                (total / 15) * 100
+            );
+
+
+        data.overall_score =
+            overallScore;
+
+
+        // ========================================================
+        // VALIDATE RECOMMENDATION
+        // ========================================================
+
+        var recommendation =
+            String(
+                form.recommendation || ""
+            );
+
+
+        if (
+            recommendation !==
+            "strongly_recommended" &&
+
+            recommendation !==
+            "recommended" &&
+
+            recommendation !==
+            "not_recommended"
+        ) {
+
+            data.success = false;
+
+            data.error =
+                "Please select a valid recommendation.";
+
+            return;
+
+        }
+
+
+        // ========================================================
+        // VALIDATE FEEDBACK
+        // ========================================================
+
+        var evaluationFeedback =
+            String(
+                form.evaluation_feedback || ""
+            ).trim();
+
+
+        if (!evaluationFeedback) {
+
+            data.success = false;
+
+            data.error =
+                "Please enter interview feedback.";
+
+            return;
+
+        }
+
+
+        // ========================================================
+        // SET TECHNICAL SCORE
+        // ========================================================
+
+        gr.setValue(
+            "technical_score",
+            technical
+        );
+
+
+        // ========================================================
+        // SET PROBLEM SOLVING SCORE
+        // ========================================================
+
+        gr.setValue(
+            "problem_solving_score",
+            problemSolving
+        );
+
+
+        // ========================================================
+        // SET COMMUNICATION SCORE
+        // ========================================================
+
+        gr.setValue(
+            "communication_score",
+            communication
+        );
+
+
+        // ========================================================
+        // SET OVERALL SCORE
+        // ========================================================
+
+        gr.setValue(
+            "overall_score",
+            overallScore
+        );
+
+
+        // ========================================================
+        // SET RECOMMENDATION
+        // ========================================================
+
+        gr.setValue(
+            "recommendation",
+            recommendation
+        );
+
+
+        // ========================================================
+        // SET EVALUATION FEEDBACK
+        // ========================================================
+
+        gr.setValue(
+            "evaluation_feedback",
+            evaluationFeedback
+        );
+
+
+        // ========================================================
+        // SET EVALUATION STATUS
+        //
+        // Choice:
+        // Pending   = pending
+        // Evaluated = evaluated
+        // ========================================================
+
+        gr.setValue(
+            "evaluation_status",
+            "evaluated"
+        );
+
+
+        // ========================================================
+        // SET INTERVIEW STATUS
+        //
+        // Scheduled -> Completed
+        // ========================================================
+
+        gr.setValue(
+            "status",
+            "completed"
+        );
+
+
+        // ========================================================
+        // SET RESULT
+        //
+        // Strongly Recommended -> Selected
+        // Recommended          -> Selected
+        // Not Recommended      -> Rejected
+        // ========================================================
+
+        if (
+            recommendation ===
+            "strongly_recommended" ||
+
+            recommendation ===
+            "recommended"
+        ) {
+
+            gr.setValue(
+                "result",
+                "selected"
+            );
+
+        }
+
+        else {
+
+            gr.setValue(
+                "result",
+                "rejected"
+            );
+
+        }
+
+
+        // ========================================================
+        // UPDATE RECORD
+        // ========================================================
+
+        try {
+
+            var updatedSysId =
+                gr.update();
+
+
+            // ====================================================
+            // SUCCESS
+            // ====================================================
+
+            if (updatedSysId) {
+
+                data.success =
+                    true;
+
+
+                data.message =
+                    "Interview evaluation saved successfully.";
+
+
+                data.overall_score =
+                    overallScore;
+
+
+                /*
+                 * Return updated values for debugging/confirmation
+                 */
+
+                data.saved = {
+
+                    technical_score:
+                        technical,
+
+                    problem_solving_score:
+                        problemSolving,
+
+                    communication_score:
+                        communication,
+
+                    overall_score:
+                        overallScore,
+
+                    recommendation:
+                        recommendation,
+
+                    evaluation_status:
+                        "evaluated",
+
+                    status:
+                        "completed",
+
+                    result:
+                        (
+                            recommendation ===
+                                "not_recommended"
+                        )
+                            ? "rejected"
+                            : "selected"
+
+                };
+
+            }
+
+            else {
+
+                data.success =
+                    false;
+
+
+                data.error =
+                    "ServiceNow could not update the interview record. Check the table ACLs and field permissions.";
+
+            }
+
+        }
+
+
+        catch (e) {
+
+            data.success =
+                false;
+
+
+            data.error =
+                "Save failed: " +
+                e.message;
+
+        }
+
+    }
+
+})();]]></script>
+        <servicenow>false</servicenow>
+        <sys_class_name>sp_widget</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-25 08:20:03</sys_created_on>
+        <sys_id>c611f025a06b03107f44e28050a33b7b</sys_id>
+        <sys_mod_count>12</sys_mod_count>
+        <sys_name>Recruiter Interview Evaluation</sys_name>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name>sp_widget_c611f025a06b03107f44e28050a33b7b</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-26 06:42:02</sys_updated_on>
+        <template><![CDATA[<div class="evaluation-page">
+
+  <!-- =========================================================
+       HEADER
+       ========================================================= -->
+
+  <section class="page-header">
+
+    <div>
+
+      <div class="eyebrow">
+        RECRUITMENT
+      </div>
+
+      <h1>
+        Interview Evaluation
+      </h1>
+
+      <p>
+        Evaluate candidate performance and submit your recommendation.
+      </p>
+
+    </div>
+
+    <button
+      type="button"
+      class="btn btn-secondary"
+      ng-click="c.goBack()">
+
+      ← Back to Interviews
+
+    </button>
+
+  </section>
+
+
+  <!-- =========================================================
+       ERROR MESSAGE
+       ========================================================= -->
+
+  <div
+    class="error-message"
+    ng-if="c.error">
+
+    {{c.error}}
+
+  </div>
+
+
+  <!-- =========================================================
+       SUCCESS MESSAGE
+       ========================================================= -->
+
+  <div
+    class="success-message"
+    ng-if="c.success">
+
+    {{c.success}}
+
+  </div>
+
+
+  <!-- =========================================================
+       INTERVIEW DETAILS
+       ========================================================= -->
+
+  <section
+    class="card"
+    ng-if="c.data.interview">
+
+    <div class="section-title">
+
+      <div class="eyebrow">
+        INTERVIEW DETAILS
+      </div>
+
+      <h2>
+        Candidate Information
+      </h2>
+
+    </div>
+
+
+    <div class="details-grid">
+
+      <!-- Candidate -->
+
+      <div class="detail-box">
+
+        <span class="label">
+          CANDIDATE
+        </span>
+
+        <strong>
+          {{c.data.interview.student_display || '-'}}
+        </strong>
+
+      </div>
+
+
+      <!-- Opportunity -->
+
+      <div class="detail-box">
+
+        <span class="label">
+          OPPORTUNITY
+        </span>
+
+        <strong>
+          {{c.data.interview.opportunity_display || '-'}}
+        </strong>
+
+      </div>
+
+
+      <!-- Application -->
+
+      <div class="detail-box">
+
+        <span class="label">
+          APPLICATION
+        </span>
+
+        <strong>
+          {{c.data.interview.application_display || '-'}}
+        </strong>
+
+      </div>
+
+
+      <!-- Interview Round -->
+
+      <div class="detail-box">
+
+        <span class="label">
+          INTERVIEW ROUND
+        </span>
+
+        <strong>
+          {{c.data.interview.interview_round_display || '-'}}
+        </strong>
+
+      </div>
+
+
+      <!-- Interview Date -->
+
+      <div class="detail-box">
+
+        <span class="label">
+          INTERVIEW DATE
+        </span>
+
+        <strong>
+          {{c.data.interview.interview_date || '-'}}
+        </strong>
+
+      </div>
+
+
+      <!-- Interviewer -->
+
+      <div class="detail-box">
+
+        <span class="label">
+          INTERVIEWER
+        </span>
+
+        <strong>
+          {{c.data.interview.interviewer || '-'}}
+        </strong>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- =========================================================
+       EVALUATION
+       ========================================================= -->
+
+  <section
+    class="card"
+    ng-if="c.data.interview">
+
+
+    <div class="section-title">
+
+      <div class="eyebrow">
+        CANDIDATE EVALUATION
+      </div>
+
+      <h2>
+        Assessment
+      </h2>
+
+      <p>
+        Rate the candidate's performance in each area.
+      </p>
+
+    </div>
+
+
+    <!-- =======================================================
+         TECHNICAL SCORE
+         ======================================================= -->
+
+    <div class="rating-group">
+
+      <label>
+        Technical Skills
+        <span>*</span>
+      </label>
+
+
+      <div class="rating-buttons">
+
+        <button
+          type="button"
+          ng-repeat="n in [1,2,3,4,5]"
+          ng-class="{'selected': c.form.technical_score == n}"
+          ng-click="c.form.technical_score = n">
+
+          {{n}}
+
+        </button>
+
+      </div>
+
+
+      <small>
+        1 = Poor &nbsp;&nbsp; 5 = Excellent
+      </small>
+
+    </div>
+
+
+    <!-- =======================================================
+         PROBLEM SOLVING SCORE
+         ======================================================= -->
+
+    <div class="rating-group">
+
+      <label>
+        Problem Solving
+        <span>*</span>
+      </label>
+
+
+      <div class="rating-buttons">
+
+        <button
+          type="button"
+          ng-repeat="n in [1,2,3,4,5]"
+          ng-class="{'selected': c.form.problem_solving_score == n}"
+          ng-click="c.form.problem_solving_score = n">
+
+          {{n}}
+
+        </button>
+
+      </div>
+
+
+      <small>
+        1 = Poor &nbsp;&nbsp; 5 = Excellent
+      </small>
+
+    </div>
+
+
+    <!-- =======================================================
+         COMMUNICATION SCORE
+         ======================================================= -->
+
+    <div class="rating-group">
+
+      <label>
+        Communication Skills
+        <span>*</span>
+      </label>
+
+
+      <div class="rating-buttons">
+
+        <button
+          type="button"
+          ng-repeat="n in [1,2,3,4,5]"
+          ng-class="{'selected': c.form.communication_score == n}"
+          ng-click="c.form.communication_score = n">
+
+          {{n}}
+
+        </button>
+
+      </div>
+
+
+      <small>
+        1 = Poor &nbsp;&nbsp; 5 = Excellent
+      </small>
+
+    </div>
+
+
+    <!-- =======================================================
+         OVERALL SCORE
+         ======================================================= -->
+
+    <div class="score-box">
+
+      <div>
+
+        <div class="score-title">
+          Overall Score
+        </div>
+
+        <div class="score-description">
+          Automatically calculated from the evaluation categories.
+        </div>
+
+      </div>
+
+
+      <div class="score-value">
+
+        {{c.overallScore}}
+
+        <span>
+          /100
+        </span>
+
+      </div>
+
+    </div>
+
+
+    <!-- =======================================================
+         RECOMMENDATION
+         ======================================================= -->
+
+    <div class="form-group">
+
+      <label>
+        Recommendation
+        <span>*</span>
+      </label>
+
+
+      <select
+        ng-model="c.form.recommendation">
+
+        <option value="">
+          Select
+        </option>
+
+        <option value="strongly_recommended">
+          Strongly Recommended
+        </option>
+
+        <option value="recommended">
+          Recommended
+        </option>
+
+        <option value="not_recommended">
+          Not Recommended
+        </option>
+
+      </select>
+
+    </div>
+
+
+    <!-- =======================================================
+         EVALUATION FEEDBACK
+         ======================================================= -->
+
+    <div class="form-group">
+
+      <label>
+        Interview Feedback
+        <span>*</span>
+      </label>
+
+
+      <textarea
+        ng-model="c.form.evaluation_feedback"
+        placeholder="Enter detailed interview feedback...">
+      </textarea>
+
+    </div>
+
+
+    <!-- =======================================================
+         EVALUATION STATUS
+         ======================================================= -->
+
+    <div class="form-group">
+
+      <label>
+        Evaluation Status
+      </label>
+
+
+      <input
+        type="text"
+        value="Pending → Evaluated"
+        readonly>
+
+    </div>
+
+
+    <!-- =======================================================
+         ACTIONS
+         ======================================================= -->
+
+    <div class="form-actions">
+
+      <button
+        type="button"
+        class="btn btn-secondary"
+        ng-click="c.goBack()"
+        ng-disabled="c.saving">
+
+        Cancel
+
+      </button>
+
+
+      <button
+        type="button"
+        class="btn btn-primary"
+        ng-click="c.submitEvaluation()"
+        ng-disabled="c.saving">
+
+        {{c.saving ? 'Saving...' : 'Submit Evaluation'}}
+
+      </button>
+
+    </div>
+
+
+  </section>
+
+
+  <!-- =========================================================
+       RECORD NOT FOUND
+       ========================================================= -->
+
+  <section
+    class="card"
+    ng-if="!c.data.interview && !c.data.loading">
+
+    <h2>
+      Interview Not Found
+    </h2>
+
+    <p>
+      {{c.data.error || 'The interview record could not be loaded.'}}
+    </p>
+
+    <button
+      type="button"
+      class="btn btn-secondary"
+      ng-click="c.goBack()">
+
+      ← Back to Interviews
+
+    </button>
+
+  </section>
+
+</div>]]></template>
+    </sp_widget>
+</record_update>

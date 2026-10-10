@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update sys_domain="global" table="sn_decision_table_decision_condition">
+    <sn_decision_table_decision_condition action="DELETE">
+        <decision_input display_value="Bottleneck Stage">c7ff0627a81f03107f44321b8bcb56d9</decision_input>
+        <decision_table display_value="Campus360 - Intervention Recommendation delta">3eff02e3a81f03107f44321b8bcb56a0</decision_table>
+        <default_operator>=</default_operator>
+        <description>Evaluates the student's placement bottleneck stage.</description>
+        <field/>
+        <field_label/>
+        <field_parent_table/>
+        <label>Bottleneck Stage</label>
+        <order>200</order>
+        <parent display_value="">64feed27a8d703107f44321b8bcb56a1</parent>
+        <reference/>
+        <sys_class_name>sn_decision_table_decision_condition</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 10:04:12</sys_created_on>
+        <sys_domain>global</sys_domain>
+        <sys_id>2bff4627a81f03107f44321b8bcb56d0</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name/>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name>sn_decision_table_decision_condition_2bff4627a81f03107f44321b8bcb56d0</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 10:04:12</sys_updated_on>
+        <type display_value="String">747127c1bf3320001875647fcf0739e0</type>
+    </sn_decision_table_decision_condition>
+    <sys_update_version action="INSERT_OR_UPDATE">
+        <action>DELETE</action>
+        <application display_value="Campus360">7cd68adee41703107f44d305db800ec3</application>
+        <file_path/>
+        <instance_id>82d18dc7c38fcf94a03197af0501316c</instance_id>
+        <instance_name>ltm-hck-2876-0027</instance_name>
+        <name>sn_decision_table_decision_condition_2bff4627a81f03107f44321b8bcb56d0</name>
+        <payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update sys_domain="global" table="sn_decision_table_decision_condition"><sn_decision_table_decision_condition action="INSERT_OR_UPDATE"><decision_input display_value="Bottleneck Stage">c7ff0627a81f03107f44321b8bcb56d9</decision_input><decision_table display_value="Campus360 - Intervention Recommendation delta">3eff02e3a81f03107f44321b8bcb56a0</decision_table><default_operator>=</default_operator><description>Evaluates the student's placement bottleneck stage.</description><field/><field_label/><field_parent_table/><label>Bottleneck Stage</label><order>200</order><parent display_value="">64feed27a8d703107f44321b8bcb56a1</parent><reference/><sys_class_name>sn_decision_table_decision_condition</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-19 10:04:12</sys_created_on><sys_domain>global</sys_domain><sys_id>2bff4627a81f03107f44321b8bcb56d0</sys_id><sys_mod_count>0</sys_mod_count><sys_name/><sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package><sys_policy/><sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope><sys_update_name>sn_decision_table_decision_condition_2bff4627a81f03107f44321b8bcb56d0</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-19 10:04:12</sys_updated_on><type display_value="String">747127c1bf3320001875647fcf0739e0</type></sn_decision_table_decision_condition></record_update>]]></payload>
+        <payload_hash>1531103592</payload_hash>
+        <record_name/>
+        <reverted_from/>
+        <source>70d68adee41703107f44d305db800ec8</source>
+        <source_table>sys_update_set</source_table>
+        <state>previous</state>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 10:04:12</sys_created_on>
+        <sys_id>2bff4627a81f03107f44321b8bcb56d2</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_recorded_at>1a0b91fa08c0000001</sys_recorded_at>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 10:04:12</sys_updated_on>
+        <type>Decision Condition</type>
+        <update_guid>2fff4627171f03105ac7178ac398d3d1</update_guid>
+        <update_guid_history>2fff4627171f03105ac7178ac398d3d1:1531103592</update_guid_history>
+    </sys_update_version>
+    <sys_metadata_delete action="INSERT_OR_UPDATE">
+        <sys_audit_delete display_value="">a2205a67a81f03107f44321b8bcb56a9</sys_audit_delete>
+        <sys_class_name>sys_metadata_delete</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 10:04:57</sys_created_on>
+        <sys_db_object display_value="" name="sn_decision_table_decision_condition">sn_decision_table_decision_condition</sys_db_object>
+        <sys_id>0478e8124ca2438387bb4eda06e31fb1</sys_id>
+        <sys_metadata>2bff4627a81f03107f44321b8bcb56d0</sys_metadata>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name/>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_parent/>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_scope_delete display_value="">1cde9626740d46978b846077c1615101</sys_scope_delete>
+        <sys_update_name>sn_decision_table_decision_condition_2bff4627a81f03107f44321b8bcb56d0</sys_update_name>
+        <sys_update_version display_value="sn_decision_table_decision_condition_2bff4627a81f03107f44321b8bcb56d0">2bff4627a81f03107f44321b8bcb56d2</sys_update_version>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 10:04:57</sys_updated_on>
+    </sys_metadata_delete>
+</record_update>

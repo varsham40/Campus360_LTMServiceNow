@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update sys_domain="global" table="sn_decision_table_decision_condition">
+    <sn_decision_table_decision_condition action="DELETE">
+        <decision_input display_value="Risk Level">bec21627a85f03107f44321b8bcb563e</decision_input>
+        <decision_table display_value="Campus360 - Intervention Recommendation delta">bd2212e3a85f03107f44321b8bcb5659</decision_table>
+        <default_operator>=</default_operator>
+        <description/>
+        <field/>
+        <field_label/>
+        <field_parent_table/>
+        <label>Risk Level</label>
+        <order>100</order>
+        <parent/>
+        <reference/>
+        <sys_class_name>sn_decision_table_decision_condition</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 10:16:28</sys_created_on>
+        <sys_domain>global</sys_domain>
+        <sys_id>d7c21627a85f03107f44321b8bcb5680</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name/>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name>sn_decision_table_decision_condition_d7c21627a85f03107f44321b8bcb5680</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 10:16:28</sys_updated_on>
+        <type display_value="Choice">5217a7c1bf3320001875647fcf0739b7</type>
+    </sn_decision_table_decision_condition>
+    <sys_update_version action="INSERT_OR_UPDATE">
+        <action>DELETE</action>
+        <application display_value="Campus360">7cd68adee41703107f44d305db800ec3</application>
+        <file_path/>
+        <instance_id>82d18dc7c38fcf94a03197af0501316c</instance_id>
+        <instance_name>ltm-hck-2876-0027</instance_name>
+        <name>sn_decision_table_decision_condition_d7c21627a85f03107f44321b8bcb5680</name>
+        <payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update sys_domain="global" table="sn_decision_table_decision_condition"><sn_decision_table_decision_condition action="INSERT_OR_UPDATE"><decision_input display_value="Risk Level">bec21627a85f03107f44321b8bcb563e</decision_input><decision_table display_value="Campus360 - Intervention Recommendation delta">bd2212e3a85f03107f44321b8bcb5659</decision_table><default_operator>=</default_operator><description/><field/><field_label/><field_parent_table/><label>Risk Level</label><order>100</order><parent/><reference/><sys_class_name>sn_decision_table_decision_condition</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-19 10:16:28</sys_created_on><sys_domain>global</sys_domain><sys_id>d7c21627a85f03107f44321b8bcb5680</sys_id><sys_mod_count>0</sys_mod_count><sys_name/><sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package><sys_policy/><sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope><sys_update_name>sn_decision_table_decision_condition_d7c21627a85f03107f44321b8bcb5680</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-19 10:16:28</sys_updated_on><type display_value="Choice">5217a7c1bf3320001875647fcf0739b7</type></sn_decision_table_decision_condition></record_update>]]></payload>
+        <payload_hash>2072674625</payload_hash>
+        <record_name/>
+        <reverted_from/>
+        <source>70d68adee41703107f44d305db800ec8</source>
+        <source_table>sys_update_set</source_table>
+        <state>previous</state>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 10:16:28</sys_created_on>
+        <sys_id>5bc21627a85f03107f44321b8bcb5682</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_recorded_at>1a0b92adbd60000001</sys_recorded_at>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 10:16:28</sys_updated_on>
+        <type>Decision Condition</type>
+        <update_guid>5fc21627975f03100e06f81887043181</update_guid>
+        <update_guid_history>5fc21627975f03100e06f81887043181:2072674625</update_guid_history>
+    </sys_update_version>
+    <sys_metadata_delete action="INSERT_OR_UPDATE">
+        <sys_audit_delete display_value="">4cc392a7a85f03107f44321b8bcb56ad</sys_audit_delete>
+        <sys_class_name>sys_metadata_delete</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 10:20:38</sys_created_on>
+        <sys_db_object display_value="" name="sn_decision_table_decision_condition">sn_decision_table_decision_condition</sys_db_object>
+        <sys_id>5078f1bc0ddc460aa7dc3e42ee1f3c41</sys_id>
+        <sys_metadata>d7c21627a85f03107f44321b8bcb5680</sys_metadata>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name/>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_parent/>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_scope_delete display_value="">1cde9626740d46978b846077c1615101</sys_scope_delete>
+        <sys_update_name>sn_decision_table_decision_condition_d7c21627a85f03107f44321b8bcb5680</sys_update_name>
+        <sys_update_version display_value="sn_decision_table_decision_condition_d7c21627a85f03107f44321b8bcb5680">5bc21627a85f03107f44321b8bcb5682</sys_update_version>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 10:20:38</sys_updated_on>
+    </sys_metadata_delete>
+</record_update>

@@ -1,0 +1,946 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_widget">
+    <sp_widget action="INSERT_OR_UPDATE">
+        <category>custom</category>
+        <client_script><![CDATA[api.controller = function($scope, $window, $timeout) {
+    var c = this;
+
+    c.form = {
+        application: '',
+        opportunity: '',
+        round: 'Technical Round',
+        mode: 'Online',
+        date: '',
+        interviewer: '',
+        meeting_link: ''
+    };
+
+    c.editingInterview = null;
+    c.error = '';
+    c.success = '';
+    c.saving = false;
+
+    c.applicationChanged = function() {
+        if (!c.form.application || !c.data.applications) return;
+        c.data.applications.forEach(function(app) {
+            if (app.sys_id === c.form.application) {
+                if (app.opportunity_sys_id) {
+                    c.form.opportunity = app.opportunity_sys_id;
+                }
+            }
+        });
+    };
+
+    c.schedule = function() {
+        c.error = '';
+        c.success = '';
+
+        if (!c.form.application) {
+            c.error = 'Please select a candidate.';
+            return;
+        }
+        if (!c.form.opportunity) {
+            c.error = 'Please select an opportunity.';
+            return;
+        }
+        if (!c.form.round) {
+            c.error = 'Please select an interview round.';
+            return;
+        }
+        if (!c.form.mode) {
+            c.error = 'Please select an interview mode.';
+            return;
+        }
+        if (!c.form.date) {
+            c.error = 'Please select the interview date & time.';
+            return;
+        }
+        if (!c.form.interviewer || !c.form.interviewer.trim()) {
+            c.error = 'Please enter the interviewer name.';
+            return;
+        }
+
+        c.saving = true;
+
+        c.server.get({
+            action: 'schedule',
+            form: {
+                application: c.form.application,
+                opportunity: c.form.opportunity,
+                round: c.form.round,
+                mode: c.form.mode,
+                date: c.form.date,
+                interviewer: c.form.interviewer.trim(),
+                meeting_link: c.form.meeting_link || ''
+            }
+        }).then(function(res) {
+            c.saving = false;
+            if (res && res.data && res.data.success) {
+                c.success = res.data.message || 'Interview scheduled successfully!';
+                c.error = '';
+                
+                // Reset form
+                c.form = {
+                    application: '',
+                    opportunity: '',
+                    round: 'Technical Round',
+                    mode: 'Online',
+                    date: '',
+                    interviewer: '',
+                    meeting_link: ''
+                };
+
+                // Refresh recent scheduled list
+                if (res.data.scheduledInterviews) {
+                    c.data.scheduledInterviews = res.data.scheduledInterviews;
+                } else {
+                    c.refreshData();
+                }
+            } else {
+                c.error = (res && res.data && res.data.error) ? res.data.error : 'Unable to schedule interview.';
+            }
+        }).catch(function(err) {
+            c.saving = false;
+            c.error = 'Communication error while scheduling interview.';
+        });
+    };
+
+    c.openEdit = function(interview) {
+        c.editingInterview = angular.copy(interview);
+    };
+
+    c.closeEdit = function() {
+        c.editingInterview = null;
+    };
+
+    c.saveEdit = function() {
+        if (!c.editingInterview) return;
+        c.saving = true;
+        c.server.get({
+            action: 'update_interview',
+            interview_sys_id: c.editingInterview.sys_id,
+            interview_round: c.editingInterview.round,
+            interview_mode: c.editingInterview.mode,
+            interviewer: c.editingInterview.interviewer,
+            meeting_link: c.editingInterview.meeting_link,
+            status: c.editingInterview.status,
+            result: c.editingInterview.result
+        }).then(function(res) {
+            c.saving = false;
+            c.editingInterview = null;
+            c.refreshData();
+        }).catch(function() {
+            c.saving = false;
+        });
+    };
+
+    c.refreshData = function() {
+        c.server.get().then(function(res) {
+            if (res && res.data) {
+                c.data = res.data;
+            }
+        });
+    };
+
+    c.goDashboard = function() {
+        $window.location.href = '?id=campus360_recruiter_dashboard_new';
+    };
+
+    c.goBack = function() {
+        $window.location.href = '?id=campus360_recruiter_interviews_new';
+    };
+};]]></client_script>
+        <controller_as>c</controller_as>
+        <css>
+.schedule-page {
+  padding: 24px 32px;
+  background: #f8fafc;
+  min-height: 100vh;
+  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+}
+
+.eyebrow {
+  font-size: 10px;
+  font-weight: 800;
+  color: #7c3aed;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.page-header h1 {
+  font-size: 26px;
+  font-weight: 900;
+  color: #0f172a;
+  margin: 4px 0;
+}
+
+.page-header p {
+  font-size: 13px;
+  color: #64748b;
+  margin: 0;
+}
+
+.header-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.btn-secondary {
+  background: #ffffff;
+  color: #475569;
+  border: 1px solid #cbd5e1;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.btn-secondary:hover {
+  background: #f1f5f9;
+  color: #1e293b;
+}
+
+.form-card, .scheduled-list-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 28px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+}
+
+.form-title h2 {
+  font-size: 18px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 4px;
+}
+
+.form-title p {
+  font-size: 12px;
+  color: #64748b;
+  margin: 0 0 20px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group.full-width {
+  grid-column: 1 / -1;
+}
+
+.form-group label {
+  font-size: 12px;
+  font-weight: 700;
+  color: #334155;
+  margin-bottom: 6px;
+}
+
+.form-group label span {
+  color: #ef4444;
+}
+
+.form-control, select {
+  height: 40px;
+  padding: 8px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 13px;
+  color: #0f172a;
+  background: #ffffff;
+  outline: none;
+}
+
+.form-control:focus, select:focus {
+  border-color: #7c3aed;
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+}
+
+.field-help {
+  font-size: 11px;
+  color: #64748b;
+  margin-top: 4px;
+}
+
+.form-footer {
+  margin-top: 20px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.btn-primary {
+  background: #7c3aed;
+  color: #ffffff;
+  border: none;
+  padding: 10px 24px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+}
+
+.btn-primary:hover {
+  background: #6d28d9;
+}
+
+.scheduled-list-card .card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.scheduled-list-card h3 {
+  font-size: 16px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+}
+
+.scheduled-list-card p {
+  font-size: 11px;
+  color: #64748b;
+  margin: 2px 0 0;
+}
+
+.scheduled-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.scheduled-table th {
+  background: #f8fafc;
+  color: #475569;
+  font-weight: 800;
+  padding: 10px 12px;
+  border-bottom: 1px solid #e2e8f0;
+  text-align: left;
+}
+
+.scheduled-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid #f1f5f9;
+  color: #1e293b;
+  vertical-align: middle;
+}
+
+.badge {
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.badge-round { background: #f3e8ff; color: #7c3aed; }
+.badge-mode { background: #e0f2fe; color: #0284c7; }
+.badge-status { background: #fef3c7; color: #d97706; }
+.badge-result { background: #f1f5f9; color: #475569; }
+
+.btn-edit {
+  padding: 4px 8px;
+  border-radius: 6px;
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #334155;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.btn-edit:hover {
+  background: #f8fafc;
+  color: #7c3aed;
+  border-color: #7c3aed;
+}
+
+.edit-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999999;
+}
+
+.edit-modal {
+  background: #ffffff;
+  border-radius: 16px;
+  width: 480px;
+  max-width: 90vw;
+  padding: 20px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+.edit-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.edit-modal-header h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.btn-close {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  color: #64748b;
+}
+
+.edit-modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.edit-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 18px;
+}
+</css>
+        <data_table>sp_instance</data_table>
+        <demo_data/>
+        <description/>
+        <docs/>
+        <field_list/>
+        <has_preview>false</has_preview>
+        <id>recruiter_schedule_new</id>
+        <internal>false</internal>
+        <link/>
+        <name>Campus360 – Recruiter Schedule Interview</name>
+        <option_schema/>
+        <public>false</public>
+        <roles/>
+        <script><![CDATA[(function() {
+
+    var APPLICATION_TABLE = "x_snc_campus360_student_application";
+    var STUDENT_ASSESSMENT_TABLE = "x_snc_campus360_student_assessment";
+    var RECRUITER_ASSESSMENT_TABLE = "x_snc_campus360_recruiter_assessment";
+    var INTERVIEW_TABLE = "x_snc_campus360_recruiter_interview";
+    var OPPORTUNITY_TABLE = "x_snc_campus360_placement_opportunity";
+    var COMPANY_TABLE = "x_snc_campus360_company_master";
+
+    data.success = false;
+    data.error = "";
+    data.message = "";
+    data.interview_id = "";
+
+    data.company_name = "Campus360 Placement Cell";
+    data.company_id = "CMP001";
+    data.recruiter_name = "Recruiter Officer";
+
+    // Handle AJAX actions
+    if (input) {
+        if (input.action === "schedule") {
+            handleSchedule(input.form);
+            return;
+        }
+        if (input.action === "update_interview") {
+            handleUpdateInterview(input);
+            return;
+        }
+    }
+
+    // Synchronize Passed status & load candidates
+    loadCandidatesAndOpportunities();
+    loadRecentInterviews();
+
+    function loadCandidatesAndOpportunities() {
+        data.applications = [];
+        data.opportunities = [];
+        var eligibleMap = {};
+        var oppMap = {};
+
+        // 1. Sync Recruiter Assessments Passed -> Student Assessment & Application
+        var raGR = new GlideRecord(RECRUITER_ASSESSMENT_TABLE);
+        raGR.addEncodedQuery("result=Passed^ORresult=passed^ORresult=Pass");
+        raGR.query();
+        while (raGR.next()) {
+            var appSysId = raGR.getValue("application");
+            var stuSysId = raGR.getValue("student");
+            var oppSysId = raGR.getValue("opportunity");
+
+            if (appSysId) {
+                var appGR = new GlideRecord(APPLICATION_TABLE);
+                if (appGR.get(appSysId)) {
+                    if (appGR.getValue("assessment_status") !== "Passed") {
+                        appGR.setValue("assessment_status", "Passed");
+                        appGR.update();
+                    }
+                }
+            }
+
+            if (stuSysId) {
+                var saGR = new GlideRecord(STUDENT_ASSESSMENT_TABLE);
+                saGR.addQuery("student", stuSysId);
+                if (oppSysId) saGR.addQuery("opportunity", oppSysId);
+                saGR.query();
+                while (saGR.next()) {
+                    if (saGR.getValue("result") !== "Passed") {
+                        saGR.setValue("result", "Passed");
+                        saGR.setValue("status", "Completed");
+                        saGR.update();
+                    }
+                }
+            }
+        }
+
+        // 2. Collect applications with Assessment Status = Passed or having Passed Assessment
+        var appQueryGR = new GlideRecord(APPLICATION_TABLE);
+        appQueryGR.addEncodedQuery("assessment_status=Passed^ORassessment_status=passed^ORassessment_status=Pass");
+        appQueryGR.query();
+        while (appQueryGR.next()) {
+            addCandidate(appQueryGR);
+        }
+
+        // 3. Fallback: Collect applications matching Passed Student Assessments
+        var saQueryGR = new GlideRecord(STUDENT_ASSESSMENT_TABLE);
+        saQueryGR.addEncodedQuery("result=Passed^ORresult=passed^ORresult=Pass");
+        saQueryGR.query();
+        while (saQueryGR.next()) {
+            var sStudent = saQueryGR.getValue("student");
+            var sOpp = saQueryGR.getValue("opportunity");
+            if (sStudent) {
+                var appMatchGR = new GlideRecord(APPLICATION_TABLE);
+                appMatchGR.addQuery("student", sStudent);
+                if (sOpp) appMatchGR.addQuery("opportunity", sOpp);
+                appMatchGR.query();
+                while (appMatchGR.next()) {
+                    if (appMatchGR.getValue("assessment_status") !== "Passed") {
+                        appMatchGR.setValue("assessment_status", "Passed");
+                        appMatchGR.update();
+                    }
+                    addCandidate(appMatchGR);
+                }
+            }
+        }
+
+        function addCandidate(appRecord) {
+            var aSysId = appRecord.getUniqueValue();
+            if (eligibleMap[aSysId]) return;
+
+            // Check if active interview already scheduled
+            var existingIntGR = new GlideRecord(INTERVIEW_TABLE);
+            existingIntGR.addQuery("application", aSysId);
+            existingIntGR.addQuery("status", "Scheduled");
+            existingIntGR.setLimit(1);
+            existingIntGR.query();
+            if (existingIntGR.hasNext()) {
+                return;
+            }
+
+            var stuId = appRecord.getValue("student");
+            var oppId = appRecord.getValue("opportunity");
+
+            var studentName = appRecord.getDisplayValue("student") || stuId || "Candidate";
+            var appId = appRecord.getDisplayValue("application_id") || appRecord.getValue("application_id") || aSysId;
+
+            var oppTitle = "Placement Drive";
+            if (oppId) {
+                var oGR = new GlideRecord(OPPORTUNITY_TABLE);
+                if (oGR.get(oppId)) {
+                    oppTitle = oGR.getValue("opportunity_title") || oGR.getValue("title") || oppTitle;
+                }
+            }
+
+            eligibleMap[aSysId] = true;
+            data.applications.push({
+                sys_id: aSysId,
+                application_id: appId,
+                student_sys_id: stuId,
+                student_name: studentName,
+                opportunity_sys_id: oppId,
+                opportunity_title: oppTitle,
+                label: studentName + " (" + appId + ") - " + oppTitle
+            });
+
+            if (oppId && !oppMap[oppId]) {
+                oppMap[oppId] = true;
+                data.opportunities.push({
+                    sys_id: oppId,
+                    label: oppTitle
+                });
+            }
+        }
+    }
+
+    function handleSchedule(form) {
+        if (!form || !form.application || !form.opportunity || !form.round || !form.mode || !form.date || !form.interviewer) {
+            data.error = "Please fill in all required fields.";
+            return;
+        }
+
+        var appGR = new GlideRecord(APPLICATION_TABLE);
+        if (!appGR.get(form.application)) {
+            data.error = "Candidate application record not found.";
+            return;
+        }
+
+        var studentSysId = appGR.getValue("student");
+        var opportunitySysId = form.opportunity || appGR.getValue("opportunity");
+        var companySysId = "";
+
+        if (opportunitySysId) {
+            var oppGR = new GlideRecord(OPPORTUNITY_TABLE);
+            if (oppGR.get(opportunitySysId)) {
+                companySysId = oppGR.getValue("company") || "";
+            }
+        }
+
+        // Generate clean Interview ID
+        var interviewId = "INT" + new Date().getTime();
+
+        var interviewGR = new GlideRecord(INTERVIEW_TABLE);
+        interviewGR.initialize();
+        interviewGR.setValue("interview_id", interviewId);
+        interviewGR.setValue("application", appGR.getUniqueValue());
+        interviewGR.setValue("student", studentSysId);
+        interviewGR.setValue("opportunity", opportunitySysId);
+        if (companySysId) interviewGR.setValue("company", companySysId);
+        interviewGR.setValue("interview_date", form.date);
+        interviewGR.setValue("interview_mode", form.mode);
+        interviewGR.setValue("interview_round", form.round);
+        interviewGR.setValue("interviewer", form.interviewer);
+        interviewGR.setValue("meeting_link", form.meeting_link || "");
+        interviewGR.setValue("status", "Scheduled");
+        interviewGR.setValue("result", "Pending");
+
+        var newSysId = interviewGR.insert();
+
+        if (newSysId) {
+            // Update Student Application
+            appGR.setValue("interview_status", "Scheduled");
+            appGR.setValue("assessment_status", "Passed");
+            appGR.update();
+
+            // Update Student Assessment
+            var saGR = new GlideRecord(STUDENT_ASSESSMENT_TABLE);
+            saGR.addQuery("student", studentSysId);
+            if (opportunitySysId) saGR.addQuery("opportunity", opportunitySysId);
+            saGR.query();
+            while (saGR.next()) {
+                saGR.setValue("result", "Passed");
+                saGR.setValue("status", "Completed");
+                saGR.update();
+            }
+
+            // Update Recruiter Assessment
+            var raGR = new GlideRecord(RECRUITER_ASSESSMENT_TABLE);
+            raGR.addQuery("application", appGR.getUniqueValue());
+            raGR.query();
+            while (raGR.next()) {
+                raGR.setValue("result", "Passed");
+                raGR.setValue("status", "Completed");
+                raGR.update();
+            }
+
+            data.success = true;
+            data.interview_id = interviewId;
+            data.message = "Interview " + interviewId + " successfully scheduled for candidate " + (appGR.getDisplayValue("student") || "Student") + ".";
+        } else {
+            data.error = "Could not create recruiter interview record.";
+        }
+    }
+
+    function handleUpdateInterview(input) {
+        if (!input.interview_sys_id) {
+            data.error = "Interview ID required.";
+            return;
+        }
+
+        var intGR = new GlideRecord(INTERVIEW_TABLE);
+        if (intGR.get(input.interview_sys_id)) {
+            if (input.interview_date) intGR.setValue("interview_date", input.interview_date);
+            if (input.interview_mode) intGR.setValue("interview_mode", input.interview_mode);
+            if (input.interview_round) intGR.setValue("interview_round", input.interview_round);
+            if (input.interviewer) intGR.setValue("interviewer", input.interviewer);
+            if (input.meeting_link !== undefined) intGR.setValue("meeting_link", input.meeting_link);
+            if (input.status) intGR.setValue("status", input.status);
+            if (input.result) intGR.setValue("result", input.result);
+            intGR.update();
+
+            data.success = true;
+            data.message = "Interview record updated successfully.";
+        }
+    }
+
+    function loadRecentInterviews() {
+        data.scheduledInterviews = [];
+        var intGR = new GlideRecord(INTERVIEW_TABLE);
+        intGR.orderByDesc("sys_created_on");
+        intGR.setLimit(15);
+        intGR.query();
+        while (intGR.next()) {
+            data.scheduledInterviews.push({
+                sys_id: intGR.getUniqueValue(),
+                interview_id: intGR.getValue("interview_id") || intGR.getUniqueValue(),
+                student_name: intGR.getDisplayValue("student") || "Student",
+                opportunity_title: intGR.getDisplayValue("opportunity") || "Placement Drive",
+                round: intGR.getValue("interview_round") || "Technical Round",
+                mode: intGR.getValue("interview_mode") || "Online",
+                date: intGR.getDisplayValue("interview_date") || intGR.getValue("interview_date") || "Scheduled",
+                interviewer: intGR.getValue("interviewer") || "Recruiter",
+                status: intGR.getValue("status") || "Scheduled",
+                result: intGR.getValue("result") || "Pending",
+                meeting_link: intGR.getValue("meeting_link") || ""
+            });
+        }
+    }
+
+})();]]></script>
+        <servicenow>false</servicenow>
+        <sys_class_name>sp_widget</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-28 04:47:42</sys_created_on>
+        <sys_id>7dfc5b1e442303107f44301daf56c7f5</sys_id>
+        <sys_mod_count>9</sys_mod_count>
+        <sys_name>Campus360 – Recruiter Schedule Interview</sys_name>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name>sp_widget_7dfc5b1e442303107f44301daf56c7f5</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-10-02 05:46:26</sys_updated_on>
+        <template><![CDATA[<div class="schedule-page">
+
+  <!-- HEADER -->
+  <div class="page-header">
+    <div class="header-left">
+      <span class="eyebrow">CAMPUS360 RECRUITMENT</span>
+      <h1>Schedule Interview</h1>
+      <p>Schedule an interview for candidates whose assessment result is Passed.</p>
+    </div>
+
+    <div class="header-actions">
+      <button type="button" class="btn btn-secondary" ng-click="c.goDashboard()">← Dashboard</button>
+      <button type="button" class="btn btn-secondary" ng-click="c.goBack()">← Interviews</button>
+    </div>
+  </div>
+
+  <!-- ALERT MESSAGES -->
+  <div class="alert alert-danger" ng-if="c.error">
+    ⚠️ {{c.error}}
+  </div>
+
+  <div class="alert alert-success" ng-if="c.success">
+    ✓ {{c.success}}
+  </div>
+
+  <!-- FORM CARD -->
+  <div class="form-card">
+    <div class="form-title">
+      <h2>Interview Details</h2>
+      <p>Only candidates with Passed assessment status are listed in the Select Candidate dropdown.</p>
+    </div>
+
+    <div class="form-grid">
+
+      <!-- CANDIDATE -->
+      <div class="form-group">
+        <label>Candidate <span>*</span></label>
+        <select
+          ng-model="c.form.application"
+          ng-change="c.applicationChanged()"
+          ng-options="a.sys_id as a.label for a in c.data.applications">
+          <option value="">Select Candidate (Passed Assessments)</option>
+        </select>
+        <small class="field-help" ng-if="!c.data.applications.length">No pending candidates found with Passed assessment result.</small>
+      </div>
+
+      <!-- OPPORTUNITY -->
+      <div class="form-group">
+        <label>Opportunity <span>*</span></label>
+        <select
+          ng-model="c.form.opportunity"
+          ng-options="o.sys_id as o.label for o in c.data.opportunities">
+          <option value="">Select Opportunity</option>
+        </select>
+      </div>
+
+      <!-- INTERVIEW ROUND -->
+      <div class="form-group">
+        <label>Interview Round <span>*</span></label>
+        <select ng-model="c.form.round">
+          <option value="Technical Round">Technical Round</option>
+          <option value="HR Round">HR Round</option>
+          <option value="Final Round">Final Round</option>
+          <option value="Coding Round">Coding Round</option>
+          <option value="Aptitude & Technical">Aptitude &amp; Technical</option>
+        </select>
+      </div>
+
+      <!-- INTERVIEW MODE -->
+      <div class="form-group">
+        <label>Interview Mode <span>*</span></label>
+        <select ng-model="c.form.mode">
+          <option value="Online">Online</option>
+          <option value="Offline">Offline</option>
+        </select>
+      </div>
+
+      <!-- INTERVIEW DATE & TIME -->
+      <div class="form-group">
+        <label>Interview Date &amp; Time <span>*</span></label>
+        <input type="text" ng-model="c.form.date" placeholder="YYYY-MM-DD HH:MM:SS" class="form-control" />
+      </div>
+
+      <!-- INTERVIEWER -->
+      <div class="form-group">
+        <label>Interviewer <span>*</span></label>
+        <input type="text" ng-model="c.form.interviewer" placeholder="Interviewer Name / Panel" class="form-control" />
+      </div>
+
+      <!-- MEETING LINK -->
+      <div class="form-group full-width" ng-if="c.form.mode === 'Online'">
+        <label>Meeting Link (Optional)</label>
+        <input type="text" ng-model="c.form.meeting_link" placeholder="e.g. https://teams.microsoft.com/... or https://meet.google.com/..." class="form-control" />
+      </div>
+
+    </div>
+
+    <div class="form-footer">
+      <button type="button" class="btn btn-primary" ng-click="c.schedule()" ng-disabled="c.saving">
+        {{ c.saving ? 'Scheduling Interview...' : ']]>📅<![CDATA[ Schedule Interview' }}
+      </button>
+    </div>
+  </div>
+
+
+  <!-- RECENTLY SCHEDULED INTERVIEWS TABLE CARD -->
+  <div class="scheduled-list-card">
+    <div class="card-head">
+      <div>
+        <h3>Scheduled Recruiter Interviews</h3>
+        <p>Real-time records from Recruiter Interview table (x_snc_campus360_recruiter_interview)</p>
+      </div>
+      <button class="btn btn-sm btn-outline" ng-click="c.refreshData()">↻ Refresh List</button>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table scheduled-table">
+        <thead>
+          <tr>
+            <th>Interview ID</th>
+            <th>Candidate</th>
+            <th>Opportunity</th>
+            <th>Round</th>
+            <th>Mode</th>
+            <th>Date &amp; Time</th>
+            <th>Interviewer</th>
+            <th>Status</th>
+            <th>Result</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr ng-repeat="item in c.data.scheduledInterviews">
+            <td><strong>{{item.interview_id}}</strong></td>
+            <td>{{item.student_name}}</td>
+            <td>{{item.opportunity_title}}</td>
+            <td><span class="badge badge-round">{{item.round}}</span></td>
+            <td><span class="badge badge-mode">{{item.mode}}</span></td>
+            <td>{{item.date}}</td>
+            <td>{{item.interviewer}}</td>
+            <td><span class="badge badge-status">{{item.status}}</span></td>
+            <td><span class="badge badge-result">{{item.result}}</span></td>
+            <td>
+              <button class="btn btn-xs btn-edit" ng-click="c.openEdit(item)">✏️ Edit</button>
+            </td>
+          </tr>
+          <tr ng-if="!c.data.scheduledInterviews.length">
+            <td colspan="10" class="text-center text-muted">No scheduled interviews recorded yet.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+
+  <!-- EDIT MODAL -->
+  <div class="edit-modal-backdrop" ng-if="c.editingInterview">
+    <div class="edit-modal">
+      <div class="edit-modal-header">
+        <h3>Edit Interview: {{c.editingInterview.interview_id}}</h3>
+        <button class="btn-close" ng-click="c.closeEdit()">×</button>
+      </div>
+      <div class="edit-modal-body">
+        <div class="form-group">
+          <label>Candidate</label>
+          <input type="text" ng-model="c.editingInterview.student_name" readonly class="form-control" />
+        </div>
+        <div class="form-group">
+          <label>Interview Round</label>
+          <select ng-model="c.editingInterview.round" class="form-control">
+            <option value="Technical Round">Technical Round</option>
+            <option value="HR Round">HR Round</option>
+            <option value="Final Round">Final Round</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Interview Mode</label>
+          <select ng-model="c.editingInterview.mode" class="form-control">
+            <option value="Online">Online</option>
+            <option value="Offline">Offline</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Date &amp; Time</label>
+          <input type="text" ng-model="c.editingInterview.date" class="form-control" />
+        </div>
+        <div class="form-group">
+          <label>Interviewer</label>
+          <input type="text" ng-model="c.editingInterview.interviewer" class="form-control" />
+        </div>
+        <div class="form-group">
+          <label>Status</label>
+          <select ng-model="c.editingInterview.status" class="form-control">
+            <option value="Scheduled">Scheduled</option>
+            <option value="Completed">Completed</option>
+            <option value="Cancelled">Cancelled</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Result</label>
+          <select ng-model="c.editingInterview.result" class="form-control">
+            <option value="Pending">Pending</option>
+            <option value="Selected">Selected</option>
+            <option value="Rejected">Rejected</option>
+            <option value="Next Round">Next Round</option>
+          </select>
+        </div>
+      </div>
+      <div class="edit-modal-footer">
+        <button class="btn btn-secondary" ng-click="c.closeEdit()">Cancel</button>
+        <button class="btn btn-primary" ng-click="c.saveEdit()">Save Changes</button>
+      </div>
+    </div>
+  </div>
+
+</div>]]></template>
+    </sp_widget>
+</record_update>

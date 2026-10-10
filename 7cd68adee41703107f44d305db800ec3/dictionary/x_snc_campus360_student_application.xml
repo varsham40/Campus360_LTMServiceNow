@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?><database>
+    <element attributes="enforce_dot_walk_cross_scope_access=true" db_object_id="96fc8ad6e45703107f44d305db800e28" label="Student Application" max_length="40" name="x_snc_campus360_student_application" type="collection">
+        <element label="AI Match Score" max_length="40" name="ai_match_score" type="integer"/>
+        <element attributes="ignore_filter_on_new=true" default="javascript:global.getNextObjNumberPadded();" label="Number" max_length="40" name="number" type="string"/>
+        <element label="Student" max_length="32" name="student" reference="x_snc_campus360_student_master" type="reference"/>
+        <element choice="3" default="Pending" label="Application Status" max_length="30" name="application_status" type="choice">
+            <choice>
+                <element inactive_on_update="false" label="Under Review" sequence="2" value="under_review"/>
+                <element inactive_on_update="false" label="Withdrawn" sequence="6" value="withdrawn"/>
+                <element inactive_on_update="false" label="Submitted" sequence="1" value="submitted"/>
+                <element inactive_on_update="false" label="Selected" sequence="5" value="selected"/>
+                <element inactive_on_update="false" label="Pending" sequence="0" value="pending"/>
+                <element inactive_on_update="false" label="Rejected" sequence="4" value="rejected"/>
+                <element inactive_on_update="false" label="Shortlisted" sequence="3" value="shortlisted"/>
+            </choice>
+        </element>
+        <element choice="3" default="Not&#10;Started" label="Assessment Status" max_length="30" name="assessment_status" type="choice">
+            <choice>
+                <element inactive_on_update="false" label="Scheduled" sequence="1" value="scheduled"/>
+                <element inactive_on_update="false" label="Failed" sequence="5" value="failed"/>
+                <element inactive_on_update="false" label="Not Started" sequence="0" value="not_started"/>
+                <element inactive_on_update="false" label="Passed" sequence="4" value="passed"/>
+                <element inactive_on_update="false" label="Completed" sequence="3" value="completed"/>
+                <element inactive_on_update="false" label="In Progress" sequence="2" value="in_progress"/>
+            </choice>
+        </element>
+        <element choice="3" label="Offer Status" max_length="30" name="offer_status" type="choice">
+            <choice>
+                <element inactive_on_update="false" label="Withdrawn" sequence="4" value="withdrawn"/>
+                <element inactive_on_update="false" label="Not Offered" sequence="0" value="not_offered"/>
+                <element inactive_on_update="false" label="Rejected" sequence="3" value="rejected"/>
+                <element inactive_on_update="false" label="Accepted" sequence="2" value="accepted"/>
+                <element inactive_on_update="false" label="Offered" sequence="1" value="offered"/>
+            </choice>
+        </element>
+        <element display="true" label="Application ID" max_length="20" name="application_id" type="string"/>
+        <element choice="1" default="Pending" label="Student Response" max_length="30" name="student_response" type="choice">
+            <choice>
+                <element inactive_on_update="false" label="Not Interested" sequence="3" value="not_interested"/>
+                <element inactive_on_update="false" label="Pending" sequence="0" value="pending"/>
+                <element inactive_on_update="false" label="Ignored" sequence="2" value="ignored"/>
+                <element inactive_on_update="false" label="Apply" sequence="1" value="apply"/>
+            </choice>
+        </element>
+        <element label="Last Reminder" max_length="40" name="last_reminder" type="glide_date_time"/>
+        <element label="Applied Date" max_length="40" name="applied_date" type="glide_date_time"/>
+        <element default="0" label="Reminder Count" max_length="40" name="reminder_count" type="integer"/>
+        <element label="Shortlisted" max_length="40" name="shortlisted" type="boolean"/>
+        <element choice="3" default="Not&#10;Scheduled" label="Interview Status" max_length="30" name="interview_status" type="choice">
+            <choice>
+                <element inactive_on_update="false" label="Rejected" sequence="5" value="rejected"/>
+                <element inactive_on_update="false" label="Scheduled" sequence="1" value="scheduled"/>
+                <element inactive_on_update="false" label="Not Scheduled" sequence="0" value="not_scheduled"/>
+                <element inactive_on_update="false" label="Selected" sequence="4" value="selected"/>
+                <element inactive_on_update="false" label="Completed" sequence="3" value="completed"/>
+                <element inactive_on_update="false" label="Cancelled" sequence="6" value="cancelled"/>
+                <element inactive_on_update="false" label="In Progress" sequence="2" value="in_progress"/>
+            </choice>
+        </element>
+        <element label="Opportunity" max_length="32" name="opportunity" reference="x_snc_campus360_placement_opportunity" type="reference"/>
+        <index name="index">
+            <element name="student"/>
+        </index>
+        <index name="index2">
+            <element name="opportunity"/>
+        </index>
+    </element>
+</database>

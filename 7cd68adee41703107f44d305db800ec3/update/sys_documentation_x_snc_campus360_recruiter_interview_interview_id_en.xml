@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update>
+    <sys_documentation element="interview_id" label="Interview ID" language="en" table="x_snc_campus360_recruiter_interview">
+        <sys_documentation action="INSERT_OR_UPDATE">
+            <element>interview_id</element>
+            <help/>
+            <hint/>
+            <label>Interview ID</label>
+            <language>en</language>
+            <name>x_snc_campus360_recruiter_interview</name>
+            <plural/>
+            <sys_class_name>sys_documentation</sys_class_name>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-09-23 19:36:43</sys_created_on>
+            <sys_mod_count>5</sys_mod_count>
+            <sys_name>Interview ID</sys_name>
+            <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+            <sys_policy/>
+            <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+            <sys_update_name>sys_documentation_x_snc_campus360_recruiter_interview_interview_id_en</sys_update_name>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-09-26 19:08:04</sys_updated_on>
+            <url/>
+            <url_target/>
+        </sys_documentation>
+    </sys_documentation>
+</record_update>

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?><database>
+    <element attributes="enforce_dot_walk_cross_scope_access=true" db_object_id="d218d69ae49703107f44d305db800e1b" label="Alumni Master" max_length="40" name="x_snc_campus360_alumni_master" type="collection">
+        <element label="Alumni Name" max_length="100" name="alumni_name" type="string"/>
+        <element label="Branch" max_length="50" name="branch" type="string"/>
+        <element label="Job Role" max_length="100" name="job_role" type="string"/>
+        <element choice="3" default="Available" label="Availability" max_length="20" name="availability" type="choice">
+            <choice>
+                <element inactive_on_update="false" label="Unavailable" sequence="2" value="unavailable"/>
+                <element inactive_on_update="false" label="Busy" sequence="1" value="busy"/>
+                <element inactive_on_update="false" label="Available" sequence="0" value="available"/>
+            </choice>
+        </element>
+        <element label="Email" max_length="100" name="email" type="string"/>
+        <element label="Company" max_length="100" name="company" type="string"/>
+        <element display="true" label="Alumni ID" max_length="20" name="alumni_id" type="string"/>
+        <element label="Graduation Year" max_length="40" name="graduation_year" type="integer"/>
+        <element label="Expertise" max_length="200" name="expertise" type="string"/>
+        <element choice="3" default="Pending" label="Verification Status" max_length="20" name="verification_status" type="choice">
+            <choice>
+                <element inactive_on_update="false" label="Verified" sequence="1" value="verified"/>
+                <element inactive_on_update="false" label="Pending" sequence="0" value="pending"/>
+                <element inactive_on_update="false" label="Rejected" sequence="2" value="rejected"/>
+            </choice>
+        </element>
+    </element>
+</database>

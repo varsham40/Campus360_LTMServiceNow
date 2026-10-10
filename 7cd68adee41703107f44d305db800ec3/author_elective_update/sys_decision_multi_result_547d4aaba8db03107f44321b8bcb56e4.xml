@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update sys_domain="global" table="sys_decision_multi_result">
+    <sys_decision_multi_result action="DELETE">
+        <decision_table display_value="Campus360 - Intervention Recommendation delta">3f4d42aba8db03107f44321b8bcb56cd</decision_table>
+        <label>Decision Table Multiple Result: Intervention Type: Mock Interview, Training Skill Area: Communication</label>
+        <result_elements/>
+        <sys_class_name>sys_decision_multi_result</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 09:53:04</sys_created_on>
+        <sys_domain>global</sys_domain>
+        <sys_domain_path>/</sys_domain_path>
+        <sys_id>547d4aaba8db03107f44321b8bcb56e4</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>Decision Table Multiple Result: Intervention Type: Mock Interview, Training Skill Area: Communication</sys_name>
+        <sys_overrides/>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name>sys_decision_multi_result_547d4aaba8db03107f44321b8bcb56e4</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 09:53:04</sys_updated_on>
+    </sys_decision_multi_result>
+    <sys_variable_value action="DELETE" query="document_key=547d4aaba8db03107f44321b8bcb56e4"/>
+    <sys_variable_value action="DELETE">
+        <document>sys_decision_multi_result</document>
+        <document_key>547d4aaba8db03107f44321b8bcb56e4</document_key>
+        <order>200</order>
+        <sys_class_name>sys_variable_value</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 09:53:04</sys_created_on>
+        <sys_id>1c7d4aaba8db03107f44321b8bcb56e4</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 09:53:04</sys_updated_on>
+        <value>Communication</value>
+        <variable display_value="Training Skill Area">545d46aba8db03107f44321b8bcb56df</variable>
+    </sys_variable_value>
+    <sys_variable_value action="DELETE">
+        <document>sys_decision_multi_result</document>
+        <document_key>547d4aaba8db03107f44321b8bcb56e4</document_key>
+        <order>100</order>
+        <sys_class_name>sys_variable_value</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 09:53:04</sys_created_on>
+        <sys_id>d07d4aaba8db03107f44321b8bcb56e5</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 09:53:04</sys_updated_on>
+        <value>Mock Interview</value>
+        <variable display_value="Intervention Type">d05d46aba8db03107f44321b8bcb56bc</variable>
+    </sys_variable_value>
+    <sys_update_version action="INSERT_OR_UPDATE">
+        <action>DELETE</action>
+        <application display_value="Campus360">7cd68adee41703107f44d305db800ec3</application>
+        <file_path/>
+        <instance_id>82d18dc7c38fcf94a03197af0501316c</instance_id>
+        <instance_name>ltm-hck-2876-0027</instance_name>
+        <name>sys_decision_multi_result_547d4aaba8db03107f44321b8bcb56e4</name>
+        <payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update sys_domain="global" table="sys_decision_multi_result"><sys_decision_multi_result action="INSERT_OR_UPDATE"><decision_table display_value="Campus360 - Intervention Recommendation delta">3f4d42aba8db03107f44321b8bcb56cd</decision_table><label>Decision Table Multiple Result: Intervention Type: Mock Interview, Training Skill Area: Communication</label><result_elements/><sys_class_name>sys_decision_multi_result</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-19 09:53:04</sys_created_on><sys_domain>global</sys_domain><sys_domain_path>/</sys_domain_path><sys_id>547d4aaba8db03107f44321b8bcb56e4</sys_id><sys_mod_count>0</sys_mod_count><sys_name>Decision Table Multiple Result: Intervention Type: Mock Interview, Training Skill Area: Communication</sys_name><sys_overrides/><sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package><sys_policy/><sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope><sys_update_name>sys_decision_multi_result_547d4aaba8db03107f44321b8bcb56e4</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-19 09:53:04</sys_updated_on></sys_decision_multi_result><sys_variable_value action="delete_multiple" query="document_key=547d4aaba8db03107f44321b8bcb56e4"/><sys_variable_value action="INSERT_OR_UPDATE"><document>sys_decision_multi_result</document><document_key>547d4aaba8db03107f44321b8bcb56e4</document_key><order>200</order><sys_class_name>sys_variable_value</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-19 09:53:04</sys_created_on><sys_id>1c7d4aaba8db03107f44321b8bcb56e4</sys_id><sys_mod_count>0</sys_mod_count><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-19 09:53:04</sys_updated_on><value>Communication</value><variable display_value="Training Skill Area">545d46aba8db03107f44321b8bcb56df</variable></sys_variable_value><sys_variable_value action="INSERT_OR_UPDATE"><document>sys_decision_multi_result</document><document_key>547d4aaba8db03107f44321b8bcb56e4</document_key><order>100</order><sys_class_name>sys_variable_value</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-19 09:53:04</sys_created_on><sys_id>d07d4aaba8db03107f44321b8bcb56e5</sys_id><sys_mod_count>0</sys_mod_count><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-19 09:53:04</sys_updated_on><value>Mock Interview</value><variable display_value="Intervention Type">d05d46aba8db03107f44321b8bcb56bc</variable></sys_variable_value></record_update>]]></payload>
+        <payload_hash>1216855922</payload_hash>
+        <record_name>Decision Table Multiple Result: Intervention Type: Mock Interview, Training Skill Area: Communicatio</record_name>
+        <reverted_from/>
+        <source>70d68adee41703107f44d305db800ec8</source>
+        <source_table>sys_update_set</source_table>
+        <state>previous</state>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 09:53:04</sys_created_on>
+        <sys_id>147d4aaba8db03107f44321b8bcb56e7</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_recorded_at>1a0b9156d880000001</sys_recorded_at>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 09:53:04</sys_updated_on>
+        <type>Decision Table Multiple Result</type>
+        <update_guid>187d4aab96db031048d18132bf582be6</update_guid>
+        <update_guid_history>187d4aab96db031048d18132bf582be6:1216855922</update_guid_history>
+    </sys_update_version>
+    <sys_metadata_delete action="INSERT_OR_UPDATE">
+        <sys_audit_delete/>
+        <sys_class_name>sys_metadata_delete</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 09:53:10</sys_created_on>
+        <sys_db_object display_value="" name="sys_decision_multi_result">sys_decision_multi_result</sys_db_object>
+        <sys_id>75242c59ff124af68682cf5b0ca878c4</sys_id>
+        <sys_metadata>547d4aaba8db03107f44321b8bcb56e4</sys_metadata>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>Decision Table Multiple Result: Intervention Type: Mock Interview, Training Skill Area: Communication</sys_name>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_parent/>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_scope_delete display_value="">1cde9626740d46978b846077c1615101</sys_scope_delete>
+        <sys_update_name>sys_decision_multi_result_547d4aaba8db03107f44321b8bcb56e4</sys_update_name>
+        <sys_update_version display_value="sys_decision_multi_result_547d4aaba8db03107f44321b8bcb56e4">147d4aaba8db03107f44321b8bcb56e7</sys_update_version>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 09:53:10</sys_updated_on>
+    </sys_metadata_delete>
+</record_update>

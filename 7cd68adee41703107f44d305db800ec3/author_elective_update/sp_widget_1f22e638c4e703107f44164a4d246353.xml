@@ -1,0 +1,2285 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_widget">
+    <sp_widget action="DELETE">
+        <category>custom</category>
+        <client_script><![CDATA[api.controller = function($window) {
+
+    var c = this;
+
+    c.searchText = "";
+    c.branch = "";
+    c.minCgpa = "";
+
+    /*
+     * SEARCH / FILTER
+     */
+    c.search = function() {
+
+        c.server.get({
+            searchText: c.searchText,
+            branch: c.branch,
+            minCgpa: c.minCgpa
+
+        }).then(function(response) {
+
+            c.data.candidates =
+                response.data.candidates;
+
+        });
+
+    };
+
+
+    /*
+     * VIEW CANDIDATE
+     */
+    c.viewCandidate = function(sysId) {
+
+        if (!sysId) {
+            return;
+        }
+
+        $window.location.href =
+            "?id=recruiter_candidate_details&sys_id=" +
+            sysId;
+
+    };
+
+
+    /*
+     * BACK TO DASHBOARD
+     */
+    c.goBack = function() {
+
+        $window.location.href =
+            "?id=recruiter_dashboard";
+
+    };
+
+};]]></client_script>
+        <controller_as>c</controller_as>
+        <css>.talent-pool-page {&#13;
+    background: #f6f8fc;&#13;
+    min-height: 100vh;&#13;
+    padding: 30px;&#13;
+    font-family: Arial, sans-serif;&#13;
+}&#13;
+&#13;
+&#13;
+/* ================================&#13;
+   HEADER&#13;
+================================ */&#13;
+&#13;
+.page-header {&#13;
+    background: #ffffff;&#13;
+    padding: 25px;&#13;
+    border-radius: 14px;&#13;
+&#13;
+    display: flex;&#13;
+    justify-content: space-between;&#13;
+    align-items: center;&#13;
+&#13;
+    margin-bottom: 20px;&#13;
+&#13;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.04);&#13;
+}&#13;
+&#13;
+.eyebrow {&#13;
+    color: #5368d8;&#13;
+    font-size: 11px;&#13;
+    font-weight: bold;&#13;
+    letter-spacing: 1px;&#13;
+    margin-bottom: 6px;&#13;
+}&#13;
+&#13;
+.page-header h1 {&#13;
+    margin: 0;&#13;
+    color: #17213a;&#13;
+    font-size: 26px;&#13;
+}&#13;
+&#13;
+.page-header p {&#13;
+    margin: 7px 0 0;&#13;
+    color: #7d879c;&#13;
+    font-size: 13px;&#13;
+}&#13;
+&#13;
+&#13;
+/* ================================&#13;
+   BACK BUTTON&#13;
+================================ */&#13;
+&#13;
+.back-btn {&#13;
+    border: 1px solid #5368d8;&#13;
+    background: white;&#13;
+    color: #5368d8;&#13;
+&#13;
+    padding: 10px 18px;&#13;
+    border-radius: 8px;&#13;
+&#13;
+    cursor: pointer;&#13;
+    font-size: 13px;&#13;
+}&#13;
+&#13;
+.back-btn:hover {&#13;
+    background: #5368d8;&#13;
+    color: white;&#13;
+}&#13;
+&#13;
+&#13;
+/* ================================&#13;
+   SEARCH PANEL&#13;
+================================ */&#13;
+&#13;
+.search-panel {&#13;
+    background: white;&#13;
+    padding: 20px;&#13;
+&#13;
+    border-radius: 14px;&#13;
+&#13;
+    display: flex;&#13;
+    gap: 12px;&#13;
+&#13;
+    margin-bottom: 15px;&#13;
+&#13;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);&#13;
+}&#13;
+&#13;
+.search-box {&#13;
+    flex: 1;&#13;
+&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+&#13;
+    border: 1px solid #dfe4ef;&#13;
+    border-radius: 9px;&#13;
+&#13;
+    padding: 0 14px;&#13;
+&#13;
+    background: #fafbfe;&#13;
+}&#13;
+&#13;
+.search-box span {&#13;
+    color: #7d879c;&#13;
+    font-size: 20px;&#13;
+    margin-right: 10px;&#13;
+}&#13;
+&#13;
+.search-box input {&#13;
+    width: 100%;&#13;
+&#13;
+    border: none;&#13;
+    outline: none;&#13;
+&#13;
+    background: transparent;&#13;
+&#13;
+    padding: 12px 0;&#13;
+&#13;
+    font-size: 13px;&#13;
+    color: #29344e;&#13;
+}&#13;
+&#13;
+.search-box input::placeholder {&#13;
+    color: #9aa3b5;&#13;
+}&#13;
+&#13;
+&#13;
+.search-btn {&#13;
+    background: #5368d8;&#13;
+    color: white;&#13;
+&#13;
+    border: none;&#13;
+    border-radius: 9px;&#13;
+&#13;
+    padding: 0 25px;&#13;
+&#13;
+    cursor: pointer;&#13;
+    font-size: 13px;&#13;
+}&#13;
+&#13;
+.search-btn:hover {&#13;
+    background: #4357c7;&#13;
+}&#13;
+&#13;
+&#13;
+/* ================================&#13;
+   FILTERS&#13;
+================================ */&#13;
+&#13;
+.filters {&#13;
+    background: white;&#13;
+&#13;
+    padding: 18px 20px;&#13;
+&#13;
+    border-radius: 14px;&#13;
+&#13;
+    display: flex;&#13;
+    gap: 20px;&#13;
+&#13;
+    margin-bottom: 20px;&#13;
+&#13;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);&#13;
+}&#13;
+&#13;
+.filters &gt; div {&#13;
+    width: 220px;&#13;
+}&#13;
+&#13;
+.filters label {&#13;
+    display: block;&#13;
+&#13;
+    color: #7d879c;&#13;
+&#13;
+    font-size: 11px;&#13;
+&#13;
+    margin-bottom: 6px;&#13;
+}&#13;
+&#13;
+.filters select {&#13;
+    width: 100%;&#13;
+&#13;
+    border: 1px solid #dfe4ef;&#13;
+&#13;
+    border-radius: 8px;&#13;
+&#13;
+    padding: 10px;&#13;
+&#13;
+    background: white;&#13;
+&#13;
+    color: #29344e;&#13;
+&#13;
+    font-size: 13px;&#13;
+&#13;
+    outline: none;&#13;
+}&#13;
+&#13;
+.filters select:focus {&#13;
+    border-color: #5368d8;&#13;
+}&#13;
+&#13;
+&#13;
+/* ================================&#13;
+   RESULT HEADER&#13;
+================================ */&#13;
+&#13;
+.result-header {&#13;
+    margin-bottom: 15px;&#13;
+&#13;
+    color: #7d879c;&#13;
+&#13;
+    font-size: 13px;&#13;
+}&#13;
+&#13;
+.result-header strong {&#13;
+    color: #17213a;&#13;
+    font-size: 15px;&#13;
+}&#13;
+&#13;
+&#13;
+/* ================================&#13;
+   CANDIDATE GRID&#13;
+================================ */&#13;
+&#13;
+.candidate-grid {&#13;
+    display: grid;&#13;
+&#13;
+    grid-template-columns:&#13;
+        repeat(3, 1fr);&#13;
+&#13;
+    gap: 18px;&#13;
+}&#13;
+&#13;
+&#13;
+/* ================================&#13;
+   CANDIDATE CARD&#13;
+================================ */&#13;
+&#13;
+.candidate-card {&#13;
+    background: white;&#13;
+&#13;
+    border-radius: 14px;&#13;
+&#13;
+    padding: 20px;&#13;
+&#13;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);&#13;
+&#13;
+    transition: 0.2s;&#13;
+&#13;
+    border: 1px solid transparent;&#13;
+}&#13;
+&#13;
+.candidate-card:hover {&#13;
+    border-color: #cbd3ff;&#13;
+&#13;
+    transform: translateY(-2px);&#13;
+}&#13;
+&#13;
+&#13;
+/* ================================&#13;
+   CANDIDATE TOP&#13;
+================================ */&#13;
+&#13;
+.candidate-top {&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 12px;&#13;
+&#13;
+    margin-bottom: 18px;&#13;
+}&#13;
+&#13;
+.avatar {&#13;
+    width: 48px;&#13;
+    height: 48px;&#13;
+&#13;
+    border-radius: 50%;&#13;
+&#13;
+    background: #5368d8;&#13;
+&#13;
+    color: white;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+&#13;
+    font-weight: bold;&#13;
+&#13;
+    font-size: 14px;&#13;
+}&#13;
+&#13;
+.candidate-name h3 {&#13;
+    margin: 0;&#13;
+&#13;
+    color: #17213a;&#13;
+&#13;
+    font-size: 15px;&#13;
+}&#13;
+&#13;
+.candidate-name p {&#13;
+    margin: 4px 0 0;&#13;
+&#13;
+    color: #8a94a7;&#13;
+&#13;
+    font-size: 11px;&#13;
+}&#13;
+&#13;
+&#13;
+/* ================================&#13;
+   CANDIDATE INFO&#13;
+================================ */&#13;
+&#13;
+.candidate-info {&#13;
+    display: grid;&#13;
+&#13;
+    grid-template-columns: 1fr 1fr;&#13;
+&#13;
+    gap: 15px;&#13;
+&#13;
+    margin-bottom: 18px;&#13;
+&#13;
+    padding-bottom: 15px;&#13;
+&#13;
+    border-bottom: 1px solid #edf0f6;&#13;
+}&#13;
+&#13;
+.candidate-info label {&#13;
+    display: block;&#13;
+&#13;
+    color: #929bad;&#13;
+&#13;
+    font-size: 10px;&#13;
+&#13;
+    margin-bottom: 5px;&#13;
+}&#13;
+&#13;
+.candidate-info span {&#13;
+    color: #29344e;&#13;
+&#13;
+    font-size: 13px;&#13;
+&#13;
+    font-weight: 500;&#13;
+}&#13;
+&#13;
+&#13;
+/* ================================&#13;
+   SKILLS&#13;
+================================ */&#13;
+&#13;
+.skills {&#13;
+    display: flex;&#13;
+&#13;
+    flex-wrap: wrap;&#13;
+&#13;
+    gap: 6px;&#13;
+&#13;
+    min-height: 28px;&#13;
+&#13;
+    margin-bottom: 18px;&#13;
+}&#13;
+&#13;
+.skill {&#13;
+    background: #eef1ff;&#13;
+&#13;
+    color: #5368d8;&#13;
+&#13;
+    padding: 5px 8px;&#13;
+&#13;
+    border-radius: 6px;&#13;
+&#13;
+    font-size: 10px;&#13;
+&#13;
+    font-weight: 500;&#13;
+}&#13;
+&#13;
+.skill-more {&#13;
+    color: #8a94a7;&#13;
+&#13;
+    font-size: 10px;&#13;
+&#13;
+    padding: 5px 3px;&#13;
+}&#13;
+&#13;
+&#13;
+/* ================================&#13;
+   FOOTER&#13;
+================================ */&#13;
+&#13;
+.candidate-footer {&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    justify-content: space-between;&#13;
+}&#13;
+&#13;
+.placement-status {&#13;
+    color: #20a66a;&#13;
+&#13;
+    background: #eaf8f1;&#13;
+&#13;
+    padding: 5px 9px;&#13;
+&#13;
+    border-radius: 6px;&#13;
+&#13;
+    font-size: 10px;&#13;
+}&#13;
+&#13;
+.view-btn {&#13;
+    border: none;&#13;
+&#13;
+    background: #f0f2ff;&#13;
+&#13;
+    color: #5368d8;&#13;
+&#13;
+    padding: 8px 12px;&#13;
+&#13;
+    border-radius: 7px;&#13;
+&#13;
+    cursor: pointer;&#13;
+&#13;
+    font-size: 11px;&#13;
+}&#13;
+&#13;
+.view-btn:hover {&#13;
+    background: #5368d8;&#13;
+&#13;
+    color: white;&#13;
+}&#13;
+&#13;
+&#13;
+/* ================================&#13;
+   EMPTY STATE&#13;
+================================ */&#13;
+&#13;
+.empty-state {&#13;
+    grid-column: 1 / -1;&#13;
+&#13;
+    background: white;&#13;
+&#13;
+    border-radius: 14px;&#13;
+&#13;
+    padding: 60px 20px;&#13;
+&#13;
+    text-align: center;&#13;
+}&#13;
+&#13;
+.empty-state h3 {&#13;
+    margin: 0 0 8px;&#13;
+&#13;
+    color: #17213a;&#13;
+}&#13;
+&#13;
+.empty-state p {&#13;
+    margin: 0;&#13;
+&#13;
+    color: #8a94a7;&#13;
+&#13;
+    font-size: 13px;&#13;
+}&#13;
+&#13;
+&#13;
+/* ================================&#13;
+   RESPONSIVE&#13;
+================================ */&#13;
+&#13;
+@media (max-width: 1000px) {&#13;
+&#13;
+    .candidate-grid {&#13;
+        grid-template-columns: repeat(2, 1fr);&#13;
+    }&#13;
+&#13;
+}&#13;
+&#13;
+@media (max-width: 700px) {&#13;
+&#13;
+    .talent-pool-page {&#13;
+        padding: 15px;&#13;
+    }&#13;
+&#13;
+    .page-header {&#13;
+        flex-direction: column;&#13;
+&#13;
+        align-items: flex-start;&#13;
+&#13;
+        gap: 15px;&#13;
+    }&#13;
+&#13;
+    .search-panel {&#13;
+        flex-direction: column;&#13;
+    }&#13;
+&#13;
+    .search-btn {&#13;
+        padding: 12px;&#13;
+    }&#13;
+&#13;
+    .filters {&#13;
+        flex-direction: column;&#13;
+    }&#13;
+&#13;
+    .filters &gt; div {&#13;
+        width: 100%;&#13;
+    }&#13;
+&#13;
+    .candidate-grid {&#13;
+        grid-template-columns: 1fr;&#13;
+    }&#13;
+&#13;
+}</css>
+        <data_table>sp_instance</data_table>
+        <demo_data/>
+        <description/>
+        <docs/>
+        <field_list/>
+        <has_preview>false</has_preview>
+        <id>recruiter_talent_pool</id>
+        <internal>false</internal>
+        <link><![CDATA[function link(scope, element, attrs, controller) {
+  
+}]]></link>
+        <name>Recruiter Talent Pool</name>
+        <option_schema/>
+        <public>false</public>
+        <roles/>
+        <script><![CDATA[(function() {
+
+    data.candidates = [];
+    data.branches = [];
+
+    /*
+     * ============================================
+     * GET BRANCHES
+     * ============================================
+     */
+
+    var branchGR = new GlideRecord(
+        "x_snc_campus360_student_master"
+    );
+
+    branchGR.query();
+
+    var branchMap = {};
+
+    while (branchGR.next()) {
+
+        var branchValue =
+            branchGR.getValue("branch");
+
+        var branchLabel =
+            branchGR.getDisplayValue("branch");
+
+        if (branchValue && !branchMap[branchValue]) {
+
+            branchMap[branchValue] = true;
+
+            data.branches.push({
+
+                value: branchValue,
+                label: branchLabel
+
+            });
+
+        }
+    }
+
+
+    /*
+     * ============================================
+     * READ SEARCH PARAMETERS
+     * ============================================
+     */
+
+    var searchText =
+        (input && input.searchText)
+        ? input.searchText.toString().trim()
+        : "";
+
+    var branch =
+        (input && input.branch)
+        ? input.branch.toString()
+        : "";
+
+    var minCgpa =
+        (input && input.minCgpa)
+        ? parseFloat(input.minCgpa)
+        : 0;
+
+
+    /*
+     * ============================================
+     * STUDENT MASTER
+     * ============================================
+     */
+
+    var studentGR = new GlideRecord(
+        "x_snc_campus360_student_master"
+    );
+
+
+    /*
+     * BRANCH FILTER
+     */
+
+    if (branch) {
+
+        studentGR.addQuery(
+            "branch",
+            branch
+        );
+
+    }
+
+
+    /*
+     * CGPA FILTER
+     */
+
+    if (minCgpa > 0) {
+
+        studentGR.addQuery(
+            "cgpa",
+            ">=",
+            minCgpa
+        );
+
+    }
+
+
+    studentGR.orderBy("student_name");
+    studentGR.query();
+
+
+    /*
+     * ============================================
+     * PROCESS STUDENTS
+     * ============================================
+     */
+
+    while (studentGR.next()) {
+
+        var name =
+            studentGR.getValue("student_name") || "";
+
+        var studentId =
+            studentGR.getValue("student_id") || "";
+
+        var email =
+            studentGR.getValue("email") || "";
+
+        var studentBranch =
+            studentGR.getDisplayValue("branch") || "";
+
+        var cgpa =
+            studentGR.getValue("cgpa") || "";
+
+        var placementStatus =
+            studentGR.getDisplayValue(
+                "placement_status"
+            ) || "";
+
+
+        /*
+         * SEARCH FILTER
+         */
+
+        if (searchText) {
+
+            var search =
+                searchText.toLowerCase();
+
+            var searchableText =
+                (
+                    name + " " +
+                    studentId + " " +
+                    studentBranch + " " +
+                    email
+                ).toLowerCase();
+
+            if (searchableText.indexOf(search) === -1) {
+
+                /*
+                 * Check skills separately
+                 */
+
+                var skillSearchGR = new GlideRecord(
+                    "x_snc_campus360_student_skills"
+                );
+
+                skillSearchGR.addQuery(
+                    "student",
+                    studentGR.getUniqueValue()
+                );
+
+                skillSearchGR.query();
+
+                var skillMatched = false;
+
+                while (skillSearchGR.next()) {
+
+                    var skillName =
+                        (
+                            skillSearchGR.getValue(
+                                "skill_name"
+                            ) || ""
+                        ).toLowerCase();
+
+                    if (
+                        skillName.indexOf(search) !== -1
+                    ) {
+
+                        skillMatched = true;
+                        break;
+
+                    }
+
+                }
+
+                if (!skillMatched) {
+                    continue;
+                }
+
+            }
+
+        }
+
+
+        /*
+         * ========================================
+         * GET SKILLS
+         * ========================================
+         */
+
+        var skills = [];
+
+        var skillGR = new GlideRecord(
+            "x_snc_campus360_student_skills"
+        );
+
+        skillGR.addQuery(
+            "student",
+            studentGR.getUniqueValue()
+        );
+
+        skillGR.query();
+
+        while (skillGR.next()) {
+
+            if (skills.length < 3) {
+
+                skills.push(
+                    skillGR.getValue(
+                        "skill_name"
+                    ) || ""
+                );
+
+            }
+
+        }
+
+
+        /*
+         * ========================================
+         * CANDIDATE OBJECT
+         * ========================================
+         */
+
+        data.candidates.push({
+
+            sys_id:
+                studentGR.getUniqueValue(),
+
+            name:
+                name,
+
+            student_id:
+                studentId,
+
+            email:
+                email,
+
+            branch:
+                studentBranch,
+
+            cgpa:
+                cgpa,
+
+            placement_status:
+                placementStatus,
+
+            skills:
+                skills,
+
+            skill_count:
+                getSkillCount(
+                    studentGR.getUniqueValue()
+                ),
+
+            initials:
+                getInitials(name)
+
+        });
+
+    }
+
+
+    /*
+     * ============================================
+     * FUNCTIONS
+     * ============================================
+     */
+
+    function getInitials(name) {
+
+        if (!name) {
+            return "ST";
+        }
+
+        var parts =
+            name.trim().split(/\s+/);
+
+        if (parts.length === 1) {
+
+            return parts[0]
+                .substring(0, 2)
+                .toUpperCase();
+
+        }
+
+        return (
+            parts[0].charAt(0) +
+            parts[parts.length - 1].charAt(0)
+        ).toUpperCase();
+
+    }
+
+
+    function getSkillCount(studentSysId) {
+
+        var gr = new GlideRecord(
+            "x_snc_campus360_student_skills"
+        );
+
+        gr.addQuery(
+            "student",
+            studentSysId
+        );
+
+        gr.query();
+
+        var count = 0;
+
+        while (gr.next()) {
+            count++;
+        }
+
+        return count;
+
+    }
+
+})();]]></script>
+        <servicenow>false</servicenow>
+        <sys_class_name>sp_widget</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-23 08:46:20</sys_created_on>
+        <sys_id>1f22e638c4e703107f44164a4d246353</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>Recruiter Talent Pool</sys_name>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name>sp_widget_1f22e638c4e703107f44164a4d246353</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-23 08:46:20</sys_updated_on>
+        <template><![CDATA[<div class="talent-pool-page">
+
+    <div class="page-header">
+
+        <div>
+            <div class="eyebrow">TALENT INTELLIGENCE</div>
+            <h1>Search Talent Pool</h1>
+            <p>Discover candidates based on skills, branch and CGPA.</p>
+        </div>
+
+        <button class="back-btn" ng-click="c.goBack()">
+            ← Back to Dashboard
+        </button>
+
+    </div>
+
+
+    <!-- SEARCH -->
+
+    <div class="search-panel">
+
+        <div class="search-box">
+
+            <span>⌕</span>
+
+            <input
+                type="text"
+                ng-model="c.searchText"
+                ng-change="c.search()"
+                placeholder="Search by name, student ID, branch or skill..."
+            />
+
+        </div>
+
+        <button
+            class="search-btn"
+            ng-click="c.search()">
+
+            Search
+
+        </button>
+
+    </div>
+
+
+    <!-- FILTERS -->
+
+    <div class="filters">
+
+        <div>
+            <label>Branch</label>
+
+            <select ng-model="c.branch"
+                    ng-change="c.search()">
+
+                <option value="">All Branches</option>
+
+                <option
+                    ng-repeat="branch in data.branches"
+                    value="{{branch.value}}">
+
+                    {{branch.label}}
+
+                </option>
+
+            </select>
+        </div>
+
+
+        <div>
+            <label>Minimum CGPA</label>
+
+            <select ng-model="c.minCgpa"
+                    ng-change="c.search()">
+
+                <option value="">Any</option>
+                <option value="7">7+</option>
+                <option value="7.5">7.5+</option>
+                <option value="8">8+</option>
+                <option value="8.5">8.5+</option>
+                <option value="9">9+</option>
+
+            </select>
+        </div>
+
+    </div>
+
+
+    <!-- RESULT COUNT -->
+
+    <div class="result-header">
+
+        <div>
+            <strong>{{data.candidates.length}}</strong>
+            candidates found
+        </div>
+
+    </div>
+
+
+    <!-- CANDIDATES -->
+
+    <div class="candidate-grid">
+
+        <div
+            class="candidate-card"
+            ng-repeat="candidate in data.candidates">
+
+            <div class="candidate-top">
+
+                <div class="avatar">
+                    {{candidate.initials}}
+                </div>
+
+                <div class="candidate-name">
+
+                    <h3>
+                        {{candidate.name}}
+                    </h3>
+
+                    <p>
+                        {{candidate.student_id}}
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="candidate-info">
+
+                <div>
+                    <label>Branch</label>
+                    <span>{{candidate.branch}}</span>
+                </div>
+
+                <div>
+                    <label>CGPA</label>
+                    <span>{{candidate.cgpa}}</span>
+                </div>
+
+            </div>
+
+
+            <div class="skills">
+
+                <span
+                    class="skill"
+                    ng-repeat="skill in candidate.skills">
+
+                    {{skill}}
+
+                </span>
+
+                <span
+                    class="skill-more"
+                    ng-if="candidate.skill_count > 3">
+
+                    +{{candidate.skill_count - 3}} more
+
+                </span>
+
+            </div>
+
+
+            <div class="candidate-footer">
+
+                <span
+                    class="placement-status">
+
+                    {{candidate.placement_status}}
+
+                </span>
+
+                <button
+                    class="view-btn"
+                    ng-click="c.viewCandidate(candidate.sys_id)">
+
+                    View Profile →
+
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <!-- EMPTY -->
+
+        <div
+            class="empty-state"
+            ng-if="data.candidates.length == 0">
+
+            <h3>No candidates found</h3>
+
+            <p>
+                Try changing your search or filters.
+            </p>
+
+        </div>
+
+    </div>
+
+</div>]]></template>
+    </sp_widget>
+    <sys_update_version action="INSERT_OR_UPDATE">
+        <action>DELETE</action>
+        <application display_value="Campus360">7cd68adee41703107f44d305db800ec3</application>
+        <file_path/>
+        <instance_id>82d18dc7c38fcf94a03197af0501316c</instance_id>
+        <instance_name>ltm-hck-2876-0027</instance_name>
+        <name>sp_widget_1f22e638c4e703107f44164a4d246353</name>
+        <payload>&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;record_update table="sp_widget"&gt;&lt;sp_widget action="INSERT_OR_UPDATE"&gt;&lt;category&gt;custom&lt;/category&gt;&lt;client_script&gt;&lt;![CDATA[api.controller = function($window) {
+
+    var c = this;
+
+    c.searchText = "";
+    c.branch = "";
+    c.minCgpa = "";
+
+    /*
+     * SEARCH / FILTER
+     */
+    c.search = function() {
+
+        c.server.get({
+            searchText: c.searchText,
+            branch: c.branch,
+            minCgpa: c.minCgpa
+
+        }).then(function(response) {
+
+            c.data.candidates =
+                response.data.candidates;
+
+        });
+
+    };
+
+
+    /*
+     * VIEW CANDIDATE
+     */
+    c.viewCandidate = function(sysId) {
+
+        if (!sysId) {
+            return;
+        }
+
+        $window.location.href =
+            "?id=recruiter_candidate_details&amp;sys_id=" +
+            sysId;
+
+    };
+
+
+    /*
+     * BACK TO DASHBOARD
+     */
+    c.goBack = function() {
+
+        $window.location.href =
+            "?id=recruiter_dashboard";
+
+    };
+
+};]]&gt;&lt;/client_script&gt;&lt;controller_as&gt;c&lt;/controller_as&gt;&lt;css&gt;.talent-pool-page {&amp;#13;
+    background: #f6f8fc;&amp;#13;
+    min-height: 100vh;&amp;#13;
+    padding: 30px;&amp;#13;
+    font-family: Arial, sans-serif;&amp;#13;
+}&amp;#13;
+&amp;#13;
+&amp;#13;
+/* ================================&amp;#13;
+   HEADER&amp;#13;
+================================ */&amp;#13;
+&amp;#13;
+.page-header {&amp;#13;
+    background: #ffffff;&amp;#13;
+    padding: 25px;&amp;#13;
+    border-radius: 14px;&amp;#13;
+&amp;#13;
+    display: flex;&amp;#13;
+    justify-content: space-between;&amp;#13;
+    align-items: center;&amp;#13;
+&amp;#13;
+    margin-bottom: 20px;&amp;#13;
+&amp;#13;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.04);&amp;#13;
+}&amp;#13;
+&amp;#13;
+.eyebrow {&amp;#13;
+    color: #5368d8;&amp;#13;
+    font-size: 11px;&amp;#13;
+    font-weight: bold;&amp;#13;
+    letter-spacing: 1px;&amp;#13;
+    margin-bottom: 6px;&amp;#13;
+}&amp;#13;
+&amp;#13;
+.page-header h1 {&amp;#13;
+    margin: 0;&amp;#13;
+    color: #17213a;&amp;#13;
+    font-size: 26px;&amp;#13;
+}&amp;#13;
+&amp;#13;
+.page-header p {&amp;#13;
+    margin: 7px 0 0;&amp;#13;
+    color: #7d879c;&amp;#13;
+    font-size: 13px;&amp;#13;
+}&amp;#13;
+&amp;#13;
+&amp;#13;
+/* ================================&amp;#13;
+   BACK BUTTON&amp;#13;
+================================ */&amp;#13;
+&amp;#13;
+.back-btn {&amp;#13;
+    border: 1px solid #5368d8;&amp;#13;
+    background: white;&amp;#13;
+    color: #5368d8;&amp;#13;
+&amp;#13;
+    padding: 10px 18px;&amp;#13;
+    border-radius: 8px;&amp;#13;
+&amp;#13;
+    cursor: pointer;&amp;#13;
+    font-size: 13px;&amp;#13;
+}&amp;#13;
+&amp;#13;
+.back-btn:hover {&amp;#13;
+    background: #5368d8;&amp;#13;
+    color: white;&amp;#13;
+}&amp;#13;
+&amp;#13;
+&amp;#13;
+/* ================================&amp;#13;
+   SEARCH PANEL&amp;#13;
+================================ */&amp;#13;
+&amp;#13;
+.search-panel {&amp;#13;
+    background: white;&amp;#13;
+    padding: 20px;&amp;#13;
+&amp;#13;
+    border-radius: 14px;&amp;#13;
+&amp;#13;
+    display: flex;&amp;#13;
+    gap: 12px;&amp;#13;
+&amp;#13;
+    margin-bottom: 15px;&amp;#13;
+&amp;#13;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);&amp;#13;
+}&amp;#13;
+&amp;#13;
+.search-box {&amp;#13;
+    flex: 1;&amp;#13;
+&amp;#13;
+    display: flex;&amp;#13;
+    align-items: center;&amp;#13;
+&amp;#13;
+    border: 1px solid #dfe4ef;&amp;#13;
+    border-radius: 9px;&amp;#13;
+&amp;#13;
+    padding: 0 14px;&amp;#13;
+&amp;#13;
+    background: #fafbfe;&amp;#13;
+}&amp;#13;
+&amp;#13;
+.search-box span {&amp;#13;
+    color: #7d879c;&amp;#13;
+    font-size: 20px;&amp;#13;
+    margin-right: 10px;&amp;#13;
+}&amp;#13;
+&amp;#13;
+.search-box input {&amp;#13;
+    width: 100%;&amp;#13;
+&amp;#13;
+    border: none;&amp;#13;
+    outline: none;&amp;#13;
+&amp;#13;
+    background: transparent;&amp;#13;
+&amp;#13;
+    padding: 12px 0;&amp;#13;
+&amp;#13;
+    font-size: 13px;&amp;#13;
+    color: #29344e;&amp;#13;
+}&amp;#13;
+&amp;#13;
+.search-box input::placeholder {&amp;#13;
+    color: #9aa3b5;&amp;#13;
+}&amp;#13;
+&amp;#13;
+&amp;#13;
+.search-btn {&amp;#13;
+    background: #5368d8;&amp;#13;
+    color: white;&amp;#13;
+&amp;#13;
+    border: none;&amp;#13;
+    border-radius: 9px;&amp;#13;
+&amp;#13;
+    padding: 0 25px;&amp;#13;
+&amp;#13;
+    cursor: pointer;&amp;#13;
+    font-size: 13px;&amp;#13;
+}&amp;#13;
+&amp;#13;
+.search-btn:hover {&amp;#13;
+    background: #4357c7;&amp;#13;
+}&amp;#13;
+&amp;#13;
+&amp;#13;
+/* ================================&amp;#13;
+   FILTERS&amp;#13;
+================================ */&amp;#13;
+&amp;#13;
+.filters {&amp;#13;
+    background: white;&amp;#13;
+&amp;#13;
+    padding: 18px 20px;&amp;#13;
+&amp;#13;
+    border-radius: 14px;&amp;#13;
+&amp;#13;
+    display: flex;&amp;#13;
+    gap: 20px;&amp;#13;
+&amp;#13;
+    margin-bottom: 20px;&amp;#13;
+&amp;#13;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);&amp;#13;
+}&amp;#13;
+&amp;#13;
+.filters &amp;gt; div {&amp;#13;
+    width: 220px;&amp;#13;
+}&amp;#13;
+&amp;#13;
+.filters label {&amp;#13;
+    display: block;&amp;#13;
+&amp;#13;
+    color: #7d879c;&amp;#13;
+&amp;#13;
+    font-size: 11px;&amp;#13;
+&amp;#13;
+    margin-bottom: 6px;&amp;#13;
+}&amp;#13;
+&amp;#13;
+.filters select {&amp;#13;
+    width: 100%;&amp;#13;
+&amp;#13;
+    border: 1px solid #dfe4ef;&amp;#13;
+&amp;#13;
+    border-radius: 8px;&amp;#13;
+&amp;#13;
+    padding: 10px;&amp;#13;
+&amp;#13;
+    background: white;&amp;#13;
+&amp;#13;
+    color: #29344e;&amp;#13;
+&amp;#13;
+    font-size: 13px;&amp;#13;
+&amp;#13;
+    outline: none;&amp;#13;
+}&amp;#13;
+&amp;#13;
+.filters select:focus {&amp;#13;
+    border-color: #5368d8;&amp;#13;
+}&amp;#13;
+&amp;#13;
+&amp;#13;
+/* ================================&amp;#13;
+   RESULT HEADER&amp;#13;
+================================ */&amp;#13;
+&amp;#13;
+.result-header {&amp;#13;
+    margin-bottom: 15px;&amp;#13;
+&amp;#13;
+    color: #7d879c;&amp;#13;
+&amp;#13;
+    font-size: 13px;&amp;#13;
+}&amp;#13;
+&amp;#13;
+.result-header strong {&amp;#13;
+    color: #17213a;&amp;#13;
+    font-size: 15px;&amp;#13;
+}&amp;#13;
+&amp;#13;
+&amp;#13;
+/* ================================&amp;#13;
+   CANDIDATE GRID&amp;#13;
+================================ */&amp;#13;
+&amp;#13;
+.candidate-grid {&amp;#13;
+    display: grid;&amp;#13;
+&amp;#13;
+    grid-template-columns:&amp;#13;
+        repeat(3, 1fr);&amp;#13;
+&amp;#13;
+    gap: 18px;&amp;#13;
+}&amp;#13;
+&amp;#13;
+&amp;#13;
+/* ================================&amp;#13;
+   CANDIDATE CARD&amp;#13;
+================================ */&amp;#13;
+&amp;#13;
+.candidate-card {&amp;#13;
+    background: white;&amp;#13;
+&amp;#13;
+    border-radius: 14px;&amp;#13;
+&amp;#13;
+    padding: 20px;&amp;#13;
+&amp;#13;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);&amp;#13;
+&amp;#13;
+    transition: 0.2s;&amp;#13;
+&amp;#13;
+    border: 1px solid transparent;&amp;#13;
+}&amp;#13;
+&amp;#13;
+.candidate-card:hover {&amp;#13;
+    border-color: #cbd3ff;&amp;#13;
+&amp;#13;
+    transform: translateY(-2px);&amp;#13;
+}&amp;#13;
+&amp;#13;
+&amp;#13;
+/* ================================&amp;#13;
+   CANDIDATE TOP&amp;#13;
+================================ */&amp;#13;
+&amp;#13;
+.candidate-top {&amp;#13;
+    display: flex;&amp;#13;
+&amp;#13;
+    align-items: center;&amp;#13;
+&amp;#13;
+    gap: 12px;&amp;#13;
+&amp;#13;
+    margin-bottom: 18px;&amp;#13;
+}&amp;#13;
+&amp;#13;
+.avatar {&amp;#13;
+    width: 48px;&amp;#13;
+    height: 48px;&amp;#13;
+&amp;#13;
+    border-radius: 50%;&amp;#13;
+&amp;#13;
+    background: #5368d8;&amp;#13;
+&amp;#13;
+    color: white;&amp;#13;
+&amp;#13;
+    display: flex;&amp;#13;
+&amp;#13;
+    align-items: center;&amp;#13;
+    justify-content: center;&amp;#13;
+&amp;#13;
+    font-weight: bold;&amp;#13;
+&amp;#13;
+    font-size: 14px;&amp;#13;
+}&amp;#13;
+&amp;#13;
+.candidate-name h3 {&amp;#13;
+    margin: 0;&amp;#13;
+&amp;#13;
+    color: #17213a;&amp;#13;
+&amp;#13;
+    font-size: 15px;&amp;#13;
+}&amp;#13;
+&amp;#13;
+.candidate-name p {&amp;#13;
+    margin: 4px 0 0;&amp;#13;
+&amp;#13;
+    color: #8a94a7;&amp;#13;
+&amp;#13;
+    font-size: 11px;&amp;#13;
+}&amp;#13;
+&amp;#13;
+&amp;#13;
+/* ================================&amp;#13;
+   CANDIDATE INFO&amp;#13;
+================================ */&amp;#13;
+&amp;#13;
+.candidate-info {&amp;#13;
+    display: grid;&amp;#13;
+&amp;#13;
+    grid-template-columns: 1fr 1fr;&amp;#13;
+&amp;#13;
+    gap: 15px;&amp;#13;
+&amp;#13;
+    margin-bottom: 18px;&amp;#13;
+&amp;#13;
+    padding-bottom: 15px;&amp;#13;
+&amp;#13;
+    border-bottom: 1px solid #edf0f6;&amp;#13;
+}&amp;#13;
+&amp;#13;
+.candidate-info label {&amp;#13;
+    display: block;&amp;#13;
+&amp;#13;
+    color: #929bad;&amp;#13;
+&amp;#13;
+    font-size: 10px;&amp;#13;
+&amp;#13;
+    margin-bottom: 5px;&amp;#13;
+}&amp;#13;
+&amp;#13;
+.candidate-info span {&amp;#13;
+    color: #29344e;&amp;#13;
+&amp;#13;
+    font-size: 13px;&amp;#13;
+&amp;#13;
+    font-weight: 500;&amp;#13;
+}&amp;#13;
+&amp;#13;
+&amp;#13;
+/* ================================&amp;#13;
+   SKILLS&amp;#13;
+================================ */&amp;#13;
+&amp;#13;
+.skills {&amp;#13;
+    display: flex;&amp;#13;
+&amp;#13;
+    flex-wrap: wrap;&amp;#13;
+&amp;#13;
+    gap: 6px;&amp;#13;
+&amp;#13;
+    min-height: 28px;&amp;#13;
+&amp;#13;
+    margin-bottom: 18px;&amp;#13;
+}&amp;#13;
+&amp;#13;
+.skill {&amp;#13;
+    background: #eef1ff;&amp;#13;
+&amp;#13;
+    color: #5368d8;&amp;#13;
+&amp;#13;
+    padding: 5px 8px;&amp;#13;
+&amp;#13;
+    border-radius: 6px;&amp;#13;
+&amp;#13;
+    font-size: 10px;&amp;#13;
+&amp;#13;
+    font-weight: 500;&amp;#13;
+}&amp;#13;
+&amp;#13;
+.skill-more {&amp;#13;
+    color: #8a94a7;&amp;#13;
+&amp;#13;
+    font-size: 10px;&amp;#13;
+&amp;#13;
+    padding: 5px 3px;&amp;#13;
+}&amp;#13;
+&amp;#13;
+&amp;#13;
+/* ================================&amp;#13;
+   FOOTER&amp;#13;
+================================ */&amp;#13;
+&amp;#13;
+.candidate-footer {&amp;#13;
+    display: flex;&amp;#13;
+&amp;#13;
+    align-items: center;&amp;#13;
+&amp;#13;
+    justify-content: space-between;&amp;#13;
+}&amp;#13;
+&amp;#13;
+.placement-status {&amp;#13;
+    color: #20a66a;&amp;#13;
+&amp;#13;
+    background: #eaf8f1;&amp;#13;
+&amp;#13;
+    padding: 5px 9px;&amp;#13;
+&amp;#13;
+    border-radius: 6px;&amp;#13;
+&amp;#13;
+    font-size: 10px;&amp;#13;
+}&amp;#13;
+&amp;#13;
+.view-btn {&amp;#13;
+    border: none;&amp;#13;
+&amp;#13;
+    background: #f0f2ff;&amp;#13;
+&amp;#13;
+    color: #5368d8;&amp;#13;
+&amp;#13;
+    padding: 8px 12px;&amp;#13;
+&amp;#13;
+    border-radius: 7px;&amp;#13;
+&amp;#13;
+    cursor: pointer;&amp;#13;
+&amp;#13;
+    font-size: 11px;&amp;#13;
+}&amp;#13;
+&amp;#13;
+.view-btn:hover {&amp;#13;
+    background: #5368d8;&amp;#13;
+&amp;#13;
+    color: white;&amp;#13;
+}&amp;#13;
+&amp;#13;
+&amp;#13;
+/* ================================&amp;#13;
+   EMPTY STATE&amp;#13;
+================================ */&amp;#13;
+&amp;#13;
+.empty-state {&amp;#13;
+    grid-column: 1 / -1;&amp;#13;
+&amp;#13;
+    background: white;&amp;#13;
+&amp;#13;
+    border-radius: 14px;&amp;#13;
+&amp;#13;
+    padding: 60px 20px;&amp;#13;
+&amp;#13;
+    text-align: center;&amp;#13;
+}&amp;#13;
+&amp;#13;
+.empty-state h3 {&amp;#13;
+    margin: 0 0 8px;&amp;#13;
+&amp;#13;
+    color: #17213a;&amp;#13;
+}&amp;#13;
+&amp;#13;
+.empty-state p {&amp;#13;
+    margin: 0;&amp;#13;
+&amp;#13;
+    color: #8a94a7;&amp;#13;
+&amp;#13;
+    font-size: 13px;&amp;#13;
+}&amp;#13;
+&amp;#13;
+&amp;#13;
+/* ================================&amp;#13;
+   RESPONSIVE&amp;#13;
+================================ */&amp;#13;
+&amp;#13;
+@media (max-width: 1000px) {&amp;#13;
+&amp;#13;
+    .candidate-grid {&amp;#13;
+        grid-template-columns: repeat(2, 1fr);&amp;#13;
+    }&amp;#13;
+&amp;#13;
+}&amp;#13;
+&amp;#13;
+@media (max-width: 700px) {&amp;#13;
+&amp;#13;
+    .talent-pool-page {&amp;#13;
+        padding: 15px;&amp;#13;
+    }&amp;#13;
+&amp;#13;
+    .page-header {&amp;#13;
+        flex-direction: column;&amp;#13;
+&amp;#13;
+        align-items: flex-start;&amp;#13;
+&amp;#13;
+        gap: 15px;&amp;#13;
+    }&amp;#13;
+&amp;#13;
+    .search-panel {&amp;#13;
+        flex-direction: column;&amp;#13;
+    }&amp;#13;
+&amp;#13;
+    .search-btn {&amp;#13;
+        padding: 12px;&amp;#13;
+    }&amp;#13;
+&amp;#13;
+    .filters {&amp;#13;
+        flex-direction: column;&amp;#13;
+    }&amp;#13;
+&amp;#13;
+    .filters &amp;gt; div {&amp;#13;
+        width: 100%;&amp;#13;
+    }&amp;#13;
+&amp;#13;
+    .candidate-grid {&amp;#13;
+        grid-template-columns: 1fr;&amp;#13;
+    }&amp;#13;
+&amp;#13;
+}&lt;/css&gt;&lt;data_table&gt;sp_instance&lt;/data_table&gt;&lt;demo_data/&gt;&lt;description/&gt;&lt;docs/&gt;&lt;field_list/&gt;&lt;has_preview&gt;false&lt;/has_preview&gt;&lt;id&gt;recruiter_talent_pool&lt;/id&gt;&lt;internal&gt;false&lt;/internal&gt;&lt;link&gt;&lt;![CDATA[function link(scope, element, attrs, controller) {
+  
+}]]&gt;&lt;/link&gt;&lt;name&gt;Recruiter Talent Pool&lt;/name&gt;&lt;option_schema/&gt;&lt;public&gt;false&lt;/public&gt;&lt;roles/&gt;&lt;script&gt;&lt;![CDATA[(function() {
+
+    data.candidates = [];
+    data.branches = [];
+
+    /*
+     * ============================================
+     * GET BRANCHES
+     * ============================================
+     */
+
+    var branchGR = new GlideRecord(
+        "x_snc_campus360_student_master"
+    );
+
+    branchGR.query();
+
+    var branchMap = {};
+
+    while (branchGR.next()) {
+
+        var branchValue =
+            branchGR.getValue("branch");
+
+        var branchLabel =
+            branchGR.getDisplayValue("branch");
+
+        if (branchValue &amp;&amp; !branchMap[branchValue]) {
+
+            branchMap[branchValue] = true;
+
+            data.branches.push({
+
+                value: branchValue,
+                label: branchLabel
+
+            });
+
+        }
+    }
+
+
+    /*
+     * ============================================
+     * READ SEARCH PARAMETERS
+     * ============================================
+     */
+
+    var searchText =
+        (input &amp;&amp; input.searchText)
+        ? input.searchText.toString().trim()
+        : "";
+
+    var branch =
+        (input &amp;&amp; input.branch)
+        ? input.branch.toString()
+        : "";
+
+    var minCgpa =
+        (input &amp;&amp; input.minCgpa)
+        ? parseFloat(input.minCgpa)
+        : 0;
+
+
+    /*
+     * ============================================
+     * STUDENT MASTER
+     * ============================================
+     */
+
+    var studentGR = new GlideRecord(
+        "x_snc_campus360_student_master"
+    );
+
+
+    /*
+     * BRANCH FILTER
+     */
+
+    if (branch) {
+
+        studentGR.addQuery(
+            "branch",
+            branch
+        );
+
+    }
+
+
+    /*
+     * CGPA FILTER
+     */
+
+    if (minCgpa &gt; 0) {
+
+        studentGR.addQuery(
+            "cgpa",
+            "&gt;=",
+            minCgpa
+        );
+
+    }
+
+
+    studentGR.orderBy("student_name");
+    studentGR.query();
+
+
+    /*
+     * ============================================
+     * PROCESS STUDENTS
+     * ============================================
+     */
+
+    while (studentGR.next()) {
+
+        var name =
+            studentGR.getValue("student_name") || "";
+
+        var studentId =
+            studentGR.getValue("student_id") || "";
+
+        var email =
+            studentGR.getValue("email") || "";
+
+        var studentBranch =
+            studentGR.getDisplayValue("branch") || "";
+
+        var cgpa =
+            studentGR.getValue("cgpa") || "";
+
+        var placementStatus =
+            studentGR.getDisplayValue(
+                "placement_status"
+            ) || "";
+
+
+        /*
+         * SEARCH FILTER
+         */
+
+        if (searchText) {
+
+            var search =
+                searchText.toLowerCase();
+
+            var searchableText =
+                (
+                    name + " " +
+                    studentId + " " +
+                    studentBranch + " " +
+                    email
+                ).toLowerCase();
+
+            if (searchableText.indexOf(search) === -1) {
+
+                /*
+                 * Check skills separately
+                 */
+
+                var skillSearchGR = new GlideRecord(
+                    "x_snc_campus360_student_skills"
+                );
+
+                skillSearchGR.addQuery(
+                    "student",
+                    studentGR.getUniqueValue()
+                );
+
+                skillSearchGR.query();
+
+                var skillMatched = false;
+
+                while (skillSearchGR.next()) {
+
+                    var skillName =
+                        (
+                            skillSearchGR.getValue(
+                                "skill_name"
+                            ) || ""
+                        ).toLowerCase();
+
+                    if (
+                        skillName.indexOf(search) !== -1
+                    ) {
+
+                        skillMatched = true;
+                        break;
+
+                    }
+
+                }
+
+                if (!skillMatched) {
+                    continue;
+                }
+
+            }
+
+        }
+
+
+        /*
+         * ========================================
+         * GET SKILLS
+         * ========================================
+         */
+
+        var skills = [];
+
+        var skillGR = new GlideRecord(
+            "x_snc_campus360_student_skills"
+        );
+
+        skillGR.addQuery(
+            "student",
+            studentGR.getUniqueValue()
+        );
+
+        skillGR.query();
+
+        while (skillGR.next()) {
+
+            if (skills.length &lt; 3) {
+
+                skills.push(
+                    skillGR.getValue(
+                        "skill_name"
+                    ) || ""
+                );
+
+            }
+
+        }
+
+
+        /*
+         * ========================================
+         * CANDIDATE OBJECT
+         * ========================================
+         */
+
+        data.candidates.push({
+
+            sys_id:
+                studentGR.getUniqueValue(),
+
+            name:
+                name,
+
+            student_id:
+                studentId,
+
+            email:
+                email,
+
+            branch:
+                studentBranch,
+
+            cgpa:
+                cgpa,
+
+            placement_status:
+                placementStatus,
+
+            skills:
+                skills,
+
+            skill_count:
+                getSkillCount(
+                    studentGR.getUniqueValue()
+                ),
+
+            initials:
+                getInitials(name)
+
+        });
+
+    }
+
+
+    /*
+     * ============================================
+     * FUNCTIONS
+     * ============================================
+     */
+
+    function getInitials(name) {
+
+        if (!name) {
+            return "ST";
+        }
+
+        var parts =
+            name.trim().split(/\s+/);
+
+        if (parts.length === 1) {
+
+            return parts[0]
+                .substring(0, 2)
+                .toUpperCase();
+
+        }
+
+        return (
+            parts[0].charAt(0) +
+            parts[parts.length - 1].charAt(0)
+        ).toUpperCase();
+
+    }
+
+
+    function getSkillCount(studentSysId) {
+
+        var gr = new GlideRecord(
+            "x_snc_campus360_student_skills"
+        );
+
+        gr.addQuery(
+            "student",
+            studentSysId
+        );
+
+        gr.query();
+
+        var count = 0;
+
+        while (gr.next()) {
+            count++;
+        }
+
+        return count;
+
+    }
+
+})();]]&gt;&lt;/script&gt;&lt;servicenow&gt;false&lt;/servicenow&gt;&lt;sys_class_name&gt;sp_widget&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-23 08:46:20&lt;/sys_created_on&gt;&lt;sys_id&gt;1f22e638c4e703107f44164a4d246353&lt;/sys_id&gt;&lt;sys_mod_count&gt;0&lt;/sys_mod_count&gt;&lt;sys_name&gt;Recruiter Talent Pool&lt;/sys_name&gt;&lt;sys_package display_value="Campus360" source="x_snc_campus360"&gt;7cd68adee41703107f44d305db800ec3&lt;/sys_package&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="Campus360"&gt;7cd68adee41703107f44d305db800ec3&lt;/sys_scope&gt;&lt;sys_update_name&gt;sp_widget_1f22e638c4e703107f44164a4d246353&lt;/sys_update_name&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-23 08:46:20&lt;/sys_updated_on&gt;&lt;template&gt;&lt;![CDATA[&lt;div class="talent-pool-page"&gt;
+
+    &lt;div class="page-header"&gt;
+
+        &lt;div&gt;
+            &lt;div class="eyebrow"&gt;TALENT INTELLIGENCE&lt;/div&gt;
+            &lt;h1&gt;Search Talent Pool&lt;/h1&gt;
+            &lt;p&gt;Discover candidates based on skills, branch and CGPA.&lt;/p&gt;
+        &lt;/div&gt;
+
+        &lt;button class="back-btn" ng-click="c.goBack()"&gt;
+            ← Back to Dashboard
+        &lt;/button&gt;
+
+    &lt;/div&gt;
+
+
+    &lt;!-- SEARCH --&gt;
+
+    &lt;div class="search-panel"&gt;
+
+        &lt;div class="search-box"&gt;
+
+            &lt;span&gt;⌕&lt;/span&gt;
+
+            &lt;input
+                type="text"
+                ng-model="c.searchText"
+                ng-change="c.search()"
+                placeholder="Search by name, student ID, branch or skill..."
+            /&gt;
+
+        &lt;/div&gt;
+
+        &lt;button
+            class="search-btn"
+            ng-click="c.search()"&gt;
+
+            Search
+
+        &lt;/button&gt;
+
+    &lt;/div&gt;
+
+
+    &lt;!-- FILTERS --&gt;
+
+    &lt;div class="filters"&gt;
+
+        &lt;div&gt;
+            &lt;label&gt;Branch&lt;/label&gt;
+
+            &lt;select ng-model="c.branch"
+                    ng-change="c.search()"&gt;
+
+                &lt;option value=""&gt;All Branches&lt;/option&gt;
+
+                &lt;option
+                    ng-repeat="branch in data.branches"
+                    value="{{branch.value}}"&gt;
+
+                    {{branch.label}}
+
+                &lt;/option&gt;
+
+            &lt;/select&gt;
+        &lt;/div&gt;
+
+
+        &lt;div&gt;
+            &lt;label&gt;Minimum CGPA&lt;/label&gt;
+
+            &lt;select ng-model="c.minCgpa"
+                    ng-change="c.search()"&gt;
+
+                &lt;option value=""&gt;Any&lt;/option&gt;
+                &lt;option value="7"&gt;7+&lt;/option&gt;
+                &lt;option value="7.5"&gt;7.5+&lt;/option&gt;
+                &lt;option value="8"&gt;8+&lt;/option&gt;
+                &lt;option value="8.5"&gt;8.5+&lt;/option&gt;
+                &lt;option value="9"&gt;9+&lt;/option&gt;
+
+            &lt;/select&gt;
+        &lt;/div&gt;
+
+    &lt;/div&gt;
+
+
+    &lt;!-- RESULT COUNT --&gt;
+
+    &lt;div class="result-header"&gt;
+
+        &lt;div&gt;
+            &lt;strong&gt;{{data.candidates.length}}&lt;/strong&gt;
+            candidates found
+        &lt;/div&gt;
+
+    &lt;/div&gt;
+
+
+    &lt;!-- CANDIDATES --&gt;
+
+    &lt;div class="candidate-grid"&gt;
+
+        &lt;div
+            class="candidate-card"
+            ng-repeat="candidate in data.candidates"&gt;
+
+            &lt;div class="candidate-top"&gt;
+
+                &lt;div class="avatar"&gt;
+                    {{candidate.initials}}
+                &lt;/div&gt;
+
+                &lt;div class="candidate-name"&gt;
+
+                    &lt;h3&gt;
+                        {{candidate.name}}
+                    &lt;/h3&gt;
+
+                    &lt;p&gt;
+                        {{candidate.student_id}}
+                    &lt;/p&gt;
+
+                &lt;/div&gt;
+
+            &lt;/div&gt;
+
+
+            &lt;div class="candidate-info"&gt;
+
+                &lt;div&gt;
+                    &lt;label&gt;Branch&lt;/label&gt;
+                    &lt;span&gt;{{candidate.branch}}&lt;/span&gt;
+                &lt;/div&gt;
+
+                &lt;div&gt;
+                    &lt;label&gt;CGPA&lt;/label&gt;
+                    &lt;span&gt;{{candidate.cgpa}}&lt;/span&gt;
+                &lt;/div&gt;
+
+            &lt;/div&gt;
+
+
+            &lt;div class="skills"&gt;
+
+                &lt;span
+                    class="skill"
+                    ng-repeat="skill in candidate.skills"&gt;
+
+                    {{skill}}
+
+                &lt;/span&gt;
+
+                &lt;span
+                    class="skill-more"
+                    ng-if="candidate.skill_count &gt; 3"&gt;
+
+                    +{{candidate.skill_count - 3}} more
+
+                &lt;/span&gt;
+
+            &lt;/div&gt;
+
+
+            &lt;div class="candidate-footer"&gt;
+
+                &lt;span
+                    class="placement-status"&gt;
+
+                    {{candidate.placement_status}}
+
+                &lt;/span&gt;
+
+                &lt;button
+                    class="view-btn"
+                    ng-click="c.viewCandidate(candidate.sys_id)"&gt;
+
+                    View Profile →
+
+                &lt;/button&gt;
+
+            &lt;/div&gt;
+
+        &lt;/div&gt;
+
+
+        &lt;!-- EMPTY --&gt;
+
+        &lt;div
+            class="empty-state"
+            ng-if="data.candidates.length == 0"&gt;
+
+            &lt;h3&gt;No candidates found&lt;/h3&gt;
+
+            &lt;p&gt;
+                Try changing your search or filters.
+            &lt;/p&gt;
+
+        &lt;/div&gt;
+
+    &lt;/div&gt;
+
+&lt;/div&gt;]]&gt;&lt;/template&gt;&lt;/sp_widget&gt;&lt;/record_update&gt;</payload>
+        <payload_hash>2073749149</payload_hash>
+        <record_name>Recruiter Talent Pool</record_name>
+        <reverted_from/>
+        <source>70d68adee41703107f44d305db800ec8</source>
+        <source_table>sys_update_set</source_table>
+        <state>previous</state>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-23 08:46:20</sys_created_on>
+        <sys_id>4e84e27cc4e703107f44164a4d246348</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_recorded_at>1a0cd71c6620000001</sys_recorded_at>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-23 08:46:20</sys_updated_on>
+        <type>Widget</type>
+        <update_guid>4284e27c8de703107a5b6160bcc37848</update_guid>
+        <update_guid_history>4284e27c8de703107a5b6160bcc37848:2073749149</update_guid_history>
+    </sys_update_version>
+    <sys_metadata_delete action="INSERT_OR_UPDATE">
+        <sys_audit_delete display_value="Recruiter Talent Pool">46a3637cc46343107f44164a4d2463bf</sys_audit_delete>
+        <sys_class_name>sys_metadata_delete</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-23 13:22:09</sys_created_on>
+        <sys_db_object display_value="" name="sp_widget">sp_widget</sys_db_object>
+        <sys_id>55cbe4e7360d4944a5a655ee9c521624</sys_id>
+        <sys_metadata>1f22e638c4e703107f44164a4d246353</sys_metadata>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>Recruiter Talent Pool</sys_name>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_parent/>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_scope_delete display_value="">1cde9626740d46978b846077c1615101</sys_scope_delete>
+        <sys_update_name>sp_widget_1f22e638c4e703107f44164a4d246353</sys_update_name>
+        <sys_update_version display_value="sp_widget_1f22e638c4e703107f44164a4d246353">4e84e27cc4e703107f44164a4d246348</sys_update_version>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-23 13:22:09</sys_updated_on>
+    </sys_metadata_delete>
+</record_update>

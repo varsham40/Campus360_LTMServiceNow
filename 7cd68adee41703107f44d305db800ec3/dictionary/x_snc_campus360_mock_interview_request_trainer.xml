@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?><database>
+    <element attributes="enforce_dot_walk_cross_scope_access=true" db_object_id="a1d4ee7cc4e703107f44164a4d2463ba" label="Mock Interview Request Trainer" max_length="40" name="x_snc_campus360_mock_interview_request_trainer" type="collection">
+        <element label="Request" max_length="32" name="request" reference="x_snc_campus360_mock_interview_slot_request" type="reference"/>
+        <element choice="1" label="Response" max_length="255" name="response" type="choice">
+            <choice>
+                <element inactive_on_update="false" label="Pending" sequence="0" value="Pending"/>
+                <element inactive_on_update="false" label="Accepted" sequence="1" value="Accepted"/>
+                <element inactive_on_update="false" label="Declined" sequence="2" value="Declined"/>
+            </choice>
+        </element>
+        <element label="Created On" max_length="255" name="created_on" type="glide_date_time"/>
+        <element label="Response On" max_length="255" name="response_on" type="glide_date_time"/>
+        <element attributes="ignore_filter_on_new=true" default="javascript:global.getNextObjNumberPadded();" label="Assignment ID" max_length="40" name="number" type="string"/>
+        <element label="Trainer" max_length="32" name="trainer" reference="x_snc_campus360_trainer_master" type="reference"/>
+        <element label="Notification Sent" max_length="255" name="notification_sent" type="boolean"/>
+        <index name="index">
+            <element name="trainer"/>
+        </index>
+        <index name="index2">
+            <element name="request"/>
+        </index>
+    </element>
+</database>

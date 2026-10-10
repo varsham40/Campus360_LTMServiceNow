@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?><database>
+    <element attributes="enforce_dot_walk_cross_scope_access=true" db_object_id="e56252d6e49703107f44d305db800eb9" label="Mock Interview" max_length="40" name="x_snc_campus360_mock_interview" type="collection">
+        <element label="End Time" max_length="40" name="end_time" type="glide_time"/>
+        <element choice="3" default="Scheduled" label="Attendance Status" max_length="20" name="attendance_status" type="choice">
+            <choice>
+                <element inactive_on_update="false" label="Present" sequence="1" value="present"/>
+                <element inactive_on_update="false" label="Excused" sequence="4" value="excused"/>
+                <element inactive_on_update="false" label="Scheduled" sequence="0" value="scheduled"/>
+                <element inactive_on_update="false" label="Late" sequence="3" value="late"/>
+                <element inactive_on_update="false" label="Absent" sequence="2" value="absent"/>
+            </choice>
+        </element>
+        <element label="Slot Request" max_length="32" name="slot_request" reference="x_snc_campus360_mock_interview_slot_request" type="reference"/>
+        <element label="Trainer" max_length="32" name="trainer" reference="x_snc_campus360_trainer_master" type="reference"/>
+        <element label="QR Code" max_length="100" name="qr_code" type="string"/>
+        <element choice="3" default="Generated" label="QR Status" max_length="20" name="qr_status" type="choice">
+            <choice>
+                <element inactive_on_update="false" label="Expired" sequence="2" value="expired"/>
+                <element inactive_on_update="false" label="Scanned" sequence="1" value="scanned"/>
+                <element inactive_on_update="false" label="Generated" sequence="0" value="generated"/>
+                <element inactive_on_update="false" label="Cancelled" sequence="3" value="cancelled"/>
+            </choice>
+        </element>
+        <element label="Student" max_length="32" name="student" reference="x_snc_campus360_student_master" type="reference"/>
+        <element choice="3" default="Technical" label="Interview Type" max_length="30" name="interview_type" type="choice">
+            <choice>
+                <element inactive_on_update="false" label="Domain" sequence="5" value="domain"/>
+                <element inactive_on_update="false" label="HR" sequence="1" value="hr"/>
+                <element inactive_on_update="false" label="Technical" sequence="0" value="technical"/>
+                <element inactive_on_update="false" label="Communication" sequence="4" value="communication"/>
+                <element inactive_on_update="false" label="Aptitude" sequence="3" value="aptitude"/>
+                <element inactive_on_update="false" label="Behavioral" sequence="2" value="behavioral"/>
+            </choice>
+        </element>
+        <element choice="3" default="Scheduled" label="Interview Status" max_length="20" name="interview_status" type="choice">
+            <choice>
+                <element inactive_on_update="false" label="Completed" sequence="2" value="completed"/>
+                <element inactive_on_update="false" label="In Progress" sequence="1" value="in_progress"/>
+                <element inactive_on_update="false" label="Scheduled" sequence="0" value="scheduled"/>
+                <element inactive_on_update="false" label="No Show" sequence="4" value="no_show"/>
+                <element inactive_on_update="false" label="Cancelled" sequence="3" value="cancelled"/>
+            </choice>
+        </element>
+        <element label="QR URL" max_length="1024" name="qr_url" type="url"/>
+        <element display="true" label="Interview ID" max_length="20" name="interview_id" type="string"/>
+        <element label="Interview Date" max_length="40" name="interview_date" type="glide_date"/>
+        <element label="Start Time" max_length="40" name="start_time" type="glide_time"/>
+        <index name="index">
+            <element name="trainer"/>
+        </index>
+        <index name="index2">
+            <element name="slot_request"/>
+        </index>
+        <index name="index3">
+            <element name="student"/>
+        </index>
+    </element>
+</database>

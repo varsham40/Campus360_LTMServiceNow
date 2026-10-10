@@ -1,0 +1,7645 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_widget">
+    <sp_widget action="INSERT_OR_UPDATE">
+        <category>custom</category>
+        <client_script><![CDATA[api.controller = function($scope, $window, $timeout) {
+
+  var c = this;
+
+
+  /* =====================================================
+     INITIAL STATE
+     ===================================================== */
+
+  c.sidebarCollapsed = false;
+
+  c.searchText = "";
+
+  c.filters = {
+    type: "",
+    source: "",
+    status: ""
+  };
+
+  c.filteredOpportunities = [];
+
+  c.modalOpen = false;
+
+  c.viewModalOpen = false;
+
+  c.isEditMode = false;
+
+  c.selectedOpportunity = null;
+
+  c.saving = false;
+
+  c.saveMessage = "";
+
+  c.toastMessage = "";
+
+  c.toastError = false;
+
+
+  /* =====================================================
+     SAFE DATA
+     ===================================================== */
+
+  if (!c.data) {
+    c.data = {};
+  }
+
+  if (!c.data.opportunities) {
+    c.data.opportunities = [];
+  }
+
+  if (!c.data.opportunityTypes) {
+    c.data.opportunityTypes = [];
+  }
+
+  if (!c.data.opportunitySources) {
+    c.data.opportunitySources = [];
+  }
+
+  if (!c.data.statuses) {
+    c.data.statuses = [];
+  }
+
+  if (!c.data.companies) {
+    c.data.companies = [];
+  }
+
+  if (!c.data.summary) {
+
+    c.data.summary = {
+      totalOpportunities: 0,
+      openOpportunities: 0,
+      closedOpportunities: 0,
+      totalApplications: 0
+    };
+
+  }
+
+
+  /* =====================================================
+     SIDEBAR
+     ===================================================== */
+
+  c.toggleSidebar = function() {
+
+    c.sidebarCollapsed =
+      !c.sidebarCollapsed;
+
+    if (!$scope.$$phase) {
+      $scope.$applyAsync();
+    }
+
+  };
+
+
+  /* =====================================================
+     NAVIGATION
+     ===================================================== */
+
+  
+
+
+  /* =====================================================
+     NORMALIZE
+     ===================================================== */
+
+  c.normalize = function(value) {
+
+    if (
+      value === null ||
+      value === undefined
+    ) {
+      return "";
+    }
+
+    return String(value)
+      .trim()
+      .toLowerCase();
+
+  };
+
+
+  /* =====================================================
+     CHOICE MATCH
+     ===================================================== */
+
+  c.choiceMatches = function(
+    selectedValue,
+    storedValue,
+    displayValue
+  ) {
+
+    if (!selectedValue) {
+      return true;
+    }
+
+    var selected =
+      c.normalize(selectedValue);
+
+    var stored =
+      c.normalize(storedValue);
+
+    var display =
+      c.normalize(displayValue);
+
+    return (
+      selected === stored ||
+      selected === display
+    );
+
+  };
+
+
+  /* =====================================================
+     FILTER
+     ===================================================== */
+
+  c.getFilteredOpportunities = function() {
+
+    var list =
+      c.data.opportunities || [];
+
+    var search =
+      c.normalize(c.searchText);
+
+
+    return list.filter(function(opportunity) {
+
+      var matchesSearch = true;
+
+
+      if (search) {
+
+        var searchable = [
+
+          opportunity.opportunity_id,
+
+          opportunity.title,
+
+          opportunity.company,
+
+          opportunity.location,
+
+          opportunity.skills,
+
+          opportunity.eligible_branches,
+
+          opportunity.type,
+
+          opportunity.type_value,
+
+          opportunity.source,
+
+          opportunity.source_value,
+
+          opportunity.status,
+
+          opportunity.status_value
+
+        ].join(" ");
+
+
+        matchesSearch =
+          c.normalize(searchable)
+            .indexOf(search) !== -1;
+
+      }
+
+
+      var matchesType =
+        c.choiceMatches(
+          c.filters.type,
+          opportunity.type_value,
+          opportunity.type
+        );
+
+
+      var matchesSource =
+        c.choiceMatches(
+          c.filters.source,
+          opportunity.source_value,
+          opportunity.source
+        );
+
+
+      var matchesStatus =
+        c.choiceMatches(
+          c.filters.status,
+          opportunity.status_value,
+          opportunity.status
+        );
+
+
+      return (
+        matchesSearch &&
+        matchesType &&
+        matchesSource &&
+        matchesStatus
+      );
+
+    });
+
+  };
+
+
+  c.updateFilteredOpportunities = function() {
+
+    c.filteredOpportunities =
+      c.getFilteredOpportunities();
+
+  };
+
+
+  /* =====================================================
+     CLEAR FILTERS
+     ===================================================== */
+
+  c.clearFilters = function() {
+
+    c.searchText = "";
+
+    c.filters.type = "";
+
+    c.filters.source = "";
+
+    c.filters.status = "";
+
+    c.updateFilteredOpportunities();
+
+  };
+
+
+  /* =====================================================
+     WATCH FILTERS
+     ===================================================== */
+
+  $scope.$watchGroup(
+
+    [
+      function() {
+        return c.searchText;
+      },
+
+      function() {
+        return c.filters.type;
+      },
+
+      function() {
+        return c.filters.source;
+      },
+
+      function() {
+        return c.filters.status;
+      }
+    ],
+
+    function() {
+
+      c.updateFilteredOpportunities();
+
+    }
+
+  );
+
+
+  /* =====================================================
+     INITIAL FILTER
+     ===================================================== */
+
+  c.updateFilteredOpportunities();
+
+
+  /* =====================================================
+     INITIALS
+     ===================================================== */
+
+  c.getInitials = function(text) {
+
+    if (!text) {
+      return "OP";
+    }
+
+    var words =
+      String(text)
+        .trim()
+        .split(/\s+/);
+
+
+    if (words.length === 1) {
+
+      return words[0]
+        .substring(0,2)
+        .toUpperCase();
+
+    }
+
+
+    return (
+      words[0].charAt(0) +
+      words[1].charAt(0)
+    ).toUpperCase();
+
+  };
+
+
+  /* =====================================================
+     STATUS CLASS
+     ===================================================== */
+
+  c.getStatusClass = function(status) {
+
+    var value =
+      c.normalize(status);
+
+
+    if (
+      value === "open" ||
+      value === "active"
+    ) {
+
+      return "status-open";
+
+    }
+
+
+    if (
+      value === "closed" ||
+      value === "inactive" ||
+      value === "cancelled" ||
+      value === "canceled"
+    ) {
+
+      return "status-closed";
+
+    }
+
+
+    return "status-other";
+
+  };
+
+
+  /* =====================================================
+     RESET FORM
+     ===================================================== */
+
+  c.resetForm = function() {
+
+    c.form = {
+
+      sys_id: "",
+
+      opportunity_id: "",
+
+      opportunity_title: "",
+
+      company: "",
+
+      opportunity_type: "",
+
+      opportunity_source: "",
+
+      status: "",
+
+      location: "",
+
+      ctc_stipend: "",
+
+      minimum_cgpa: "",
+
+      eligible_branches: "",
+
+      required_skills: "",
+
+      application_deadline: null,
+
+      drive_date: null,
+
+      job_description: ""
+
+    };
+
+  };
+
+
+  c.resetForm();
+
+
+  /* =====================================================
+     DATE
+     ===================================================== */
+
+  c.toDateTimeLocal = function(value) {
+
+    if (!value) {
+      return null;
+    }
+
+    var date =
+      new Date(value);
+
+    if (isNaN(date.getTime())) {
+      return null;
+    }
+
+    var year =
+      date.getFullYear();
+
+    var month =
+      String(date.getMonth() + 1)
+        .padStart(2,"0");
+
+    var day =
+      String(date.getDate())
+        .padStart(2,"0");
+
+    var hours =
+      String(date.getHours())
+        .padStart(2,"0");
+
+    var minutes =
+      String(date.getMinutes())
+        .padStart(2,"0");
+
+
+    return (
+      year + "-" +
+      month + "-" +
+      day + "T" +
+      hours + ":" +
+      minutes
+    );
+
+  };
+
+
+  /* =====================================================
+     CREATE
+     ===================================================== */
+
+  c.openAddModal = function() {
+
+    c.resetForm();
+
+    c.isEditMode = false;
+
+    c.saveMessage = "";
+
+    c.modalOpen = true;
+
+  };
+
+
+  /* =====================================================
+     VIEW
+     ===================================================== */
+
+  c.openViewModal = function(opportunity) {
+
+    if (!opportunity) {
+      return;
+    }
+
+    c.selectedOpportunity =
+      opportunity;
+
+    c.viewModalOpen = true;
+
+  };
+
+
+  c.closeViewModal = function() {
+
+    c.viewModalOpen = false;
+
+    c.selectedOpportunity = null;
+
+  };
+
+
+  c.closeModal = function() {
+
+    if (c.saving) {
+      return;
+    }
+
+    c.modalOpen = false;
+
+    c.saveMessage = "";
+
+  };
+
+
+  /* =====================================================
+     EDIT
+     ===================================================== */
+
+  c.editOpportunity = function(opportunity) {
+
+    if (!opportunity) {
+      return;
+    }
+
+
+    c.viewModalOpen = false;
+
+    c.isEditMode = true;
+
+    c.saveMessage = "";
+
+
+    c.form = {
+
+      sys_id:
+        opportunity.sys_id || "",
+
+      opportunity_id:
+        opportunity.opportunity_id || "",
+
+      opportunity_title:
+        opportunity.title || "",
+
+      company:
+        opportunity.company_sys_id || "",
+
+      opportunity_type:
+        opportunity.type_value || "",
+
+      opportunity_source:
+        opportunity.source_value || "",
+
+      status:
+        opportunity.status_value || "",
+
+      location:
+        opportunity.location || "",
+
+      ctc_stipend:
+        opportunity.ctc || "",
+
+      minimum_cgpa:
+        opportunity.minimum_cgpa || "",
+
+      eligible_branches:
+        opportunity.eligible_branches || "",
+
+      required_skills:
+        opportunity.skills || "",
+
+      application_deadline:
+        c.toDateTimeLocal(
+          opportunity.application_deadline_raw
+        ),
+
+      drive_date:
+        c.toDateTimeLocal(
+          opportunity.drive_date_raw
+        ),
+
+      job_description:
+        opportunity.description || ""
+
+    };
+
+
+    c.modalOpen = true;
+
+  };
+
+
+  /* =====================================================
+     VALIDATION
+     ===================================================== */
+
+  c.validateForm = function() {
+
+    if (
+      !c.form.opportunity_title ||
+      !String(
+        c.form.opportunity_title
+      ).trim()
+    ) {
+
+      c.saveMessage =
+        "Opportunity Title is required.";
+
+      return false;
+
+    }
+
+
+    if (!c.form.company) {
+
+      c.saveMessage =
+        "Please select a Company.";
+
+      return false;
+
+    }
+
+
+    return true;
+
+  };
+
+
+  /* =====================================================
+     SAVE
+     ===================================================== */
+
+  c.saveOpportunity = function() {
+
+    c.saveMessage = "";
+
+
+    if (!c.validateForm()) {
+      return;
+    }
+
+
+    c.saving = true;
+
+
+    var payload = {
+
+      sys_id:
+        c.form.sys_id || "",
+
+      opportunity_id:
+        c.form.opportunity_id || "",
+
+      opportunity_title:
+        c.form.opportunity_title || "",
+
+      company:
+        c.form.company || "",
+
+      opportunity_type:
+        c.form.opportunity_type || "",
+
+      opportunity_source:
+        c.form.opportunity_source || "",
+
+      status:
+        c.form.status || "",
+
+      location:
+        c.form.location || "",
+
+      ctc_stipend:
+        c.form.ctc_stipend || "",
+
+      minimum_cgpa:
+        c.form.minimum_cgpa,
+
+      eligible_branches:
+        c.form.eligible_branches || "",
+
+      required_skills:
+        c.form.required_skills || "",
+
+      application_deadline:
+        c.form.application_deadline
+          ? new Date(
+              c.form.application_deadline
+            ).toISOString()
+          : "",
+
+      drive_date:
+        c.form.drive_date
+          ? new Date(
+              c.form.drive_date
+            ).toISOString()
+          : "",
+
+      job_description:
+        c.form.job_description || ""
+
+    };
+
+
+    c.server.get({
+
+      action:
+        c.isEditMode
+          ? "update"
+          : "create",
+
+      opportunity:
+        payload
+
+    }).then(
+
+      function(response) {
+
+        var result =
+          response.data &&
+          response.data.result
+            ? response.data.result
+            : null;
+
+
+        if (
+          result &&
+          result.success
+        ) {
+
+          c.modalOpen = false;
+
+          c.saving = false;
+
+          c.showToast(
+            c.isEditMode
+              ? "Opportunity updated successfully."
+              : "Opportunity created successfully.",
+            false
+          );
+
+          c.refreshData();
+
+        } else {
+
+          c.saving = false;
+
+          c.saveMessage =
+            result &&
+            result.message
+              ? result.message
+              : "Unable to save the opportunity.";
+
+        }
+
+      },
+
+      function() {
+
+        c.saving = false;
+
+        c.saveMessage =
+          "A server error occurred while saving the opportunity.";
+
+      }
+
+    );
+
+  };
+
+
+  /* =====================================================
+     REFRESH
+     ===================================================== */
+
+  c.refreshData = function() {
+
+    c.server.get({
+
+      action: "refresh"
+
+    }).then(
+
+      function(response) {
+
+        if (
+          response.data &&
+          response.data.opportunities
+        ) {
+
+          c.data =
+            response.data;
+
+          c.updateFilteredOpportunities();
+
+          c.showToast(
+            "Opportunity data refreshed.",
+            false
+          );
+
+        }
+
+      }
+
+    );
+
+  };
+
+
+  /* =====================================================
+     TOAST
+     ===================================================== */
+
+  c.showToast = function(
+    message,
+    isError
+  ) {
+
+    c.toastMessage =
+      message;
+
+    c.toastError =
+      !!isError;
+
+
+    if (!$scope.$$phase) {
+      $scope.$applyAsync();
+    }
+
+
+    window.setTimeout(
+
+      function() {
+
+        c.toastMessage = "";
+
+        if (!$scope.$$phase) {
+          $scope.$applyAsync();
+        }
+
+      },
+
+      3500
+
+    );
+
+  };
+
+
+  /* =====================================================
+     DATA WATCH
+     ===================================================== */
+
+  $scope.$watch(
+
+    function() {
+      return c.data.opportunities;
+    },
+
+    function() {
+
+      c.updateFilteredOpportunities();
+
+    },
+
+    true
+
+  );
+
+
+    c.goTo = function(pageId) {
+        if (!pageId) return;
+        var map = {
+            'dashboard': 'campus360_tpo_home',
+            'home': 'campus360_tpo_home',
+            'campus360_tpo_home': 'campus360_tpo_home',
+            'students': 'campus360_tpo_student_management',
+            'student_management': 'campus360_tpo_student_management',
+            'campus360_tpo_student_management': 'campus360_tpo_student_management',
+            'skills': 'campus360_tpo_skill_intelligence_new',
+            'skill_intelligence': 'campus360_tpo_skill_intelligence_new',
+            'campus360_tpo_skill_intelligence': 'campus360_tpo_skill_intelligence_new',
+            'campus360_tpo_skill_intelligence_new': 'campus360_tpo_skill_intelligence_new',
+            'assessments': 'student_assessments_new',
+            'student_assessments': 'student_assessments_new',
+            'student_assessments_new': 'student_assessments_new',
+            'companies': 'campus360_tpo_companies_new',
+            'campus360_tpo_companies': 'campus360_tpo_companies_new',
+            'campus360_tpo_companies_new': 'campus360_tpo_companies_new',
+            'opportunities': 'campus360_tpo_opportunities_new',
+            'campus360_tpo_opportunities': 'campus360_tpo_opportunities_new',
+            'campus360_tpo_opportunities_new': 'campus360_tpo_opportunities_new',
+            'applications': 'campus360_tpo_application_new',
+            'application': 'campus360_tpo_application_new',
+            'campus360_tpo_application': 'campus360_tpo_application_new',
+            'campus360_tpo_application_new': 'campus360_tpo_application_new',
+            'interviews': 'campus360_tpo_interviews_new',
+            'campus360_tpo_interviews': 'campus360_tpo_interviews_new',
+            'campus360_tpo_interviews_new': 'campus360_tpo_interviews_new',
+            'outcomes': 'campus360_tpo_placement_outcomes',
+            'placement_outcomes': 'campus360_tpo_placement_outcomes',
+            'campus360_tpo_placement_outcomes': 'campus360_tpo_placement_outcomes',
+            'training': 'campus360_tpo_training_programs',
+            'training_programs': 'campus360_tpo_training_programs',
+            'campus360_tpo_training_programs': 'campus360_tpo_training_programs',
+            'enrollments': 'campus360_tpo_training_programs',
+            'campus360_tpo_enrollments': 'campus360_tpo_training_programs',
+            'mock_interviews': 'campus360_tpo_interviews_new',
+            'campus360_tpo_mock_interviews': 'campus360_tpo_interviews_new',
+            'risk': 'campus360_tpo_student_management',
+            'campus360_tpo_risk_intelligence': 'campus360_tpo_student_management',
+            'interventions': 'campus360_tpo_student_management',
+            'campus360_tpo_interventions': 'campus360_tpo_student_management',
+            'readiness': 'campus360_tpo_skill_intelligence_new',
+            'ai_assistant': 'campus360_tpo_ai_assistant',
+            'campus360_tpo_ai_assistant': 'campus360_tpo_ai_assistant'
+        };
+        var target = map[pageId] || pageId;
+        if (typeof $window !== 'undefined' && $window.location) {
+            $window.location.href = '?id=' + encodeURIComponent(target);
+        } else {
+            window.location.href = '?id=' + encodeURIComponent(target);
+        }
+    };
+    c.goToPage = function(pageId) { c.goTo(pageId); };
+    c.navigate = function(pageId) { c.goTo(pageId); };
+
+};]]></client_script>
+        <controller_as>c</controller_as>
+        <css>/* =========================================================&#13;
+   CAMPUS360 OPPORTUNITIES&#13;
+   COMPLETE FINAL CSS&#13;
+   FULLSCREEN&#13;
+   NATIVE SERVICENOW NAVBAR HIDDEN&#13;
+   PROPER CAMPUS360 TOP NAVBAR&#13;
+   SIDEBAR FOOTER FIXED&#13;
+   ========================================================= */&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   1. GLOBAL PAGE RESET&#13;
+   ========================================================= */&#13;
+&#13;
+html,&#13;
+body {&#13;
+  width:100% !important;&#13;
+  height:100% !important;&#13;
+&#13;
+  min-width:100% !important;&#13;
+  min-height:100% !important;&#13;
+&#13;
+  margin:0 !important;&#13;
+  padding:0 !important;&#13;
+&#13;
+  overflow:hidden !important;&#13;
+&#13;
+  background:#f7f8fc !important;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   2. REMOVE SERVICENOW OUTER CONTAINERS&#13;
+   ========================================================= */&#13;
+&#13;
+body:has(.campus360-opportunity-app) #sp-page,&#13;
+body:has(.campus360-opportunity-app) #sp-main,&#13;
+body:has(.campus360-opportunity-app) .sp-page,&#13;
+body:has(.campus360-opportunity-app) .sp-main,&#13;
+body:has(.campus360-opportunity-app) .sp-page-container,&#13;
+body:has(.campus360-opportunity-app) #page_content,&#13;
+body:has(.campus360-opportunity-app) .page,&#13;
+body:has(.campus360-opportunity-app) .page-wrapper,&#13;
+body:has(.campus360-opportunity-app) .main-content,&#13;
+body:has(.campus360-opportunity-app) .container,&#13;
+body:has(.campus360-opportunity-app) .container-fluid,&#13;
+body:has(.campus360-opportunity-app) .row {&#13;
+  width:100% !important;&#13;
+  max-width:none !important;&#13;
+  min-width:0 !important;&#13;
+&#13;
+  margin:0 !important;&#13;
+  padding:0 !important;&#13;
+&#13;
+  border:0 !important;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   3. COMPLETELY REMOVE NATIVE SERVICENOW HEADER&#13;
+   ========================================================= */&#13;
+&#13;
+body:has(.campus360-opportunity-app) #sp-header,&#13;
+body:has(.campus360-opportunity-app) header#sp-header,&#13;
+body:has(.campus360-opportunity-app) .sp-header,&#13;
+body:has(.campus360-opportunity-app) .sp-header-wrapper,&#13;
+body:has(.campus360-opportunity-app) .sp-header-content,&#13;
+&#13;
+body:has(.campus360-opportunity-app) #sp-nav-bar,&#13;
+body:has(.campus360-opportunity-app) .sp-nav-bar,&#13;
+body:has(.campus360-opportunity-app) .sp-nav,&#13;
+&#13;
+body:has(.campus360-opportunity-app) .sp-navbar,&#13;
+body:has(.campus360-opportunity-app) .sp-navbar-wrapper,&#13;
+body:has(.campus360-opportunity-app) .sp-navbar-container,&#13;
+&#13;
+body:has(.campus360-opportunity-app) .portal-header,&#13;
+body:has(.campus360-opportunity-app) .portal-navbar,&#13;
+body:has(.campus360-opportunity-app) .portal-nav,&#13;
+body:has(.campus360-opportunity-app) .header-nav,&#13;
+&#13;
+body:has(.campus360-opportunity-app) .navpage-header,&#13;
+body:has(.campus360-opportunity-app) .navpage-header-content,&#13;
+&#13;
+body:has(.campus360-opportunity-app) .navbar,&#13;
+body:has(.campus360-opportunity-app) nav.navbar,&#13;
+body:has(.campus360-opportunity-app) .navbar-default,&#13;
+body:has(.campus360-opportunity-app) .navbar-inverse,&#13;
+body:has(.campus360-opportunity-app) .navbar-header,&#13;
+body:has(.campus360-opportunity-app) .navbar-collapse,&#13;
+&#13;
+body:has(.campus360-opportunity-app) .navbar-wrapper,&#13;
+body:has(.campus360-opportunity-app) .sp-navbar-wrapper,&#13;
+body:has(.campus360-opportunity-app) .sp-header-container,&#13;
+body:has(.campus360-opportunity-app) .header {&#13;
+  display:none !important;&#13;
+&#13;
+  visibility:hidden !important;&#13;
+&#13;
+  width:0 !important;&#13;
+  height:0 !important;&#13;
+&#13;
+  min-width:0 !important;&#13;
+  min-height:0 !important;&#13;
+&#13;
+  max-width:0 !important;&#13;
+  max-height:0 !important;&#13;
+&#13;
+  margin:0 !important;&#13;
+  padding:0 !important;&#13;
+&#13;
+  border:0 !important;&#13;
+&#13;
+  overflow:hidden !important;&#13;
+}&#13;
+&#13;
+&#13;
+/* Hide native header elements except our Campus360 header */&#13;
+&#13;
+body:has(.campus360-opportunity-app)&#13;
+header:not(.opportunity-topbar) {&#13;
+  display:none !important;&#13;
+&#13;
+  visibility:hidden !important;&#13;
+&#13;
+  height:0 !important;&#13;
+&#13;
+  min-height:0 !important;&#13;
+&#13;
+  max-height:0 !important;&#13;
+&#13;
+  overflow:hidden !important;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   4. ROOT CAMPUS360 APPLICATION&#13;
+   ========================================================= */&#13;
+&#13;
+.campus360-opportunity-app {&#13;
+  --purple:#7b3aec;&#13;
+  --purple-dark:#6424c7;&#13;
+  --purple-light:#f1e9ff;&#13;
+&#13;
+  --navy:#121028;&#13;
+&#13;
+  --text:#17172f;&#13;
+  --muted:#6b7890;&#13;
+&#13;
+  --page-bg:#f7f8fc;&#13;
+  --sidebar-bg:#121028;&#13;
+&#13;
+  --white:#ffffff;&#13;
+  --border:#e2e5ec;&#13;
+&#13;
+  --green:#05976a;&#13;
+  --green-light:#e9fbf4;&#13;
+&#13;
+  --orange:#b77900;&#13;
+  --orange-light:#fff8e6;&#13;
+&#13;
+  --blue:#2e86ff;&#13;
+  --blue-light:#eef5ff;&#13;
+&#13;
+  position:fixed !important;&#13;
+&#13;
+  top:0 !important;&#13;
+  left:0 !important;&#13;
+  right:0 !important;&#13;
+  bottom:0 !important;&#13;
+&#13;
+  width:100vw !important;&#13;
+  height:100vh !important;&#13;
+&#13;
+  max-width:none !important;&#13;
+  min-width:0 !important;&#13;
+&#13;
+  margin:0 !important;&#13;
+  padding:0 !important;&#13;
+&#13;
+  background:var(--page-bg);&#13;
+&#13;
+  color:var(--text);&#13;
+&#13;
+  font-family:&#13;
+    -apple-system,&#13;
+    BlinkMacSystemFont,&#13;
+    "Segoe UI",&#13;
+    Roboto,&#13;
+    Arial,&#13;
+    sans-serif;&#13;
+&#13;
+  overflow:hidden !important;&#13;
+&#13;
+  z-index:2147483647 !important;&#13;
+&#13;
+  isolation:isolate;&#13;
+}&#13;
+&#13;
+&#13;
+.campus360-opportunity-app *,&#13;
+.campus360-opportunity-app *::before,&#13;
+.campus360-opportunity-app *::after {&#13;
+  box-sizing:border-box;&#13;
+}&#13;
+&#13;
+&#13;
+.campus360-opportunity-app button,&#13;
+.campus360-opportunity-app input,&#13;
+.campus360-opportunity-app select,&#13;
+.campus360-opportunity-app textarea {&#13;
+  font-family:inherit;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   5. SIDEBAR&#13;
+   ========================================================= */&#13;
+&#13;
+.opportunity-sidebar {&#13;
+  position:absolute !important;&#13;
+&#13;
+  top:0 !important;&#13;
+  left:0 !important;&#13;
+  bottom:0 !important;&#13;
+&#13;
+  width:250px !important;&#13;
+  min-width:250px !important;&#13;
+  max-width:250px !important;&#13;
+&#13;
+  height:100vh !important;&#13;
+&#13;
+  margin:0 !important;&#13;
+  padding:0 !important;&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      180deg,&#13;
+      #10092a 0%,&#13;
+      #130d31 55%,&#13;
+      #0d0822 100%&#13;
+    ) !important;&#13;
+&#13;
+  border-right:1px solid #26213f !important;&#13;
+&#13;
+  color:#ffffff !important;&#13;
+&#13;
+  z-index:2000 !important;&#13;
+&#13;
+  display:flex !important;&#13;
+  flex-direction:column !important;&#13;
+&#13;
+  overflow:hidden !important;&#13;
+&#13;
+  transition:&#13;
+    width .25s ease,&#13;
+    min-width .25s ease,&#13;
+    max-width .25s ease,&#13;
+    transform .25s ease,&#13;
+    opacity .2s ease;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   6. SIDEBAR BRAND&#13;
+   ========================================================= */&#13;
+&#13;
+.sidebar-brand {&#13;
+  width:100%;&#13;
+&#13;
+  height:92px;&#13;
+  min-height:92px;&#13;
+&#13;
+  padding:20px;&#13;
+&#13;
+  display:flex;&#13;
+&#13;
+  align-items:center;&#13;
+&#13;
+  flex-shrink:0;&#13;
+&#13;
+  border-bottom:1px solid #26213f;&#13;
+}&#13;
+&#13;
+&#13;
+.brand-icon {&#13;
+  width:52px;&#13;
+  height:52px;&#13;
+&#13;
+  min-width:52px;&#13;
+&#13;
+  border-radius:15px;&#13;
+&#13;
+  background:#7b3aec;&#13;
+&#13;
+  color:#ffffff;&#13;
+&#13;
+  display:flex;&#13;
+&#13;
+  align-items:center;&#13;
+&#13;
+  justify-content:center;&#13;
+&#13;
+  font-size:26px;&#13;
+&#13;
+  font-weight:900;&#13;
+&#13;
+  box-shadow:&#13;
+    0 9px 20px rgba(112,69,232,.20);&#13;
+}&#13;
+&#13;
+&#13;
+.brand-text {&#13;
+  min-width:0;&#13;
+&#13;
+  margin-left:13px;&#13;
+}&#13;
+&#13;
+&#13;
+.brand-title {&#13;
+  color:#f5f2fb;&#13;
+&#13;
+  font-size:19px;&#13;
+&#13;
+  line-height:1;&#13;
+&#13;
+  font-weight:900;&#13;
+&#13;
+  white-space:nowrap;&#13;
+}&#13;
+&#13;
+&#13;
+.brand-subtitle {&#13;
+  color:#a9a2bd;&#13;
+&#13;
+  font-size:11px;&#13;
+&#13;
+  font-weight:700;&#13;
+&#13;
+  margin-top:7px;&#13;
+&#13;
+  letter-spacing:.4px;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   7. SIDEBAR PROFILE&#13;
+   ========================================================= */&#13;
+&#13;
+.sidebar-profile {&#13;
+  margin:16px 13px 14px;&#13;
+&#13;
+  padding:14px;&#13;
+&#13;
+  background:#1c1838;&#13;
+&#13;
+  border:1px solid #2d2750;&#13;
+&#13;
+  border-radius:16px;&#13;
+&#13;
+  display:flex;&#13;
+&#13;
+  align-items:center;&#13;
+&#13;
+  flex-shrink:0;&#13;
+}&#13;
+&#13;
+&#13;
+.profile-avatar {&#13;
+  width:47px;&#13;
+  height:47px;&#13;
+&#13;
+  min-width:47px;&#13;
+&#13;
+  border-radius:50%;&#13;
+&#13;
+  background:#7b3aec;&#13;
+&#13;
+  color:#ffffff;&#13;
+&#13;
+  display:flex;&#13;
+&#13;
+  align-items:center;&#13;
+&#13;
+  justify-content:center;&#13;
+&#13;
+  font-size:13px;&#13;
+&#13;
+  font-weight:900;&#13;
+}&#13;
+&#13;
+&#13;
+.profile-details {&#13;
+  min-width:0;&#13;
+&#13;
+  margin-left:10px;&#13;
+}&#13;
+&#13;
+&#13;
+.profile-name {&#13;
+  color:#f5f2fb;&#13;
+&#13;
+  font-size:14px;&#13;
+&#13;
+  font-weight:900;&#13;
+}&#13;
+&#13;
+&#13;
+.profile-role {&#13;
+  color:#b48cff;&#13;
+&#13;
+  font-size:10px;&#13;
+&#13;
+  font-weight:900;&#13;
+&#13;
+  margin-top:2px;&#13;
+}&#13;
+&#13;
+&#13;
+.profile-department {&#13;
+  color:#a9a2bd;&#13;
+&#13;
+  font-size:9px;&#13;
+&#13;
+  line-height:1.3;&#13;
+&#13;
+  margin-top:4px;&#13;
+&#13;
+  white-space:nowrap;&#13;
+&#13;
+  overflow:hidden;&#13;
+&#13;
+  text-overflow:ellipsis;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   8. SIDEBAR MENU&#13;
+   IMPORTANT:&#13;
+   MENU GETS ITS OWN SCROLL AREA.&#13;
+   FOOTER NO LONGER OVERLAPS NAVIGATION.&#13;
+   ========================================================= */&#13;
+&#13;
+.sidebar-menu {&#13;
+  flex:1 1 auto !important;&#13;
+&#13;
+  min-height:0 !important;&#13;
+&#13;
+  width:100%;&#13;
+&#13;
+  padding:0 13px 10px;&#13;
+&#13;
+  overflow-y:auto !important;&#13;
+&#13;
+  overflow-x:hidden !important;&#13;
+&#13;
+  scrollbar-width:none !important;&#13;
+&#13;
+  -ms-overflow-style:none !important;&#13;
+}&#13;
+&#13;
+&#13;
+.sidebar-menu::-webkit-scrollbar {&#13;
+  display:none !important;&#13;
+&#13;
+  width:0 !important;&#13;
+  height:0 !important;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   9. SECTION TITLES&#13;
+   ========================================================= */&#13;
+&#13;
+.menu-section-title {&#13;
+  color:#9d96b2;&#13;
+&#13;
+  font-size:9px;&#13;
+&#13;
+  font-weight:900;&#13;
+&#13;
+  letter-spacing:1.5px;&#13;
+&#13;
+  margin:17px 11px 8px;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   10. SIDEBAR ITEMS&#13;
+   ========================================================= */&#13;
+&#13;
+.sidebar-menu-item {&#13;
+  width:100%;&#13;
+&#13;
+  min-height:44px;&#13;
+&#13;
+  margin:0 0 3px;&#13;
+&#13;
+  padding:0 12px;&#13;
+&#13;
+  border:0;&#13;
+&#13;
+  border-radius:10px;&#13;
+&#13;
+  background:transparent;&#13;
+&#13;
+  color:#f5f2fb;&#13;
+&#13;
+  display:flex;&#13;
+&#13;
+  align-items:center;&#13;
+&#13;
+  text-align:left;&#13;
+&#13;
+  font-size:12px;&#13;
+&#13;
+  font-weight:700;&#13;
+&#13;
+  cursor:pointer;&#13;
+&#13;
+  position:relative;&#13;
+&#13;
+  z-index:10;&#13;
+&#13;
+  transition:&#13;
+    background .16s ease,&#13;
+    color .16s ease,&#13;
+    transform .16s ease;&#13;
+}&#13;
+&#13;
+&#13;
+.sidebar-menu-item:hover {&#13;
+  background:#211b40;&#13;
+&#13;
+  color:#ffffff;&#13;
+&#13;
+  transform:translateX(1px);&#13;
+}&#13;
+&#13;
+&#13;
+.sidebar-menu-item.active {&#13;
+  background:#7b3aec;&#13;
+&#13;
+  color:#ffffff;&#13;
+&#13;
+  box-shadow:&#13;
+    0 8px 18px rgba(123,58,236,.24);&#13;
+}&#13;
+&#13;
+&#13;
+.menu-icon {&#13;
+  width:27px;&#13;
+&#13;
+  min-width:27px;&#13;
+&#13;
+  margin-right:7px;&#13;
+&#13;
+  color:#aaa3ba;&#13;
+&#13;
+  font-size:15px;&#13;
+&#13;
+  text-align:center;&#13;
+}&#13;
+&#13;
+&#13;
+.sidebar-menu-item.active .menu-icon {&#13;
+  color:#ffffff;&#13;
+}&#13;
+&#13;
+&#13;
+.menu-label {&#13;
+  flex:1;&#13;
+&#13;
+  min-width:0;&#13;
+&#13;
+  white-space:nowrap;&#13;
+&#13;
+  overflow:hidden;&#13;
+&#13;
+  text-overflow:ellipsis;&#13;
+}&#13;
+&#13;
+&#13;
+.menu-count {&#13;
+  min-width:23px;&#13;
+&#13;
+  height:23px;&#13;
+&#13;
+  padding:0 6px;&#13;
+&#13;
+  border-radius:50%;&#13;
+&#13;
+  background:#2e235a;&#13;
+&#13;
+  color:#c9b6ff;&#13;
+&#13;
+  display:flex;&#13;
+&#13;
+  align-items:center;&#13;
+&#13;
+  justify-content:center;&#13;
+&#13;
+  font-size:9px;&#13;
+&#13;
+  font-weight:900;&#13;
+&#13;
+  flex-shrink:0;&#13;
+}&#13;
+&#13;
+&#13;
+.active-count,&#13;
+.green-count {&#13;
+  background:#123d32;&#13;
+&#13;
+  color:#46d6a3;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   11. SIDEBAR FOOTER&#13;
+   FIXED BELOW THE SCROLLING MENU&#13;
+   ========================================================= */&#13;
+&#13;
+.sidebar-footer {&#13;
+  width:100%;&#13;
+&#13;
+  min-height:61px;&#13;
+&#13;
+  flex:0 0 61px;&#13;
+&#13;
+  padding:10px 14px 11px;&#13;
+&#13;
+  border-top:1px solid #26213f;&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      180deg,&#13;
+      #120c2c 0%,&#13;
+      #0e0924 100%&#13;
+    );&#13;
+&#13;
+  position:relative;&#13;
+&#13;
+  z-index:50;&#13;
+}&#13;
+&#13;
+&#13;
+.sidebar-footer-status {&#13;
+  display:flex;&#13;
+&#13;
+  align-items:center;&#13;
+&#13;
+  gap:7px;&#13;
+&#13;
+  color:#c7c0da;&#13;
+&#13;
+  font-size:10px;&#13;
+&#13;
+  font-weight:800;&#13;
+&#13;
+  line-height:1;&#13;
+}&#13;
+&#13;
+&#13;
+.sidebar-footer-status span {&#13;
+  width:7px;&#13;
+&#13;
+  height:7px;&#13;
+&#13;
+  min-width:7px;&#13;
+&#13;
+  border-radius:50%;&#13;
+&#13;
+  background:#3cd18a;&#13;
+&#13;
+  box-shadow:&#13;
+    0 0 0 3px rgba(60,209,138,.10);&#13;
+}&#13;
+&#13;
+&#13;
+.sidebar-footer small {&#13;
+  display:block;&#13;
+&#13;
+  margin-top:5px;&#13;
+&#13;
+  color:#807896;&#13;
+&#13;
+  font-size:8px;&#13;
+&#13;
+  line-height:1;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   12. MAIN&#13;
+   ========================================================= */&#13;
+&#13;
+.opportunity-main {&#13;
+  position:absolute !important;&#13;
+&#13;
+  top:0 !important;&#13;
+  right:0 !important;&#13;
+  bottom:0 !important;&#13;
+  left:250px !important;&#13;
+&#13;
+  width:calc(100vw - 250px) !important;&#13;
+&#13;
+  height:100vh !important;&#13;
+&#13;
+  max-width:none !important;&#13;
+&#13;
+  min-width:0 !important;&#13;
+&#13;
+  margin:0 !important;&#13;
+&#13;
+  padding:0 !important;&#13;
+&#13;
+  background:#f7f8fc !important;&#13;
+&#13;
+  overflow-x:hidden !important;&#13;
+&#13;
+  overflow-y:auto !important;&#13;
+&#13;
+  scrollbar-width:thin;&#13;
+&#13;
+  scrollbar-color:&#13;
+    #b8acda&#13;
+    #f1f2f6;&#13;
+&#13;
+  z-index:50 !important;&#13;
+&#13;
+  transition:&#13;
+    left .25s ease,&#13;
+    width .25s ease;&#13;
+}&#13;
+&#13;
+&#13;
+.opportunity-main::-webkit-scrollbar {&#13;
+  width:10px !important;&#13;
+&#13;
+  display:block !important;&#13;
+}&#13;
+&#13;
+&#13;
+.opportunity-main::-webkit-scrollbar-track {&#13;
+  background:#f1f2f6 !important;&#13;
+&#13;
+  border-left:1px solid #e2e5ec;&#13;
+}&#13;
+&#13;
+&#13;
+.opportunity-main::-webkit-scrollbar-thumb {&#13;
+  background:#b8acda !important;&#13;
+&#13;
+  border-radius:7px !important;&#13;
+&#13;
+  border:2px solid #f1f2f6 !important;&#13;
+}&#13;
+&#13;
+&#13;
+.opportunity-main::-webkit-scrollbar-thumb:hover {&#13;
+  background:#957dd1 !important;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   13. CUSTOM CAMPUS360 TOP NAVBAR&#13;
+   ========================================================= */&#13;
+&#13;
+.opportunity-topbar {&#13;
+  position:sticky !important;&#13;
+&#13;
+  top:0 !important;&#13;
+&#13;
+  z-index:1000 !important;&#13;
+&#13;
+  width:100% !important;&#13;
+&#13;
+  height:72px !important;&#13;
+&#13;
+  min-height:72px !important;&#13;
+&#13;
+  padding:0 22px !important;&#13;
+&#13;
+  margin:0 !important;&#13;
+&#13;
+  background:#ffffff !important;&#13;
+&#13;
+  border-bottom:1px solid #e4e7ed !important;&#13;
+&#13;
+  display:flex !important;&#13;
+&#13;
+  align-items:center !important;&#13;
+&#13;
+  justify-content:space-between !important;&#13;
+&#13;
+  box-shadow:&#13;
+    0 1px 3px rgba(30,38,55,.025);&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   14. TOPBAR LEFT&#13;
+   ========================================================= */&#13;
+&#13;
+.topbar-left {&#13;
+  min-width:0;&#13;
+&#13;
+  display:flex;&#13;
+&#13;
+  align-items:center;&#13;
+&#13;
+  flex-shrink:1;&#13;
+}&#13;
+&#13;
+&#13;
+.sidebar-toggle {&#13;
+  width:44px !important;&#13;
+&#13;
+  height:44px !important;&#13;
+&#13;
+  min-width:44px !important;&#13;
+&#13;
+  padding:0 !important;&#13;
+&#13;
+  margin-right:12px !important;&#13;
+&#13;
+  border:1px solid #dfe3ea !important;&#13;
+&#13;
+  border-radius:12px !important;&#13;
+&#13;
+  background:#ffffff !important;&#13;
+&#13;
+  color:#59667a !important;&#13;
+&#13;
+  display:flex !important;&#13;
+&#13;
+  align-items:center !important;&#13;
+&#13;
+  justify-content:center !important;&#13;
+&#13;
+  font-size:20px !important;&#13;
+&#13;
+  line-height:1 !important;&#13;
+&#13;
+  cursor:pointer !important;&#13;
+&#13;
+  outline:none !important;&#13;
+&#13;
+  box-shadow:none !important;&#13;
+}&#13;
+&#13;
+&#13;
+.sidebar-toggle:hover {&#13;
+  background:#f6f1ff !important;&#13;
+&#13;
+  color:#6d36d9 !important;&#13;
+&#13;
+  border-color:#d5c6ef !important;&#13;
+}&#13;
+&#13;
+&#13;
+.sidebar-toggle:active {&#13;
+  transform:scale(.95);&#13;
+}&#13;
+&#13;
+&#13;
+.page-title-box {&#13;
+  min-width:0;&#13;
+&#13;
+  display:flex;&#13;
+&#13;
+  flex-direction:column;&#13;
+&#13;
+  justify-content:center;&#13;
+}&#13;
+&#13;
+&#13;
+.page-title-small {&#13;
+  color:#7b3aec;&#13;
+&#13;
+  font-size:9px;&#13;
+&#13;
+  font-weight:950;&#13;
+&#13;
+  letter-spacing:1.7px;&#13;
+&#13;
+  line-height:1;&#13;
+}&#13;
+&#13;
+&#13;
+.page-title-large {&#13;
+  color:#17172f;&#13;
+&#13;
+  font-size:17px;&#13;
+&#13;
+  font-weight:950;&#13;
+&#13;
+  margin-top:5px;&#13;
+&#13;
+  line-height:1.1;&#13;
+&#13;
+  white-space:nowrap;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   15. TOPBAR RIGHT&#13;
+   ========================================================= */&#13;
+&#13;
+.topbar-right {&#13;
+  min-width:0;&#13;
+&#13;
+  display:flex;&#13;
+&#13;
+  align-items:center;&#13;
+&#13;
+  justify-content:flex-end;&#13;
+&#13;
+  gap:9px;&#13;
+&#13;
+  margin-left:auto;&#13;
+&#13;
+  flex-shrink:0;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   16. SEARCH BAR&#13;
+   ========================================================= */&#13;
+&#13;
+.global-search {&#13;
+  width:315px !important;&#13;
+&#13;
+  min-width:230px !important;&#13;
+&#13;
+  height:42px !important;&#13;
+&#13;
+  padding:0 13px !important;&#13;
+&#13;
+  display:flex !important;&#13;
+&#13;
+  align-items:center !important;&#13;
+&#13;
+  gap:8px;&#13;
+&#13;
+  background:#ffffff !important;&#13;
+&#13;
+  border:1px solid #dfe4ec !important;&#13;
+&#13;
+  border-radius:11px !important;&#13;
+&#13;
+  flex-shrink:1;&#13;
+&#13;
+  transition:&#13;
+    border-color .15s ease,&#13;
+    background .15s ease,&#13;
+    box-shadow .15s ease;&#13;
+}&#13;
+&#13;
+&#13;
+.global-search:hover {&#13;
+  border-color:#d6dbe5 !important;&#13;
+}&#13;
+&#13;
+&#13;
+.global-search:focus-within {&#13;
+  border-color:#a88be8 !important;&#13;
+&#13;
+  background:#ffffff !important;&#13;
+&#13;
+  box-shadow:&#13;
+    0 0 0 3px rgba(123,63,240,.08) !important;&#13;
+}&#13;
+&#13;
+&#13;
+.global-search-icon {&#13;
+  color:#6f3ce0 !important;&#13;
+&#13;
+  font-size:16px !important;&#13;
+&#13;
+  line-height:1 !important;&#13;
+&#13;
+  flex-shrink:0 !important;&#13;
+}&#13;
+&#13;
+&#13;
+.global-search input {&#13;
+  width:100% !important;&#13;
+&#13;
+  height:100% !important;&#13;
+&#13;
+  min-width:0 !important;&#13;
+&#13;
+  margin:0 !important;&#13;
+&#13;
+  padding:0 !important;&#13;
+&#13;
+  border:0 !important;&#13;
+&#13;
+  outline:0 !important;&#13;
+&#13;
+  background:transparent !important;&#13;
+&#13;
+  color:#29334a !important;&#13;
+&#13;
+  font-size:11px !important;&#13;
+&#13;
+  font-weight:600 !important;&#13;
+&#13;
+  box-shadow:none !important;&#13;
+}&#13;
+&#13;
+&#13;
+.global-search input::placeholder {&#13;
+  color:#929aaa !important;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   17. REFRESH BUTTON&#13;
+   ========================================================= */&#13;
+&#13;
+.topbar-circle-button {&#13;
+  position:relative;&#13;
+&#13;
+  width:42px !important;&#13;
+&#13;
+  height:42px !important;&#13;
+&#13;
+  min-width:42px !important;&#13;
+&#13;
+  padding:0 !important;&#13;
+&#13;
+  border-radius:50% !important;&#13;
+&#13;
+  border:1px solid #dfe3eb !important;&#13;
+&#13;
+  background:#ffffff !important;&#13;
+&#13;
+  color:#59667a !important;&#13;
+&#13;
+  display:flex !important;&#13;
+&#13;
+  align-items:center !important;&#13;
+&#13;
+  justify-content:center !important;&#13;
+&#13;
+  font-size:17px !important;&#13;
+&#13;
+  line-height:1 !important;&#13;
+&#13;
+  cursor:pointer !important;&#13;
+&#13;
+  outline:none !important;&#13;
+&#13;
+  box-shadow:none !important;&#13;
+&#13;
+  transition:&#13;
+    background .15s ease,&#13;
+    border-color .15s ease,&#13;
+    color .15s ease,&#13;
+    transform .15s ease;&#13;
+}&#13;
+&#13;
+&#13;
+.topbar-circle-button i {&#13;
+  margin:0 !important;&#13;
+&#13;
+  font-size:17px !important;&#13;
+&#13;
+  line-height:1 !important;&#13;
+}&#13;
+&#13;
+&#13;
+.topbar-circle-button:hover {&#13;
+  background:#f7f2ff !important;&#13;
+&#13;
+  border-color:#d1c1f3 !important;&#13;
+&#13;
+  color:#6736d5 !important;&#13;
+}&#13;
+&#13;
+&#13;
+.topbar-circle-button:active {&#13;
+  transform:scale(.95);&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   18. NOTIFICATION BUTTON&#13;
+   ========================================================= */&#13;
+&#13;
+.topbar-icon-button {&#13;
+  position:relative !important;&#13;
+&#13;
+  width:42px !important;&#13;
+&#13;
+  height:42px !important;&#13;
+&#13;
+  min-width:42px !important;&#13;
+&#13;
+  padding:0 !important;&#13;
+&#13;
+  margin:0 !important;&#13;
+&#13;
+  border-radius:50% !important;&#13;
+&#13;
+  border:1px solid #dfe3eb !important;&#13;
+&#13;
+  background:#ffffff !important;&#13;
+&#13;
+  color:#59667a !important;&#13;
+&#13;
+  display:flex !important;&#13;
+&#13;
+  align-items:center !important;&#13;
+&#13;
+  justify-content:center !important;&#13;
+&#13;
+  font-size:17px !important;&#13;
+&#13;
+  line-height:1 !important;&#13;
+&#13;
+  cursor:pointer !important;&#13;
+&#13;
+  outline:none !important;&#13;
+&#13;
+  box-shadow:none !important;&#13;
+&#13;
+  transition:&#13;
+    background .15s ease,&#13;
+    border-color .15s ease,&#13;
+    color .15s ease,&#13;
+    transform .15s ease;&#13;
+}&#13;
+&#13;
+&#13;
+.topbar-icon-button i {&#13;
+  margin:0 !important;&#13;
+&#13;
+  padding:0 !important;&#13;
+&#13;
+  color:inherit !important;&#13;
+&#13;
+  font-size:17px !important;&#13;
+&#13;
+  line-height:1 !important;&#13;
+}&#13;
+&#13;
+&#13;
+.topbar-icon-button:hover {&#13;
+  background:#f7f2ff !important;&#13;
+&#13;
+  border-color:#d1c1f3 !important;&#13;
+&#13;
+  color:#6736d5 !important;&#13;
+}&#13;
+&#13;
+&#13;
+.topbar-icon-button:active {&#13;
+  transform:scale(.95);&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   19. NOTIFICATION RED DOT&#13;
+   ========================================================= */&#13;
+&#13;
+.notification-button .notification-indicator {&#13;
+  position:absolute !important;&#13;
+&#13;
+  top:7px !important;&#13;
+&#13;
+  right:7px !important;&#13;
+&#13;
+  width:7px !important;&#13;
+&#13;
+  height:7px !important;&#13;
+&#13;
+  min-width:7px !important;&#13;
+&#13;
+  min-height:7px !important;&#13;
+&#13;
+  padding:0 !important;&#13;
+&#13;
+  margin:0 !important;&#13;
+&#13;
+  display:block !important;&#13;
+&#13;
+  border-radius:50% !important;&#13;
+&#13;
+  background:#ee4965 !important;&#13;
+&#13;
+  border:1.5px solid #ffffff !important;&#13;
+&#13;
+  box-sizing:border-box !important;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   20. DIVIDER&#13;
+   ========================================================= */&#13;
+&#13;
+.topbar-divider {&#13;
+  width:1px !important;&#13;
+&#13;
+  height:34px !important;&#13;
+&#13;
+  margin:0 6px !important;&#13;
+&#13;
+  background:#e5e8ee !important;&#13;
+&#13;
+  flex-shrink:0 !important;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   21. TOPBAR PROFILE&#13;
+   ========================================================= */&#13;
+&#13;
+.topbar-user {&#13;
+  display:flex !important;&#13;
+&#13;
+  align-items:center !important;&#13;
+&#13;
+  gap:8px !important;&#13;
+&#13;
+  margin-left:1px !important;&#13;
+&#13;
+  flex-shrink:0 !important;&#13;
+}&#13;
+&#13;
+&#13;
+.topbar-user-avatar {&#13;
+  width:40px !important;&#13;
+&#13;
+  height:40px !important;&#13;
+&#13;
+  min-width:40px !important;&#13;
+&#13;
+  border-radius:50% !important;&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      135deg,&#13;
+      #7c45e8,&#13;
+      #6d35db&#13;
+    ) !important;&#13;
+&#13;
+  color:#ffffff !important;&#13;
+&#13;
+  display:flex !important;&#13;
+&#13;
+  align-items:center !important;&#13;
+&#13;
+  justify-content:center !important;&#13;
+&#13;
+  font-size:11px !important;&#13;
+&#13;
+  font-weight:950 !important;&#13;
+&#13;
+  box-shadow:&#13;
+    0 4px 10px rgba(123,63,240,.14) !important;&#13;
+}&#13;
+&#13;
+&#13;
+.topbar-user-info {&#13;
+  min-width:0;&#13;
+&#13;
+  display:flex;&#13;
+&#13;
+  flex-direction:column;&#13;
+&#13;
+  justify-content:center;&#13;
+&#13;
+  gap:2px;&#13;
+}&#13;
+&#13;
+&#13;
+.topbar-user-name {&#13;
+  color:#1d2738 !important;&#13;
+&#13;
+  font-size:11px !important;&#13;
+&#13;
+  font-weight:950 !important;&#13;
+&#13;
+  line-height:1.1 !important;&#13;
+&#13;
+  white-space:nowrap !important;&#13;
+}&#13;
+&#13;
+&#13;
+.topbar-user-role {&#13;
+  color:#929aaa !important;&#13;
+&#13;
+  font-size:9px !important;&#13;
+&#13;
+  font-weight:700 !important;&#13;
+&#13;
+  line-height:1 !important;&#13;
+&#13;
+  white-space:nowrap !important;&#13;
+}&#13;
+&#13;
+&#13;
+.user-chevron {&#13;
+  margin-left:2px;&#13;
+&#13;
+  color:#59667a;&#13;
+&#13;
+  font-size:14px;&#13;
+&#13;
+  line-height:1;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   22. PAGE CONTENT&#13;
+   ========================================================= */&#13;
+&#13;
+.opportunity-content {&#13;
+  width:100% !important;&#13;
+&#13;
+  max-width:1480px !important;&#13;
+&#13;
+  margin:0 auto !important;&#13;
+&#13;
+  padding:27px 30px 48px !important;&#13;
+&#13;
+  background:#f7f8fc !important;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   23. PAGE HEADER&#13;
+   ========================================================= */&#13;
+&#13;
+.page-header-row {&#13;
+  width:100%;&#13;
+&#13;
+  display:flex;&#13;
+&#13;
+  align-items:flex-end;&#13;
+&#13;
+  justify-content:space-between;&#13;
+&#13;
+  gap:25px;&#13;
+&#13;
+  margin-bottom:22px;&#13;
+}&#13;
+&#13;
+&#13;
+.page-header-copy {&#13;
+  min-width:0;&#13;
+}&#13;
+&#13;
+&#13;
+.section-kicker {&#13;
+  display:flex;&#13;
+&#13;
+  align-items:center;&#13;
+&#13;
+  color:#7b3aec;&#13;
+&#13;
+  font-size:11px;&#13;
+&#13;
+  font-weight:950;&#13;
+&#13;
+  letter-spacing:1.4px;&#13;
+&#13;
+  margin-bottom:8px;&#13;
+}&#13;
+&#13;
+&#13;
+.kicker-dot {&#13;
+  width:8px;&#13;
+&#13;
+  height:8px;&#13;
+&#13;
+  min-width:8px;&#13;
+&#13;
+  border-radius:50%;&#13;
+&#13;
+  background:#7b3aec;&#13;
+&#13;
+  margin-right:9px;&#13;
+}&#13;
+&#13;
+&#13;
+.page-header-copy h1 {&#13;
+  margin:0;&#13;
+&#13;
+  color:#141429;&#13;
+&#13;
+  font-size:34px;&#13;
+&#13;
+  line-height:1.05;&#13;
+&#13;
+  font-weight:950;&#13;
+&#13;
+  letter-spacing:-.45px;&#13;
+}&#13;
+&#13;
+&#13;
+.page-header-copy p {&#13;
+  margin:9px 0 0;&#13;
+&#13;
+  max-width:760px;&#13;
+&#13;
+  color:#737b91;&#13;
+&#13;
+  font-size:13px;&#13;
+&#13;
+  font-weight:600;&#13;
+&#13;
+  line-height:1.55;&#13;
+}&#13;
+&#13;
+&#13;
+.page-header-actions {&#13;
+  display:flex;&#13;
+&#13;
+  align-items:center;&#13;
+&#13;
+  gap:9px;&#13;
+&#13;
+  flex-shrink:0;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   24. PAGE ACTION BUTTONS&#13;
+   ========================================================= */&#13;
+&#13;
+.secondary-action,&#13;
+.primary-action {&#13;
+  height:45px;&#13;
+&#13;
+  padding:0 17px;&#13;
+&#13;
+  border-radius:10px;&#13;
+&#13;
+  display:flex;&#13;
+&#13;
+  align-items:center;&#13;
+&#13;
+  justify-content:center;&#13;
+&#13;
+  font-size:11px;&#13;
+&#13;
+  font-weight:900;&#13;
+&#13;
+  cursor:pointer;&#13;
+&#13;
+  white-space:nowrap;&#13;
+}&#13;
+&#13;
+&#13;
+.secondary-action {&#13;
+  background:#ffffff;&#13;
+&#13;
+  border:1px solid #ded7ee;&#13;
+&#13;
+  color:#6d36d9;&#13;
+}&#13;
+&#13;
+&#13;
+.secondary-action:hover {&#13;
+  background:#faf8ff;&#13;
+&#13;
+  border-color:#cabbe8;&#13;
+}&#13;
+&#13;
+&#13;
+.primary-action {&#13;
+  background:#7b3aec;&#13;
+&#13;
+  border:1px solid #7b3aec;&#13;
+&#13;
+  color:#ffffff;&#13;
+&#13;
+  box-shadow:&#13;
+    0 8px 16px rgba(112,69,232,.17);&#13;
+}&#13;
+&#13;
+&#13;
+.primary-action:hover {&#13;
+  background:#692bd2;&#13;
+&#13;
+  border-color:#692bd2;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   25. KPI GRID&#13;
+   ========================================================= */&#13;
+&#13;
+.opportunity-kpi-grid {&#13;
+  width:100%;&#13;
+&#13;
+  display:grid;&#13;
+&#13;
+  grid-template-columns:&#13;
+    repeat(4,minmax(0,1fr));&#13;
+&#13;
+  gap:14px;&#13;
+&#13;
+  margin-bottom:20px;&#13;
+}&#13;
+&#13;
+&#13;
+.opportunity-kpi-card {&#13;
+  min-height:142px;&#13;
+&#13;
+  border-radius:16px;&#13;
+&#13;
+  padding:22px 20px;&#13;
+&#13;
+  display:flex;&#13;
+&#13;
+  align-items:center;&#13;
+&#13;
+  border:1px solid;&#13;
+}&#13;
+&#13;
+&#13;
+.kpi-total {&#13;
+  background:#f5f0ff;&#13;
+&#13;
+  border-color:#e5d9ff;&#13;
+}&#13;
+&#13;
+&#13;
+.kpi-open {&#13;
+  background:#effcf5;&#13;
+&#13;
+  border-color:#d2f2e3;&#13;
+}&#13;
+&#13;
+&#13;
+.kpi-closed {&#13;
+  background:#fff8e6;&#13;
+&#13;
+  border-color:#f3e3b7;&#13;
+}&#13;
+&#13;
+&#13;
+.kpi-applications {&#13;
+  background:#eef5ff;&#13;
+&#13;
+  border-color:#dbe8fb;&#13;
+}&#13;
+&#13;
+&#13;
+.kpi-icon {&#13;
+  width:56px;&#13;
+&#13;
+  height:56px;&#13;
+&#13;
+  min-width:56px;&#13;
+&#13;
+  border-radius:15px;&#13;
+&#13;
+  display:flex;&#13;
+&#13;
+  align-items:center;&#13;
+&#13;
+  justify-content:center;&#13;
+&#13;
+  font-size:23px;&#13;
+&#13;
+  font-weight:900;&#13;
+}&#13;
+&#13;
+&#13;
+.kpi-total .kpi-icon {&#13;
+  background:#e5dcff;&#13;
+&#13;
+  color:#6d36d9;&#13;
+}&#13;
+&#13;
+&#13;
+.kpi-open .kpi-icon {&#13;
+  background:#cff2e1;&#13;
+&#13;
+  color:#087f5b;&#13;
+}&#13;
+&#13;
+&#13;
+.kpi-closed .kpi-icon {&#13;
+  background:#ffe7b4;&#13;
+&#13;
+  color:#b77900;&#13;
+}&#13;
+&#13;
+&#13;
+.kpi-applications .kpi-icon {&#13;
+  background:#d8e8ff;&#13;
+&#13;
+  color:#2e86ff;&#13;
+}&#13;
+&#13;
+&#13;
+.kpi-content {&#13;
+  min-width:0;&#13;
+&#13;
+  margin-left:15px;&#13;
+}&#13;
+&#13;
+&#13;
+.kpi-label {&#13;
+  color:#273047;&#13;
+&#13;
+  font-size:9px;&#13;
+&#13;
+  font-weight:950;&#13;
+&#13;
+  letter-spacing:1.2px;&#13;
+&#13;
+  line-height:1.25;&#13;
+}&#13;
+&#13;
+&#13;
+.kpi-value {&#13;
+  margin-top:7px;&#13;
+&#13;
+  font-size:28px;&#13;
+&#13;
+  line-height:1;&#13;
+&#13;
+  font-weight:950;&#13;
+}&#13;
+&#13;
+&#13;
+.kpi-total .kpi-value {&#13;
+  color:#6424c7;&#13;
+}&#13;
+&#13;
+&#13;
+.kpi-open .kpi-value {&#13;
+  color:#087f5b;&#13;
+}&#13;
+&#13;
+&#13;
+.kpi-closed .kpi-value {&#13;
+  color:#b77900;&#13;
+}&#13;
+&#13;
+&#13;
+.kpi-applications .kpi-value {&#13;
+  color:#2e86ff;&#13;
+}&#13;
+&#13;
+&#13;
+.kpi-description {&#13;
+  color:#737b91;&#13;
+&#13;
+  font-size:9px;&#13;
+&#13;
+  font-weight:600;&#13;
+&#13;
+  margin-top:7px;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   26. FILTER CARD&#13;
+   ========================================================= */&#13;
+&#13;
+.opportunity-filter-card {&#13;
+  width:100%;&#13;
+&#13;
+  background:#ffffff;&#13;
+&#13;
+  border:1px solid #e2e5ec;&#13;
+&#13;
+  border-radius:15px;&#13;
+&#13;
+  padding:11px;&#13;
+&#13;
+  margin-bottom:17px;&#13;
+}&#13;
+&#13;
+&#13;
+.filter-controls {&#13;
+  width:100%;&#13;
+&#13;
+  display:flex;&#13;
+&#13;
+  align-items:center;&#13;
+&#13;
+  gap:8px;&#13;
+}&#13;
+&#13;
+&#13;
+.search-box {&#13;
+  flex:2 1 320px;&#13;
+&#13;
+  min-width:220px;&#13;
+&#13;
+  height:45px;&#13;
+&#13;
+  display:flex;&#13;
+&#13;
+  align-items:center;&#13;
+&#13;
+  border:1px solid #e1e5ec;&#13;
+&#13;
+  border-radius:9px;&#13;
+&#13;
+  padding:0 12px;&#13;
+&#13;
+  background:#ffffff;&#13;
+}&#13;
+&#13;
+&#13;
+.search-icon {&#13;
+  color:#7b3aec;&#13;
+&#13;
+  font-size:18px;&#13;
+&#13;
+  margin-right:7px;&#13;
+}&#13;
+&#13;
+&#13;
+.search-box input {&#13;
+  width:100%;&#13;
+&#13;
+  border:0;&#13;
+&#13;
+  outline:0;&#13;
+&#13;
+  background:transparent;&#13;
+&#13;
+  color:#273047;&#13;
+&#13;
+  font-size:12px;&#13;
+}&#13;
+&#13;
+&#13;
+.search-box:focus-within {&#13;
+  border-color:#b99af7;&#13;
+&#13;
+  box-shadow:&#13;
+    0 0 0 3px rgba(123,58,236,.08);&#13;
+}&#13;
+&#13;
+&#13;
+.filter-select {&#13;
+  flex:1 1 165px;&#13;
+&#13;
+  min-width:135px;&#13;
+&#13;
+  height:45px;&#13;
+&#13;
+  border:1px solid #e1e5ec;&#13;
+&#13;
+  border-radius:9px;&#13;
+&#13;
+  background:#ffffff;&#13;
+&#13;
+  color:#28364e;&#13;
+&#13;
+  padding:0 10px;&#13;
+&#13;
+  font-size:11px;&#13;
+&#13;
+  font-weight:800;&#13;
+&#13;
+  outline:0;&#13;
+}&#13;
+&#13;
+&#13;
+.filter-select:focus {&#13;
+  border-color:#b99af7;&#13;
+&#13;
+  box-shadow:&#13;
+    0 0 0 3px rgba(123,58,236,.08);&#13;
+}&#13;
+&#13;
+&#13;
+.clear-filter-btn {&#13;
+  flex:0 0 65px;&#13;
+&#13;
+  height:45px;&#13;
+&#13;
+  border:1px solid #e1e5ec;&#13;
+&#13;
+  border-radius:9px;&#13;
+&#13;
+  background:#ffffff;&#13;
+&#13;
+  color:#59657a;&#13;
+&#13;
+  font-size:11px;&#13;
+&#13;
+  font-weight:900;&#13;
+&#13;
+  cursor:pointer;&#13;
+}&#13;
+&#13;
+&#13;
+.clear-filter-btn:hover {&#13;
+  background:#f7f5fb;&#13;
+&#13;
+  color:#6d36d9;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   27. OPPORTUNITY DIRECTORY&#13;
+   ========================================================= */&#13;
+&#13;
+.opportunity-directory-card {&#13;
+  width:100%;&#13;
+&#13;
+  background:#ffffff;&#13;
+&#13;
+  border:1px solid #dddff0;&#13;
+&#13;
+  border-radius:16px;&#13;
+&#13;
+  overflow:hidden;&#13;
+&#13;
+  box-shadow:&#13;
+    0 2px 8px rgba(30,25,60,.035);&#13;
+}&#13;
+&#13;
+&#13;
+.opportunity-directory-card::before {&#13;
+  content:"";&#13;
+&#13;
+  display:block;&#13;
+&#13;
+  width:100%;&#13;
+&#13;
+  height:4px;&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      90deg,&#13;
+      #7b3aec 0%,&#13;
+      #7b3aec 28%,&#13;
+      #2e86ff 28%,&#13;
+      #2e86ff 48%,&#13;
+      #05976a 48%,&#13;
+      #05976a 68%,&#13;
+      #f2b632 68%,&#13;
+      #f2b632 84%,&#13;
+      #ef476f 84%,&#13;
+      #ef476f 100%&#13;
+    );&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   28. DIRECTORY HEADER&#13;
+   ========================================================= */&#13;
+&#13;
+.directory-header {&#13;
+  min-height:82px;&#13;
+&#13;
+  padding:16px 19px;&#13;
+&#13;
+  display:flex;&#13;
+&#13;
+  align-items:center;&#13;
+&#13;
+  justify-content:space-between;&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      90deg,&#13;
+      #faf7ff 0%,&#13;
+      #ffffff 62%&#13;
+    );&#13;
+&#13;
+  border-bottom:1px solid #e7e3f2;&#13;
+}&#13;
+&#13;
+&#13;
+.directory-kicker {&#13;
+  color:#7b3aec;&#13;
+&#13;
+  font-size:8px;&#13;
+&#13;
+  font-weight:950;&#13;
+&#13;
+  letter-spacing:1.4px;&#13;
+&#13;
+  margin-bottom:5px;&#13;
+}&#13;
+&#13;
+&#13;
+.directory-header h2 {&#13;
+  margin:0;&#13;
+&#13;
+  color:#141429;&#13;
+&#13;
+  font-size:21px;&#13;
+&#13;
+  font-weight:950;&#13;
+}&#13;
+&#13;
+&#13;
+.directory-header-right {&#13;
+  display:flex;&#13;
+&#13;
+  align-items:center;&#13;
+&#13;
+  gap:12px;&#13;
+}&#13;
+&#13;
+&#13;
+.record-count {&#13;
+  color:#6d36d9;&#13;
+&#13;
+  font-size:11px;&#13;
+&#13;
+  font-weight:800;&#13;
+&#13;
+  padding:7px 10px;&#13;
+&#13;
+  border-radius:20px;&#13;
+&#13;
+  background:#f3efff;&#13;
+&#13;
+  border:1px solid #ded1f7;&#13;
+}&#13;
+&#13;
+&#13;
+.directory-add-btn {&#13;
+  height:38px;&#13;
+&#13;
+  padding:0 14px;&#13;
+&#13;
+  border:0;&#13;
+&#13;
+  border-radius:9px;&#13;
+&#13;
+  background:#7b3aec;&#13;
+&#13;
+  color:#ffffff;&#13;
+&#13;
+  font-size:11px;&#13;
+&#13;
+  font-weight:900;&#13;
+&#13;
+  cursor:pointer;&#13;
+&#13;
+  box-shadow:&#13;
+    0 5px 12px rgba(123,58,236,.16);&#13;
+}&#13;
+&#13;
+&#13;
+.directory-add-btn:hover {&#13;
+  background:#692bd2;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   29. TABLE&#13;
+   ========================================================= */&#13;
+&#13;
+.opportunity-table-wrapper {&#13;
+  width:100%;&#13;
+&#13;
+  max-height:calc(100vh - 400px);&#13;
+&#13;
+  min-height:270px;&#13;
+&#13;
+  overflow-x:auto;&#13;
+&#13;
+  overflow-y:auto;&#13;
+}&#13;
+&#13;
+&#13;
+.opportunity-table-wrapper::-webkit-scrollbar {&#13;
+  width:8px;&#13;
+&#13;
+  height:8px;&#13;
+}&#13;
+&#13;
+&#13;
+.opportunity-table-wrapper::-webkit-scrollbar-track {&#13;
+  background:#f7f8fb;&#13;
+}&#13;
+&#13;
+&#13;
+.opportunity-table-wrapper::-webkit-scrollbar-thumb {&#13;
+  background:#bdb4d2;&#13;
+&#13;
+  border-radius:8px;&#13;
+}&#13;
+&#13;
+&#13;
+.opportunity-table {&#13;
+  width:100%;&#13;
+&#13;
+  min-width:1380px;&#13;
+&#13;
+  border-collapse:collapse;&#13;
+&#13;
+  table-layout:fixed;&#13;
+}&#13;
+&#13;
+&#13;
+.opportunity-table thead th {&#13;
+  position:sticky;&#13;
+&#13;
+  top:0;&#13;
+&#13;
+  z-index:20;&#13;
+&#13;
+  background:#fafbfe;&#13;
+&#13;
+  color:#737b91;&#13;
+&#13;
+  font-size:8px;&#13;
+&#13;
+  font-weight:950;&#13;
+&#13;
+  letter-spacing:1px;&#13;
+&#13;
+  text-align:left;&#13;
+&#13;
+  padding:13px 14px;&#13;
+&#13;
+  border-bottom:1px solid #e5e8ee;&#13;
+&#13;
+  white-space:nowrap;&#13;
+}&#13;
+&#13;
+&#13;
+.opportunity-table thead th:nth-child(1) {&#13;
+  color:#6d36d9;&#13;
+}&#13;
+&#13;
+&#13;
+.opportunity-table thead th:nth-child(2) {&#13;
+  color:#7b3aec;&#13;
+}&#13;
+&#13;
+&#13;
+.opportunity-table thead th:nth-child(3) {&#13;
+  color:#2e6fc5;&#13;
+}&#13;
+&#13;
+&#13;
+.opportunity-table thead th:nth-child(4) {&#13;
+  color:#b77900;&#13;
+}&#13;
+&#13;
+&#13;
+.opportunity-table thead th:nth-child(5),&#13;
+.opportunity-table thead th:nth-child(6) {&#13;
+  color:#087f5b;&#13;
+}&#13;
+&#13;
+&#13;
+.opportunity-table thead th:nth-child(7) {&#13;
+  color:#6d36d9;&#13;
+}&#13;
+&#13;
+&#13;
+.opportunity-table thead th:nth-child(8) {&#13;
+  color:#2e86ff;&#13;
+}&#13;
+&#13;
+&#13;
+.opportunity-table thead th:nth-child(9) {&#13;
+  color:#b77900;&#13;
+}&#13;
+&#13;
+&#13;
+.opportunity-table thead th:nth-child(10) {&#13;
+  color:#087f5b;&#13;
+}&#13;
+&#13;
+&#13;
+.opportunity-table thead th:nth-child(11) {&#13;
+  color:#6d36d9;&#13;
+}&#13;
+&#13;
+&#13;
+.opportunity-table tbody tr {&#13;
+  transition:background .15s ease;&#13;
+}&#13;
+&#13;
+&#13;
+.opportunity-table tbody tr:hover td {&#13;
+  background:#fbf9ff;&#13;
+}&#13;
+&#13;
+&#13;
+.opportunity-table tbody td {&#13;
+  padding:14px;&#13;
+&#13;
+  border-bottom:1px solid #edf0f4;&#13;
+&#13;
+  vertical-align:middle;&#13;
+&#13;
+  color:#39445a;&#13;
+&#13;
+  font-size:11px;&#13;
+&#13;
+  background:#ffffff;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   30. OPPORTUNITY NAME&#13;
+   ========================================================= */&#13;
+&#13;
+.opportunity-name-cell {&#13;
+  min-width:250px;&#13;
+&#13;
+  display:flex;&#13;
+&#13;
+  align-items:center;&#13;
+}&#13;
+&#13;
+&#13;
+.opportunity-avatar {&#13;
+  width:39px;&#13;
+&#13;
+  height:39px;&#13;
+&#13;
+  min-width:39px;&#13;
+&#13;
+  border-radius:11px;&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      135deg,&#13;
+      #eee5ff 0%,&#13;
+      #dfd0ff 100%&#13;
+    );&#13;
+&#13;
+  color:#6d36d9;&#13;
+&#13;
+  display:flex;&#13;
+&#13;
+  align-items:center;&#13;
+&#13;
+  justify-content:center;&#13;
+&#13;
+  font-size:10px;&#13;
+&#13;
+  font-weight:950;&#13;
+&#13;
+  flex-shrink:0;&#13;
+&#13;
+  margin-right:10px;&#13;
+&#13;
+  border:1px solid #d8c8fa;&#13;
+}&#13;
+&#13;
+&#13;
+.opportunity-title {&#13;
+  max-width:250px;&#13;
+&#13;
+  color:#17172f;&#13;
+&#13;
+  font-size:12px;&#13;
+&#13;
+  font-weight:950;&#13;
+}&#13;
+&#13;
+&#13;
+.opportunity-title:hover {&#13;
+  color:#6d36d9;&#13;
+}&#13;
+&#13;
+&#13;
+.opportunity-subtitle {&#13;
+  color:#8a92a5;&#13;
+&#13;
+  font-size:9px;&#13;
+&#13;
+  margin-top:3px;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   31. TABLE VALUES&#13;
+   ========================================================= */&#13;
+&#13;
+.opportunity-id {&#13;
+  color:#6d36d9;&#13;
+&#13;
+  font-size:10px;&#13;
+&#13;
+  font-weight:950;&#13;
+&#13;
+  background:#f3edff;&#13;
+&#13;
+  padding:5px 7px;&#13;
+&#13;
+  border-radius:7px;&#13;
+&#13;
+  display:inline-flex;&#13;
+}&#13;
+&#13;
+&#13;
+.company-name {&#13;
+  color:#273047;&#13;
+&#13;
+  font-weight:850;&#13;
+}&#13;
+&#13;
+&#13;
+.type-badge {&#13;
+  display:inline-flex;&#13;
+&#13;
+  padding:5px 8px;&#13;
+&#13;
+  border-radius:8px;&#13;
+&#13;
+  background:#fff6dc;&#13;
+&#13;
+  color:#a96d00;&#13;
+&#13;
+  border:1px solid #f2dfaa;&#13;
+&#13;
+  font-size:9px;&#13;
+&#13;
+  font-weight:950;&#13;
+}&#13;
+&#13;
+&#13;
+.location-text {&#13;
+  color:#087f5b;&#13;
+&#13;
+  font-weight:800;&#13;
+&#13;
+  background:#effaf5;&#13;
+&#13;
+  padding:5px 8px;&#13;
+&#13;
+  border-radius:7px;&#13;
+}&#13;
+&#13;
+&#13;
+.ctc-text {&#13;
+  color:#087f5b;&#13;
+&#13;
+  font-weight:950;&#13;
+&#13;
+  background:#e9fbf4;&#13;
+&#13;
+  padding:5px 8px;&#13;
+&#13;
+  border-radius:7px;&#13;
+}&#13;
+&#13;
+&#13;
+.cgpa-value {&#13;
+  color:#6040bb;&#13;
+&#13;
+  font-weight:950;&#13;
+}&#13;
+&#13;
+&#13;
+.application-count {&#13;
+  display:flex;&#13;
+&#13;
+  flex-direction:column;&#13;
+}&#13;
+&#13;
+&#13;
+.application-number {&#13;
+  color:#2e86ff;&#13;
+&#13;
+  font-size:13px;&#13;
+&#13;
+  font-weight:950;&#13;
+}&#13;
+&#13;
+&#13;
+.application-label {&#13;
+  color:#8a92a5;&#13;
+&#13;
+  font-size:8px;&#13;
+}&#13;
+&#13;
+&#13;
+.date-text {&#13;
+  color:#a96d00;&#13;
+&#13;
+  font-size:10px;&#13;
+&#13;
+  font-weight:850;&#13;
+&#13;
+  background:#fff8e8;&#13;
+&#13;
+  padding:5px 8px;&#13;
+&#13;
+  border-radius:7px;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   32. STATUS&#13;
+   ========================================================= */&#13;
+&#13;
+.status-badge {&#13;
+  display:inline-flex;&#13;
+&#13;
+  min-width:66px;&#13;
+&#13;
+  padding:5px 9px;&#13;
+&#13;
+  border-radius:20px;&#13;
+&#13;
+  align-items:center;&#13;
+&#13;
+  justify-content:center;&#13;
+&#13;
+  font-size:9px;&#13;
+&#13;
+  font-weight:950;&#13;
+}&#13;
+&#13;
+&#13;
+.status-open {&#13;
+  background:#e5f8ef;&#13;
+&#13;
+  color:#087f5b;&#13;
+&#13;
+  border:1px solid #bfead7;&#13;
+}&#13;
+&#13;
+&#13;
+.status-closed {&#13;
+  background:#fff0f0;&#13;
+&#13;
+  color:#c53b52;&#13;
+&#13;
+  border:1px solid #f3cfd5;&#13;
+}&#13;
+&#13;
+&#13;
+.status-other {&#13;
+  background:#f1ebff;&#13;
+&#13;
+  color:#6745b4;&#13;
+&#13;
+  border:1px solid #ded0fa;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   33. VIEW BUTTON&#13;
+   ========================================================= */&#13;
+&#13;
+.view-button {&#13;
+  height:32px;&#13;
+&#13;
+  padding:0 12px;&#13;
+&#13;
+  border-radius:8px;&#13;
+&#13;
+  border:1px solid #d7c8f2;&#13;
+&#13;
+  background:#f8f4ff;&#13;
+&#13;
+  color:#6d36d9;&#13;
+&#13;
+  font-size:9px;&#13;
+&#13;
+  font-weight:950;&#13;
+&#13;
+  cursor:pointer;&#13;
+&#13;
+  transition:&#13;
+    background .15s ease,&#13;
+    color .15s ease,&#13;
+    border-color .15s ease,&#13;
+    transform .15s ease;&#13;
+}&#13;
+&#13;
+&#13;
+.view-button:hover {&#13;
+  background:#7b3aec;&#13;
+&#13;
+  color:#ffffff;&#13;
+&#13;
+  border-color:#7b3aec;&#13;
+&#13;
+  transform:translateY(-1px);&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   34. EMPTY STATE&#13;
+   ========================================================= */&#13;
+&#13;
+.empty-state {&#13;
+  height:210px !important;&#13;
+&#13;
+  text-align:center !important;&#13;
+&#13;
+  vertical-align:middle !important;&#13;
+}&#13;
+&#13;
+&#13;
+.empty-icon {&#13;
+  width:42px;&#13;
+&#13;
+  height:42px;&#13;
+&#13;
+  margin:0 auto 8px;&#13;
+&#13;
+  border-radius:12px;&#13;
+&#13;
+  background:#f1e9ff;&#13;
+&#13;
+  color:#7b3aec;&#13;
+&#13;
+  display:flex;&#13;
+&#13;
+  align-items:center;&#13;
+&#13;
+  justify-content:center;&#13;
+&#13;
+  font-size:18px;&#13;
+}&#13;
+&#13;
+&#13;
+.empty-title {&#13;
+  color:#32384b;&#13;
+&#13;
+  font-size:11px;&#13;
+&#13;
+  font-weight:900;&#13;
+}&#13;
+&#13;
+&#13;
+.empty-description {&#13;
+  margin-top:4px;&#13;
+&#13;
+  color:#8c95a8;&#13;
+&#13;
+  font-size:9px;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   35. MODAL BACKDROP&#13;
+   ========================================================= */&#13;
+&#13;
+.modal-backdrop {&#13;
+  position:fixed !important;&#13;
+&#13;
+  inset:0 !important;&#13;
+&#13;
+  z-index:2147483646 !important;&#13;
+&#13;
+  background:rgba(17,29,48,.62) !important;&#13;
+&#13;
+  display:flex !important;&#13;
+&#13;
+  align-items:center !important;&#13;
+&#13;
+  justify-content:center !important;&#13;
+&#13;
+  padding:20px !important;&#13;
+&#13;
+  overflow-y:auto !important;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   36. CREATE / EDIT MODAL&#13;
+   ========================================================= */&#13;
+&#13;
+.opportunity-modal {&#13;
+  width:min(1050px,96vw) !important;&#13;
+&#13;
+  height:min(90vh,900px) !important;&#13;
+&#13;
+  max-height:90vh !important;&#13;
+&#13;
+  min-height:0 !important;&#13;
+&#13;
+  background:#ffffff !important;&#13;
+&#13;
+  border-radius:19px !important;&#13;
+&#13;
+  overflow:hidden !important;&#13;
+&#13;
+  box-shadow:&#13;
+    0 30px 90px rgba(15,28,50,.34) !important;&#13;
+&#13;
+  display:flex !important;&#13;
+&#13;
+  flex-direction:column !important;&#13;
+&#13;
+  flex-shrink:0 !important;&#13;
+}&#13;
+&#13;
+&#13;
+.modal-header {&#13;
+  flex:0 0 auto !important;&#13;
+&#13;
+  padding:21px 26px !important;&#13;
+&#13;
+  display:flex !important;&#13;
+&#13;
+  align-items:center !important;&#13;
+&#13;
+  justify-content:space-between !important;&#13;
+&#13;
+  border-bottom:1px solid #e2dff0 !important;&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      110deg,&#13;
+      #f1e9ff 0%,&#13;
+      #fbf9ff 55%,&#13;
+      #ffffff 100%&#13;
+    ) !important;&#13;
+}&#13;
+&#13;
+&#13;
+.modal-title-area {&#13;
+  display:flex;&#13;
+&#13;
+  align-items:center;&#13;
+}&#13;
+&#13;
+&#13;
+.modal-icon {&#13;
+  width:53px;&#13;
+&#13;
+  height:53px;&#13;
+&#13;
+  border-radius:15px;&#13;
+&#13;
+  background:#d6c2ff;&#13;
+&#13;
+  color:#6d36d9;&#13;
+&#13;
+  display:flex;&#13;
+&#13;
+  align-items:center;&#13;
+&#13;
+  justify-content:center;&#13;
+&#13;
+  font-size:27px;&#13;
+&#13;
+  font-weight:950;&#13;
+&#13;
+  margin-right:14px;&#13;
+&#13;
+  box-shadow:&#13;
+    inset 0 0 0 1px #cdbcf5;&#13;
+}&#13;
+&#13;
+&#13;
+.modal-kicker {&#13;
+  color:#7b3aec;&#13;
+&#13;
+  font-size:9px;&#13;
+&#13;
+  font-weight:950;&#13;
+&#13;
+  letter-spacing:1.5px;&#13;
+&#13;
+  margin-bottom:5px;&#13;
+}&#13;
+&#13;
+&#13;
+.modal-header h2 {&#13;
+  color:#141429;&#13;
+&#13;
+  font-size:25px;&#13;
+&#13;
+  font-weight:950;&#13;
+&#13;
+  line-height:1.1;&#13;
+&#13;
+  margin:0;&#13;
+}&#13;
+&#13;
+&#13;
+.modal-header p {&#13;
+  color:#737b91;&#13;
+&#13;
+  font-size:12px;&#13;
+&#13;
+  font-weight:600;&#13;
+&#13;
+  margin:5px 0 0;&#13;
+}&#13;
+&#13;
+&#13;
+.modal-close {&#13;
+  width:41px;&#13;
+&#13;
+  height:41px;&#13;
+&#13;
+  border-radius:11px;&#13;
+&#13;
+  border:1px solid #d7dce5;&#13;
+&#13;
+  background:#ffffff;&#13;
+&#13;
+  color:#59657a;&#13;
+&#13;
+  font-size:24px;&#13;
+&#13;
+  cursor:pointer;&#13;
+}&#13;
+&#13;
+&#13;
+.modal-close:hover {&#13;
+  background:#f2edff;&#13;
+&#13;
+  color:#7b3aec;&#13;
+&#13;
+  border-color:#c9b7ed;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   37. MODAL BODY&#13;
+   ========================================================= */&#13;
+&#13;
+.modal-body {&#13;
+  flex:1 1 auto !important;&#13;
+&#13;
+  min-height:0 !important;&#13;
+&#13;
+  overflow-y:auto !important;&#13;
+&#13;
+  overflow-x:hidden !important;&#13;
+&#13;
+  padding:22px 26px 28px !important;&#13;
+&#13;
+  background:#ffffff !important;&#13;
+}&#13;
+&#13;
+&#13;
+.modal-body::-webkit-scrollbar,&#13;
+.view-modal-body::-webkit-scrollbar {&#13;
+  width:8px;&#13;
+}&#13;
+&#13;
+&#13;
+.modal-body::-webkit-scrollbar-thumb,&#13;
+.view-modal-body::-webkit-scrollbar-thumb {&#13;
+  background:#b9a7e8;&#13;
+&#13;
+  border-radius:10px;&#13;
+}&#13;
+&#13;
+&#13;
+.modal-body::-webkit-scrollbar-track,&#13;
+.view-modal-body::-webkit-scrollbar-track {&#13;
+  background:#f7f5fb;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   38. FORM SECTIONS&#13;
+   ========================================================= */&#13;
+&#13;
+.form-section-title {&#13;
+  font-size:9px;&#13;
+&#13;
+  font-weight:950;&#13;
+&#13;
+  letter-spacing:1.5px;&#13;
+&#13;
+  padding:9px 12px;&#13;
+&#13;
+  margin:2px 0 15px;&#13;
+&#13;
+  border-radius:8px;&#13;
+}&#13;
+&#13;
+&#13;
+.purple-section {&#13;
+  color:#6741c9;&#13;
+&#13;
+  background:#f0eaff;&#13;
+&#13;
+  border-left:4px solid #7b3aec;&#13;
+}&#13;
+&#13;
+&#13;
+.green-section {&#13;
+  color:#087f5b;&#13;
+&#13;
+  background:#e9fbf4;&#13;
+&#13;
+  border-left:4px solid #05976a;&#13;
+}&#13;
+&#13;
+&#13;
+.blue-section {&#13;
+  color:#2e6fc5;&#13;
+&#13;
+  background:#e8f2ff;&#13;
+&#13;
+  border-left:4px solid #3b82f6;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   39. FORM GRID&#13;
+   ========================================================= */&#13;
+&#13;
+.form-grid {&#13;
+  display:grid;&#13;
+&#13;
+  grid-template-columns:&#13;
+    repeat(2,minmax(0,1fr));&#13;
+&#13;
+  gap:15px;&#13;
+&#13;
+  margin-bottom:22px;&#13;
+}&#13;
+&#13;
+&#13;
+.form-group-wide,&#13;
+.form-group-full {&#13;
+  grid-column:1 / -1;&#13;
+}&#13;
+&#13;
+&#13;
+.form-group label {&#13;
+  display:block;&#13;
+&#13;
+  color:#344158;&#13;
+&#13;
+  font-size:11px;&#13;
+&#13;
+  font-weight:900;&#13;
+&#13;
+  margin-bottom:6px;&#13;
+}&#13;
+&#13;
+&#13;
+.form-group label span {&#13;
+  color:#c53b52;&#13;
+}&#13;
+&#13;
+&#13;
+.form-group input,&#13;
+.form-group textarea,&#13;
+.modal-select {&#13;
+  width:100%;&#13;
+&#13;
+  border:1px solid #dfe3ea;&#13;
+&#13;
+  border-radius:9px;&#13;
+&#13;
+  background:#fbfcfe;&#13;
+&#13;
+  color:#20263a;&#13;
+&#13;
+  outline:none;&#13;
+&#13;
+  font-size:12px;&#13;
+&#13;
+  font-weight:650;&#13;
+&#13;
+  box-shadow:none;&#13;
+}&#13;
+&#13;
+&#13;
+.form-group input,&#13;
+.modal-select {&#13;
+  height:44px;&#13;
+&#13;
+  padding:0 11px;&#13;
+}&#13;
+&#13;
+&#13;
+.form-group textarea {&#13;
+  min-height:125px;&#13;
+&#13;
+  padding:11px;&#13;
+&#13;
+  resize:vertical;&#13;
+}&#13;
+&#13;
+&#13;
+.form-group input:focus,&#13;
+.form-group textarea:focus,&#13;
+.modal-select:focus {&#13;
+  background:#ffffff;&#13;
+&#13;
+  border-color:#9a6bff;&#13;
+&#13;
+  box-shadow:&#13;
+    0 0 0 3px rgba(112,69,232,.10);&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   40. MODAL FOOTER&#13;
+   ========================================================= */&#13;
+&#13;
+.modal-footer {&#13;
+  flex:0 0 auto !important;&#13;
+&#13;
+  min-height:70px;&#13;
+&#13;
+  padding:13px 26px;&#13;
+&#13;
+  border-top:1px solid #e2e6ed;&#13;
+&#13;
+  display:flex;&#13;
+&#13;
+  align-items:center;&#13;
+&#13;
+  justify-content:flex-end;&#13;
+&#13;
+  gap:9px;&#13;
+&#13;
+  background:#f8f9fc;&#13;
+}&#13;
+&#13;
+&#13;
+.modal-message {&#13;
+  margin-right:auto;&#13;
+&#13;
+  color:#c53b52;&#13;
+&#13;
+  font-size:11px;&#13;
+&#13;
+  font-weight:800;&#13;
+}&#13;
+&#13;
+&#13;
+.modal-cancel-btn,&#13;
+.modal-save-btn {&#13;
+  height:41px;&#13;
+&#13;
+  padding:0 18px;&#13;
+&#13;
+  border-radius:9px;&#13;
+&#13;
+  font-size:11px;&#13;
+&#13;
+  font-weight:900;&#13;
+&#13;
+  cursor:pointer;&#13;
+}&#13;
+&#13;
+&#13;
+.modal-cancel-btn {&#13;
+  border:1px solid #dfe3ea;&#13;
+&#13;
+  background:#ffffff;&#13;
+&#13;
+  color:#59657a;&#13;
+}&#13;
+&#13;
+&#13;
+.modal-save-btn {&#13;
+  border:1px solid #7b3aec;&#13;
+&#13;
+  background:#7b3aec;&#13;
+&#13;
+  color:#ffffff;&#13;
+&#13;
+  box-shadow:&#13;
+    0 7px 15px rgba(112,69,232,.18);&#13;
+}&#13;
+&#13;
+&#13;
+.modal-save-btn:hover {&#13;
+  background:#6424c7;&#13;
+&#13;
+  border-color:#6424c7;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   41. VIEW MODAL&#13;
+   ========================================================= */&#13;
+&#13;
+.view-modal {&#13;
+  width:min(1040px,96vw) !important;&#13;
+&#13;
+  height:min(88vh,880px) !important;&#13;
+&#13;
+  max-height:88vh !important;&#13;
+&#13;
+  min-height:0 !important;&#13;
+&#13;
+  background:#ffffff !important;&#13;
+&#13;
+  border-radius:19px !important;&#13;
+&#13;
+  overflow:hidden !important;&#13;
+&#13;
+  box-shadow:&#13;
+    0 30px 90px rgba(15,28,50,.38) !important;&#13;
+&#13;
+  display:flex !important;&#13;
+&#13;
+  flex-direction:column !important;&#13;
+&#13;
+  flex-shrink:0 !important;&#13;
+}&#13;
+&#13;
+&#13;
+.view-modal-header {&#13;
+  flex:0 0 auto !important;&#13;
+&#13;
+  min-height:130px;&#13;
+&#13;
+  padding:23px 31px;&#13;
+&#13;
+  display:flex;&#13;
+&#13;
+  align-items:center;&#13;
+&#13;
+  justify-content:space-between;&#13;
+&#13;
+  border-bottom:1px solid #e2dff0;&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      110deg,&#13;
+      #f1e9ff 0%,&#13;
+      #faf9ff 58%,&#13;
+      #ffffff 100%&#13;
+    );&#13;
+}&#13;
+&#13;
+&#13;
+.view-title-area {&#13;
+  display:flex;&#13;
+&#13;
+  align-items:center;&#13;
+}&#13;
+&#13;
+&#13;
+.view-opportunity-icon {&#13;
+  width:60px;&#13;
+&#13;
+  height:60px;&#13;
+&#13;
+  min-width:60px;&#13;
+&#13;
+  border-radius:16px;&#13;
+&#13;
+  background:#e7dcff;&#13;
+&#13;
+  color:#6d36d9;&#13;
+&#13;
+  display:flex;&#13;
+&#13;
+  align-items:center;&#13;
+&#13;
+  justify-content:center;&#13;
+&#13;
+  font-size:14px;&#13;
+&#13;
+  font-weight:950;&#13;
+&#13;
+  margin-right:15px;&#13;
+&#13;
+  border:1px solid #cdbcf5;&#13;
+}&#13;
+&#13;
+&#13;
+.view-modal-header h2 {&#13;
+  color:#141429;&#13;
+&#13;
+  font-size:28px;&#13;
+&#13;
+  font-weight:950;&#13;
+&#13;
+  line-height:1.1;&#13;
+&#13;
+  margin:0 0 9px;&#13;
+}&#13;
+&#13;
+&#13;
+.view-header-meta {&#13;
+  display:flex;&#13;
+&#13;
+  align-items:center;&#13;
+&#13;
+  gap:8px;&#13;
+}&#13;
+&#13;
+&#13;
+.view-id-pill {&#13;
+  display:inline-flex;&#13;
+&#13;
+  align-items:center;&#13;
+&#13;
+  min-height:25px;&#13;
+&#13;
+  padding:0 9px;&#13;
+&#13;
+  border-radius:7px;&#13;
+&#13;
+  background:#eee8ff;&#13;
+&#13;
+  color:#6d36d9;&#13;
+&#13;
+  font-size:9px;&#13;
+&#13;
+  font-weight:950;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   42. VIEW BODY&#13;
+   ========================================================= */&#13;
+&#13;
+.view-modal-body {&#13;
+  flex:1 1 auto !important;&#13;
+&#13;
+  min-height:0 !important;&#13;
+&#13;
+  overflow-y:auto !important;&#13;
+&#13;
+  overflow-x:hidden !important;&#13;
+&#13;
+  padding:21px 31px 29px !important;&#13;
+&#13;
+  background:#f7f8fc !important;&#13;
+}&#13;
+&#13;
+&#13;
+.view-section-title {&#13;
+  font-size:9px;&#13;
+&#13;
+  font-weight:950;&#13;
+&#13;
+  letter-spacing:1.4px;&#13;
+&#13;
+  padding:8px 11px;&#13;
+&#13;
+  border-radius:8px;&#13;
+&#13;
+  margin:2px 0 12px;&#13;
+}&#13;
+&#13;
+&#13;
+.purple-view-title {&#13;
+  color:#6540c5;&#13;
+&#13;
+  background:#f2edff;&#13;
+&#13;
+  border-left:4px solid #7b3aec;&#13;
+}&#13;
+&#13;
+&#13;
+.green-view-title {&#13;
+  color:#087f5b;&#13;
+&#13;
+  background:#e5f6ee;&#13;
+&#13;
+  border-left:4px solid #05976a;&#13;
+&#13;
+  margin-top:20px;&#13;
+}&#13;
+&#13;
+&#13;
+.blue-view-title {&#13;
+  color:#2e6fc5;&#13;
+&#13;
+  background:#e7f1fd;&#13;
+&#13;
+  border-left:4px solid #3b82f6;&#13;
+&#13;
+  margin-top:20px;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   43. DETAIL GRID&#13;
+   ========================================================= */&#13;
+&#13;
+.details-grid {&#13;
+  display:grid;&#13;
+&#13;
+  grid-template-columns:&#13;
+    repeat(2,minmax(0,1fr));&#13;
+&#13;
+  gap:10px;&#13;
+}&#13;
+&#13;
+&#13;
+.detail-box {&#13;
+  position:relative;&#13;
+&#13;
+  min-height:82px;&#13;
+&#13;
+  padding:14px 15px 13px 18px;&#13;
+&#13;
+  border-radius:11px;&#13;
+&#13;
+  background:#ffffff;&#13;
+&#13;
+  border:1px solid #dfe5ed;&#13;
+&#13;
+  overflow:hidden;&#13;
+}&#13;
+&#13;
+&#13;
+.detail-box::before {&#13;
+  content:"";&#13;
+&#13;
+  position:absolute;&#13;
+&#13;
+  left:0;&#13;
+&#13;
+  top:0;&#13;
+&#13;
+  bottom:0;&#13;
+&#13;
+  width:4px;&#13;
+}&#13;
+&#13;
+&#13;
+.detail-purple::before {&#13;
+  background:#7b3aec;&#13;
+}&#13;
+&#13;
+&#13;
+.detail-green::before {&#13;
+  background:#05976a;&#13;
+}&#13;
+&#13;
+&#13;
+.detail-blue::before {&#13;
+  background:#3b82f6;&#13;
+}&#13;
+&#13;
+&#13;
+.detail-orange::before {&#13;
+  background:#e3a43a;&#13;
+}&#13;
+&#13;
+&#13;
+.detail-box span {&#13;
+  display:block;&#13;
+&#13;
+  color:#7b879a;&#13;
+&#13;
+  font-size:8px;&#13;
+&#13;
+  font-weight:950;&#13;
+&#13;
+  letter-spacing:.9px;&#13;
+&#13;
+  margin-bottom:7px;&#13;
+}&#13;
+&#13;
+&#13;
+.detail-box strong {&#13;
+  color:#273047;&#13;
+&#13;
+  font-size:13px;&#13;
+&#13;
+  font-weight:900;&#13;
+&#13;
+  line-height:1.4;&#13;
+}&#13;
+&#13;
+&#13;
+.detail-purple strong {&#13;
+  color:#6040bb;&#13;
+}&#13;
+&#13;
+&#13;
+.detail-green strong {&#13;
+  color:#087f5b;&#13;
+}&#13;
+&#13;
+&#13;
+.detail-blue strong {&#13;
+  color:#2e6fc5;&#13;
+}&#13;
+&#13;
+&#13;
+.detail-orange strong {&#13;
+  color:#ad720f;&#13;
+}&#13;
+&#13;
+&#13;
+.detail-wide {&#13;
+  grid-column:1 / -1;&#13;
+}&#13;
+&#13;
+&#13;
+.detail-description {&#13;
+  min-height:125px;&#13;
+}&#13;
+&#13;
+&#13;
+.detail-box p {&#13;
+  margin:0;&#13;
+&#13;
+  color:#59657a;&#13;
+&#13;
+  font-size:12px;&#13;
+&#13;
+  line-height:1.6;&#13;
+&#13;
+  font-weight:600;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   44. VIEW FOOTER&#13;
+   ========================================================= */&#13;
+&#13;
+.view-modal-footer {&#13;
+  flex:0 0 auto !important;&#13;
+&#13;
+  min-height:68px;&#13;
+&#13;
+  padding:13px 31px;&#13;
+&#13;
+  border-top:1px solid #dfe5ed;&#13;
+&#13;
+  display:flex;&#13;
+&#13;
+  align-items:center;&#13;
+&#13;
+  justify-content:flex-end;&#13;
+&#13;
+  gap:9px;&#13;
+&#13;
+  background:#ffffff;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   45. TOAST&#13;
+   ========================================================= */&#13;
+&#13;
+.opportunity-toast {&#13;
+  position:fixed !important;&#13;
+&#13;
+  right:24px !important;&#13;
+&#13;
+  bottom:24px !important;&#13;
+&#13;
+  z-index:2147483647 !important;&#13;
+&#13;
+  min-width:250px;&#13;
+&#13;
+  padding:13px 17px;&#13;
+&#13;
+  border-radius:10px;&#13;
+&#13;
+  background:#173f34;&#13;
+&#13;
+  color:#ffffff;&#13;
+&#13;
+  font-size:11px;&#13;
+&#13;
+  font-weight:800;&#13;
+&#13;
+  box-shadow:&#13;
+    0 12px 28px rgba(20,25,30,.18);&#13;
+}&#13;
+&#13;
+&#13;
+.opportunity-toast.toast-error {&#13;
+  background:#8f3434;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   46. AI WIDGET&#13;
+   ========================================================= */&#13;
+&#13;
+.campus360-ai-widget {&#13;
+  position:fixed !important;&#13;
+&#13;
+  right:21px !important;&#13;
+&#13;
+  bottom:18px !important;&#13;
+&#13;
+  z-index:2147483645 !important;&#13;
+&#13;
+  pointer-events:auto;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   47. COLLAPSED SIDEBAR&#13;
+   ========================================================= */&#13;
+&#13;
+.campus360-opportunity-app.sidebar-collapsed&#13;
+.opportunity-sidebar {&#13;
+  width:0 !important;&#13;
+&#13;
+  min-width:0 !important;&#13;
+&#13;
+  max-width:0 !important;&#13;
+&#13;
+  transform:translateX(-100%) !important;&#13;
+&#13;
+  opacity:0 !important;&#13;
+&#13;
+  pointer-events:none !important;&#13;
+&#13;
+  overflow:hidden !important;&#13;
+&#13;
+  border-right:0 !important;&#13;
+}&#13;
+&#13;
+&#13;
+.campus360-opportunity-app.sidebar-collapsed&#13;
+.opportunity-main {&#13;
+  left:0 !important;&#13;
+&#13;
+  width:100vw !important;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   48. MEDIUM DESKTOP&#13;
+   ========================================================= */&#13;
+&#13;
+@media (max-width:1250px) {&#13;
+&#13;
+  .global-search {&#13;
+    width:250px !important;&#13;
+&#13;
+    min-width:190px !important;&#13;
+  }&#13;
+&#13;
+&#13;
+  .filter-controls {&#13;
+    flex-wrap:wrap;&#13;
+  }&#13;
+&#13;
+&#13;
+  .search-box {&#13;
+    flex:1 1 100%;&#13;
+  }&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   49. TABLET&#13;
+   ========================================================= */&#13;
+&#13;
+@media (max-width:1000px) {&#13;
+&#13;
+  .opportunity-sidebar {&#13;
+    width:220px !important;&#13;
+&#13;
+    min-width:220px !important;&#13;
+&#13;
+    max-width:220px !important;&#13;
+  }&#13;
+&#13;
+&#13;
+  .opportunity-main {&#13;
+    left:220px !important;&#13;
+&#13;
+    width:calc(100vw - 220px) !important;&#13;
+  }&#13;
+&#13;
+&#13;
+  .campus360-opportunity-app.sidebar-collapsed&#13;
+  .opportunity-main {&#13;
+    left:0 !important;&#13;
+&#13;
+    width:100% !important;&#13;
+  }&#13;
+&#13;
+&#13;
+  .opportunity-content {&#13;
+    padding-left:20px !important;&#13;
+&#13;
+    padding-right:20px !important;&#13;
+  }&#13;
+&#13;
+&#13;
+  .page-header-row {&#13;
+    align-items:flex-start;&#13;
+&#13;
+    flex-direction:column;&#13;
+  }&#13;
+&#13;
+&#13;
+  .page-header-actions {&#13;
+    width:100%;&#13;
+&#13;
+    justify-content:flex-start;&#13;
+  }&#13;
+&#13;
+&#13;
+  .opportunity-kpi-grid {&#13;
+    grid-template-columns:&#13;
+      repeat(2,minmax(0,1fr));&#13;
+  }&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   50. SMALL TABLET&#13;
+   ========================================================= */&#13;
+&#13;
+@media (max-width:800px) {&#13;
+&#13;
+  .opportunity-sidebar {&#13;
+    width:76px !important;&#13;
+&#13;
+    min-width:76px !important;&#13;
+&#13;
+    max-width:76px !important;&#13;
+  }&#13;
+&#13;
+&#13;
+  .opportunity-main {&#13;
+    left:76px !important;&#13;
+&#13;
+    width:calc(100vw - 76px) !important;&#13;
+  }&#13;
+&#13;
+&#13;
+  .brand-text,&#13;
+  .profile-details,&#13;
+  .menu-section-title,&#13;
+  .menu-label,&#13;
+  .menu-count {&#13;
+    display:none !important;&#13;
+  }&#13;
+&#13;
+&#13;
+  .sidebar-brand {&#13;
+    justify-content:center;&#13;
+&#13;
+    padding-left:8px;&#13;
+&#13;
+    padding-right:8px;&#13;
+  }&#13;
+&#13;
+&#13;
+  .sidebar-profile {&#13;
+    justify-content:center;&#13;
+&#13;
+    margin-left:8px;&#13;
+&#13;
+    margin-right:8px;&#13;
+&#13;
+    padding-left:8px;&#13;
+&#13;
+    padding-right:8px;&#13;
+  }&#13;
+&#13;
+&#13;
+  .sidebar-menu-item {&#13;
+    justify-content:center;&#13;
+&#13;
+    padding-left:8px;&#13;
+&#13;
+    padding-right:8px;&#13;
+  }&#13;
+&#13;
+&#13;
+  .menu-icon {&#13;
+    margin-right:0;&#13;
+  }&#13;
+&#13;
+&#13;
+  .sidebar-footer {&#13;
+    padding-left:7px;&#13;
+&#13;
+    padding-right:7px;&#13;
+  }&#13;
+&#13;
+&#13;
+  .sidebar-footer-status {&#13;
+    justify-content:center;&#13;
+  }&#13;
+&#13;
+&#13;
+  .sidebar-footer-status span {&#13;
+    margin:0;&#13;
+  }&#13;
+&#13;
+&#13;
+  .sidebar-footer-status {&#13;
+    font-size:0;&#13;
+  }&#13;
+&#13;
+&#13;
+  .sidebar-footer small {&#13;
+    display:none;&#13;
+  }&#13;
+&#13;
+&#13;
+  .global-search {&#13;
+    width:185px !important;&#13;
+&#13;
+    min-width:145px !important;&#13;
+  }&#13;
+&#13;
+&#13;
+  .topbar-user-info,&#13;
+  .user-chevron {&#13;
+    display:none;&#13;
+  }&#13;
+&#13;
+&#13;
+  .page-header-copy h1 {&#13;
+    font-size:29px;&#13;
+  }&#13;
+&#13;
+&#13;
+  .form-grid,&#13;
+  .details-grid {&#13;
+    grid-template-columns:1fr !important;&#13;
+  }&#13;
+&#13;
+&#13;
+  .form-group-wide,&#13;
+  .form-group-full,&#13;
+  .detail-wide {&#13;
+    grid-column:auto !important;&#13;
+  }&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   51. MOBILE&#13;
+   ========================================================= */&#13;
+&#13;
+@media (max-width:560px) {&#13;
+&#13;
+  .opportunity-sidebar {&#13;
+    width:0 !important;&#13;
+&#13;
+    min-width:0 !important;&#13;
+&#13;
+    max-width:0 !important;&#13;
+&#13;
+    transform:translateX(-100%) !important;&#13;
+&#13;
+    overflow:hidden !important;&#13;
+  }&#13;
+&#13;
+&#13;
+  .opportunity-main {&#13;
+    left:0 !important;&#13;
+&#13;
+    width:100vw !important;&#13;
+  }&#13;
+&#13;
+&#13;
+  .opportunity-topbar {&#13;
+    height:68px !important;&#13;
+&#13;
+    min-height:68px !important;&#13;
+&#13;
+    padding:0 12px !important;&#13;
+  }&#13;
+&#13;
+&#13;
+  .page-title-small {&#13;
+    display:none;&#13;
+  }&#13;
+&#13;
+&#13;
+  .page-title-large {&#13;
+    font-size:14px;&#13;
+  }&#13;
+&#13;
+&#13;
+  .global-search {&#13;
+    display:none !important;&#13;
+  }&#13;
+&#13;
+&#13;
+  .topbar-divider {&#13;
+    display:none !important;&#13;
+  }&#13;
+&#13;
+&#13;
+  .topbar-user-info,&#13;
+  .user-chevron {&#13;
+    display:none !important;&#13;
+  }&#13;
+&#13;
+&#13;
+  .opportunity-content {&#13;
+    padding:&#13;
+      18px&#13;
+      10px&#13;
+      36px !important;&#13;
+  }&#13;
+&#13;
+&#13;
+  .page-header-copy h1 {&#13;
+    font-size:25px;&#13;
+  }&#13;
+&#13;
+&#13;
+  .page-header-copy p {&#13;
+    font-size:11px;&#13;
+  }&#13;
+&#13;
+&#13;
+  .page-header-actions {&#13;
+    width:100%;&#13;
+&#13;
+    flex-direction:column;&#13;
+&#13;
+    align-items:stretch;&#13;
+  }&#13;
+&#13;
+&#13;
+  .secondary-action,&#13;
+  .primary-action {&#13;
+    width:100%;&#13;
+  }&#13;
+&#13;
+&#13;
+  .opportunity-kpi-grid {&#13;
+    grid-template-columns:1fr;&#13;
+  }&#13;
+&#13;
+&#13;
+  .filter-controls {&#13;
+    flex-direction:column;&#13;
+&#13;
+    align-items:stretch;&#13;
+  }&#13;
+&#13;
+&#13;
+  .search-box,&#13;
+  .filter-select,&#13;
+  .clear-filter-btn {&#13;
+    width:100%;&#13;
+&#13;
+    min-width:0;&#13;
+&#13;
+    flex:1 1 auto;&#13;
+  }&#13;
+&#13;
+&#13;
+  .directory-header {&#13;
+    flex-direction:column;&#13;
+&#13;
+    align-items:flex-start;&#13;
+&#13;
+    gap:10px;&#13;
+  }&#13;
+&#13;
+&#13;
+  .directory-header-right {&#13;
+    width:100%;&#13;
+&#13;
+    justify-content:space-between;&#13;
+  }&#13;
+&#13;
+&#13;
+  .opportunity-table-wrapper {&#13;
+    max-height:calc(100vh - 350px);&#13;
+  }&#13;
+&#13;
+&#13;
+  .opportunity-toast {&#13;
+    left:12px;&#13;
+&#13;
+    right:12px;&#13;
+&#13;
+    min-width:0;&#13;
+  }&#13;
+&#13;
+}</css>
+        <data_table>sp_instance</data_table>
+        <demo_data/>
+        <description/>
+        <docs/>
+        <field_list/>
+        <has_preview>false</has_preview>
+        <id>campus360_tpo_opportunities_new</id>
+        <internal>false</internal>
+        <link><![CDATA[function link(scope, element, attrs, controller) {
+  
+}]]></link>
+        <name>Campus360 TPO Opportunities New</name>
+        <option_schema/>
+        <public>false</public>
+        <roles/>
+        <script><![CDATA[(function() {
+
+
+  /* =====================================================
+     TABLE NAMES
+     ===================================================== */
+
+  var OPPORTUNITY_TABLE =
+    "x_snc_campus360_placement_opportunity";
+
+  var COMPANY_TABLE =
+    "x_snc_campus360_company_master";
+
+  var APPLICATION_TABLE =
+    "x_snc_campus360_student_application";
+
+
+  /* =====================================================
+     INITIAL DATA
+     ===================================================== */
+
+  data.opportunities = [];
+
+  data.companies = [];
+
+  data.opportunityTypes = [];
+
+  data.opportunitySources = [];
+
+  data.statuses = [];
+
+
+  data.summary = {
+
+    totalOpportunities: 0,
+
+    openOpportunities: 0,
+
+    closedOpportunities: 0,
+
+    totalApplications: 0
+
+  };
+
+
+  data.companyCount = 0;
+
+  data.applicationCount = 0;
+
+  data.studentCount = 0;
+
+  data.placementOutcomeCount = 0;
+
+  data.riskCount = 0;
+
+  data.result = null;
+
+
+  /* =====================================================
+     CHOICE LABEL
+     ===================================================== */
+
+  function getChoiceLabel(
+    tableName,
+    fieldName,
+    value
+  ) {
+
+    if (!value) {
+      return "";
+    }
+
+
+    var choice =
+      new GlideRecord("sys_choice");
+
+
+    choice.addQuery(
+      "name",
+      tableName
+    );
+
+    choice.addQuery(
+      "element",
+      fieldName
+    );
+
+    choice.addQuery(
+      "value",
+      value
+    );
+
+    choice.addQuery(
+      "language",
+      "en"
+    );
+
+    choice.setLimit(1);
+
+    choice.query();
+
+
+    if (choice.next()) {
+
+      return (
+        choice.getValue("label") ||
+        value
+      );
+
+    }
+
+
+    return value;
+
+  }
+
+
+  /* =====================================================
+     CHOICES
+     ===================================================== */
+
+  function getChoices(
+    tableName,
+    fieldName
+  ) {
+
+    var result = [];
+
+    var seen = {};
+
+
+    var choice =
+      new GlideRecord("sys_choice");
+
+
+    choice.addQuery(
+      "name",
+      tableName
+    );
+
+    choice.addQuery(
+      "element",
+      fieldName
+    );
+
+    choice.addQuery(
+      "language",
+      "en"
+    );
+
+    choice.addQuery(
+      "inactive",
+      false
+    );
+
+    choice.orderBy("sequence");
+
+    choice.orderBy("label");
+
+    choice.query();
+
+
+    while (choice.next()) {
+
+      var value =
+        choice.getValue("value");
+
+      var label =
+        choice.getValue("label") ||
+        value;
+
+
+      if (
+        value &&
+        !seen[value]
+      ) {
+
+        seen[value] = true;
+
+
+        result.push({
+
+          value: value,
+
+          label: label
+
+        });
+
+      }
+
+    }
+
+
+    return result;
+
+  }
+
+
+  /* =====================================================
+     UNIQUE CHOICE
+     ===================================================== */
+
+  function addUniqueChoice(
+    array,
+    value,
+    label
+  ) {
+
+    if (!value) {
+      return;
+    }
+
+
+    var normalized =
+      String(value)
+        .trim()
+        .toLowerCase();
+
+
+    for (
+      var i = 0;
+      i < array.length;
+      i++
+    ) {
+
+      if (
+        String(array[i].value)
+          .trim()
+          .toLowerCase() ===
+        normalized
+      ) {
+
+        return;
+
+      }
+
+    }
+
+
+    array.push({
+
+      value: String(value),
+
+      label:
+        label ||
+        String(value)
+
+    });
+
+  }
+
+
+  /* =====================================================
+     DATE FORMAT
+     ===================================================== */
+
+  function formatDateTime(value) {
+
+    if (!value) {
+      return "";
+    }
+
+
+    try {
+
+      var gd =
+        new GlideDateTime(value);
+
+      return gd.getDisplayValue();
+
+    } catch (e) {
+
+      return value;
+
+    }
+
+  }
+
+
+  /* =====================================================
+     APPLICATION COUNT
+     ===================================================== */
+
+  function getApplicationCount(
+    opportunitySysId
+  ) {
+
+    if (!opportunitySysId) {
+      return 0;
+    }
+
+
+    var application =
+      new GlideRecord(
+        APPLICATION_TABLE
+      );
+
+
+    if (
+      !application.isValid() ||
+      !application.isValidField(
+        "opportunity"
+      )
+    ) {
+
+      return 0;
+
+    }
+
+
+    application.addQuery(
+      "opportunity",
+      opportunitySysId
+    );
+
+    application.query();
+
+
+    return application.getRowCount();
+
+  }
+
+
+  /* =====================================================
+     COMPANIES
+     ===================================================== */
+
+  function loadCompanies() {
+
+    var company =
+      new GlideRecord(
+        COMPANY_TABLE
+      );
+
+
+    if (!company.isValid()) {
+      return;
+    }
+
+
+    company.orderBy(
+      "company_name"
+    );
+
+    company.query();
+
+
+    while (company.next()) {
+
+      data.companies.push({
+
+        sys_id:
+          company.getUniqueValue(),
+
+        name:
+          company.getDisplayValue(
+            "company_name"
+          ) ||
+          company.getValue(
+            "company_name"
+          ) ||
+          "Unnamed Company"
+
+      });
+
+    }
+
+
+    data.companyCount =
+      data.companies.length;
+
+  }
+
+
+  /* =====================================================
+     OPPORTUNITIES
+     ===================================================== */
+
+  function loadOpportunities() {
+
+    var gr =
+      new GlideRecord(
+        OPPORTUNITY_TABLE
+      );
+
+
+    if (!gr.isValid()) {
+      return;
+    }
+
+
+    gr.orderByDesc(
+      "sys_created_on"
+    );
+
+    gr.query();
+
+
+    while (gr.next()) {
+
+      var sysId =
+        gr.getUniqueValue();
+
+
+      var typeValue =
+        gr.getValue(
+          "opportunity_type"
+        ) || "";
+
+
+      var sourceValue =
+        gr.getValue(
+          "opportunity_source"
+        ) || "";
+
+
+      var statusValue =
+        gr.getValue(
+          "status"
+        ) || "";
+
+
+      var typeLabel =
+        getChoiceLabel(
+          OPPORTUNITY_TABLE,
+          "opportunity_type",
+          typeValue
+        );
+
+
+      var sourceLabel =
+        getChoiceLabel(
+          OPPORTUNITY_TABLE,
+          "opportunity_source",
+          sourceValue
+        );
+
+
+      var statusLabel =
+        getChoiceLabel(
+          OPPORTUNITY_TABLE,
+          "status",
+          statusValue
+        );
+
+
+      var applicationCount =
+        getApplicationCount(
+          sysId
+        );
+
+
+      addUniqueChoice(
+        data.opportunityTypes,
+        typeValue,
+        typeLabel
+      );
+
+
+      addUniqueChoice(
+        data.opportunitySources,
+        sourceValue,
+        sourceLabel
+      );
+
+
+      addUniqueChoice(
+        data.statuses,
+        statusValue,
+        statusLabel
+      );
+
+
+      data.opportunities.push({
+
+        sys_id:
+          sysId,
+
+        opportunity_id:
+          gr.getValue(
+            "opportunity_id"
+          ) || "",
+
+        title:
+          gr.getValue(
+            "opportunity_title"
+          ) || "",
+
+        company:
+          gr.getDisplayValue(
+            "company"
+          ) || "",
+
+        company_sys_id:
+          gr.getValue(
+            "company"
+          ) || "",
+
+        type:
+          typeLabel,
+
+        type_value:
+          typeValue,
+
+        source:
+          sourceLabel,
+
+        source_value:
+          sourceValue,
+
+        status:
+          statusLabel,
+
+        status_value:
+          statusValue,
+
+        location:
+          gr.getValue(
+            "location"
+          ) || "",
+
+        ctc:
+          gr.getValue(
+            "ctc_stipend"
+          ) || "",
+
+        minimum_cgpa:
+          gr.getValue(
+            "minimum_cgpa"
+          ) || "",
+
+        eligible_branches:
+          gr.getValue(
+            "eligible_branches"
+          ) || "",
+
+        skills:
+          gr.getValue(
+            "required_skills"
+          ) || "",
+
+        deadline:
+          formatDateTime(
+            gr.getValue(
+              "application_deadline"
+            )
+          ),
+
+        application_deadline_raw:
+          gr.getValue(
+            "application_deadline"
+          ) || "",
+
+        drive_date:
+          formatDateTime(
+            gr.getValue(
+              "drive_date"
+            )
+          ),
+
+        drive_date_raw:
+          gr.getValue(
+            "drive_date"
+          ) || "",
+
+        description:
+          gr.getValue(
+            "job_description"
+          ) || "",
+
+        application_count:
+          applicationCount
+
+      });
+
+
+      data.summary.totalApplications +=
+        applicationCount;
+
+
+      var statusForCount =
+        String(statusValue)
+          .trim()
+          .toLowerCase();
+
+
+      if (
+        statusForCount === "open" ||
+        statusForCount === "active"
+      ) {
+
+        data.summary.openOpportunities++;
+
+      }
+
+
+      if (
+        statusForCount === "closed" ||
+        statusForCount === "inactive" ||
+        statusForCount === "cancelled" ||
+        statusForCount === "canceled"
+      ) {
+
+        data.summary.closedOpportunities++;
+
+      }
+
+    }
+
+
+    data.summary.totalOpportunities =
+      data.opportunities.length;
+
+
+    data.applicationCount =
+      data.summary.totalApplications;
+
+  }
+
+
+  /* =====================================================
+     LOAD CHOICES
+     ===================================================== */
+
+  function loadChoices() {
+
+    var typeChoices =
+      getChoices(
+        OPPORTUNITY_TABLE,
+        "opportunity_type"
+      );
+
+
+    var sourceChoices =
+      getChoices(
+        OPPORTUNITY_TABLE,
+        "opportunity_source"
+      );
+
+
+    var statusChoices =
+      getChoices(
+        OPPORTUNITY_TABLE,
+        "status"
+      );
+
+
+    typeChoices.forEach(
+      function(item) {
+
+        addUniqueChoice(
+          data.opportunityTypes,
+          item.value,
+          item.label
+        );
+
+      }
+    );
+
+
+    sourceChoices.forEach(
+      function(item) {
+
+        addUniqueChoice(
+          data.opportunitySources,
+          item.value,
+          item.label
+        );
+
+      }
+    );
+
+
+    statusChoices.forEach(
+      function(item) {
+
+        addUniqueChoice(
+          data.statuses,
+          item.value,
+          item.label
+        );
+
+      }
+    );
+
+  }
+
+
+  /* =====================================================
+     CREATE
+     ===================================================== */
+
+  function createOpportunity(payload) {
+
+    var result = {
+      success: false,
+      message: ""
+    };
+
+
+    if (!payload) {
+
+      result.message =
+        "No opportunity data was received.";
+
+      return result;
+
+    }
+
+
+    if (
+      !payload.opportunity_title ||
+      !String(
+        payload.opportunity_title
+      ).trim()
+    ) {
+
+      result.message =
+        "Opportunity Title is required.";
+
+      return result;
+
+    }
+
+
+    if (!payload.company) {
+
+      result.message =
+        "Company is required.";
+
+      return result;
+
+    }
+
+
+    var gr =
+      new GlideRecord(
+        OPPORTUNITY_TABLE
+      );
+
+
+    if (!gr.isValid()) {
+
+      result.message =
+        "Placement Opportunity table could not be found.";
+
+      return result;
+
+    }
+
+
+    gr.initialize();
+
+
+    if (
+      gr.isValidField(
+        "opportunity_id"
+      )
+    ) {
+
+      gr.setValue(
+        "opportunity_id",
+        payload.opportunity_id || ""
+      );
+
+    }
+
+
+    gr.setValue(
+      "opportunity_title",
+      payload.opportunity_title
+    );
+
+
+    gr.setValue(
+      "company",
+      payload.company
+    );
+
+
+    if (
+      gr.isValidField(
+        "opportunity_type"
+      )
+    ) {
+
+      gr.setValue(
+        "opportunity_type",
+        payload.opportunity_type || ""
+      );
+
+    }
+
+
+    if (
+      gr.isValidField(
+        "opportunity_source"
+      )
+    ) {
+
+      gr.setValue(
+        "opportunity_source",
+        payload.opportunity_source || ""
+      );
+
+    }
+
+
+    if (
+      gr.isValidField(
+        "status"
+      )
+    ) {
+
+      gr.setValue(
+        "status",
+        payload.status || ""
+      );
+
+    }
+
+
+    if (
+      gr.isValidField(
+        "location"
+      )
+    ) {
+
+      gr.setValue(
+        "location",
+        payload.location || ""
+      );
+
+    }
+
+
+    if (
+      gr.isValidField(
+        "ctc_stipend"
+      )
+    ) {
+
+      gr.setValue(
+        "ctc_stipend",
+        payload.ctc_stipend || ""
+      );
+
+    }
+
+
+    if (
+      gr.isValidField(
+        "minimum_cgpa"
+      )
+    ) {
+
+      if (
+        payload.minimum_cgpa !== "" &&
+        payload.minimum_cgpa !== null &&
+        payload.minimum_cgpa !== undefined
+      ) {
+
+        gr.setValue(
+          "minimum_cgpa",
+          payload.minimum_cgpa
+        );
+
+      }
+
+    }
+
+
+    if (
+      gr.isValidField(
+        "eligible_branches"
+      )
+    ) {
+
+      gr.setValue(
+        "eligible_branches",
+        payload.eligible_branches || ""
+      );
+
+    }
+
+
+    if (
+      gr.isValidField(
+        "required_skills"
+      )
+    ) {
+
+      gr.setValue(
+        "required_skills",
+        payload.required_skills || ""
+      );
+
+    }
+
+
+    if (
+      gr.isValidField(
+        "job_description"
+      )
+    ) {
+
+      gr.setValue(
+        "job_description",
+        payload.job_description || ""
+      );
+
+    }
+
+
+    if (
+      gr.isValidField(
+        "application_deadline"
+      )
+    ) {
+
+      gr.setValue(
+        "application_deadline",
+        payload.application_deadline || ""
+      );
+
+    }
+
+
+    if (
+      gr.isValidField(
+        "drive_date"
+      )
+    ) {
+
+      gr.setValue(
+        "drive_date",
+        payload.drive_date || ""
+      );
+
+    }
+
+
+    var newSysId =
+      gr.insert();
+
+
+    if (newSysId) {
+
+      result.success = true;
+
+      result.message =
+        "Opportunity created successfully.";
+
+      result.sys_id =
+        newSysId;
+
+    } else {
+
+      result.message =
+        "The opportunity could not be created.";
+
+    }
+
+
+    return result;
+
+  }
+
+
+  /* =====================================================
+     UPDATE
+     ===================================================== */
+
+  function updateOpportunity(payload) {
+
+    var result = {
+      success: false,
+      message: ""
+    };
+
+
+    if (
+      !payload ||
+      !payload.sys_id
+    ) {
+
+      result.message =
+        "Opportunity record was not identified.";
+
+      return result;
+
+    }
+
+
+    var gr =
+      new GlideRecord(
+        OPPORTUNITY_TABLE
+      );
+
+
+    if (
+      !gr.get(
+        payload.sys_id
+      )
+    ) {
+
+      result.message =
+        "Opportunity record could not be found.";
+
+      return result;
+
+    }
+
+
+    if (
+      gr.isValidField(
+        "opportunity_id"
+      )
+    ) {
+
+      gr.setValue(
+        "opportunity_id",
+        payload.opportunity_id || ""
+      );
+
+    }
+
+
+    if (
+      gr.isValidField(
+        "opportunity_title"
+      )
+    ) {
+
+      gr.setValue(
+        "opportunity_title",
+        payload.opportunity_title || ""
+      );
+
+    }
+
+
+    if (
+      gr.isValidField(
+        "company"
+      )
+    ) {
+
+      gr.setValue(
+        "company",
+        payload.company || ""
+      );
+
+    }
+
+
+    if (
+      gr.isValidField(
+        "opportunity_type"
+      )
+    ) {
+
+      gr.setValue(
+        "opportunity_type",
+        payload.opportunity_type || ""
+      );
+
+    }
+
+
+    if (
+      gr.isValidField(
+        "opportunity_source"
+      )
+    ) {
+
+      gr.setValue(
+        "opportunity_source",
+        payload.opportunity_source || ""
+      );
+
+    }
+
+
+    if (
+      gr.isValidField(
+        "status"
+      )
+    ) {
+
+      gr.setValue(
+        "status",
+        payload.status || ""
+      );
+
+    }
+
+
+    if (
+      gr.isValidField(
+        "location"
+      )
+    ) {
+
+      gr.setValue(
+        "location",
+        payload.location || ""
+      );
+
+    }
+
+
+    if (
+      gr.isValidField(
+        "ctc_stipend"
+      )
+    ) {
+
+      gr.setValue(
+        "ctc_stipend",
+        payload.ctc_stipend || ""
+      );
+
+    }
+
+
+    if (
+      gr.isValidField(
+        "minimum_cgpa"
+      )
+    ) {
+
+      gr.setValue(
+        "minimum_cgpa",
+        payload.minimum_cgpa || ""
+      );
+
+    }
+
+
+    if (
+      gr.isValidField(
+        "eligible_branches"
+      )
+    ) {
+
+      gr.setValue(
+        "eligible_branches",
+        payload.eligible_branches || ""
+      );
+
+    }
+
+
+    if (
+      gr.isValidField(
+        "required_skills"
+      )
+    ) {
+
+      gr.setValue(
+        "required_skills",
+        payload.required_skills || ""
+      );
+
+    }
+
+
+    if (
+      gr.isValidField(
+        "job_description"
+      )
+    ) {
+
+      gr.setValue(
+        "job_description",
+        payload.job_description || ""
+      );
+
+    }
+
+
+    if (
+      gr.isValidField(
+        "application_deadline"
+      )
+    ) {
+
+      gr.setValue(
+        "application_deadline",
+        payload.application_deadline || ""
+      );
+
+    }
+
+
+    if (
+      gr.isValidField(
+        "drive_date"
+      )
+    ) {
+
+      gr.setValue(
+        "drive_date",
+        payload.drive_date || ""
+      );
+
+    }
+
+
+    var updated =
+      gr.update();
+
+
+    if (updated) {
+
+      result.success = true;
+
+      result.message =
+        "Opportunity updated successfully.";
+
+      result.sys_id =
+        updated;
+
+    } else {
+
+      result.message =
+        "The opportunity could not be updated.";
+
+    }
+
+
+    return result;
+
+  }
+
+
+  /* =====================================================
+     ACTIONS
+     ===================================================== */
+
+  if (
+    input &&
+    input.action === "create"
+  ) {
+
+    data.result =
+      createOpportunity(
+        input.opportunity
+      );
+
+    return;
+
+  }
+
+
+  if (
+    input &&
+    input.action === "update"
+  ) {
+
+    data.result =
+      updateOpportunity(
+        input.opportunity
+      );
+
+    return;
+
+  }
+
+
+  /* =====================================================
+     INITIAL LOAD
+     ===================================================== */
+
+  loadChoices();
+
+  loadCompanies();
+
+  loadOpportunities();
+
+
+})();
+(function() {
+    var tpoGR = new GlideRecord('x_snc_campus360_campus360_tpo_profile');
+    tpoGR.query();
+    if (tpoGR.next()) {
+        data.tpoName = tpoGR.getValue('tpo_name') || 'MD Ali';
+        data.tpoInitials = 'MA';
+        data.tpoTitle = tpoGR.getValue('designation') || 'Training & Placement Officer';
+        data.tpoOffice = tpoGR.getValue('college_name') || 'CMR Institute of Technology';
+    } else {
+        data.tpoName = 'MD Ali';
+        data.tpoInitials = 'MA';
+        data.tpoTitle = 'TPO';
+        data.tpoOffice = 'Training & Placement Office';
+    }
+})();
+
+
+(function() {
+    var tpoGR = new GlideRecord('x_snc_campus360_campus360_tpo_profile');
+    tpoGR.query();
+    var name = 'MD Ali';
+    var title = 'Training & Placement Officer';
+    var office = 'CMR Institute of Technology';
+    if (tpoGR.next()) {
+        name = tpoGR.getValue('tpo_name') || 'MD Ali';
+        title = tpoGR.getValue('designation') || title;
+        office = tpoGR.getValue('college_name') || office;
+    }
+    data.tpo = {
+        name: name,
+        firstName: name,
+        initials: 'MA',
+        title: title,
+        office: office
+    };
+    data.tpoName = name;
+    data.tpoInitials = 'MA';
+})();
+
+
+data.aiWidget = $sp.getWidget('c4ae634574e703107f4410c9fee0cde5');
+]]></script>
+        <servicenow>false</servicenow>
+        <sys_class_name>sp_widget</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-28 05:30:13</sys_created_on>
+        <sys_id>a317a79a44a303107f44301daf56c724</sys_id>
+        <sys_mod_count>24</sys_mod_count>
+        <sys_name>Campus360 TPO Opportunities New</sys_name>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name>sp_widget_a317a79a44a303107f44301daf56c724</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-10-01 09:44:14</sys_updated_on>
+        <template><![CDATA[<div class="campus360-opportunity-app"
+     ng-class="{'sidebar-collapsed': c.sidebarCollapsed}">
+
+  <!-- =====================================================
+       LEFT SIDEBAR
+       ===================================================== -->
+
+  <aside class="opportunity-sidebar">
+
+    <!-- BRAND -->
+    <div class="sidebar-brand">
+
+      <div class="brand-icon">
+        C
+      </div>
+
+      <div class="brand-text">
+
+        <div class="brand-title">
+          Campus360
+        </div>
+
+        <div class="brand-subtitle">
+          TPO Portal
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- TPO PROFILE -->
+    <div class="sidebar-profile">
+
+      <div class="profile-avatar">
+        MA
+      </div>
+
+      <div class="profile-details">
+
+        <div class="profile-name">
+          MD Ali
+        </div>
+
+        <div class="profile-role">
+          TPO
+        </div>
+
+        <div class="profile-department">
+          Training &amp; Placement Office
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- ===================================================
+         SIDEBAR MENU
+         =================================================== -->
+
+    <div class="sidebar-menu">
+
+      <div class="menu-section-title">
+        OVERVIEW
+      </div>
+
+
+      <button
+        type="button"
+        class="sidebar-menu-item"
+        ng-click="c.goTo('campus360_tpo_home')">
+
+        <span class="menu-icon">
+          ⌂
+        </span>
+
+        <span class="menu-label">
+          Dashboard
+        </span>
+
+      </button>
+
+
+      <div class="menu-section-title">
+        STUDENTS
+      </div>
+
+
+      <button
+        type="button"
+        class="sidebar-menu-item"
+        ng-click="c.goTo('campus360_tpo_student_management')">
+
+        <span class="menu-icon">
+          ♟
+        </span>
+
+        <span class="menu-label">
+          Students
+        </span>
+
+        <span
+          class="menu-count"
+          ng-if="c.data.studentCount">
+
+          {{c.data.studentCount}}
+
+        </span>
+
+      </button>
+
+
+      <button
+        type="button"
+        class="sidebar-menu-item"
+        ng-click="c.goTo('campus360_tpo_skill_intelligence_new')">
+
+        <span class="menu-icon">
+          ✣
+        </span>
+
+        <span class="menu-label">
+          Skill Intelligence
+        </span>
+
+      </button>
+
+
+      <button
+        type="button"
+        class="sidebar-menu-item"
+        ng-click="c.goTo('student_assessments_new')">
+
+        <span class="menu-icon">
+          ▤
+        </span>
+
+        <span class="menu-label">
+          Assessments
+        </span>
+
+      </button>
+
+
+      <div class="menu-section-title">
+        PLACEMENTS
+      </div>
+
+
+      <button
+        type="button"
+        class="sidebar-menu-item"
+        ng-click="c.goTo('campus360_tpo_companies_new')">
+
+        <span class="menu-icon">
+          ▤
+        </span>
+
+        <span class="menu-label">
+          Companies
+        </span>
+
+        <span
+          class="menu-count"
+          ng-if="c.data.companyCount">
+
+          {{c.data.companyCount}}
+
+        </span>
+
+      </button>
+
+
+      <!-- ACTIVE PAGE -->
+      <button
+        type="button"
+        class="sidebar-menu-item active"
+        ng-click="c.goTo('campus360_tpo_opportunities_new')">
+
+        <span class="menu-icon">
+          ◇
+        </span>
+
+        <span class="menu-label">
+          Opportunities
+        </span>
+
+        <span class="menu-count active-count">
+          {{c.data.summary.totalOpportunities}}
+        </span>
+
+      </button>
+
+
+      <button
+        type="button"
+        class="sidebar-menu-item"
+        ng-click="c.goTo('campus360_tpo_application_new')">
+
+        <span class="menu-icon">
+          ▤
+        </span>
+
+        <span class="menu-label">
+          Applications
+        </span>
+
+        <span
+          class="menu-count"
+          ng-if="c.data.applicationCount">
+
+          {{c.data.applicationCount}}
+
+        </span>
+
+      </button>
+
+
+      <button
+        type="button"
+        class="sidebar-menu-item"
+        ng-click="c.goTo('campus360_tpo_interviews_new')">
+
+        <span class="menu-icon">
+          ◎
+        </span>
+
+        <span class="menu-label">
+          Interviews
+        </span>
+
+      </button>
+
+
+      <button
+        type="button"
+        class="sidebar-menu-item"
+        ng-click="c.goTo('campus360_tpo_placement_outcomes')">
+
+        <span class="menu-icon">
+          ✓
+        </span>
+
+        <span class="menu-label">
+          Placement Outcomes
+        </span>
+
+        <span
+          class="menu-count green-count"
+          ng-if="c.data.placementOutcomeCount">
+
+          {{c.data.placementOutcomeCount}}
+
+        </span>
+
+      </button>
+
+
+      <div class="menu-section-title">
+        TRAINING
+      </div>
+
+
+      <button
+        type="button"
+        class="sidebar-menu-item"
+        ng-click="c.goTo('campus360_tpo_training_programs')">
+
+        <span class="menu-icon">
+          ▱
+        </span>
+
+        <span class="menu-label">
+          Training Programs
+        </span>
+
+      </button>
+
+    </div>
+
+
+    <!-- ===================================================
+         SIDEBAR FOOTER
+         =================================================== -->
+
+    <div class="sidebar-footer">
+
+      <div class="sidebar-footer-status">
+
+        <span></span>
+
+        Campus360 TPO
+
+      </div>
+
+      <small>
+        Opportunity Management
+      </small>
+
+    </div>
+
+  </aside>
+
+
+  <!-- =====================================================
+       MAIN CONTENT
+       ===================================================== -->
+
+  <main class="opportunity-main">
+
+
+    <!-- ===================================================
+         CAMPUS360 CUSTOM TOP NAVBAR
+         =================================================== -->
+
+    <header class="opportunity-topbar">
+
+
+      <!-- LEFT -->
+      <div class="topbar-left">
+
+
+        <!-- SIDEBAR TOGGLE -->
+        <button
+          type="button"
+          class="sidebar-toggle"
+          ng-click="c.toggleSidebar()"
+          title="Toggle Sidebar"
+          aria-label="Toggle Sidebar">
+
+          ☰
+
+        </button>
+
+
+        <!-- PAGE TITLE -->
+        <div class="page-title-box">
+
+          <div class="page-title-small">
+            CAMPUS360
+          </div>
+
+          <div class="page-title-large">
+            Opportunity Management
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- =================================================
+           RIGHT NAVBAR
+           ================================================= -->
+
+      <div class="topbar-right">
+
+
+        <!-- SEARCH -->
+        <div class="global-search">
+
+          <i class="fa fa-search global-search-icon"></i>
+
+          <input
+            type="text"
+            ng-model="c.searchText"
+            placeholder="Search opportunities..."
+            aria-label="Search opportunities">
+
+        </div>
+
+
+        <!-- REFRESH -->
+        <button
+          type="button"
+          class="topbar-circle-button"
+          ng-click="c.refreshData()"
+          title="Refresh">
+
+          <i class="fa fa-refresh"></i>
+
+        </button>
+
+
+        <!-- NOTIFICATIONS -->
+        <button
+          type="button"
+          class="topbar-icon-button notification-button"
+          title="Notifications"
+          aria-label="Notifications">
+
+          <i class="fa fa-bell-o"></i>
+
+          <span class="notification-indicator"></span>
+
+        </button>
+
+
+        <!-- DIVIDER -->
+        <div class="topbar-divider"></div>
+
+
+        <!-- USER PROFILE -->
+        <div class="topbar-user">
+
+          <div class="topbar-user-avatar">
+            MA
+          </div>
+
+          <div class="topbar-user-info">
+
+            <div class="topbar-user-name">
+              MD Ali
+            </div>
+
+            <div class="topbar-user-role">
+              TPO
+            </div>
+
+          </div>
+
+          <span class="user-chevron">
+            ˅
+          </span>
+
+        </div>
+
+      </div>
+
+    </header>
+
+
+    <!-- ===================================================
+         PAGE CONTENT
+         =================================================== -->
+
+    <section class="opportunity-content">
+
+
+      <!-- PAGE HEADER -->
+      <div class="page-header-row">
+
+        <div class="page-header-copy">
+
+          <div class="section-kicker">
+
+            <span class="kicker-dot"></span>
+
+            TPO OPPORTUNITY MANAGEMENT
+
+          </div>
+
+
+          <h1>
+            Placement Opportunities
+          </h1>
+
+
+          <p>
+            Create and manage recruitment opportunities,
+            eligibility, deadlines and placement drives
+            from one place.
+          </p>
+
+        </div>
+
+
+        <div class="page-header-actions">
+
+          <button
+            type="button"
+            class="secondary-action"
+            ng-click="c.refreshData()">
+
+            ↻ &nbsp; Refresh Data
+
+          </button>
+
+
+          <button
+            type="button"
+            class="primary-action"
+            ng-click="c.openAddModal()">
+
+            + &nbsp; Add Opportunity
+
+          </button>
+
+        </div>
+
+      </div>
+
+
+      <!-- ===================================================
+           KPI CARDS
+           =================================================== -->
+
+      <div class="opportunity-kpi-grid">
+
+
+        <!-- TOTAL -->
+        <div class="opportunity-kpi-card kpi-total">
+
+          <div class="kpi-icon">
+            ▤
+          </div>
+
+          <div class="kpi-content">
+
+            <div class="kpi-label">
+              TOTAL<br>
+              OPPORTUNITIES
+            </div>
+
+            <div class="kpi-value">
+              {{c.data.summary.totalOpportunities}}
+            </div>
+
+            <div class="kpi-description">
+              Registered opportunities
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- OPEN -->
+        <div class="opportunity-kpi-card kpi-open">
+
+          <div class="kpi-icon">
+            ✓
+          </div>
+
+          <div class="kpi-content">
+
+            <div class="kpi-label">
+              OPEN<br>
+              OPPORTUNITIES
+            </div>
+
+            <div class="kpi-value">
+              {{c.data.summary.openOpportunities}}
+            </div>
+
+            <div class="kpi-description">
+              Currently accepting applications
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- CLOSED -->
+        <div class="opportunity-kpi-card kpi-closed">
+
+          <div class="kpi-icon">
+            !
+          </div>
+
+          <div class="kpi-content">
+
+            <div class="kpi-label">
+              CLOSED<br>
+              OPPORTUNITIES
+            </div>
+
+            <div class="kpi-value">
+              {{c.data.summary.closedOpportunities}}
+            </div>
+
+            <div class="kpi-description">
+              No longer accepting applications
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- APPLICATIONS -->
+        <div class="opportunity-kpi-card kpi-applications">
+
+          <div class="kpi-icon">
+            ▱
+          </div>
+
+          <div class="kpi-content">
+
+            <div class="kpi-label">
+              TOTAL<br>
+              APPLICATIONS
+            </div>
+
+            <div class="kpi-value">
+              {{c.data.summary.totalApplications}}
+            </div>
+
+            <div class="kpi-description">
+              Student applications received
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- ===================================================
+           FILTER BAR
+           =================================================== -->
+
+      <div class="opportunity-filter-card">
+
+        <div class="filter-controls">
+
+
+          <div class="search-box">
+
+            <span class="search-icon">
+              ⌕
+            </span>
+
+            <input
+              type="text"
+              ng-model="c.searchText"
+              placeholder="Search by title, ID, company, location or skills...">
+
+          </div>
+
+
+          <select
+            class="filter-select"
+            ng-model="c.filters.type"
+            ng-options="item.value as item.label for item in c.data.opportunityTypes track by item.value">
+
+            <option value="">
+              All Opportunity Types
+            </option>
+
+          </select>
+
+
+          <select
+            class="filter-select"
+            ng-model="c.filters.source"
+            ng-options="item.value as item.label for item in c.data.opportunitySources track by item.value">
+
+            <option value="">
+              All Sources
+            </option>
+
+          </select>
+
+
+          <select
+            class="filter-select"
+            ng-model="c.filters.status"
+            ng-options="item.value as item.label for item in c.data.statuses track by item.value">
+
+            <option value="">
+              All Status
+            </option>
+
+          </select>
+
+
+          <button
+            type="button"
+            class="clear-filter-btn"
+            ng-click="c.clearFilters()">
+
+            Clear
+
+          </button>
+
+        </div>
+
+      </div>
+
+
+      <!-- ===================================================
+           DIRECTORY
+           =================================================== -->
+
+      <div class="opportunity-directory-card">
+
+        <div class="directory-header">
+
+          <div>
+
+            <div class="directory-kicker">
+              PLACEMENT OPPORTUNITY DIRECTORY
+            </div>
+
+            <h2>
+              All Opportunities
+            </h2>
+
+          </div>
+
+
+          <div class="directory-header-right">
+
+            <span class="record-count">
+              {{c.filteredOpportunities.length}} records
+            </span>
+
+            <button
+              type="button"
+              class="directory-add-btn"
+              ng-click="c.openAddModal()">
+
+              + Add Opportunity
+
+            </button>
+
+          </div>
+
+        </div>
+
+
+        <div class="opportunity-table-wrapper">
+
+          <table class="opportunity-table">
+
+            <thead>
+
+              <tr>
+
+                <th>OPPORTUNITY</th>
+                <th>OPPORTUNITY ID</th>
+                <th>COMPANY</th>
+                <th>TYPE</th>
+                <th>LOCATION</th>
+                <th>CTC / STIPEND</th>
+                <th>MIN CGPA</th>
+                <th>APPLICATIONS</th>
+                <th>DEADLINE</th>
+                <th>STATUS</th>
+                <th>ACTION</th>
+
+              </tr>
+
+            </thead>
+
+
+            <tbody>
+
+              <tr
+                ng-repeat="opportunity in c.filteredOpportunities track by opportunity.sys_id">
+
+
+                <!-- OPPORTUNITY -->
+
+                <td>
+
+                  <div class="opportunity-name-cell">
+
+                    <div class="opportunity-avatar">
+                      {{c.getInitials(opportunity.title)}}
+                    </div>
+
+                    <div>
+
+                      <div class="opportunity-title">
+                        {{opportunity.title || 'Untitled Opportunity'}}
+                      </div>
+
+                      <div class="opportunity-subtitle">
+                        {{opportunity.source || 'Placement Opportunity'}}
+                      </div>
+
+                    </div>
+
+                  </div>
+
+                </td>
+
+
+                <!-- ID -->
+
+                <td>
+
+                  <span class="opportunity-id">
+                    {{opportunity.opportunity_id || '—'}}
+                  </span>
+
+                </td>
+
+
+                <!-- COMPANY -->
+
+                <td>
+
+                  <span class="company-name">
+                    {{opportunity.company || '—'}}
+                  </span>
+
+                </td>
+
+
+                <!-- TYPE -->
+
+                <td>
+
+                  <span class="type-badge">
+                    {{opportunity.type || '—'}}
+                  </span>
+
+                </td>
+
+
+                <!-- LOCATION -->
+
+                <td>
+
+                  <span class="location-text">
+                    {{opportunity.location || '—'}}
+                  </span>
+
+                </td>
+
+
+                <!-- CTC -->
+
+                <td>
+
+                  <span class="ctc-text">
+                    {{opportunity.ctc || '—'}}
+                  </span>
+
+                </td>
+
+
+                <!-- CGPA -->
+
+                <td>
+
+                  <span class="cgpa-value">
+                    {{opportunity.minimum_cgpa || '—'}}
+                  </span>
+
+                </td>
+
+
+                <!-- APPLICATIONS -->
+
+                <td>
+
+                  <div class="application-count">
+
+                    <span class="application-number">
+                      {{opportunity.application_count || 0}}
+                    </span>
+
+                    <span class="application-label">
+                      applications
+                    </span>
+
+                  </div>
+
+                </td>
+
+
+                <!-- DEADLINE -->
+
+                <td>
+
+                  <span class="date-text">
+                    {{opportunity.deadline || '—'}}
+                  </span>
+
+                </td>
+
+
+                <!-- STATUS -->
+
+                <td>
+
+                  <span
+                    class="status-badge"
+                    ng-class="c.getStatusClass(opportunity.status)">
+
+                    {{opportunity.status || '—'}}
+
+                  </span>
+
+                </td>
+
+
+                <!-- ACTION -->
+
+                <td>
+
+                  <button
+                    type="button"
+                    class="view-button"
+                    ng-click="c.openViewModal(opportunity)">
+
+                    View
+
+                  </button>
+
+                </td>
+
+              </tr>
+
+
+              <!-- EMPTY -->
+
+              <tr ng-if="!c.filteredOpportunities.length">
+
+                <td
+                  colspan="11"
+                  class="empty-state">
+
+                  <div class="empty-icon">
+                    ◇
+                  </div>
+
+                  <div class="empty-title">
+                    No opportunities found
+                  </div>
+
+                  <div class="empty-description">
+                    Try changing your search or filters.
+                  </div>
+
+                </td>
+
+              </tr>
+
+            </tbody>
+
+          </table>
+
+        </div>
+
+      </div>
+
+    </section>
+
+  </main>
+
+
+  <!-- =====================================================
+       CREATE / EDIT MODAL
+       ===================================================== -->
+
+  <div
+    class="modal-backdrop"
+    ng-if="c.modalOpen"
+    ng-click="c.closeModal()">
+
+    <div
+      class="opportunity-modal"
+      ng-click="$event.stopPropagation()">
+
+
+      <div class="modal-header">
+
+        <div class="modal-title-area">
+
+          <div class="modal-icon">
+            +
+          </div>
+
+          <div>
+
+            <div class="modal-kicker">
+              CAMPUS360 OPPORTUNITY
+            </div>
+
+            <h2>
+              {{c.isEditMode
+                ? 'Edit Opportunity'
+                : 'Create Opportunity'}}
+            </h2>
+
+            <p>
+              {{c.isEditMode
+                ? 'Update the placement opportunity details.'
+                : 'Add a new placement opportunity for students.'}}
+            </p>
+
+          </div>
+
+        </div>
+
+
+        <button
+          type="button"
+          class="modal-close"
+          ng-click="c.closeModal()">
+
+          ×
+
+        </button>
+
+      </div>
+
+
+      <div class="modal-body">
+
+
+        <div class="form-section-title purple-section">
+          BASIC INFORMATION
+        </div>
+
+
+        <div class="form-grid">
+
+
+          <div class="form-group">
+
+            <label>
+              Opportunity ID
+            </label>
+
+            <input
+              type="text"
+              ng-model="c.form.opportunity_id"
+              maxlength="20"
+              placeholder="e.g. OPP001">
+
+          </div>
+
+
+          <div class="form-group">
+
+            <label>
+              Opportunity Title <span>*</span>
+            </label>
+
+            <input
+              type="text"
+              ng-model="c.form.opportunity_title"
+              maxlength="100"
+              placeholder="Enter opportunity title">
+
+          </div>
+
+
+          <div class="form-group">
+
+            <label>
+              Company <span>*</span>
+            </label>
+
+            <select
+              ng-model="c.form.company"
+              class="modal-select">
+
+              <option value="">
+                Select Company
+              </option>
+
+              <option
+                ng-repeat="company in c.data.companies track by company.sys_id"
+                value="{{company.sys_id}}">
+
+                {{company.name}}
+
+              </option>
+
+            </select>
+
+          </div>
+
+
+          <div class="form-group">
+
+            <label>
+              Opportunity Type
+            </label>
+
+            <select
+              ng-model="c.form.opportunity_type"
+              class="modal-select">
+
+              <option value="">
+                Select Opportunity Type
+              </option>
+
+              <option
+                ng-repeat="item in c.data.opportunityTypes track by item.value"
+                value="{{item.value}}">
+
+                {{item.label}}
+
+              </option>
+
+            </select>
+
+          </div>
+
+
+          <div class="form-group">
+
+            <label>
+              Opportunity Source
+            </label>
+
+            <select
+              ng-model="c.form.opportunity_source"
+              class="modal-select">
+
+              <option value="">
+                Select Source
+              </option>
+
+              <option
+                ng-repeat="item in c.data.opportunitySources track by item.value"
+                value="{{item.value}}">
+
+                {{item.label}}
+
+              </option>
+
+            </select>
+
+          </div>
+
+
+          <div class="form-group">
+
+            <label>
+              Status
+            </label>
+
+            <select
+              ng-model="c.form.status"
+              class="modal-select">
+
+              <option value="">
+                Select Status
+              </option>
+
+              <option
+                ng-repeat="item in c.data.statuses track by item.value"
+                value="{{item.value}}">
+
+                {{item.label}}
+
+              </option>
+
+            </select>
+
+          </div>
+
+        </div>
+
+
+        <div class="form-section-title green-section">
+          PLACEMENT DETAILS
+        </div>
+
+
+        <div class="form-grid">
+
+
+          <div class="form-group">
+
+            <label>
+              Location
+            </label>
+
+            <input
+              type="text"
+              ng-model="c.form.location"
+              maxlength="100"
+              placeholder="e.g. Hyderabad">
+
+          </div>
+
+
+          <div class="form-group">
+
+            <label>
+              CTC / Stipend
+            </label>
+
+            <input
+              type="text"
+              ng-model="c.form.ctc_stipend"
+              maxlength="50"
+              placeholder="e.g. 6 LPA">
+
+          </div>
+
+
+          <div class="form-group">
+
+            <label>
+              Minimum CGPA
+            </label>
+
+            <input
+              type="number"
+              step="0.01"
+              ng-model="c.form.minimum_cgpa"
+              placeholder="e.g. 7.50">
+
+          </div>
+
+
+          <div class="form-group">
+
+            <label>
+              Eligible Branches
+            </label>
+
+            <input
+              type="text"
+              ng-model="c.form.eligible_branches"
+              maxlength="200"
+              placeholder="e.g. CSE, IT, ECE">
+
+          </div>
+
+
+          <div class="form-group form-group-wide">
+
+            <label>
+              Required Skills
+            </label>
+
+            <input
+              type="text"
+              ng-model="c.form.required_skills"
+              maxlength="500"
+              placeholder="e.g. Java, SQL, Python">
+
+          </div>
+
+
+          <div class="form-group">
+
+            <label>
+              Application Deadline
+            </label>
+
+            <input
+              type="datetime-local"
+              ng-model="c.form.application_deadline">
+
+          </div>
+
+
+          <div class="form-group">
+
+            <label>
+              Drive Date
+            </label>
+
+            <input
+              type="datetime-local"
+              ng-model="c.form.drive_date">
+
+          </div>
+
+        </div>
+
+
+        <div class="form-section-title blue-section">
+          JOB DESCRIPTION
+        </div>
+
+
+        <div class="form-group form-group-full">
+
+          <label>
+            Job Description
+          </label>
+
+          <textarea
+            ng-model="c.form.job_description"
+            maxlength="4000"
+            rows="6"
+            placeholder="Enter job description, responsibilities and role details"></textarea>
+
+        </div>
+
+      </div>
+
+
+      <div class="modal-footer">
+
+        <div
+          class="modal-message"
+          ng-if="c.saveMessage">
+
+          {{c.saveMessage}}
+
+        </div>
+
+
+        <button
+          type="button"
+          class="modal-cancel-btn"
+          ng-click="c.closeModal()">
+
+          Cancel
+
+        </button>
+
+
+        <button
+          type="button"
+          class="modal-save-btn"
+          ng-click="c.saveOpportunity()"
+          ng-disabled="c.saving">
+
+          {{c.saving
+            ? 'Saving...'
+            : (c.isEditMode
+              ? 'Update Opportunity'
+              : 'Create Opportunity')}}
+
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- =====================================================
+       VIEW OPPORTUNITY MODAL
+       ===================================================== -->
+
+  <div
+    class="modal-backdrop view-backdrop"
+    ng-if="c.viewModalOpen"
+    ng-click="c.closeViewModal()">
+
+
+    <div
+      class="view-modal"
+      ng-click="$event.stopPropagation()">
+
+
+      <div class="view-modal-header">
+
+        <div class="view-title-area">
+
+          <div class="view-opportunity-icon">
+            {{c.getInitials(c.selectedOpportunity.title)}}
+          </div>
+
+          <div>
+
+            <div class="modal-kicker">
+              OPPORTUNITY DETAILS
+            </div>
+
+            <h2>
+              {{c.selectedOpportunity.title}}
+            </h2>
+
+            <div class="view-header-meta">
+
+              <span class="view-id-pill">
+                {{c.selectedOpportunity.opportunity_id || 'NO ID'}}
+              </span>
+
+              <span
+                class="status-badge"
+                ng-class="c.getStatusClass(c.selectedOpportunity.status)">
+
+                {{c.selectedOpportunity.status || '—'}}
+
+              </span>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <button
+          type="button"
+          class="modal-close"
+          ng-click="c.closeViewModal()">
+
+          ×
+
+        </button>
+
+      </div>
+
+
+      <div class="view-modal-body">
+
+
+        <div class="view-section-title purple-view-title">
+          OPPORTUNITY INFORMATION
+        </div>
+
+
+        <div class="details-grid">
+
+
+          <div class="detail-box detail-purple">
+
+            <span>
+              Opportunity ID
+            </span>
+
+            <strong>
+              {{c.selectedOpportunity.opportunity_id || '—'}}
+            </strong>
+
+          </div>
+
+
+          <div class="detail-box detail-blue">
+
+            <span>
+              Company
+            </span>
+
+            <strong>
+              {{c.selectedOpportunity.company || '—'}}
+            </strong>
+
+          </div>
+
+
+          <div class="detail-box detail-purple">
+
+            <span>
+              Opportunity Type
+            </span>
+
+            <strong>
+              {{c.selectedOpportunity.type || '—'}}
+            </strong>
+
+          </div>
+
+
+          <div class="detail-box detail-orange">
+
+            <span>
+              Opportunity Source
+            </span>
+
+            <strong>
+              {{c.selectedOpportunity.source || '—'}}
+            </strong>
+
+          </div>
+
+
+          <div class="detail-box detail-blue">
+
+            <span>
+              Location
+            </span>
+
+            <strong>
+              {{c.selectedOpportunity.location || '—'}}
+            </strong>
+
+          </div>
+
+
+          <div class="detail-box detail-green">
+
+            <span>
+              CTC / Stipend
+            </span>
+
+            <strong>
+              {{c.selectedOpportunity.ctc || '—'}}
+            </strong>
+
+          </div>
+
+
+          <div class="detail-box detail-purple">
+
+            <span>
+              Minimum CGPA
+            </span>
+
+            <strong>
+              {{c.selectedOpportunity.minimum_cgpa || '—'}}
+            </strong>
+
+          </div>
+
+
+          <div class="detail-box detail-green">
+
+            <span>
+              Applications
+            </span>
+
+            <strong>
+              {{c.selectedOpportunity.application_count || 0}}
+            </strong>
+
+          </div>
+
+        </div>
+
+
+        <div class="view-section-title green-view-title">
+          ELIGIBILITY &amp; SKILLS
+        </div>
+
+
+        <div class="details-grid">
+
+
+          <div class="detail-box detail-wide detail-green">
+
+            <span>
+              Eligible Branches
+            </span>
+
+            <strong>
+              {{c.selectedOpportunity.eligible_branches || '—'}}
+            </strong>
+
+          </div>
+
+
+          <div class="detail-box detail-wide detail-purple">
+
+            <span>
+              Required Skills
+            </span>
+
+            <strong>
+              {{c.selectedOpportunity.skills || '—'}}
+            </strong>
+
+          </div>
+
+        </div>
+
+
+        <div class="view-section-title blue-view-title">
+          DATES &amp; DESCRIPTION
+        </div>
+
+
+        <div class="details-grid">
+
+
+          <div class="detail-box detail-blue">
+
+            <span>
+              Application Deadline
+            </span>
+
+            <strong>
+              {{c.selectedOpportunity.deadline || '—'}}
+            </strong>
+
+          </div>
+
+
+          <div class="detail-box detail-blue">
+
+            <span>
+              Drive Date
+            </span>
+
+            <strong>
+              {{c.selectedOpportunity.drive_date || '—'}}
+            </strong>
+
+          </div>
+
+
+          <div class="detail-box detail-wide detail-description">
+
+            <span>
+              Job Description
+            </span>
+
+            <p>
+              {{c.selectedOpportunity.description ||
+                'No job description available.'}}
+            </p>
+
+          </div>
+
+        </div>
+
+
+      </div>
+
+
+      <div class="view-modal-footer">
+
+        <button
+          type="button"
+          class="modal-cancel-btn"
+          ng-click="c.closeViewModal()">
+
+          Close
+
+        </button>
+
+
+        <button
+          type="button"
+          class="modal-save-btn"
+          ng-click="c.editOpportunity(c.selectedOpportunity)">
+
+          Edit Opportunity
+
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- =====================================================
+       TOAST
+       ===================================================== -->
+
+  <div
+    class="opportunity-toast"
+    ng-if="c.toastMessage"
+    ng-class="{'toast-error': c.toastError}">
+
+    {{c.toastMessage}}
+
+  </div>
+
+
+  <!-- =====================================================
+       AI CHATBOT
+       ===================================================== -->
+
+  <div class="campus360-ai-widget">
+    <sp-widget widget="data.aiWidget"></sp-widget>
+  </div>
+
+</div>]]></template>
+    </sp_widget>
+</record_update>

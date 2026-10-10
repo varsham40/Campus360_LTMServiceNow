@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?><database>
+    <element attributes="enforce_dot_walk_cross_scope_access=true" db_object_id="067f0652e49703107f44d305db800ec0" label="Training Program" max_length="40" name="x_snc_campus360_training_program" type="collection">
+        <element label="Capacity" max_length="40" name="capacity" type="integer"/>
+        <element label="Trainer" max_length="32" name="trainer" reference="x_snc_campus360_trainer_master" type="reference"/>
+        <element display="true" label="Training Name" max_length="100" name="training_name" type="string"/>
+        <element label="Batch" max_length="30" name="batch" type="string"/>
+        <element choice="3" default="Planned" label="Status" max_length="20" name="status" type="choice">
+            <choice>
+                <element inactive_on_update="false" label="Ongoing" sequence="2" value="ongoing"/>
+                <element inactive_on_update="false" label="Open" sequence="1" value="open"/>
+                <element inactive_on_update="false" label="Cancelled" sequence="4" value="cancelled"/>
+                <element inactive_on_update="false" label="Planned" sequence="0" value="planned"/>
+                <element inactive_on_update="false" label="Completed" sequence="3" value="completed"/>
+            </choice>
+        </element>
+        <element label="Start Date" max_length="40" name="start_date" type="glide_date"/>
+        <element label="Skill Area" max_length="100" name="skill_area" type="string"/>
+        <element label="Training ID" max_length="20" name="training_id" type="string"/>
+        <element label="End Date" max_length="40" name="end_date" type="glide_date"/>
+        <index name="index">
+            <element name="trainer"/>
+        </index>
+    </element>
+</database>

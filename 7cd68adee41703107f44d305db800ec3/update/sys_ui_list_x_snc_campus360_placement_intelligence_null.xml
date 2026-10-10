@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update>
+    <sys_ui_list parent="" relationship="" sys_domain="global" table="x_snc_campus360_placement_intelligence" version="2" view="">
+        <sys_ui_list_element action="INSERT_OR_UPDATE">
+            <average_value>false</average_value>
+            <element>ai_insight</element>
+            <list_id display_value="x_snc_campus360_placement_intelligence" element="NULL" name="x_snc_campus360_placement_intelligence" parent="NULL" relationship="NULL" sys_domain="global" view="Default view">953f4f62ac5f03107f44b432e3496968</list_id>
+            <max_value>false</max_value>
+            <min_value>false</min_value>
+            <position>0</position>
+            <sum>false</sum>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-09-16 12:06:28</sys_created_on>
+            <sys_id>1d3f4f62ac5f03107f44b432e3496969</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-09-16 12:06:28</sys_updated_on>
+        </sys_ui_list_element>
+        <sys_ui_list_element action="INSERT_OR_UPDATE">
+            <average_value>false</average_value>
+            <element>bottleneck_stage</element>
+            <list_id display_value="x_snc_campus360_placement_intelligence" element="NULL" name="x_snc_campus360_placement_intelligence" parent="NULL" relationship="NULL" sys_domain="global" view="Default view">953f4f62ac5f03107f44b432e3496968</list_id>
+            <max_value>false</max_value>
+            <min_value>false</min_value>
+            <position>1</position>
+            <sum>false</sum>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-09-16 12:06:28</sys_created_on>
+            <sys_id>993f4f62ac5f03107f44b432e349696a</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-09-16 12:06:28</sys_updated_on>
+        </sys_ui_list_element>
+        <sys_ui_list_element action="INSERT_OR_UPDATE">
+            <average_value>false</average_value>
+            <element>intelligence_id</element>
+            <list_id display_value="x_snc_campus360_placement_intelligence" element="NULL" name="x_snc_campus360_placement_intelligence" parent="NULL" relationship="NULL" sys_domain="global" view="Default view">953f4f62ac5f03107f44b432e3496968</list_id>
+            <max_value>false</max_value>
+            <min_value>false</min_value>
+            <position>2</position>
+            <sum>false</sum>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-09-16 12:06:28</sys_created_on>
+            <sys_id>113f4f62ac5f03107f44b432e349696b</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-09-16 12:06:28</sys_updated_on>
+        </sys_ui_list_element>
+        <sys_ui_list_element action="INSERT_OR_UPDATE">
+            <average_value>false</average_value>
+            <element>last_updated</element>
+            <list_id display_value="x_snc_campus360_placement_intelligence" element="NULL" name="x_snc_campus360_placement_intelligence" parent="NULL" relationship="NULL" sys_domain="global" view="Default view">953f4f62ac5f03107f44b432e3496968</list_id>
+            <max_value>false</max_value>
+            <min_value>false</min_value>
+            <position>3</position>
+            <sum>false</sum>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-09-16 12:06:28</sys_created_on>
+            <sys_id>953f4f62ac5f03107f44b432e349696b</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-09-16 12:06:28</sys_updated_on>
+        </sys_ui_list_element>
+        <sys_ui_list_element action="INSERT_OR_UPDATE">
+            <average_value>false</average_value>
+            <element>missed_opportunities</element>
+            <list_id display_value="x_snc_campus360_placement_intelligence" element="NULL" name="x_snc_campus360_placement_intelligence" parent="NULL" relationship="NULL" sys_domain="global" view="Default view">953f4f62ac5f03107f44b432e3496968</list_id>
+            <max_value>false</max_value>
+            <min_value>false</min_value>
+            <position>4</position>
+            <sum>false</sum>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-09-16 12:06:28</sys_created_on>
+            <sys_id>1d3f4f62ac5f03107f44b432e349696b</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-09-16 12:06:28</sys_updated_on>
+        </sys_ui_list_element>
+        <sys_ui_list_element action="INSERT_OR_UPDATE">
+            <average_value>false</average_value>
+            <element>participation_score</element>
+            <list_id display_value="x_snc_campus360_placement_intelligence" element="NULL" name="x_snc_campus360_placement_intelligence" parent="NULL" relationship="NULL" sys_domain="global" view="Default view">953f4f62ac5f03107f44b432e3496968</list_id>
+            <max_value>false</max_value>
+            <min_value>false</min_value>
+            <position>5</position>
+            <sum>false</sum>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-09-16 12:06:28</sys_created_on>
+            <sys_id>913f4f62ac5f03107f44b432e349696c</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-09-16 12:06:28</sys_updated_on>
+        </sys_ui_list_element>
+        <sys_ui_list_element action="INSERT_OR_UPDATE">
+            <average_value>false</average_value>
+            <element>readiness_score</element>
+            <list_id display_value="x_snc_campus360_placement_intelligence" element="NULL" name="x_snc_campus360_placement_intelligence" parent="NULL" relationship="NULL" sys_domain="global" view="Default view">953f4f62ac5f03107f44b432e3496968</list_id>
+            <max_value>false</max_value>
+            <min_value>false</min_value>
+            <position>6</position>
+            <sum>false</sum>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-09-16 12:06:28</sys_created_on>
+            <sys_id>193f4f62ac5f03107f44b432e349696c</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-09-16 12:06:28</sys_updated_on>
+        </sys_ui_list_element>
+        <sys_ui_list_element action="INSERT_OR_UPDATE">
+            <average_value>false</average_value>
+            <element>recommended_action</element>
+            <list_id display_value="x_snc_campus360_placement_intelligence" element="NULL" name="x_snc_campus360_placement_intelligence" parent="NULL" relationship="NULL" sys_domain="global" view="Default view">953f4f62ac5f03107f44b432e3496968</list_id>
+            <max_value>false</max_value>
+            <min_value>false</min_value>
+            <position>7</position>
+            <sum>false</sum>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-09-16 12:06:28</sys_created_on>
+            <sys_id>9d3f4f62ac5f03107f44b432e349696c</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-09-16 12:06:28</sys_updated_on>
+        </sys_ui_list_element>
+        <sys_ui_list_element action="INSERT_OR_UPDATE">
+            <average_value>false</average_value>
+            <element>risk_level</element>
+            <list_id display_value="x_snc_campus360_placement_intelligence" element="NULL" name="x_snc_campus360_placement_intelligence" parent="NULL" relationship="NULL" sys_domain="global" view="Default view">953f4f62ac5f03107f44b432e3496968</list_id>
+            <max_value>false</max_value>
+            <min_value>false</min_value>
+            <position>8</position>
+            <sum>false</sum>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-09-16 12:06:28</sys_created_on>
+            <sys_id>153f4f62ac5f03107f44b432e349696d</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-09-16 12:06:28</sys_updated_on>
+        </sys_ui_list_element>
+        <sys_ui_list_element action="INSERT_OR_UPDATE">
+            <average_value>false</average_value>
+            <element>skill_gap_summary</element>
+            <list_id display_value="x_snc_campus360_placement_intelligence" element="NULL" name="x_snc_campus360_placement_intelligence" parent="NULL" relationship="NULL" sys_domain="global" view="Default view">953f4f62ac5f03107f44b432e3496968</list_id>
+            <max_value>false</max_value>
+            <min_value>false</min_value>
+            <position>9</position>
+            <sum>false</sum>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-09-16 12:06:28</sys_created_on>
+            <sys_id>993f4f62ac5f03107f44b432e349696d</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-09-16 12:06:28</sys_updated_on>
+        </sys_ui_list_element>
+        <sys_ui_list action="INSERT_OR_UPDATE">
+            <average_value>false</average_value>
+            <element/>
+            <max_value>false</max_value>
+            <min_value>false</min_value>
+            <name>x_snc_campus360_placement_intelligence</name>
+            <parent/>
+            <position/>
+            <relationship/>
+            <sum>false</sum>
+            <sys_class_name>sys_ui_list</sys_class_name>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-09-16 12:06:28</sys_created_on>
+            <sys_domain>global</sys_domain>
+            <sys_domain_path>/</sys_domain_path>
+            <sys_id>953f4f62ac5f03107f44b432e3496968</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_name>x_snc_campus360_placement_intelligence</sys_name>
+            <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+            <sys_policy/>
+            <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+            <sys_update_name>sys_ui_list_x_snc_campus360_placement_intelligence_null</sys_update_name>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-09-16 12:06:28</sys_updated_on>
+            <sys_user/>
+            <view display_value="Default view" name="NULL">Default view</view>
+            <view_name/>
+        </sys_ui_list>
+    </sys_ui_list>
+</record_update>

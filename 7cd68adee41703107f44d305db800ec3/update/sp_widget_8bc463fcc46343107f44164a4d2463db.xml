@@ -1,0 +1,1358 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_widget">
+    <sp_widget action="INSERT_OR_UPDATE">
+        <category>custom</category>
+        <client_script><![CDATA[api.controller = function($scope, $window) {
+
+    var c = this;
+
+
+    /*
+     * =====================================================
+     * INITIAL DATA
+     * =====================================================
+     */
+
+    c.search = "";
+
+    c.branchFilter = "";
+
+    c.cgpaFilter = "";
+
+    c.statusFilter = "";
+
+
+    /*
+     * =====================================================
+     * BACK TO DASHBOARD
+     * =====================================================
+     */
+
+    c.backToDashboard = function() {
+
+        $window.location.href =
+            "?id=recruiter_dashboard";
+
+    };
+
+
+    /*
+     * =====================================================
+     * VIEW CANDIDATE
+     * =====================================================
+     */
+
+    c.viewCandidate = function(candidate) {
+
+        if (!candidate || !candidate.sys_id) {
+            return;
+        }
+
+        $window.location.href =
+            "?id=campus360_recruiter_candidate_details" +
+            "&sys_id=" +
+            encodeURIComponent(candidate.sys_id);
+
+    };
+
+
+    /*
+     * =====================================================
+     * SEARCH + FILTER
+     * =====================================================
+     */
+
+    c.filterCandidate = function(candidate) {
+
+        if (!candidate) {
+            return false;
+        }
+
+
+        /*
+         * SEARCH
+         */
+
+        if (c.search) {
+
+            var searchText =
+                c.search.toLowerCase().trim();
+
+            var name =
+                (candidate.name || "").toLowerCase();
+
+            var studentId =
+                (candidate.student_id || "").toLowerCase();
+
+            var branch =
+                (candidate.branch || "").toLowerCase();
+
+            var skills =
+                (candidate.skills || []).join(" ").toLowerCase();
+
+            var email =
+                (candidate.email || "").toLowerCase();
+
+
+            var matchesSearch =
+                name.indexOf(searchText) !== -1 ||
+                studentId.indexOf(searchText) !== -1 ||
+                branch.indexOf(searchText) !== -1 ||
+                skills.indexOf(searchText) !== -1 ||
+                email.indexOf(searchText) !== -1;
+
+
+            if (!matchesSearch) {
+                return false;
+            }
+
+        }
+
+
+        /*
+         * BRANCH FILTER
+         */
+
+        if (c.branchFilter) {
+
+            if (candidate.branch !== c.branchFilter) {
+                return false;
+            }
+
+        }
+
+
+        /*
+         * CGPA FILTER
+         */
+
+        if (c.cgpaFilter) {
+
+            var cgpa =
+                parseFloat(candidate.cgpa || 0);
+
+            var minimum =
+                parseFloat(c.cgpaFilter);
+
+            if (cgpa < minimum) {
+                return false;
+            }
+
+        }
+
+
+        /*
+         * PLACEMENT STATUS
+         */
+
+        if (c.statusFilter) {
+
+            if (
+                candidate.placement_status !==
+                c.statusFilter
+            ) {
+
+                return false;
+
+            }
+
+        }
+
+
+        return true;
+
+    };
+
+
+    /*
+     * =====================================================
+     * GET UNIQUE BRANCHES
+     * =====================================================
+     */
+
+    c.getBranches = function() {
+
+        var branches = [];
+
+        if (!c.data || !c.data.candidates) {
+            return branches;
+        }
+
+
+        c.data.candidates.forEach(function(candidate) {
+
+            if (
+                candidate.branch &&
+                branches.indexOf(candidate.branch) === -1
+            ) {
+
+                branches.push(candidate.branch);
+
+            }
+
+        });
+
+
+        branches.sort();
+
+        return branches;
+
+    };
+
+
+    /*
+     * =====================================================
+     * RESULT COUNT
+     * =====================================================
+     */
+
+    c.getFilteredCount = function() {
+
+        if (!c.data || !c.data.candidates) {
+            return 0;
+        }
+
+        var count = 0;
+
+        c.data.candidates.forEach(function(candidate) {
+
+            if (c.filterCandidate(candidate)) {
+                count++;
+            }
+
+        });
+
+        return count;
+
+    };
+
+
+    /*
+     * =====================================================
+     * CLEAR FILTERS
+     * =====================================================
+     */
+
+    c.clearFilters = function() {
+
+        c.search = "";
+
+        c.branchFilter = "";
+
+        c.cgpaFilter = "";
+
+        c.statusFilter = "";
+
+    };
+
+
+    /*
+     * =====================================================
+     * REFRESH
+     * =====================================================
+     */
+
+    c.refresh = function() {
+
+        c.server.update();
+
+    };
+
+
+};]]></client_script>
+        <controller_as>c</controller_as>
+        <css>.talent-pool-page {&#13;
+    min-height: 100vh;&#13;
+    padding: 32px;&#13;
+    background: #eef2f7;&#13;
+    font-family: Arial, sans-serif;&#13;
+    color: #17213a;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   HEADER&#13;
+   ========================================= */&#13;
+&#13;
+.page-header {&#13;
+    background: linear-gradient(&#13;
+        135deg,&#13;
+        #182848,&#13;
+        #3b4cc0&#13;
+    );&#13;
+&#13;
+    color: white;&#13;
+&#13;
+    padding: 28px 32px;&#13;
+&#13;
+    border-radius: 16px;&#13;
+&#13;
+    display: flex;&#13;
+    justify-content: space-between;&#13;
+    align-items: center;&#13;
+&#13;
+    margin-bottom: 20px;&#13;
+&#13;
+    box-shadow:&#13;
+        0 8px 24px rgba(30, 45, 100, 0.18);&#13;
+}&#13;
+&#13;
+&#13;
+.eyebrow {&#13;
+    font-size: 11px;&#13;
+    font-weight: 700;&#13;
+&#13;
+    letter-spacing: 1.5px;&#13;
+&#13;
+    color: #cdd6ff;&#13;
+&#13;
+    margin-bottom: 8px;&#13;
+}&#13;
+&#13;
+&#13;
+.page-header h1 {&#13;
+    margin: 0;&#13;
+&#13;
+    font-size: 28px;&#13;
+&#13;
+    font-weight: 700;&#13;
+&#13;
+    color: white;&#13;
+}&#13;
+&#13;
+&#13;
+.page-header p {&#13;
+    margin: 8px 0 0;&#13;
+&#13;
+    font-size: 13px;&#13;
+&#13;
+    color: #d9dff5;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   BACK BUTTON&#13;
+   ========================================= */&#13;
+&#13;
+.back-btn {&#13;
+    border: 1px solid rgba(255,255,255,0.5);&#13;
+&#13;
+    background: rgba(255,255,255,0.1);&#13;
+&#13;
+    color: white;&#13;
+&#13;
+    padding: 11px 18px;&#13;
+&#13;
+    border-radius: 9px;&#13;
+&#13;
+    cursor: pointer;&#13;
+&#13;
+    font-size: 12px;&#13;
+&#13;
+    transition: 0.2s;&#13;
+}&#13;
+&#13;
+&#13;
+.back-btn:hover {&#13;
+    background: white;&#13;
+    color: #3b4cc0;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   SEARCH&#13;
+   ========================================= */&#13;
+&#13;
+.search-panel {&#13;
+    background: white;&#13;
+&#13;
+    padding: 18px;&#13;
+&#13;
+    border-radius: 14px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    gap: 12px;&#13;
+&#13;
+    margin-bottom: 14px;&#13;
+&#13;
+    border: 1px solid #dce2ec;&#13;
+&#13;
+    box-shadow:&#13;
+        0 4px 14px rgba(30,45,80,0.06);&#13;
+}&#13;
+&#13;
+&#13;
+.search-box {&#13;
+    flex: 1;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    border: 1px solid #d6dce8;&#13;
+&#13;
+    border-radius: 9px;&#13;
+&#13;
+    padding: 0 14px;&#13;
+&#13;
+    background: #f8faff;&#13;
+}&#13;
+&#13;
+&#13;
+.search-box span {&#13;
+    color: #667085;&#13;
+&#13;
+    font-size: 21px;&#13;
+&#13;
+    margin-right: 10px;&#13;
+}&#13;
+&#13;
+&#13;
+.search-box input {&#13;
+    width: 100%;&#13;
+&#13;
+    border: none;&#13;
+&#13;
+    outline: none;&#13;
+&#13;
+    background: transparent;&#13;
+&#13;
+    padding: 12px 0;&#13;
+&#13;
+    font-size: 13px;&#13;
+&#13;
+    color: #27324a;&#13;
+}&#13;
+&#13;
+&#13;
+.search-btn {&#13;
+    background: #4658d8;&#13;
+&#13;
+    color: white;&#13;
+&#13;
+    border: none;&#13;
+&#13;
+    border-radius: 9px;&#13;
+&#13;
+    padding: 0 26px;&#13;
+&#13;
+    cursor: pointer;&#13;
+&#13;
+    font-size: 13px;&#13;
+&#13;
+    font-weight: 600;&#13;
+&#13;
+    transition: 0.2s;&#13;
+}&#13;
+&#13;
+&#13;
+.search-btn:hover {&#13;
+    background: #3547c5;&#13;
+&#13;
+    transform: translateY(-1px);&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   FILTERS&#13;
+   ========================================= */&#13;
+&#13;
+.filters {&#13;
+    background: white;&#13;
+&#13;
+    padding: 18px;&#13;
+&#13;
+    border-radius: 14px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    gap: 18px;&#13;
+&#13;
+    margin-bottom: 22px;&#13;
+&#13;
+    border: 1px solid #dce2ec;&#13;
+&#13;
+    box-shadow:&#13;
+        0 4px 14px rgba(30,45,80,0.05);&#13;
+}&#13;
+&#13;
+&#13;
+.filters &gt; div {&#13;
+    width: 220px;&#13;
+}&#13;
+&#13;
+&#13;
+.filters label {&#13;
+    display: block;&#13;
+&#13;
+    color: #667085;&#13;
+&#13;
+    font-size: 11px;&#13;
+&#13;
+    font-weight: 600;&#13;
+&#13;
+    margin-bottom: 7px;&#13;
+}&#13;
+&#13;
+&#13;
+.filters select {&#13;
+    width: 100%;&#13;
+&#13;
+    border: 1px solid #d6dce8;&#13;
+&#13;
+    border-radius: 8px;&#13;
+&#13;
+    padding: 10px;&#13;
+&#13;
+    background: #f9fafc;&#13;
+&#13;
+    color: #27324a;&#13;
+&#13;
+    font-size: 13px;&#13;
+&#13;
+    outline: none;&#13;
+}&#13;
+&#13;
+&#13;
+.filters select:focus {&#13;
+    border-color: #5368d8;&#13;
+&#13;
+    box-shadow:&#13;
+        0 0 0 3px rgba(83,104,216,0.1);&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   RESULT COUNT&#13;
+   ========================================= */&#13;
+&#13;
+.result-header {&#13;
+    margin-bottom: 14px;&#13;
+&#13;
+    color: #667085;&#13;
+&#13;
+    font-size: 13px;&#13;
+}&#13;
+&#13;
+&#13;
+.result-header strong {&#13;
+    color: #17213a;&#13;
+&#13;
+    font-size: 18px;&#13;
+&#13;
+    margin-right: 4px;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   GRID&#13;
+   ========================================= */&#13;
+&#13;
+.candidate-grid {&#13;
+    display: grid;&#13;
+&#13;
+    grid-template-columns:&#13;
+        repeat(3, minmax(0, 1fr));&#13;
+&#13;
+    gap: 18px;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   CARD&#13;
+   ========================================= */&#13;
+&#13;
+.candidate-card {&#13;
+    background: white;&#13;
+&#13;
+    border-radius: 15px;&#13;
+&#13;
+    padding: 20px;&#13;
+&#13;
+    border: 1px solid #dce2ec;&#13;
+&#13;
+    box-shadow:&#13;
+        0 4px 14px rgba(30,45,80,0.06);&#13;
+&#13;
+    transition:&#13;
+        transform 0.2s,&#13;
+        box-shadow 0.2s,&#13;
+        border-color 0.2s;&#13;
+}&#13;
+&#13;
+&#13;
+.candidate-card:hover {&#13;
+    transform: translateY(-4px);&#13;
+&#13;
+    border-color: #b8c2f5;&#13;
+&#13;
+    box-shadow:&#13;
+        0 10px 25px rgba(30,45,80,0.12);&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   TOP&#13;
+   ========================================= */&#13;
+&#13;
+.candidate-top {&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 12px;&#13;
+&#13;
+    margin-bottom: 18px;&#13;
+}&#13;
+&#13;
+&#13;
+.avatar {&#13;
+    width: 48px;&#13;
+&#13;
+    height: 48px;&#13;
+&#13;
+    border-radius: 12px;&#13;
+&#13;
+    background:&#13;
+        linear-gradient(&#13;
+            135deg,&#13;
+            #4658d8,&#13;
+            #6979e8&#13;
+        );&#13;
+&#13;
+    color: white;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    justify-content: center;&#13;
+&#13;
+    font-weight: 700;&#13;
+&#13;
+    font-size: 14px;&#13;
+&#13;
+    box-shadow:&#13;
+        0 5px 12px rgba(70,88,216,0.25);&#13;
+}&#13;
+&#13;
+&#13;
+.candidate-name h3 {&#13;
+    margin: 0;&#13;
+&#13;
+    color: #17213a;&#13;
+&#13;
+    font-size: 15px;&#13;
+&#13;
+    font-weight: 700;&#13;
+}&#13;
+&#13;
+&#13;
+.candidate-name p {&#13;
+    margin: 4px 0 0;&#13;
+&#13;
+    color: #7a8498;&#13;
+&#13;
+    font-size: 11px;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   INFO&#13;
+   ========================================= */&#13;
+&#13;
+.candidate-info {&#13;
+    display: grid;&#13;
+&#13;
+    grid-template-columns:&#13;
+        1fr 1fr;&#13;
+&#13;
+    gap: 14px;&#13;
+&#13;
+    margin-bottom: 17px;&#13;
+&#13;
+    padding-bottom: 16px;&#13;
+&#13;
+    border-bottom:&#13;
+        1px solid #edf0f5;&#13;
+}&#13;
+&#13;
+&#13;
+.candidate-info label {&#13;
+    display: block;&#13;
+&#13;
+    color: #98a2b3;&#13;
+&#13;
+    font-size: 10px;&#13;
+&#13;
+    margin-bottom: 5px;&#13;
+&#13;
+    text-transform: uppercase;&#13;
+&#13;
+    letter-spacing: .4px;&#13;
+}&#13;
+&#13;
+&#13;
+.candidate-info span {&#13;
+    color: #29344e;&#13;
+&#13;
+    font-size: 13px;&#13;
+&#13;
+    font-weight: 600;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   SKILLS&#13;
+   ========================================= */&#13;
+&#13;
+.skills {&#13;
+    display: flex;&#13;
+&#13;
+    flex-wrap: wrap;&#13;
+&#13;
+    gap: 6px;&#13;
+&#13;
+    min-height: 30px;&#13;
+&#13;
+    margin-bottom: 18px;&#13;
+}&#13;
+&#13;
+&#13;
+.skill {&#13;
+    background: #edf0ff;&#13;
+&#13;
+    color: #4658d8;&#13;
+&#13;
+    padding: 5px 9px;&#13;
+&#13;
+    border-radius: 6px;&#13;
+&#13;
+    font-size: 10px;&#13;
+&#13;
+    font-weight: 600;&#13;
+}&#13;
+&#13;
+&#13;
+.skill-more {&#13;
+    color: #7a8498;&#13;
+&#13;
+    font-size: 10px;&#13;
+&#13;
+    padding: 5px 3px;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   FOOTER&#13;
+   ========================================= */&#13;
+&#13;
+.candidate-footer {&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    justify-content: space-between;&#13;
+}&#13;
+&#13;
+&#13;
+.placement-status {&#13;
+    padding: 5px 9px;&#13;
+&#13;
+    border-radius: 6px;&#13;
+&#13;
+    font-size: 10px;&#13;
+&#13;
+    font-weight: 600;&#13;
+&#13;
+    background: #fff4e5;&#13;
+&#13;
+    color: #c77700;&#13;
+}&#13;
+&#13;
+&#13;
+.placement-status.placed {&#13;
+    background: #e8f7ef;&#13;
+&#13;
+    color: #188653;&#13;
+}&#13;
+&#13;
+&#13;
+.placement-status.not-placed {&#13;
+    background: #fff4e5;&#13;
+&#13;
+    color: #c77700;&#13;
+}&#13;
+&#13;
+&#13;
+.view-btn {&#13;
+    border: 1px solid #d7dcf8;&#13;
+&#13;
+    background: #f1f3ff;&#13;
+&#13;
+    color: #4658d8;&#13;
+&#13;
+    padding: 8px 12px;&#13;
+&#13;
+    border-radius: 7px;&#13;
+&#13;
+    cursor: pointer;&#13;
+&#13;
+    font-size: 11px;&#13;
+&#13;
+    font-weight: 600;&#13;
+&#13;
+    transition: 0.2s;&#13;
+}&#13;
+&#13;
+&#13;
+.view-btn:hover {&#13;
+    background: #4658d8;&#13;
+&#13;
+    color: white;&#13;
+&#13;
+    border-color: #4658d8;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   EMPTY STATE&#13;
+   ========================================= */&#13;
+&#13;
+.empty-state {&#13;
+    grid-column: 1 / -1;&#13;
+&#13;
+    background: white;&#13;
+&#13;
+    border-radius: 15px;&#13;
+&#13;
+    padding: 70px 20px;&#13;
+&#13;
+    text-align: center;&#13;
+&#13;
+    border: 1px solid #dce2ec;&#13;
+}&#13;
+&#13;
+&#13;
+.empty-icon {&#13;
+    font-size: 35px;&#13;
+&#13;
+    margin-bottom: 12px;&#13;
+}&#13;
+&#13;
+&#13;
+.empty-state h3 {&#13;
+    margin: 0 0 8px;&#13;
+&#13;
+    color: #17213a;&#13;
+}&#13;
+&#13;
+&#13;
+.empty-state p {&#13;
+    margin: 0;&#13;
+&#13;
+    color: #8a94a7;&#13;
+&#13;
+    font-size: 13px;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   RESPONSIVE&#13;
+   ========================================= */&#13;
+&#13;
+@media (max-width: 1100px) {&#13;
+&#13;
+    .candidate-grid {&#13;
+        grid-template-columns:&#13;
+            repeat(2, 1fr);&#13;
+    }&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+@media (max-width: 750px) {&#13;
+&#13;
+    .talent-pool-page {&#13;
+        padding: 15px;&#13;
+    }&#13;
+&#13;
+&#13;
+    .page-header {&#13;
+        flex-direction: column;&#13;
+&#13;
+        align-items: flex-start;&#13;
+&#13;
+        gap: 18px;&#13;
+    }&#13;
+&#13;
+&#13;
+    .search-panel {&#13;
+        flex-direction: column;&#13;
+    }&#13;
+&#13;
+&#13;
+    .search-btn {&#13;
+        padding: 12px;&#13;
+    }&#13;
+&#13;
+&#13;
+    .filters {&#13;
+        flex-direction: column;&#13;
+    }&#13;
+&#13;
+&#13;
+    .filters &gt; div {&#13;
+        width: 100%;&#13;
+    }&#13;
+&#13;
+&#13;
+    .candidate-grid {&#13;
+        grid-template-columns: 1fr;&#13;
+    }&#13;
+&#13;
+}</css>
+        <data_table>sp_instance</data_table>
+        <demo_data/>
+        <description/>
+        <docs/>
+        <field_list/>
+        <has_preview>false</has_preview>
+        <id>recruiter_talent_pool</id>
+        <internal>false</internal>
+        <link><![CDATA[function link(scope, element, attrs, controller) {
+  
+}]]></link>
+        <name>Recruiter Talent Pool</name>
+        <option_schema/>
+        <public>false</public>
+        <roles/>
+        <script><![CDATA[(function() {
+
+    data.candidates = [];
+
+    var students = new GlideRecord('x_snc_campus360_student_master');
+
+    students.orderBy('student_name');
+    students.query();
+
+    while (students.next()) {
+
+        var candidate = {};
+
+        candidate.sys_id = students.getUniqueValue();
+
+        candidate.name = students.getValue('student_name') || 'Unknown Student';
+
+        candidate.student_id = students.getValue('student_id') || '';
+
+        candidate.branch = students.getValue('branch') || '';
+
+        candidate.cgpa = students.getValue('cgpa') || '';
+
+        candidate.placement_status =
+            students.getValue('placement_status') || 'Not Placed';
+
+        candidate.profile_status =
+            students.getValue('profile_status') || '';
+
+        candidate.email =
+            students.getValue('email') || '';
+
+        /*
+         * INITIALS
+         */
+
+        var nameParts = candidate.name.trim().split(/\s+/);
+
+        if (nameParts.length >= 2) {
+
+            candidate.initials =
+                nameParts[0].charAt(0).toUpperCase() +
+                nameParts[nameParts.length - 1].charAt(0).toUpperCase();
+
+        } else {
+
+            candidate.initials =
+                candidate.name.substring(0, 2).toUpperCase();
+
+        }
+
+
+        /*
+         * GET STUDENT SKILLS
+         */
+
+        candidate.skills = [];
+
+        var skillGR =
+            new GlideRecord('x_snc_campus360_student_skills');
+
+        skillGR.addQuery('student', students.getUniqueValue());
+
+        skillGR.orderBy('skill_name');
+
+        skillGR.query();
+
+        while (skillGR.next()) {
+
+            var skillName =
+                skillGR.getValue('skill_name');
+
+            if (skillName) {
+
+                candidate.skills.push(skillName);
+
+            }
+
+        }
+
+
+        /*
+         * ADD CANDIDATE
+         */
+
+        data.candidates.push(candidate);
+
+    }
+
+
+})();]]></script>
+        <servicenow>false</servicenow>
+        <sys_class_name>sp_widget</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-23 13:28:45</sys_created_on>
+        <sys_id>8bc463fcc46343107f44164a4d2463db</sys_id>
+        <sys_mod_count>10</sys_mod_count>
+        <sys_name>Recruiter Talent Pool</sys_name>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name>sp_widget_8bc463fcc46343107f44164a4d2463db</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-23 18:06:30</sys_updated_on>
+        <template><![CDATA[<div class="talent-pool-page">
+
+    <!-- HEADER -->
+
+    <div class="page-header">
+
+        <div>
+
+            <div class="eyebrow">
+                TALENT INTELLIGENCE
+            </div>
+
+            <h1>
+                Search Talent Pool
+            </h1>
+
+            <p>
+                Discover candidates based on skills, branch and CGPA.
+            </p>
+
+        </div>
+
+        <button
+            class="back-btn"
+            ng-click="c.backToDashboard()">
+
+            ← Back to Dashboard
+
+        </button>
+
+    </div>
+
+
+    <!-- SEARCH -->
+
+    <div class="search-panel">
+
+        <div class="search-box">
+
+            <span>⌕</span>
+
+            <input
+                type="text"
+                ng-model="c.search"
+                placeholder="Search by name, student ID, branch or skill...">
+
+        </div>
+
+        <button
+            class="search-btn"
+            ng-click="c.refresh()">
+
+            Search
+
+        </button>
+
+    </div>
+
+
+    <!-- FILTERS -->
+
+    <div class="filters">
+
+        <div>
+
+            <label>
+                Branch
+            </label>
+
+            <select ng-model="c.branchFilter">
+
+                <option value="">
+                    All Branches
+                </option>
+
+                <option
+                    ng-repeat="branch in c.getBranches()"
+                    value="{{branch}}">
+
+                    {{branch}}
+
+                </option>
+
+            </select>
+
+        </div>
+
+
+        <div>
+
+            <label>
+                Minimum CGPA
+            </label>
+
+            <select ng-model="c.cgpaFilter">
+
+                <option value="">
+                    Any
+                </option>
+
+                <option value="6">
+                    6.0+
+                </option>
+
+                <option value="7">
+                    7.0+
+                </option>
+
+                <option value="8">
+                    8.0+
+                </option>
+
+                <option value="8.5">
+                    8.5+
+                </option>
+
+                <option value="9">
+                    9.0+
+                </option>
+
+            </select>
+
+        </div>
+
+
+        <div>
+
+            <label>
+                Placement Status
+            </label>
+
+            <select ng-model="c.statusFilter">
+
+                <option value="">
+                    All Status
+                </option>
+
+                <option value="Not Placed">
+                    Not Placed
+                </option>
+
+                <option value="Placed">
+                    Placed
+                </option>
+
+            </select>
+
+        </div>
+
+
+        <div style="margin-left:auto;">
+
+            <label>
+                &nbsp;
+            </label>
+
+            <button
+                class="back-btn"
+                ng-click="c.clearFilters()">
+
+                Clear Filters
+
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <!-- RESULT COUNT -->
+
+    <div class="result-header">
+
+        <strong>
+            {{c.getFilteredCount()}}
+        </strong>
+
+        candidates found
+
+    </div>
+
+
+    <!-- CANDIDATE GRID -->
+
+    <div class="candidate-grid">
+
+
+        <!-- CANDIDATE CARD -->
+
+        <div
+            class="candidate-card"
+            ng-repeat="candidate in c.data.candidates"
+            ng-if="c.filterCandidate(candidate)">
+
+
+            <!-- TOP -->
+
+            <div class="candidate-top">
+
+                <div class="avatar">
+
+                    {{candidate.initials}}
+
+                </div>
+
+
+                <div class="candidate-name">
+
+                    <h3>
+                        {{candidate.name}}
+                    </h3>
+
+                    <p>
+                        {{candidate.student_id}}
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <!-- INFORMATION -->
+
+            <div class="candidate-info">
+
+                <div>
+
+                    <label>
+                        Branch
+                    </label>
+
+                    <span>
+                        {{candidate.branch || 'Not specified'}}
+                    </span>
+
+                </div>
+
+
+                <div>
+
+                    <label>
+                        CGPA
+                    </label>
+
+                    <span>
+                        {{candidate.cgpa || 'N/A'}}
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <!-- SKILLS -->
+
+            <div class="skills">
+
+                <span
+                    class="skill"
+                    ng-repeat="skill in candidate.skills | limitTo:4">
+
+                    {{skill}}
+
+                </span>
+
+
+                <span
+                    class="skill-more"
+                    ng-if="candidate.skills.length > 4">
+
+                    +{{candidate.skills.length - 4}} more
+
+                </span>
+
+            </div>
+
+
+            <!-- FOOTER -->
+
+            <div class="candidate-footer">
+
+
+                <span class="placement-status">
+
+                    {{candidate.placement_status || 'Not Placed'}}
+
+                </span>
+
+
+                <button
+                    class="view-btn"
+                    ng-click="c.viewCandidate(candidate)">
+
+                    View Profile →
+
+                </button>
+
+
+            </div>
+
+        </div>
+
+
+        <!-- EMPTY STATE -->
+
+        <div
+            class="empty-state"
+            ng-if="c.getFilteredCount() === 0">
+
+            <h3>
+                No candidates found
+            </h3>
+
+            <p>
+                Try changing your search or filters.
+            </p>
+
+        </div>
+
+
+    </div>
+
+</div>]]></template>
+    </sp_widget>
+</record_update>

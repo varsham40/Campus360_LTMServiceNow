@@ -1,0 +1,741 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_widget">
+    <sp_widget action="INSERT_OR_UPDATE">
+        <category>custom</category>
+        <client_script><![CDATA[api.controller = function($scope, $window) {
+
+    var c = this;
+
+    c.loading = true;
+    c.error = "";
+    c.interview = null;
+    c.result = "";
+    c.feedback = "";
+    c.saving = false;
+
+
+    /*
+     * BACK TO INTERVIEW MANAGEMENT
+     */
+
+    c.backToInterviews = function() {
+
+        $window.location.href =
+            "?id=campus360_recruiter_interviews";
+
+    };
+
+
+    /*
+     * GET INTERVIEW
+     */
+
+    if (c.data && c.data.interview) {
+
+        c.interview = c.data.interview;
+
+        c.result = c.interview.result || "";
+        c.feedback = c.interview.feedback || "";
+
+        c.loading = false;
+
+    } else {
+
+        c.loading = false;
+        c.error = "Interview record could not be found.";
+
+    }
+
+
+    /*
+     * UPDATE RESULT
+     */
+
+    c.updateResult = function() {
+
+        if (!c.result) {
+            alert("Please select an interview result.");
+            return;
+        }
+
+        c.saving = true;
+
+        c.server.get({
+            action: "update_result",
+            sys_id: c.interview.sys_id,
+            result: c.result,
+            feedback: c.feedback
+        }).then(function(response) {
+
+            c.saving = false;
+
+            if (response.data.success) {
+
+                alert("Interview result updated successfully.");
+
+                c.interview.result =
+                    response.data.result;
+
+                c.interview.feedback =
+                    response.data.feedback;
+
+            } else {
+
+                alert(
+                    response.data.error ||
+                    "Unable to update interview."
+                );
+
+            }
+
+        });
+
+    };
+
+};]]></client_script>
+        <controller_as>c</controller_as>
+        <css>.interview-details-page {&#13;
+    max-width: 1100px;&#13;
+    margin: 0 auto;&#13;
+    padding: 30px;&#13;
+    background: #f5f7fb;&#13;
+    min-height: 100vh;&#13;
+    font-family: Arial, sans-serif;&#13;
+}&#13;
+&#13;
+&#13;
+/* HEADER */&#13;
+&#13;
+.details-header {&#13;
+    background: #ffffff;&#13;
+    border: 1px solid #dce3f0;&#13;
+    border-radius: 16px;&#13;
+    padding: 28px 32px;&#13;
+    display: flex;&#13;
+    justify-content: space-between;&#13;
+    align-items: center;&#13;
+    margin-bottom: 22px;&#13;
+}&#13;
+&#13;
+.eyebrow {&#13;
+    color: #4d63e8;&#13;
+    font-size: 12px;&#13;
+    font-weight: 700;&#13;
+    letter-spacing: 2px;&#13;
+    margin-bottom: 8px;&#13;
+}&#13;
+&#13;
+.details-header h1 {&#13;
+    margin: 0;&#13;
+    color: #082b5c;&#13;
+    font-size: 30px;&#13;
+}&#13;
+&#13;
+.details-header p {&#13;
+    margin: 8px 0 0;&#13;
+    color: #718096;&#13;
+}&#13;
+&#13;
+&#13;
+/* BUTTONS */&#13;
+&#13;
+.btn-back,&#13;
+.btn-secondary {&#13;
+    background: #ffffff;&#13;
+    border: 1px solid #cbd5e1;&#13;
+    color: #173f78;&#13;
+    padding: 11px 18px;&#13;
+    border-radius: 8px;&#13;
+    cursor: pointer;&#13;
+}&#13;
+&#13;
+.btn-primary {&#13;
+    background: #5367e8;&#13;
+    border: none;&#13;
+    color: #ffffff;&#13;
+    padding: 11px 20px;&#13;
+    border-radius: 8px;&#13;
+    cursor: pointer;&#13;
+    font-weight: 600;&#13;
+}&#13;
+&#13;
+.btn-primary:disabled {&#13;
+    opacity: 0.6;&#13;
+    cursor: not-allowed;&#13;
+}&#13;
+&#13;
+&#13;
+/* CARDS */&#13;
+&#13;
+.section-card {&#13;
+    background: #ffffff;&#13;
+    border: 1px solid #dce3f0;&#13;
+    border-radius: 14px;&#13;
+    padding: 25px;&#13;
+    margin-bottom: 20px;&#13;
+    box-shadow: 0 3px 12px rgba(20, 50, 100, 0.04);&#13;
+}&#13;
+&#13;
+.section-title {&#13;
+    font-size: 18px;&#13;
+    font-weight: 600;&#13;
+    color: #123b70;&#13;
+    padding-bottom: 15px;&#13;
+    border-bottom: 1px solid #e5eaf2;&#13;
+    margin-bottom: 20px;&#13;
+}&#13;
+&#13;
+.section-description {&#13;
+    color: #718096;&#13;
+    font-size: 14px;&#13;
+}&#13;
+&#13;
+&#13;
+/* INFORMATION GRID */&#13;
+&#13;
+.info-grid {&#13;
+    display: grid;&#13;
+    grid-template-columns: 1fr 1fr;&#13;
+    gap: 22px 40px;&#13;
+}&#13;
+&#13;
+.info-item {&#13;
+    display: flex;&#13;
+    flex-direction: column;&#13;
+    gap: 6px;&#13;
+}&#13;
+&#13;
+.info-item span {&#13;
+    color: #718096;&#13;
+    font-size: 12px;&#13;
+}&#13;
+&#13;
+.info-item strong {&#13;
+    color: #173f78;&#13;
+    font-size: 15px;&#13;
+}&#13;
+&#13;
+.full-width {&#13;
+    grid-column: 1 / -1;&#13;
+}&#13;
+&#13;
+&#13;
+/* MEETING */&#13;
+&#13;
+.meeting-link {&#13;
+    color: #4d63e8;&#13;
+    font-weight: 600;&#13;
+    text-decoration: none;&#13;
+}&#13;
+&#13;
+.meeting-link:hover {&#13;
+    text-decoration: underline;&#13;
+}&#13;
+&#13;
+&#13;
+/* STATUS */&#13;
+&#13;
+.status-row {&#13;
+    display: flex;&#13;
+    gap: 100px;&#13;
+}&#13;
+&#13;
+.status-row &gt; div {&#13;
+    display: flex;&#13;
+    flex-direction: column;&#13;
+    gap: 8px;&#13;
+}&#13;
+&#13;
+.status-row span {&#13;
+    color: #718096;&#13;
+    font-size: 12px;&#13;
+}&#13;
+&#13;
+.status-row strong {&#13;
+    color: #173f78;&#13;
+}&#13;
+&#13;
+.status-badge {&#13;
+    display: inline-block;&#13;
+    background: #eef1ff;&#13;
+    color: #4d63e8;&#13;
+    padding: 6px 12px;&#13;
+    border-radius: 7px;&#13;
+    font-size: 12px;&#13;
+    font-weight: 600;&#13;
+}&#13;
+&#13;
+&#13;
+/* FORM */&#13;
+&#13;
+.result-form {&#13;
+    display: flex;&#13;
+    flex-direction: column;&#13;
+    gap: 18px;&#13;
+}&#13;
+&#13;
+.form-group {&#13;
+    display: flex;&#13;
+    flex-direction: column;&#13;
+    gap: 7px;&#13;
+}&#13;
+&#13;
+.form-group label {&#13;
+    color: #173f78;&#13;
+    font-size: 13px;&#13;
+    font-weight: 600;&#13;
+}&#13;
+&#13;
+.form-group select,&#13;
+.form-group textarea {&#13;
+    width: 100%;&#13;
+    border: 1px solid #ccd6e5;&#13;
+    border-radius: 8px;&#13;
+    padding: 11px 12px;&#13;
+    font-size: 14px;&#13;
+    box-sizing: border-box;&#13;
+}&#13;
+&#13;
+.form-group textarea {&#13;
+    min-height: 110px;&#13;
+    resize: vertical;&#13;
+}&#13;
+&#13;
+.form-group select:focus,&#13;
+.form-group textarea:focus {&#13;
+    outline: none;&#13;
+    border-color: #5367e8;&#13;
+}&#13;
+&#13;
+&#13;
+/* ACTIONS */&#13;
+&#13;
+.action-row {&#13;
+    display: flex;&#13;
+    justify-content: flex-end;&#13;
+    gap: 12px;&#13;
+    margin-top: 22px;&#13;
+}&#13;
+&#13;
+&#13;
+/* LOADING / ERROR */&#13;
+&#13;
+.loading-card,&#13;
+.error-card {&#13;
+    background: #ffffff;&#13;
+    border: 1px solid #dce3f0;&#13;
+    border-radius: 14px;&#13;
+    padding: 40px;&#13;
+    text-align: center;&#13;
+}&#13;
+&#13;
+.error-card {&#13;
+    color: #b42318;&#13;
+}&#13;
+&#13;
+&#13;
+/* MOBILE */&#13;
+&#13;
+@media (max-width: 700px) {&#13;
+&#13;
+    .interview-details-page {&#13;
+        padding: 15px;&#13;
+    }&#13;
+&#13;
+    .details-header {&#13;
+        flex-direction: column;&#13;
+        align-items: flex-start;&#13;
+        gap: 20px;&#13;
+    }&#13;
+&#13;
+    .info-grid {&#13;
+        grid-template-columns: 1fr;&#13;
+    }&#13;
+&#13;
+    .full-width {&#13;
+        grid-column: auto;&#13;
+    }&#13;
+&#13;
+    .status-row {&#13;
+        flex-direction: column;&#13;
+        gap: 20px;&#13;
+    }&#13;
+}</css>
+        <data_table>sp_instance</data_table>
+        <demo_data/>
+        <description/>
+        <docs/>
+        <field_list/>
+        <has_preview>false</has_preview>
+        <id>recruiter_interview_details</id>
+        <internal>false</internal>
+        <link><![CDATA[function link(scope, element, attrs, controller) {
+  
+}]]></link>
+        <name>Recruiter Interview Details</name>
+        <option_schema/>
+        <public>false</public>
+        <roles/>
+        <script><![CDATA[(function() {
+
+    data.interview = null;
+    data.success = false;
+    data.error = "";
+
+
+    /*
+     * GET SYS_ID FROM URL
+     */
+
+    var sysId = $sp.getParameter("sys_id");
+
+
+    if (!sysId) {
+
+        data.error = "No interview was selected.";
+        return;
+
+    }
+
+
+    /*
+     * UPDATE RESULT
+     */
+
+    if (input && input.action == "update_result") {
+
+        var updateGR = new GlideRecord(
+            "x_snc_campus360_recruiter_interview"
+        );
+
+        if (!updateGR.get(input.sys_id)) {
+
+            data.error = "Interview record not found.";
+            return;
+
+        }
+
+
+        updateGR.setValue(
+            "result",
+            input.result
+        );
+
+        updateGR.setValue(
+            "feedback",
+            input.feedback || ""
+        );
+
+
+        /*
+         * Mark interview completed
+         */
+
+        updateGR.setValue(
+            "status",
+            "Completed"
+        );
+
+
+        updateGR.update();
+
+
+        data.success = true;
+        data.result =
+            updateGR.getDisplayValue("result");
+
+        data.feedback =
+            updateGR.getValue("feedback");
+
+        return;
+
+    }
+
+
+    /*
+     * GET INTERVIEW RECORD
+     */
+
+    var gr = new GlideRecord(
+        "x_snc_campus360_recruiter_interview"
+    );
+
+
+    if (!gr.get(sysId)) {
+
+        data.error = "Interview record not found.";
+        return;
+
+    }
+
+
+    var interview = {};
+
+    interview.sys_id =
+        gr.getUniqueValue();
+
+    interview.interview_id =
+        gr.getValue("interview_id");
+
+    interview.student =
+        gr.getDisplayValue("student");
+
+    interview.application =
+        gr.getDisplayValue("application");
+
+    interview.opportunity =
+        gr.getDisplayValue("opportunity");
+
+    interview.round =
+        gr.getDisplayValue("interview_round");
+
+    interview.mode =
+        gr.getDisplayValue("interview_mode");
+
+    interview.interviewer =
+        gr.getValue("interviewer");
+
+    interview.interview_date =
+        gr.getDisplayValue("interview_date");
+
+    interview.meeting_link =
+        gr.getValue("meeting_link");
+
+    interview.status =
+        gr.getDisplayValue("status");
+
+    interview.result =
+        gr.getDisplayValue("result");
+
+    interview.feedback =
+        gr.getValue("feedback");
+
+
+    data.interview = interview;
+
+})();]]></script>
+        <servicenow>false</servicenow>
+        <sys_class_name>sp_widget</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-24 06:39:42</sys_created_on>
+        <sys_id>b85f43c174e303107f4410c9fee0cd4b</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>Recruiter Interview Details</sys_name>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name>sp_widget_b85f43c174e303107f4410c9fee0cd4b</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-24 06:39:42</sys_updated_on>
+        <template><![CDATA[<div class="interview-details-page">
+
+  <!-- Header -->
+  <div class="details-header">
+
+    <div>
+      <div class="eyebrow">RECRUITMENT</div>
+      <h1>Interview Details</h1>
+      <p>View interview information and update the interview result.</p>
+    </div>
+
+    <button class="btn-back"
+            ng-click="c.backToInterviews()">
+      ← Back to Interviews
+    </button>
+
+  </div>
+
+
+  <!-- Loading -->
+  <div class="loading-card" ng-if="c.loading">
+    Loading interview details...
+  </div>
+
+
+  <!-- Error -->
+  <div class="error-card" ng-if="c.error">
+    {{c.error}}
+  </div>
+
+
+  <!-- Details -->
+  <div ng-if="!c.loading && c.interview" class="details-container">
+
+    <!-- Candidate -->
+    <div class="section-card">
+
+      <div class="section-title">
+        Candidate Information
+      </div>
+
+      <div class="info-grid">
+
+        <div class="info-item">
+          <span>Candidate</span>
+          <strong>{{c.interview.student}}</strong>
+        </div>
+
+        <div class="info-item">
+          <span>Opportunity</span>
+          <strong>{{c.interview.opportunity}}</strong>
+        </div>
+
+        <div class="info-item">
+          <span>Application</span>
+          <strong>{{c.interview.application}}</strong>
+        </div>
+
+        <div class="info-item">
+          <span>Interview ID</span>
+          <strong>{{c.interview.interview_id}}</strong>
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- Interview Information -->
+    <div class="section-card">
+
+      <div class="section-title">
+        Interview Information
+      </div>
+
+      <div class="info-grid">
+
+        <div class="info-item">
+          <span>Interview Round</span>
+          <strong>{{c.interview.round}}</strong>
+        </div>
+
+        <div class="info-item">
+          <span>Interview Mode</span>
+          <strong>{{c.interview.mode}}</strong>
+        </div>
+
+        <div class="info-item">
+          <span>Date & Time</span>
+          <strong>{{c.interview.interview_date}}</strong>
+        </div>
+
+        <div class="info-item">
+          <span>Interviewer</span>
+          <strong>{{c.interview.interviewer}}</strong>
+        </div>
+
+        <div class="info-item full-width">
+          <span>Meeting Link</span>
+
+          <a ng-if="c.interview.meeting_link"
+             href="{{c.interview.meeting_link}}"
+             target="_blank"
+             class="meeting-link">
+            Join Interview
+          </a>
+
+          <span ng-if="!c.interview.meeting_link">
+            Not provided
+          </span>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- Status -->
+    <div class="section-card">
+
+      <div class="section-title">
+        Interview Status
+      </div>
+
+      <div class="status-row">
+
+        <div>
+          <span>Status</span>
+          <div class="status-badge">
+            {{c.interview.status}}
+          </div>
+        </div>
+
+        <div>
+          <span>Current Result</span>
+          <strong>
+            {{c.interview.result || 'Pending'}}
+          </strong>
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- Result -->
+    <div class="section-card result-card">
+
+      <div class="section-title">
+        Interview Result
+      </div>
+
+      <p class="section-description">
+        Update the result after completing the interview.
+      </p>
+
+      <div class="result-form">
+
+        <div class="form-group">
+
+          <label>Result</label>
+
+          <select ng-model="c.result">
+
+            <option value="">Select Result</option>
+            <option value="Selected">Selected</option>
+            <option value="Rejected">Rejected</option>
+            <option value="Next Round">Next Round</option>
+
+          </select>
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label>Feedback</label>
+
+          <textarea
+              ng-model="c.feedback"
+              placeholder="Enter interview feedback...">
+          </textarea>
+
+        </div>
+
+      </div>
+
+
+      <div class="action-row">
+
+        <button class="btn-secondary"
+                ng-click="c.backToInterviews()">
+          Cancel
+        </button>
+
+        <button class="btn-primary"
+                ng-click="c.updateResult()"
+                ng-disabled="c.saving">
+
+          {{c.saving ? 'Saving...' : 'Update Result'}}
+
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>]]></template>
+    </sp_widget>
+</record_update>

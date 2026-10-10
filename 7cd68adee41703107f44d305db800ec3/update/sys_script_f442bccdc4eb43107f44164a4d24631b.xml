@@ -1,0 +1,1131 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update sys_domain="global" table="sys_script">
+    <sys_script action="INSERT_OR_UPDATE">
+        <abort_action>false</abort_action>
+        <access>package_private</access>
+        <action_delete>false</action_delete>
+        <action_insert>false</action_insert>
+        <action_query>false</action_query>
+        <action_update>false</action_update>
+        <active>true</active>
+        <add_message>false</add_message>
+        <advanced>true</advanced>
+        <change_fields>false</change_fields>
+        <client_callable>false</client_callable>
+        <collection>x_snc_campus360_mock_interview_request_trainer</collection>
+        <condition/>
+        <description/>
+        <execute_function>false</execute_function>
+        <filter_condition/>
+        <is_rest>false</is_rest>
+        <message/>
+        <name>api.controller = function() {     var c </name>
+        <order>200</order>
+        <priority>100</priority>
+        <rest_method/>
+        <rest_method_text/>
+        <rest_service/>
+        <rest_service_text/>
+        <rest_variables/>
+        <role_conditions/>
+        <script><![CDATA[(function executeRule(current, previous) {
+
+    var ASSIGNMENT_TABLE =
+        'x_snc_campus360_mock_interview_request_trainer';
+
+    var REQUEST_TABLE =
+        'x_snc_campus360_mock_interview_slot_request';
+
+    var AVAIL_TABLE =
+        'x_snc_campus360_trainer_interview_availability';
+
+    var MOCK_TABLE =
+        'x_snc_campus360_mock_interview';
+
+    var NOTIFICATION_TABLE =
+        'x_snc_campus360_student_notification';
+
+
+    /*
+     * ============================================================
+     * CHOICE HELPERS
+     * ============================================================
+     */
+
+    function getChoiceValueByLabel(tableName, fieldName, label) {
+
+        var choice = new GlideRecord('sys_choice');
+
+        choice.addQuery('name', tableName);
+        choice.addQuery('element', fieldName);
+        choice.addQuery('label', label);
+        choice.addQuery('inactive', false);
+        choice.setLimit(1);
+        choice.query();
+
+        if (choice.next()) {
+            return String(choice.getValue('value'));
+        }
+
+        return '';
+    }
+
+
+    function getFirstChoiceValue(tableName, fieldName) {
+
+        var choice = new GlideRecord('sys_choice');
+
+        choice.addQuery('name', tableName);
+        choice.addQuery('element', fieldName);
+        choice.addQuery('inactive', false);
+        choice.orderBy('sequence');
+        choice.setLimit(1);
+        choice.query();
+
+        if (choice.next()) {
+            return String(choice.getValue('value'));
+        }
+
+        return '';
+    }
+
+
+    function getChoiceValueLike(
+        tableName,
+        fieldName,
+        searchText
+    ) {
+
+        var choice = new GlideRecord('sys_choice');
+
+        choice.addQuery('name', tableName);
+        choice.addQuery('element', fieldName);
+        choice.addQuery('inactive', false);
+        choice.query();
+
+        var search =
+            String(searchText).toLowerCase();
+
+        while (choice.next()) {
+
+            var label =
+                String(
+                    choice.getValue('label') || ''
+                ).toLowerCase();
+
+            if (label.indexOf(search) >= 0) {
+
+                return String(
+                    choice.getValue('value')
+                );
+            }
+        }
+
+        return '';
+    }
+
+
+    function setChoiceByLabel(
+        gr,
+        fieldName,
+        label
+    ) {
+
+        if (!gr.isValidField(fieldName)) {
+            return false;
+        }
+
+        var value =
+            getChoiceValueByLabel(
+                gr.getTableName(),
+                fieldName,
+                label
+            );
+
+        if (!value) {
+            return false;
+        }
+
+        gr.setValue(
+            fieldName,
+            value
+        );
+
+        return true;
+    }
+
+
+    /*
+     * ============================================================
+     * TIME HELPER
+     * ============================================================
+     */
+
+    function normalizeTime(value) {
+
+        if (!value) {
+            return '';
+        }
+
+        var text =
+            String(value);
+
+        if (text.indexOf('.') >= 0) {
+            text =
+                text.split('.')[0];
+        }
+
+        var parts =
+            text.split(':');
+
+        if (parts.length < 2) {
+            return text;
+        }
+
+        var hh = parts[0];
+        var mm = parts[1];
+        var ss =
+            parts.length > 2
+                ? parts[2]
+                : '00';
+
+        if (hh.length === 1) {
+            hh = '0' + hh;
+        }
+
+        if (mm.length === 1) {
+            mm = '0' + mm;
+        }
+
+        if (ss.length === 1) {
+            ss = '0' + ss;
+        }
+
+        return hh + ':' + mm + ':' + ss;
+    }
+
+
+    /*
+     * ============================================================
+     * CHECK RESPONSE
+     * ============================================================
+     */
+
+    var acceptedValue =
+        getChoiceValueByLabel(
+            ASSIGNMENT_TABLE,
+            'response',
+            'Accepted'
+        );
+
+    if (!acceptedValue) {
+        return;
+    }
+
+    if (
+        String(current.getValue('response')) !==
+        acceptedValue
+    ) {
+        return;
+    }
+
+    /*
+     * Only execute when response CHANGED to Accepted.
+     */
+    if (
+        previous &&
+        String(previous.getValue('response')) ===
+        acceptedValue
+    ) {
+        return;
+    }
+
+
+    /*
+     * ============================================================
+     * LOAD PARENT REQUEST
+     * ============================================================
+     */
+
+    var requestId =
+        String(
+            current.getValue('request') || ''
+        );
+
+    if (!requestId) {
+        return;
+    }
+
+    var request =
+        new GlideRecord(REQUEST_TABLE);
+
+    if (!request.get(requestId)) {
+        return;
+    }
+
+
+    /*
+     * ============================================================
+     * FIND TIMING
+     * ============================================================
+     */
+
+    var timingId = '';
+
+    if (request.isValidField('requested_timing')) {
+
+        timingId =
+            String(
+                request.getValue('requested_timing') || ''
+            );
+    }
+
+    if (!timingId &&
+        request.isValidField('selected_availability')) {
+
+        timingId =
+            String(
+                request.getValue(
+                    'selected_availability'
+                ) || ''
+            );
+    }
+
+    if (!timingId &&
+        request.isValidField('selected_slot')) {
+
+        timingId =
+            String(
+                request.getValue('selected_slot') || ''
+            );
+    }
+
+    if (!timingId) {
+        return;
+    }
+
+
+    /*
+     * ============================================================
+     * LOAD AVAILABILITY
+     * ============================================================
+     */
+
+    var availability =
+        new GlideRecord(AVAIL_TABLE);
+
+    if (!availability.get(timingId)) {
+        return;
+    }
+
+    var availableValue =
+        getChoiceValueByLabel(
+            AVAIL_TABLE,
+            'status',
+            'Available'
+        );
+
+    var bookedValue =
+        getChoiceValueByLabel(
+            AVAIL_TABLE,
+            'status',
+            'Booked'
+        );
+
+    if (!availableValue ||
+        !bookedValue) {
+        return;
+    }
+
+
+    /*
+     * ============================================================
+     * IMPORTANT:
+     *
+     * If the slot was already booked by another request,
+     * do not continue.
+     *
+     * The Before BR prevents second trainer acceptance for
+     * the same parent request.
+     * This check protects against another parent request
+     * trying to use the same slot.
+     * ============================================================
+     */
+
+    var parentAcceptedValue =
+        getChoiceValueByLabel(
+            REQUEST_TABLE,
+            'status',
+            'Accepted'
+        );
+
+    var existingAcceptedTrainer =
+        String(
+            request.getValue('accepted_trainer') || ''
+        );
+
+    if (
+        parentAcceptedValue &&
+        String(request.getValue('status')) ===
+            parentAcceptedValue &&
+        existingAcceptedTrainer &&
+        existingAcceptedTrainer !==
+            String(current.getValue('trainer'))
+    ) {
+
+        return;
+    }
+
+
+    /*
+     * ============================================================
+     * EXACT SLOT DATA
+     * ============================================================
+     */
+
+    var slotDate =
+        String(
+            availability.getValue(
+                'available_date'
+            )
+        );
+
+    var slotStart =
+        normalizeTime(
+            availability.getValue(
+                'start_time'
+            )
+        );
+
+    var slotEnd =
+        normalizeTime(
+            availability.getValue(
+                'end_time'
+            )
+        );
+
+    var slotType =
+        String(
+            availability.getValue(
+                'interview_type'
+            )
+        );
+
+    var slotTypeDisplay =
+        String(
+            availability.getDisplayValue(
+                'interview_type'
+            )
+        );
+
+    var slotSkill =
+        String(
+            availability.getDisplayValue(
+                'skill_area'
+            ) || ''
+        );
+
+    /*
+     * ============================================================
+     * BOOK ALL TRAINER AVAILABILITY ROWS FOR EXACT SLOT
+     * ============================================================
+     *
+     * If TR001 and TR002 both have:
+     *
+     * 25-Sep-2026
+     * 10:00 - 11:00
+     * Technical
+     * Java
+     *
+     * BOTH rows become Booked.
+     *
+     * The trainer who accepted becomes accepted_trainer.
+     * ============================================================
+     */
+
+    var matchingAvailability =
+        new GlideRecord(AVAIL_TABLE);
+
+    matchingAvailability.addQuery(
+        'active',
+        true
+    );
+
+    matchingAvailability.addQuery(
+        'available_date',
+        slotDate
+    );
+
+    matchingAvailability.addQuery(
+        'start_time',
+        slotStart
+    );
+
+    matchingAvailability.addQuery(
+        'end_time',
+        slotEnd
+    );
+
+    matchingAvailability.addQuery(
+        'interview_type',
+        slotType
+    );
+
+    matchingAvailability.query();
+
+    while (matchingAvailability.next()) {
+
+        var skillDisplay =
+            String(
+                matchingAvailability.getDisplayValue(
+                    'skill_area'
+                ) || ''
+            );
+
+        if (skillDisplay !== slotSkill) {
+            continue;
+        }
+
+        matchingAvailability.setValue(
+            'status',
+            bookedValue
+        );
+
+        matchingAvailability.update();
+    }
+
+
+    /*
+     * ============================================================
+     * CREATE / LINK MOCK INTERVIEW
+     * ============================================================
+     */
+
+    var mockInterviewId = '';
+
+    /*
+     * First look for an existing Mock Interview already linked
+     * to this request.
+     */
+    if (request.isValidField('mock_interview')) {
+
+        mockInterviewId =
+            String(
+                request.getValue(
+                    'mock_interview'
+                ) || ''
+            );
+    }
+
+
+    /*
+     * If not already linked, look for a matching interview.
+     */
+    if (!mockInterviewId) {
+
+        var existingMock =
+            new GlideRecord(MOCK_TABLE);
+
+        if (
+            existingMock.isValidField('student') &&
+            existingMock.isValidField('trainer') &&
+            existingMock.isValidField('interview_date') &&
+            existingMock.isValidField('start_time') &&
+            existingMock.isValidField('end_time')
+        ) {
+
+            existingMock.addQuery(
+                'student',
+                request.getValue('student')
+            );
+
+            existingMock.addQuery(
+                'trainer',
+                current.getValue('trainer')
+            );
+
+            existingMock.addQuery(
+                'interview_date',
+                slotDate
+            );
+
+            existingMock.addQuery(
+                'start_time',
+                slotStart
+            );
+
+            existingMock.addQuery(
+                'end_time',
+                slotEnd
+            );
+
+            existingMock.query();
+
+            while (existingMock.next()) {
+
+                var existingType =
+                    existingMock.isValidField(
+                        'interview_type'
+                    )
+                        ? String(
+                            existingMock.getDisplayValue(
+                                'interview_type'
+                            ) || ''
+                        )
+                        : '';
+
+                if (
+                    !existingType ||
+                    existingType === slotTypeDisplay
+                ) {
+
+                    /*
+                     * Only reuse if unlinked or already linked
+                     * to this request.
+                     */
+                    var existingSlotRequest = '';
+
+                    if (
+                        existingMock.isValidField(
+                            'slot_request'
+                        )
+                    ) {
+
+                        existingSlotRequest =
+                            String(
+                                existingMock.getValue(
+                                    'slot_request'
+                                ) || ''
+                            );
+                    }
+
+                    if (
+                        !existingSlotRequest ||
+                        existingSlotRequest === requestId
+                    ) {
+
+                        mockInterviewId =
+                            String(
+                                existingMock.getUniqueValue()
+                            );
+
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+
+    /*
+     * ============================================================
+     * CREATE MOCK INTERVIEW IF NONE EXISTS
+     * ============================================================
+     */
+
+    if (!mockInterviewId) {
+
+        var mock =
+            new GlideRecord(MOCK_TABLE);
+
+        mock.initialize();
+
+        if (mock.isValidField('student')) {
+
+            mock.setValue(
+                'student',
+                request.getValue('student')
+            );
+        }
+
+        if (mock.isValidField('trainer')) {
+
+            mock.setValue(
+                'trainer',
+                current.getValue('trainer')
+            );
+        }
+
+        if (mock.isValidField('interview_date')) {
+
+            mock.setValue(
+                'interview_date',
+                slotDate
+            );
+        }
+
+        if (mock.isValidField('start_time')) {
+
+            mock.setValue(
+                'start_time',
+                slotStart
+            );
+        }
+
+        if (mock.isValidField('end_time')) {
+
+            mock.setValue(
+                'end_time',
+                slotEnd
+            );
+        }
+
+        /*
+         * Resolve interview type using the Mock Interview
+         * table's own choice list.
+         */
+        if (mock.isValidField('interview_type')) {
+
+            var mockTypeValue =
+                getChoiceValueByLabel(
+                    MOCK_TABLE,
+                    'interview_type',
+                    slotTypeDisplay
+                );
+
+            if (mockTypeValue) {
+
+                mock.setValue(
+                    'interview_type',
+                    mockTypeValue
+                );
+            }
+        }
+
+        /*
+         * Link parent request immediately.
+         */
+        if (mock.isValidField('slot_request')) {
+
+            mock.setValue(
+                'slot_request',
+                requestId
+            );
+        }
+
+        /*
+         * Interview Status.
+         */
+        if (mock.isValidField('interview_status')) {
+
+            setChoiceByLabel(
+                mock,
+                'interview_status',
+                'Scheduled'
+            );
+        }
+
+        /*
+         * Attendance Status.
+         */
+        if (mock.isValidField('attendance_status')) {
+
+            setChoiceByLabel(
+                mock,
+                'attendance_status',
+                'Scheduled'
+            );
+        }
+
+        /*
+         * QR Status.
+         */
+        if (mock.isValidField('qr_status')) {
+
+            setChoiceByLabel(
+                mock,
+                'qr_status',
+                'Generated'
+            );
+        }
+
+        mockInterviewId =
+            mock.insert();
+
+        /*
+         * Generate real QR target after sys_id exists.
+         */
+        if (mockInterviewId) {
+
+            var instanceUrl =
+                String(
+                    gs.getProperty(
+                        'glide.servlet.uri'
+                    ) || ''
+                );
+
+            if (
+                instanceUrl &&
+                instanceUrl.charAt(
+                    instanceUrl.length - 1
+                ) !== '/'
+            ) {
+
+                instanceUrl += '/';
+            }
+
+            var qrTarget =
+                instanceUrl +
+                'sp?id=qr_attendance&interview_id=' +
+                mockInterviewId;
+
+            var qrImage =
+                '';
+
+            try {
+
+                qrImage =
+                    'https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=' +
+                    encodeURIComponent(qrTarget);
+
+            } catch (ignoreEncode) {
+            }
+
+            var mockUpdate =
+                new GlideRecord(MOCK_TABLE);
+
+            if (mockUpdate.get(mockInterviewId)) {
+
+                if (
+                    mockUpdate.isValidField('qr_url')
+                ) {
+
+                    mockUpdate.setValue(
+                        'qr_url',
+                        qrTarget
+                    );
+                }
+
+                if (
+                    mockUpdate.isValidField('qr_code') &&
+                    qrImage
+                ) {
+
+                    mockUpdate.setValue(
+                        'qr_code',
+                        qrImage
+                    );
+                }
+
+                mockUpdate.update();
+            }
+        }
+
+    } else {
+
+        /*
+         * Existing Mock Interview:
+         * make sure Slot Request is populated.
+         */
+        var linkedMock =
+            new GlideRecord(MOCK_TABLE);
+
+        if (linkedMock.get(mockInterviewId)) {
+
+            if (
+                linkedMock.isValidField('slot_request') &&
+                !linkedMock.getValue('slot_request')
+            ) {
+
+                linkedMock.setValue(
+                    'slot_request',
+                    requestId
+                );
+
+                linkedMock.update();
+            }
+        }
+    }
+
+
+    /*
+     * ============================================================
+     * UPDATE PARENT REQUEST
+     * ============================================================
+     */
+
+    if (request.isValidField('status')) {
+
+        if (parentAcceptedValue) {
+
+            request.setValue(
+                'status',
+                parentAcceptedValue
+            );
+        }
+    }
+
+    if (request.isValidField('accepted_trainer')) {
+
+        request.setValue(
+            'accepted_trainer',
+            current.getValue('trainer')
+        );
+    }
+
+    if (request.isValidField('accepted_on')) {
+
+        request.setValue(
+            'accepted_on',
+            new GlideDateTime().getValue()
+        );
+    }
+
+    if (
+        request.isValidField('requested_timing') &&
+        !request.getValue('requested_timing')
+    ) {
+
+        request.setValue(
+            'requested_timing',
+            timingId
+        );
+    }
+
+    if (
+        request.isValidField('selected_availability') &&
+        !request.getValue('selected_availability')
+    ) {
+
+        request.setValue(
+            'selected_availability',
+            timingId
+        );
+    }
+
+    if (
+        request.isValidField('mock_interview') &&
+        mockInterviewId
+    ) {
+
+        request.setValue(
+            'mock_interview',
+            mockInterviewId
+        );
+    }
+
+    request.update();
+
+
+    /*
+     * ============================================================
+     * CREATE STUDENT NOTIFICATION
+     * ============================================================
+     */
+
+    var studentId =
+        String(
+            request.getValue('student') || ''
+        );
+
+    if (studentId) {
+
+        var requestDisplay =
+            String(
+                request.getDisplayValue()
+            );
+
+        var notificationMessage =
+            'Your mock interview request ' +
+            requestDisplay +
+            ' for ' +
+            slotDate +
+            ', ' +
+            normalizeTime(slotStart) +
+            ' - ' +
+            normalizeTime(slotEnd) +
+            ' (' +
+            slotTypeDisplay +
+            (slotSkill
+                ? ' - ' + slotSkill
+                : '') +
+            ') has been accepted by a trainer. Your interview is scheduled.';
+
+        /*
+         * Prevent duplicate notifications.
+         */
+        var existingNotification =
+            new GlideRecord(
+                NOTIFICATION_TABLE
+            );
+
+        if (
+            existingNotification.isValidField('student') &&
+            existingNotification.isValidField('message')
+        ) {
+
+            existingNotification.addQuery(
+                'student',
+                studentId
+            );
+
+            existingNotification.addQuery(
+                'message',
+                'CONTAINS',
+                requestDisplay
+            );
+
+            existingNotification.setLimit(1);
+            existingNotification.query();
+
+            if (!existingNotification.next()) {
+
+                var notification =
+                    new GlideRecord(
+                        NOTIFICATION_TABLE
+                    );
+
+                notification.initialize();
+
+                if (
+                    notification.isValidField(
+                        'student'
+                    )
+                ) {
+
+                    notification.setValue(
+                        'student',
+                        studentId
+                    );
+                }
+
+                if (
+                    notification.isValidField(
+                        'message'
+                    )
+                ) {
+
+                    notification.setValue(
+                        'message',
+                        notificationMessage
+                    );
+                }
+
+                if (
+                    notification.isValidField(
+                        'sent_date'
+                    )
+                ) {
+
+                    notification.setValue(
+                        'sent_date',
+                        new GlideDateTime().getValue()
+                    );
+                }
+
+                if (
+                    notification.isValidField(
+                        'action_required'
+                    )
+                ) {
+
+                    notification.setValue(
+                        'action_required',
+                        true
+                    );
+                }
+
+                if (
+                    notification.isValidField(
+                        'action_taken'
+                    )
+                ) {
+
+                    notification.setValue(
+                        'action_taken',
+                        false
+                    );
+                }
+
+                if (
+                    notification.isValidField(
+                        'reminder_count'
+                    )
+                ) {
+
+                    notification.setValue(
+                        'reminder_count',
+                        0
+                    );
+                }
+
+                /*
+                 * Use actual existing choice values.
+                 */
+                if (
+                    notification.isValidField(
+                        'notification_type'
+                    )
+                ) {
+
+                    var notificationType =
+                        getChoiceValueLike(
+                            NOTIFICATION_TABLE,
+                            'notification_type',
+                            'interview'
+                        );
+
+                    if (!notificationType) {
+
+                        notificationType =
+                            getFirstChoiceValue(
+                                NOTIFICATION_TABLE,
+                                'notification_type'
+                            );
+                    }
+
+                    if (notificationType) {
+
+                        notification.setValue(
+                            'notification_type',
+                            notificationType
+                        );
+                    }
+                }
+
+                if (
+                    notification.isValidField(
+                        'status'
+                    )
+                ) {
+
+                    var notificationStatus =
+                        getFirstChoiceValue(
+                            NOTIFICATION_TABLE,
+                            'status'
+                        );
+
+                    if (notificationStatus) {
+
+                        notification.setValue(
+                            'status',
+                            notificationStatus
+                        );
+                    }
+                }
+
+                notification.insert();
+            }
+        }
+    }
+
+})(current, previous);]]></script>
+        <sys_class_name>sys_script</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-23 19:07:07</sys_created_on>
+        <sys_domain>global</sys_domain>
+        <sys_domain_path>/</sys_domain_path>
+        <sys_id>f442bccdc4eb43107f44164a4d24631b</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>api.controller = function() {     var c </sys_name>
+        <sys_overrides/>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name>sys_script_f442bccdc4eb43107f44164a4d24631b</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-23 19:07:07</sys_updated_on>
+        <template/>
+        <when>after</when>
+    </sys_script>
+    <sys_translated_text action="delete_multiple" query="documentkey=f442bccdc4eb43107f44164a4d24631b"/>
+</record_update>

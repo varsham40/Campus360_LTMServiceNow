@@ -1,0 +1,1605 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_widget">
+    <sp_widget action="INSERT_OR_UPDATE">
+        <category>custom</category>
+        <client_script><![CDATA[api.controller = function($scope) {
+
+    var c = this;
+
+
+    // ==========================================
+    // FILTERS
+    // ==========================================
+
+    c.filters = {
+
+        search: "",
+
+        opportunity: ""
+
+    };
+
+
+    // ==========================================
+    // FILTERED OFFERS
+    // ==========================================
+
+    c.filteredOffers = [];
+
+
+    // ==========================================
+    // OPPORTUNITY FILTER LIST
+    // ==========================================
+
+    c.opportunityList = [];
+
+
+    // ==========================================
+    // BUILD OPPORTUNITY LIST
+    // ==========================================
+
+    c.buildOpportunityList = function() {
+
+        var offers =
+            c.data.offers || [];
+
+        var map = {};
+
+        c.opportunityList = [];
+
+
+        offers.forEach(function(offer) {
+
+            if (
+                offer.opportunity_sys_id &&
+                !map[offer.opportunity_sys_id]
+            ) {
+
+                map[
+                    offer.opportunity_sys_id
+                ] = true;
+
+
+                c.opportunityList.push({
+
+                    id:
+                        offer.opportunity_sys_id,
+
+                    title:
+                        offer.opportunity_title
+
+                });
+
+            }
+
+        });
+
+    };
+
+
+    // ==========================================
+    // APPLY FILTERS
+    // ==========================================
+
+    c.applyFilters = function() {
+
+        var offers =
+            c.data.offers || [];
+
+
+        var search =
+            (
+                c.filters.search ||
+                ""
+            )
+            .toLowerCase()
+            .trim();
+
+
+        var opportunity =
+            c.filters.opportunity ||
+            "";
+
+
+        c.filteredOffers =
+            offers.filter(function(offer) {
+
+
+                // --------------------------------
+                // SEARCH
+                // --------------------------------
+
+                var student =
+                    (
+                        offer.student_name ||
+                        ""
+                    ).toLowerCase();
+
+
+                var applicationId =
+                    (
+                        offer.application_id ||
+                        ""
+                    ).toLowerCase();
+
+
+                var opportunityTitle =
+                    (
+                        offer.opportunity_title ||
+                        ""
+                    ).toLowerCase();
+
+
+                var opportunityId =
+                    (
+                        offer.opportunity_id ||
+                        ""
+                    ).toLowerCase();
+
+
+                var matchesSearch =
+                    !search ||
+
+                    student.indexOf(search) !== -1 ||
+
+                    applicationId.indexOf(search) !== -1 ||
+
+                    opportunityTitle.indexOf(search) !== -1 ||
+
+                    opportunityId.indexOf(search) !== -1;
+
+
+                // --------------------------------
+                // OPPORTUNITY
+                // --------------------------------
+
+                var matchesOpportunity =
+                    !opportunity ||
+
+                    offer.opportunity_sys_id ===
+                    opportunity;
+
+
+                return (
+                    matchesSearch &&
+                    matchesOpportunity
+                );
+
+            });
+
+    };
+
+
+    // ==========================================
+    // CLEAR FILTERS
+    // ==========================================
+
+    c.clearFilters = function() {
+
+        c.filters.search = "";
+
+        c.filters.opportunity = "";
+
+        c.applyFilters();
+
+    };
+
+
+    // ==========================================
+    // INITIALIZE
+    // ==========================================
+
+    $scope.$watch(
+
+        function() {
+
+            return c.data.offers;
+
+        },
+
+        function(newValue) {
+
+            if (newValue) {
+
+                c.buildOpportunityList();
+
+                c.applyFilters();
+
+            }
+
+        },
+
+        true
+
+    );
+
+};]]></client_script>
+        <controller_as>c</controller_as>
+        <css>.offers-page {&#13;
+    padding: 30px;&#13;
+    max-width: 1200px;&#13;
+    margin: auto;&#13;
+    color: #0b2a5b;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   HEADER&#13;
+========================================= */&#13;
+&#13;
+.page-header {&#13;
+    background: #ffffff;&#13;
+    border: 1px solid #dbe3f3;&#13;
+    border-radius: 18px;&#13;
+    padding: 32px;&#13;
+    display: flex;&#13;
+    justify-content: space-between;&#13;
+    align-items: center;&#13;
+    box-shadow: 0 8px 25px rgba(40, 60, 100, 0.06);&#13;
+}&#13;
+&#13;
+&#13;
+.eyebrow {&#13;
+    font-size: 11px;&#13;
+    letter-spacing: 3px;&#13;
+    font-weight: 700;&#13;
+    color: #4e5ff5;&#13;
+}&#13;
+&#13;
+&#13;
+.page-header h1 {&#13;
+    margin: 8px 0 5px;&#13;
+    font-size: 28px;&#13;
+}&#13;
+&#13;
+&#13;
+.page-header p {&#13;
+    margin: 0;&#13;
+    color: #64748b;&#13;
+}&#13;
+&#13;
+&#13;
+.company-info {&#13;
+    display: inline-block;&#13;
+    margin-top: 14px;&#13;
+    padding: 8px 14px;&#13;
+    background: #f1f3ff;&#13;
+    border-radius: 7px;&#13;
+    font-size: 12px;&#13;
+    color: #4054d9;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   BUTTON&#13;
+========================================= */&#13;
+&#13;
+.btn {&#13;
+    padding: 11px 18px;&#13;
+    border-radius: 8px;&#13;
+    text-decoration: none;&#13;
+    font-size: 13px;&#13;
+}&#13;
+&#13;
+&#13;
+.btn-secondary {&#13;
+    border: 1px solid #ccd6ed;&#13;
+    background: #ffffff;&#13;
+    color: #3155df;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   STATISTICS&#13;
+========================================= */&#13;
+&#13;
+.stats-grid {&#13;
+    display: grid;&#13;
+    grid-template-columns:&#13;
+        repeat(4, 1fr);&#13;
+&#13;
+    gap: 18px;&#13;
+    margin-top: 24px;&#13;
+}&#13;
+&#13;
+&#13;
+.stat-card {&#13;
+    background: #ffffff;&#13;
+    border: 1px solid #dbe3f3;&#13;
+    border-radius: 16px;&#13;
+    padding: 20px;&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    gap: 14px;&#13;
+}&#13;
+&#13;
+&#13;
+.stat-icon {&#13;
+    width: 42px;&#13;
+    height: 42px;&#13;
+    border-radius: 10px;&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+    background: #eef1ff;&#13;
+    color: #4e5ff5;&#13;
+    font-size: 18px;&#13;
+}&#13;
+&#13;
+&#13;
+.stat-icon.offered {&#13;
+    background: #eefaf4;&#13;
+    color: #1a9b5d;&#13;
+}&#13;
+&#13;
+&#13;
+.stat-icon.accepted {&#13;
+    background: #eefaf4;&#13;
+    color: #14844b;&#13;
+}&#13;
+&#13;
+&#13;
+.stat-icon.rejected {&#13;
+    background: #fff0f0;&#13;
+    color: #d94848;&#13;
+}&#13;
+&#13;
+&#13;
+.stat-label {&#13;
+    font-size: 12px;&#13;
+    color: #64748b;&#13;
+}&#13;
+&#13;
+&#13;
+.stat-value {&#13;
+    margin-top: 4px;&#13;
+    font-size: 22px;&#13;
+    font-weight: 700;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   FILTERS&#13;
+========================================= */&#13;
+&#13;
+.offer-filters {&#13;
+    margin-top: 24px;&#13;
+    padding: 16px;&#13;
+    border: 1px solid #dbe3f3;&#13;
+    background: #f8faff;&#13;
+    border-radius: 14px;&#13;
+&#13;
+    display: grid;&#13;
+&#13;
+    grid-template-columns:&#13;
+        1fr 260px 90px;&#13;
+&#13;
+    gap: 12px;&#13;
+}&#13;
+&#13;
+&#13;
+.search-box,&#13;
+.filter-box {&#13;
+    position: relative;&#13;
+}&#13;
+&#13;
+&#13;
+.search-box input,&#13;
+.filter-box select {&#13;
+    width: 100%;&#13;
+    height: 42px;&#13;
+    border: 1px solid #ccd7ec;&#13;
+    border-radius: 8px;&#13;
+    background: #ffffff;&#13;
+    padding: 0 14px;&#13;
+    font-size: 13px;&#13;
+    color: #19355f;&#13;
+}&#13;
+&#13;
+&#13;
+.search-box input {&#13;
+    padding-left: 36px;&#13;
+}&#13;
+&#13;
+&#13;
+.search-icon {&#13;
+    position: absolute;&#13;
+    left: 13px;&#13;
+    top: 11px;&#13;
+    color: #52658a;&#13;
+}&#13;
+&#13;
+&#13;
+.clear-filter-btn {&#13;
+    height: 42px;&#13;
+    border: 1px solid #ccd7ec;&#13;
+    border-radius: 8px;&#13;
+    background: #ffffff;&#13;
+    color: #3155df;&#13;
+    cursor: pointer;&#13;
+}&#13;
+&#13;
+&#13;
+.filter-result {&#13;
+    margin: 12px 2px;&#13;
+    font-size: 12px;&#13;
+    color: #64748b;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   LIST CARD&#13;
+========================================= */&#13;
+&#13;
+.list-card {&#13;
+    margin-top: 8px;&#13;
+    background: #ffffff;&#13;
+    border: 1px solid #dbe3f3;&#13;
+    border-radius: 18px;&#13;
+    overflow: hidden;&#13;
+}&#13;
+&#13;
+&#13;
+.list-header {&#13;
+    padding: 24px;&#13;
+    display: flex;&#13;
+    justify-content: space-between;&#13;
+    border-bottom: 1px solid #e5eaf3;&#13;
+}&#13;
+&#13;
+&#13;
+.list-header h2 {&#13;
+    margin: 0;&#13;
+    font-size: 18px;&#13;
+}&#13;
+&#13;
+&#13;
+.list-header p {&#13;
+    margin: 6px 0 0;&#13;
+    font-size: 12px;&#13;
+    color: #64748b;&#13;
+}&#13;
+&#13;
+&#13;
+.record-count {&#13;
+    padding: 8px 12px;&#13;
+    background: #f1f3ff;&#13;
+    color: #4054d9;&#13;
+    border-radius: 8px;&#13;
+    font-size: 12px;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   TABLE&#13;
+========================================= */&#13;
+&#13;
+.table-wrapper {&#13;
+    overflow-x: auto;&#13;
+}&#13;
+&#13;
+&#13;
+.offer-table {&#13;
+    width: 100%;&#13;
+    border-collapse: collapse;&#13;
+}&#13;
+&#13;
+&#13;
+.offer-table th {&#13;
+    background: #f7f9fd;&#13;
+    padding: 14px;&#13;
+    text-align: left;&#13;
+    font-size: 10px;&#13;
+    letter-spacing: 1px;&#13;
+    color: #637391;&#13;
+}&#13;
+&#13;
+&#13;
+.offer-table td {&#13;
+    padding: 17px 14px;&#13;
+    border-top: 1px solid #edf0f6;&#13;
+    font-size: 12px;&#13;
+    color: #35486c;&#13;
+}&#13;
+&#13;
+&#13;
+.student-cell {&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    gap: 10px;&#13;
+}&#13;
+&#13;
+&#13;
+.student-cell strong {&#13;
+    display: block;&#13;
+    color: #0b2a5b;&#13;
+}&#13;
+&#13;
+&#13;
+.student-cell span {&#13;
+    display: block;&#13;
+    margin-top: 3px;&#13;
+    color: #7b8aa6;&#13;
+    font-size: 10px;&#13;
+}&#13;
+&#13;
+&#13;
+.student-avatar {&#13;
+    width: 34px;&#13;
+    height: 34px;&#13;
+    border-radius: 50%;&#13;
+    background: #eef1ff;&#13;
+    color: #4054d9;&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+    font-weight: 600;&#13;
+}&#13;
+&#13;
+&#13;
+.application-id {&#13;
+    color: #4054d9;&#13;
+}&#13;
+&#13;
+&#13;
+.opportunity-cell strong {&#13;
+    display: block;&#13;
+    color: #0b2a5b;&#13;
+}&#13;
+&#13;
+&#13;
+.opportunity-cell span {&#13;
+    display: block;&#13;
+    margin-top: 4px;&#13;
+    color: #7b8aa6;&#13;
+    font-size: 10px;&#13;
+}&#13;
+&#13;
+&#13;
+.interview-cell strong {&#13;
+    display: block;&#13;
+    color: #15945a;&#13;
+}&#13;
+&#13;
+&#13;
+.interview-cell span {&#13;
+    display: block;&#13;
+    margin-top: 4px;&#13;
+    color: #7b8aa6;&#13;
+    font-size: 10px;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   STATUS&#13;
+========================================= */&#13;
+&#13;
+.status-badge {&#13;
+    display: inline-block;&#13;
+    padding: 7px 12px;&#13;
+    border-radius: 20px;&#13;
+    font-size: 10px;&#13;
+    font-weight: 600;&#13;
+}&#13;
+&#13;
+&#13;
+.status-offered {&#13;
+    background: #eaf8f0;&#13;
+    color: #16884f;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   EMPTY&#13;
+========================================= */&#13;
+&#13;
+.empty-state {&#13;
+    text-align: center;&#13;
+    padding: 60px 20px;&#13;
+}&#13;
+&#13;
+&#13;
+.empty-icon {&#13;
+    font-size: 30px;&#13;
+    color: #7b88e8;&#13;
+}&#13;
+&#13;
+&#13;
+.empty-state h3 {&#13;
+    margin: 12px 0 6px;&#13;
+}&#13;
+&#13;
+&#13;
+.empty-state p {&#13;
+    color: #71809d;&#13;
+    font-size: 13px;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   RESPONSIVE&#13;
+========================================= */&#13;
+&#13;
+@media(max-width: 900px) {&#13;
+&#13;
+    .stats-grid {&#13;
+        grid-template-columns:&#13;
+            repeat(2, 1fr);&#13;
+    }&#13;
+&#13;
+&#13;
+    .offer-filters {&#13;
+        grid-template-columns: 1fr;&#13;
+    }&#13;
+&#13;
+}</css>
+        <data_table>sp_instance</data_table>
+        <demo_data/>
+        <description/>
+        <docs/>
+        <field_list/>
+        <has_preview>false</has_preview>
+        <id>recruiter_offers_new</id>
+        <internal>false</internal>
+        <link><![CDATA[function link(scope, element, attrs, controller) {
+  
+}]]></link>
+        <name>Campus360 Recruiter Offers New</name>
+        <option_schema/>
+        <public>false</public>
+        <roles/>
+        <script><![CDATA[(function() {
+
+    // =====================================================
+    // CAMPUS360 RECRUITER OFFERS
+    // =====================================================
+
+    // Current recruiter
+    data.recruiter_name = 'Ananya Mehta';
+    data.recruiter_id = 'RCR001';
+
+
+    // =====================================================
+    // CURRENT COMPANY
+    // =====================================================
+
+    var companySysId =
+        'e9268662acd303107f44b432e349694b';
+
+
+    // =====================================================
+    // GET COMPANY
+    // =====================================================
+
+    var companyGR =
+        new GlideRecord('x_snc_campus360_company_master');
+
+
+    if (!companyGR.get(companySysId)) {
+
+        data.error =
+            'Company record could not be found.';
+
+        return;
+
+    }
+
+
+    data.company_name =
+        companyGR.getValue('company_name');
+
+    data.company_id =
+        companyGR.getValue('company_id');
+
+
+    // =====================================================
+    // INITIAL VALUES
+    // =====================================================
+
+    data.total_count = 0;
+    data.offered_count = 0;
+    data.accepted_count = 0;
+    data.rejected_count = 0;
+
+    data.offers = [];
+
+
+    // =====================================================
+    // GET STUDENT APPLICATIONS
+    // =====================================================
+    //
+    // Application
+    //      ↓
+    // Opportunity
+    //      ↓
+    // Company
+    //
+    // Only applications belonging to this company.
+    //
+    // Then:
+    //
+    // Offer Status = Offered
+    //
+    // AND
+    //
+    // Recruiter Interview Result = Selected
+    //
+    // for the SAME student + opportunity.
+    //
+    // =====================================================
+
+    var applicationGR =
+        new GlideRecord(
+            'x_snc_campus360_student_application'
+        );
+
+
+    applicationGR.addQuery(
+        'opportunity.company',
+        companySysId
+    );
+
+
+    applicationGR.orderByDesc(
+        'sys_created_on'
+    );
+
+
+    applicationGR.query();
+
+
+    while (applicationGR.next()) {
+
+
+        // =================================================
+        // CHECK OFFER STATUS
+        // =================================================
+
+        var offerStatusDisplay =
+            applicationGR.getDisplayValue(
+                'offer_status'
+            );
+
+
+        /*
+         * Only Offered applications should appear
+         * in the Offers page.
+         */
+
+        if (offerStatusDisplay != 'Offered') {
+
+            continue;
+
+        }
+
+
+        // =================================================
+        // STUDENT
+        // =================================================
+
+        var studentSysId =
+            applicationGR.getValue('student');
+
+
+        if (!studentSysId) {
+
+            continue;
+
+        }
+
+
+        var studentName =
+            applicationGR.student.getDisplayValue();
+
+
+        // =================================================
+        // OPPORTUNITY
+        // =================================================
+
+        var opportunitySysId =
+            applicationGR.getValue('opportunity');
+
+
+        if (!opportunitySysId) {
+
+            continue;
+
+        }
+
+
+        var opportunityGR =
+            applicationGR.opportunity.getRefRecord();
+
+
+        if (
+            !opportunityGR ||
+            !opportunityGR.isValidRecord()
+        ) {
+
+            continue;
+
+        }
+
+
+        // =================================================
+        // VERIFY COMPANY
+        // =================================================
+
+        if (
+            opportunityGR.getValue('company') !=
+            companySysId
+        ) {
+
+            continue;
+
+        }
+
+
+        // =================================================
+        // CHECK RECRUITER INTERVIEW
+        // =================================================
+        //
+        // Same:
+        //      Student
+        //      Opportunity
+        //
+        // Interview Result must be Selected.
+        //
+        // =================================================
+
+        var interviewGR =
+            new GlideRecord(
+                'x_snc_campus360_recruiter_interview'
+            );
+
+
+        interviewGR.addQuery(
+            'student',
+            studentSysId
+        );
+
+
+        interviewGR.addQuery(
+            'opportunity',
+            opportunitySysId
+        );
+
+
+        interviewGR.query();
+
+
+        var selectedInterviewFound = false;
+        var selectedInterview = null;
+
+
+        while (interviewGR.next()) {
+
+            var resultDisplay =
+                interviewGR.getDisplayValue(
+                    'result'
+                );
+
+
+            if (resultDisplay == 'Selected') {
+
+                selectedInterviewFound = true;
+
+                selectedInterview =
+                    interviewGR.getUniqueValue();
+
+                break;
+
+            }
+
+        }
+
+
+        /*
+         * If interview result is not Selected,
+         * don't show the application as an offer.
+         */
+
+        if (!selectedInterviewFound) {
+
+            continue;
+
+        }
+
+
+        // =================================================
+        // BUILD OFFER RECORD
+        // =================================================
+
+        var offer = {};
+
+
+        // -----------------------------------------------
+        // APPLICATION
+        // -----------------------------------------------
+
+        offer.application_sys_id =
+            applicationGR.getUniqueValue();
+
+
+        offer.application_id =
+            applicationGR.getValue(
+                'application_id'
+            );
+
+
+        // -----------------------------------------------
+        // STUDENT
+        // -----------------------------------------------
+
+        offer.student_sys_id =
+            studentSysId;
+
+
+        offer.student_name =
+            studentName;
+
+
+        // -----------------------------------------------
+        // OPPORTUNITY
+        // -----------------------------------------------
+
+        offer.opportunity_sys_id =
+            opportunitySysId;
+
+
+        offer.opportunity_title =
+            opportunityGR.getValue(
+                'opportunity_title'
+            );
+
+
+        offer.opportunity_id =
+            opportunityGR.getValue(
+                'opportunity_id'
+            );
+
+
+        offer.location =
+            opportunityGR.getValue(
+                'location'
+            );
+
+
+        offer.ctc =
+            opportunityGR.getValue(
+                'ctc_stipend'
+            );
+
+
+        // -----------------------------------------------
+        // APPLICATION DETAILS
+        // -----------------------------------------------
+
+        offer.application_status =
+            applicationGR.getDisplayValue(
+                'application_status'
+            );
+
+
+        offer.offer_status =
+            offerStatusDisplay;
+
+
+        offer.applied_date =
+            applicationGR.getDisplayValue(
+                'applied_date'
+            );
+
+
+        // -----------------------------------------------
+        // INTERVIEW DETAILS
+        // -----------------------------------------------
+
+        offer.interview_sys_id =
+            selectedInterview;
+
+
+        var selectedInterviewGR =
+            new GlideRecord(
+                'x_snc_campus360_recruiter_interview'
+            );
+
+
+        if (
+            selectedInterviewGR.get(
+                selectedInterview
+            )
+        ) {
+
+            offer.interview_date =
+                selectedInterviewGR.getDisplayValue(
+                    'interview_date'
+                );
+
+
+            offer.interview_round =
+                selectedInterviewGR.getDisplayValue(
+                    'interview_round'
+                );
+
+
+            offer.interview_mode =
+                selectedInterviewGR.getDisplayValue(
+                    'interview_mode'
+                );
+
+
+            offer.interviewer =
+                selectedInterviewGR.getValue(
+                    'interviewer'
+                );
+
+
+            offer.interview_result =
+                selectedInterviewGR.getDisplayValue(
+                    'result'
+                );
+
+        }
+
+
+        // -----------------------------------------------
+        // ADD OFFER
+        // -----------------------------------------------
+
+        data.offers.push(
+            offer
+        );
+
+
+        data.total_count++;
+
+
+        // -----------------------------------------------
+        // OFFER STATUS COUNTS
+        // -----------------------------------------------
+
+        var applicationOfferStatus =
+            applicationGR.getDisplayValue(
+                'offer_status'
+            );
+
+
+        if (
+            applicationOfferStatus ==
+            'Offered'
+        ) {
+
+            data.offered_count++;
+
+        }
+
+
+        if (
+            applicationOfferStatus ==
+            'Accepted'
+        ) {
+
+            data.accepted_count++;
+
+        }
+
+
+        if (
+            applicationOfferStatus ==
+            'Rejected'
+        ) {
+
+            data.rejected_count++;
+
+        }
+
+    }
+
+
+})();]]></script>
+        <servicenow>false</servicenow>
+        <sys_class_name>sp_widget</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-29 16:37:00</sys_created_on>
+        <sys_id>6af80fbe08e303107f44368bf163ed19</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>Campus360 Recruiter Offers New</sys_name>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name>sp_widget_6af80fbe08e303107f44368bf163ed19</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-29 16:37:00</sys_updated_on>
+        <template><![CDATA[<div class="offers-page">
+
+
+  <!-- =========================================
+       HEADER
+  ========================================== -->
+
+  <div class="page-header">
+
+    <div>
+
+      <span class="eyebrow">
+        RECRUITMENT
+      </span>
+
+      <h1>
+        Placement Offers
+      </h1>
+
+      <p>
+        Manage offers issued to selected students at
+        {{c.data.company_name}}.
+      </p>
+
+      <div class="company-info">
+
+        {{c.data.company_name}}
+        ·
+        {{c.data.company_id}}
+
+      </div>
+
+    </div>
+
+
+    <div class="header-actions">
+
+      <a
+        class="btn btn-secondary"
+        href="?id=campus360_recruiter_dashboard_new">
+
+        ← Dashboard
+
+      </a>
+
+    </div>
+
+  </div>
+
+
+
+  <!-- =========================================
+       ERROR
+  ========================================== -->
+
+  <div
+    class="error-message"
+    ng-if="c.data.error">
+
+    {{c.data.error}}
+
+  </div>
+
+
+
+  <!-- =========================================
+       STATISTICS
+  ========================================== -->
+
+  <div class="stats-grid">
+
+
+    <!-- TOTAL -->
+
+    <div class="stat-card">
+
+      <div class="stat-icon">
+        ★
+      </div>
+
+      <div>
+
+        <div class="stat-label">
+          Total Offers
+        </div>
+
+        <div class="stat-value">
+          {{c.data.total_count}}
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- OFFERED -->
+
+    <div class="stat-card">
+
+      <div class="stat-icon offered">
+        ✓
+      </div>
+
+      <div>
+
+        <div class="stat-label">
+          Offered
+        </div>
+
+        <div class="stat-value">
+          {{c.data.offered_count}}
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- ACCEPTED -->
+
+    <div class="stat-card">
+
+      <div class="stat-icon accepted">
+        ✓
+      </div>
+
+      <div>
+
+        <div class="stat-label">
+          Accepted
+        </div>
+
+        <div class="stat-value">
+          {{c.data.accepted_count}}
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- REJECTED -->
+
+    <div class="stat-card">
+
+      <div class="stat-icon rejected">
+        ×
+      </div>
+
+      <div>
+
+        <div class="stat-label">
+          Rejected
+        </div>
+
+        <div class="stat-value">
+          {{c.data.rejected_count}}
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+
+  <!-- =========================================
+       SEARCH & FILTER
+  ========================================== -->
+
+  <div class="offer-filters">
+
+
+    <!-- SEARCH -->
+
+    <div class="search-box">
+
+      <span class="search-icon">
+        ⌕
+      </span>
+
+      <input
+        type="text"
+        ng-model="c.filters.search"
+        ng-change="c.applyFilters()"
+        placeholder="Search student, offer ID or opportunity...">
+
+    </div>
+
+
+    <!-- OPPORTUNITY -->
+
+    <div class="filter-box">
+
+      <select
+        ng-model="c.filters.opportunity"
+        ng-change="c.applyFilters()">
+
+        <option value="">
+          All Opportunities
+        </option>
+
+        <option
+          ng-repeat="opportunity in c.opportunityList"
+          value="{{opportunity.id}}">
+
+          {{opportunity.title}}
+
+        </option>
+
+      </select>
+
+    </div>
+
+
+    <!-- CLEAR -->
+
+    <button
+      type="button"
+      class="clear-filter-btn"
+      ng-click="c.clearFilters()">
+
+      Clear
+
+    </button>
+
+  </div>
+
+
+
+  <!-- =========================================
+       RESULT COUNT
+  ========================================== -->
+
+  <div class="filter-result">
+
+    Showing
+
+    <strong>
+      {{c.filteredOffers.length}}
+    </strong>
+
+    of
+
+    <strong>
+      {{c.data.offers.length}}
+    </strong>
+
+    offers
+
+  </div>
+
+
+
+  <!-- =========================================
+       OFFER LIST
+  ========================================== -->
+
+  <div class="list-card">
+
+
+    <!-- HEADER -->
+
+    <div class="list-header">
+
+      <div>
+
+        <h2>
+          Placement Offers
+        </h2>
+
+        <p>
+          Students selected through the recruitment process
+        </p>
+
+      </div>
+
+
+      <div class="record-count">
+
+        {{c.filteredOffers.length}}
+        records
+
+      </div>
+
+    </div>
+
+
+
+    <!-- =======================================
+         EMPTY STATE
+    ======================================== -->
+
+    <div
+      class="empty-state"
+      ng-if="!c.filteredOffers.length">
+
+      <div class="empty-icon">
+        ★
+      </div>
+
+      <h3>
+        No offers found
+      </h3>
+
+      <p>
+        No students currently satisfy the offer
+        conditions for {{c.data.company_name}}.
+      </p>
+
+    </div>
+
+
+
+    <!-- =======================================
+         TABLE
+    ======================================== -->
+
+    <div
+      class="table-wrapper"
+      ng-if="c.filteredOffers.length">
+
+      <table class="offer-table">
+
+        <thead>
+
+          <tr>
+
+            <th>
+              STUDENT
+            </th>
+
+            <th>
+              APPLICATION ID
+            </th>
+
+            <th>
+              OPPORTUNITY
+            </th>
+
+            <th>
+              LOCATION
+            </th>
+
+            <th>
+              CTC / STIPEND
+            </th>
+
+            <th>
+              INTERVIEW
+            </th>
+
+            <th>
+              STATUS
+            </th>
+
+          </tr>
+
+        </thead>
+
+
+        <tbody>
+
+          <tr
+            ng-repeat="offer in c.filteredOffers">
+
+
+            <!-- STUDENT -->
+
+            <td>
+
+              <div class="student-cell">
+
+                <div class="student-avatar">
+
+                  {{offer.student_name.charAt(0)}}
+
+                </div>
+
+                <div>
+
+                  <strong>
+                    {{offer.student_name}}
+                  </strong>
+
+                  <span>
+                    Selected Candidate
+                  </span>
+
+                </div>
+
+              </div>
+
+            </td>
+
+
+            <!-- APPLICATION ID -->
+
+            <td>
+
+              <span class="application-id">
+
+                {{offer.application_id}}
+
+              </span>
+
+            </td>
+
+
+            <!-- OPPORTUNITY -->
+
+            <td>
+
+              <div class="opportunity-cell">
+
+                <strong>
+                  {{offer.opportunity_title}}
+                </strong>
+
+                <span>
+                  {{offer.opportunity_id}}
+                </span>
+
+              </div>
+
+            </td>
+
+
+            <!-- LOCATION -->
+
+            <td>
+
+              {{offer.location || '—'}}
+
+            </td>
+
+
+            <!-- CTC -->
+
+            <td>
+
+              {{offer.ctc || '—'}}
+
+            </td>
+
+
+            <!-- INTERVIEW -->
+
+            <td>
+
+              <div class="interview-cell">
+
+                <strong>
+                  {{offer.interview_result}}
+                </strong>
+
+                <span>
+                  {{offer.interview_round || 'Interview'}}
+                </span>
+
+              </div>
+
+            </td>
+
+
+            <!-- STATUS -->
+
+            <td>
+
+              <span
+                class="status-badge status-offered">
+
+                {{offer.offer_status}}
+
+              </span>
+
+            </td>
+
+
+          </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </div>
+
+</div>]]></template>
+    </sp_widget>
+</record_update>

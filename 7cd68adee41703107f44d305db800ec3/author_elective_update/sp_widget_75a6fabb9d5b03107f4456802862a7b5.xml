@@ -1,0 +1,497 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_widget">
+    <sp_widget action="DELETE">
+        <category>custom</category>
+        <client_script><![CDATA[api.controller=function() {
+  /* widget controller */
+  var c = this;
+};]]></client_script>
+        <controller_as>c</controller_as>
+        <css>.qr-container {&#13;
+    text-align: center;&#13;
+    background: white;&#13;
+    max-width: 600px;&#13;
+    margin: 40px auto;&#13;
+    padding: 40px;&#13;
+    border-radius: 12px;&#13;
+    box-shadow: 0 3px 15px rgba(0,0,0,0.15);&#13;
+}&#13;
+&#13;
+.qr-container h1 {&#13;
+    color: #17365d;&#13;
+    margin-bottom: 10px;&#13;
+}&#13;
+&#13;
+.qr-container h2 {&#13;
+    color: #333;&#13;
+    margin-bottom: 15px;&#13;
+}&#13;
+&#13;
+.instruction {&#13;
+    font-size: 16px;&#13;
+    color: #555;&#13;
+}&#13;
+&#13;
+.qr-box {&#13;
+    margin: 25px auto;&#13;
+    padding: 20px;&#13;
+    width: 390px;&#13;
+    max-width: 90%;&#13;
+    border: 2px solid #ddd;&#13;
+    border-radius: 10px;&#13;
+    background: white;&#13;
+}&#13;
+&#13;
+.qr-image {&#13;
+    width: 350px;&#13;
+    height: 350px;&#13;
+    max-width: 100%;&#13;
+}&#13;
+&#13;
+.scan-text {&#13;
+    font-size: 18px;&#13;
+    font-weight: bold;&#13;
+    color: #087f5b;&#13;
+}&#13;
+&#13;
+.interview-info {&#13;
+    color: #666;&#13;
+    margin-top: 15px;&#13;
+}&#13;
+&#13;
+.error-box {&#13;
+    text-align: center;&#13;
+    background: #ffe5e5;&#13;
+    color: #b00020;&#13;
+    padding: 30px;&#13;
+    margin: 40px auto;&#13;
+    max-width: 600px;&#13;
+}</css>
+        <data_table>sp_instance</data_table>
+        <demo_data/>
+        <description/>
+        <docs/>
+        <field_list/>
+        <has_preview>false</has_preview>
+        <id>campus360_interview_qr</id>
+        <internal>false</internal>
+        <link><![CDATA[function link(scope, element, attrs, controller) {
+  
+}]]></link>
+        <name>Campus360 Interview QR</name>
+        <option_schema/>
+        <public>false</public>
+        <roles/>
+        <script><![CDATA[(function() {
+
+    data.success = false;
+    data.message = '';
+    data.interviewNumber = '';
+
+    // Get value from URL
+    var identifier = $sp.getParameter('interview_id');
+
+    if (!identifier) {
+        data.message = 'Interview ID is missing from the URL.';
+        return;
+    }
+
+    // Mock Interview table
+    var gr = new GlideRecord('x_snc_campus360_mock_interview');
+
+    if (!gr.isValid()) {
+        data.message = 'Mock Interview table is invalid.';
+        return;
+    }
+
+    /*
+     * SUPPORT BOTH:
+     * 1. ServiceNow sys_id
+     * 2. Interview ID such as INT007
+     */
+
+    var found = false;
+
+    // First try as sys_id
+    if (gr.get(identifier)) {
+        found = true;
+    }
+
+    // If not found, try Interview ID field
+    if (!found) {
+
+        gr.initialize();
+
+        var lookup = new GlideRecord('x_snc_campus360_mock_interview');
+
+        lookup.addQuery('interview_id', identifier);
+        lookup.setLimit(1);
+        lookup.query();
+
+        if (lookup.next()) {
+            gr = lookup;
+            found = true;
+        }
+    }
+
+    // Record not found
+    if (!found) {
+        data.message = 'No Mock Interview record found for: ' + identifier;
+        return;
+    }
+
+    // Display Interview ID
+    data.interviewNumber = gr.getValue('interview_id');
+
+    /*
+     * Validate current QR status
+     */
+
+    var qrStatus = gr.getValue('qr_status');
+    var attendanceStatus = gr.getValue('attendance_status');
+
+    // Already marked
+    if (attendanceStatus == 'Present') {
+
+        data.success = true;
+        data.message =
+            'Attendance has already been marked for Interview ' +
+            gr.getValue('interview_id') + '.';
+
+        return;
+    }
+
+    // QR must be Generated
+    if (qrStatus != 'Generated') {
+
+        data.message =
+            'This QR code is not valid. Current QR Status: ' +
+            qrStatus;
+
+        return;
+    }
+
+    /*
+     * Mark attendance
+     */
+
+    gr.setValue('attendance_status', 'Present');
+    gr.setValue('qr_status', 'Scanned');
+
+    var updated = gr.update();
+
+    if (updated) {
+
+        data.success = true;
+
+        data.message =
+            'Attendance marked successfully. Interview = ' +
+            gr.getValue('interview_id');
+
+    } else {
+
+        data.message =
+            'Unable to update the Mock Interview record.';
+    }
+
+})();]]></script>
+        <servicenow>false</servicenow>
+        <sys_class_name>sp_widget</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-20 07:33:16</sys_created_on>
+        <sys_id>75a6fabb9d5b03107f4456802862a7b5</sys_id>
+        <sys_mod_count>2</sys_mod_count>
+        <sys_name>Campus360 Interview QR</sys_name>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name>sp_widget_75a6fabb9d5b03107f4456802862a7b5</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-20 07:56:35</sys_updated_on>
+        <template><![CDATA[<div class="qr-container" ng-if="c.data.success">
+
+    <h1>Campus360 Interview QR</h1>
+
+    <h2>{{c.data.interviewId}}</h2>
+
+    <p class="instruction">
+        Ask the student to scan this QR code to mark attendance.
+    </p>
+
+    <div class="qr-box">
+        <img ng-src="{{c.data.qrImageUrl}}"
+             alt="Interview Attendance QR Code"
+             class="qr-image">
+    </div>
+
+    <p class="scan-text">
+        ]]>📱<![CDATA[ Scan this QR using your mobile phone
+    </p>
+
+    <p class="interview-info">
+        Interview Type: {{c.data.interviewType}}
+    </p>
+
+</div>
+
+<div class="error-box" ng-if="!c.data.success">
+
+    <h2>QR Generation Failed</h2>
+
+    <p>{{c.data.message}}</p>
+
+</div>]]></template>
+    </sp_widget>
+    <sys_update_version action="INSERT_OR_UPDATE">
+        <action>DELETE</action>
+        <application display_value="Campus360">7cd68adee41703107f44d305db800ec3</application>
+        <file_path/>
+        <instance_id>82d18dc7c38fcf94a03197af0501316c</instance_id>
+        <instance_name>ltm-hck-2876-0027</instance_name>
+        <name>sp_widget_75a6fabb9d5b03107f4456802862a7b5</name>
+        <payload>&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;record_update table="sp_widget"&gt;&lt;sp_widget action="INSERT_OR_UPDATE"&gt;&lt;category&gt;custom&lt;/category&gt;&lt;client_script&gt;&lt;![CDATA[api.controller=function() {
+  /* widget controller */
+  var c = this;
+};]]&gt;&lt;/client_script&gt;&lt;controller_as&gt;c&lt;/controller_as&gt;&lt;css&gt;.qr-container {&amp;#13;
+    text-align: center;&amp;#13;
+    background: white;&amp;#13;
+    max-width: 600px;&amp;#13;
+    margin: 40px auto;&amp;#13;
+    padding: 40px;&amp;#13;
+    border-radius: 12px;&amp;#13;
+    box-shadow: 0 3px 15px rgba(0,0,0,0.15);&amp;#13;
+}&amp;#13;
+&amp;#13;
+.qr-container h1 {&amp;#13;
+    color: #17365d;&amp;#13;
+    margin-bottom: 10px;&amp;#13;
+}&amp;#13;
+&amp;#13;
+.qr-container h2 {&amp;#13;
+    color: #333;&amp;#13;
+    margin-bottom: 15px;&amp;#13;
+}&amp;#13;
+&amp;#13;
+.instruction {&amp;#13;
+    font-size: 16px;&amp;#13;
+    color: #555;&amp;#13;
+}&amp;#13;
+&amp;#13;
+.qr-box {&amp;#13;
+    margin: 25px auto;&amp;#13;
+    padding: 20px;&amp;#13;
+    width: 390px;&amp;#13;
+    max-width: 90%;&amp;#13;
+    border: 2px solid #ddd;&amp;#13;
+    border-radius: 10px;&amp;#13;
+    background: white;&amp;#13;
+}&amp;#13;
+&amp;#13;
+.qr-image {&amp;#13;
+    width: 350px;&amp;#13;
+    height: 350px;&amp;#13;
+    max-width: 100%;&amp;#13;
+}&amp;#13;
+&amp;#13;
+.scan-text {&amp;#13;
+    font-size: 18px;&amp;#13;
+    font-weight: bold;&amp;#13;
+    color: #087f5b;&amp;#13;
+}&amp;#13;
+&amp;#13;
+.interview-info {&amp;#13;
+    color: #666;&amp;#13;
+    margin-top: 15px;&amp;#13;
+}&amp;#13;
+&amp;#13;
+.error-box {&amp;#13;
+    text-align: center;&amp;#13;
+    background: #ffe5e5;&amp;#13;
+    color: #b00020;&amp;#13;
+    padding: 30px;&amp;#13;
+    margin: 40px auto;&amp;#13;
+    max-width: 600px;&amp;#13;
+}&lt;/css&gt;&lt;data_table&gt;sp_instance&lt;/data_table&gt;&lt;demo_data/&gt;&lt;description/&gt;&lt;docs/&gt;&lt;field_list/&gt;&lt;has_preview&gt;false&lt;/has_preview&gt;&lt;id&gt;campus360_interview_qr&lt;/id&gt;&lt;internal&gt;false&lt;/internal&gt;&lt;link&gt;&lt;![CDATA[function link(scope, element, attrs, controller) {
+  
+}]]&gt;&lt;/link&gt;&lt;name&gt;Campus360 Interview QR&lt;/name&gt;&lt;option_schema/&gt;&lt;public&gt;false&lt;/public&gt;&lt;roles/&gt;&lt;script&gt;&lt;![CDATA[(function() {
+
+    data.success = false;
+    data.message = '';
+    data.interviewNumber = '';
+
+    // Get value from URL
+    var identifier = $sp.getParameter('interview_id');
+
+    if (!identifier) {
+        data.message = 'Interview ID is missing from the URL.';
+        return;
+    }
+
+    // Mock Interview table
+    var gr = new GlideRecord('x_snc_campus360_mock_interview');
+
+    if (!gr.isValid()) {
+        data.message = 'Mock Interview table is invalid.';
+        return;
+    }
+
+    /*
+     * SUPPORT BOTH:
+     * 1. ServiceNow sys_id
+     * 2. Interview ID such as INT007
+     */
+
+    var found = false;
+
+    // First try as sys_id
+    if (gr.get(identifier)) {
+        found = true;
+    }
+
+    // If not found, try Interview ID field
+    if (!found) {
+
+        gr.initialize();
+
+        var lookup = new GlideRecord('x_snc_campus360_mock_interview');
+
+        lookup.addQuery('interview_id', identifier);
+        lookup.setLimit(1);
+        lookup.query();
+
+        if (lookup.next()) {
+            gr = lookup;
+            found = true;
+        }
+    }
+
+    // Record not found
+    if (!found) {
+        data.message = 'No Mock Interview record found for: ' + identifier;
+        return;
+    }
+
+    // Display Interview ID
+    data.interviewNumber = gr.getValue('interview_id');
+
+    /*
+     * Validate current QR status
+     */
+
+    var qrStatus = gr.getValue('qr_status');
+    var attendanceStatus = gr.getValue('attendance_status');
+
+    // Already marked
+    if (attendanceStatus == 'Present') {
+
+        data.success = true;
+        data.message =
+            'Attendance has already been marked for Interview ' +
+            gr.getValue('interview_id') + '.';
+
+        return;
+    }
+
+    // QR must be Generated
+    if (qrStatus != 'Generated') {
+
+        data.message =
+            'This QR code is not valid. Current QR Status: ' +
+            qrStatus;
+
+        return;
+    }
+
+    /*
+     * Mark attendance
+     */
+
+    gr.setValue('attendance_status', 'Present');
+    gr.setValue('qr_status', 'Scanned');
+
+    var updated = gr.update();
+
+    if (updated) {
+
+        data.success = true;
+
+        data.message =
+            'Attendance marked successfully. Interview = ' +
+            gr.getValue('interview_id');
+
+    } else {
+
+        data.message =
+            'Unable to update the Mock Interview record.';
+    }
+
+})();]]&gt;&lt;/script&gt;&lt;servicenow&gt;false&lt;/servicenow&gt;&lt;sys_class_name&gt;sp_widget&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-20 07:33:16&lt;/sys_created_on&gt;&lt;sys_id&gt;75a6fabb9d5b03107f4456802862a7b5&lt;/sys_id&gt;&lt;sys_mod_count&gt;2&lt;/sys_mod_count&gt;&lt;sys_name&gt;Campus360 Interview QR&lt;/sys_name&gt;&lt;sys_package display_value="Campus360" source="x_snc_campus360"&gt;7cd68adee41703107f44d305db800ec3&lt;/sys_package&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="Campus360"&gt;7cd68adee41703107f44d305db800ec3&lt;/sys_scope&gt;&lt;sys_update_name&gt;sp_widget_75a6fabb9d5b03107f4456802862a7b5&lt;/sys_update_name&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-20 07:56:35&lt;/sys_updated_on&gt;&lt;template&gt;&lt;![CDATA[&lt;div class="qr-container" ng-if="c.data.success"&gt;
+
+    &lt;h1&gt;Campus360 Interview QR&lt;/h1&gt;
+
+    &lt;h2&gt;{{c.data.interviewId}}&lt;/h2&gt;
+
+    &lt;p class="instruction"&gt;
+        Ask the student to scan this QR code to mark attendance.
+    &lt;/p&gt;
+
+    &lt;div class="qr-box"&gt;
+        &lt;img ng-src="{{c.data.qrImageUrl}}"
+             alt="Interview Attendance QR Code"
+             class="qr-image"&gt;
+    &lt;/div&gt;
+
+    &lt;p class="scan-text"&gt;
+        ]]&gt;📱&lt;![CDATA[ Scan this QR using your mobile phone
+    &lt;/p&gt;
+
+    &lt;p class="interview-info"&gt;
+        Interview Type: {{c.data.interviewType}}
+    &lt;/p&gt;
+
+&lt;/div&gt;
+
+&lt;div class="error-box" ng-if="!c.data.success"&gt;
+
+    &lt;h2&gt;QR Generation Failed&lt;/h2&gt;
+
+    &lt;p&gt;{{c.data.message}}&lt;/p&gt;
+
+&lt;/div&gt;]]&gt;&lt;/template&gt;&lt;/sp_widget&gt;&lt;/record_update&gt;</payload>
+        <payload_hash>-1085114913</payload_hash>
+        <record_name>Campus360 Interview QR</record_name>
+        <reverted_from/>
+        <source>70d68adee41703107f44d305db800ec8</source>
+        <source_table>sys_update_set</source_table>
+        <state>previous</state>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-20 07:56:35</sys_created_on>
+        <sys_id>3f5c7eff9d9b03107f4456802862a71a</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_recorded_at>1a0bdd1244a0000001</sys_recorded_at>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-20 07:56:35</sys_updated_on>
+        <type>Widget</type>
+        <update_guid>ff5c7eff1e9b031064dcb07cf25c5419</update_guid>
+        <update_guid_history>ff5c7eff1e9b031064dcb07cf25c5419:-1085114913,850af6fb199b03102a1324c84138a58d:1081521192,12073e77e69b03100463579a69dcb0e3:832781974</update_guid_history>
+    </sys_update_version>
+    <sys_metadata_delete action="INSERT_OR_UPDATE">
+        <sys_audit_delete display_value="Campus360 Interview QR">bd57e3bb9d5343107f4456802862a740</sys_audit_delete>
+        <sys_class_name>sys_metadata_delete</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-20 11:04:19</sys_created_on>
+        <sys_db_object display_value="" name="sp_widget">sp_widget</sys_db_object>
+        <sys_id>78e1aac9393f40aeb4d6f4681278b719</sys_id>
+        <sys_metadata>75a6fabb9d5b03107f4456802862a7b5</sys_metadata>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>Campus360 Interview QR</sys_name>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_parent/>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_scope_delete display_value="">1cde9626740d46978b846077c1615101</sys_scope_delete>
+        <sys_update_name>sp_widget_75a6fabb9d5b03107f4456802862a7b5</sys_update_name>
+        <sys_update_version display_value="sp_widget_75a6fabb9d5b03107f4456802862a7b5">3f5c7eff9d9b03107f4456802862a71a</sys_update_version>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-20 11:04:19</sys_updated_on>
+    </sys_metadata_delete>
+</record_update>

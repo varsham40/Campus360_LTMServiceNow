@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update sys_domain="global" table="sys_decision_question">
+    <sys_decision_question action="DELETE">
+        <active>true</active>
+        <answer>60fe2167a8d703107f44321b8bcb5628</answer>
+        <condition table="var__m_sys_decision_input_ddc925eba89703107f44321b8bcb5609">u_risk_level=High^u_bottleneck_stage=Interview Perfomance^EQ<item endquery="false" field="u_risk_level" goto="false" newquery="false" operator="=" or="false" value="High"/>
+            <item endquery="false" field="u_bottleneck_stage" goto="false" newquery="false" operator="=" or="false" value="Interview Perfomance"/>
+            <item endquery="true" field="" goto="false" newquery="false" operator="=" or="false" value=""/>
+        </condition>
+        <decision_table display_value="Campus360 - Intervention Recommendation">ddc925eba89703107f44321b8bcb5609</decision_table>
+        <default_answer>false</default_answer>
+        <input_table>var__m_sys_decision_input_ddc925eba89703107f44321b8bcb5609</input_table>
+        <label>Campus360 - Intervention Recommendation_200</label>
+        <marked_for_deletion>true</marked_for_deletion>
+        <order>200</order>
+        <sys_class_name>sys_decision_question</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 09:49:30</sys_created_on>
+        <sys_domain>global</sys_domain>
+        <sys_domain_path>/</sys_domain_path>
+        <sys_id>4cacce2ba8db03107f44321b8bcb564a</sys_id>
+        <sys_mod_count>2</sys_mod_count>
+        <sys_name>Campus360 - Intervention Recommendation_200</sys_name>
+        <sys_overrides/>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name>sys_decision_question_4cacce2ba8db03107f44321b8bcb564a</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 09:53:04</sys_updated_on>
+    </sys_decision_question>
+    <sys_update_version action="INSERT_OR_UPDATE">
+        <action>DELETE</action>
+        <application display_value="Campus360">7cd68adee41703107f44d305db800ec3</application>
+        <file_path/>
+        <instance_id>82d18dc7c38fcf94a03197af0501316c</instance_id>
+        <instance_name>ltm-hck-2876-0027</instance_name>
+        <name>sys_decision_question_4cacce2ba8db03107f44321b8bcb564a</name>
+        <payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update sys_domain="global" table="sys_decision_question"><sys_decision_question action="INSERT_OR_UPDATE"><active>true</active><answer>60fe2167a8d703107f44321b8bcb5628</answer><condition table="var__m_sys_decision_input_ddc925eba89703107f44321b8bcb5609">u_risk_level=High^u_bottleneck_stage=Interview Perfomance^EQ<item endquery="false" field="u_risk_level" goto="false" newquery="false" operator="=" or="false" value="High"/><item endquery="false" field="u_bottleneck_stage" goto="false" newquery="false" operator="=" or="false" value="Interview Perfomance"/><item endquery="true" field="" goto="false" newquery="false" operator="=" or="false" value=""/></condition><decision_table display_value="Campus360 - Intervention Recommendation">ddc925eba89703107f44321b8bcb5609</decision_table><default_answer>false</default_answer><input_table>var__m_sys_decision_input_ddc925eba89703107f44321b8bcb5609</input_table><label>Campus360 - Intervention Recommendation_200</label><marked_for_deletion>true</marked_for_deletion><order>200</order><sys_class_name>sys_decision_question</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-19 09:49:30</sys_created_on><sys_domain>global</sys_domain><sys_domain_path>/</sys_domain_path><sys_id>4cacce2ba8db03107f44321b8bcb564a</sys_id><sys_mod_count>2</sys_mod_count><sys_name>Campus360 - Intervention Recommendation_200</sys_name><sys_overrides/><sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package><sys_policy/><sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope><sys_update_name>sys_decision_question_4cacce2ba8db03107f44321b8bcb564a</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-19 09:53:04</sys_updated_on></sys_decision_question></record_update>]]></payload>
+        <payload_hash>-1317751521</payload_hash>
+        <record_name>Campus360 - Intervention Recommendation_200</record_name>
+        <reverted_from/>
+        <source>70d68adee41703107f44d305db800ec8</source>
+        <source_table>sys_update_set</source_table>
+        <state>previous</state>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 09:53:05</sys_created_on>
+        <sys_id>a07d4aaba8db03107f44321b8bcb56f5</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_recorded_at>1a0b91570250000001</sys_recorded_at>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 09:53:05</sys_updated_on>
+        <type>Decision</type>
+        <update_guid>e47d4aab55db0310556fa4130c1eb7f4</update_guid>
+        <update_guid_history>e47d4aab55db0310556fa4130c1eb7f4:-1317751521,e6ac026bf9db0310e4ea5cf51f16e331:-1014143500,4cacce2bc3db0310a8ce9411c418a968:1673754938</update_guid_history>
+    </sys_update_version>
+    <sys_metadata_delete action="INSERT_OR_UPDATE">
+        <sys_audit_delete/>
+        <sys_class_name>sys_metadata_delete</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 09:53:10</sys_created_on>
+        <sys_db_object display_value="" name="sys_decision_question">sys_decision_question</sys_db_object>
+        <sys_id>1693835f4aa642cd836d4bc5d97ea089</sys_id>
+        <sys_metadata>4cacce2ba8db03107f44321b8bcb564a</sys_metadata>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>Campus360 - Intervention Recommendation_200</sys_name>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_parent/>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_scope_delete display_value="">1cde9626740d46978b846077c1615101</sys_scope_delete>
+        <sys_update_name>sys_decision_question_4cacce2ba8db03107f44321b8bcb564a</sys_update_name>
+        <sys_update_version display_value="sys_decision_question_4cacce2ba8db03107f44321b8bcb564a">a07d4aaba8db03107f44321b8bcb56f5</sys_update_version>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 09:53:10</sys_updated_on>
+    </sys_metadata_delete>
+</record_update>

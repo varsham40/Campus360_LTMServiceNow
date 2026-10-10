@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update sys_domain="global" table="sys_decision_multi_result">
+    <sys_decision_multi_result action="INSERT_OR_UPDATE">
+        <decision_table display_value="Campus360 - Intervention Recommendation">ddc925eba89703107f44321b8bcb5609</decision_table>
+        <label>Training Skill Area: Interview Perform, Intervention Type: Mock Intervie</label>
+        <result_elements/>
+        <sys_class_name>sys_decision_multi_result</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 11:52:08</sys_created_on>
+        <sys_domain>global</sys_domain>
+        <sys_domain_path>/</sys_domain_path>
+        <sys_id>14b8a263a81343107f44321b8bcb565d</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>Training Skill Area: Interview Perform, Intervention Type: Mock Intervie</sys_name>
+        <sys_overrides/>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name>sys_decision_multi_result_14b8a263a81343107f44321b8bcb565d</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 11:52:08</sys_updated_on>
+    </sys_decision_multi_result>
+    <sys_variable_value action="delete_multiple" query="document_key=14b8a263a81343107f44321b8bcb565d"/>
+    <sys_variable_value action="INSERT_OR_UPDATE">
+        <document>sys_decision_multi_result</document>
+        <document_key>14b8a263a81343107f44321b8bcb565d</document_key>
+        <order>200</order>
+        <sys_class_name>sys_variable_value</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 11:52:08</sys_created_on>
+        <sys_id>d8b8a263a81343107f44321b8bcb565d</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 11:52:08</sys_updated_on>
+        <value>Interview Perform</value>
+        <variable display_value="Training Skill Area">c4feed27a8d703107f44321b8bcb567f</variable>
+    </sys_variable_value>
+    <sys_variable_value action="INSERT_OR_UPDATE">
+        <document>sys_decision_multi_result</document>
+        <document_key>14b8a263a81343107f44321b8bcb565d</document_key>
+        <order>100</order>
+        <sys_class_name>sys_variable_value</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 11:52:08</sys_created_on>
+        <sys_id>90b8a263a81343107f44321b8bcb565e</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 11:52:08</sys_updated_on>
+        <value>Mock Intervie</value>
+        <variable display_value="Intervention Type">48feed27a8d703107f44321b8bcb564a</variable>
+    </sys_variable_value>
+</record_update>

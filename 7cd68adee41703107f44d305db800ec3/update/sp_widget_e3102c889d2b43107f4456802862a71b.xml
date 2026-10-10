@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_widget">
+    <sp_widget action="INSERT_OR_UPDATE">
+        <category>custom</category>
+        <client_script><![CDATA[api.controller=function() {
+  /* widget controller */
+  var c = this;
+};]]></client_script>
+        <controller_as>c</controller_as>
+        <css>.qr-card {&#13;
+    max-width: 700px;&#13;
+    margin: 40px auto;&#13;
+    padding: 40px;&#13;
+    background: white;&#13;
+    border-radius: 12px;&#13;
+    text-align: center;&#13;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.15);&#13;
+}&#13;
+&#13;
+.qr-card h1 {&#13;
+    font-size: 32px;&#13;
+}&#13;
+&#13;
+.qr-card h2 {&#13;
+    margin: 15px;&#13;
+}&#13;
+&#13;
+.qr-card p {&#13;
+    font-size: 16px;&#13;
+    margin: 10px;&#13;
+}&#13;
+&#13;
+.qr-code {&#13;
+    width: 300px;&#13;
+    height: 300px;&#13;
+    display: block;&#13;
+    margin: 25px auto;&#13;
+}</css>
+        <data_table>sp_instance</data_table>
+        <demo_data/>
+        <description/>
+        <docs/>
+        <field_list/>
+        <has_preview>false</has_preview>
+        <id>interviewerqr_dis</id>
+        <internal>false</internal>
+        <link><![CDATA[function link(scope, element, attrs, controller) {
+  
+}]]></link>
+        <name>Campus360 Interview QR Display</name>
+        <option_schema/>
+        <public>false</public>
+        <roles/>
+        <script><![CDATA[(function() {
+
+    data.interview = null;
+    data.error = '';
+
+    var interviewId = $sp.getParameter('interview_id');
+
+    if (!interviewId) {
+        data.error = 'Interview ID is missing.';
+        return;
+    }
+
+    var gr = new GlideRecord('x_snc_campus360_mock_interview');
+
+    if (!gr.get(interviewId)) {
+        data.error = 'Interview not found.';
+        return;
+    }
+
+    data.interview = {
+        sys_id: gr.getUniqueValue(),
+        interview_id: gr.getValue('interview_id'),
+        student: gr.student.getDisplayValue(),
+        interview_date: gr.getDisplayValue('interview_date'),
+        interview_type: gr.getDisplayValue('interview_type'),
+        start_time: gr.getDisplayValue('start_time'),
+        end_time: gr.getDisplayValue('end_time')
+    };
+
+    /*
+     * THIS IS THE URL INSIDE THE QR CODE.
+     *
+     * IMPORTANT:
+     * It points to student_attendance,
+     * NOT qr_attendance.
+     */
+
+    var studentUrl =
+        gs.getProperty('glide.servlet.uri') +
+        'sp?id=student_attendance&interview_id=' +
+        interviewId;
+
+    data.qr_debug_url = studentUrl;
+
+    data.qr_image_url =
+        'https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=' +
+        encodeURIComponent(studentUrl);
+
+})();]]></script>
+        <servicenow>false</servicenow>
+        <sys_class_name>sp_widget</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-20 15:13:45</sys_created_on>
+        <sys_id>e3102c889d2b43107f4456802862a71b</sys_id>
+        <sys_mod_count>2</sys_mod_count>
+        <sys_name>Campus360 Interview QR Display</sys_name>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name>sp_widget_e3102c889d2b43107f4456802862a71b</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-22 09:08:33</sys_updated_on>
+        <template><![CDATA[<div class="qr-card">
+
+    <h1>Campus360</h1>
+
+    <h2>Interview Attendance</h2>
+
+    <h3 ng-if="c.data.interview">
+        {{c.data.interview.interview_id}}
+    </h3>
+
+    <div ng-if="c.data.error" class="alert alert-danger">
+        {{c.data.error}}
+    </div>
+
+    <div ng-if="c.data.interview">
+
+        <p>
+            <b>Student:</b>
+            {{c.data.interview.student}}
+        </p>
+
+        <p>
+            <b>Interview:</b>
+            {{c.data.interview.interview_type}}
+        </p>
+
+        <p>
+            <b>Date:</b>
+            {{c.data.interview.interview_date}}
+        </p>
+
+        <p>
+            <b>Time:</b>
+            {{c.data.interview.start_time}}
+            -
+            {{c.data.interview.end_time}}
+        </p>
+
+        <hr>
+
+        <h2>Scan to Mark Attendance</h2>
+
+        <img
+            ng-if="c.data.qr_image_url"
+            ng-src="{{c.data.qr_image_url}}"
+            class="qr-code"
+            alt="Interview Attendance QR Code">
+
+        <h4>
+            Tranner : Scan this QR code to mark attendance
+        </h4>
+
+    </div>
+
+</div>]]></template>
+    </sp_widget>
+</record_update>

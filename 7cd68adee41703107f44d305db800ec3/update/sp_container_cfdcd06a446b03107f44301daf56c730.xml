@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_container">
+    <sp_container action="INSERT_OR_UPDATE">
+        <aria_label/>
+        <background_color/>
+        <background_image/>
+        <background_style>default</background_style>
+        <bootstrap_alt>false</bootstrap_alt>
+        <class_name/>
+        <container_class_name/>
+        <name>Student Assessments New - Container 1</name>
+        <order>1</order>
+        <semantic_tag/>
+        <sp_page display_value="student_assessments_new">e75b14a6446b03107f44301daf56c7b4</sp_page>
+        <subheader>false</subheader>
+        <sys_class_name>sp_container</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-28 09:22:57</sys_created_on>
+        <sys_id>cfdcd06a446b03107f44301daf56c730</sys_id>
+        <sys_mod_count>6</sys_mod_count>
+        <sys_name>Student Assessments New - Container 1</sys_name>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name>sp_container_cfdcd06a446b03107f44301daf56c730</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-28 09:26:39</sys_updated_on>
+        <title/>
+        <width>container</width>
+    </sp_container>
+</record_update>

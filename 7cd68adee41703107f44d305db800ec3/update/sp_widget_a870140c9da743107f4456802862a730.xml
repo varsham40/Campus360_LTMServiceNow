@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_widget">
+    <sp_widget action="INSERT_OR_UPDATE">
+        <category>custom</category>
+        <client_script><![CDATA[api.controller = function() {
+
+    var c = this;
+
+};]]></client_script>
+        <controller_as>c</controller_as>
+        <css>.attendance-card {&#13;
+    max-width: 650px;&#13;
+    margin: 60px auto;&#13;
+    padding: 40px;&#13;
+    background: white;&#13;
+    border-radius: 15px;&#13;
+    text-align: center;&#13;
+    box-shadow: 0 4px 18px rgba(0,0,0,0.15);&#13;
+}&#13;
+&#13;
+.attendance-card h1 {&#13;
+    font-size: 32px;&#13;
+    margin-bottom: 10px;&#13;
+}&#13;
+&#13;
+.attendance-card h2 {&#13;
+    font-size: 28px;&#13;
+    margin: 15px 0;&#13;
+}&#13;
+&#13;
+.attendance-card p {&#13;
+    font-size: 16px;&#13;
+    margin: 12px;&#13;
+}&#13;
+&#13;
+.success-box {&#13;
+    padding: 25px;&#13;
+    background: #e8f5e9;&#13;
+    border-radius: 12px;&#13;
+    color: #256029;&#13;
+}&#13;
+&#13;
+.checkmark {&#13;
+    width: 70px;&#13;
+    height: 70px;&#13;
+    line-height: 70px;&#13;
+    margin: 0 auto 15px;&#13;
+    border-radius: 50%;&#13;
+    background: #2e7d32;&#13;
+    color: white;&#13;
+    font-size: 42px;&#13;
+    font-weight: bold;&#13;
+}&#13;
+&#13;
+.status {&#13;
+    margin-top: 25px;&#13;
+    padding: 15px;&#13;
+    background: #c8e6c9;&#13;
+    border-radius: 8px;&#13;
+    color: #1b5e20;&#13;
+}</css>
+        <data_table>sp_instance</data_table>
+        <demo_data/>
+        <description/>
+        <docs/>
+        <field_list/>
+        <has_preview>false</has_preview>
+        <id>student_scan</id>
+        <internal>false</internal>
+        <link><![CDATA[function link(scope, element, attrs, controller) {
+  
+}]]></link>
+        <name>Campus360 Student Attendance</name>
+        <option_schema/>
+        <public>false</public>
+        <roles/>
+        <script><![CDATA[(function() {
+
+    data.interview = null;
+    data.success = false;
+    data.error = '';
+
+    // Get interview ID from QR URL
+    var interviewId = $sp.getParameter('interview_id');
+
+    if (!interviewId) {
+        data.error = 'Interview ID is missing.';
+        return;
+    }
+
+    var gr = new GlideRecord('x_snc_campus360_mock_interview');
+
+    if (!gr.get(interviewId)) {
+        data.error = 'Interview not found.';
+        return;
+    }
+
+    // Mark attendance automatically when QR is scanned
+    if (gr.getValue('attendance_status') != 'Present') {
+
+        gr.setValue('attendance_status', 'Present');
+        gr.setValue('qr_status', 'Scanned');
+        gr.update();
+
+    }
+
+    // Prepare interview information
+    data.interview = {
+        sys_id: gr.getUniqueValue(),
+        interview_id: gr.getValue('interview_id'),
+        student: gr.student.getDisplayValue(),
+        interview_date: gr.getDisplayValue('interview_date'),
+        interview_type: gr.getDisplayValue('interview_type'),
+        start_time: gr.getDisplayValue('start_time'),
+        end_time: gr.getDisplayValue('end_time'),
+        attendance_status: 'Present',
+        qr_status: 'Scanned'
+    };
+
+    // Attendance is successful
+    data.success = true;
+    data.message = 'Attendance marked successfully.';
+
+})();]]></script>
+        <servicenow>false</servicenow>
+        <sys_class_name>sp_widget</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-20 14:06:02</sys_created_on>
+        <sys_id>a870140c9da743107f4456802862a730</sys_id>
+        <sys_mod_count>6</sys_mod_count>
+        <sys_name>Campus360 Student Attendance</sys_name>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name>sp_widget_a870140c9da743107f4456802862a730</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-20 15:22:28</sys_updated_on>
+        <template><![CDATA[<div class="attendance-card">
+
+    <h1>Campus360</h1>
+
+    <h2>Interview Attendance</h2>
+
+    <!-- Error -->
+    <div ng-if="c.data.error" class="alert alert-danger">
+        {{c.data.error}}
+    </div>
+
+    <!-- Success -->
+    <div ng-if="c.data.success" class="success-box">
+
+        <div class="checkmark">✓</div>
+
+        <h2>Attendance Marked</h2>
+
+        <p>
+            Your attendance has been successfully recorded.
+        </p>
+
+        <hr>
+
+        <p>
+            <b>Interview ID:</b>
+            {{c.data.interview.interview_id}}
+        </p>
+
+        <p>
+            <b>Student:</b>
+            {{c.data.interview.student}}
+        </p>
+
+        <p>
+            <b>Interview:</b>
+            {{c.data.interview.interview_type}}
+        </p>
+
+        <p>
+            <b>Date:</b>
+            {{c.data.interview.interview_date}}
+        </p>
+
+        <p>
+            <b>Time:</b>
+            {{c.data.interview.start_time}}
+            -
+            {{c.data.interview.end_time}}
+        </p>
+
+        <div class="status">
+            <b>Status: PRESENT</b>
+        </div>
+
+    </div>
+
+    <!-- Error / no data -->
+    <div ng-if="!c.data.success && !c.data.error">
+
+        <h3>Processing Attendance...</h3>
+
+    </div>
+
+</div>]]></template>
+    </sp_widget>
+</record_update>

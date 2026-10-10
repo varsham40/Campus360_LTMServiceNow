@@ -1,0 +1,1158 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_widget">
+    <sp_widget action="INSERT_OR_UPDATE">
+        <category>custom</category>
+        <client_script><![CDATA[api.controller = function($scope, $location) {
+
+    var c = this;
+
+
+    // ==========================================
+    // BACK TO APPLICATIONS
+    // ==========================================
+
+    c.goBack = function() {
+
+        window.location.href =
+            '?id=campus360_recruiter_applications_new';
+
+    };
+
+};]]></client_script>
+        <controller_as>c</controller_as>
+        <css>.student-profile-page {&#13;
+    max-width: 1100px;&#13;
+    margin: 0 auto;&#13;
+    padding: 24px;&#13;
+    color: #102a5c;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   HEADER&#13;
+========================================= */&#13;
+&#13;
+.profile-header {&#13;
+    background: #ffffff;&#13;
+    border: 1px solid #dce3f2;&#13;
+    border-radius: 18px;&#13;
+    padding: 32px;&#13;
+    display: flex;&#13;
+    justify-content: space-between;&#13;
+    align-items: center;&#13;
+    margin-bottom: 24px;&#13;
+    box-shadow: 0 8px 25px rgba(30, 60, 100, 0.06);&#13;
+}&#13;
+&#13;
+.profile-header h1 {&#13;
+    margin: 8px 0;&#13;
+    font-size: 28px;&#13;
+    font-weight: 700;&#13;
+}&#13;
+&#13;
+.profile-header p {&#13;
+    margin: 0 0 14px;&#13;
+    color: #60739a;&#13;
+    font-size: 13px;&#13;
+}&#13;
+&#13;
+.eyebrow {&#13;
+    font-size: 10px;&#13;
+    letter-spacing: 2px;&#13;
+    font-weight: 700;&#13;
+    color: #5367e8;&#13;
+}&#13;
+&#13;
+.company-info {&#13;
+    display: inline-block;&#13;
+    padding: 8px 12px;&#13;
+    border-radius: 7px;&#13;
+    background: #f0f3ff;&#13;
+    color: #5265d9;&#13;
+    font-size: 11px;&#13;
+    font-weight: 600;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   BUTTON&#13;
+========================================= */&#13;
+&#13;
+.btn {&#13;
+    border-radius: 8px;&#13;
+    padding: 11px 18px;&#13;
+    font-size: 12px;&#13;
+    font-weight: 600;&#13;
+    cursor: pointer;&#13;
+    text-decoration: none;&#13;
+}&#13;
+&#13;
+.btn-secondary {&#13;
+    background: #ffffff;&#13;
+    color: #5367e8;&#13;
+    border: 1px solid #cdd6eb;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   PROFILE SUMMARY&#13;
+========================================= */&#13;
+&#13;
+.profile-summary {&#13;
+    background: #ffffff;&#13;
+    border: 1px solid #dce3f2;&#13;
+    border-radius: 18px;&#13;
+    padding: 28px;&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    gap: 20px;&#13;
+    margin-bottom: 20px;&#13;
+    box-shadow: 0 8px 25px rgba(30, 60, 100, 0.05);&#13;
+}&#13;
+&#13;
+.large-avatar {&#13;
+    width: 70px;&#13;
+    height: 70px;&#13;
+    border-radius: 18px;&#13;
+    background: #eef0ff;&#13;
+    color: #5367e8;&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+    font-size: 27px;&#13;
+    font-weight: 700;&#13;
+}&#13;
+&#13;
+.profile-main {&#13;
+    flex: 1;&#13;
+}&#13;
+&#13;
+.profile-main h2 {&#13;
+    margin: 0 0 5px;&#13;
+    font-size: 23px;&#13;
+}&#13;
+&#13;
+.student-id {&#13;
+    margin: 0 0 10px;&#13;
+    color: #7182a4;&#13;
+    font-size: 12px;&#13;
+}&#13;
+&#13;
+.placement-badge {&#13;
+    display: inline-block;&#13;
+    background: #edf8f1;&#13;
+    color: #17834c;&#13;
+    border-radius: 20px;&#13;
+    padding: 6px 11px;&#13;
+    font-size: 11px;&#13;
+    font-weight: 600;&#13;
+}&#13;
+&#13;
+.resume-btn {&#13;
+    display: inline-block;&#13;
+    background: #5367e8;&#13;
+    color: #ffffff;&#13;
+    padding: 11px 18px;&#13;
+    border-radius: 8px;&#13;
+    font-size: 12px;&#13;
+    font-weight: 600;&#13;
+    text-decoration: none;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   PROFILE CARD&#13;
+========================================= */&#13;
+&#13;
+.profile-card {&#13;
+    background: #ffffff;&#13;
+    border: 1px solid #dce3f2;&#13;
+    border-radius: 18px;&#13;
+    margin-bottom: 20px;&#13;
+    overflow: hidden;&#13;
+    box-shadow: 0 8px 25px rgba(30, 60, 100, 0.05);&#13;
+}&#13;
+&#13;
+.card-header {&#13;
+    padding: 22px 26px;&#13;
+    border-bottom: 1px solid #e6ebf4;&#13;
+}&#13;
+&#13;
+.card-header h2 {&#13;
+    margin: 0;&#13;
+    font-size: 18px;&#13;
+}&#13;
+&#13;
+.card-header p {&#13;
+    margin: 6px 0 0;&#13;
+    font-size: 12px;&#13;
+    color: #7182a4;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   PROFILE GRID&#13;
+========================================= */&#13;
+&#13;
+.profile-grid {&#13;
+    padding: 25px;&#13;
+    display: grid;&#13;
+    grid-template-columns: repeat(2, 1fr);&#13;
+    gap: 22px 40px;&#13;
+}&#13;
+&#13;
+.profile-field {&#13;
+    display: flex;&#13;
+    flex-direction: column;&#13;
+    gap: 6px;&#13;
+}&#13;
+&#13;
+.field-label {&#13;
+    font-size: 11px;&#13;
+    color: #7889a8;&#13;
+}&#13;
+&#13;
+.profile-field strong {&#13;
+    font-size: 13px;&#13;
+    color: #183467;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   ACADEMIC&#13;
+========================================= */&#13;
+&#13;
+.academic-grid {&#13;
+    padding: 25px;&#13;
+    display: grid;&#13;
+    grid-template-columns: repeat(4, 1fr);&#13;
+    gap: 15px;&#13;
+}&#13;
+&#13;
+.academic-box {&#13;
+    background: #f7f9ff;&#13;
+    border: 1px solid #e4e9f5;&#13;
+    border-radius: 12px;&#13;
+    padding: 18px;&#13;
+}&#13;
+&#13;
+.academic-box span {&#13;
+    display: block;&#13;
+    color: #7182a4;&#13;
+    font-size: 11px;&#13;
+    margin-bottom: 8px;&#13;
+}&#13;
+&#13;
+.academic-box strong {&#13;
+    font-size: 20px;&#13;
+    color: #183467;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   APPLICATION HISTORY&#13;
+========================================= */&#13;
+&#13;
+.application-history {&#13;
+    padding: 0 25px 20px;&#13;
+}&#13;
+&#13;
+.application-history-row {&#13;
+    display: grid;&#13;
+    grid-template-columns: 2fr 1fr 1fr 1fr;&#13;
+    gap: 20px;&#13;
+    align-items: center;&#13;
+    padding: 18px 0;&#13;
+    border-bottom: 1px solid #edf0f6;&#13;
+}&#13;
+&#13;
+.application-history-row:last-child {&#13;
+    border-bottom: none;&#13;
+}&#13;
+&#13;
+.application-history-row strong {&#13;
+    display: block;&#13;
+    font-size: 13px;&#13;
+}&#13;
+&#13;
+.application-history-row span {&#13;
+    font-size: 11px;&#13;
+    color: #7182a4;&#13;
+}&#13;
+&#13;
+.status-badge {&#13;
+    display: inline-block;&#13;
+    padding: 6px 10px;&#13;
+    border-radius: 20px;&#13;
+    font-size: 10px;&#13;
+    font-weight: 600;&#13;
+}&#13;
+&#13;
+.status-pending {&#13;
+    background: #fff5df;&#13;
+    color: #b97700;&#13;
+}&#13;
+&#13;
+.status-submitted {&#13;
+    background: #eaf2ff;&#13;
+    color: #2868c7;&#13;
+}&#13;
+&#13;
+.status-selected {&#13;
+    background: #eaf8ef;&#13;
+    color: #16814a;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   ERROR&#13;
+========================================= */&#13;
+&#13;
+.error-message {&#13;
+    background: #fff1f1;&#13;
+    border: 1px solid #ffd1d1;&#13;
+    color: #c33b3b;&#13;
+    padding: 15px;&#13;
+    border-radius: 10px;&#13;
+    margin-bottom: 20px;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   EMPTY&#13;
+========================================= */&#13;
+&#13;
+.empty-state {&#13;
+    padding: 35px;&#13;
+    text-align: center;&#13;
+    color: #7182a4;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   MOBILE&#13;
+========================================= */&#13;
+&#13;
+@media (max-width: 768px) {&#13;
+&#13;
+    .profile-header {&#13;
+        flex-direction: column;&#13;
+        align-items: flex-start;&#13;
+        gap: 20px;&#13;
+    }&#13;
+&#13;
+    .profile-grid {&#13;
+        grid-template-columns: 1fr;&#13;
+    }&#13;
+&#13;
+    .academic-grid {&#13;
+        grid-template-columns: repeat(2, 1fr);&#13;
+    }&#13;
+&#13;
+    .profile-summary {&#13;
+        flex-wrap: wrap;&#13;
+    }&#13;
+&#13;
+    .application-history-row {&#13;
+        grid-template-columns: 1fr;&#13;
+        gap: 8px;&#13;
+    }&#13;
+&#13;
+}</css>
+        <data_table>sp_instance</data_table>
+        <demo_data/>
+        <description/>
+        <docs/>
+        <field_list/>
+        <has_preview>false</has_preview>
+        <id>recruiter_student_view</id>
+        <internal>false</internal>
+        <link><![CDATA[function link(scope, element, attrs, controller) {
+  
+}]]></link>
+        <name>Campus360 Recruiter Student View</name>
+        <option_schema/>
+        <public>false</public>
+        <roles/>
+        <script><![CDATA[(function() {
+
+    // =====================================================
+    // CAMPUS360 RECRUITER STUDENT PROFILE
+    // =====================================================
+
+
+    // =====================================================
+    // CURRENT COMPANY
+    // =====================================================
+
+    var companySysId =
+        'e9268662acd303107f44b432e349694b';
+
+
+    // =====================================================
+    // GET STUDENT SYS ID FROM URL
+    // =====================================================
+
+    var studentSysId =
+        $sp.getParameter('sys_id');
+
+
+    if (!studentSysId) {
+
+        data.error =
+            'Student profile could not be identified.';
+
+        return;
+
+    }
+
+
+    // =====================================================
+    // COMPANY INFORMATION
+    // =====================================================
+
+    var companyGR =
+        new GlideRecord(
+            'x_snc_campus360_company_master'
+        );
+
+
+    if (companyGR.get(companySysId)) {
+
+        data.company_name =
+            companyGR.getValue('company_name');
+
+        data.company_id =
+            companyGR.getValue('company_id');
+
+    }
+
+
+    // =====================================================
+    // SECURITY CHECK
+    //
+    // Make sure this student has actually applied
+    // to an opportunity belonging to this company.
+    // =====================================================
+
+    var applicationCheck =
+        new GlideRecord(
+            'x_snc_campus360_student_application'
+        );
+
+
+    applicationCheck.addQuery(
+        'student',
+        studentSysId
+    );
+
+
+    applicationCheck.addQuery(
+        'opportunity.company',
+        companySysId
+    );
+
+
+    applicationCheck.setLimit(1);
+
+    applicationCheck.query();
+
+
+    if (!applicationCheck.next()) {
+
+        data.error =
+            'This student profile is not available for your company.';
+
+        return;
+
+    }
+
+
+    // =====================================================
+    // GET STUDENT MASTER
+    // =====================================================
+
+    var studentGR =
+        new GlideRecord(
+            'x_snc_campus360_student_master'
+        );
+
+
+    if (!studentGR.get(studentSysId)) {
+
+        data.error =
+            'Student record could not be found.';
+
+        return;
+
+    }
+
+
+    // =====================================================
+    // STUDENT BASIC INFORMATION
+    // =====================================================
+
+    data.student = {};
+
+
+    data.student.sys_id =
+        studentGR.getUniqueValue();
+
+
+    data.student.student_name =
+        studentGR.getValue('student_name');
+
+
+    data.student.student_id =
+        studentGR.getValue('student_id');
+
+
+    data.student.email =
+        studentGR.getValue('email');
+
+
+    data.student.phone_number =
+        studentGR.getValue('phone_number');
+
+
+    data.student.batch =
+        studentGR.getValue('batch');
+
+
+    data.student.branch =
+        studentGR.getDisplayValue('branch');
+
+
+    data.student.degree =
+        studentGR.getDisplayValue('degree');
+
+
+    data.student.cgpa =
+        studentGR.getValue('cgpa');
+
+
+    data.student.backlogs =
+        studentGR.getValue('backlogs');
+
+
+    data.student.placement_status =
+        studentGR.getDisplayValue(
+            'placement_status'
+        );
+
+
+    // =====================================================
+    // USER
+    // =====================================================
+
+    if (studentGR.user) {
+
+        data.student.user =
+            studentGR.user.getDisplayValue();
+
+    } else {
+
+        data.student.user = '';
+
+    }
+
+
+    // =====================================================
+    // RESUME ATTACHMENT
+    // =====================================================
+
+    data.student.resume_available = false;
+
+    data.student.resume_url = '';
+
+
+    var attachmentGR =
+        new GlideRecord('sys_attachment');
+
+
+    attachmentGR.addQuery(
+        'table_name',
+        'x_snc_campus360_student_master'
+    );
+
+
+    attachmentGR.addQuery(
+        'table_sys_id',
+        studentSysId
+    );
+
+
+    attachmentGR.addQuery(
+        'file_name',
+        'STARTSWITH',
+        ''
+    );
+
+
+    attachmentGR.orderByDesc(
+        'sys_created_on'
+    );
+
+
+    attachmentGR.setLimit(1);
+
+    attachmentGR.query();
+
+
+    if (attachmentGR.next()) {
+
+        data.student.resume_available =
+            true;
+
+        data.student.resume_name =
+            attachmentGR.getValue(
+                'file_name'
+            );
+
+        data.student.resume_url =
+            '/sys_attachment.do?sys_id=' +
+            attachmentGR.getUniqueValue();
+
+    }
+
+
+    // =====================================================
+    // APPLICATION INFORMATION
+    // =====================================================
+
+    data.student.application_count = 0;
+
+    var applicationGR =
+        new GlideRecord(
+            'x_snc_campus360_student_application'
+        );
+
+
+    applicationGR.addQuery(
+        'student',
+        studentSysId
+    );
+
+
+    applicationGR.addQuery(
+        'opportunity.company',
+        companySysId
+    );
+
+
+    applicationGR.orderByDesc(
+        'sys_created_on'
+    );
+
+
+    applicationGR.query();
+
+
+    data.student.applications = [];
+
+
+    while (applicationGR.next()) {
+
+        var application = {};
+
+
+        application.application_id =
+            applicationGR.getValue(
+                'application_id'
+            );
+
+
+        application.status =
+            applicationGR.getDisplayValue(
+                'application_status'
+            );
+
+
+        application.applied_date =
+            applicationGR.getDisplayValue(
+                'applied_date'
+            );
+
+
+        if (applicationGR.opportunity) {
+
+            var opportunityGR =
+                applicationGR.opportunity.getRefRecord();
+
+
+            if (
+                opportunityGR &&
+                opportunityGR.isValidRecord()
+            ) {
+
+                application.opportunity_title =
+                    opportunityGR.getValue(
+                        'opportunity_title'
+                    );
+
+
+                application.opportunity_id =
+                    opportunityGR.getValue(
+                        'opportunity_id'
+                    );
+
+            }
+
+        }
+
+
+        data.student.applications.push(
+            application
+        );
+
+
+        data.student.application_count++;
+
+    }
+
+
+})();]]></script>
+        <servicenow>false</servicenow>
+        <sys_class_name>sp_widget</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-29 04:35:51</sys_created_on>
+        <sys_id>3073a8faace303107f44e94dfa051a4e</sys_id>
+        <sys_mod_count>1</sys_mod_count>
+        <sys_name>Campus360 Recruiter Student View</sys_name>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name>sp_widget_3073a8faace303107f44e94dfa051a4e</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-29 04:36:39</sys_updated_on>
+        <template><![CDATA[<div class="student-profile-page">
+
+
+  <!-- =========================================
+       HEADER
+  ========================================== -->
+
+  <div class="profile-header">
+
+    <div>
+
+      <span class="eyebrow">
+        RECRUITMENT
+      </span>
+
+      <h1>
+        Student Profile
+      </h1>
+
+      <p>
+        Review candidate information and application history.
+      </p>
+
+      <div class="company-info">
+
+        {{c.data.company_name}}
+        ·
+        {{c.data.company_id}}
+
+      </div>
+
+    </div>
+
+
+    <div class="header-actions">
+
+      <button
+        type="button"
+        class="btn btn-secondary"
+        ng-click="c.goBack()">
+
+        ← Applications
+
+      </button>
+
+    </div>
+
+  </div>
+
+
+  <!-- =========================================
+       ERROR
+  ========================================== -->
+
+  <div
+    class="error-message"
+    ng-if="c.data.error">
+
+    {{c.data.error}}
+
+  </div>
+
+
+  <!-- =========================================
+       STUDENT PROFILE
+  ========================================== -->
+
+  <div
+    class="profile-container"
+    ng-if="!c.data.error && c.data.student">
+
+
+    <!-- =======================================
+         PROFILE SUMMARY
+    ======================================== -->
+
+    <div class="profile-summary">
+
+      <div class="large-avatar">
+
+        {{c.data.student.student_name.charAt(0)}}
+
+      </div>
+
+
+      <div class="profile-main">
+
+        <h2>
+          {{c.data.student.student_name}}
+        </h2>
+
+        <p class="student-id">
+
+          {{c.data.student.student_id}}
+
+        </p>
+
+        <span
+          class="placement-badge">
+
+          {{c.data.student.placement_status}}
+
+        </span>
+
+      </div>
+
+
+      <div class="profile-actions">
+
+        <a
+          ng-if="c.data.student.resume_available"
+          class="resume-btn"
+          ng-href="{{c.data.student.resume_url}}"
+          target="_blank">
+
+          View Resume
+
+        </a>
+
+      </div>
+
+    </div>
+
+
+    <!-- =======================================
+         PERSONAL INFORMATION
+    ======================================== -->
+
+    <div class="profile-card">
+
+      <div class="card-header">
+
+        <h2>
+          Personal Information
+        </h2>
+
+      </div>
+
+
+      <div class="profile-grid">
+
+
+        <div class="profile-field">
+
+          <span class="field-label">
+            Student Name
+          </span>
+
+          <strong>
+            {{c.data.student.student_name || '—'}}
+          </strong>
+
+        </div>
+
+
+        <div class="profile-field">
+
+          <span class="field-label">
+            Student ID
+          </span>
+
+          <strong>
+            {{c.data.student.student_id || '—'}}
+          </strong>
+
+        </div>
+
+
+        <div class="profile-field">
+
+          <span class="field-label">
+            Email
+          </span>
+
+          <strong>
+            {{c.data.student.email || '—'}}
+          </strong>
+
+        </div>
+
+
+        <div class="profile-field">
+
+          <span class="field-label">
+            Phone Number
+          </span>
+
+          <strong>
+            {{c.data.student.phone_number || '—'}}
+          </strong>
+
+        </div>
+
+
+        <div class="profile-field">
+
+          <span class="field-label">
+            Batch
+          </span>
+
+          <strong>
+            {{c.data.student.batch || '—'}}
+          </strong>
+
+        </div>
+
+
+        <div class="profile-field">
+
+          <span class="field-label">
+            Branch
+          </span>
+
+          <strong>
+            {{c.data.student.branch || '—'}}
+          </strong>
+
+        </div>
+
+
+        <div class="profile-field">
+
+          <span class="field-label">
+            Degree
+          </span>
+
+          <strong>
+            {{c.data.student.degree || '—'}}
+          </strong>
+
+        </div>
+
+
+        <div class="profile-field">
+
+          <span class="field-label">
+            User Account
+          </span>
+
+          <strong>
+            {{c.data.student.user || '—'}}
+          </strong>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- =======================================
+         ACADEMIC INFORMATION
+    ======================================== -->
+
+    <div class="profile-card">
+
+      <div class="card-header">
+
+        <h2>
+          Academic Information
+        </h2>
+
+      </div>
+
+
+      <div class="academic-grid">
+
+
+        <div class="academic-box">
+
+          <span>
+            CGPA
+          </span>
+
+          <strong>
+            {{c.data.student.cgpa || '—'}}
+          </strong>
+
+        </div>
+
+
+        <div class="academic-box">
+
+          <span>
+            Backlogs
+          </span>
+
+          <strong>
+            {{c.data.student.backlogs || '0'}}
+          </strong>
+
+        </div>
+
+
+        <div class="academic-box">
+
+          <span>
+            Placement Status
+          </span>
+
+          <strong>
+            {{c.data.student.placement_status || '—'}}
+          </strong>
+
+        </div>
+
+
+        <div class="academic-box">
+
+          <span>
+            Applications
+          </span>
+
+          <strong>
+            {{c.data.student.application_count}}
+          </strong>
+
+        </div>
+
+
+      </div>
+
+    </div>
+
+
+    <!-- =======================================
+         APPLICATION HISTORY
+    ======================================== -->
+
+    <div class="profile-card">
+
+      <div class="card-header">
+
+        <div>
+
+          <h2>
+            Application History
+          </h2>
+
+          <p>
+            Opportunities this student applied for.
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <div
+        class="empty-state"
+        ng-if="!c.data.student.applications.length">
+
+        No applications found.
+
+      </div>
+
+
+      <div
+        class="application-history"
+        ng-if="c.data.student.applications.length">
+
+
+        <div
+          class="application-history-row"
+          ng-repeat="application in c.data.student.applications">
+
+
+          <div>
+
+            <strong>
+              {{application.opportunity_title}}
+            </strong>
+
+            <span>
+              {{application.opportunity_id}}
+            </span>
+
+          </div>
+
+
+          <div>
+
+            <span>
+              {{application.application_id}}
+            </span>
+
+          </div>
+
+
+          <div>
+
+            <span>
+              {{application.applied_date || '—'}}
+            </span>
+
+          </div>
+
+
+          <div>
+
+            <span
+              class="status-badge"
+              ng-class="{
+                'status-pending':
+                  application.status == 'Pending',
+
+                'status-submitted':
+                  application.status == 'Submitted',
+
+                'status-selected':
+                  application.status == 'Selected'
+              }">
+
+              {{application.status}}
+
+            </span>
+
+          </div>
+
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+  </div>
+
+</div>]]></template>
+    </sp_widget>
+</record_update>

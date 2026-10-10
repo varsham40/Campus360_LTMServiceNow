@@ -1,0 +1,1264 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update sys_domain="global" table="sys_hub_flow">
+    <sys_hub_flow action="INSERT_OR_UPDATE">
+        <access>public</access>
+        <acls/>
+        <active>true</active>
+        <allow_high_security_roles>false</allow_high_security_roles>
+        <annotation/>
+        <attributes>browserActivatedIn=chrome,integrationActivatedIn=standalone,timeFromCreateToActivate=173859000,viewActivatedIn=naturalLanguage</attributes>
+        <authored_on_release_version>29000</authored_on_release_version>
+        <callable_by_client_api>false</callable_by_client_api>
+        <category/>
+        <copied_from>51cbc6c97743011031e3b3c64b5a9907</copied_from>
+        <copied_from_name>FlowTemplate: Record Trigger</copied_from_name>
+        <description>Automatically creates student application records when a placement opportunity is opened for eligible students.</description>
+        <display_name_after_preview/>
+        <flow_priority/>
+        <generation_source/>
+        <internal_name>campus360__open_opportunity_application_creation</internal_name>
+        <label_cache>[{"name":"undefined","label":" - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record","usedInstances":{},"attributes":{}},{"name":"8dac1e4a-9610-4919-93ae-0dce12af1035.Records","label":"1 - Look Up Records➛Student Master Records","reference":"x_snc_campus360_student_master","reference_display":"Student Master","type":"records","base_type":"records","usedInstances":{},"attributes":{"element_mapping_provider":"com.glide.flow_design.action.data.FlowDesignVariableMapper"}},{"name":"Created or Updated_1.current.minimum_cgpa","label":"Trigger - Record Created or Updated➛ Record➛Minimum CGPA","reference":"","reference_display":"Minimum CGPA","type":"decimal","base_type":"decimal","parent_table_name":"x_snc_campus360_placement_opportunity","column_name":"minimum_cgpa","choices":[{"order":0.0}],"usedInstances":{"8dac1e4a-9610-4919-93ae-0dce12af1035":[null,"conditions"]}},{"name":"8bff04fd-a6dd-424f-a568-e4188bc2be5b.Records","label":"4 - Look Up Records➛Student Application Records","reference":"x_snc_campus360_student_application","reference_display":"Student Application","type":"records","base_type":"records","usedInstances":{},"attributes":{"element_mapping_provider":"com.glide.flow_design.action.data.FlowDesignVariableMapper"}},{"name":"Created or Updated_1.current.eligible_branches","label":"Trigger - Record Created or Updated➛ Record➛Eligible Branches","reference":"","reference_display":"Eligible Branches","type":"string","base_type":"string","parent_table_name":"x_snc_campus360_placement_opportunity","column_name":"eligible_branches","choices":[{"order":0.0}],"usedInstances":{"51bebe25-9d2a-4221-911d-fb6844c56651":["condition"],"8bbec505-9249-4053-8c23-660f65396578":["condition"]}},{"name":"Created or Updated_1.current.opportunity_id","label":"Trigger - Record Created or Updated➛ Record➛Opportunity ID","reference":"","reference_display":"Opportunity ID","type":"string","base_type":"string","parent_table_name":"x_snc_campus360_placement_opportunity","column_name":"opportunity_id","choices":[{"order":0.0}],"usedInstances":{"c963605b-7803-4245-ab01-36d24ff8f42c":["opportunity"],"8ca4a067-6703-4e60-968c-cc39434958e7":["opportunity"]}},{"name":"f5541d25-8acf-4ed7-a042-0f73121e6d1c.item.branch","label":"2 - For Each➛Student Master Record➛Branch","reference":"","reference_display":"Branch","type":"choice","base_type":"choice","parent_table_name":"x_snc_campus360_student_master","column_name":"branch","choices":[{"sequence":0.0,"reference":false,"used":false,"label":"CSE","image":"","rawLabel":"CSE","selected":false,"missing":false,"value":"cse","parameters":{"name":"x_snc_campus360_student_master","dependent_values":[""],"dependent_values_map":{"":"CSE"}}},{"sequence":1.0,"reference":false,"used":false,"label":"CSE-AI","image":"","rawLabel":"CSE-AI","selected":false,"missing":false,"value":"cse_ai","parameters":{"name":"x_snc_campus360_student_master","dependent_values":[""],"dependent_values_map":{"":"CSE-AI"}}},{"sequence":2.0,"reference":false,"used":false,"label":"CSE-DS","image":"","rawLabel":"CSE-DS","selected":false,"missing":false,"value":"cse_ds","parameters":{"name":"x_snc_campus360_student_master","dependent_values":[""],"dependent_values_map":{"":"CSE-DS"}}},{"sequence":3.0,"reference":false,"used":false,"label":"IT","image":"","rawLabel":"IT","selected":false,"missing":false,"value":"it","parameters":{"name":"x_snc_campus360_student_master","dependent_values":[""],"dependent_values_map":{"":"IT"}}},{"sequence":4.0,"reference":false,"used":false,"label":"ECE","image":"","rawLabel":"ECE","selected":false,"missing":false,"value":"ece","parameters":{"name":"x_snc_campus360_student_master","dependent_values":[""],"dependent_values_map":{"":"ECE"}}},{"sequence":5.0,"reference":false,"used":false,"label":"EEE","image":"","rawLabel":"EEE","selected":false,"missing":false,"value":"eee","parameters":{"name":"x_snc_campus360_student_master","dependent_values":[""],"dependent_values_map":{"":"EEE"}}},{"sequence":6.0,"reference":false,"used":false,"label":"Mechanical","image":"","rawLabel":"Mechanical","selected":false,"missing":false,"value":"mechanical","parameters":{"name":"x_snc_campus360_student_master","dependent_values":[""],"dependent_values_map":{"":"Mechanical"}}},{"sequence":7.0,"reference":false,"used":false,"label":"Civil","image":"","rawLabel":"Civil","selected":false,"missing":false,"value":"civil","parameters":{"name":"x_snc_campus360_student_master","dependent_values":[""],"dependent_values_map":{"":"Civil"}}},{"sequence":8.0,"reference":false,"used":false,"label":"Other","image":"","rawLabel":"Other","selected":false,"missing":false,"value":"other","parameters":{"name":"x_snc_campus360_student_master","dependent_values":[""],"dependent_values_map":{"":"Other"}}}],"usedInstances":{"51bebe25-9d2a-4221-911d-fb6844c56651":["condition"],"8bbec505-9249-4053-8c23-660f65396578":["condition"]}},{"name":"f5541d25-8acf-4ed7-a042-0f73121e6d1c.item","label":"2 - For Each➛Student Master Record","reference":"x_snc_campus360_student_master","reference_display":"Student Master","type":"reference","base_type":"reference","usedInstances":{},"attributes":{"pills_draggable_inside_block":"true","pills_draggable_outside_block":"false"}},{"name":"f5541d25-8acf-4ed7-a042-0f73121e6d1c.item.student_id","label":"2 - For Each➛Student Master Record➛Student ID","reference":"","reference_display":"Student ID","type":"string","base_type":"string","parent_table_name":"x_snc_campus360_student_master","column_name":"student_id","choices":[{"order":0.0}],"usedInstances":{"95e70b28-85a8-42aa-8ca0-d40de89a0ed0":["table_name"],"8ca4a067-6703-4e60-968c-cc39434958e7":["student"]}},{"name":"Created or Updated_1.current","label":"Trigger - Record Created or Updated➛ Record","reference":"x_snc_campus360_placement_opportunity","reference_display":"Placement Opportunity","type":"reference","base_type":"reference","choices":[{"order":0.0}],"usedInstances":{"c963605b-7803-4245-ab01-36d24ff8f42c":["opportunity"],"8ca4a067-6703-4e60-968c-cc39434958e7":["opportunity"]},"attributes":{"":""}}]</label_cache>
+        <master_snapshot>23f14fe3a8d343107f44321b8bcb56a3</master_snapshot>
+        <master_snapshot_digest/>
+        <name>Campus360 - Open Opportunity Application Creation</name>
+        <natlang/>
+        <outputs/>
+        <pre_compiled>false</pre_compiled>
+        <remote_trigger_id>fff14fe3a8d343107f44321b8bcb56e4</remote_trigger_id>
+        <run_as>user</run_as>
+        <run_with_roles/>
+        <sc_callable>false</sc_callable>
+        <show_draft_actions>false</show_draft_actions>
+        <show_triggered_flows>false</show_triggered_flows>
+        <status>published</status>
+        <substatus/>
+        <sys_class_name>sys_hub_flow</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-17 13:25:00</sys_created_on>
+        <sys_domain>global</sys_domain>
+        <sys_domain_path>/</sys_domain_path>
+        <sys_id>51caaccbfd1343107f44e0b0f427dbe2</sys_id>
+        <sys_mod_count>49</sys_mod_count>
+        <sys_name>Campus360 - Open Opportunity Application Creation</sys_name>
+        <sys_overrides/>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name>sys_hub_flow_51caaccbfd1343107f44e0b0f427dbe2</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:42:40</sys_updated_on>
+        <type>flow</type>
+        <updation_source/>
+        <version>2</version>
+        <version_record>0c028fe3a8d343107f44321b8bcb5664</version_record>
+    </sys_hub_flow>
+    <sys_translated_text action="delete_multiple" query="documentkey=51caaccbfd1343107f44e0b0f427dbe2"/>
+    <sys_variable_value action="delete_multiple" query="document_key=51caaccbfd1343107f44e0b0f427dbe2"/>
+    <sys_flow_record_trigger action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <condition table="x_snc_campus360_placement_opportunity">status=open<item display_value="Open" endquery="false" field="status" goto="false" newquery="false" operator="=" or="false" value="open"/>
+        </condition>
+        <name/>
+        <on_delete>false</on_delete>
+        <on_insert>true</on_insert>
+        <on_update>true</on_update>
+        <published_version/>
+        <run_flow_in>background</run_flow_in>
+        <run_on_extended>false</run_on_extended>
+        <run_when_setting>both</run_when_setting>
+        <run_when_user_list/>
+        <run_when_user_setting>any</run_when_user_setting>
+        <sys_class_name>sys_flow_record_trigger</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 13:42:40</sys_created_on>
+        <sys_domain>global</sys_domain>
+        <sys_domain_path>/</sys_domain_path>
+        <sys_id>fff14fe3a8d343107f44321b8bcb56e4</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_overrides/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:42:40</sys_updated_on>
+        <table>x_snc_campus360_placement_opportunity</table>
+        <trigger_definition/>
+    </sys_flow_record_trigger>
+    <sys_trigger_runner_mapping action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <data>{"run_flow_in":"background","run_when_user_list":[],"run_when_setting":"both","run_when_user_setting":"any","run_on_extended":"false"}</data>
+        <identifier>51caaccbfd1343107f44e0b0f427dbe2</identifier>
+        <identifier_type>flow</identifier_type>
+        <runner>FDTriggerRunner</runner>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 13:42:40</sys_created_on>
+        <sys_id>fbf14fe3a8d343107f44321b8bcb56e5</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:42:40</sys_updated_on>
+        <trigger display_value="">fff14fe3a8d343107f44321b8bcb56e4</trigger>
+    </sys_trigger_runner_mapping>
+    <sys_trigger_runner_mapping action="delete_multiple" query="identifier=51caaccbfd1343107f44e0b0f427dbe2^sys_idNOT INfbf14fe3a8d343107f44321b8bcb56e5"/>
+    <sys_hub_flow_stage action="delete_multiple" query="flow=51caaccbfd1343107f44e0b0f427dbe2"/>
+    <sys_flow_cat_variable_model action="delete_multiple" query="id=51caaccbfd1343107f44e0b0f427dbe2^sys_idNOT IN15caaccbfd1343107f44e0b0f427dbe3"/>
+    <sys_flow_cat_variable_model action="INSERT_OR_UPDATE">
+        <id>51caaccbfd1343107f44e0b0f427dbe2</id>
+        <name>Campus360 - Open Opportunity Application Creation</name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-17 13:25:00</sys_created_on>
+        <sys_id>15caaccbfd1343107f44e0b0f427dbe3</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_scope/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-17 13:25:00</sys_updated_on>
+    </sys_flow_cat_variable_model>
+    <sys_flow_cat_variable action="delete_multiple" query="flow_catalog_model=15caaccbfd1343107f44e0b0f427dbe3"/>
+    <sys_hub_flow_input action="delete_multiple" query="model=51caaccbfd1343107f44e0b0f427dbe2^sys_idNOT IN11caaccbfd1343107f44e0b0f427dbec,55caaccbfd1343107f44e0b0f427dbf9,5dcaaccbfd1343107f44e0b0f427dbf3"/>
+    <sys_hub_flow_input action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <array>false</array>
+        <array_denormalized>false</array_denormalized>
+        <attributes>element_mapping_provider=com.glide.flow_design.action.data.FlowDesignVariableMapper,test_input_hidden=true,uiType=table_name,uiTypeLabel=Table Name</attributes>
+        <audit>false</audit>
+        <calculation><![CDATA[(function calculatedFieldValue(current) {
+
+	// Add your code here
+	return '';  // return the calculated value
+
+})(current);]]></calculation>
+        <choice/>
+        <choice_field/>
+        <choice_table/>
+        <column_label/>
+        <comments/>
+        <create_roles/>
+        <default_value/>
+        <defaultsort/>
+        <delete_roles/>
+        <dependent/>
+        <dependent_on_field/>
+        <display>false</display>
+        <dynamic_creation>false</dynamic_creation>
+        <dynamic_creation_script/>
+        <dynamic_default_value/>
+        <dynamic_ref_qual/>
+        <element>table_name</element>
+        <element_reference>false</element_reference>
+        <foreign_database/>
+        <formula/>
+        <function_definition/>
+        <function_field>false</function_field>
+        <help/>
+        <hint/>
+        <internal_type display_value="">table_name</internal_type>
+        <label>Table Name</label>
+        <mandatory>false</mandatory>
+        <max_length>200</max_length>
+        <model display_value="Campus360 - Open Opportunity Application Creation">51caaccbfd1343107f44e0b0f427dbe2</model>
+        <model_id>51caaccbfd1343107f44e0b0f427dbe2</model_id>
+        <model_table>sys_hub_flow</model_table>
+        <name>var__m_sys_hub_flow_input_51caaccbfd1343107f44e0b0f427dbe2</name>
+        <next_element/>
+        <order>101</order>
+        <primary>false</primary>
+        <read_only>false</read_only>
+        <read_only_option/>
+        <read_roles/>
+        <reference/>
+        <reference_cascade_rule/>
+        <reference_floats>false</reference_floats>
+        <reference_key/>
+        <reference_qual/>
+        <reference_qual_condition/>
+        <reference_type/>
+        <sizeclass/>
+        <spell_check>false</spell_check>
+        <staged>false</staged>
+        <sys_class_name>sys_hub_flow_input</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-17 13:25:00</sys_created_on>
+        <sys_id>11caaccbfd1343107f44e0b0f427dbec</sys_id>
+        <sys_mod_count>1</sys_mod_count>
+        <sys_name/>
+        <sys_package/>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:42:38</sys_updated_on>
+        <table_reference>false</table_reference>
+        <text_index>false</text_index>
+        <unique>false</unique>
+        <use_dependent_field>false</use_dependent_field>
+        <use_dynamic_default>false</use_dynamic_default>
+        <use_reference_qualifier>simple</use_reference_qualifier>
+        <virtual>false</virtual>
+        <virtual_type>script</virtual_type>
+        <widget/>
+        <write_roles/>
+        <xml_view>false</xml_view>
+    </sys_hub_flow_input>
+    <sys_hub_action_input_action_instance action="delete_multiple" query="action_input=11caaccbfd1343107f44e0b0f427dbec"/>
+    <sys_hub_flow_input action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <array>false</array>
+        <array_denormalized>false</array_denormalized>
+        <attributes>child_label=FDChangeDetails,child_name=FDChangeDetails,child_type=object,child_type_label=Object,co_type_name=FDCollection,element_mapping_provider=com.glide.flow_design.action.data.FlowDesignVariableMapper,pwd2droppable=true,uiType=array.object,uiTypeLabel=Array.Object</attributes>
+        <audit>false</audit>
+        <calculation><![CDATA[(function calculatedFieldValue(current) {
+
+	// Add your code here
+	return '';  // return the calculated value
+
+})(current);]]></calculation>
+        <choice/>
+        <choice_field/>
+        <choice_table/>
+        <column_label/>
+        <comments/>
+        <create_roles/>
+        <default_value/>
+        <defaultsort/>
+        <delete_roles/>
+        <dependent/>
+        <dependent_on_field/>
+        <display>false</display>
+        <dynamic_creation>false</dynamic_creation>
+        <dynamic_creation_script/>
+        <dynamic_default_value/>
+        <dynamic_ref_qual/>
+        <element>changed_fields</element>
+        <element_reference>false</element_reference>
+        <foreign_database/>
+        <formula/>
+        <function_definition/>
+        <function_field>false</function_field>
+        <help/>
+        <hint/>
+        <internal_type display_value="String">string</internal_type>
+        <label>Changed Fields</label>
+        <mandatory>false</mandatory>
+        <max_length>4000</max_length>
+        <model display_value="Campus360 - Open Opportunity Application Creation">51caaccbfd1343107f44e0b0f427dbe2</model>
+        <model_id>51caaccbfd1343107f44e0b0f427dbe2</model_id>
+        <model_table>sys_hub_flow</model_table>
+        <name>var__m_sys_hub_flow_input_51caaccbfd1343107f44e0b0f427dbe2</name>
+        <next_element/>
+        <order>100</order>
+        <primary>false</primary>
+        <read_only>false</read_only>
+        <read_only_option/>
+        <read_roles/>
+        <reference/>
+        <reference_cascade_rule/>
+        <reference_floats>false</reference_floats>
+        <reference_key/>
+        <reference_qual/>
+        <reference_qual_condition/>
+        <reference_type/>
+        <sizeclass/>
+        <spell_check>false</spell_check>
+        <staged>false</staged>
+        <sys_class_name>sys_hub_flow_input</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-17 13:25:00</sys_created_on>
+        <sys_id>55caaccbfd1343107f44e0b0f427dbf9</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name/>
+        <sys_package/>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-17 13:25:00</sys_updated_on>
+        <table_reference>false</table_reference>
+        <text_index>false</text_index>
+        <unique>false</unique>
+        <use_dependent_field>false</use_dependent_field>
+        <use_dynamic_default>false</use_dynamic_default>
+        <use_reference_qualifier>simple</use_reference_qualifier>
+        <virtual>false</virtual>
+        <virtual_type>script</virtual_type>
+        <widget/>
+        <write_roles/>
+        <xml_view>false</xml_view>
+    </sys_hub_flow_input>
+    <sys_hub_action_input_action_instance action="delete_multiple" query="action_input=55caaccbfd1343107f44e0b0f427dbf9"/>
+    <sys_hub_flow_input action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <array>false</array>
+        <array_denormalized>false</array_denormalized>
+        <attributes>element_mapping_provider=com.glide.flow_design.action.data.FlowDesignVariableMapper,uiType=document_id,uiTypeLabel=Document ID</attributes>
+        <audit>false</audit>
+        <calculation><![CDATA[(function calculatedFieldValue(current) {
+
+	// Add your code here
+	return '';  // return the calculated value
+
+})(current);]]></calculation>
+        <choice/>
+        <choice_field/>
+        <choice_table/>
+        <column_label/>
+        <comments/>
+        <create_roles/>
+        <default_value/>
+        <defaultsort/>
+        <delete_roles/>
+        <dependent>table_name</dependent>
+        <dependent_on_field>table_name</dependent_on_field>
+        <display>false</display>
+        <dynamic_creation>false</dynamic_creation>
+        <dynamic_creation_script/>
+        <dynamic_default_value/>
+        <dynamic_ref_qual/>
+        <element>current</element>
+        <element_reference>false</element_reference>
+        <foreign_database/>
+        <formula/>
+        <function_definition/>
+        <function_field>false</function_field>
+        <help/>
+        <hint/>
+        <internal_type display_value="">document_id</internal_type>
+        <label>Record</label>
+        <mandatory>true</mandatory>
+        <max_length>200</max_length>
+        <model display_value="Campus360 - Open Opportunity Application Creation">51caaccbfd1343107f44e0b0f427dbe2</model>
+        <model_id>51caaccbfd1343107f44e0b0f427dbe2</model_id>
+        <model_table>sys_hub_flow</model_table>
+        <name>var__m_sys_hub_flow_input_51caaccbfd1343107f44e0b0f427dbe2</name>
+        <next_element/>
+        <order>100</order>
+        <primary>false</primary>
+        <read_only>false</read_only>
+        <read_only_option/>
+        <read_roles/>
+        <reference/>
+        <reference_cascade_rule/>
+        <reference_floats>false</reference_floats>
+        <reference_key/>
+        <reference_qual/>
+        <reference_qual_condition/>
+        <reference_type/>
+        <sizeclass/>
+        <spell_check>false</spell_check>
+        <staged>false</staged>
+        <sys_class_name>sys_hub_flow_input</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-17 13:25:00</sys_created_on>
+        <sys_id>5dcaaccbfd1343107f44e0b0f427dbf3</sys_id>
+        <sys_mod_count>1</sys_mod_count>
+        <sys_name/>
+        <sys_package/>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:42:38</sys_updated_on>
+        <table_reference>false</table_reference>
+        <text_index>false</text_index>
+        <unique>false</unique>
+        <use_dependent_field>true</use_dependent_field>
+        <use_dynamic_default>false</use_dynamic_default>
+        <use_reference_qualifier>simple</use_reference_qualifier>
+        <virtual>false</virtual>
+        <virtual_type>script</virtual_type>
+        <widget/>
+        <write_roles/>
+        <xml_view>false</xml_view>
+    </sys_hub_flow_input>
+    <sys_hub_action_input_action_instance action="delete_multiple" query="action_input=5dcaaccbfd1343107f44e0b0f427dbf3"/>
+    <sys_hub_flow_output action="delete_multiple" query="model=51caaccbfd1343107f44e0b0f427dbe2"/>
+    <sys_hub_alias_mapping action="delete_multiple" query="source_id=51caaccbfd1343107f44e0b0f427dbe2"/>
+    <sys_hub_trigger_instance_v2 action="delete_multiple" query="flow=51caaccbfd1343107f44e0b0f427dbe2^sys_idNOT IN91caeccbfd1343107f44e0b0f427db40"/>
+    <sys_hub_trigger_instance_v2 action="INSERT_OR_UPDATE">
+        <comment/>
+        <display_text/>
+        <flow display_value="Campus360 - Open Opportunity Application Creation">51caaccbfd1343107f44e0b0f427dbe2</flow>
+        <generation_source/>
+        <name>Created or Updated</name>
+        <published_version/>
+        <remote_sys_id/>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-17 13:25:00</sys_created_on>
+        <sys_id>91caeccbfd1343107f44e0b0f427db40</sys_id>
+        <sys_mod_count>3</sys_mod_count>
+        <sys_scope/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:42:39</sys_updated_on>
+        <trigger_definition display_value="Created or Updated">a45d9180c32222002841b63b12d3aea7</trigger_definition>
+        <trigger_inputs>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</trigger_inputs>
+        <trigger_outputs/>
+        <trigger_type>record_create_or_update</trigger_type>
+        <updation_source/>
+    </sys_hub_trigger_instance_v2>
+    <sys_hub_action_instance_v2 action="delete_multiple" query="flow=51caaccbfd1343107f44e0b0f427dbe2^sys_idNOT IN38dbac8bfd1343107f44e0b0f427dbcd,c6a474cffd5343107f44e0b0f427db71,8c667c83fd9343107f44e0b0f427dbeb,795a3c8bfd9343107f44e0b0f427db2f"/>
+    <sys_hub_action_instance_v2 action="INSERT_OR_UPDATE">
+        <action_type display_value="Look Up Records">43400a1587003300663ca1bb36cb0b4b</action_type>
+        <action_type_parent/>
+        <attributes/>
+        <comment/>
+        <compiled_snapshot>43400a1587003300663ca1bb36cb0b4b</compiled_snapshot>
+        <display_text/>
+        <flow display_value="Campus360 - Open Opportunity Application Creation">51caaccbfd1343107f44e0b0f427dbe2</flow>
+        <generation_source/>
+        <order>1</order>
+        <parent_ui_id/>
+        <sys_class_name>sys_hub_action_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-17 13:29:37</sys_created_on>
+        <sys_id>38dbac8bfd1343107f44e0b0f427dbcd</sys_id>
+        <sys_mod_count>3</sys_mod_count>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-27 05:48:27</sys_updated_on>
+        <ui_id>8dac1e4a-9610-4919-93ae-0dce12af1035</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/+VWXU/bMBT9K1Geq8pdS2G8TUVIk/iQKOOFgeXYTrHmOJntFErV/75rO0m7NnR0KxrTXii51/Y9Pvcc27fzWLD4OEbpACHSOzg6RKjfR2g47FPSS5L+kCYoOfgYd2JFMg4jTa4ttrOCQ2hKZNnEiKEQYsIUksxuqgyJbB49Q5w+CMk0V/Hx7V0nLoiG1SzX8fF8LfVaOJIkXMLQMdSOrgOeFoj+5xhq5ILW32fV1FEdzDVzUPqdmD9ZrhgHDCmRhnfijChGbK5nTURzwi6VXAYehLKwWuwGPxnxDPX6H9y4lMOuKA+55hNXFIVwekIsGVtdUlvqamgAa4CPebPNhsgWziv4aNFZjn9248n6eMZXJ/QWwDfjKSmlHf1ezd6uNT+4mmGDl4UVOXQ97ru+kETW289lmamL0Mu4QXjTIraQOXlBc6UBsnnhGuo6VLUrHT/kj1d1N06F8riqpMwpkc0XsVaLpLSOl3mcMpwKLhkWSgrlKkHbnHy45BlUwBkpCqEmuND5VPhVYS9ZdyLho5vK/NFxISaqS6jbeReERbqnED/x4RuihWPhHJaByR1X8AGmVvWwoVoUFj8KNuF2Wb0exXL7SOS3tnylOFw3ym8vXnRiMzMjSYxZkg0yxd9Lx0GgvmIP+0b5KR7FJ9jBlFdEOQ1429LDrbY9WLNoaPSKXjbPj51PjldAqFm4dIqMktlLqKqjI/Tcj/j5+Dh1iegiJGp57+0IOUL7OULaLL5pwZ0cuGktJ7U/cNYbGqjNsbsLP3DzC/UPtl5aw95SZ9BkrLkBSs2K+nsIoU0H9DohvJsNXoGltsE5eYquGjCtCCsngEj5xBO7aoPPTbTywGBvHhi8Xw/UzWq9geqe7fkCehub7P8aONr+ekNLmdFcMeEwrvqATgrytYSp3P9l8/kIxGI5i3IdfSmY+xf3urTUQKDtZkKJrMywm7ZY3AMpqZBwW1piSxNWIB7mPbSIBgZXkyq32GfYpvn+JpTdDP8KzmvDj1ZJb2tE/WZej521LVA/BPdoevR+bf+PXH1vdMNtF9kgWeopLLf09BM2imJKsqI0/SEC1ZcsbNtYf3esGW8c8tF5nd+nGzzQ2g3XFdI14JUH/Gfb489PW3v8of/z8fc+rzUAJCQoBIcWmrzUnsopprI0PqGJMmGtPV6Cdz8ArXh/OVMRAAA=</values>
+    </sys_hub_action_instance_v2>
+    <sys_hub_alias_mapping action="delete_multiple" query="source_id=38dbac8bfd1343107f44e0b0f427dbcd"/>
+    <sys_hub_action_instance_v2 action="INSERT_OR_UPDATE">
+        <action_type display_value="Look Up Records">43400a1587003300663ca1bb36cb0b4b</action_type>
+        <action_type_parent/>
+        <attributes/>
+        <comment/>
+        <compiled_snapshot>43400a1587003300663ca1bb36cb0b4b</compiled_snapshot>
+        <display_text/>
+        <flow display_value="Campus360 - Open Opportunity Application Creation">51caaccbfd1343107f44e0b0f427dbe2</flow>
+        <generation_source/>
+        <order>4</order>
+        <parent_ui_id>51bebe25-9d2a-4221-911d-fb6844c56651</parent_ui_id>
+        <sys_class_name>sys_hub_action_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-17 14:08:12</sys_created_on>
+        <sys_id>c6a474cffd5343107f44e0b0f427db71</sys_id>
+        <sys_mod_count>3</sys_mod_count>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-27 05:48:27</sys_updated_on>
+        <ui_id>8bff04fd-a6dd-424f-a568-e4188bc2be5b</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/+VWXU/bMBT9K1GeS+U0bWG8oSKkSRtIsPGyMcuxnWLNTTLbAUrV/77rj6RdmzG6lYlpT22ur32Pzz3H9qdFLFh8HKN8iBBJRkeHCKUpQuNxSkmSZemYZigbvYl7cUFmHDJ1qQw284pD6I7Iuo0RTSHEhK4kmV+HERKZMnqEOL0VkilexMefbnpxRRSsZriKjxcbQ8+FI0nGJaReQe3og8fTAdH9HEONUtDm+12YOmmCpWIWStqL+YPhBeOAISdS8148IwUjplTzNqI4YReFXAVuRWFgtdgmP2jxCPXSgc3LOeyKcj/WfuJAkQ/np8SQK6NqamoVUj1YDXws2m22RHZwHuCjZW+V/2jzyWY+4+sTkiXwzXhOamkmv1cz2bXmwNb0G7yojCih63Fq+0Iy2Wy/lPWsOPe9jFuE1x1i8yOnP9FcrYFsXtmG2g6FduVXt+X9ZdONM1E4XGFQlpTI9osYo0RWG8vLIs4ZzgWXDItCisJWgrZZ+XDJZ1ABz0hViWKKK1XeCbcq7GXWn0r46OeyvLdciGnRJ9TuvA/CIv0ziJ+68DVRwrLwHpaByT1b8BamhnpYUyUqg+8Fm3Kzqt5ksdLcE/m1azwoDjeNctuLl71Yz/VEEq1XZINM8bfacuCpD+xh1yg3xaE4gR3c8UCU1YCzLT180rajDYv6Rq/pZfv82PnkeAaEhoULq8gom/8MVTg6fM9dxo/Hx5kdiM79QCPvvR0hR2g/R0iXxbctuJMDt61lpfYHznpBA3U5dnfhe25+of7hk5fWOFnpDJqMFddAqV5Tf4IQ2nZA0vPh3WzwDCyNDd6Th+iyBdOJMDgBRMqnjth1G7xto8EDw715YPh6PdA0q/MGanq25wvoZWyy/2vg6OnXG1rJjJYFExbjug+0qW2tzzXMZotFPhoNEzYYHRwRmh8MOTs8IGg4OED5YZoMEj5mCe0Lw2fL5ZeyquAIrwth5s30CQjNcBaVKvpYMfsXJ31aKyDfLJfbfvvL1Xez9TOYbWw9Wae2i+7mZbwZe9e1QPPc26O10es19z9ywb3QPfa0yIbZSk9+uZVzH7AuKKZkVtU6HSMcvIQBrhSUuFZsGe7KJ0UnPyTt0xcOcuOLDwHzxhaCG9xn12PPTdt47KH/87H3Oq8xACQkKAT7FuqyVo7KO0xlrd2AIoX2a+3x0rv5Di2g0HBDEQAA</values>
+    </sys_hub_action_instance_v2>
+    <sys_hub_alias_mapping action="delete_multiple" query="source_id=c6a474cffd5343107f44e0b0f427db71"/>
+    <sys_hub_action_instance_v2 action="INSERT_OR_UPDATE">
+        <action_type display_value="Create Record">2de05916c31332002841b63b12d3aee1</action_type>
+        <action_type_parent/>
+        <attributes/>
+        <comment/>
+        <compiled_snapshot>2de05916c31332002841b63b12d3aee1</compiled_snapshot>
+        <display_text/>
+        <flow display_value="Campus360 - Open Opportunity Application Creation">51caaccbfd1343107f44e0b0f427dbe2</flow>
+        <generation_source/>
+        <order>6</order>
+        <parent_ui_id>ce72d6a6-c749-407e-a288-86bc5a3b7f1d</parent_ui_id>
+        <sys_class_name>sys_hub_action_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-17 14:15:42</sys_created_on>
+        <sys_id>8c667c83fd9343107f44e0b0f427dbeb</sys_id>
+        <sys_mod_count>6</sys_mod_count>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-27 05:48:27</sys_updated_on>
+        <ui_id>c963605b-7803-4245-ab01-36d24ff8f42c</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/+1V3W/bNhD/Vwg9JamtSHbipO6TkSzbgK4p5iYvdS3Q5MnmQJEaP5x4hv/3HSnJcZq224A9rMD8YvF4H7+7+93x4zYRPBknIw7Z69f5iA3z4XCQZYPLs3wxGi7yAR9SyBdJL1G0AtRcU+nB4jl+oMA6z0G5mc+yId9uy/Pzs5wPzvuXlJX9M+AXfZqdDfpZeTHMBzmMeM5S4aDa7ea6rrVxXgm36cyvDFAHnGhD7moePos8Zd4YDIEWtK6lYNQJrQrrqPO2MaxBcaGW8xZMYcDWWll4fhut0WPw29zM7QoRSGExUCMpqbQwp9aCtVVwdRhG6Xg2qD0XyoFZC3h4qcFWwL1EHV2WYF7cRyneSmoD0kooDqbF0x0Lpn1X1GxORVFRx1boWpsO+mEtRIee9y0zokaA2CIubC3p5v7/Tv3XO8VWQnKsXDL++KmX1NTgsCHoZLz97OrvTqukC5CoeiNAcvuF8XWbOpyxvUgRB0Uzzo38bWv8ob0k9+2lNjyAynsJPDpsFWIfxzb0kooqbJY2m2TsjEcB0oPfKrnZa6ywD+g0CbqPVvyB4fNRFn9BO1RaMWg09sei5XAjLq+po1P0z5w3rSpbacEwpVgeDiX10l0dyhqF2zqUvzFxdCE7ay19pd41xUn2DrqRQYm3CAICMSHgb5Irpyv98GsH8iYSYZ+o1IzK/Yk6Z8TCuwBnm4CEyNUKOYFEL2qj1yIaI5QqXUo8pKXUDxjTiqVKKQu4U6wtTW9Qfh3F99SIkMQv6AaNd73EbuwV0tQ+pYI1LH73AUmTWJtCEasQS1BEUgTjyMQJhlpDl2IjC5if0zdIvqWfnJ7M1MnJhGEDLAmQTycxBxJyIN5i2sStgJRxvCnRi9+AuZRMowNSeeuIAWywIpREWqYkeLwN5CPKVwv8E5bgcFpwZLEhr3IiFPnBGNxFPyEPZQgxhaZyEcyaChkyJjrSwJKWVsTj8iE1LqEIa5aks4TQEkevgxfM4ZHiIMAY0RgS9xB2gZFmkDvFFNu8XILpdmAaFUMbY14Y9U3w1Wa29xKEpzPVioPLwcXk/fvmg7wiS5suQYHBMfzx7ufro+PU+oXFWGp5lPVIfnGcOn0XWHBFLRwdv0l2u12ve9ZzyM6/uijg7GkvHPDh6Wl/LKxiBcPkvR2OsqLb2QeEePnKTBslMnmm9A8X3F/j7hbchzjLX86j23Gfy94e2pJ3zUW727J/a7ddfk9brU3ju19rL5dZhLv79Cep5M/86QoAAA==</values>
+    </sys_hub_action_instance_v2>
+    <sys_hub_alias_mapping action="delete_multiple" query="source_id=8c667c83fd9343107f44e0b0f427dbeb"/>
+    <sys_hub_action_instance_v2 action="INSERT_OR_UPDATE">
+        <action_type display_value="Create Record">2de05916c31332002841b63b12d3aee1</action_type>
+        <action_type_parent/>
+        <attributes/>
+        <comment/>
+        <compiled_snapshot>2de05916c31332002841b63b12d3aee1</compiled_snapshot>
+        <display_text/>
+        <flow display_value="Campus360 - Open Opportunity Application Creation">51caaccbfd1343107f44e0b0f427dbe2</flow>
+        <generation_source/>
+        <order>7</order>
+        <parent_ui_id>ce72d6a6-c749-407e-a288-86bc5a3b7f1d</parent_ui_id>
+        <sys_class_name>sys_hub_action_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-17 14:33:02</sys_created_on>
+        <sys_id>795a3c8bfd9343107f44e0b0f427db2f</sys_id>
+        <sys_mod_count>6</sys_mod_count>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-27 05:48:27</sys_updated_on>
+        <ui_id>8ca4a067-6703-4e60-968c-cc39434958e7</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/+1VW3MaNxT+Kxo9tS6sdwEThzx5nLp9SO1Mcf0Swo6QzoJarXajCzZl+O89knYxTdLbTB+amfICOvrO0fedG+/2VAo6o1MB+cuXxZSPi/F4lOejy0mxmo5XxUiMGRQrOqCa1YDILVMeLJ7jDzRY5wVot/B5Phb7fXVxMSnE6GJ4yXg1nIB4MWT5ZDTMqxfjYlTAVBQ8kw7qrHMspTgclk3bNsZ5Ld2uj3RtgDkQpDHkp1aEn2WRcW8MOqGHbpysJGdONrp0uxaS30mgZQ3WsnV3cQuPpFWMQ43+5ASWkbcKmAViYCsR5DZwek2YFnhl2wa/V1A1BiKEta3qnicCmFBSw9IGQYFrerMSQ8uNbJH7kvHI1MAHLw2IBHDGQ3/j2C+gOz+mLCwN1FILMCVvfJ/gfGkdc96mUwtaSL3GaghpUdzu4f+i/IeKwjdSCcwMnb17P6AtMzhCDgyd7T+6+rszqNgKFEJvJChhPzOUIeV4xkpiVh2UaUiT/U3nfN9dkofusjEikCoGFJ4ckgdkE8UOaI15Zq4xOzoLWRlQLL+402p3RGykdhiUBuyTlb/i88U0j5+ArgBFckiI47Hs2jWZq9fMsTnG586bDso3jeQoKaZHQMW8ctentgS4a0OVkotjK9V7N8rX+jYlhx4D9NOBFm+RBIRSQeCfxFXzTfP4Y0/yJtb5KFQ1nKnjiTln5Mq7QGdPQcUGLmvsPyx92ZpmK6MzUqmztcJDVqnmEd+0cq2z1F0Z5pZlN2h/Hc0PzMgg4gcMg86HAbU7e62Ytc9SMIflBx+YJGGdhDJmIaagjE0RnGOXX+FTW+glJlvgfJyKePgTKD0/W+izsyuOubcksD2/4mnCkD7xFhXH4atEGS3N6mfgLiPzGIDU3jqcVaytJozEjsxIiHgX+o5oX6/wS1rSVJUFR1Y78k1BpCbfGoNr5ntsQRWemENKWiSzZVIFsbgUgtGSrqOIx5VAWlwNkdaCZgtKWIVT19ML7vDEcAZghmwMsRvcKlgATtL89sAMK7xeg+nXWxaBoYJRF776KsTqlB2jBOP5Qndmjbvru1B+7HG4lzV89fUrejgcBv0fbwH5xR8OPUyeZ/ykts9/vk+l1bzkqMbb8TQv+/V9uoc//XeYJxS5/T3qH66rv2ber6v7OJmfV9JvrI9tb059yW266DZV/m9tqssvaUd1Mr74JfXpaop0D+9/A6Jsn5uNCgAA</values>
+    </sys_hub_action_instance_v2>
+    <sys_hub_alias_mapping action="delete_multiple" query="source_id=795a3c8bfd9343107f44e0b0f427db2f"/>
+    <sys_hub_sub_flow_instance_v2 action="delete_multiple" query="flow=51caaccbfd1343107f44e0b0f427dbe2"/>
+    <sys_hub_flow_logic_instance_v2 action="delete_multiple" query="flow=51caaccbfd1343107f44e0b0f427dbe2^sys_idNOT INe755fc03fd9343107f44e0b0f427db8c,56417cc7fd5343107f44e0b0f427db28,327de043fd5343107f44e0b0f427db4d"/>
+    <sys_hub_flow_logic_instance_v2 action="INSERT_OR_UPDATE">
+        <attributes/>
+        <block display_value="">e755fc03fd9343107f44e0b0f427db8b</block>
+        <comment/>
+        <connected_to/>
+        <decision_table/>
+        <display_text/>
+        <flow display_value="Campus360 - Open Opportunity Application Creation">51caaccbfd1343107f44e0b0f427dbe2</flow>
+        <flow_variables_assigned/>
+        <generation_source/>
+        <logic_definition display_value="If">af4e1945c3e232002841b63b12d3ae3e</logic_definition>
+        <order>5</order>
+        <outputs_assigned/>
+        <parent_ui_id>51bebe25-9d2a-4221-911d-fb6844c56651</parent_ui_id>
+        <sys_class_name>sys_hub_flow_logic_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-17 14:11:18</sys_created_on>
+        <sys_id>e755fc03fd9343107f44e0b0f427db8c</sys_id>
+        <sys_mod_count>7</sys_mod_count>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:42:39</sys_updated_on>
+        <ui_id>ce72d6a6-c749-407e-a288-86bc5a3b7f1d</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/+1U72vbMBD9V4Y+J8Z27JDmW9lWKKzraEJhlGJk6ZSIyZInyUmzkP99J/9Iw5Kxse3jvllPd+/e3T1rT0zj68a7pbl2Tq40mT89j4jUAcPvPdG0AjInzGguvTSajMiGqiZg+/2sFCLOBB/TKefjLM3EmObT2RiyZDYrWVpCXkYPwIzl7nC4Xby/+7T8jAxculrR3eNfE7G1VNxCL7umFtV6sGS+/+HK72ooFC1BYb2Ft1KvMF1yPF3RXORJnLNJOp2kcZzOsqScTsok5RMK2RTjhsS3J1O4MJhQBCE30KPaoCWNRwRePGgOWE9Q5WBEKqo59cbuyNzbBgELlN9rtTtGrKX2yEZC7IuT3yAwxXGIFICNMehuj8eiH2sHs7WRDO7rVluLeFqqPocZ1VT6Y9dCWAgI2ig/LASRxiEf1EF0kNFrEou12T4MBW+kbhvsL5VhVB1P1OMYysaDC9sABRUSFRWtaxxOUVuzkW0yaqmilcJDJJTZYtHgw4iyIDzCGdHoBvF3LfxIrQxd3CENJuMGXeGYlfXQW1ucHNqpFF+boKfrr++k6IaBAV3aNZbZQC/6MDr3e9ECr6Y/d+8/sqGIqUiuWHLZhnRyyYZvPrTIuRkH1T9xZPILR/bIb1kyz/878tSRQWZJnWRF+4oiXfi//9iSz8F6XQnXeYgDkw6VLAN2O7zU4WKHW5fsFNoa+yX08IodvgMbIIWR8wUAAA==</values>
+        <workflow_reference/>
+    </sys_hub_flow_logic_instance_v2>
+    <sys_hub_flow_logic_instance_v2 action="INSERT_OR_UPDATE">
+        <attributes/>
+        <block display_value="">9e417cc7fd5343107f44e0b0f427db27</block>
+        <comment/>
+        <connected_to/>
+        <decision_table/>
+        <display_text/>
+        <flow display_value="Campus360 - Open Opportunity Application Creation">51caaccbfd1343107f44e0b0f427dbe2</flow>
+        <flow_variables_assigned/>
+        <generation_source/>
+        <logic_definition display_value="If">af4e1945c3e232002841b63b12d3ae3e</logic_definition>
+        <order>3</order>
+        <outputs_assigned/>
+        <parent_ui_id>f5541d25-8acf-4ed7-a042-0f73121e6d1c</parent_ui_id>
+        <sys_class_name>sys_hub_flow_logic_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-17 13:53:28</sys_created_on>
+        <sys_id>56417cc7fd5343107f44e0b0f427db28</sys_id>
+        <sys_mod_count>8</sys_mod_count>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:42:39</sys_updated_on>
+        <ui_id>51bebe25-9d2a-4221-911d-fb6844c56651</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/+1VTW/bMAz9K4XOiWE7cdrmVnQrUKxbgbXrZSgMWqITYbLkSXLbzPB/H+WPtFgzbBgG7LKb9SiSj49PSctM4+vGu1tz5pzcaLb+fD9jUgeMvlumoUK2ZtxoIb00ms3YA6gmYG17bhE8iiNjjz7VInzmScQba1H7CJXcyEJhXljQfIuu664u371t2zLLlolIs/kJ8HK+RHE8h3iZzuPyeJGkCa5EwiPpsYqGzK6jpkK6WsHu7l/05lupBNUdxKnBkiYeLVu3P4T8rsZcQYGKKN54K/WG0qWg0ylkZZbEGV+kq0Uax+nJMilWiyJJxQJwuaJ7U+L5C60PyB+aEOSm8saKwCWNZwyfPGqB1K8E5XDGKtAkjbE7tva2IYBEE9da7fY3tlJ7qsbC3Scnv2GoFMfhZok0GMchuj/m4yYGmG+N5Hhd99x6xAPpPgaNair9YRgh7BBLaJSfdkhI46ge1oF0oDFyKm+25vHj1PBC6n7AMagMB7U/gScZisajC9tAhRUVyiuoaxInr615kH0ycamijaJDVCrzSE2D2yPggXhEGkF0QfibHr4DK8MU76kMJdMGXe64lfU0W9+cdb0q+dcm8BnmGyfJBzHowpB2Rm0ecCTdzV6/qrwHnp/Wa8P/JRuWMZTJKU8O2xAWh2x4dNUjr804sf6JI5NfOHJEfsuSWfbfkS8dGWgW4CTP+99qKhfe9x9b8j5Yb2jhBg8J5NIRk9uAXU7/ByGwo61L/hJ6NPZLmOEZ674D/EZ0ClkGAAA=</values>
+        <workflow_reference/>
+    </sys_hub_flow_logic_instance_v2>
+    <sys_hub_flow_logic_instance_v2 action="INSERT_OR_UPDATE">
+        <attributes/>
+        <block display_value="">b27de043fd5343107f44e0b0f427db4c</block>
+        <comment/>
+        <connected_to/>
+        <decision_table/>
+        <display_text/>
+        <flow display_value="Campus360 - Open Opportunity Application Creation">51caaccbfd1343107f44e0b0f427dbe2</flow>
+        <flow_variables_assigned/>
+        <generation_source/>
+        <logic_definition display_value="For Each">098e1dc5c3e232002841b63b12d3ae33</logic_definition>
+        <order>2</order>
+        <outputs_assigned/>
+        <parent_ui_id/>
+        <sys_class_name>sys_hub_flow_logic_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-17 13:36:51</sys_created_on>
+        <sys_id>327de043fd5343107f44e0b0f427db4d</sys_id>
+        <sys_mod_count>6</sys_mod_count>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:42:39</sys_updated_on>
+        <ui_id>f5541d25-8acf-4ed7-a042-0f73121e6d1c</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/51SwW7bMAz9F50Tw7KzoM6tQFGgh61AV/RSFAYt0YkwWdIkOaln+N9LxU5W9NiTzUfyvUeRI7N9dH0Mz/Y2BLU3bPf6tmLKJIz+R2agQ7ZjKmIX2IodQfcpHscbCYLjBtbVlufrTcWrdVUCrnMpkBfQ8rz8kT2hsF6GaaJWqYLTMLx8n0EclJYeF5MOPHmL6Nlu/JKKg8NaQ4OahBYG6leSQl7JtuJ5JcpiWxZ5XtxseLMtG15IEpdbqrt0PixDf3mDxE6hv/LSJ7ko8hXD94hGIgm1oAOuWAdGQrR+YLvoewI8gnw0erhWHJSJRMdS7XtQ/4ib53kqbJEmEjgnr2G9POQMi4NVAh9dVNbMSIRGLz3C6r4zv2b7aQXYQq/jZQWE9IH40CXPycViqf19sKeni+C9Muf5lqS2AvQ1ghi9avqIIa0BNXZEVHfgnDL72nl7VOdm8tJle01B1mp7ItF0bhmIZDyjJ4LsnvC7M/wCXqUpfhINNU/n6eu/fdKd51gc1/PQVBCEVy7eEt0RF3PTW7rXmSnMhyFRqECCzwl7uFx5Sgy0ZCU+Qyfr/ySr/7HpA/lmuGEvAwAA</values>
+        <workflow_reference/>
+    </sys_hub_flow_logic_instance_v2>
+    <sys_hub_pill_compound action="delete_multiple" query="attached_to=51caaccbfd1343107f44e0b0f427dbe2"/>
+    <sys_hub_flow_variable action="delete_multiple" query="model=51caaccbfd1343107f44e0b0f427dbe2"/>
+    <sys_documentation action="INSERT_OR_UPDATE">
+        <element>changed_fields</element>
+        <help/>
+        <hint/>
+        <label>Changed Fields</label>
+        <language>en</language>
+        <name>var__m_sys_hub_flow_input_51caaccbfd1343107f44e0b0f427dbe2</name>
+        <plural/>
+        <sys_class_name>sys_documentation</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-17 13:25:00</sys_created_on>
+        <sys_id>1dcaaccbfd1343107f44e0b0f427dbfd</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name/>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-17 13:25:00</sys_updated_on>
+        <url/>
+        <url_target/>
+    </sys_documentation>
+    <sys_documentation action="INSERT_OR_UPDATE">
+        <element>table_name</element>
+        <help/>
+        <hint/>
+        <label>Table Name</label>
+        <language>en</language>
+        <name>var__m_sys_hub_flow_input_51caaccbfd1343107f44e0b0f427dbe2</name>
+        <plural/>
+        <sys_class_name>sys_documentation</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-17 13:25:00</sys_created_on>
+        <sys_id>51caaccbfd1343107f44e0b0f427dbf1</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name/>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-17 13:25:00</sys_updated_on>
+        <url/>
+        <url_target/>
+    </sys_documentation>
+    <sys_documentation action="INSERT_OR_UPDATE">
+        <element>current</element>
+        <help/>
+        <hint/>
+        <label>Record</label>
+        <language>en</language>
+        <name>var__m_sys_hub_flow_input_51caaccbfd1343107f44e0b0f427dbe2</name>
+        <plural/>
+        <sys_class_name>sys_documentation</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-17 13:25:00</sys_created_on>
+        <sys_id>55caaccbfd1343107f44e0b0f427dbf7</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name/>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-17 13:25:00</sys_updated_on>
+        <url/>
+        <url_target/>
+    </sys_documentation>
+    <sys_choice action="delete_multiple" query="name=var__m_sys_hub_flow_input_51caaccbfd1343107f44e0b0f427dbe2"/>
+    <sys_choice action="delete_multiple" query="name=var__m_sys_hub_flow_output_51caaccbfd1343107f44e0b0f427dbe2"/>
+    <sys_hub_flow_snapshot action="INSERT_OR_UPDATE">
+        <access>public</access>
+        <acls/>
+        <active>true</active>
+        <allow_high_security_roles>false</allow_high_security_roles>
+        <annotation/>
+        <attributes>browserActivatedIn=chrome,integrationActivatedIn=standalone,viewActivatedIn=naturalLanguage</attributes>
+        <authored_on_release_version>29000</authored_on_release_version>
+        <callable_by_client_api>false</callable_by_client_api>
+        <category/>
+        <copied_from>51cbc6c97743011031e3b3c64b5a9907</copied_from>
+        <copied_from_name/>
+        <description>Automatically creates student application records when a placement opportunity is opened for eligible students.</description>
+        <flow_priority/>
+        <internal_name>campus360__open_opportunity_application_creation</internal_name>
+        <label_cache>[{"name":"undefined","label":" - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record - Create Record","usedInstances":{},"attributes":{}},{"name":"8dac1e4a-9610-4919-93ae-0dce12af1035.Records","label":"1 - Look Up Records➛Student Master Records","reference":"x_snc_campus360_student_master","reference_display":"Student Master","type":"records","base_type":"records","usedInstances":{},"attributes":{"element_mapping_provider":"com.glide.flow_design.action.data.FlowDesignVariableMapper"}},{"name":"Created or Updated_1.current.minimum_cgpa","label":"Trigger - Record Created or Updated➛ Record➛Minimum CGPA","reference":"","reference_display":"Minimum CGPA","type":"decimal","base_type":"decimal","parent_table_name":"x_snc_campus360_placement_opportunity","column_name":"minimum_cgpa","choices":[{"order":0.0}],"usedInstances":{"8dac1e4a-9610-4919-93ae-0dce12af1035":[null,"conditions"]}},{"name":"8bff04fd-a6dd-424f-a568-e4188bc2be5b.Records","label":"4 - Look Up Records➛Student Application Records","reference":"x_snc_campus360_student_application","reference_display":"Student Application","type":"records","base_type":"records","usedInstances":{},"attributes":{"element_mapping_provider":"com.glide.flow_design.action.data.FlowDesignVariableMapper"}},{"name":"Created or Updated_1.current.eligible_branches","label":"Trigger - Record Created or Updated➛ Record➛Eligible Branches","reference":"","reference_display":"Eligible Branches","type":"string","base_type":"string","parent_table_name":"x_snc_campus360_placement_opportunity","column_name":"eligible_branches","choices":[{"order":0.0}],"usedInstances":{"51bebe25-9d2a-4221-911d-fb6844c56651":["condition"],"8bbec505-9249-4053-8c23-660f65396578":["condition"]}},{"name":"Created or Updated_1.current.opportunity_id","label":"Trigger - Record Created or Updated➛ Record➛Opportunity ID","reference":"","reference_display":"Opportunity ID","type":"string","base_type":"string","parent_table_name":"x_snc_campus360_placement_opportunity","column_name":"opportunity_id","choices":[{"order":0.0}],"usedInstances":{"c963605b-7803-4245-ab01-36d24ff8f42c":["opportunity"],"8ca4a067-6703-4e60-968c-cc39434958e7":["opportunity"]}},{"name":"f5541d25-8acf-4ed7-a042-0f73121e6d1c.item.branch","label":"2 - For Each➛Student Master Record➛Branch","reference":"","reference_display":"Branch","type":"choice","base_type":"choice","parent_table_name":"x_snc_campus360_student_master","column_name":"branch","choices":[{"sequence":0.0,"reference":false,"used":false,"label":"CSE","image":"","rawLabel":"CSE","selected":false,"missing":false,"value":"cse","parameters":{"name":"x_snc_campus360_student_master","dependent_values":[""],"dependent_values_map":{"":"CSE"}}},{"sequence":1.0,"reference":false,"used":false,"label":"CSE-AI","image":"","rawLabel":"CSE-AI","selected":false,"missing":false,"value":"cse_ai","parameters":{"name":"x_snc_campus360_student_master","dependent_values":[""],"dependent_values_map":{"":"CSE-AI"}}},{"sequence":2.0,"reference":false,"used":false,"label":"CSE-DS","image":"","rawLabel":"CSE-DS","selected":false,"missing":false,"value":"cse_ds","parameters":{"name":"x_snc_campus360_student_master","dependent_values":[""],"dependent_values_map":{"":"CSE-DS"}}},{"sequence":3.0,"reference":false,"used":false,"label":"IT","image":"","rawLabel":"IT","selected":false,"missing":false,"value":"it","parameters":{"name":"x_snc_campus360_student_master","dependent_values":[""],"dependent_values_map":{"":"IT"}}},{"sequence":4.0,"reference":false,"used":false,"label":"ECE","image":"","rawLabel":"ECE","selected":false,"missing":false,"value":"ece","parameters":{"name":"x_snc_campus360_student_master","dependent_values":[""],"dependent_values_map":{"":"ECE"}}},{"sequence":5.0,"reference":false,"used":false,"label":"EEE","image":"","rawLabel":"EEE","selected":false,"missing":false,"value":"eee","parameters":{"name":"x_snc_campus360_student_master","dependent_values":[""],"dependent_values_map":{"":"EEE"}}},{"sequence":6.0,"reference":false,"used":false,"label":"Mechanical","image":"","rawLabel":"Mechanical","selected":false,"missing":false,"value":"mechanical","parameters":{"name":"x_snc_campus360_student_master","dependent_values":[""],"dependent_values_map":{"":"Mechanical"}}},{"sequence":7.0,"reference":false,"used":false,"label":"Civil","image":"","rawLabel":"Civil","selected":false,"missing":false,"value":"civil","parameters":{"name":"x_snc_campus360_student_master","dependent_values":[""],"dependent_values_map":{"":"Civil"}}},{"sequence":8.0,"reference":false,"used":false,"label":"Other","image":"","rawLabel":"Other","selected":false,"missing":false,"value":"other","parameters":{"name":"x_snc_campus360_student_master","dependent_values":[""],"dependent_values_map":{"":"Other"}}}],"usedInstances":{"51bebe25-9d2a-4221-911d-fb6844c56651":["condition"],"8bbec505-9249-4053-8c23-660f65396578":["condition"]}},{"name":"f5541d25-8acf-4ed7-a042-0f73121e6d1c.item","label":"2 - For Each➛Student Master Record","reference":"x_snc_campus360_student_master","reference_display":"Student Master","type":"reference","base_type":"reference","usedInstances":{},"attributes":{"pills_draggable_inside_block":"true","pills_draggable_outside_block":"false"}},{"name":"f5541d25-8acf-4ed7-a042-0f73121e6d1c.item.student_id","label":"2 - For Each➛Student Master Record➛Student ID","reference":"","reference_display":"Student ID","type":"string","base_type":"string","parent_table_name":"x_snc_campus360_student_master","column_name":"student_id","choices":[{"order":0.0}],"usedInstances":{"95e70b28-85a8-42aa-8ca0-d40de89a0ed0":["table_name"],"8ca4a067-6703-4e60-968c-cc39434958e7":["student"]}},{"name":"Created or Updated_1.current","label":"Trigger - Record Created or Updated➛ Record","reference":"x_snc_campus360_placement_opportunity","reference_display":"Placement Opportunity","type":"reference","base_type":"reference","choices":[{"order":0.0}],"usedInstances":{"c963605b-7803-4245-ab01-36d24ff8f42c":["opportunity"],"8ca4a067-6703-4e60-968c-cc39434958e7":["opportunity"]},"attributes":{"":""}}]</label_cache>
+        <master>true</master>
+        <name>Campus360 - Open Opportunity Application Creation</name>
+        <natlang/>
+        <outputs/>
+        <parent_flow display_value="Campus360 - Open Opportunity Application Creation">51caaccbfd1343107f44e0b0f427dbe2</parent_flow>
+        <remote_trigger_id/>
+        <run_as>user</run_as>
+        <run_with_roles/>
+        <sc_callable>false</sc_callable>
+        <status>published</status>
+        <sys_class_name>sys_hub_flow_snapshot</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 13:42:40</sys_created_on>
+        <sys_domain>global</sys_domain>
+        <sys_domain_path>/</sys_domain_path>
+        <sys_id>23f14fe3a8d343107f44321b8bcb56a3</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name/>
+        <sys_overrides/>
+        <sys_package/>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:42:40</sys_updated_on>
+        <type>flow</type>
+        <version>2</version>
+    </sys_hub_flow_snapshot>
+    <sys_translated_text action="delete_multiple" query="documentkey=23f14fe3a8d343107f44321b8bcb56a3"/>
+    <sys_variable_value action="delete_multiple" query="document_key=23f14fe3a8d343107f44321b8bcb56a3"/>
+    <sys_hub_flow_stage action="delete_multiple" query="flow=23f14fe3a8d343107f44321b8bcb56a3"/>
+    <sys_flow_cat_variable_model action="delete_multiple" query="id=23f14fe3a8d343107f44321b8bcb56a3^sys_idNOT IN2ff14fe3a8d343107f44321b8bcb56a3"/>
+    <sys_flow_cat_variable_model action="INSERT_OR_UPDATE">
+        <id>23f14fe3a8d343107f44321b8bcb56a3</id>
+        <name>Campus360 - Open Opportunity Application Creation</name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 13:42:40</sys_created_on>
+        <sys_id>2ff14fe3a8d343107f44321b8bcb56a3</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_scope/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:42:40</sys_updated_on>
+    </sys_flow_cat_variable_model>
+    <sys_flow_cat_variable action="delete_multiple" query="flow_catalog_model=2ff14fe3a8d343107f44321b8bcb56a3"/>
+    <sys_hub_flow_input action="delete_multiple" query="model=23f14fe3a8d343107f44321b8bcb56a3^sys_idNOT IN2ff14fe3a8d343107f44321b8bcb56bf,67f14fe3a8d343107f44321b8bcb56b6,ebf14fe3a8d343107f44321b8bcb56a4"/>
+    <sys_hub_flow_input action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <array>false</array>
+        <array_denormalized>false</array_denormalized>
+        <attributes>element_mapping_provider=com.glide.flow_design.action.data.FlowDesignVariableMapper,test_input_hidden=true,uiType=table_name,uiTypeLabel=Table Name</attributes>
+        <audit>false</audit>
+        <calculation><![CDATA[(function calculatedFieldValue(current) {
+
+	// Add your code here
+	return '';  // return the calculated value
+
+})(current);]]></calculation>
+        <choice/>
+        <choice_field/>
+        <choice_table/>
+        <column_label/>
+        <comments/>
+        <create_roles/>
+        <default_value/>
+        <defaultsort/>
+        <delete_roles/>
+        <dependent/>
+        <dependent_on_field/>
+        <display>false</display>
+        <dynamic_creation>false</dynamic_creation>
+        <dynamic_creation_script/>
+        <dynamic_default_value/>
+        <dynamic_ref_qual/>
+        <element>table_name</element>
+        <element_reference>false</element_reference>
+        <foreign_database/>
+        <formula/>
+        <function_definition/>
+        <function_field>false</function_field>
+        <help/>
+        <hint/>
+        <internal_type display_value="">table_name</internal_type>
+        <label>Table Name</label>
+        <mandatory>false</mandatory>
+        <max_length>200</max_length>
+        <model display_value="Campus360 - Open Opportunity Application Creation">23f14fe3a8d343107f44321b8bcb56a3</model>
+        <model_id>23f14fe3a8d343107f44321b8bcb56a3</model_id>
+        <model_table>sys_hub_flow_snapshot</model_table>
+        <name>var__m_sys_hub_flow_input_23f14fe3a8d343107f44321b8bcb56a3</name>
+        <next_element/>
+        <order>101</order>
+        <primary>false</primary>
+        <read_only>false</read_only>
+        <read_only_option/>
+        <read_roles/>
+        <reference/>
+        <reference_cascade_rule/>
+        <reference_floats>false</reference_floats>
+        <reference_key/>
+        <reference_qual/>
+        <reference_qual_condition/>
+        <reference_type/>
+        <sizeclass/>
+        <spell_check>false</spell_check>
+        <staged>false</staged>
+        <sys_class_name>sys_hub_flow_input</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 13:42:40</sys_created_on>
+        <sys_id>2ff14fe3a8d343107f44321b8bcb56bf</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name/>
+        <sys_package/>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:42:40</sys_updated_on>
+        <table_reference>false</table_reference>
+        <text_index>false</text_index>
+        <unique>false</unique>
+        <use_dependent_field>false</use_dependent_field>
+        <use_dynamic_default>false</use_dynamic_default>
+        <use_reference_qualifier>simple</use_reference_qualifier>
+        <virtual>false</virtual>
+        <virtual_type>script</virtual_type>
+        <widget/>
+        <write_roles/>
+        <xml_view>false</xml_view>
+    </sys_hub_flow_input>
+    <sys_hub_action_input_action_instance action="delete_multiple" query="action_input=2ff14fe3a8d343107f44321b8bcb56bf"/>
+    <sys_hub_flow_input action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <array>false</array>
+        <array_denormalized>false</array_denormalized>
+        <attributes>child_label=FDChangeDetails,child_name=FDChangeDetails,child_type=object,child_type_label=Object,element_mapping_provider=com.glide.flow_design.action.data.FlowDesignVariableMapper,pwd2droppable=true,uiType=array.object,uiTypeLabel=Array.Object</attributes>
+        <audit>false</audit>
+        <calculation><![CDATA[(function calculatedFieldValue(current) {
+
+	// Add your code here
+	return '';  // return the calculated value
+
+})(current);]]></calculation>
+        <choice/>
+        <choice_field/>
+        <choice_table/>
+        <column_label/>
+        <comments/>
+        <create_roles/>
+        <default_value/>
+        <defaultsort/>
+        <delete_roles/>
+        <dependent/>
+        <dependent_on_field/>
+        <display>false</display>
+        <dynamic_creation>false</dynamic_creation>
+        <dynamic_creation_script/>
+        <dynamic_default_value/>
+        <dynamic_ref_qual/>
+        <element>changed_fields</element>
+        <element_reference>false</element_reference>
+        <foreign_database/>
+        <formula/>
+        <function_definition/>
+        <function_field>false</function_field>
+        <help/>
+        <hint/>
+        <internal_type display_value="String">string</internal_type>
+        <label>Changed Fields</label>
+        <mandatory>false</mandatory>
+        <max_length>4000</max_length>
+        <model display_value="Campus360 - Open Opportunity Application Creation">23f14fe3a8d343107f44321b8bcb56a3</model>
+        <model_id>23f14fe3a8d343107f44321b8bcb56a3</model_id>
+        <model_table>sys_hub_flow_snapshot</model_table>
+        <name>var__m_sys_hub_flow_input_23f14fe3a8d343107f44321b8bcb56a3</name>
+        <next_element/>
+        <order>100</order>
+        <primary>false</primary>
+        <read_only>false</read_only>
+        <read_only_option/>
+        <read_roles/>
+        <reference/>
+        <reference_cascade_rule/>
+        <reference_floats>false</reference_floats>
+        <reference_key/>
+        <reference_qual/>
+        <reference_qual_condition/>
+        <reference_type/>
+        <sizeclass/>
+        <spell_check>false</spell_check>
+        <staged>false</staged>
+        <sys_class_name>sys_hub_flow_input</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 13:42:40</sys_created_on>
+        <sys_id>67f14fe3a8d343107f44321b8bcb56b6</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name/>
+        <sys_package/>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:42:40</sys_updated_on>
+        <table_reference>false</table_reference>
+        <text_index>false</text_index>
+        <unique>false</unique>
+        <use_dependent_field>false</use_dependent_field>
+        <use_dynamic_default>false</use_dynamic_default>
+        <use_reference_qualifier>simple</use_reference_qualifier>
+        <virtual>false</virtual>
+        <virtual_type>script</virtual_type>
+        <widget/>
+        <write_roles/>
+        <xml_view>false</xml_view>
+    </sys_hub_flow_input>
+    <sys_hub_action_input_action_instance action="delete_multiple" query="action_input=67f14fe3a8d343107f44321b8bcb56b6"/>
+    <sys_hub_flow_input action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <array>false</array>
+        <array_denormalized>false</array_denormalized>
+        <attributes>element_mapping_provider=com.glide.flow_design.action.data.FlowDesignVariableMapper,uiType=document_id,uiTypeLabel=Document ID</attributes>
+        <audit>false</audit>
+        <calculation><![CDATA[(function calculatedFieldValue(current) {
+
+	// Add your code here
+	return '';  // return the calculated value
+
+})(current);]]></calculation>
+        <choice/>
+        <choice_field/>
+        <choice_table/>
+        <column_label/>
+        <comments/>
+        <create_roles/>
+        <default_value/>
+        <defaultsort/>
+        <delete_roles/>
+        <dependent>table_name</dependent>
+        <dependent_on_field>table_name</dependent_on_field>
+        <display>false</display>
+        <dynamic_creation>false</dynamic_creation>
+        <dynamic_creation_script/>
+        <dynamic_default_value/>
+        <dynamic_ref_qual/>
+        <element>current</element>
+        <element_reference>false</element_reference>
+        <foreign_database/>
+        <formula/>
+        <function_definition/>
+        <function_field>false</function_field>
+        <help/>
+        <hint/>
+        <internal_type display_value="">document_id</internal_type>
+        <label>Record</label>
+        <mandatory>true</mandatory>
+        <max_length>200</max_length>
+        <model display_value="Campus360 - Open Opportunity Application Creation">23f14fe3a8d343107f44321b8bcb56a3</model>
+        <model_id>23f14fe3a8d343107f44321b8bcb56a3</model_id>
+        <model_table>sys_hub_flow_snapshot</model_table>
+        <name>var__m_sys_hub_flow_input_23f14fe3a8d343107f44321b8bcb56a3</name>
+        <next_element/>
+        <order>100</order>
+        <primary>false</primary>
+        <read_only>false</read_only>
+        <read_only_option/>
+        <read_roles/>
+        <reference/>
+        <reference_cascade_rule/>
+        <reference_floats>false</reference_floats>
+        <reference_key/>
+        <reference_qual/>
+        <reference_qual_condition/>
+        <reference_type/>
+        <sizeclass/>
+        <spell_check>false</spell_check>
+        <staged>false</staged>
+        <sys_class_name>sys_hub_flow_input</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 13:42:40</sys_created_on>
+        <sys_id>ebf14fe3a8d343107f44321b8bcb56a4</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name/>
+        <sys_package/>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:42:40</sys_updated_on>
+        <table_reference>false</table_reference>
+        <text_index>false</text_index>
+        <unique>false</unique>
+        <use_dependent_field>true</use_dependent_field>
+        <use_dynamic_default>false</use_dynamic_default>
+        <use_reference_qualifier>simple</use_reference_qualifier>
+        <virtual>false</virtual>
+        <virtual_type>script</virtual_type>
+        <widget/>
+        <write_roles/>
+        <xml_view>false</xml_view>
+    </sys_hub_flow_input>
+    <sys_hub_action_input_action_instance action="delete_multiple" query="action_input=ebf14fe3a8d343107f44321b8bcb56a4"/>
+    <sys_hub_flow_output action="delete_multiple" query="model=23f14fe3a8d343107f44321b8bcb56a3"/>
+    <sys_hub_alias_mapping action="delete_multiple" query="source_id=23f14fe3a8d343107f44321b8bcb56a3"/>
+    <sys_hub_trigger_instance_v2 action="delete_multiple" query="flow=23f14fe3a8d343107f44321b8bcb56a3^sys_idNOT IN27f14fe3a8d343107f44321b8bcb56d5"/>
+    <sys_hub_trigger_instance_v2 action="INSERT_OR_UPDATE">
+        <comment/>
+        <display_text/>
+        <flow display_value="Campus360 - Open Opportunity Application Creation">23f14fe3a8d343107f44321b8bcb56a3</flow>
+        <generation_source/>
+        <name>Created or Updated</name>
+        <published_version/>
+        <remote_sys_id/>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 13:42:40</sys_created_on>
+        <sys_id>27f14fe3a8d343107f44321b8bcb56d5</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_scope/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:42:40</sys_updated_on>
+        <trigger_definition display_value="Created or Updated">a45d9180c32222002841b63b12d3aea7</trigger_definition>
+        <trigger_inputs>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</trigger_inputs>
+        <trigger_outputs/>
+        <trigger_type>record_create_or_update</trigger_type>
+        <updation_source/>
+    </sys_hub_trigger_instance_v2>
+    <sys_hub_action_instance_v2 action="delete_multiple" query="flow=23f14fe3a8d343107f44321b8bcb56a3^sys_idNOT IN67f14fe3a8d343107f44321b8bcb56d2,2ff14fe3a8d343107f44321b8bcb56d2,2bf14fe3a8d343107f44321b8bcb56d3,eff14fe3a8d343107f44321b8bcb56d3"/>
+    <sys_hub_action_instance_v2 action="INSERT_OR_UPDATE">
+        <action_type display_value="Look Up Records">43400a1587003300663ca1bb36cb0b4b</action_type>
+        <action_type_parent display_value="Look Up Records">d1c56ec50b30030085c083eb37673a50</action_type_parent>
+        <attributes/>
+        <comment/>
+        <compiled_snapshot>43400a1587003300663ca1bb36cb0b4b</compiled_snapshot>
+        <display_text/>
+        <flow display_value="Campus360 - Open Opportunity Application Creation">23f14fe3a8d343107f44321b8bcb56a3</flow>
+        <generation_source/>
+        <order>1</order>
+        <parent_ui_id/>
+        <sys_class_name>sys_hub_action_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 13:42:40</sys_created_on>
+        <sys_id>67f14fe3a8d343107f44321b8bcb56d2</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:42:40</sys_updated_on>
+        <ui_id>8dac1e4a-9610-4919-93ae-0dce12af1035</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/+VWXU/bMBT9K1Geq8pdS2G8TUVIk/iQKOOFgeXYTrHmOJntFErV/75rO0m7NnR0KxrTXii51/Y9Pvcc27fzWLD4OEbpACHSOzg6RKjfR2g47FPSS5L+kCYoOfgYd2JFMg4jTa4ttrOCQ2hKZNnEiKEQYsIUksxuqgyJbB49Q5w+CMk0V/Hx7V0nLoiG1SzX8fF8LfVaOJIkXMLQMdSOrgOeFoj+5xhq5ILW32fV1FEdzDVzUPqdmD9ZrhgHDCmRhnfijChGbK5nTURzwi6VXAYehLKwWuwGPxnxDPX6H9y4lMOuKA+55hNXFIVwekIsGVtdUlvqamgAa4CPebPNhsgWziv4aNFZjn9248n6eMZXJ/QWwDfjKSmlHf1ezd6uNT+4mmGDl4UVOXQ97ru+kETW289lmamL0Mu4QXjTIraQOXlBc6UBsnnhGuo6VLUrHT/kj1d1N06F8riqpMwpkc0XsVaLpLSOl3mcMpwKLhkWSgrlKkHbnHy45BlUwBkpCqEmuND5VPhVYS9ZdyLho5vK/NFxISaqS6jbeReERbqnED/x4RuihWPhHJaByR1X8AGmVvWwoVoUFj8KNuF2Wb0exXL7SOS3tnylOFw3ym8vXnRiMzMjSYxZkg0yxd9Lx0GgvmIP+0b5KR7FJ9jBlFdEOQ1429LDrbY9WLNoaPSKXjbPj51PjldAqFm4dIqMktlLqKqjI/Tcj/j5+Dh1iegiJGp57+0IOUL7OULaLL5pwZ0cuGktJ7U/cNYbGqjNsbsLP3DzC/UPtl5aw95SZ9BkrLkBSs2K+nsIoU0H9DohvJsNXoGltsE5eYquGjCtCCsngEj5xBO7aoPPTbTywGBvHhi8Xw/UzWq9geqe7fkCehub7P8aONr+ekNLmdFcMeEwrvqATgrytYSp3P9l8/kIxGI5i3IdfSmY+xf3urTUQKDtZkKJrMywm7ZY3AMpqZBwW1piSxNWIB7mPbSIBgZXkyq32GfYpvn+JpTdDP8KzmvDj1ZJb2tE/WZej521LVA/BPdoevR+bf+PXH1vdMNtF9kgWeopLLf09BM2imJKsqI0/SEC1ZcsbNtYf3esGW8c8tF5nd+nGzzQ2g3XFdI14JUH/Gfb489PW3v8of/z8fc+rzUAJCQoBIcWmrzUnsopprI0PqGJMmGtPV6Cdz8ArXh/OVMRAAA=</values>
+    </sys_hub_action_instance_v2>
+    <sys_hub_alias_mapping action="delete_multiple" query="source_id=67f14fe3a8d343107f44321b8bcb56d2"/>
+    <sys_hub_action_instance_v2 action="INSERT_OR_UPDATE">
+        <action_type display_value="Look Up Records">43400a1587003300663ca1bb36cb0b4b</action_type>
+        <action_type_parent display_value="Look Up Records">d1c56ec50b30030085c083eb37673a50</action_type_parent>
+        <attributes/>
+        <comment/>
+        <compiled_snapshot>43400a1587003300663ca1bb36cb0b4b</compiled_snapshot>
+        <display_text/>
+        <flow display_value="Campus360 - Open Opportunity Application Creation">23f14fe3a8d343107f44321b8bcb56a3</flow>
+        <generation_source/>
+        <order>4</order>
+        <parent_ui_id>51bebe25-9d2a-4221-911d-fb6844c56651</parent_ui_id>
+        <sys_class_name>sys_hub_action_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 13:42:40</sys_created_on>
+        <sys_id>2ff14fe3a8d343107f44321b8bcb56d2</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:42:40</sys_updated_on>
+        <ui_id>8bff04fd-a6dd-424f-a568-e4188bc2be5b</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/+VWXU/bMBT9K1GeS+U0bWG8oSKkSRtIsPGyMcuxnWLNTTLbAUrV/77rj6RdmzG6lYlpT22ur32Pzz3H9qdFLFh8HKN8iBBJRkeHCKUpQuNxSkmSZemYZigbvYl7cUFmHDJ1qQw284pD6I7Iuo0RTSHEhK4kmV+HERKZMnqEOL0VkilexMefbnpxRRSsZriKjxcbQ8+FI0nGJaReQe3og8fTAdH9HEONUtDm+12YOmmCpWIWStqL+YPhBeOAISdS8148IwUjplTzNqI4YReFXAVuRWFgtdgmP2jxCPXSgc3LOeyKcj/WfuJAkQ/np8SQK6NqamoVUj1YDXws2m22RHZwHuCjZW+V/2jzyWY+4+sTkiXwzXhOamkmv1cz2bXmwNb0G7yojCih63Fq+0Iy2Wy/lPWsOPe9jFuE1x1i8yOnP9FcrYFsXtmG2g6FduVXt+X9ZdONM1E4XGFQlpTI9osYo0RWG8vLIs4ZzgWXDItCisJWgrZZ+XDJZ1ABz0hViWKKK1XeCbcq7GXWn0r46OeyvLdciGnRJ9TuvA/CIv0ziJ+68DVRwrLwHpaByT1b8BamhnpYUyUqg+8Fm3Kzqt5ksdLcE/m1azwoDjeNctuLl71Yz/VEEq1XZINM8bfacuCpD+xh1yg3xaE4gR3c8UCU1YCzLT180rajDYv6Rq/pZfv82PnkeAaEhoULq8gom/8MVTg6fM9dxo/Hx5kdiM79QCPvvR0hR2g/R0iXxbctuJMDt61lpfYHznpBA3U5dnfhe25+of7hk5fWOFnpDJqMFddAqV5Tf4IQ2nZA0vPh3WzwDCyNDd6Th+iyBdOJMDgBRMqnjth1G7xto8EDw715YPh6PdA0q/MGanq25wvoZWyy/2vg6OnXG1rJjJYFExbjug+0qW2tzzXMZotFPhoNEzYYHRwRmh8MOTs8IGg4OED5YZoMEj5mCe0Lw2fL5ZeyquAIrwth5s30CQjNcBaVKvpYMfsXJ31aKyDfLJfbfvvL1Xez9TOYbWw9Wae2i+7mZbwZe9e1QPPc26O10es19z9ywb3QPfa0yIbZSk9+uZVzH7AuKKZkVtU6HSMcvIQBrhSUuFZsGe7KJ0UnPyTt0xcOcuOLDwHzxhaCG9xn12PPTdt47KH/87H3Oq8xACQkKAT7FuqyVo7KO0xlrd2AIoX2a+3x0rv5Di2g0HBDEQAA</values>
+    </sys_hub_action_instance_v2>
+    <sys_hub_alias_mapping action="delete_multiple" query="source_id=2ff14fe3a8d343107f44321b8bcb56d2"/>
+    <sys_hub_action_instance_v2 action="INSERT_OR_UPDATE">
+        <action_type display_value="Create Record">2de05916c31332002841b63b12d3aee1</action_type>
+        <action_type_parent display_value="Create Record">02f0b88cc3c632002841b63b12d3aeff</action_type_parent>
+        <attributes/>
+        <comment/>
+        <compiled_snapshot>2de05916c31332002841b63b12d3aee1</compiled_snapshot>
+        <display_text/>
+        <flow display_value="Campus360 - Open Opportunity Application Creation">23f14fe3a8d343107f44321b8bcb56a3</flow>
+        <generation_source/>
+        <order>6</order>
+        <parent_ui_id>ce72d6a6-c749-407e-a288-86bc5a3b7f1d</parent_ui_id>
+        <sys_class_name>sys_hub_action_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 13:42:40</sys_created_on>
+        <sys_id>2bf14fe3a8d343107f44321b8bcb56d3</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:42:40</sys_updated_on>
+        <ui_id>c963605b-7803-4245-ab01-36d24ff8f42c</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/+1V3W/bNhD/Vwg9JamtSHbipO6TkSzbgK4p5iYvdS3Q5MnmQJEaP5x4hv/3HSnJcZq224A9rMD8YvF4H7+7+93x4zYRPBknIw7Z69f5iA3z4XCQZYPLs3wxGi7yAR9SyBdJL1G0AtRcU+nB4jl+oMA6z0G5mc+yId9uy/Pzs5wPzvuXlJX9M+AXfZqdDfpZeTHMBzmMeM5S4aDa7ea6rrVxXgm36cyvDFAHnGhD7moePos8Zd4YDIEWtK6lYNQJrQrrqPO2MaxBcaGW8xZMYcDWWll4fhut0WPw29zM7QoRSGExUCMpqbQwp9aCtVVwdRhG6Xg2qD0XyoFZC3h4qcFWwL1EHV2WYF7cRyneSmoD0kooDqbF0x0Lpn1X1GxORVFRx1boWpsO+mEtRIee9y0zokaA2CIubC3p5v7/Tv3XO8VWQnKsXDL++KmX1NTgsCHoZLz97OrvTqukC5CoeiNAcvuF8XWbOpyxvUgRB0Uzzo38bWv8ob0k9+2lNjyAynsJPDpsFWIfxzb0kooqbJY2m2TsjEcB0oPfKrnZa6ywD+g0CbqPVvyB4fNRFn9BO1RaMWg09sei5XAjLq+po1P0z5w3rSpbacEwpVgeDiX10l0dyhqF2zqUvzFxdCE7ay19pd41xUn2DrqRQYm3CAICMSHgb5Irpyv98GsH8iYSYZ+o1IzK/Yk6Z8TCuwBnm4CEyNUKOYFEL2qj1yIaI5QqXUo8pKXUDxjTiqVKKQu4U6wtTW9Qfh3F99SIkMQv6AaNd73EbuwV0tQ+pYI1LH73AUmTWJtCEasQS1BEUgTjyMQJhlpDl2IjC5if0zdIvqWfnJ7M1MnJhGEDLAmQTycxBxJyIN5i2sStgJRxvCnRi9+AuZRMowNSeeuIAWywIpREWqYkeLwN5CPKVwv8E5bgcFpwZLEhr3IiFPnBGNxFPyEPZQgxhaZyEcyaChkyJjrSwJKWVsTj8iE1LqEIa5aks4TQEkevgxfM4ZHiIMAY0RgS9xB2gZFmkDvFFNu8XILpdmAaFUMbY14Y9U3w1Wa29xKEpzPVioPLwcXk/fvmg7wiS5suQYHBMfzx7ufro+PU+oXFWGp5lPVIfnGcOn0XWHBFLRwdv0l2u12ve9ZzyM6/uijg7GkvHPDh6Wl/LKxiBcPkvR2OsqLb2QeEePnKTBslMnmm9A8X3F/j7hbchzjLX86j23Gfy94e2pJ3zUW727J/a7ddfk9brU3ju19rL5dZhLv79Cep5M/86QoAAA==</values>
+    </sys_hub_action_instance_v2>
+    <sys_hub_alias_mapping action="delete_multiple" query="source_id=2bf14fe3a8d343107f44321b8bcb56d3"/>
+    <sys_hub_action_instance_v2 action="INSERT_OR_UPDATE">
+        <action_type display_value="Create Record">2de05916c31332002841b63b12d3aee1</action_type>
+        <action_type_parent display_value="Create Record">02f0b88cc3c632002841b63b12d3aeff</action_type_parent>
+        <attributes/>
+        <comment/>
+        <compiled_snapshot>2de05916c31332002841b63b12d3aee1</compiled_snapshot>
+        <display_text/>
+        <flow display_value="Campus360 - Open Opportunity Application Creation">23f14fe3a8d343107f44321b8bcb56a3</flow>
+        <generation_source/>
+        <order>7</order>
+        <parent_ui_id>ce72d6a6-c749-407e-a288-86bc5a3b7f1d</parent_ui_id>
+        <sys_class_name>sys_hub_action_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 13:42:40</sys_created_on>
+        <sys_id>eff14fe3a8d343107f44321b8bcb56d3</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:42:40</sys_updated_on>
+        <ui_id>8ca4a067-6703-4e60-968c-cc39434958e7</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/+1VW3MaNxT+Kxo9tS6sdwEThzx5nLp9SO1Mcf0Swo6QzoJarXajCzZl+O89knYxTdLbTB+amfICOvrO0fedG+/2VAo6o1MB+cuXxZSPi/F4lOejy0mxmo5XxUiMGRQrOqCa1YDILVMeLJ7jDzRY5wVot/B5Phb7fXVxMSnE6GJ4yXg1nIB4MWT5ZDTMqxfjYlTAVBQ8kw7qrHMspTgclk3bNsZ5Ld2uj3RtgDkQpDHkp1aEn2WRcW8MOqGHbpysJGdONrp0uxaS30mgZQ3WsnV3cQuPpFWMQ43+5ASWkbcKmAViYCsR5DZwek2YFnhl2wa/V1A1BiKEta3qnicCmFBSw9IGQYFrerMSQ8uNbJH7kvHI1MAHLw2IBHDGQ3/j2C+gOz+mLCwN1FILMCVvfJ/gfGkdc96mUwtaSL3GaghpUdzu4f+i/IeKwjdSCcwMnb17P6AtMzhCDgyd7T+6+rszqNgKFEJvJChhPzOUIeV4xkpiVh2UaUiT/U3nfN9dkofusjEikCoGFJ4ckgdkE8UOaI15Zq4xOzoLWRlQLL+402p3RGykdhiUBuyTlb/i88U0j5+ArgBFckiI47Hs2jWZq9fMsTnG586bDso3jeQoKaZHQMW8ctentgS4a0OVkotjK9V7N8rX+jYlhx4D9NOBFm+RBIRSQeCfxFXzTfP4Y0/yJtb5KFQ1nKnjiTln5Mq7QGdPQcUGLmvsPyx92ZpmK6MzUqmztcJDVqnmEd+0cq2z1F0Z5pZlN2h/Hc0PzMgg4gcMg86HAbU7e62Ytc9SMIflBx+YJGGdhDJmIaagjE0RnGOXX+FTW+glJlvgfJyKePgTKD0/W+izsyuOubcksD2/4mnCkD7xFhXH4atEGS3N6mfgLiPzGIDU3jqcVaytJozEjsxIiHgX+o5oX6/wS1rSVJUFR1Y78k1BpCbfGoNr5ntsQRWemENKWiSzZVIFsbgUgtGSrqOIx5VAWlwNkdaCZgtKWIVT19ML7vDEcAZghmwMsRvcKlgATtL89sAMK7xeg+nXWxaBoYJRF776KsTqlB2jBOP5Qndmjbvru1B+7HG4lzV89fUrejgcBv0fbwH5xR8OPUyeZ/ykts9/vk+l1bzkqMbb8TQv+/V9uoc//XeYJxS5/T3qH66rv2ber6v7OJmfV9JvrI9tb059yW266DZV/m9tqssvaUd1Mr74JfXpaop0D+9/A6Jsn5uNCgAA</values>
+    </sys_hub_action_instance_v2>
+    <sys_hub_alias_mapping action="delete_multiple" query="source_id=eff14fe3a8d343107f44321b8bcb56d3"/>
+    <sys_hub_sub_flow_instance_v2 action="delete_multiple" query="flow=23f14fe3a8d343107f44321b8bcb56a3"/>
+    <sys_hub_flow_logic_instance_v2 action="delete_multiple" query="flow=23f14fe3a8d343107f44321b8bcb56a3^sys_idNOT IN2bf14fe3a8d343107f44321b8bcb56ce,63f14fe3a8d343107f44321b8bcb56d0,a7f14fe3a8d343107f44321b8bcb56d1"/>
+    <sys_hub_flow_logic_instance_v2 action="INSERT_OR_UPDATE">
+        <attributes/>
+        <block display_value="">b27de043fd5343107f44e0b0f427db4c</block>
+        <comment/>
+        <connected_to/>
+        <decision_table/>
+        <display_text/>
+        <flow display_value="Campus360 - Open Opportunity Application Creation">23f14fe3a8d343107f44321b8bcb56a3</flow>
+        <flow_variables_assigned/>
+        <generation_source/>
+        <logic_definition display_value="For Each">098e1dc5c3e232002841b63b12d3ae33</logic_definition>
+        <order>2</order>
+        <outputs_assigned/>
+        <parent_ui_id/>
+        <sys_class_name>sys_hub_flow_logic_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 13:42:40</sys_created_on>
+        <sys_id>2bf14fe3a8d343107f44321b8bcb56ce</sys_id>
+        <sys_mod_count>1</sys_mod_count>
+        <sys_scope/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:42:40</sys_updated_on>
+        <ui_id>f5541d25-8acf-4ed7-a042-0f73121e6d1c</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/51Ty27bMBD8F55lQQ/XiHwLEgQI0DaAE+RSBMaKXNlEKVLlw44q6N+7tGQlyLEnaYe7szMjamAm+C5492JunZMHzba/3hImdcTofWAaWmRbJj22jiXsBCrEehhuBPAc17CqNnm2Wld5tapKwFUmOOYFNHlWfkt3yI0VbhxpVEjXKehf/5+BH6USFmeRHVjS5tGy7fDlSApakFeiqfKs4mWxKYssK27Web0p67wQtEVsiFBBjYpaH2d3X8z6voulnSTMwPd5Zreg9Igiiixh+O5RC6T1DSiHCWtBC/DG9mzrbSDAIognrfql4yi1JzoWe9+d/Esb8yyLjQ2SIY7T4VLu5xwnuLkHD89EzX2wcys/GsnRTVEIbCAof/cZmxqeOi+NnkY81Oo6bVRo9c8pCbYQXD8bIcGRCOyi0Sh99tE8H815d1X5IPUllPlQGQ5qqcB7K+vgo56BocKWiPYtdJ3Uh31nzUlehklLmx4UFWmjzJmWxiuaAo/CU8oV0gfC7y/wK1gZXfwgGhoeE+Z6d6fAuQ8vFOL+T4hKJmezh/0UQxzhVnb+lhaccJY7vsVbP3EvmXLpSMJLxB6v/0o86OkGSf4ZOhv7O4r/wMZ/m5S1AnUDAAA=</values>
+        <workflow_reference/>
+    </sys_hub_flow_logic_instance_v2>
+    <sys_hub_flow_logic_instance_v2 action="INSERT_OR_UPDATE">
+        <attributes/>
+        <block display_value="">9e417cc7fd5343107f44e0b0f427db27</block>
+        <comment/>
+        <connected_to/>
+        <decision_table/>
+        <display_text/>
+        <flow display_value="Campus360 - Open Opportunity Application Creation">23f14fe3a8d343107f44321b8bcb56a3</flow>
+        <flow_variables_assigned/>
+        <generation_source/>
+        <logic_definition display_value="If">af4e1945c3e232002841b63b12d3ae3e</logic_definition>
+        <order>3</order>
+        <outputs_assigned/>
+        <parent_ui_id>f5541d25-8acf-4ed7-a042-0f73121e6d1c</parent_ui_id>
+        <sys_class_name>sys_hub_flow_logic_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 13:42:40</sys_created_on>
+        <sys_id>63f14fe3a8d343107f44321b8bcb56d0</sys_id>
+        <sys_mod_count>1</sys_mod_count>
+        <sys_scope/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:42:40</sys_updated_on>
+        <ui_id>51bebe25-9d2a-4221-911d-fb6844c56651</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/+1VXU/bMBT9K8jPbZSkTYG+oTIkNDakwXiZUHRj37TWHDuzHaCL8t93naQtGkgb2qS97C0+vh/nHh/HLTONrxvvbs2Zc3Kt2fLL/YRJHTD6bpmGCtmScaOF9NJoNmEPoJqAte3KIngUR8Yefa5F+MyTiDfWovYRKrmWhcK8sKD5Bl3XXV2+f9e2ZZbNE5Fm0xPg5XSO4ngK8TydxuXxLEkTXIiER9JjFQ2ZXUdNhXS1gu3dv+jNN1IJqjuIU4MlTTxatmx/2pKCqJ1CVmZJnPFZupilcZyezJNiMSuSVMwA5wsqqKBARaGrZ6q+IrTf1gFy3kq9HtdXY+rNDjRWBCppPGH45FELJBIlKIcTVoEmZYzdsqW3DQGkmbjWaruP2EjtqRoLsU9OfsdQKY5DZIk0F8dhd7/Mx4MY4PIcPBCVhvvGjqF8YyRHNygisIRG+dVzbAi4rvsp+xQPdFZjtlFNpT8OYrB9gd25E9I4IoF1mDRwHwcpbzbm8dOO5YXUvSrjpjIc1H4FnrQrGh/4tAwVVlQor6CuSdG8tuZB9snEpYrWihZRqcwjNQ03JAIeiEckLEQXhJ/38B1YGab4QGUombzgcsetrHez9c1ZN2Fu61YKnDvMSOLm35rAcJh4nC0f5AkpfaEzavyA4xjd5OXdzHvgcEFfXps3m7mMoUxOefK6mWH2mpmPBo++tPSO31t8nfzC1yPyW8bOsv++/mNfB5oFOMnz/pWgcuHX8heNfR8MPDTdi82lI263AbvcvU1hY0uOkvw59Gjs1zDVAet+AEFx1qDlBgAA</values>
+        <workflow_reference/>
+    </sys_hub_flow_logic_instance_v2>
+    <sys_hub_flow_logic_instance_v2 action="INSERT_OR_UPDATE">
+        <attributes/>
+        <block display_value="">e755fc03fd9343107f44e0b0f427db8b</block>
+        <comment/>
+        <connected_to/>
+        <decision_table/>
+        <display_text/>
+        <flow display_value="Campus360 - Open Opportunity Application Creation">23f14fe3a8d343107f44321b8bcb56a3</flow>
+        <flow_variables_assigned/>
+        <generation_source/>
+        <logic_definition display_value="If">af4e1945c3e232002841b63b12d3ae3e</logic_definition>
+        <order>5</order>
+        <outputs_assigned/>
+        <parent_ui_id>51bebe25-9d2a-4221-911d-fb6844c56651</parent_ui_id>
+        <sys_class_name>sys_hub_flow_logic_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 13:42:40</sys_created_on>
+        <sys_id>a7f14fe3a8d343107f44321b8bcb56d1</sys_id>
+        <sys_mod_count>1</sys_mod_count>
+        <sys_scope/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:42:40</sys_updated_on>
+        <ui_id>ce72d6a6-c749-407e-a288-86bc5a3b7f1d</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/+1VXWvbMBT9K0PPSbAdO6R5K+kKhXUdTSmMUcy1PhIxRfIkOWlm8t935Y8kLIGtdI97s47uvTrn+Miuial8WXn3ZK6dk0tNZt9eBkTqgOFzTTSsOZkRajSTXhpNBmQDqgpYXU8LIaJUsCFMGBumSSqGkE2mQ57G02lBk4JnxeiRU2OZ2+/vFh/vvzx9xQlMulLB7vndg+hKKmZ5R7sEi2w9t2RW/7YlGZ5zBZnI4iij42QyTqIomaZxMRkXccLGwNMJDlRQcIWl8xO9FyzwuzJAzlupl936U9e66EEkG6gk0YDwV88140hCgHJ8QNagGXhjd2TmbYWA5cAetNodKlZSe5xGQu2rkz95mBRFoVJw1EV5u3tY5p2rLSxuwANSqaivbFdKV0ZS7lpHGBdQKT8/xdqCh7JR2bR4KFTfbVS11p9bM8hhQP8SEakckuBlUBq4d0LEYmW2jz3LW6kbV7pNZSiowwo8eldUPvCpCVd8jYPyNZQlOpqX1mxk04xc1qOlwsVIKLPFQ0N2R0AD8REaC6NbxG8a+BmsDCrucQw2YxZc7qiVZa+tOZzsB8Tt3FyBc0eNaG7+owoMW8Wdtry1J7Q0g67x4A3vZOwH57cmb4Dj1Tm/A28Os4hAxFc0vhxmGF8K84c2o+eR7vm9JdfxH3LdIX8V7Cz7n+t35zrQLMBJmjffbxwXPi3/MNgvIcDtoQezqXTI7Slgd/1fI2zsMFGSnkJbY78HVUds/ws2nnC0fwYAAA==</values>
+        <workflow_reference/>
+    </sys_hub_flow_logic_instance_v2>
+    <sys_hub_pill_compound action="delete_multiple" query="attached_to=23f14fe3a8d343107f44321b8bcb56a3"/>
+    <sys_hub_flow_variable action="delete_multiple" query="model=23f14fe3a8d343107f44321b8bcb56a3"/>
+    <sys_documentation action="INSERT_OR_UPDATE">
+        <element>current</element>
+        <help/>
+        <hint/>
+        <label>Record</label>
+        <language>en</language>
+        <name>var__m_sys_hub_flow_input_23f14fe3a8d343107f44321b8bcb56a3</name>
+        <plural/>
+        <sys_class_name>sys_documentation</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 13:42:40</sys_created_on>
+        <sys_id>27f14fe3a8d343107f44321b8bcb56b2</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name/>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:42:40</sys_updated_on>
+        <url/>
+        <url_target/>
+    </sys_documentation>
+    <sys_documentation action="INSERT_OR_UPDATE">
+        <element>changed_fields</element>
+        <help/>
+        <hint/>
+        <label>Changed Fields</label>
+        <language>en</language>
+        <name>var__m_sys_hub_flow_input_23f14fe3a8d343107f44321b8bcb56a3</name>
+        <plural/>
+        <sys_class_name>sys_documentation</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 13:42:40</sys_created_on>
+        <sys_id>2ff14fe3a8d343107f44321b8bcb56bb</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name/>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:42:40</sys_updated_on>
+        <url/>
+        <url_target/>
+    </sys_documentation>
+    <sys_documentation action="INSERT_OR_UPDATE">
+        <element>table_name</element>
+        <help/>
+        <hint/>
+        <label>Table Name</label>
+        <language>en</language>
+        <name>var__m_sys_hub_flow_input_23f14fe3a8d343107f44321b8bcb56a3</name>
+        <plural/>
+        <sys_class_name>sys_documentation</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 13:42:40</sys_created_on>
+        <sys_id>eff14fe3a8d343107f44321b8bcb56c4</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name/>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:42:40</sys_updated_on>
+        <url/>
+        <url_target/>
+    </sys_documentation>
+    <sys_choice action="delete_multiple" query="name=var__m_sys_hub_flow_input_23f14fe3a8d343107f44321b8bcb56a3"/>
+    <sys_choice action="delete_multiple" query="name=var__m_sys_hub_flow_output_23f14fe3a8d343107f44321b8bcb56a3"/>
+    <sys_hub_flow action="UPDATE">
+        <sys_id>51caaccbfd1343107f44e0b0f427dbe2</sys_id>
+        <latest_snapshot>23f14fe3a8d343107f44321b8bcb56a3</latest_snapshot>
+        <compiler_build>glide-australia-02-11-2026__patch3-hotfix1-06-18-2026_06-19-2026_0938.zip</compiler_build>
+        <version_record/>
+    </sys_hub_flow>
+    <sys_flow_trigger_plan action="delete_multiple" query="plan_id=51caaccbfd1343107f44e0b0f427dbe2^sys_idNOT INf3f14fe3a8d343107f44321b8bcb56e6"/>
+    <sys_flow_trigger_plan action="INSERT_OR_UPDATE">
+        <binding_strategy>com.snc.process_flow.engine.binding.OncePerRecord</binding_strategy>
+        <plan>{"@class":"com.snc.process_flow.engine.serialization.plan_data.ChunkingPlanData","chunk_data":{"table":"sys_flow_trigger_plan","id":"f3f14fe3a8d343107f44321b8bcb56e6","name":"plan","plan_signature":null},"plan_data":"CHUNKING_PLAN"}</plan>
+        <plan_id>51caaccbfd1343107f44e0b0f427dbe2</plan_id>
+        <snapshot>c322e602096f83107f442a080dcb42c9</snapshot>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 13:42:40</sys_created_on>
+        <sys_domain>global</sys_domain>
+        <sys_domain_path>/</sys_domain_path>
+        <sys_id>f3f14fe3a8d343107f44321b8bcb56e6</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_overrides/>
+        <sys_scope/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:42:40</sys_updated_on>
+        <trigger display_value="">fff14fe3a8d343107f44321b8bcb56e4</trigger>
+    </sys_flow_trigger_plan>
+    <sys_flow_subflow_plan action="delete_multiple" query="plan_id=51caaccbfd1343107f44e0b0f427dbe2"/>
+</record_update>

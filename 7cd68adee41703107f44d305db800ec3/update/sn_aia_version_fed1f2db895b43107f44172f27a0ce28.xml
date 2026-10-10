@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update sys_domain="global" table="sn_aia_version">
+    <sn_aia_version action="INSERT_OR_UPDATE">
+        <condition/>
+        <instructions>1. Use the "Get Campus360 Placement Evidence" tool with the provided student sys_id.
+
+2. Pass the provided student sys_id exactly into the tool's Student input.
+
+3. Wait for the tool result and use the returned placement evidence as the only evidence source for the diagnosis.
+
+4. Examine interview performance, including interview count, overall scores, latest performance, strengths, recurring improvement areas, and any available performance trend.
+
+5. Examine technical skills, skill assessment scores, certification information, and skill-level evidence.
+
+6. Examine student assessment performance and identify evidence of strengths or weaknesses.
+
+7. Examine placement application progress, including current application stages, highest achieved stages, and missed opportunities.
+
+8. Examine training participation and training completion evidence.
+
+9. Identify the single most significant current skill or placement gap using the available evidence.
+
+10. Classify the primary skill gap into one of the provided Campus360 categories when sufficient evidence exists: Communication, Technical Knowledge, Problem Solving, Coding, Aptitude, Presentation, Interview Performance, Resume / Profile, Skill Development, or No Significant Gap.
+
+11. Identify the main placement bottleneck, such as skill readiness, interview performance, assessment performance, application engagement, training participation, or another evidence-supported placement stage.
+
+12. Write a concise evidence-based explanation of the identified gap and bottleneck.
+
+13. Recommend one practical improvement action that can be used by Campus360 for the student's placement intervention.
+
+14. Do not invent information. If evidence is insufficient for a conclusion, explicitly state that the available evidence is insufficient.
+
+15. Do not calculate or modify Readiness Score, Risk Level, Participation Score, or Missed Opportunities. These values are calculated deterministically by the Campus360 flow.
+
+16. Return the diagnosis in a structured format containing: Primary Skill Gap, Skill Gap Summary, Bottleneck Stage, AI Insight, and Recommended Action.
+
+TOOL USAGE INSTRUCTIONS
+
+When a student placement diagnosis is requested, use the "Get Campus360 Placement Evidence" tool first.
+
+Provide the student's sys_id as the Student input to the tool.
+
+After the tool returns the placement evidence, analyze all relevant sections of the returned evidence:
+- student
+- skills
+- assessments
+- applications
+- training
+- interviews
+- interview_feedback
+- placement_intelligence
+
+Use the evidence to identify the student's most significant current placement or skill gap.
+
+Do not invent information that is not present in the tool output.
+
+Do not calculate, modify, or override:
+- Readiness Score
+- Risk Level
+- Participation Score
+- Missed Opportunities
+
+Return the diagnosis using exactly this structure:
+
+Primary Skill Gap:
+[one category]
+
+Skill Gap Summary:
+[brief evidence-based explanation]
+
+Bottleneck Stage:
+[main placement bottleneck]
+
+AI Insight:
+[concise diagnosis explaining the evidence]
+
+Recommended Action:
+[one practical improvement action]</instructions>
+        <state>published</state>
+        <sys_class_name>sn_aia_version</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-18 17:53:40</sys_created_on>
+        <sys_domain>global</sys_domain>
+        <sys_id>fed1f2db895b43107f44172f27a0ce28</sys_id>
+        <sys_mod_count>3</sys_mod_count>
+        <sys_name>V1</sys_name>
+        <sys_overrides/>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name>sn_aia_version_fed1f2db895b43107f44172f27a0ce28</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 05:30:14</sys_updated_on>
+        <target_id>488f2a97895b43107f44172f27a0ce73</target_id>
+        <target_table>sn_aia_agent</target_table>
+        <version_name>V1</version_name>
+        <version_number>1</version_number>
+    </sn_aia_version>
+</record_update>

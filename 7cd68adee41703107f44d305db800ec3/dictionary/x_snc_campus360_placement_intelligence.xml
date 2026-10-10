@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?><database>
+    <element attributes="enforce_dot_walk_cross_scope_access=true" db_object_id="44b4d69ee45703107f44d305db800ef4" label="Placement Intelligence" max_length="40" name="x_snc_campus360_placement_intelligence" type="collection">
+        <element choice="3" label="Bottleneck Stage" max_length="30" name="bottleneck_stage" type="choice">
+            <choice>
+                <element inactive_on_update="false" label="Training" sequence="5" value="training"/>
+                <element inactive_on_update="false" label="Skills" sequence="1" value="skills"/>
+                <element inactive_on_update="false" label="Interviews" sequence="4" value="interviews"/>
+                <element inactive_on_update="false" label="None" sequence="7" value="none"/>
+                <element inactive_on_update="false" label="Assessments" sequence="3" value="assessments"/>
+                <element inactive_on_update="false" label="Profile" sequence="0" value="profile"/>
+                <element inactive_on_update="false" label="Placement" sequence="6" value="placement"/>
+                <element inactive_on_update="false" label="Applications" sequence="2" value="applications"/>
+            </choice>
+        </element>
+        <element choice="3" label="Primary Skill Gap" max_length="255" name="primary_skill_gap" type="choice">
+            <choice>
+                <element inactive_on_update="false" label="Resume / Profile" sequence="7" value="Resume / Profile"/>
+                <element inactive_on_update="false" label="Presentation" sequence="5" value="Presentation"/>
+                <element inactive_on_update="false" label="Coding" sequence="3" value="Coding"/>
+                <element inactive_on_update="false" label="Technical Knowledge" sequence="1" value="Technical Knowledge"/>
+                <element inactive_on_update="false" label="No Significant Gap" sequence="9" value="No Significant Gap"/>
+                <element inactive_on_update="false" label="Communication" sequence="0" value="Communication"/>
+                <element inactive_on_update="false" label="Problem Solving" sequence="2" value="Problem Solving"/>
+                <element inactive_on_update="false" label="Skill Development" sequence="8" value="Skill Development"/>
+                <element inactive_on_update="false" label="Interview Performance" sequence="6" value="Interview Performance"/>
+                <element inactive_on_update="false" label="Aptitude" sequence="4" value="Aptitude"/>
+            </choice>
+        </element>
+        <element label="Recommended Action" max_length="2000" name="recommended_action" type="string"/>
+        <element label="Student" max_length="32" name="student" reference="x_snc_campus360_student_master" type="reference"/>
+        <element display="true" label="Intelligence ID" max_length="20" name="intelligence_id" type="string"/>
+        <element label="Skill Gap Summary" max_length="2000" name="skill_gap_summary" type="string"/>
+        <element attributes="ignore_filter_on_new=true" default="javascript:global.getNextObjNumberPadded();" label="Number" max_length="40" name="number" type="string"/>
+        <element choice="3" default="low" label="Risk Level" max_length="20" name="risk_level" type="choice">
+            <choice>
+                <element inactive_on_update="false" label="Critical" sequence="3" value="critical"/>
+                <element inactive_on_update="false" label="Low" sequence="0" value="low"/>
+                <element inactive_on_update="false" label="High" sequence="2" value="high"/>
+                <element inactive_on_update="false" label="Medium" sequence="1" value="medium"/>
+            </choice>
+        </element>
+        <element label="Last Updated" max_length="40" name="last_updated" type="glide_date_time"/>
+        <element label="Participation Score" max_length="40" name="participation_score" type="integer"/>
+        <element label="Readiness Score" max_length="40" name="readiness_score" type="integer"/>
+        <element label="AI Insight" max_length="3000" name="ai_insight" type="string"/>
+        <element default="0" label="Missed Opportunities" max_length="40" name="missed_opportunities" type="integer"/>
+        <index name="index">
+            <element name="student"/>
+        </index>
+    </element>
+</database>

@@ -1,0 +1,1216 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update sys_domain="global" table="sys_hub_flow">
+    <sys_hub_flow action="INSERT_OR_UPDATE">
+        <access>public</access>
+        <acls/>
+        <active>false</active>
+        <allow_high_security_roles>false</allow_high_security_roles>
+        <annotation/>
+        <attributes>browserActivatedIn=chrome,integrationActivatedIn=standalone,timeFromCreateToActivate=84920000,viewActivatedIn=naturalLanguage</attributes>
+        <authored_on_release_version>29000</authored_on_release_version>
+        <callable_by_client_api>false</callable_by_client_api>
+        <category/>
+        <copied_from>51cbc6c97743011031e3b3c64b5a9907</copied_from>
+        <copied_from_name>FlowTemplate: Record Trigger</copied_from_name>
+        <description>Mock Interview Feedback to Placement Intelligence</description>
+        <display_name_after_preview/>
+        <flow_priority/>
+        <generation_source/>
+        <internal_name>campus360_interview_feedback_to_placement_intelligence</internal_name>
+        <label_cache>[{"name":"cb98ebf7-b69a-45f1-95a8-9df9e3191c8b.Records","label":"1➛Placement Intelligence Records","reference":"x_snc_campus360_placement_intelligence","reference_display":"Placement Intelligence","type":"records","base_type":"records","usedInstances":{},"attributes":{"element_mapping_provider":"com.glide.flow_design.action.data.FlowDesignVariableMapper"}},{"name":"a158d329-c6c3-4e16-9765-005b34001b27.Count","label":"1➛Count","reference_display":"Count","type":"integer","base_type":"integer","usedInstances":{},"attributes":{"element_mapping_provider":"com.glide.flow_design.action.data.FlowDesignVariableMapper"}},{"name":"03f14cdc-5817-429d-8ce9-e44d5fddae98.item","label":"3➛Placement Intelligence Record","reference":"x_snc_campus360_placement_intelligence","reference_display":"Placement Intelligence","type":"reference","base_type":"reference","usedInstances":{},"attributes":{"pills_draggable_outside_block":"false","pills_draggable_inside_block":"true"}},{"name":"6e412194-6b27-485d-ae46-736b99126242.item","label":"3 - For Each➛Placement Intelligence Record","reference":"x_snc_campus360_placement_intelligence","reference_display":"Placement Intelligence","type":"reference","base_type":"reference","usedInstances":{},"attributes":{"pills_draggable_inside_block":"true","pills_draggable_outside_block":"false"}},{"name":"0f0aae9c-b0c7-44f4-b8ee-a04dae2f312f.Records","label":"1 - Look Up Records➛Placement Intelligence Records","reference":"x_snc_campus360_placement_intelligence","reference_display":"Placement Intelligence","type":"records","base_type":"records","usedInstances":{},"attributes":{"element_mapping_provider":"com.glide.flow_design.action.data.FlowDesignVariableMapper"}},{"name":"Created or Updated_1.current","label":"Trigger - Record Created or Updated➛ Record","reference":"x_snc_campus360_interview_feedback","reference_display":"Interview Feedback","type":"reference","base_type":"reference","choices":[{"order":0.0}],"usedInstances":{"a158d329-c6c3-4e16-9765-005b34001b27":[null]},"attributes":{"":""}},{"name":"Created or Updated_1.current.overall_score","label":"Trigger - Record Created or Updated➛ Record➛Overall Score","reference":"","reference_display":"Overall Score","type":"integer","base_type":"integer","parent_table_name":"x_snc_campus360_interview_feedback","column_name":"overall_score","choices":[{"order":0.0}],"usedInstances":{"ff58d94d-5ce8-43fa-b448-69c8fbad7281":["readiness_score"]}},{"name":"8d4531de-5b9d-4b6b-a342-7e0c609f59e4.item","label":"3➛Placement Intelligence Record","reference":"x_snc_campus360_placement_intelligence","reference_display":"Placement Intelligence","type":"reference","base_type":"reference","usedInstances":{},"attributes":{"pills_draggable_outside_block":"false","pills_draggable_inside_block":"true"}},{"name":"Created or Updated_1.current.interview.student","label":"Trigger - Record Created or Updated➛ Record➛Interview➛Student","reference":"x_snc_campus360_student_master","reference_display":"Student Master","type":"reference","base_type":"reference","parent_table_name":"x_snc_campus360_mock_interview","column_name":"student","choices":[{"order":0.0}],"usedInstances":{"278aef42-287c-4114-8c1e-80b340fe53ac":["student"],"d64fe26b-dd8e-4aa2-86be-5b55ba38f3aa":["student"]}},{"name":"0f0aae9c-b0c7-44f4-b8ee-a04dae2f312f.Count","label":"1 - Look Up Records➛Count","reference_display":"Count","type":"integer","base_type":"integer","usedInstances":{},"attributes":{"element_mapping_provider":"com.glide.flow_design.action.data.FlowDesignVariableMapper"}},{"name":"Created or Updated_1.current.improvement_areas","label":"Trigger - Record Created or Updated➛ Record➛Improvement Areas","reference":"","reference_display":"Improvement Areas","type":"string","base_type":"string","parent_table_name":"x_snc_campus360_interview_feedback","column_name":"improvement_areas","choices":[{"order":0.0}],"usedInstances":{"8201de89-d758-46fa-808a-496b8b580034":["readiness_score","skill_gap_summary"],"ff58d94d-5ce8-43fa-b448-69c8fbad7281":["skill_gap_summary"]}},{"name":"Created or Updated_1.current.recommendation","label":"Trigger - Record Created or Updated➛ Record➛Recommendation","reference":"","reference_display":"Recommendation","type":"string","base_type":"string","parent_table_name":"x_snc_campus360_interview_feedback","column_name":"recommendation","choices":[{"order":0.0}],"usedInstances":{"8201de89-d758-46fa-808a-496b8b580034":["recommended_action"],"ff58d94d-5ce8-43fa-b448-69c8fbad7281":["recommended_action"]}},{"name":"a80cefe8-22c6-456d-88ab-c4d77c4583b2.status","label":"1➛Status","reference_display":"Status","type":"choice","base_type":"choice","choices":[{"order":0.0}],"usedInstances":{},"attributes":{"uiTypeLabel":"Choice","element_mapping_provider":"com.glide.flow_design.action.data.FlowDesignVariableMapper","uiType":"choice","uiUniqueId":"5e478657-3a84-4a60-a92b-d3e80005ad34"}},{"name":"Created or Updated_1.current.student","label":"Trigger - Record Created or Updated➛ Record➛Student","reference":"x_snc_campus360_student_master","reference_display":"Student Master","type":"reference","base_type":"reference","parent_table_name":"x_snc_campus360_interview_feedback","column_name":"student","choices":[{"order":0.0}],"usedInstances":{"8201de89-d758-46fa-808a-496b8b580034":["student"],"ff58d94d-5ce8-43fa-b448-69c8fbad7281":["student"]}},{"name":"a158d329-c6c3-4e16-9765-005b34001b27.Records","label":"1➛Placement Intelligence Records","reference":"x_snc_campus360_placement_intelligence","reference_display":"Placement Intelligence","type":"records","base_type":"records","usedInstances":{},"attributes":{"element_mapping_provider":"com.glide.flow_design.action.data.FlowDesignVariableMapper"}}]</label_cache>
+        <master_snapshot>03520f27a8d343107f44321b8bcb5620</master_snapshot>
+        <master_snapshot_digest/>
+        <name>Campus360- Interview Feedback to Placement Intelligence</name>
+        <natlang/>
+        <outputs/>
+        <pre_compiled>false</pre_compiled>
+        <remote_trigger_id>df520f27a8d343107f44321b8bcb5661</remote_trigger_id>
+        <run_as>user</run_as>
+        <run_with_roles/>
+        <sc_callable>false</sc_callable>
+        <show_draft_actions>false</show_draft_actions>
+        <show_triggered_flows>false</show_triggered_flows>
+        <status>published</status>
+        <substatus/>
+        <sys_class_name>sys_hub_flow</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-18 14:08:56</sys_created_on>
+        <sys_domain>global</sys_domain>
+        <sys_domain_path>/</sys_domain_path>
+        <sys_id>626e31d789d343107f44172f27a0ce3e</sys_id>
+        <sys_mod_count>61</sys_mod_count>
+        <sys_name>Campus360- Interview Feedback to Placement Intelligence</sys_name>
+        <sys_overrides/>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name>sys_hub_flow_626e31d789d343107f44172f27a0ce3e</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:44:25</sys_updated_on>
+        <type>flow</type>
+        <updation_source/>
+        <version>2</version>
+        <version_record>b1628f27a8d343107f44321b8bcb5643</version_record>
+    </sys_hub_flow>
+    <sys_translated_text action="delete_multiple" query="documentkey=626e31d789d343107f44172f27a0ce3e"/>
+    <sys_variable_value action="delete_multiple" query="document_key=626e31d789d343107f44172f27a0ce3e"/>
+    <sys_flow_record_trigger action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <condition table="x_snc_campus360_interview_feedback">^EQ<item endquery="true" field="" goto="false" newquery="false" operator="=" or="false" value=""/>
+        </condition>
+        <name/>
+        <on_delete>false</on_delete>
+        <on_insert>true</on_insert>
+        <on_update>true</on_update>
+        <published_version/>
+        <run_flow_in>background</run_flow_in>
+        <run_on_extended>false</run_on_extended>
+        <run_when_setting>both</run_when_setting>
+        <run_when_user_list/>
+        <run_when_user_setting>any</run_when_user_setting>
+        <sys_class_name>sys_flow_record_trigger</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 13:44:17</sys_created_on>
+        <sys_domain>global</sys_domain>
+        <sys_domain_path>/</sys_domain_path>
+        <sys_id>df520f27a8d343107f44321b8bcb5661</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_overrides/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:44:17</sys_updated_on>
+        <table>x_snc_campus360_interview_feedback</table>
+        <trigger_definition/>
+    </sys_flow_record_trigger>
+    <sys_trigger_runner_mapping action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <data>{"run_on_extended":"false","run_flow_in":"background","run_when_user_list":[],"run_when_setting":"both","run_when_user_setting":"any"}</data>
+        <identifier>626e31d789d343107f44172f27a0ce3e</identifier>
+        <identifier_type>flow</identifier_type>
+        <runner>FDTriggerRunner</runner>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 13:44:17</sys_created_on>
+        <sys_id>db520f27a8d343107f44321b8bcb5662</sys_id>
+        <sys_mod_count>2</sys_mod_count>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-20 02:17:18</sys_updated_on>
+        <trigger display_value="">df520f27a8d343107f44321b8bcb5661</trigger>
+    </sys_trigger_runner_mapping>
+    <sys_trigger_runner_mapping action="delete_multiple" query="identifier=626e31d789d343107f44172f27a0ce3e^sys_idNOT INdb520f27a8d343107f44321b8bcb5662"/>
+    <sys_hub_flow_stage action="delete_multiple" query="flow=626e31d789d343107f44172f27a0ce3e"/>
+    <sys_flow_cat_variable_model action="delete_multiple" query="id=626e31d789d343107f44172f27a0ce3e^sys_idNOT IN266e31d789d343107f44172f27a0ce3f"/>
+    <sys_flow_cat_variable_model action="INSERT_OR_UPDATE">
+        <id>626e31d789d343107f44172f27a0ce3e</id>
+        <name>Campus360- Interview Feedback to Placement Intelligence</name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-18 14:08:56</sys_created_on>
+        <sys_id>266e31d789d343107f44172f27a0ce3f</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_scope/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-18 14:08:56</sys_updated_on>
+    </sys_flow_cat_variable_model>
+    <sys_flow_cat_variable action="delete_multiple" query="flow_catalog_model=266e31d789d343107f44172f27a0ce3f"/>
+    <sys_hub_flow_input action="delete_multiple" query="model=626e31d789d343107f44172f27a0ce3e^sys_idNOT IN226e31d789d343107f44172f27a0ce5d,266e31d789d343107f44172f27a0ce62,ee6e31d789d343107f44172f27a0ce48"/>
+    <sys_hub_flow_input action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <array>false</array>
+        <array_denormalized>false</array_denormalized>
+        <attributes>element_mapping_provider=com.glide.flow_design.action.data.FlowDesignVariableMapper,uiType=document_id,uiTypeLabel=Document ID</attributes>
+        <audit>false</audit>
+        <calculation><![CDATA[(function calculatedFieldValue(current) {
+
+	// Add your code here
+	return '';  // return the calculated value
+
+})(current);]]></calculation>
+        <choice/>
+        <choice_field/>
+        <choice_table/>
+        <column_label/>
+        <comments/>
+        <create_roles/>
+        <default_value/>
+        <defaultsort/>
+        <delete_roles/>
+        <dependent>table_name</dependent>
+        <dependent_on_field>table_name</dependent_on_field>
+        <display>false</display>
+        <dynamic_creation>false</dynamic_creation>
+        <dynamic_creation_script/>
+        <dynamic_default_value/>
+        <dynamic_ref_qual/>
+        <element>current</element>
+        <element_reference>false</element_reference>
+        <foreign_database/>
+        <formula/>
+        <function_definition/>
+        <function_field>false</function_field>
+        <help/>
+        <hint/>
+        <internal_type display_value="">document_id</internal_type>
+        <label>Record</label>
+        <mandatory>true</mandatory>
+        <max_length>200</max_length>
+        <model display_value="Campus360- Interview Feedback to Placement Intelligence">626e31d789d343107f44172f27a0ce3e</model>
+        <model_id>626e31d789d343107f44172f27a0ce3e</model_id>
+        <model_table>sys_hub_flow</model_table>
+        <name>var__m_sys_hub_flow_input_626e31d789d343107f44172f27a0ce3e</name>
+        <next_element/>
+        <order>100</order>
+        <primary>false</primary>
+        <read_only>false</read_only>
+        <read_only_option/>
+        <read_roles/>
+        <reference/>
+        <reference_cascade_rule/>
+        <reference_floats>false</reference_floats>
+        <reference_key/>
+        <reference_qual/>
+        <reference_qual_condition/>
+        <reference_type/>
+        <sizeclass/>
+        <spell_check>false</spell_check>
+        <staged>false</staged>
+        <sys_class_name>sys_hub_flow_input</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-18 14:08:56</sys_created_on>
+        <sys_id>226e31d789d343107f44172f27a0ce5d</sys_id>
+        <sys_mod_count>1</sys_mod_count>
+        <sys_name/>
+        <sys_package/>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:44:15</sys_updated_on>
+        <table_reference>false</table_reference>
+        <text_index>false</text_index>
+        <unique>false</unique>
+        <use_dependent_field>true</use_dependent_field>
+        <use_dynamic_default>false</use_dynamic_default>
+        <use_reference_qualifier>simple</use_reference_qualifier>
+        <virtual>false</virtual>
+        <virtual_type>script</virtual_type>
+        <widget/>
+        <write_roles/>
+        <xml_view>false</xml_view>
+    </sys_hub_flow_input>
+    <sys_hub_action_input_action_instance action="delete_multiple" query="action_input=226e31d789d343107f44172f27a0ce5d"/>
+    <sys_hub_flow_input action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <array>false</array>
+        <array_denormalized>false</array_denormalized>
+        <attributes>child_label=FDChangeDetails,child_name=FDChangeDetails,child_type=object,child_type_label=Object,co_type_name=FDCollection,element_mapping_provider=com.glide.flow_design.action.data.FlowDesignVariableMapper,pwd2droppable=true,uiType=array.object,uiTypeLabel=Array.Object</attributes>
+        <audit>false</audit>
+        <calculation><![CDATA[(function calculatedFieldValue(current) {
+
+	// Add your code here
+	return '';  // return the calculated value
+
+})(current);]]></calculation>
+        <choice/>
+        <choice_field/>
+        <choice_table/>
+        <column_label/>
+        <comments/>
+        <create_roles/>
+        <default_value/>
+        <defaultsort/>
+        <delete_roles/>
+        <dependent/>
+        <dependent_on_field/>
+        <display>false</display>
+        <dynamic_creation>false</dynamic_creation>
+        <dynamic_creation_script/>
+        <dynamic_default_value/>
+        <dynamic_ref_qual/>
+        <element>changed_fields</element>
+        <element_reference>false</element_reference>
+        <foreign_database/>
+        <formula/>
+        <function_definition/>
+        <function_field>false</function_field>
+        <help/>
+        <hint/>
+        <internal_type display_value="String">string</internal_type>
+        <label>Changed Fields</label>
+        <mandatory>false</mandatory>
+        <max_length>4000</max_length>
+        <model display_value="Campus360- Interview Feedback to Placement Intelligence">626e31d789d343107f44172f27a0ce3e</model>
+        <model_id>626e31d789d343107f44172f27a0ce3e</model_id>
+        <model_table>sys_hub_flow</model_table>
+        <name>var__m_sys_hub_flow_input_626e31d789d343107f44172f27a0ce3e</name>
+        <next_element/>
+        <order>100</order>
+        <primary>false</primary>
+        <read_only>false</read_only>
+        <read_only_option/>
+        <read_roles/>
+        <reference/>
+        <reference_cascade_rule/>
+        <reference_floats>false</reference_floats>
+        <reference_key/>
+        <reference_qual/>
+        <reference_qual_condition/>
+        <reference_type/>
+        <sizeclass/>
+        <spell_check>false</spell_check>
+        <staged>false</staged>
+        <sys_class_name>sys_hub_flow_input</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-18 14:08:56</sys_created_on>
+        <sys_id>266e31d789d343107f44172f27a0ce62</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name/>
+        <sys_package/>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-18 14:08:56</sys_updated_on>
+        <table_reference>false</table_reference>
+        <text_index>false</text_index>
+        <unique>false</unique>
+        <use_dependent_field>false</use_dependent_field>
+        <use_dynamic_default>false</use_dynamic_default>
+        <use_reference_qualifier>simple</use_reference_qualifier>
+        <virtual>false</virtual>
+        <virtual_type>script</virtual_type>
+        <widget/>
+        <write_roles/>
+        <xml_view>false</xml_view>
+    </sys_hub_flow_input>
+    <sys_hub_action_input_action_instance action="delete_multiple" query="action_input=266e31d789d343107f44172f27a0ce62"/>
+    <sys_hub_flow_input action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <array>false</array>
+        <array_denormalized>false</array_denormalized>
+        <attributes>element_mapping_provider=com.glide.flow_design.action.data.FlowDesignVariableMapper,test_input_hidden=true,uiType=table_name,uiTypeLabel=Table Name</attributes>
+        <audit>false</audit>
+        <calculation><![CDATA[(function calculatedFieldValue(current) {
+
+	// Add your code here
+	return '';  // return the calculated value
+
+})(current);]]></calculation>
+        <choice/>
+        <choice_field/>
+        <choice_table/>
+        <column_label/>
+        <comments/>
+        <create_roles/>
+        <default_value/>
+        <defaultsort/>
+        <delete_roles/>
+        <dependent/>
+        <dependent_on_field/>
+        <display>false</display>
+        <dynamic_creation>false</dynamic_creation>
+        <dynamic_creation_script/>
+        <dynamic_default_value/>
+        <dynamic_ref_qual/>
+        <element>table_name</element>
+        <element_reference>false</element_reference>
+        <foreign_database/>
+        <formula/>
+        <function_definition/>
+        <function_field>false</function_field>
+        <help/>
+        <hint/>
+        <internal_type display_value="">table_name</internal_type>
+        <label>Table Name</label>
+        <mandatory>false</mandatory>
+        <max_length>200</max_length>
+        <model display_value="Campus360- Interview Feedback to Placement Intelligence">626e31d789d343107f44172f27a0ce3e</model>
+        <model_id>626e31d789d343107f44172f27a0ce3e</model_id>
+        <model_table>sys_hub_flow</model_table>
+        <name>var__m_sys_hub_flow_input_626e31d789d343107f44172f27a0ce3e</name>
+        <next_element/>
+        <order>101</order>
+        <primary>false</primary>
+        <read_only>false</read_only>
+        <read_only_option/>
+        <read_roles/>
+        <reference/>
+        <reference_cascade_rule/>
+        <reference_floats>false</reference_floats>
+        <reference_key/>
+        <reference_qual/>
+        <reference_qual_condition/>
+        <reference_type/>
+        <sizeclass/>
+        <spell_check>false</spell_check>
+        <staged>false</staged>
+        <sys_class_name>sys_hub_flow_input</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-18 14:08:56</sys_created_on>
+        <sys_id>ee6e31d789d343107f44172f27a0ce48</sys_id>
+        <sys_mod_count>1</sys_mod_count>
+        <sys_name/>
+        <sys_package/>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:44:15</sys_updated_on>
+        <table_reference>false</table_reference>
+        <text_index>false</text_index>
+        <unique>false</unique>
+        <use_dependent_field>false</use_dependent_field>
+        <use_dynamic_default>false</use_dynamic_default>
+        <use_reference_qualifier>simple</use_reference_qualifier>
+        <virtual>false</virtual>
+        <virtual_type>script</virtual_type>
+        <widget/>
+        <write_roles/>
+        <xml_view>false</xml_view>
+    </sys_hub_flow_input>
+    <sys_hub_action_input_action_instance action="delete_multiple" query="action_input=ee6e31d789d343107f44172f27a0ce48"/>
+    <sys_hub_flow_output action="delete_multiple" query="model=626e31d789d343107f44172f27a0ce3e"/>
+    <sys_hub_alias_mapping action="delete_multiple" query="source_id=626e31d789d343107f44172f27a0ce3e"/>
+    <sys_hub_trigger_instance_v2 action="delete_multiple" query="flow=626e31d789d343107f44172f27a0ce3e^sys_idNOT INbe6e31d789d343107f44172f27a0ce84"/>
+    <sys_hub_trigger_instance_v2 action="INSERT_OR_UPDATE">
+        <comment/>
+        <display_text/>
+        <flow display_value="Campus360- Interview Feedback to Placement Intelligence">626e31d789d343107f44172f27a0ce3e</flow>
+        <generation_source/>
+        <name>Created or Updated</name>
+        <published_version/>
+        <remote_sys_id/>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-18 14:08:56</sys_created_on>
+        <sys_id>be6e31d789d343107f44172f27a0ce84</sys_id>
+        <sys_mod_count>2</sys_mod_count>
+        <sys_scope/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:44:15</sys_updated_on>
+        <trigger_definition display_value="Created or Updated">a45d9180c32222002841b63b12d3aea7</trigger_definition>
+        <trigger_inputs>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</trigger_inputs>
+        <trigger_outputs/>
+        <trigger_type>record_create_or_update</trigger_type>
+        <updation_source/>
+    </sys_hub_trigger_instance_v2>
+    <sys_hub_action_instance_v2 action="delete_multiple" query="flow=626e31d789d343107f44172f27a0ce3e^sys_idNOT IN8c498edb891743107f44172f27a0ce1e,a3a9ca1f891743107f44172f27a0ced1,e8bb4253895743107f44172f27a0cec5"/>
+    <sys_hub_action_instance_v2 action="INSERT_OR_UPDATE">
+        <action_type display_value="Look Up Records">43400a1587003300663ca1bb36cb0b4b</action_type>
+        <action_type_parent/>
+        <attributes/>
+        <comment/>
+        <compiled_snapshot/>
+        <display_text/>
+        <flow display_value="Campus360- Interview Feedback to Placement Intelligence">626e31d789d343107f44172f27a0ce3e</flow>
+        <generation_source/>
+        <order>1</order>
+        <parent_ui_id/>
+        <sys_class_name>sys_hub_action_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-18 14:56:16</sys_created_on>
+        <sys_id>8c498edb891743107f44172f27a0ce1e</sys_id>
+        <sys_mod_count>2</sys_mod_count>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:44:15</sys_updated_on>
+        <ui_id>0f0aae9c-b0c7-44f4-b8ee-a04dae2f312f</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/+1W30/bMBD+V6I8V5WzlMJ4m0BIPDAmYLwwZDm201pzncxx+oOq//vOsZOWNpRSyrRJe4Kcz3fffffd1Q/zULDwNERpDyESHZ0cIxTHCPX7MSVRksR9mqDk6HPYCRUZcfAsMm2wmeUcTGMiy8ZGCgomJopcktm9PyGByYInsNOhkExzFZ4+PHbCnGiIZrgOT+drRzY0liThEq6fDTNBbaZdQdYXbwFRcOdQtgCv/pxCZh8+08xiiTshnxquGId0KZEF74QjohgxmZ41Fs0Ju1ZyaRgKZSBaaJ2nhXiC0PEn65dyKItyd9Z8Ys+RMzsMBRQ/b9A3rLUQ7KGiRWfp/2T9ybo/46sXogWQy3hKSmnO9ssZvTXnJ5vTFXidG5FBi8PY0k8S6VmhmSxH6qtrUdggvG9Rljs5f0FgZQHE8tw2z3bDtya9HWaTm5r5C6EqXP5QZpTI5osYo0VSGsvLPEwZTgWXDAslhbKZjC6tVLjkI8iARyTPhRrgXGdjUUWFWkbdgYSPbiqzieVCDFSXUFt5F0REuhdgP6/M90QLy8IVhIHLHZtwCFd9PlxQLXKDJ4INuFlmr71YZiZE/mw79+pqZqgqL1xUAsS/SluxI9pzhau2WAeX8wvgHXNPi+14NXv0eOvsHa3NmWvrijo2V8PeS+HC9iWoJNPZGVx9+doqM0hmL+H1m8H1XrkctZoPth1O0Nu2QzM8b5qdzaGwInnHTHyg9Ntm7TXJOiZe0W1v629GP1rqALqDNS+AwGJFt9GmcKO9lXupDB9UJe+Krb55RabBTQOuFbFXrmhyeNn2Dibb3h+RbYQQenHdRx13euBt/zHKfu/OPdn+3kFLJdBMMWERrUq3MKXN9aOE22w+P4MWG86CTAffc2b/xVGXlhq4Ml3vu1hsyn3fMHu++FYr2ZWF1stt1NTvvlVb/bg54Jig//t99ynYaY1vF0EvWfbbhVtOwRQXimJKRnlZxH2EgXvqyrSbUkoxqJq0IftvtV9w+dxvP13fWVjPHi07lPTs8maJXs3V59pbBf3zb5W/c6UDICGh29iRXmSlrlgZYyrLojrQRBUu1t4/AI+/AZYpE7qXDwAA</values>
+    </sys_hub_action_instance_v2>
+    <sys_hub_alias_mapping action="delete_multiple" query="source_id=8c498edb891743107f44172f27a0ce1e"/>
+    <sys_hub_action_instance_v2 action="INSERT_OR_UPDATE">
+        <action_type display_value="Update Record">f9d01dd2c31332002841b63b12d3aea1</action_type>
+        <action_type_parent/>
+        <attributes/>
+        <comment/>
+        <compiled_snapshot/>
+        <display_text/>
+        <flow display_value="Campus360- Interview Feedback to Placement Intelligence">626e31d789d343107f44172f27a0ce3e</flow>
+        <generation_source/>
+        <order>4</order>
+        <parent_ui_id>6e412194-6b27-485d-ae46-736b99126242</parent_ui_id>
+        <sys_class_name>sys_hub_action_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-18 14:58:09</sys_created_on>
+        <sys_id>a3a9ca1f891743107f44172f27a0ced1</sys_id>
+        <sys_mod_count>2</sys_mod_count>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:44:15</sys_updated_on>
+        <ui_id>ff58d94d-5ce8-43fa-b448-69c8fbad7281</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/+1WTXPbNhD9KxieGluiSUqWLfnkqevWh8SdOM0lSjgguZTQgCALgLJVjf57FwBJ0VZiezLudDpjXSgs9+O9hwWWnzYey7yZN4YsCKfhJB2Fo1EUBNHpOEwmoySMshEFCL2BJ2gB6CkhLWWG6xXltTFsNhMYh1E4HQ8nSXQyHJ8eZ0MK48nwZDRJptMwmkTjyGcaiu0W4zKmKk7XH5twtKRLxjMJwpt9+jzwKiqxkgbpzTYPXul1BTGnCXAMvCjTugChydUF5nguizb6fUvjIS1TA9dZkz1mxoivDJ4wGHhwp0FkgOVyyhUMvIKKjOpSrr2ZljUaJNDsWvB157FkQjumBb1T7G/MPw6MXw5ILW1U6JZxo1ArTslSuK40K4WzaJrwVrmS14V45ygYbSGnNdc9bWuF+aAykA0IhzC/WZa379t6l0xYdg1aXqaUdyuqtWRJrUGZ7QAOVpSCVhUTi7iS5YrZYIRS+AuOCz/n5S3WVGwhfJoa3D4KRP1LtF9Y80cqmSHxFtNg8NaSj/+qTV1HowEcW86WcGw3Cl1VKlmlzzHxChqY20HTxkH0aAPAbr9t96peG5tdYwKUihV2AszrIBhlm83PaNeQkVKSP6rM/I1DP60lKqf9cgWScu4ittsv6ivD1YJWsaqLgsr1s7KwwsjohKXoqDATZTETKNVSuxR5NnS8IftiWrUobBPGTt9nlenCqAnBGpwqHdfOb6/K/kF9FeihQD92b32AAmXVQJywg2d3bpvgkgHP1Ddaubm6dFMgXjUFutvrxa6vcBLY3+sl9iKXmCPkbAZhv/HM+jFv7+hgLg4OztMUjyYx8I7OLV5i8JJaIUWil0DyLLaWMvkTUu2TG5uAFLXSRIKupSCU2Jbxicl4bbqGiLpI8MEUKfNcgSbJmhyGhAnyi5R4jH7D9uGmxA04lSyYFWXc8CWl3XJFmm4gdYXAKolQTczc8+ceoTkemhaeCYc7ih0MM0QjiVqWUqPiKXFHsHX0cUsXC5Dd8bWOZsssL6x6ZnI1zLosxng0F41ZwC351ez3BUr9gRXw05szsz272+VV/n9DfpO5mQ1P5b03Qs5cqNL4aqGX6klQrWMT2JskT4XuDR1M0fWNiY1O3pbpV9wKlG/FsJFaQhbprPEhh539cC6I+7lX2AMtvJ73jtu+/1UPvsXUi+tTO2wj3ANbett9IiXHjw2adLqbK70ba/eZdBcrkcYpdkitRpMgxrZKnUhGCM7Zwg6Dva+H31s/cnXf7weHqG3vdw7bc3ndC/4Oz3aG9m3N/Dx+sfF5+h8NzgbR/2xyfu+j//M/TnTBGb0OAAA=</values>
+    </sys_hub_action_instance_v2>
+    <sys_hub_alias_mapping action="delete_multiple" query="source_id=a3a9ca1f891743107f44172f27a0ced1"/>
+    <sys_hub_action_instance_v2 action="INSERT_OR_UPDATE">
+        <action_type display_value="Create Record">2de05916c31332002841b63b12d3aee1</action_type>
+        <action_type_parent/>
+        <attributes/>
+        <comment/>
+        <compiled_snapshot/>
+        <display_text/>
+        <flow display_value="Campus360- Interview Feedback to Placement Intelligence">626e31d789d343107f44172f27a0ce3e</flow>
+        <generation_source/>
+        <order>6</order>
+        <parent_ui_id>5580d90e-6b45-44d5-a727-0877bdb26d04</parent_ui_id>
+        <sys_class_name>sys_hub_action_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-18 15:06:57</sys_created_on>
+        <sys_id>e8bb4253895743107f44172f27a0cec5</sys_id>
+        <sys_mod_count>3</sys_mod_count>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:44:15</sys_updated_on>
+        <ui_id>8201de89-d758-46fa-808a-496b8b580034</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/+1XS3PbNhD+Kxie/FBp0kqURD554jr1IXantnOJIgwILinUIMgCoGzVo//eBUBKipXUnkwymXasi4jlPr7d/RYAP95HIo/G0SiH5M2bdMSH6XB4mCSHr1+k2WiYpYf5kEGaRYNIsQpQc85kCwbX/gEFQlmQUpSgOFCRT9okGeZF/ovhWjQW8qmxbQ7Khhf39281MBSTWpPrJnePNI15qzXqxJ3ucjnVwtxQCXOQwVDWt1O0zIUCY6jhtYYneRRVo+s5VPhMGSoa9N0wbQUXDbOiVpu+ppUwBs3rpqm1bZWwAkx4lUyz2loJCvgNNZaVvQkTVCgjypndTl0DrysMnaNPxl20J2FemXmACFgyY2kb9L5Q4BshJS1ZQ01bVUwvvrUw2NVcmEayxYfn5v4Pm8tnQub4Php//DSIsFA40hZ0NL5/8MouGqCSZSCRA1dQISUskECKwZN3jN7BqQCZmy9sIS4Mrm0XgM67ALXOHap0EMGd9QWOxgWTBgZRxVzhar2Ixla3KHC0uVBysdKYIWfRaeR074z4GyOko8T/nHYB2pE5aKyWtON9EPNZLThcNK5BQWJZJjsbXsu2UuchFTcxULBW2n5iUNIa9AeNA+6gBJzF5ay+/aOPdyqUT7HDLGvO5GrFrNUiay3WCDsDMrSxYk0jVEldY4U3RihVXEpcxAVOEMZEpqo4cDHGMrH4FOUnXvyBaeGSeI9u0Hjpk6d/tS5uSKMDTH3OPmHqG4aqgY3H6HgOfUJB5hBuEtit/007OtibqL29Y85x0omDd3Ds8RKHl7QGUyR2BqTIqZfU2Z/AbUwuvQNStcYSDbbVijDiCRMT5/HCcYaotsrwTxhSF4UBS7IF2U+JUORXrXFSfkP6SBfiEkKVPJg5E9LlS2rfckM6NpC2QWCNRqjOZhLFk4iwAkemh+fM4Y4hf2GMaDQxM9xbsOKchDntFWNsaVmCXm+GTtG1zOeFUY+cry6zlRcnPJioTqzglrxz/T7BUl+JCnZ2j1x7HuzSzz34gT1wLg9fnZ1fhQeyT0oTY+VBY0/eXZ+d7OzGps0MxlLlTjIg6avd2NbXbureMtO3bH2wPHfrR3TLecYDUDMpH/PbqYWrwlEwxfaBKu3MPAqqV+wMNw7ex0y3zmh08YBm72t+Q9x067nA2e8T8kjHZMXAXr4/UST8wivkQA9vQ3ud27b+2QZ8j2nDbjO1/d4i/CGll8tB/y2RQvLyqzcDeLG+CGwcMuvviTtqFKccGdKa4SihSCseirS5zW1fVX/v9cjZ53rfeOvx9D4P2J6a12fGX8mzv/RsyroLT/K9Ljyvf9JVp0P0H7vrbN9wPLjlp38Aih2P+h4PAAA=</values>
+    </sys_hub_action_instance_v2>
+    <sys_hub_alias_mapping action="delete_multiple" query="source_id=e8bb4253895743107f44172f27a0cec5"/>
+    <sys_hub_sub_flow_instance_v2 action="delete_multiple" query="flow=626e31d789d343107f44172f27a0ce3e"/>
+    <sys_hub_flow_logic_instance_v2 action="delete_multiple" query="flow=626e31d789d343107f44172f27a0ce3e^sys_idNOT INc979061f891743107f44172f27a0ce02,f1994a1f891743107f44172f27a0ce77,969b0213895743107f44172f27a0ce7d"/>
+    <sys_hub_flow_logic_instance_v2 action="INSERT_OR_UPDATE">
+        <attributes/>
+        <block display_value="">0579061f891743107f44172f27a0ce02</block>
+        <comment/>
+        <connected_to/>
+        <decision_table/>
+        <display_text/>
+        <flow display_value="Campus360- Interview Feedback to Placement Intelligence">626e31d789d343107f44172f27a0ce3e</flow>
+        <flow_variables_assigned/>
+        <generation_source/>
+        <logic_definition display_value="If">af4e1945c3e232002841b63b12d3ae3e</logic_definition>
+        <order>2</order>
+        <outputs_assigned/>
+        <parent_ui_id/>
+        <sys_class_name>sys_hub_flow_logic_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-18 14:57:09</sys_created_on>
+        <sys_id>c979061f891743107f44172f27a0ce02</sys_id>
+        <sys_mod_count>6</sys_mod_count>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:44:15</sys_updated_on>
+        <ui_id>d66d2a67-52e6-4c44-b7f9-a950cb8f0855</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/+1UyW7bMBD9FYNnW6AWu4kvRZAiQIC2KZoglzQQRtTIJkqRqkh5qeF/71CLY9QuUrQ99iY+zvLezBN3zDSuapx9MFfWyoVm86fnMZPaY/S9YxpKZHMmjM6lk0azMVuBajy22/GCA+ClmGRcvJkkSZFMsgvECfAkB4yKOIyK4No02u33XxrOY+SUn0tbKdg+/mUZsZQqr7GnXEFNTB3WbL776cptK0wVZKio272rpV5QuszpdAnTYhryqYijWRxxHl0kYTaLszDKY8BkRnFD4vXRBM4MxTchyA7lTZ17LhEfM9w41DlSvwKUxTErQefgTL1lc1c3BNQI+Z1W20PEUmpH1ZiP3Vj5HX0lzn1kgSRMYHd7OKb9UDtYLI0UeFe13FrEQab6HGFUU+qPnQS/DiygUW5YByGNpXpYedKeRs+puF+a9eeh4Y3UrcD+UhkB6nACR2PIGofWbwMVllQoLaGqaDhpVZuVbJOJSxksFB2CQpk1NfUeDEB44gHNCIIbwt+18CPU0qv4QGUomTZoUytqWQ3a2uZs304l/dZ4Pp2+XknaDYMCurQrarPCnvR+fOr1tAVeDP9JgWiljG61Q6Xkwk9ihBtpnX176uxX4/+FhenfKcJLEZ63MMTnLDx63yKnRh4U/8LN4Stu7pHfsvN0+t/Nx272NDOwUqTt60vl/Nvwx3Z+9rbtWtjOQzkKaYnJg8duhxfeX2xp61IcQ2tTf/UaXrD9DxZC+20rBgAA</values>
+        <workflow_reference/>
+    </sys_hub_flow_logic_instance_v2>
+    <sys_hub_flow_logic_instance_v2 action="INSERT_OR_UPDATE">
+        <attributes/>
+        <block display_value="">3d994a1f891743107f44172f27a0ce76</block>
+        <comment/>
+        <connected_to/>
+        <decision_table/>
+        <display_text/>
+        <flow display_value="Campus360- Interview Feedback to Placement Intelligence">626e31d789d343107f44172f27a0ce3e</flow>
+        <flow_variables_assigned/>
+        <generation_source/>
+        <logic_definition display_value="For Each">098e1dc5c3e232002841b63b12d3ae33</logic_definition>
+        <order>3</order>
+        <outputs_assigned/>
+        <parent_ui_id>d66d2a67-52e6-4c44-b7f9-a950cb8f0855</parent_ui_id>
+        <sys_class_name>sys_hub_flow_logic_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-18 14:57:45</sys_created_on>
+        <sys_id>f1994a1f891743107f44172f27a0ce77</sys_id>
+        <sys_mod_count>5</sys_mod_count>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:44:15</sys_updated_on>
+        <ui_id>6e412194-6b27-485d-ae46-736b99126242</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/51STW/bMAz9LzonhvyBrMmtwFCgh61AV/QyFAYtUYkwWdIkOaln5L+Pip2s6HEnm4/k43siJ+aG5IcUX9x9jHpv2e7n24ppmzH6n5iFHtmO6YR9ZCt2BDPkeJq44gC4FeuOiy/rplHNurtDXANvJGCl6rJSxTMKF2Q8n6lV6ugNjK//zyAO2siAi0gPgbQlDGw3fUql0WNroENDgxYG6teSwnIr1bbkW1FXm7rivLprym5Td2Ula0C5obpr5+Ni+tMbZHYKw42XPllFxVcM3xNaiTRIgYm4Yj1YCcmFke1SGAgICPLJmvFWcdA2ER3Lte9R/yHukvNcqJAcCZyTt7BdHnKGxcFpgU8+aWdnJEFnlh7hzNDb77P8vAJUMJh0XQEhQyQ+9FlzVrFIUj8O7vR8Hfig7cXfkjROgLlFkFLQ3ZAw5jWgwZ6I2h6813bf+uCO+tJMWvpibygolHEnGprPrQCRhRf0RFA8EP71Ar9C0NnFN6Kh5vPFfft7yHNnH4vidjZNBVEE7dM90R1xEXd+y/c6M8X5MCQKHWngS8Yer1eeEyMtWYuP0MmFX1nqP+z8F7ebjc4vAwAA</values>
+        <workflow_reference/>
+    </sys_hub_flow_logic_instance_v2>
+    <sys_hub_flow_logic_instance_v2 action="INSERT_OR_UPDATE">
+        <attributes/>
+        <block display_value="">de9b0213895743107f44172f27a0ce7c</block>
+        <comment/>
+        <connected_to>d66d2a67-52e6-4c44-b7f9-a950cb8f0855</connected_to>
+        <decision_table/>
+        <display_text/>
+        <flow display_value="Campus360- Interview Feedback to Placement Intelligence">626e31d789d343107f44172f27a0ce3e</flow>
+        <flow_variables_assigned/>
+        <generation_source/>
+        <logic_definition display_value="Else">1f781bf3c32232002841b63b12d3aee6</logic_definition>
+        <order>5</order>
+        <outputs_assigned/>
+        <parent_ui_id/>
+        <sys_class_name>sys_hub_flow_logic_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-18 15:06:31</sys_created_on>
+        <sys_id>969b0213895743107f44172f27a0ce7d</sys_id>
+        <sys_mod_count>4</sys_mod_count>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:44:15</sys_updated_on>
+        <ui_id>5580d90e-6b45-44d5-a727-0877bdb26d04</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/6tWyi8tKSgtKQ7JdywuzkzPU7KKjtVRyswDiUHYZYlFmYlJOalQbkpqcmZxZn5eCEjME0ldSmVeYm5mMrJQeX5RdlpOfjlCrBYAD1ouqHEAAAA=</values>
+        <workflow_reference/>
+    </sys_hub_flow_logic_instance_v2>
+    <sys_hub_pill_compound action="delete_multiple" query="attached_to=626e31d789d343107f44172f27a0ce3e"/>
+    <sys_hub_flow_variable action="delete_multiple" query="model=626e31d789d343107f44172f27a0ce3e"/>
+    <sys_documentation action="INSERT_OR_UPDATE">
+        <element>current</element>
+        <help/>
+        <hint/>
+        <label>Record</label>
+        <language>en</language>
+        <name>var__m_sys_hub_flow_input_626e31d789d343107f44172f27a0ce3e</name>
+        <plural/>
+        <sys_class_name>sys_documentation</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-18 14:08:56</sys_created_on>
+        <sys_id>266e31d789d343107f44172f27a0ce60</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name/>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-18 14:08:56</sys_updated_on>
+        <url/>
+        <url_target/>
+    </sys_documentation>
+    <sys_documentation action="INSERT_OR_UPDATE">
+        <element>table_name</element>
+        <help/>
+        <hint/>
+        <label>Table Name</label>
+        <language>en</language>
+        <name>var__m_sys_hub_flow_input_626e31d789d343107f44172f27a0ce3e</name>
+        <plural/>
+        <sys_class_name>sys_documentation</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-18 14:08:56</sys_created_on>
+        <sys_id>6e6e31d789d343107f44172f27a0ce4d</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name/>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-18 14:08:56</sys_updated_on>
+        <url/>
+        <url_target/>
+    </sys_documentation>
+    <sys_documentation action="INSERT_OR_UPDATE">
+        <element>changed_fields</element>
+        <help/>
+        <hint/>
+        <label>Changed Fields</label>
+        <language>en</language>
+        <name>var__m_sys_hub_flow_input_626e31d789d343107f44172f27a0ce3e</name>
+        <plural/>
+        <sys_class_name>sys_documentation</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-18 14:08:56</sys_created_on>
+        <sys_id>b66e31d789d343107f44172f27a0ce66</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name/>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-18 14:08:56</sys_updated_on>
+        <url/>
+        <url_target/>
+    </sys_documentation>
+    <sys_choice action="delete_multiple" query="name=var__m_sys_hub_flow_input_626e31d789d343107f44172f27a0ce3e"/>
+    <sys_choice action="delete_multiple" query="name=var__m_sys_hub_flow_output_626e31d789d343107f44172f27a0ce3e"/>
+    <sys_hub_flow_snapshot action="INSERT_OR_UPDATE">
+        <access>public</access>
+        <acls/>
+        <active>true</active>
+        <allow_high_security_roles>false</allow_high_security_roles>
+        <annotation/>
+        <attributes>browserActivatedIn=chrome,integrationActivatedIn=standalone,viewActivatedIn=naturalLanguage</attributes>
+        <authored_on_release_version>29000</authored_on_release_version>
+        <callable_by_client_api>false</callable_by_client_api>
+        <category/>
+        <copied_from>51cbc6c97743011031e3b3c64b5a9907</copied_from>
+        <copied_from_name/>
+        <description>Mock Interview Feedback to Placement Intelligence</description>
+        <flow_priority/>
+        <internal_name>campus360_interview_feedback_to_placement_intelligence</internal_name>
+        <label_cache>[{"name":"cb98ebf7-b69a-45f1-95a8-9df9e3191c8b.Records","label":"1➛Placement Intelligence Records","reference":"x_snc_campus360_placement_intelligence","reference_display":"Placement Intelligence","type":"records","base_type":"records","usedInstances":{},"attributes":{"element_mapping_provider":"com.glide.flow_design.action.data.FlowDesignVariableMapper"}},{"name":"a158d329-c6c3-4e16-9765-005b34001b27.Count","label":"1➛Count","reference_display":"Count","type":"integer","base_type":"integer","usedInstances":{},"attributes":{"element_mapping_provider":"com.glide.flow_design.action.data.FlowDesignVariableMapper"}},{"name":"03f14cdc-5817-429d-8ce9-e44d5fddae98.item","label":"3➛Placement Intelligence Record","reference":"x_snc_campus360_placement_intelligence","reference_display":"Placement Intelligence","type":"reference","base_type":"reference","usedInstances":{},"attributes":{"pills_draggable_outside_block":"false","pills_draggable_inside_block":"true"}},{"name":"6e412194-6b27-485d-ae46-736b99126242.item","label":"3 - For Each➛Placement Intelligence Record","reference":"x_snc_campus360_placement_intelligence","reference_display":"Placement Intelligence","type":"reference","base_type":"reference","usedInstances":{},"attributes":{"pills_draggable_inside_block":"true","pills_draggable_outside_block":"false"}},{"name":"0f0aae9c-b0c7-44f4-b8ee-a04dae2f312f.Records","label":"1 - Look Up Records➛Placement Intelligence Records","reference":"x_snc_campus360_placement_intelligence","reference_display":"Placement Intelligence","type":"records","base_type":"records","usedInstances":{},"attributes":{"element_mapping_provider":"com.glide.flow_design.action.data.FlowDesignVariableMapper"}},{"name":"Created or Updated_1.current","label":"Trigger - Record Created or Updated➛ Record","reference":"x_snc_campus360_interview_feedback","reference_display":"Interview Feedback","type":"reference","base_type":"reference","choices":[{"order":0.0}],"usedInstances":{"a158d329-c6c3-4e16-9765-005b34001b27":[null]},"attributes":{"":""}},{"name":"Created or Updated_1.current.overall_score","label":"Trigger - Record Created or Updated➛ Record➛Overall Score","reference":"","reference_display":"Overall Score","type":"integer","base_type":"integer","parent_table_name":"x_snc_campus360_interview_feedback","column_name":"overall_score","choices":[{"order":0.0}],"usedInstances":{"ff58d94d-5ce8-43fa-b448-69c8fbad7281":["readiness_score"]}},{"name":"8d4531de-5b9d-4b6b-a342-7e0c609f59e4.item","label":"3➛Placement Intelligence Record","reference":"x_snc_campus360_placement_intelligence","reference_display":"Placement Intelligence","type":"reference","base_type":"reference","usedInstances":{},"attributes":{"pills_draggable_outside_block":"false","pills_draggable_inside_block":"true"}},{"name":"Created or Updated_1.current.interview.student","label":"Trigger - Record Created or Updated➛ Record➛Interview➛Student","reference":"x_snc_campus360_student_master","reference_display":"Student Master","type":"reference","base_type":"reference","parent_table_name":"x_snc_campus360_mock_interview","column_name":"student","choices":[{"order":0.0}],"usedInstances":{"278aef42-287c-4114-8c1e-80b340fe53ac":["student"],"d64fe26b-dd8e-4aa2-86be-5b55ba38f3aa":["student"]}},{"name":"0f0aae9c-b0c7-44f4-b8ee-a04dae2f312f.Count","label":"1 - Look Up Records➛Count","reference_display":"Count","type":"integer","base_type":"integer","usedInstances":{},"attributes":{"element_mapping_provider":"com.glide.flow_design.action.data.FlowDesignVariableMapper"}},{"name":"Created or Updated_1.current.improvement_areas","label":"Trigger - Record Created or Updated➛ Record➛Improvement Areas","reference":"","reference_display":"Improvement Areas","type":"string","base_type":"string","parent_table_name":"x_snc_campus360_interview_feedback","column_name":"improvement_areas","choices":[{"order":0.0}],"usedInstances":{"8201de89-d758-46fa-808a-496b8b580034":["readiness_score","skill_gap_summary"],"ff58d94d-5ce8-43fa-b448-69c8fbad7281":["skill_gap_summary"]}},{"name":"Created or Updated_1.current.recommendation","label":"Trigger - Record Created or Updated➛ Record➛Recommendation","reference":"","reference_display":"Recommendation","type":"string","base_type":"string","parent_table_name":"x_snc_campus360_interview_feedback","column_name":"recommendation","choices":[{"order":0.0}],"usedInstances":{"8201de89-d758-46fa-808a-496b8b580034":["recommended_action"],"ff58d94d-5ce8-43fa-b448-69c8fbad7281":["recommended_action"]}},{"name":"a80cefe8-22c6-456d-88ab-c4d77c4583b2.status","label":"1➛Status","reference_display":"Status","type":"choice","base_type":"choice","choices":[{"order":0.0}],"usedInstances":{},"attributes":{"uiTypeLabel":"Choice","element_mapping_provider":"com.glide.flow_design.action.data.FlowDesignVariableMapper","uiType":"choice","uiUniqueId":"5e478657-3a84-4a60-a92b-d3e80005ad34"}},{"name":"Created or Updated_1.current.student","label":"Trigger - Record Created or Updated➛ Record➛Student","reference":"x_snc_campus360_student_master","reference_display":"Student Master","type":"reference","base_type":"reference","parent_table_name":"x_snc_campus360_interview_feedback","column_name":"student","choices":[{"order":0.0}],"usedInstances":{"8201de89-d758-46fa-808a-496b8b580034":["student"],"ff58d94d-5ce8-43fa-b448-69c8fbad7281":["student"]}},{"name":"a158d329-c6c3-4e16-9765-005b34001b27.Records","label":"1➛Placement Intelligence Records","reference":"x_snc_campus360_placement_intelligence","reference_display":"Placement Intelligence","type":"records","base_type":"records","usedInstances":{},"attributes":{"element_mapping_provider":"com.glide.flow_design.action.data.FlowDesignVariableMapper"}}]</label_cache>
+        <master>true</master>
+        <name>Campus360- Interview Feedback to Placement Intelligence</name>
+        <natlang/>
+        <outputs/>
+        <parent_flow display_value="Campus360- Interview Feedback to Placement Intelligence">626e31d789d343107f44172f27a0ce3e</parent_flow>
+        <remote_trigger_id/>
+        <run_as>user</run_as>
+        <run_with_roles/>
+        <sc_callable>false</sc_callable>
+        <status>published</status>
+        <sys_class_name>sys_hub_flow_snapshot</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 13:44:16</sys_created_on>
+        <sys_domain>global</sys_domain>
+        <sys_domain_path>/</sys_domain_path>
+        <sys_id>03520f27a8d343107f44321b8bcb5620</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name/>
+        <sys_overrides/>
+        <sys_package/>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:44:16</sys_updated_on>
+        <type>flow</type>
+        <version>2</version>
+    </sys_hub_flow_snapshot>
+    <sys_translated_text action="delete_multiple" query="documentkey=03520f27a8d343107f44321b8bcb5620"/>
+    <sys_variable_value action="delete_multiple" query="document_key=03520f27a8d343107f44321b8bcb5620"/>
+    <sys_hub_flow_stage action="delete_multiple" query="flow=03520f27a8d343107f44321b8bcb5620"/>
+    <sys_flow_cat_variable_model action="delete_multiple" query="id=03520f27a8d343107f44321b8bcb5620^sys_idNOT IN0f520f27a8d343107f44321b8bcb5620"/>
+    <sys_flow_cat_variable_model action="INSERT_OR_UPDATE">
+        <id>03520f27a8d343107f44321b8bcb5620</id>
+        <name>Campus360- Interview Feedback to Placement Intelligence</name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 13:44:16</sys_created_on>
+        <sys_id>0f520f27a8d343107f44321b8bcb5620</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_scope/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:44:16</sys_updated_on>
+    </sys_flow_cat_variable_model>
+    <sys_flow_cat_variable action="delete_multiple" query="flow_catalog_model=0f520f27a8d343107f44321b8bcb5620"/>
+    <sys_hub_flow_input action="delete_multiple" query="model=03520f27a8d343107f44321b8bcb5620^sys_idNOT IN43520f27a8d343107f44321b8bcb5635,c7520f27a8d343107f44321b8bcb563e,cb520f27a8d343107f44321b8bcb5621"/>
+    <sys_hub_flow_input action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <array>false</array>
+        <array_denormalized>false</array_denormalized>
+        <attributes>child_label=FDChangeDetails,child_name=FDChangeDetails,child_type=object,child_type_label=Object,element_mapping_provider=com.glide.flow_design.action.data.FlowDesignVariableMapper,pwd2droppable=true,uiType=array.object,uiTypeLabel=Array.Object</attributes>
+        <audit>false</audit>
+        <calculation><![CDATA[(function calculatedFieldValue(current) {
+
+	// Add your code here
+	return '';  // return the calculated value
+
+})(current);]]></calculation>
+        <choice/>
+        <choice_field/>
+        <choice_table/>
+        <column_label/>
+        <comments/>
+        <create_roles/>
+        <default_value/>
+        <defaultsort/>
+        <delete_roles/>
+        <dependent/>
+        <dependent_on_field/>
+        <display>false</display>
+        <dynamic_creation>false</dynamic_creation>
+        <dynamic_creation_script/>
+        <dynamic_default_value/>
+        <dynamic_ref_qual/>
+        <element>changed_fields</element>
+        <element_reference>false</element_reference>
+        <foreign_database/>
+        <formula/>
+        <function_definition/>
+        <function_field>false</function_field>
+        <help/>
+        <hint/>
+        <internal_type display_value="String">string</internal_type>
+        <label>Changed Fields</label>
+        <mandatory>false</mandatory>
+        <max_length>4000</max_length>
+        <model display_value="Campus360- Interview Feedback to Placement Intelligence">03520f27a8d343107f44321b8bcb5620</model>
+        <model_id>03520f27a8d343107f44321b8bcb5620</model_id>
+        <model_table>sys_hub_flow_snapshot</model_table>
+        <name>var__m_sys_hub_flow_input_03520f27a8d343107f44321b8bcb5620</name>
+        <next_element/>
+        <order>100</order>
+        <primary>false</primary>
+        <read_only>false</read_only>
+        <read_only_option/>
+        <read_roles/>
+        <reference/>
+        <reference_cascade_rule/>
+        <reference_floats>false</reference_floats>
+        <reference_key/>
+        <reference_qual/>
+        <reference_qual_condition/>
+        <reference_type/>
+        <sizeclass/>
+        <spell_check>false</spell_check>
+        <staged>false</staged>
+        <sys_class_name>sys_hub_flow_input</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 13:44:16</sys_created_on>
+        <sys_id>43520f27a8d343107f44321b8bcb5635</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name/>
+        <sys_package/>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:44:16</sys_updated_on>
+        <table_reference>false</table_reference>
+        <text_index>false</text_index>
+        <unique>false</unique>
+        <use_dependent_field>false</use_dependent_field>
+        <use_dynamic_default>false</use_dynamic_default>
+        <use_reference_qualifier>simple</use_reference_qualifier>
+        <virtual>false</virtual>
+        <virtual_type>script</virtual_type>
+        <widget/>
+        <write_roles/>
+        <xml_view>false</xml_view>
+    </sys_hub_flow_input>
+    <sys_hub_action_input_action_instance action="delete_multiple" query="action_input=43520f27a8d343107f44321b8bcb5635"/>
+    <sys_hub_flow_input action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <array>false</array>
+        <array_denormalized>false</array_denormalized>
+        <attributes>element_mapping_provider=com.glide.flow_design.action.data.FlowDesignVariableMapper,test_input_hidden=true,uiType=table_name,uiTypeLabel=Table Name</attributes>
+        <audit>false</audit>
+        <calculation><![CDATA[(function calculatedFieldValue(current) {
+
+	// Add your code here
+	return '';  // return the calculated value
+
+})(current);]]></calculation>
+        <choice/>
+        <choice_field/>
+        <choice_table/>
+        <column_label/>
+        <comments/>
+        <create_roles/>
+        <default_value/>
+        <defaultsort/>
+        <delete_roles/>
+        <dependent/>
+        <dependent_on_field/>
+        <display>false</display>
+        <dynamic_creation>false</dynamic_creation>
+        <dynamic_creation_script/>
+        <dynamic_default_value/>
+        <dynamic_ref_qual/>
+        <element>table_name</element>
+        <element_reference>false</element_reference>
+        <foreign_database/>
+        <formula/>
+        <function_definition/>
+        <function_field>false</function_field>
+        <help/>
+        <hint/>
+        <internal_type display_value="">table_name</internal_type>
+        <label>Table Name</label>
+        <mandatory>false</mandatory>
+        <max_length>200</max_length>
+        <model display_value="Campus360- Interview Feedback to Placement Intelligence">03520f27a8d343107f44321b8bcb5620</model>
+        <model_id>03520f27a8d343107f44321b8bcb5620</model_id>
+        <model_table>sys_hub_flow_snapshot</model_table>
+        <name>var__m_sys_hub_flow_input_03520f27a8d343107f44321b8bcb5620</name>
+        <next_element/>
+        <order>101</order>
+        <primary>false</primary>
+        <read_only>false</read_only>
+        <read_only_option/>
+        <read_roles/>
+        <reference/>
+        <reference_cascade_rule/>
+        <reference_floats>false</reference_floats>
+        <reference_key/>
+        <reference_qual/>
+        <reference_qual_condition/>
+        <reference_type/>
+        <sizeclass/>
+        <spell_check>false</spell_check>
+        <staged>false</staged>
+        <sys_class_name>sys_hub_flow_input</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 13:44:17</sys_created_on>
+        <sys_id>c7520f27a8d343107f44321b8bcb563e</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name/>
+        <sys_package/>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:44:17</sys_updated_on>
+        <table_reference>false</table_reference>
+        <text_index>false</text_index>
+        <unique>false</unique>
+        <use_dependent_field>false</use_dependent_field>
+        <use_dynamic_default>false</use_dynamic_default>
+        <use_reference_qualifier>simple</use_reference_qualifier>
+        <virtual>false</virtual>
+        <virtual_type>script</virtual_type>
+        <widget/>
+        <write_roles/>
+        <xml_view>false</xml_view>
+    </sys_hub_flow_input>
+    <sys_hub_action_input_action_instance action="delete_multiple" query="action_input=c7520f27a8d343107f44321b8bcb563e"/>
+    <sys_hub_flow_input action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <array>false</array>
+        <array_denormalized>false</array_denormalized>
+        <attributes>element_mapping_provider=com.glide.flow_design.action.data.FlowDesignVariableMapper,uiType=document_id,uiTypeLabel=Document ID</attributes>
+        <audit>false</audit>
+        <calculation><![CDATA[(function calculatedFieldValue(current) {
+
+	// Add your code here
+	return '';  // return the calculated value
+
+})(current);]]></calculation>
+        <choice/>
+        <choice_field/>
+        <choice_table/>
+        <column_label/>
+        <comments/>
+        <create_roles/>
+        <default_value/>
+        <defaultsort/>
+        <delete_roles/>
+        <dependent>table_name</dependent>
+        <dependent_on_field>table_name</dependent_on_field>
+        <display>false</display>
+        <dynamic_creation>false</dynamic_creation>
+        <dynamic_creation_script/>
+        <dynamic_default_value/>
+        <dynamic_ref_qual/>
+        <element>current</element>
+        <element_reference>false</element_reference>
+        <foreign_database/>
+        <formula/>
+        <function_definition/>
+        <function_field>false</function_field>
+        <help/>
+        <hint/>
+        <internal_type display_value="">document_id</internal_type>
+        <label>Record</label>
+        <mandatory>true</mandatory>
+        <max_length>200</max_length>
+        <model display_value="Campus360- Interview Feedback to Placement Intelligence">03520f27a8d343107f44321b8bcb5620</model>
+        <model_id>03520f27a8d343107f44321b8bcb5620</model_id>
+        <model_table>sys_hub_flow_snapshot</model_table>
+        <name>var__m_sys_hub_flow_input_03520f27a8d343107f44321b8bcb5620</name>
+        <next_element/>
+        <order>100</order>
+        <primary>false</primary>
+        <read_only>false</read_only>
+        <read_only_option/>
+        <read_roles/>
+        <reference/>
+        <reference_cascade_rule/>
+        <reference_floats>false</reference_floats>
+        <reference_key/>
+        <reference_qual/>
+        <reference_qual_condition/>
+        <reference_type/>
+        <sizeclass/>
+        <spell_check>false</spell_check>
+        <staged>false</staged>
+        <sys_class_name>sys_hub_flow_input</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 13:44:16</sys_created_on>
+        <sys_id>cb520f27a8d343107f44321b8bcb5621</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name/>
+        <sys_package/>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:44:16</sys_updated_on>
+        <table_reference>false</table_reference>
+        <text_index>false</text_index>
+        <unique>false</unique>
+        <use_dependent_field>true</use_dependent_field>
+        <use_dynamic_default>false</use_dynamic_default>
+        <use_reference_qualifier>simple</use_reference_qualifier>
+        <virtual>false</virtual>
+        <virtual_type>script</virtual_type>
+        <widget/>
+        <write_roles/>
+        <xml_view>false</xml_view>
+    </sys_hub_flow_input>
+    <sys_hub_action_input_action_instance action="delete_multiple" query="action_input=cb520f27a8d343107f44321b8bcb5621"/>
+    <sys_hub_flow_output action="delete_multiple" query="model=03520f27a8d343107f44321b8bcb5620"/>
+    <sys_hub_alias_mapping action="delete_multiple" query="source_id=03520f27a8d343107f44321b8bcb5620"/>
+    <sys_hub_trigger_instance_v2 action="delete_multiple" query="flow=03520f27a8d343107f44321b8bcb5620^sys_idNOT IN5b520f27a8d343107f44321b8bcb5653"/>
+    <sys_hub_trigger_instance_v2 action="INSERT_OR_UPDATE">
+        <comment/>
+        <display_text/>
+        <flow display_value="Campus360- Interview Feedback to Placement Intelligence">03520f27a8d343107f44321b8bcb5620</flow>
+        <generation_source/>
+        <name>Created or Updated</name>
+        <published_version/>
+        <remote_sys_id/>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 13:44:17</sys_created_on>
+        <sys_id>5b520f27a8d343107f44321b8bcb5653</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_scope/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:44:17</sys_updated_on>
+        <trigger_definition display_value="Created or Updated">a45d9180c32222002841b63b12d3aea7</trigger_definition>
+        <trigger_inputs>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</trigger_inputs>
+        <trigger_outputs/>
+        <trigger_type>record_create_or_update</trigger_type>
+        <updation_source/>
+    </sys_hub_trigger_instance_v2>
+    <sys_hub_action_instance_v2 action="delete_multiple" query="flow=03520f27a8d343107f44321b8bcb5620^sys_idNOT IN9f520f27a8d343107f44321b8bcb5650,9b520f27a8d343107f44321b8bcb5651,97520f27a8d343107f44321b8bcb5652"/>
+    <sys_hub_action_instance_v2 action="INSERT_OR_UPDATE">
+        <action_type display_value="Look Up Records">43400a1587003300663ca1bb36cb0b4b</action_type>
+        <action_type_parent display_value="Look Up Records">d1c56ec50b30030085c083eb37673a50</action_type_parent>
+        <attributes/>
+        <comment/>
+        <compiled_snapshot>43400a1587003300663ca1bb36cb0b4b</compiled_snapshot>
+        <display_text/>
+        <flow display_value="Campus360- Interview Feedback to Placement Intelligence">03520f27a8d343107f44321b8bcb5620</flow>
+        <generation_source/>
+        <order>1</order>
+        <parent_ui_id/>
+        <sys_class_name>sys_hub_action_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 13:44:17</sys_created_on>
+        <sys_id>9f520f27a8d343107f44321b8bcb5650</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:44:17</sys_updated_on>
+        <ui_id>0f0aae9c-b0c7-44f4-b8ee-a04dae2f312f</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/+VWbU/bMBD+K1E+V5VDS2F8m4qQkHiZgPGFIcuxndaam2S2UyhV//vOL0lLGxhlRWLapzZ3Z9/dc89j+24eCxYfxSjrI0SS/cMDhHo9hAaDHiVJmvYGNEXp/pe4E+dkwiFSF8pgMys5mKZEVo2NaAomJnQpyew2eEhkiugJ7HQsJFM8j4/u7jtxSRTsZriKj+ZrrreWI0nKJYReQ+7oxtfTUqL7OYIchaD191lYOqyNhWK2lF4n5o+G54xDDRmRmnfiCckZMYWaNRbFCbvM5dIwFrmB3WIb/KjFE+Tr7dm4jENXlHtf84kDRN6cHRNDro2qqKlUCPXFasBj3rTZANmCeSgfLTrL+CcbT9bjGV9dkCwAb8YzUkkzfF/OZNucezanb/CyNKKAqcc9OxeSyrr9QlaT/MLPMm4qvG0hm/ccv8C5SgPYvLQDtRMK48qux8XDVT2NE5G7uoJTFpTI5osYo0RaGYvLPM4YzgSXDItcitxmgrFZ+nDJJ5ABT0hZinyES1VMhdsVepl0RxI+upksHiwWYpR3CbWdd4FYpHsC9mNnviVKWBTOYRtY3LEJx7A05MOaKlEa/CDYiJtl9jqKFeaByJ9t/sA4XA/KtRcvOrGe6aEkWi/BBpriX5XFwEMf0MNuUG6Jq+IrdDDlASjLASdbevCqbPfXJOoHvcKXzfNj65PjDSXUKFxaRkbp7KWqwtHhZ+4inh8fJ9YRXXhHTe+dHSGHaDdHSJvENyW4lQI3pWWp9hfK+kABtSl2e+J7bP7A/v6rl9YgWfIMhowV1wCpXmF/skn/ZGv+v6GImv/n5DG6aqpoLS1IANjJRw7RVf6fNtZA/v7OyN//vORPEEIvXj1Jx3t3fPN8jD52f/4fvv5sQ0ua0SJnwta4KgBtKpvrRwWr2Xw+BKYYzqJCRd9LZv/ipEsrBeiZbohdLDZF895tthPaG3qthTZcbbYNgPqRum47a9ugfnntUGzo88rtH7lrPuhKeZ1k/XTJJ7/dUkuPWOcUUzIpK90bIAwjpL5xe5hLKUZu1hvi+VbHRafP43apDld4rY6bUPlaI0ET7rPt9eWWrb2+0P/5+vqc1wsUJCQwBPsR6qJSDsopprLSzqFIrv1eO7yM7n8D4os1I9QQAAA=</values>
+    </sys_hub_action_instance_v2>
+    <sys_hub_alias_mapping action="delete_multiple" query="source_id=9f520f27a8d343107f44321b8bcb5650"/>
+    <sys_hub_action_instance_v2 action="INSERT_OR_UPDATE">
+        <action_type display_value="Update Record">f9d01dd2c31332002841b63b12d3aea1</action_type>
+        <action_type_parent display_value="Update Record">baf174c8c3c232002841b63b12d3aee4</action_type_parent>
+        <attributes/>
+        <comment/>
+        <compiled_snapshot>f9d01dd2c31332002841b63b12d3aea1</compiled_snapshot>
+        <display_text/>
+        <flow display_value="Campus360- Interview Feedback to Placement Intelligence">03520f27a8d343107f44321b8bcb5620</flow>
+        <generation_source/>
+        <order>4</order>
+        <parent_ui_id>6e412194-6b27-485d-ae46-736b99126242</parent_ui_id>
+        <sys_class_name>sys_hub_action_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 13:44:17</sys_created_on>
+        <sys_id>9b520f27a8d343107f44321b8bcb5651</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:44:17</sys_updated_on>
+        <ui_id>ff58d94d-5ce8-43fa-b448-69c8fbad7281</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/+1XUVPbOBD+Kxo/XSExdhICCU8MHHfMtOWmcLw0rUe214musuyT5EAuk/9+K8l2DGmBzvRmrjPkJWi1u/q+T6vd8HHtsdSbeiNIg3ASjpNhOBwOgmBwPArj8TAOB+mQAoRezxM0B/SUkBQyxfWS8soY1usxjMJBOBn1x/HgqD86Pkz7FEbj/tFwHE8m4WA8GA18piHfbDAuZarkdHVbh6MlWTCeShDe9OOnnldSiSdpkN50/WjrpVA5jYGj64cG62PselWadVokVQ5CR6wxvq0jz+sdcnmOOxhk4IRBz4N7DSIFBJJRrqDn5VSkVBdy5U21rNAggaZXgq9ajwUT2hHN6b1i/+DJo8D4ZYDMklqEdhnVAjlzdk41vcbMia5kq1fBElBOkxQyWnF91rU5h6tSs0K4EE1j3kQXvMrFe6eI1ybo3EelEASUhqdB7mhl14vi7kMD8oIJK0lNkRcJ5e2Kai1ZXGkDZ+0BB6txTsuSiXlUymLJbDBCyf05x4Wf8eIOz1RsLnyaGNw+qkr9C7SfW/MtlcyQeIdpMHjT89RKnXGq1JYKahj9XRkkjlhNIbIqWAkiWwkmOJGs1Kd41BJq4Jte/RiCwZMVBtuCsm9AdR6DuXwmQKlIYanBrAqCYbpen6FdQ0oKSf4sU/NnFPpJJVFL7RdLkJRzF7HZfFZfGK7mtIxUledUrl6UheVGWCc1RUeFmSiLmEDxFtqlyNK+4w3pZ/MW8tzWcuQUf9ExbRg1IXgG3oCOKue3c8ruc38V6LFA39f9XlCbTfe7YMBT9ZVirbsfNmS8GQ2RK96HDfCm3iS39WbbA39YEwzHgf28tsL/Uyt0FJ3NYO6Wr1k/5e0d7M3E3t5pgvIrYgAfnFoGxDAglULSRC+AZGlkLUX8FyTaJ9c2AckrpYkEvF5BKLFl6ROT8coUHxFVHuMXU6TIMgWaxCuyHxImyK9S4mP8HauQmyOuwelmwSwp44YvKWwRKFIXFalKBFZKhGpiZp4/8wjN8Ok18Ew43FN8CDBFNJKoRSE13kFC3ENuHH285PkcZNsErKO5RMsLTz0xuWpmbRZjPJiJ2izgjvxmKgDLHG5YDr+8OTHXs+1Rr/L/F/KbzPWEeS7vg0F04kKVxq25XqhnQTWOdWBnHj0XujO6MEVbNyZ2cPSuSL7gVaB8S4aF1BCySKe1D9lv7fszQdzHbWENNPA63ltuu/6XHfgWUyeuS22/iXBfWNKb9odWfPjUMEsm29nV6VjbH1v3kRJJlGCFVGo4DiIsq8SJZITgnM3tTNn5DfJH40cuH/p93yh+AfpmFN/YmfN1Ns00fmx7240l791GPYUPf9gQPv6Zxm9N46efv9/6B+TTvzufaPCPDwAA</values>
+    </sys_hub_action_instance_v2>
+    <sys_hub_alias_mapping action="delete_multiple" query="source_id=9b520f27a8d343107f44321b8bcb5651"/>
+    <sys_hub_action_instance_v2 action="INSERT_OR_UPDATE">
+        <action_type display_value="Create Record">2de05916c31332002841b63b12d3aee1</action_type>
+        <action_type_parent display_value="Create Record">02f0b88cc3c632002841b63b12d3aeff</action_type_parent>
+        <attributes/>
+        <comment/>
+        <compiled_snapshot>2de05916c31332002841b63b12d3aee1</compiled_snapshot>
+        <display_text/>
+        <flow display_value="Campus360- Interview Feedback to Placement Intelligence">03520f27a8d343107f44321b8bcb5620</flow>
+        <generation_source/>
+        <order>6</order>
+        <parent_ui_id>5580d90e-6b45-44d5-a727-0877bdb26d04</parent_ui_id>
+        <sys_class_name>sys_hub_action_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 13:44:17</sys_created_on>
+        <sys_id>97520f27a8d343107f44321b8bcb5652</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:44:17</sys_updated_on>
+        <ui_id>8201de89-d758-46fa-808a-496b8b580034</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/+1XS3PbNhD+Kxie/FBp0kqURD557Dr1TGJ36sclijgguKRQgyALgLJVjf57FwApsZZbu53mkI51EbHYXXy7+y24/LIMeBaMg1EG0YcP8YgN4+HwMIoO37+J09EwjQ+zIYU4DQaBpCWg5pyKBjSu3QMKuDQgBC9AMkh4NmmiaJjl2Q+aKV4byKbaNBlI4zeWyxMFFMWkUuSmzuxjEoesUQp1wlZ3tZoqru8SAXMQ3lBU91O0zLgErRPNKgUv8sjLWlVzKPE5oaio0XdNleGM19TwSvZ9TUuuNZpXdV0p00huOGi/FU3TyhgBEthdog0tOhPKEy41L2ZmO3QFrCrx6Ax9UmZPexHmtZkDiIAF1SZpvN4TCb7jQiQFrRPdlCVVi3+bGKxqxnUt6OL2tbj/w+KyGRcZ7gfjL18HASYKW9qACsbLR1svvRMETUGg6hkHkeknLgmzqO3aQImsMpD4S8PLP7XG1+0muW03K5VZUPEggAfj8huMcyo0DIKS2rxVahGMjWpQYFlzKcVirTFDyqLTwOo+aP47Hh+PIvez2jkoy2WvsV4mLe29OD+lhl6hf2Ya1aqyWcUZhuTSk0FOG2FO+jKvcFnbonoTQ1PRWVeiKeWFT06wdtB1GUoajSCgttFa/D64/GpW3f/SgTzj0uWlDVRUjIr1ihqjeNoYC2cZgPClL2ldc1kklgzcGSOUMiwELsIcuw7PRHbL0PM3xNzS8Azlp058SxW3QXxGN2i8GgR6oU+Qr3oTCuYw+a2xSHxgbQiJy4JLQeJIYY0dp4/xqDl0IXqZxdxvA7v+O+3gYG8i9/aOGaZfEwv44NhFQGwEpNEYNDEzIHmWOEmV/grMhOTKOSBlow1RgOWVhBJHypBYj5eWekQ2ZYp/XJMqzzUYki7Ifky4JD8qhf32E7JQ2COuwOfNgZlTLmy8pHIk0KQlFWlqBFYrhGptJkE4CQjNsfE6eNYcHii2AYwRjSJ6hjcU1oAR3+2dYohFLgpQmyvVKtoiurjw1CPrq41s7cUKDyayFUu4Jx8tA5DmcM1L2Nk9suV5dNe/1uAb1sC6PHx3fnHtH8g+KXSImQeFNfl4c366sxvqJtV4lix2ogGJ3+2GprqxfXhCdVeyzevptVrfolrWM75GFRXiOb+tmh84jrwplg9kYWb6WVCdYmvYe30/Z7r1pkcXj2j2uWJ3xHa3mnPs/S4gh3RM1gzs5PsTSfzPbyEHOng97U1s2/rnPfgOU8+uH9p+Z+H/kNKr1aD7IokhevuX0we82QwbvZfM5qvkIdGSJQwZ0ujhKEqQVswnqX/NbQ+8P3d65PzPev9wdnoefTc7Xbsx4elouvHpsexT35Zc+I12bIr+q7Hp/fc0MLVhfPcT0/ac5OCuvv4BqFvZnaoPAAA=</values>
+    </sys_hub_action_instance_v2>
+    <sys_hub_alias_mapping action="delete_multiple" query="source_id=97520f27a8d343107f44321b8bcb5652"/>
+    <sys_hub_sub_flow_instance_v2 action="delete_multiple" query="flow=03520f27a8d343107f44321b8bcb5620"/>
+    <sys_hub_flow_logic_instance_v2 action="delete_multiple" query="flow=03520f27a8d343107f44321b8bcb5620^sys_idNOT INd3520f27a8d343107f44321b8bcb564d,9b520f27a8d343107f44321b8bcb564e,df520f27a8d343107f44321b8bcb564f"/>
+    <sys_hub_flow_logic_instance_v2 action="INSERT_OR_UPDATE">
+        <attributes/>
+        <block display_value="">0579061f891743107f44172f27a0ce02</block>
+        <comment/>
+        <connected_to/>
+        <decision_table/>
+        <display_text/>
+        <flow display_value="Campus360- Interview Feedback to Placement Intelligence">03520f27a8d343107f44321b8bcb5620</flow>
+        <flow_variables_assigned/>
+        <generation_source/>
+        <logic_definition display_value="If">af4e1945c3e232002841b63b12d3ae3e</logic_definition>
+        <order>2</order>
+        <outputs_assigned/>
+        <parent_ui_id/>
+        <sys_class_name>sys_hub_flow_logic_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 13:44:17</sys_created_on>
+        <sys_id>d3520f27a8d343107f44321b8bcb564d</sys_id>
+        <sys_mod_count>1</sys_mod_count>
+        <sys_scope/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:44:17</sys_updated_on>
+        <ui_id>d66d2a67-52e6-4c44-b7f9-a950cb8f0855</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/+1Vy27bMBD8FYNn26AkO419KQIHAQK0TdEEuaSBsKJWNlGaVPmI7Rr+9y71cIImQBqkx97E4e5yZsSR9swEXwfvbsyZc3Kp2fzufsikjhg975mGNbI5E0aX0kuj2ZA9gAoR2+95xQFwJkYFFx9Gk0k1GRWniCPgkxIwrbIkrcYLE7Q/HL4HzjPk1F9KVyvY3b5zjFhJVVrsKNdgialHy+b7P7ZkSafMYFpNEz4VWXqSpZynp5OkOMmKJC0zwMkJDVRQoKLSxROtL8j3uzpCzlupl936U9d63YPGlpFKyocMtx51iUSiAuVwyNagS/DG7tjc20CARSivtNodK1ZSe5rGYu3WyV8YJ3EeKyskXQLb3eMy7zxt4eocPBCVIHywXalYGSnQtY6UWEFQfvEUawuu6kZl0+KhUH23UWGtv7RmsOOA/hUSEhyRwDoqjdw7IdX1ymy+9SwvpG5c6TaVEaCOK/DkXRF85LNnqHBNg/I11DU5mtfWPMimmbisx0tFi3GlzIYOjfd2DCISH5OxML4g/LyBb8HKqOIzjaFmugsud8LKutfWHM4OQ+Z2bqHAuUeNZG7+M0SGreJOW97aE1uaQWd08AN2Mg7D54nJG+AxNl8ViEbc4FJ7VEouozcD3Ern3cfn+Xi1/m1BoKxVyUwkLwcBspeCMGjv9/M49NrekonklUx0yF+FYjr9n4l3ZyLSLMBJkTfffRoXP0v/MBT38fK3hx7NFtIRt5uIXfZ/m7ixoxslxVNoY+yPqOoRO/wGKqn2AbcGAAA=</values>
+        <workflow_reference/>
+    </sys_hub_flow_logic_instance_v2>
+    <sys_hub_flow_logic_instance_v2 action="INSERT_OR_UPDATE">
+        <attributes/>
+        <block display_value="">3d994a1f891743107f44172f27a0ce76</block>
+        <comment/>
+        <connected_to/>
+        <decision_table/>
+        <display_text/>
+        <flow display_value="Campus360- Interview Feedback to Placement Intelligence">03520f27a8d343107f44321b8bcb5620</flow>
+        <flow_variables_assigned/>
+        <generation_source/>
+        <logic_definition display_value="For Each">098e1dc5c3e232002841b63b12d3ae33</logic_definition>
+        <order>3</order>
+        <outputs_assigned/>
+        <parent_ui_id>d66d2a67-52e6-4c44-b7f9-a950cb8f0855</parent_ui_id>
+        <sys_class_name>sys_hub_flow_logic_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 13:44:17</sys_created_on>
+        <sys_id>9b520f27a8d343107f44321b8bcb564e</sys_id>
+        <sys_mod_count>1</sys_mod_count>
+        <sys_scope/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:44:17</sys_updated_on>
+        <ui_id>6e412194-6b27-485d-ae46-736b99126242</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/51Ty27bMBD8F55lQS+4sW9BggAB2gZwglyKwFiRS5soRaokZUcV9O9dWrIS5NiTtMPd2ZkRNTDbhbYL/sXeeq8Ohm1/vSVMmYjR+8AMNMi2TAVsPEvYCXQX62HIZAaAG76qM/5tVVWyWtU3iCvIKgFYyDIvZLpDbp3w40ijQvlWQ//6/wz8qLRwOItswZG2gI5thy9HStCCfCPkJs82vCzWZZFlxU2V1+uyzgtRAoo1EWqoUVPr4+zui9nQt7F0k4QZ+D7P7BaUHlFEkSUM3wMagbRegvaYsAaMgGBdz7bBdQQ4BPFkdL90HJUJRMdi77tXf2ljnmWxUSIZ4jgdLuV+znGC5T0EeCZqHjo3t/KjVRz9FIVACZ0Od5+xqeGpDcqaaSRAra/TVneN+TklwRaC62cjpPMkAttoNEqffcjnoz3vrioflLmEMh9qy0EvFYTgVN2FqGdgqLEhon0DbavMYd86e1KXYdLSpAdNRSq1PdPSeEVT4FF4SrlC+kD4/QV+Baeiix9EQ8Njwnzv7zR4/+GFQtz/6aKSydnsYT/FEEe4U224pQUnnOWOb/HWT9xLplx5kvASscfrvxIPerpBin+Gztb9juI/sPEfVZE7LnUDAAA=</values>
+        <workflow_reference/>
+    </sys_hub_flow_logic_instance_v2>
+    <sys_hub_flow_logic_instance_v2 action="INSERT_OR_UPDATE">
+        <attributes/>
+        <block display_value="">de9b0213895743107f44172f27a0ce7c</block>
+        <comment/>
+        <connected_to>d66d2a67-52e6-4c44-b7f9-a950cb8f0855</connected_to>
+        <decision_table/>
+        <display_text/>
+        <flow display_value="Campus360- Interview Feedback to Placement Intelligence">03520f27a8d343107f44321b8bcb5620</flow>
+        <flow_variables_assigned/>
+        <generation_source/>
+        <logic_definition display_value="Else">1f781bf3c32232002841b63b12d3aee6</logic_definition>
+        <order>5</order>
+        <outputs_assigned/>
+        <parent_ui_id/>
+        <sys_class_name>sys_hub_flow_logic_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 13:44:17</sys_created_on>
+        <sys_id>df520f27a8d343107f44321b8bcb564f</sys_id>
+        <sys_mod_count>1</sys_mod_count>
+        <sys_scope/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:44:17</sys_updated_on>
+        <ui_id>5580d90e-6b45-44d5-a727-0877bdb26d04</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/6tWyi8tKSgtKQ7JdywuzkzPU7KKjtVRyswDiUHYZYlFmYlJOalQbkpqcmZxZn5eCEjME0ldSmVeYm5mMrJQeX5RdlpOfjlCrBYAD1ouqHEAAAA=</values>
+        <workflow_reference/>
+    </sys_hub_flow_logic_instance_v2>
+    <sys_hub_pill_compound action="delete_multiple" query="attached_to=03520f27a8d343107f44321b8bcb5620"/>
+    <sys_hub_flow_variable action="delete_multiple" query="model=03520f27a8d343107f44321b8bcb5620"/>
+    <sys_documentation action="INSERT_OR_UPDATE">
+        <element>current</element>
+        <help/>
+        <hint/>
+        <label>Record</label>
+        <language>en</language>
+        <name>var__m_sys_hub_flow_input_03520f27a8d343107f44321b8bcb5620</name>
+        <plural/>
+        <sys_class_name>sys_documentation</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 13:44:16</sys_created_on>
+        <sys_id>03520f27a8d343107f44321b8bcb5631</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name/>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:44:16</sys_updated_on>
+        <url/>
+        <url_target/>
+    </sys_documentation>
+    <sys_documentation action="INSERT_OR_UPDATE">
+        <element>table_name</element>
+        <help/>
+        <hint/>
+        <label>Table Name</label>
+        <language>en</language>
+        <name>var__m_sys_hub_flow_input_03520f27a8d343107f44321b8bcb5620</name>
+        <plural/>
+        <sys_class_name>sys_documentation</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 13:44:17</sys_created_on>
+        <sys_id>9b520f27a8d343107f44321b8bcb5643</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name/>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:44:17</sys_updated_on>
+        <url/>
+        <url_target/>
+    </sys_documentation>
+    <sys_documentation action="INSERT_OR_UPDATE">
+        <element>changed_fields</element>
+        <help/>
+        <hint/>
+        <label>Changed Fields</label>
+        <language>en</language>
+        <name>var__m_sys_hub_flow_input_03520f27a8d343107f44321b8bcb5620</name>
+        <plural/>
+        <sys_class_name>sys_documentation</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 13:44:17</sys_created_on>
+        <sys_id>c7520f27a8d343107f44321b8bcb563a</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name/>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:44:17</sys_updated_on>
+        <url/>
+        <url_target/>
+    </sys_documentation>
+    <sys_choice action="delete_multiple" query="name=var__m_sys_hub_flow_input_03520f27a8d343107f44321b8bcb5620"/>
+    <sys_choice action="delete_multiple" query="name=var__m_sys_hub_flow_output_03520f27a8d343107f44321b8bcb5620"/>
+    <sys_hub_flow action="UPDATE">
+        <sys_id>626e31d789d343107f44172f27a0ce3e</sys_id>
+        <latest_snapshot>03520f27a8d343107f44321b8bcb5620</latest_snapshot>
+        <compiler_build/>
+        <version_record/>
+    </sys_hub_flow>
+    <sys_flow_trigger_plan action="delete_multiple" query="plan_id=626e31d789d343107f44172f27a0ce3e^sys_idNOT INd3520f27a8d343107f44321b8bcb5663"/>
+    <sys_flow_trigger_plan action="INSERT_OR_UPDATE">
+        <binding_strategy>com.snc.process_flow.engine.binding.OncePerRecord</binding_strategy>
+        <plan/>
+        <plan_id>626e31d789d343107f44172f27a0ce3e</plan_id>
+        <snapshot>03520f27a8d343107f44321b8bcb5620</snapshot>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 13:44:17</sys_created_on>
+        <sys_domain>global</sys_domain>
+        <sys_domain_path>/</sys_domain_path>
+        <sys_id>d3520f27a8d343107f44321b8bcb5663</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_overrides/>
+        <sys_scope/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:44:17</sys_updated_on>
+        <trigger display_value="">df520f27a8d343107f44321b8bcb5661</trigger>
+    </sys_flow_trigger_plan>
+    <sys_flow_subflow_plan action="delete_multiple" query="plan_id=626e31d789d343107f44172f27a0ce3e"/>
+</record_update>

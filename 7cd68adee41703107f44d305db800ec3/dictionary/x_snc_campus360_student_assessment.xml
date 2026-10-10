@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?><database>
+    <element attributes="enforce_dot_walk_cross_scope_access=true" db_object_id="b53e4e9ae41703107f44d305db800ed3" label="Student Assessment" max_length="40" name="x_snc_campus360_student_assessment" type="collection">
+        <element label="Opportunity" max_length="32" name="opportunity" reference="x_snc_campus360_placement_opportunity" type="reference"/>
+        <element label="Instructions" max_length="40" name="instructions" type="string"/>
+        <element choice="3" default="Pending" label="Result" max_length="20" name="result" type="choice">
+            <choice>
+                <element inactive_on_update="false" label="Passed" sequence="1" value="passed"/>
+                <element inactive_on_update="false" label="Pending" sequence="0" value="pending"/>
+                <element inactive_on_update="false" label="Needs Improvement" sequence="3" value="needs_improvement"/>
+                <element inactive_on_update="false" label="Failed" sequence="2" value="failed"/>
+            </choice>
+        </element>
+        <element label="Student" max_length="32" name="student" reference="x_snc_campus360_student_master" type="reference"/>
+        <element label="Assessment Name" max_length="100" name="assessment_name" type="string"/>
+        <element label="Duration" max_length="40" name="duration" type="integer"/>
+        <element label="Remarks" max_length="500" name="remarks" type="string"/>
+        <element label="Maximum Score" max_length="40" name="maximum_score" type="integer"/>
+        <element choice="3" default="Technical" label="Assessment Type" max_length="30" name="assessment_type" type="choice">
+            <choice>
+                <element inactive_on_update="false" label="Coding" sequence="2" value="coding"/>
+                <element inactive_on_update="false" label="Behavioral" sequence="6" value="behavioral"/>
+                <element inactive_on_update="false" label="Aptitude" sequence="1" value="aptitude"/>
+                <element inactive_on_update="false" label="Domain" sequence="5" value="domain"/>
+                <element inactive_on_update="false" label="Technical" sequence="0" value="technical"/>
+                <element inactive_on_update="false" label="HR" sequence="4" value="hr"/>
+                <element inactive_on_update="false" label="Communication" sequence="3" value="communication"/>
+            </choice>
+        </element>
+        <element default="draft" label="Status" max_length="255" name="status" type="choice">
+            <choice>
+                <element inactive_on_update="false" label="Draft" sequence="0" value="draft"/>
+                <element inactive_on_update="false" label="Published" sequence="1" value="published"/>
+                <element inactive_on_update="false" label="Closed" sequence="2" value="closed"/>
+            </choice>
+        </element>
+        <element display="true" label="Assessment ID" max_length="20" name="assessment_id" type="string"/>
+        <element label="Score" max_length="40" name="score" type="integer"/>
+        <element label="Assessment Date" max_length="40" name="assessment_date" type="glide_date"/>
+        <index name="index">
+            <element name="student"/>
+        </index>
+        <index name="index2">
+            <element name="opportunity"/>
+        </index>
+    </element>
+</database>

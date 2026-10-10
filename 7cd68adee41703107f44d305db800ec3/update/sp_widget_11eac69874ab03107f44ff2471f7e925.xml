@@ -1,0 +1,7156 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_widget">
+    <sp_widget action="INSERT_OR_UPDATE">
+        <category>custom</category>
+        <client_script><![CDATA[api.controller = function($window, $sce) {
+
+    var c = this;
+
+
+    /* =====================================================
+       INITIAL STATE
+       ===================================================== */
+
+    c.sidebarOpen = $window.innerWidth > 900;
+
+    c.loading = false;
+
+    c.refreshing = false;
+
+    c.actionLoading = false;
+
+    c.selectedInterview = null;
+
+    c.qrInterview = null;
+
+    c.performanceInterview = null;
+
+    c.qrFrameUrl = '';
+
+    c.lastUpdated = '';
+
+
+    /* =====================================================
+       SIDEBAR
+       ===================================================== */
+
+    c.toggleSidebar = function() {
+
+        c.sidebarOpen = !c.sidebarOpen;
+
+    };
+
+
+    c.closeSidebar = function() {
+
+        c.sidebarOpen = false;
+
+    };
+
+
+    /* =====================================================
+       NAVIGATION
+       ===================================================== */
+
+    c.navigate = function(pageId) {
+
+        if (!pageId) {
+            return;
+        }
+
+        c.sidebarOpen = false;
+
+        var studentId = '';
+
+        if (
+            c.data &&
+            c.data.studentId
+        ) {
+
+            studentId = c.data.studentId;
+
+        }
+
+        /*
+         * The Server Script reads:
+         *
+         * $sp.getParameter('student')
+         *
+         * so preserve the student parameter when navigating.
+         */
+
+        var url =
+            '?id=' +
+            encodeURIComponent(pageId);
+
+        if (studentId) {
+
+            url +=
+                '&student=' +
+                encodeURIComponent(studentId);
+
+        }
+
+        $window.location.href = url;
+
+    };
+
+
+    /* =====================================================
+       STUDENT DISPLAY
+       ===================================================== */
+
+    c.getStudentName = function() {
+
+        /*
+         * Your current Server Script does not return
+         * data.student or data.studentId.
+         *
+         * Therefore use the URL student parameter when
+         * available.
+         */
+
+        var student =
+            new URLSearchParams(
+                $window.location.search
+            ).get('student');
+
+        return student || 'Student';
+
+    };
+
+
+    c.getStudentInitials = function() {
+
+        var name =
+            c.getStudentName();
+
+        if (!name) {
+            return 'S';
+        }
+
+        var parts =
+            name.trim().split(/\s+/);
+
+        if (parts.length === 1) {
+
+            return parts[0]
+                .substring(0, 2)
+                .toUpperCase();
+
+        }
+
+        return (
+            parts[0].charAt(0) +
+            parts[parts.length - 1].charAt(0)
+        ).toUpperCase();
+
+    };
+
+
+    /* =====================================================
+       REFRESH
+       ===================================================== */
+
+    c.refresh = function() {
+
+        c.refreshing = true;
+
+        /*
+         * This does NOT modify interview records.
+         *
+         * It simply executes the supplied Server Script
+         * again and reloads the read-only data.
+         */
+
+        c.server.update().then(
+            function(response) {
+
+                c.refreshing = false;
+
+                c.lastUpdated =
+                    new Date()
+                    .toLocaleTimeString();
+
+            },
+            function() {
+
+                c.refreshing = false;
+
+            }
+        );
+
+    };
+
+
+    /* =====================================================
+       START INTERVIEW
+       ===================================================== */
+
+    c.startInterview = function(interview) {
+
+        if (!interview) {
+            return;
+        }
+
+        /*
+         * IMPORTANT:
+         *
+         * Do NOT update interview_status here.
+         *
+         * Do NOT call:
+         *
+         * c.server.update()
+         *
+         * Do NOT send:
+         *
+         * start_interview
+         *
+         * to the Server Script.
+         *
+         * The supplied Server Script is read-only.
+         *
+         * We simply open the QR URL already stored
+         * in the interview record.
+         */
+
+        c.openQR(interview);
+
+    };
+
+
+    /* =====================================================
+       OPEN QR
+       ===================================================== */
+
+    c.openQR = function(interview) {
+
+        if (!interview) {
+            return;
+        }
+
+        c.qrInterview = interview;
+
+        c.qrFrameUrl = '';
+
+        /*
+         * qr_url is supplied directly by your Server Script:
+         *
+         * qr_url:
+         *     interviewGR.getValue('qr_url')
+         */
+
+        if (
+            interview.qr_url &&
+            String(interview.qr_url).trim()
+        ) {
+
+            c.qrFrameUrl =
+                $sce.trustAsResourceUrl(
+                    String(interview.qr_url)
+                );
+
+        }
+
+    };
+
+
+    /* =====================================================
+       CLOSE QR
+       ===================================================== */
+
+    c.closeQR = function() {
+
+        c.qrInterview = null;
+
+        c.qrFrameUrl = '';
+
+    };
+
+
+    /* =====================================================
+       REFRESH AFTER QR
+       ===================================================== */
+
+    c.refreshAfterQR = function() {
+
+        c.refresh();
+
+    };
+
+
+    /* =====================================================
+       INTERVIEW DETAILS
+       ===================================================== */
+
+    c.viewInterview = function(interview) {
+
+        c.selectedInterview =
+            interview;
+
+    };
+
+
+    c.closeInterview = function() {
+
+        c.selectedInterview =
+            null;
+
+    };
+
+
+    /* =====================================================
+       PERFORMANCE
+       ===================================================== */
+
+    c.viewPerformance = function(interview) {
+
+        c.performanceInterview =
+            interview;
+
+    };
+
+
+    c.closePerformance = function() {
+
+        c.performanceInterview =
+            null;
+
+    };
+
+
+    /* =====================================================
+       STATUS CLASS
+       ===================================================== */
+
+    c.getStatusClass = function(status) {
+
+        if (status === 'Scheduled') {
+
+            return 'status-scheduled';
+
+        }
+
+        if (status === 'In Progress') {
+
+            return 'status-progress';
+
+        }
+
+        if (status === 'Completed') {
+
+            return 'status-completed';
+
+        }
+
+        return 'status-default';
+
+    };
+
+
+    /* =====================================================
+       STATUS LINE CLASS
+       ===================================================== */
+
+    c.getStatusLineClass = function(status) {
+
+        if (status === 'Scheduled') {
+
+            return 'status-line-scheduled';
+
+        }
+
+        if (status === 'In Progress') {
+
+            return 'status-line-progress';
+
+        }
+
+        if (status === 'Completed') {
+
+            return 'status-line-completed';
+
+        }
+
+        return 'status-line-default';
+
+    };
+
+
+    /* =====================================================
+       ICON CLASS
+       ===================================================== */
+
+    c.getIconClass = function(status) {
+
+        if (status === 'Scheduled') {
+
+            return 'icon-scheduled';
+
+        }
+
+        if (status === 'In Progress') {
+
+            return 'icon-progress';
+
+        }
+
+        if (status === 'Completed') {
+
+            return 'icon-completed';
+
+        }
+
+        return '';
+
+    };
+
+
+    /* =====================================================
+       ATTENDANCE CLASS
+       ===================================================== */
+
+    c.getAttendanceClass = function(status) {
+
+        if (status === 'Present') {
+
+            return 'attendance-present';
+
+        }
+
+        if (status === 'Scheduled') {
+
+            return 'attendance-scheduled';
+
+        }
+
+        return 'attendance-default';
+
+    };
+
+
+    /* =====================================================
+       WINDOW RESIZE
+       ===================================================== */
+
+    angular.element($window).on(
+        'resize',
+        function() {
+
+            /*
+             * Keep the hamburger visible at all times.
+             *
+             * Only automatically close the sidebar when
+             * moving into the mobile layout.
+             */
+
+            if ($window.innerWidth <= 900) {
+
+                c.sidebarOpen = false;
+
+            }
+
+        }
+    );
+
+
+    /* =====================================================
+       CLEANUP
+       ===================================================== */
+
+    c.$onDestroy = function() {
+
+        try {
+
+            angular.element($window).off(
+                'resize'
+            );
+
+        } catch (e) {}
+
+    };
+
+};]]></client_script>
+        <controller_as>c</controller_as>
+        <css>/* =========================================================&#13;
+   CAMPUS360 STUDENT INTERVIEWS&#13;
+   SAME NAVIGATION SYSTEM AS APPLICATIONS / OPPORTUNITIES&#13;
+   FULL 100% VIEW&#13;
+   ========================================================= */&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   SERVICE NOW OUTER RESET&#13;
+   ========================================================= */&#13;
+&#13;
+html,&#13;
+body {&#13;
+&#13;
+  margin: 0 !important;&#13;
+  padding: 0 !important;&#13;
+&#13;
+  width: 100% !important;&#13;
+  max-width: none !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+body:has(.campus360-interviews) {&#13;
+&#13;
+  margin: 0 !important;&#13;
+  padding: 0 !important;&#13;
+&#13;
+  overflow: hidden !important;&#13;
+&#13;
+  background: #f3f6fb !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* Remove common ServiceNow portal chrome.&#13;
+   Campus360's own header is NOT targeted. */&#13;
+&#13;
+body:has(.campus360-interviews) #sp-nav,&#13;
+body:has(.campus360-interviews) .sp-navbar,&#13;
+body:has(.campus360-interviews) .sp-header,&#13;
+body:has(.campus360-interviews) .sp-header-bar,&#13;
+body:has(.campus360-interviews) .portal-header,&#13;
+body:has(.campus360-interviews) nav.navbar,&#13;
+body:has(.campus360-interviews) .navbar.navbar-default {&#13;
+&#13;
+  display: none !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* Bootstrap / ServiceNow wrappers */&#13;
+&#13;
+body:has(.campus360-interviews) .container,&#13;
+body:has(.campus360-interviews) .container-fluid,&#13;
+body:has(.campus360-interviews) .row,&#13;
+body:has(.campus360-interviews) [class*="col-"],&#13;
+body:has(.campus360-interviews) .well,&#13;
+body:has(.campus360-interviews) .panel {&#13;
+&#13;
+  width: 100% !important;&#13;
+&#13;
+  max-width: none !important;&#13;
+&#13;
+  min-width: 0 !important;&#13;
+&#13;
+  margin: 0 !important;&#13;
+&#13;
+  padding-left: 0 !important;&#13;
+&#13;
+  padding-right: 0 !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+body:has(.campus360-interviews) .panel-body {&#13;
+&#13;
+  width: 100% !important;&#13;
+&#13;
+  max-width: none !important;&#13;
+&#13;
+  margin: 0 !important;&#13;
+&#13;
+  padding: 0 !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   ROOT&#13;
+   ========================================================= */&#13;
+&#13;
+.campus360-interviews {&#13;
+&#13;
+  position: fixed !important;&#13;
+&#13;
+  inset: 0 !important;&#13;
+&#13;
+  width: 100vw !important;&#13;
+&#13;
+  height: 100vh !important;&#13;
+&#13;
+  min-width: 100vw !important;&#13;
+&#13;
+  min-height: 100vh !important;&#13;
+&#13;
+  max-width: 100vw !important;&#13;
+&#13;
+  max-height: 100vh !important;&#13;
+&#13;
+  margin: 0 !important;&#13;
+&#13;
+  padding: 0 !important;&#13;
+&#13;
+  overflow: hidden !important;&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      135deg,&#13;
+      #f1f6fc 0%,&#13;
+      #f7f4ff 50%,&#13;
+      #f0f8f6 100%&#13;
+    );&#13;
+&#13;
+  color: #10243f;&#13;
+&#13;
+  font-family:&#13;
+    Inter,&#13;
+    -apple-system,&#13;
+    BlinkMacSystemFont,&#13;
+    "Segoe UI",&#13;
+    Arial,&#13;
+    sans-serif;&#13;
+&#13;
+  z-index: 999999 !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.campus360-interviews *,&#13;
+.campus360-interviews *::before,&#13;
+.campus360-interviews *::after {&#13;
+&#13;
+  box-sizing: border-box;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   SIDEBAR&#13;
+   ========================================================= */&#13;
+&#13;
+.c360-left-sidebar {&#13;
+&#13;
+  position: absolute !important;&#13;
+&#13;
+  left: 0;&#13;
+&#13;
+  top: 0;&#13;
+&#13;
+  bottom: 0;&#13;
+&#13;
+  width: 285px !important;&#13;
+&#13;
+  min-width: 285px !important;&#13;
+&#13;
+  max-width: 285px !important;&#13;
+&#13;
+  height: 100vh !important;&#13;
+&#13;
+  z-index: 100;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  flex-direction: column;&#13;
+&#13;
+  overflow: hidden;&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      180deg,&#13;
+      #130d2f 0%,&#13;
+      #160d38 48%,&#13;
+      #100a29 100%&#13;
+    ) !important;&#13;
+&#13;
+  border-right:&#13;
+    1px solid #2d2157 !important;&#13;
+&#13;
+  box-shadow:&#13;
+    4px 0 18px&#13;
+    rgba(0,0,0,.14);&#13;
+&#13;
+  transition:&#13;
+    transform .25s ease;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.campus360-interviews.sidebar-closed&#13;
+.c360-left-sidebar {&#13;
+&#13;
+  transform:&#13;
+    translateX(-105%);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   BRAND&#13;
+   ========================================================= */&#13;
+&#13;
+.c360-sidebar-brand {&#13;
+&#13;
+  height: 88px;&#13;
+&#13;
+  min-height: 88px;&#13;
+&#13;
+  flex: 0 0 88px;&#13;
+&#13;
+  padding:&#13;
+    0 20px;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  gap: 12px;&#13;
+&#13;
+  border-bottom:&#13;
+    1px solid rgba(255,255,255,.08);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-brand-logo {&#13;
+&#13;
+  width: 48px;&#13;
+&#13;
+  height: 48px;&#13;
+&#13;
+  min-width: 48px;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  justify-content: center;&#13;
+&#13;
+  border-radius: 14px;&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      135deg,&#13;
+      #7c3aed,&#13;
+      #9333ea&#13;
+    );&#13;
+&#13;
+  color: #ffffff;&#13;
+&#13;
+  font-size: 23px;&#13;
+&#13;
+  font-weight: 900;&#13;
+&#13;
+  box-shadow:&#13;
+    0 7px 18px&#13;
+    rgba(124,58,237,.34);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-brand-name {&#13;
+&#13;
+  min-width: 0;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-brand-name strong {&#13;
+&#13;
+  display: block;&#13;
+&#13;
+  color: #ffffff;&#13;
+&#13;
+  font-size: 20px;&#13;
+&#13;
+  line-height: 1;&#13;
+&#13;
+  font-weight: 900;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-brand-name span {&#13;
+&#13;
+  display: block;&#13;
+&#13;
+  margin-top: 5px;&#13;
+&#13;
+  color: #c4b5fd;&#13;
+&#13;
+  font-size: 11px;&#13;
+&#13;
+  font-weight: 800;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   STUDENT PROFILE CARD&#13;
+   ========================================================= */&#13;
+&#13;
+.c360-sidebar-student {&#13;
+&#13;
+  margin:&#13;
+    18px&#13;
+    13px&#13;
+    10px;&#13;
+&#13;
+  min-height: 67px;&#13;
+&#13;
+  padding: 12px;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  gap: 10px;&#13;
+&#13;
+  border:&#13;
+    1px solid #3c2b69;&#13;
+&#13;
+  border-radius: 14px;&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      145deg,&#13;
+      #1f1448,&#13;
+      #21154d&#13;
+    );&#13;
+&#13;
+  color: #ffffff !important;&#13;
+&#13;
+  text-decoration: none !important;&#13;
+&#13;
+  transition: .2s ease;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-sidebar-student:hover {&#13;
+&#13;
+  border-color: #5b3ea2;&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      145deg,&#13;
+      #271957,&#13;
+      #2b1c61&#13;
+    );&#13;
+&#13;
+  box-shadow:&#13;
+    0 8px 20px&#13;
+    rgba(124,58,237,.18);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-sidebar-avatar {&#13;
+&#13;
+  width: 43px;&#13;
+&#13;
+  height: 43px;&#13;
+&#13;
+  min-width: 43px;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  justify-content: center;&#13;
+&#13;
+  border-radius: 50%;&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      135deg,&#13;
+      #8b5cf6,&#13;
+      #7c3aed&#13;
+    );&#13;
+&#13;
+  color: #ffffff;&#13;
+&#13;
+  font-size: 11px;&#13;
+&#13;
+  font-weight: 900;&#13;
+&#13;
+  box-shadow:&#13;
+    0 6px 16px&#13;
+    rgba(124,58,237,.28);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-sidebar-student-info {&#13;
+&#13;
+  min-width: 0;&#13;
+&#13;
+  flex: 1;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-sidebar-student-info strong {&#13;
+&#13;
+  display: block;&#13;
+&#13;
+  max-width: 185px;&#13;
+&#13;
+  overflow: hidden;&#13;
+&#13;
+  white-space: nowrap;&#13;
+&#13;
+  text-overflow: ellipsis;&#13;
+&#13;
+  color: #ffffff;&#13;
+&#13;
+  font-size: 13px;&#13;
+&#13;
+  font-weight: 900;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-sidebar-student-info span {&#13;
+&#13;
+  display: block;&#13;
+&#13;
+  margin-top: 3px;&#13;
+&#13;
+  color: #b9add7;&#13;
+&#13;
+  font-size: 10px;&#13;
+&#13;
+  font-weight: 600;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-student-arrow {&#13;
+&#13;
+  color: #aaa0c2;&#13;
+&#13;
+  font-size: 21px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   NAVIGATION&#13;
+   ========================================================= */&#13;
+&#13;
+.c360-sidebar-nav {&#13;
+&#13;
+  flex:&#13;
+    1 1 auto;&#13;
+&#13;
+  min-height: 0;&#13;
+&#13;
+  padding:&#13;
+    2px&#13;
+    8px&#13;
+    12px;&#13;
+&#13;
+  overflow-y: auto;&#13;
+&#13;
+  overflow-x: hidden;&#13;
+&#13;
+  scrollbar-width: none;&#13;
+&#13;
+  -ms-overflow-style: none;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-sidebar-nav::-webkit-scrollbar {&#13;
+&#13;
+  width: 0 !important;&#13;
+&#13;
+  height: 0 !important;&#13;
+&#13;
+  display: none !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-nav-group {&#13;
+&#13;
+  margin-bottom: 4px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-nav-heading {&#13;
+&#13;
+  padding:&#13;
+    17px&#13;
+    9px&#13;
+    8px;&#13;
+&#13;
+  color: #9f94bd;&#13;
+&#13;
+  font-size: 10px;&#13;
+&#13;
+  font-weight: 900;&#13;
+&#13;
+  letter-spacing: .11em;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-nav-link {&#13;
+&#13;
+  position: relative;&#13;
+&#13;
+  width: 100%;&#13;
+&#13;
+  min-height: 46px;&#13;
+&#13;
+  margin:&#13;
+    3px&#13;
+    0;&#13;
+&#13;
+  padding:&#13;
+    9px&#13;
+    12px;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  gap: 12px;&#13;
+&#13;
+  border: 0;&#13;
+&#13;
+  border-radius: 11px;&#13;
+&#13;
+  background: transparent;&#13;
+&#13;
+  color: #ddd8e8 !important;&#13;
+&#13;
+  font-size: 14px;&#13;
+&#13;
+  font-weight: 750;&#13;
+&#13;
+  text-decoration: none !important;&#13;
+&#13;
+  transition:&#13;
+    background .2s ease,&#13;
+    color .2s ease,&#13;
+    transform .2s ease;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-nav-link:hover {&#13;
+&#13;
+  color: #ffffff !important;&#13;
+&#13;
+  background:&#13;
+    rgba(124,58,237,.16);&#13;
+&#13;
+  transform:&#13;
+    translateX(2px);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-nav-link.active {&#13;
+&#13;
+  color: #ffffff !important;&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      90deg,&#13;
+      #7c3aed 0%,&#13;
+      #8b3ff2 100%&#13;
+    );&#13;
+&#13;
+  font-weight: 900;&#13;
+&#13;
+  box-shadow:&#13;
+    0 7px 18px&#13;
+    rgba(124,58,237,.28);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-nav-link.active::before {&#13;
+&#13;
+  content: "";&#13;
+&#13;
+  position: absolute;&#13;
+&#13;
+  left: 0;&#13;
+&#13;
+  top: 8px;&#13;
+&#13;
+  bottom: 8px;&#13;
+&#13;
+  width: 4px;&#13;
+&#13;
+  border-radius:&#13;
+    0&#13;
+    4px&#13;
+    4px&#13;
+    0;&#13;
+&#13;
+  background: #c4b5fd;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-nav-icon {&#13;
+&#13;
+  width: 24px;&#13;
+&#13;
+  height: 24px;&#13;
+&#13;
+  min-width: 24px;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  justify-content: center;&#13;
+&#13;
+  color: #b8aecb;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-nav-icon svg {&#13;
+&#13;
+  width: 21px;&#13;
+&#13;
+  height: 21px;&#13;
+&#13;
+  fill: none;&#13;
+&#13;
+  stroke: currentColor;&#13;
+&#13;
+  stroke-width: 1.8;&#13;
+&#13;
+  stroke-linecap: round;&#13;
+&#13;
+  stroke-linejoin: round;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-nav-link.active&#13;
+.c360-nav-icon {&#13;
+&#13;
+  color: #ffffff;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-nav-text {&#13;
+&#13;
+  min-width: 0;&#13;
+&#13;
+  flex: 1;&#13;
+&#13;
+  white-space: nowrap;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   SIDEBAR FOOTER&#13;
+   ========================================================= */&#13;
+&#13;
+.c360-sidebar-footer {&#13;
+&#13;
+  flex:&#13;
+    0 0 auto;&#13;
+&#13;
+  padding:&#13;
+    10px&#13;
+    12px&#13;
+    13px;&#13;
+&#13;
+  border-top:&#13;
+    1px solid rgba(255,255,255,.08);&#13;
+&#13;
+  background:&#13;
+    #120c2d;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-journey-mini {&#13;
+&#13;
+  padding: 12px;&#13;
+&#13;
+  border-radius: 12px;&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      145deg,&#13;
+      #1e143f,&#13;
+      #21164a&#13;
+    );&#13;
+&#13;
+  border:&#13;
+    1px solid #382963;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-journey-label {&#13;
+&#13;
+  color: #a69abd;&#13;
+&#13;
+  font-size: 9px;&#13;
+&#13;
+  font-weight: 900;&#13;
+&#13;
+  letter-spacing: .08em;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-journey-progress {&#13;
+&#13;
+  height: 7px;&#13;
+&#13;
+  margin-top: 9px;&#13;
+&#13;
+  border-radius: 8px;&#13;
+&#13;
+  overflow: hidden;&#13;
+&#13;
+  background: #30234f;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-journey-fill {&#13;
+&#13;
+  height: 100%;&#13;
+&#13;
+  border-radius: 8px;&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      90deg,&#13;
+      #7c3aed,&#13;
+      #a855f7&#13;
+    );&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-journey-score {&#13;
+&#13;
+  margin-top: 6px;&#13;
+&#13;
+  color: #c1b7d3;&#13;
+&#13;
+  font-size: 10px;&#13;
+&#13;
+  font-weight: 700;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   RIGHT PAGE&#13;
+   ========================================================= */&#13;
+&#13;
+.c360-right-page {&#13;
+&#13;
+  position: absolute !important;&#13;
+&#13;
+  top: 0;&#13;
+&#13;
+  right: 0;&#13;
+&#13;
+  bottom: 0;&#13;
+&#13;
+  left: 285px;&#13;
+&#13;
+  width: auto !important;&#13;
+&#13;
+  height: 100vh !important;&#13;
+&#13;
+  min-width: 0 !important;&#13;
+&#13;
+  max-width: none !important;&#13;
+&#13;
+  overflow-x: hidden;&#13;
+&#13;
+  overflow-y: auto;&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      135deg,&#13;
+      #f1f6fc 0%,&#13;
+      #f7f4ff 50%,&#13;
+      #f0f8f6 100%&#13;
+    );&#13;
+&#13;
+  scrollbar-width: none;&#13;
+&#13;
+  -ms-overflow-style: none;&#13;
+&#13;
+  transition:&#13;
+    left .25s ease;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-right-page::-webkit-scrollbar {&#13;
+&#13;
+  width: 0 !important;&#13;
+&#13;
+  height: 0 !important;&#13;
+&#13;
+  display: none !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.campus360-interviews.sidebar-closed&#13;
+.c360-right-page {&#13;
+&#13;
+  left: 0;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   TOP NAVBAR&#13;
+   WHITE ONLY&#13;
+   ========================================================= */&#13;
+&#13;
+.c360-topbar {&#13;
+&#13;
+  position: sticky;&#13;
+&#13;
+  top: 0;&#13;
+&#13;
+  z-index: 5000;&#13;
+&#13;
+  width: 100%;&#13;
+&#13;
+  height: 78px;&#13;
+&#13;
+  min-height: 78px;&#13;
+&#13;
+  padding:&#13;
+    0&#13;
+    24px;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  justify-content: space-between;&#13;
+&#13;
+  background: #ffffff;&#13;
+&#13;
+  border-bottom:&#13;
+    1px solid #dfe4ec;&#13;
+&#13;
+  box-shadow:&#13;
+    0 2px 10px&#13;
+    rgba(20,39,60,.035);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   TOPBAR LEFT&#13;
+   ========================================================= */&#13;
+&#13;
+.c360-topbar-left {&#13;
+&#13;
+  min-width: 0;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  gap: 13px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-menu-button {&#13;
+&#13;
+  width: 42px;&#13;
+&#13;
+  height: 42px;&#13;
+&#13;
+  min-width: 42px;&#13;
+&#13;
+  padding: 9px;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  flex-direction: column;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  justify-content: center;&#13;
+&#13;
+  gap: 4px;&#13;
+&#13;
+  border:&#13;
+    1px solid #dce2ea;&#13;
+&#13;
+  border-radius: 10px;&#13;
+&#13;
+  background: #ffffff;&#13;
+&#13;
+  cursor: pointer;&#13;
+&#13;
+  transition: .2s ease;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-menu-button:hover {&#13;
+&#13;
+  background: #f1efff;&#13;
+&#13;
+  border-color: #bcb5ff;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-menu-button span {&#13;
+&#13;
+  display: block;&#13;
+&#13;
+  width: 19px;&#13;
+&#13;
+  height: 2px;&#13;
+&#13;
+  border-radius: 3px;&#13;
+&#13;
+  background: #5362ee;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   TOP PAGE TITLE&#13;
+   ========================================================= */&#13;
+&#13;
+.c360-page-heading {&#13;
+&#13;
+  min-width: 150px;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  flex-direction: column;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-page-heading span {&#13;
+&#13;
+  color: #673cff;&#13;
+&#13;
+  font-size: 9px;&#13;
+&#13;
+  font-weight: 950;&#13;
+&#13;
+  letter-spacing: 1.6px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-page-heading strong {&#13;
+&#13;
+  margin-top: 5px;&#13;
+&#13;
+  color: #172a33;&#13;
+&#13;
+  font-size: 17px;&#13;
+&#13;
+  font-weight: 900;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   TOP RIGHT&#13;
+   ========================================================= */&#13;
+&#13;
+.c360-topbar-right {&#13;
+&#13;
+  margin-left: auto;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  gap: 10px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   REFRESH + NOTIFICATION ICON&#13;
+   ========================================================= */&#13;
+&#13;
+.c360-top-icon {&#13;
+&#13;
+  position: relative;&#13;
+&#13;
+  width: 41px;&#13;
+&#13;
+  height: 41px;&#13;
+&#13;
+  min-width: 41px;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  justify-content: center;&#13;
+&#13;
+  border:&#13;
+    1px solid #dce2ea;&#13;
+&#13;
+  border-radius: 10px;&#13;
+&#13;
+  background: #ffffff;&#13;
+&#13;
+  color: #536476;&#13;
+&#13;
+  cursor: pointer;&#13;
+&#13;
+  transition: .2s ease;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-top-icon:hover {&#13;
+&#13;
+  color: #673cff;&#13;
+&#13;
+  border-color: #c9baff;&#13;
+&#13;
+  background: #f8f5ff;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-top-icon svg {&#13;
+&#13;
+  width: 18px;&#13;
+&#13;
+  height: 18px;&#13;
+&#13;
+  fill: none;&#13;
+&#13;
+  stroke: currentColor;&#13;
+&#13;
+  stroke-width: 1.8;&#13;
+&#13;
+  stroke-linecap: round;&#13;
+&#13;
+  stroke-linejoin: round;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-notification-button {&#13;
+&#13;
+  border-color: #d9ddff;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-notification-button svg {&#13;
+&#13;
+  color: #4f46e5;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-notification-dot {&#13;
+&#13;
+  position: absolute;&#13;
+&#13;
+  width: 7px;&#13;
+&#13;
+  height: 7px;&#13;
+&#13;
+  top: 6px;&#13;
+&#13;
+  right: 6px;&#13;
+&#13;
+  border-radius: 50%;&#13;
+&#13;
+  background: #ff3b4f;&#13;
+&#13;
+  border:&#13;
+    1.5px solid #ffffff;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   TOP PROFILE&#13;
+   ========================================================= */&#13;
+&#13;
+.c360-top-profile {&#13;
+&#13;
+  min-height: 45px;&#13;
+&#13;
+  padding-left: 11px;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  gap: 9px;&#13;
+&#13;
+  border-left:&#13;
+    1px solid #e0e4eb;&#13;
+&#13;
+  color: inherit !important;&#13;
+&#13;
+  text-decoration: none !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-top-avatar {&#13;
+&#13;
+  width: 39px;&#13;
+&#13;
+  height: 39px;&#13;
+&#13;
+  min-width: 39px;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  justify-content: center;&#13;
+&#13;
+  border-radius: 50%;&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      135deg,&#13;
+      #7659f4,&#13;
+      #6654eb&#13;
+    );&#13;
+&#13;
+  color: #ffffff;&#13;
+&#13;
+  font-size: 11px;&#13;
+&#13;
+  font-weight: 900;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-top-profile-info {&#13;
+&#13;
+  min-width: 0;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  flex-direction: column;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-top-profile-info strong {&#13;
+&#13;
+  display: block;&#13;
+&#13;
+  max-width: 190px;&#13;
+&#13;
+  overflow: hidden;&#13;
+&#13;
+  white-space: nowrap;&#13;
+&#13;
+  text-overflow: ellipsis;&#13;
+&#13;
+  color: #101828;&#13;
+&#13;
+  font-size: 12px;&#13;
+&#13;
+  font-weight: 900;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-top-profile-info span {&#13;
+&#13;
+  display: block;&#13;
+&#13;
+  margin-top: 2px;&#13;
+&#13;
+  color: #667085;&#13;
+&#13;
+  font-size: 9px;&#13;
+&#13;
+  font-weight: 600;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-profile-chevron {&#13;
+&#13;
+  color: #667085;&#13;
+&#13;
+  font-size: 13px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   PAGE CONTENT&#13;
+   ========================================================= */&#13;
+&#13;
+.c360-page-content {&#13;
+&#13;
+  width: 100% !important;&#13;
+&#13;
+  max-width: none !important;&#13;
+&#13;
+  min-width: 0 !important;&#13;
+&#13;
+  margin: 0 !important;&#13;
+&#13;
+  padding:&#13;
+    24px&#13;
+    15px&#13;
+    55px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   INTERVIEWS TOP HERO CARD&#13;
+   DARK PURPLE&#13;
+   ========================================================= */&#13;
+&#13;
+.interviews-header {&#13;
+&#13;
+  position: relative;&#13;
+&#13;
+  z-index: 1;&#13;
+&#13;
+  width: 100%;&#13;
+&#13;
+  min-height: 178px;&#13;
+&#13;
+  margin: 0;&#13;
+&#13;
+  padding:&#13;
+    30px&#13;
+    38px;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  border-radius:&#13;
+    18px;&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      135deg,&#13;
+      #241044 0%,&#13;
+      #32145b 52%,&#13;
+      #45206d 100%&#13;
+    ) !important;&#13;
+&#13;
+  border:&#13;
+    1px solid #5a357d !important;&#13;
+&#13;
+  color: #ffffff !important;&#13;
+&#13;
+  box-shadow:&#13;
+    0 12px 30px&#13;
+    rgba(50,20,80,.18);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.interviews-header-content {&#13;
+&#13;
+  width: 100%;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.interviews-eyebrow {&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  gap: 9px;&#13;
+&#13;
+  margin-bottom: 9px;&#13;
+&#13;
+  color: #dccbff !important;&#13;
+&#13;
+  font-size: 13px;&#13;
+&#13;
+  font-weight: 850;&#13;
+&#13;
+  letter-spacing: 1.5px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.interviews-eyebrow-dot {&#13;
+&#13;
+  width: 10px;&#13;
+&#13;
+  height: 10px;&#13;
+&#13;
+  flex: 0 0 10px;&#13;
+&#13;
+  border-radius: 50%;&#13;
+&#13;
+  background: #c4b5fd !important;&#13;
+&#13;
+  box-shadow:&#13;
+    0 0 0 6px&#13;
+    rgba(196,181,253,.16);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.interviews-header h1 {&#13;
+&#13;
+  margin: 0;&#13;
+&#13;
+  color: #ffffff !important;&#13;
+&#13;
+  font-size: 42px;&#13;
+&#13;
+  line-height: 1.1;&#13;
+&#13;
+  font-weight: 850;&#13;
+&#13;
+  letter-spacing: -.8px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.interviews-header p {&#13;
+&#13;
+  max-width: 800px;&#13;
+&#13;
+  margin:&#13;
+    11px&#13;
+    0&#13;
+    0;&#13;
+&#13;
+  color: #e5dcf0 !important;&#13;
+&#13;
+  font-size: 17px;&#13;
+&#13;
+  line-height: 1.55;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   MAIN&#13;
+   ========================================================= */&#13;
+&#13;
+.interviews-main-content {&#13;
+&#13;
+  width: 100%;&#13;
+&#13;
+  padding-top: 25px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   KPI GRID&#13;
+   ========================================================= */&#13;
+&#13;
+.interviews-kpi-grid {&#13;
+&#13;
+  width: 100%;&#13;
+&#13;
+  display: grid;&#13;
+&#13;
+  grid-template-columns:&#13;
+    repeat(4,minmax(0,1fr));&#13;
+&#13;
+  gap: 17px;&#13;
+&#13;
+  margin-bottom: 31px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.interviews-kpi-card {&#13;
+&#13;
+  position: relative;&#13;
+&#13;
+  min-height: 126px;&#13;
+&#13;
+  padding: 19px;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: flex-start;&#13;
+&#13;
+  gap: 13px;&#13;
+&#13;
+  background: #ffffff;&#13;
+&#13;
+  border:&#13;
+    1px solid #d8e2ed;&#13;
+&#13;
+  border-radius: 15px;&#13;
+&#13;
+  box-shadow:&#13;
+    0 5px 17px&#13;
+    rgba(25,43,60,.045);&#13;
+&#13;
+  overflow: hidden;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.interviews-kpi-card::after {&#13;
+&#13;
+  content: "";&#13;
+&#13;
+  position: absolute;&#13;
+&#13;
+  left: 0;&#13;
+&#13;
+  right: 0;&#13;
+&#13;
+  bottom: 0;&#13;
+&#13;
+  height: 4px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.interviews-kpi-purple::after {&#13;
+  background: #7040ff;&#13;
+}&#13;
+&#13;
+.interviews-kpi-blue::after {&#13;
+  background: #159bb1;&#13;
+}&#13;
+&#13;
+.interviews-kpi-green::after {&#13;
+  background: #16a34a;&#13;
+}&#13;
+&#13;
+.interviews-kpi-orange::after {&#13;
+  background: #dc8b00;&#13;
+}&#13;
+&#13;
+&#13;
+.interviews-kpi-icon {&#13;
+&#13;
+  width: 40px;&#13;
+&#13;
+  height: 40px;&#13;
+&#13;
+  flex: 0 0 40px;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  justify-content: center;&#13;
+&#13;
+  border-radius: 10px;&#13;
+&#13;
+  font-size: 18px;&#13;
+&#13;
+  font-weight: 800;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.interviews-kpi-purple&#13;
+.interviews-kpi-icon {&#13;
+&#13;
+  color: #7040ff;&#13;
+&#13;
+  background: #eee7ff;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.interviews-kpi-blue&#13;
+.interviews-kpi-icon {&#13;
+&#13;
+  color: #0d91a7;&#13;
+&#13;
+  background: #d9f7fb;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.interviews-kpi-green&#13;
+.interviews-kpi-icon {&#13;
+&#13;
+  color: #16a34a;&#13;
+&#13;
+  background: #dcfce7;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.interviews-kpi-orange&#13;
+.interviews-kpi-icon {&#13;
+&#13;
+  color: #d17a00;&#13;
+&#13;
+  background: #fff0c9;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.interviews-kpi-text {&#13;
+&#13;
+  min-width: 0;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.interviews-kpi-text &gt; span {&#13;
+&#13;
+  display: block;&#13;
+&#13;
+  color: #637188;&#13;
+&#13;
+  font-size: 11px;&#13;
+&#13;
+  font-weight: 850;&#13;
+&#13;
+  letter-spacing: 1px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.interviews-kpi-text &gt; strong {&#13;
+&#13;
+  display: block;&#13;
+&#13;
+  margin-top: 7px;&#13;
+&#13;
+  color: #0d203a;&#13;
+&#13;
+  font-size: 31px;&#13;
+&#13;
+  line-height: 1;&#13;
+&#13;
+  font-weight: 850;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.interviews-kpi-text &gt; p {&#13;
+&#13;
+  margin:&#13;
+    7px&#13;
+    0&#13;
+    0;&#13;
+&#13;
+  color: #8290a4;&#13;
+&#13;
+  font-size: 12px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   SECTIONS&#13;
+   ========================================================= */&#13;
+&#13;
+.interviews-section {&#13;
+&#13;
+  width: 100%;&#13;
+&#13;
+  margin-bottom: 36px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.interviews-section-heading {&#13;
+&#13;
+  margin-bottom: 14px;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: flex-end;&#13;
+&#13;
+  justify-content: space-between;&#13;
+&#13;
+  gap: 15px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.interviews-section-title {&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  gap: 9px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.interviews-section-marker {&#13;
+&#13;
+  width: 5px;&#13;
+&#13;
+  height: 27px;&#13;
+&#13;
+  border-radius: 10px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.upcoming-marker {&#13;
+&#13;
+  background: #0e8f87;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.history-marker {&#13;
+&#13;
+  background: #16a34a;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.interviews-section-title h2 {&#13;
+&#13;
+  margin: 0;&#13;
+&#13;
+  color: #0a1d38;&#13;
+&#13;
+  font-size: 24px;&#13;
+&#13;
+  font-weight: 800;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.interviews-section-heading p {&#13;
+&#13;
+  margin:&#13;
+    6px&#13;
+    0&#13;
+    0&#13;
+    14px;&#13;
+&#13;
+  color: #687a91;&#13;
+&#13;
+  font-size: 14px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.interviews-updated {&#13;
+&#13;
+  color: #8a97aa;&#13;
+&#13;
+  font-size: 11px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   UPCOMING INTERVIEWS&#13;
+   ========================================================= */&#13;
+&#13;
+.interviews-list {&#13;
+&#13;
+  width: 100%;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  flex-direction: column;&#13;
+&#13;
+  gap: 13px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.interview-card {&#13;
+&#13;
+  position: relative;&#13;
+&#13;
+  width: 100%;&#13;
+&#13;
+  background: #ffffff;&#13;
+&#13;
+  border:&#13;
+    1px solid #d8e2ed;&#13;
+&#13;
+  border-radius: 15px;&#13;
+&#13;
+  overflow: hidden;&#13;
+&#13;
+  box-shadow:&#13;
+    0 5px 17px&#13;
+    rgba(25,43,60,.045);&#13;
+&#13;
+  transition:&#13;
+    transform .18s ease,&#13;
+    box-shadow .18s ease;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.interview-card:hover {&#13;
+&#13;
+  transform:&#13;
+    translateY(-2px);&#13;
+&#13;
+  box-shadow:&#13;
+    0 10px 25px&#13;
+    rgba(25,43,60,.075);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.interview-card-status {&#13;
+&#13;
+  width: 100%;&#13;
+&#13;
+  height: 5px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.status-line-scheduled {&#13;
+  background: #7040ff;&#13;
+}&#13;
+&#13;
+.status-line-progress {&#13;
+  background: #159bb1;&#13;
+}&#13;
+&#13;
+.status-line-completed {&#13;
+  background: #16a34a;&#13;
+}&#13;
+&#13;
+.status-line-default {&#13;
+  background: #94a3b8;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   INTERVIEW INNER&#13;
+   ========================================================= */&#13;
+&#13;
+.interview-card-inner {&#13;
+&#13;
+  min-height: 148px;&#13;
+&#13;
+  padding:&#13;
+    18px&#13;
+    19px;&#13;
+&#13;
+  display: grid;&#13;
+&#13;
+  grid-template-columns:&#13;
+    minmax(280px,1.15fr)&#13;
+    minmax(330px,1.35fr)&#13;
+    155px;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  gap: 20px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   MAIN INTERVIEW INFO&#13;
+   ========================================================= */&#13;
+&#13;
+.interview-main-info {&#13;
+&#13;
+  min-width: 0;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: flex-start;&#13;
+&#13;
+  gap: 13px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.interview-main-icon {&#13;
+&#13;
+  width: 48px;&#13;
+&#13;
+  height: 48px;&#13;
+&#13;
+  min-width: 48px;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  justify-content: center;&#13;
+&#13;
+  border-radius: 12px;&#13;
+&#13;
+  font-size: 20px;&#13;
+&#13;
+  font-weight: 800;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.icon-scheduled {&#13;
+&#13;
+  color: #7040ff;&#13;
+&#13;
+  background: #eee7ff;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.icon-progress {&#13;
+&#13;
+  color: #087f93;&#13;
+&#13;
+  background: #d8f7fb;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.icon-completed {&#13;
+&#13;
+  color: #15803d;&#13;
+&#13;
+  background: #dcfce7;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.interview-main-text {&#13;
+&#13;
+  min-width: 0;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.interview-title-row {&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  flex-wrap: wrap;&#13;
+&#13;
+  gap: 7px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.interview-title-row h3 {&#13;
+&#13;
+  margin: 0;&#13;
+&#13;
+  color: #0a1d38;&#13;
+&#13;
+  font-size: 20px;&#13;
+&#13;
+  line-height: 1.2;&#13;
+&#13;
+  font-weight: 800;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.interview-type {&#13;
+&#13;
+  margin-top: 5px;&#13;
+&#13;
+  color: #53677f;&#13;
+&#13;
+  font-size: 14px;&#13;
+&#13;
+  font-weight: 600;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   STATUS&#13;
+   ========================================================= */&#13;
+&#13;
+.interview-status-pill {&#13;
+&#13;
+  display: inline-flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  gap: 5px;&#13;
+&#13;
+  padding:&#13;
+    5px&#13;
+    9px;&#13;
+&#13;
+  border-radius: 20px;&#13;
+&#13;
+  font-size: 10px;&#13;
+&#13;
+  font-weight: 850;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.status-scheduled {&#13;
+&#13;
+  color: #7040ff;&#13;
+&#13;
+  background: #eee7ff;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.status-progress {&#13;
+&#13;
+  color: #087f93;&#13;
+&#13;
+  background: #d8f7fb;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.status-completed {&#13;
+&#13;
+  color: #15803d;&#13;
+&#13;
+  background: #dcfce7;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.status-default {&#13;
+&#13;
+  color: #64748b;&#13;
+&#13;
+  background: #eef2f7;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.interview-status-dot {&#13;
+&#13;
+  width: 5px;&#13;
+&#13;
+  height: 5px;&#13;
+&#13;
+  border-radius: 50%;&#13;
+&#13;
+  background: currentColor;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   ATTENDANCE&#13;
+   ========================================================= */&#13;
+&#13;
+.interview-attendance {&#13;
+&#13;
+  width: fit-content;&#13;
+&#13;
+  margin-top: 9px;&#13;
+&#13;
+  padding:&#13;
+    6px&#13;
+    9px;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  gap: 4px;&#13;
+&#13;
+  border-radius: 7px;&#13;
+&#13;
+  font-size: 11px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.interview-attendance strong {&#13;
+&#13;
+  font-weight: 850;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.attendance-present {&#13;
+&#13;
+  color: #15803d;&#13;
+&#13;
+  background: #ecfdf3;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.attendance-absent {&#13;
+&#13;
+  color: #dc2626;&#13;
+&#13;
+  background: #fef2f2;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.attendance-pending {&#13;
+&#13;
+  color: #b45309;&#13;
+&#13;
+  background: #fff7ed;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   DETAILS&#13;
+   ========================================================= */&#13;
+&#13;
+.interview-detail-grid {&#13;
+&#13;
+  min-width: 0;&#13;
+&#13;
+  display: grid;&#13;
+&#13;
+  grid-template-columns:&#13;
+    repeat(3,minmax(0,1fr));&#13;
+&#13;
+  gap: 8px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.interview-detail-item {&#13;
+&#13;
+  min-width: 0;&#13;
+&#13;
+  min-height: 62px;&#13;
+&#13;
+  padding: 9px;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  gap: 8px;&#13;
+&#13;
+  border:&#13;
+    1px solid #edf1f6;&#13;
+&#13;
+  border-radius: 10px;&#13;
+&#13;
+  background: #f8fafc;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.interview-detail-icon {&#13;
+&#13;
+  width: 29px;&#13;
+&#13;
+  height: 29px;&#13;
+&#13;
+  min-width: 29px;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  justify-content: center;&#13;
+&#13;
+  border-radius: 7px;&#13;
+&#13;
+  background: #ffffff;&#13;
+&#13;
+  font-size: 13px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.interview-detail-item div {&#13;
+&#13;
+  min-width: 0;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.interview-detail-item small {&#13;
+&#13;
+  display: block;&#13;
+&#13;
+  margin-bottom: 3px;&#13;
+&#13;
+  color: #8997aa;&#13;
+&#13;
+  font-size: 8px;&#13;
+&#13;
+  font-weight: 850;&#13;
+&#13;
+  letter-spacing: .9px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.interview-detail-item strong {&#13;
+&#13;
+  display: block;&#13;
+&#13;
+  color: #344964;&#13;
+&#13;
+  font-size: 11px;&#13;
+&#13;
+  font-weight: 780;&#13;
+&#13;
+  white-space: nowrap;&#13;
+&#13;
+  overflow: hidden;&#13;
+&#13;
+  text-overflow: ellipsis;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   ACTIONS&#13;
+   ========================================================= */&#13;
+&#13;
+.interview-actions {&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  flex-direction: column;&#13;
+&#13;
+  gap: 8px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.interview-view-button,&#13;
+.interview-start-button,&#13;
+.interview-progress-button,&#13;
+.qr-refresh-button {&#13;
+&#13;
+  width: 100%;&#13;
+&#13;
+  min-height: 39px;&#13;
+&#13;
+  padding:&#13;
+    8px&#13;
+    11px;&#13;
+&#13;
+  border-radius: 8px;&#13;
+&#13;
+  font-family: inherit;&#13;
+&#13;
+  font-size: 11px;&#13;
+&#13;
+  font-weight: 800;&#13;
+&#13;
+  cursor: pointer;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.interview-view-button {&#13;
+&#13;
+  color: #334964;&#13;
+&#13;
+  background: #ffffff;&#13;
+&#13;
+  border:&#13;
+    1px solid #cbd7e5;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.interview-view-button:hover {&#13;
+&#13;
+  background: #f6f8fb;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.interview-start-button {&#13;
+&#13;
+  color: #ffffff;&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      135deg,&#13;
+      #7040ff,&#13;
+      #875eff&#13;
+    );&#13;
+&#13;
+  border:&#13;
+    1px solid #7040ff;&#13;
+&#13;
+  box-shadow:&#13;
+    0 4px 10px&#13;
+    rgba(112,64,255,.18);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.interview-start-button:hover {&#13;
+&#13;
+  filter: brightness(.96);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.interview-progress-button {&#13;
+&#13;
+  color: #087f93;&#13;
+&#13;
+  background: #e9f9fb;&#13;
+&#13;
+  border:&#13;
+    1px solid #c8edf2;&#13;
+&#13;
+  cursor: default;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   HISTORY&#13;
+   ========================================================= */&#13;
+&#13;
+.interviews-history-list {&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  flex-direction: column;&#13;
+&#13;
+  gap: 11px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.interview-history-card {&#13;
+&#13;
+  min-height: 103px;&#13;
+&#13;
+  padding:&#13;
+    16px&#13;
+    19px;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  justify-content: space-between;&#13;
+&#13;
+  gap: 20px;&#13;
+&#13;
+  background: #ffffff;&#13;
+&#13;
+  border:&#13;
+    1px solid #d8e2ed;&#13;
+&#13;
+  border-left:&#13;
+    4px solid #16a34a;&#13;
+&#13;
+  border-radius: 14px;&#13;
+&#13;
+  box-shadow:&#13;
+    0 4px 15px rgba(25,43,60,.04);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.interview-history-card:nth-child(4n + 1) {&#13;
+&#13;
+  border-left-color: #7040ff;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.interview-history-card:nth-child(4n + 2) {&#13;
+&#13;
+  border-left-color: #159bb1;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.interview-history-card:nth-child(4n + 3) {&#13;
+&#13;
+  border-left-color: #e08a00;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.interview-history-card:nth-child(4n + 4) {&#13;
+&#13;
+  border-left-color: #16a34a;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.history-left {&#13;
+&#13;
+  min-width: 0;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  gap: 12px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.history-icon {&#13;
+&#13;
+  width: 44px;&#13;
+&#13;
+  height: 44px;&#13;
+&#13;
+  min-width: 44px;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  justify-content: center;&#13;
+&#13;
+  border-radius: 11px;&#13;
+&#13;
+  background: #dcfce7;&#13;
+&#13;
+  color: #15803d;&#13;
+&#13;
+  font-size: 18px;&#13;
+&#13;
+  font-weight: 800;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.history-information {&#13;
+&#13;
+  min-width: 0;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.history-title-row {&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  gap: 7px;&#13;
+&#13;
+  flex-wrap: wrap;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.history-title-row h3 {&#13;
+&#13;
+  margin: 0;&#13;
+&#13;
+  color: #0a1d38;&#13;
+&#13;
+  font-size: 18px;&#13;
+&#13;
+  font-weight: 800;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.history-completed-pill {&#13;
+&#13;
+  padding:&#13;
+    5px&#13;
+    9px;&#13;
+&#13;
+  border-radius: 20px;&#13;
+&#13;
+  color: #15803d;&#13;
+&#13;
+  background: #dcfce7;&#13;
+&#13;
+  font-size: 10px;&#13;
+&#13;
+  font-weight: 850;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.history-type {&#13;
+&#13;
+  margin-top: 4px;&#13;
+&#13;
+  color: #53677f;&#13;
+&#13;
+  font-size: 13px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.history-meta {&#13;
+&#13;
+  margin-top: 6px;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  gap: 13px;&#13;
+&#13;
+  flex-wrap: wrap;&#13;
+&#13;
+  color: #8794a7;&#13;
+&#13;
+  font-size: 11px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.history-right {&#13;
+&#13;
+  flex-shrink: 0;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  gap: 18px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   HISTORY SCORE&#13;
+   ========================================================= */&#13;
+&#13;
+.history-score {&#13;
+&#13;
+  min-width: 82px;&#13;
+&#13;
+  padding:&#13;
+    8px&#13;
+    10px;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  flex-direction: column;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  border-radius: 10px;&#13;
+&#13;
+  background: #f1edff;&#13;
+&#13;
+  border:&#13;
+    1px solid #ddd2ff;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.history-score strong {&#13;
+&#13;
+  color: #7040ff;&#13;
+&#13;
+  font-size: 27px;&#13;
+&#13;
+  line-height: 1;&#13;
+&#13;
+  font-weight: 900;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.history-score span {&#13;
+&#13;
+  margin-top: 5px;&#13;
+&#13;
+  color: #725bb4;&#13;
+&#13;
+  font-size: 9px;&#13;
+&#13;
+  font-weight: 750;&#13;
+&#13;
+  white-space: nowrap;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.history-no-score {&#13;
+&#13;
+  padding:&#13;
+    10px&#13;
+    12px;&#13;
+&#13;
+  color: #94a3b8;&#13;
+&#13;
+  background: #f8fafc;&#13;
+&#13;
+  border-radius: 8px;&#13;
+&#13;
+  font-size: 11px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   HISTORY BUTTON&#13;
+   ========================================================= */&#13;
+&#13;
+.history-right&#13;
+.interview-view-button {&#13;
+&#13;
+  width: auto;&#13;
+&#13;
+  min-width: 132px;&#13;
+&#13;
+  color: #ffffff;&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      135deg,&#13;
+      #7040ff,&#13;
+      #875eff&#13;
+    );&#13;
+&#13;
+  border:&#13;
+    1px solid #7040ff;&#13;
+&#13;
+  box-shadow:&#13;
+    0 5px 12px&#13;
+    rgba(112,64,255,.18);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.interview-history-card:nth-child(4n + 2)&#13;
+.history-right&#13;
+.interview-view-button {&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      135deg,&#13;
+      #0794aa,&#13;
+      #18b1c3&#13;
+    );&#13;
+&#13;
+  border-color: #0794aa;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.interview-history-card:nth-child(4n + 3)&#13;
+.history-right&#13;
+.interview-view-button {&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      135deg,&#13;
+      #dc8500,&#13;
+      #efaa24&#13;
+    );&#13;
+&#13;
+  border-color: #dc8500;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.interview-history-card:nth-child(4n + 4)&#13;
+.history-right&#13;
+.interview-view-button {&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      135deg,&#13;
+      #159447,&#13;
+      #26b45d&#13;
+    );&#13;
+&#13;
+  border-color: #159447;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   EMPTY STATE&#13;
+   ========================================================= */&#13;
+&#13;
+.interviews-empty {&#13;
+&#13;
+  min-height: 190px;&#13;
+&#13;
+  padding: 30px;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  flex-direction: column;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  justify-content: center;&#13;
+&#13;
+  text-align: center;&#13;
+&#13;
+  border:&#13;
+    1px solid #d8e2ed;&#13;
+&#13;
+  border-radius: 15px;&#13;
+&#13;
+  background: #ffffff;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.interviews-empty-icon {&#13;
+&#13;
+  width: 48px;&#13;
+&#13;
+  height: 48px;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  justify-content: center;&#13;
+&#13;
+  border-radius: 12px;&#13;
+&#13;
+  color: #6638d0;&#13;
+&#13;
+  background: #eee7ff;&#13;
+&#13;
+  font-size: 22px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.interviews-empty h3 {&#13;
+&#13;
+  margin:&#13;
+    10px&#13;
+    0&#13;
+    4px;&#13;
+&#13;
+  color: #0a1d38;&#13;
+&#13;
+  font-size: 18px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.interviews-empty p {&#13;
+&#13;
+  margin: 0;&#13;
+&#13;
+  color: #687a91;&#13;
+&#13;
+  font-size: 13px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   LOADING&#13;
+   ========================================================= */&#13;
+&#13;
+.interviews-loading {&#13;
+&#13;
+  min-height: 300px;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  justify-content: center;&#13;
+&#13;
+  gap: 10px;&#13;
+&#13;
+  color: #53677f;&#13;
+&#13;
+  font-size: 14px;&#13;
+&#13;
+  font-weight: 700;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.interviews-spinner {&#13;
+&#13;
+  width: 21px;&#13;
+&#13;
+  height: 21px;&#13;
+&#13;
+  border:&#13;
+    3px solid #ded6f7;&#13;
+&#13;
+  border-top-color: #7040ff;&#13;
+&#13;
+  border-radius: 50%;&#13;
+&#13;
+  animation:&#13;
+    c360InterviewSpin&#13;
+    .8s linear infinite;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+@keyframes c360InterviewSpin {&#13;
+&#13;
+  to {&#13;
+    transform:&#13;
+      rotate(360deg);&#13;
+  }&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   MODALS&#13;
+   ========================================================= */&#13;
+&#13;
+.interview-modal-backdrop {&#13;
+&#13;
+  position: fixed;&#13;
+&#13;
+  inset: 0;&#13;
+&#13;
+  z-index: 50000;&#13;
+&#13;
+  padding: 20px;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  justify-content: center;&#13;
+&#13;
+  background:&#13;
+    rgba(12,25,43,.60);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.interview-modal {&#13;
+&#13;
+  position: relative;&#13;
+&#13;
+  width:&#13;
+    min(680px,100%);&#13;
+&#13;
+  max-height: 90vh;&#13;
+&#13;
+  overflow-y: auto;&#13;
+&#13;
+  border-radius: 16px;&#13;
+&#13;
+  background: #ffffff;&#13;
+&#13;
+  box-shadow:&#13;
+    0 25px 70px rgba(15,23,42,.25);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.interview-modal-close {&#13;
+&#13;
+  position: absolute;&#13;
+&#13;
+  top: 14px;&#13;
+&#13;
+  right: 15px;&#13;
+&#13;
+  z-index: 5;&#13;
+&#13;
+  width: 34px;&#13;
+&#13;
+  height: 34px;&#13;
+&#13;
+  border: 0;&#13;
+&#13;
+  border-radius: 8px;&#13;
+&#13;
+  background: #f1f4f8;&#13;
+&#13;
+  color: #536178;&#13;
+&#13;
+  font-size: 21px;&#13;
+&#13;
+  cursor: pointer;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.interview-modal-header {&#13;
+&#13;
+  padding:&#13;
+    26px&#13;
+    26px&#13;
+    18px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.interview-modal-eyebrow {&#13;
+&#13;
+  margin-bottom: 7px;&#13;
+&#13;
+  color: #7040ff;&#13;
+&#13;
+  font-size: 11px;&#13;
+&#13;
+  font-weight: 900;&#13;
+&#13;
+  letter-spacing: 1.3px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.interview-modal-header h2 {&#13;
+&#13;
+  margin: 0;&#13;
+&#13;
+  color: #0a1d38;&#13;
+&#13;
+  font-size: 25px;&#13;
+&#13;
+  font-weight: 820;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.interview-modal-header p {&#13;
+&#13;
+  margin:&#13;
+    6px&#13;
+    0&#13;
+    0;&#13;
+&#13;
+  color: #718096;&#13;
+&#13;
+  font-size: 13px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.interview-modal-details {&#13;
+&#13;
+  padding:&#13;
+    0&#13;
+    26px&#13;
+    20px;&#13;
+&#13;
+  display: grid;&#13;
+&#13;
+  grid-template-columns:&#13;
+    repeat(2,1fr);&#13;
+&#13;
+  gap: 11px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.modal-detail-item {&#13;
+&#13;
+  position: relative;&#13;
+&#13;
+  min-height: 62px;&#13;
+&#13;
+  padding:&#13;
+    13px&#13;
+    14px;&#13;
+&#13;
+  border:&#13;
+    1px solid #e8edf3;&#13;
+&#13;
+  border-radius: 10px;&#13;
+&#13;
+  background: #f8fafc;&#13;
+&#13;
+  overflow: hidden;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.modal-detail-item::before {&#13;
+&#13;
+  content: "";&#13;
+&#13;
+  position: absolute;&#13;
+&#13;
+  left: 0;&#13;
+&#13;
+  top: 0;&#13;
+&#13;
+  bottom: 0;&#13;
+&#13;
+  width: 4px;&#13;
+&#13;
+  background: #7040ff;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.modal-detail-item:nth-child(1) {&#13;
+  background: #f6f2ff;&#13;
+  border-color: #ded4ff;&#13;
+}&#13;
+&#13;
+.modal-detail-item:nth-child(2) {&#13;
+  background: #edfafd;&#13;
+  border-color: #c9edf2;&#13;
+}&#13;
+&#13;
+.modal-detail-item:nth-child(3) {&#13;
+  background: #eef6ff;&#13;
+  border-color: #d1e3fa;&#13;
+}&#13;
+&#13;
+.modal-detail-item:nth-child(4) {&#13;
+  background: #fff7e9;&#13;
+  border-color: #f4dfb7;&#13;
+}&#13;
+&#13;
+.modal-detail-item:nth-child(5) {&#13;
+  background: #eefaf1;&#13;
+  border-color: #cee9d5;&#13;
+}&#13;
+&#13;
+.modal-detail-item:nth-child(6) {&#13;
+  background: #fff0f7;&#13;
+  border-color: #f4cce0;&#13;
+}&#13;
+&#13;
+&#13;
+.modal-detail-item:nth-child(1)::before {&#13;
+  background: #7040ff;&#13;
+}&#13;
+&#13;
+.modal-detail-item:nth-child(2)::before {&#13;
+  background: #0b91a7;&#13;
+}&#13;
+&#13;
+.modal-detail-item:nth-child(3)::before {&#13;
+  background: #2878c7;&#13;
+}&#13;
+&#13;
+.modal-detail-item:nth-child(4)::before {&#13;
+  background: #df8a00;&#13;
+}&#13;
+&#13;
+.modal-detail-item:nth-child(5)::before {&#13;
+  background: #16a34a;&#13;
+}&#13;
+&#13;
+.modal-detail-item:nth-child(6)::before {&#13;
+  background: #df2d79;&#13;
+}&#13;
+&#13;
+&#13;
+.modal-detail-item span {&#13;
+&#13;
+  display: block;&#13;
+&#13;
+  margin-bottom: 5px;&#13;
+&#13;
+  color: #7e8da1;&#13;
+&#13;
+  font-size: 9px;&#13;
+&#13;
+  font-weight: 900;&#13;
+&#13;
+  letter-spacing: .8px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.modal-detail-item strong {&#13;
+&#13;
+  color: #344964;&#13;
+&#13;
+  font-size: 13px;&#13;
+&#13;
+  font-weight: 800;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.interview-modal-footer {&#13;
+&#13;
+  padding:&#13;
+    13px&#13;
+    26px&#13;
+    20px;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  justify-content: flex-end;&#13;
+&#13;
+  gap: 9px;&#13;
+&#13;
+  border-top:&#13;
+    1px solid #edf1f6;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   QR MODAL&#13;
+   ========================================================= */&#13;
+&#13;
+.interview-qr-modal {&#13;
+&#13;
+  position: relative;&#13;
+&#13;
+  width:&#13;
+    min(600px,100%);&#13;
+&#13;
+  height:&#13;
+    min(750px,92vh);&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  flex-direction: column;&#13;
+&#13;
+  overflow: hidden;&#13;
+&#13;
+  border-radius: 16px;&#13;
+&#13;
+  background: #ffffff;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.qr-header {&#13;
+&#13;
+  padding:&#13;
+    22px&#13;
+    50px&#13;
+    9px;&#13;
+&#13;
+  text-align: center;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.qr-icon {&#13;
+&#13;
+  width: 45px;&#13;
+&#13;
+  height: 45px;&#13;
+&#13;
+  margin:&#13;
+    0&#13;
+    auto&#13;
+    8px;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  justify-content: center;&#13;
+&#13;
+  border-radius: 11px;&#13;
+&#13;
+  color: #7040ff;&#13;
+&#13;
+  background: #eee7ff;&#13;
+&#13;
+  font-size: 20px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.qr-header h2 {&#13;
+&#13;
+  margin: 0;&#13;
+&#13;
+  color: #0a1d38;&#13;
+&#13;
+  font-size: 22px;&#13;
+&#13;
+  font-weight: 820;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.qr-header p {&#13;
+&#13;
+  margin:&#13;
+    5px&#13;
+    0&#13;
+    0;&#13;
+&#13;
+  color: #718096;&#13;
+&#13;
+  font-size: 13px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.qr-frame-wrapper {&#13;
+&#13;
+  flex: 1;&#13;
+&#13;
+  min-height: 0;&#13;
+&#13;
+  padding:&#13;
+    5px&#13;
+    14px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.qr-frame {&#13;
+&#13;
+  width: 100%;&#13;
+&#13;
+  height: 100%;&#13;
+&#13;
+  border: 0;&#13;
+&#13;
+  border-radius: 9px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.qr-information {&#13;
+&#13;
+  margin:&#13;
+    7px&#13;
+    14px;&#13;
+&#13;
+  padding: 12px;&#13;
+&#13;
+  border:&#13;
+    1px solid #bfe9ce;&#13;
+&#13;
+  border-radius: 9px;&#13;
+&#13;
+  background: #effbf4;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.qr-information strong {&#13;
+&#13;
+  display: block;&#13;
+&#13;
+  color: #166534;&#13;
+&#13;
+  font-size: 12px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.qr-information span {&#13;
+&#13;
+  display: block;&#13;
+&#13;
+  margin-top: 3px;&#13;
+&#13;
+  color: #4d7c65;&#13;
+&#13;
+  font-size: 11px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.qr-refresh-button {&#13;
+&#13;
+  width: auto;&#13;
+&#13;
+  color: #7040ff;&#13;
+&#13;
+  background: #f1edff;&#13;
+&#13;
+  border:&#13;
+    1px solid #ddd2ff;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   PERFORMANCE MODAL&#13;
+   ========================================================= */&#13;
+&#13;
+.performance-score-grid {&#13;
+&#13;
+  padding:&#13;
+    0&#13;
+    26px;&#13;
+&#13;
+  display: grid;&#13;
+&#13;
+  grid-template-columns:&#13;
+    repeat(4,1fr);&#13;
+&#13;
+  gap: 10px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.performance-score-item {&#13;
+&#13;
+  padding:&#13;
+    14px&#13;
+    8px;&#13;
+&#13;
+  text-align: center;&#13;
+&#13;
+  border:&#13;
+    1px solid #e7edf4;&#13;
+&#13;
+  border-radius: 10px;&#13;
+&#13;
+  background: #f8fafc;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.performance-score-item span {&#13;
+&#13;
+  display: block;&#13;
+&#13;
+  color: #718096;&#13;
+&#13;
+  font-size: 10px;&#13;
+&#13;
+  font-weight: 780;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.performance-score-item strong {&#13;
+&#13;
+  display: block;&#13;
+&#13;
+  margin-top: 6px;&#13;
+&#13;
+  color: #172033;&#13;
+&#13;
+  font-size: 23px;&#13;
+&#13;
+  font-weight: 900;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.performance-score-item:nth-child(1) {&#13;
+&#13;
+  background: #eee7ff;&#13;
+&#13;
+  border-color: #d8caff;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.performance-score-item:nth-child(1) strong {&#13;
+&#13;
+  color: #7040ff;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.performance-score-item:nth-child(2) {&#13;
+&#13;
+  background: #e8f9fc;&#13;
+&#13;
+  border-color: #c7edf2;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.performance-score-item:nth-child(2) strong {&#13;
+&#13;
+  color: #0b8195;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.performance-score-item:nth-child(3) {&#13;
+&#13;
+  background: #fff4df;&#13;
+&#13;
+  border-color: #f1dcae;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.performance-score-item:nth-child(3) strong {&#13;
+&#13;
+  color: #c56f00;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.performance-score-item.overall {&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      135deg,&#13;
+      #f0eaff,&#13;
+      #e7ddff&#13;
+    );&#13;
+&#13;
+  border-color: #cdbaff;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.performance-score-item.overall strong {&#13;
+&#13;
+  color: #7040ff;&#13;
+&#13;
+  font-size: 25px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.feedback-section {&#13;
+&#13;
+  padding:&#13;
+    18px&#13;
+    26px&#13;
+    8px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.feedback-box {&#13;
+&#13;
+  position: relative;&#13;
+&#13;
+  margin-bottom: 11px;&#13;
+&#13;
+  padding:&#13;
+    13px&#13;
+    14px&#13;
+    13px&#13;
+    16px;&#13;
+&#13;
+  border-radius: 10px;&#13;
+&#13;
+  background: #f8fafc;&#13;
+&#13;
+  border:&#13;
+    1px solid #e7edf4;&#13;
+&#13;
+  overflow: hidden;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.feedback-box::before {&#13;
+&#13;
+  content: "";&#13;
+&#13;
+  position: absolute;&#13;
+&#13;
+  left: 0;&#13;
+&#13;
+  top: 0;&#13;
+&#13;
+  bottom: 0;&#13;
+&#13;
+  width: 4px;&#13;
+&#13;
+  background: #7040ff;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.feedback-box:nth-child(1) {&#13;
+&#13;
+  background: #f5f1ff;&#13;
+&#13;
+  border-color: #ded4ff;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.feedback-box:nth-child(2) {&#13;
+&#13;
+  background: #eefafd;&#13;
+&#13;
+  border-color: #c9edf2;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.feedback-box:nth-child(3) {&#13;
+&#13;
+  background: #fff7e9;&#13;
+&#13;
+  border-color: #f2dfb8;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.feedback-box h4 {&#13;
+&#13;
+  margin:&#13;
+    0&#13;
+    0&#13;
+    6px;&#13;
+&#13;
+  color: #344964;&#13;
+&#13;
+  font-size: 13px;&#13;
+&#13;
+  font-weight: 800;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.feedback-box p {&#13;
+&#13;
+  margin: 0;&#13;
+&#13;
+  color: #657189;&#13;
+&#13;
+  font-size: 12px;&#13;
+&#13;
+  line-height: 1.55;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.performance-empty {&#13;
+&#13;
+  padding:&#13;
+    40px&#13;
+    25px;&#13;
+&#13;
+  text-align: center;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.performance-empty h3 {&#13;
+&#13;
+  color: #344964;&#13;
+&#13;
+  font-size: 18px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.performance-empty p {&#13;
+&#13;
+  color: #718096;&#13;
+&#13;
+  font-size: 13px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   MOBILE OVERLAY&#13;
+   ========================================================= */&#13;
+&#13;
+.c360-sidebar-overlay {&#13;
+&#13;
+  display: none;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   LARGE DESKTOP&#13;
+   ========================================================= */&#13;
+&#13;
+@media (min-width: 1600px) {&#13;
+&#13;
+  .c360-page-content {&#13;
+&#13;
+    padding-left:&#13;
+      15px;&#13;
+&#13;
+    padding-right:&#13;
+      15px;&#13;
+&#13;
+  }&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   TABLET&#13;
+   ========================================================= */&#13;
+&#13;
+@media (max-width: 1200px) {&#13;
+&#13;
+  .interviews-kpi-grid {&#13;
+&#13;
+    grid-template-columns:&#13;
+      repeat(2,minmax(0,1fr));&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .interview-card-inner {&#13;
+&#13;
+    grid-template-columns:&#13;
+      minmax(250px,1fr)&#13;
+      minmax(280px,1fr);&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .interview-actions {&#13;
+&#13;
+    grid-column:&#13;
+      1 / -1;&#13;
+&#13;
+    flex-direction:&#13;
+      row;&#13;
+&#13;
+    justify-content:&#13;
+      flex-end;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .interview-actions button {&#13;
+&#13;
+    width:&#13;
+      auto;&#13;
+&#13;
+  }&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   TABLET / MOBILE&#13;
+   ========================================================= */&#13;
+&#13;
+@media (max-width: 900px) {&#13;
+&#13;
+  .c360-left-sidebar {&#13;
+&#13;
+    position: fixed !important;&#13;
+&#13;
+    top: 0;&#13;
+&#13;
+    left: 0;&#13;
+&#13;
+    bottom: 0;&#13;
+&#13;
+    width: 285px !important;&#13;
+&#13;
+    min-width: 285px !important;&#13;
+&#13;
+    max-width: 285px !important;&#13;
+&#13;
+    transform:&#13;
+      translateX(-105%);&#13;
+&#13;
+    box-shadow:&#13;
+      8px 0 25px&#13;
+      rgba(25,43,60,.13);&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .campus360-interviews.sidebar-open&#13;
+  .c360-left-sidebar {&#13;
+&#13;
+    transform:&#13;
+      translateX(0);&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .campus360-interviews.sidebar-closed&#13;
+  .c360-left-sidebar {&#13;
+&#13;
+    transform:&#13;
+      translateX(-105%);&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .c360-sidebar-overlay {&#13;
+&#13;
+    position: fixed;&#13;
+&#13;
+    inset: 0;&#13;
+&#13;
+    z-index: 90;&#13;
+&#13;
+    display: block;&#13;
+&#13;
+    background:&#13;
+      rgba(15,28,45,.35);&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .campus360-interviews.sidebar-closed&#13;
+  .c360-sidebar-overlay {&#13;
+&#13;
+    display: none;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .c360-right-page {&#13;
+&#13;
+    left: 0 !important;&#13;
+&#13;
+    width: 100vw !important;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  /* Keep dark-purple Interviews card&#13;
+     separated from the white navbar on mobile. */&#13;
+&#13;
+  .c360-page-content {&#13;
+&#13;
+    padding-top:&#13;
+      18px;&#13;
+&#13;
+  }&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   MOBILE&#13;
+   ========================================================= */&#13;
+&#13;
+@media (max-width: 650px) {&#13;
+&#13;
+  .c360-topbar {&#13;
+&#13;
+    height: 68px;&#13;
+&#13;
+    min-height: 68px;&#13;
+&#13;
+    padding:&#13;
+      0&#13;
+      11px;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .c360-page-heading {&#13;
+&#13;
+    display: none;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .c360-top-profile-info,&#13;
+  .c360-profile-chevron {&#13;
+&#13;
+    display: none;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .c360-top-profile {&#13;
+&#13;
+    padding-left: 3px;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .c360-topbar-right {&#13;
+&#13;
+    gap: 5px;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .c360-top-icon {&#13;
+&#13;
+    width: 37px;&#13;
+&#13;
+    height: 37px;&#13;
+&#13;
+    min-width: 37px;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .c360-top-avatar {&#13;
+&#13;
+    width: 37px;&#13;
+&#13;
+    height: 37px;&#13;
+&#13;
+    min-width: 37px;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .c360-page-content {&#13;
+&#13;
+    padding:&#13;
+      14px&#13;
+      10px&#13;
+      45px;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .interviews-header {&#13;
+&#13;
+    min-height:&#13;
+      160px;&#13;
+&#13;
+    padding:&#13;
+      25px&#13;
+      22px;&#13;
+&#13;
+    border-radius:&#13;
+      15px;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .interviews-header h1 {&#13;
+&#13;
+    font-size:&#13;
+      32px;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .interviews-header p {&#13;
+&#13;
+    font-size:&#13;
+      14px;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .interviews-kpi-grid {&#13;
+&#13;
+    grid-template-columns:&#13;
+      1fr;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .interview-card-inner {&#13;
+&#13;
+    grid-template-columns:&#13;
+      1fr;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .interview-detail-grid {&#13;
+&#13;
+    grid-template-columns:&#13;
+      1fr;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .interview-actions {&#13;
+&#13;
+    grid-column:&#13;
+      auto;&#13;
+&#13;
+    flex-direction:&#13;
+      column;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .interview-actions button {&#13;
+&#13;
+    width:&#13;
+      100%;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .interview-history-card {&#13;
+&#13;
+    align-items:&#13;
+      flex-start;&#13;
+&#13;
+    flex-direction:&#13;
+      column;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .history-right {&#13;
+&#13;
+    width:&#13;
+      100%;&#13;
+&#13;
+    justify-content:&#13;
+      space-between;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .history-right&#13;
+  .interview-view-button {&#13;
+&#13;
+    min-width:&#13;
+      120px;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .interview-modal-details {&#13;
+&#13;
+    grid-template-columns:&#13;
+      1fr;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .performance-score-grid {&#13;
+&#13;
+    grid-template-columns:&#13;
+      repeat(2,1fr);&#13;
+&#13;
+  }&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   VERY SMALL MOBILE&#13;
+   ========================================================= */&#13;
+&#13;
+@media (max-width: 430px) {&#13;
+&#13;
+  .c360-topbar {&#13;
+&#13;
+    height: 62px;&#13;
+&#13;
+    min-height: 62px;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .c360-menu-button {&#13;
+&#13;
+    width: 37px;&#13;
+&#13;
+    height: 37px;&#13;
+&#13;
+    min-width: 37px;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .c360-menu-button span {&#13;
+&#13;
+    width: 17px;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .interviews-header h1 {&#13;
+&#13;
+    font-size: 29px;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .interview-title-row h3 {&#13;
+&#13;
+    font-size: 18px;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .history-right {&#13;
+&#13;
+    flex-wrap: wrap;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .history-right&#13;
+  .interview-view-button {&#13;
+&#13;
+    width:&#13;
+      100%;&#13;
+&#13;
+  }&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   FINAL FULL-VIEW SAFETY&#13;
+   ========================================================= */&#13;
+&#13;
+.campus360-interviews {&#13;
+&#13;
+  margin-top: 0 !important;&#13;
+&#13;
+  margin-bottom: 0 !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.campus360-interviews .c360-right-page {&#13;
+&#13;
+  margin-left: 0 !important;&#13;
+&#13;
+  margin-right: 0 !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.campus360-interviews .c360-page-content {&#13;
+&#13;
+  width: 100% !important;&#13;
+&#13;
+  max-width: none !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* Never display an unintended external navigation bar&#13;
+   above the Campus360 application. */&#13;
+&#13;
+body:has(.campus360-interviews) &gt; header,&#13;
+body:has(.campus360-interviews) &gt; nav {&#13;
+&#13;
+  display: none !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   FINAL SIDEBAR PURPLE OVERRIDE&#13;
+   ========================================================= */&#13;
+&#13;
+.campus360-interviews .c360-left-sidebar {&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      180deg,&#13;
+      #130d2f 0%,&#13;
+      #160d38 48%,&#13;
+      #100a29 100%&#13;
+    ) !important;&#13;
+&#13;
+  border-right:&#13;
+    1px solid #2d2157 !important;&#13;
+&#13;
+  color: #ffffff !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.campus360-interviews .c360-sidebar-brand {&#13;
+&#13;
+  border-bottom:&#13;
+    1px solid rgba(255,255,255,.08) !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.campus360-interviews .c360-brand-logo {&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      135deg,&#13;
+      #7c3aed,&#13;
+      #9333ea&#13;
+    ) !important;&#13;
+&#13;
+  color: #ffffff !important;&#13;
+&#13;
+  box-shadow:&#13;
+    0 7px 18px&#13;
+    rgba(124,58,237,.34) !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.campus360-interviews .c360-brand-name strong {&#13;
+&#13;
+  color:&#13;
+    #ffffff !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.campus360-interviews .c360-brand-name span {&#13;
+&#13;
+  color:&#13;
+    #c4b5fd !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.campus360-interviews .c360-sidebar-student {&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      145deg,&#13;
+      #1f1448,&#13;
+      #21154d&#13;
+    ) !important;&#13;
+&#13;
+  border:&#13;
+    1px solid #3c2b69 !important;&#13;
+&#13;
+  color:&#13;
+    #ffffff !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.campus360-interviews .c360-sidebar-student:hover {&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      145deg,&#13;
+      #271957,&#13;
+      #2b1c61&#13;
+    ) !important;&#13;
+&#13;
+  border-color:&#13;
+    #5b3ea2 !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.campus360-interviews .c360-sidebar-avatar {&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      135deg,&#13;
+      #8b5cf6,&#13;
+      #7c3aed&#13;
+    ) !important;&#13;
+&#13;
+  color:&#13;
+    #ffffff !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.campus360-interviews .c360-sidebar-student-info strong {&#13;
+&#13;
+  color:&#13;
+    #ffffff !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.campus360-interviews .c360-sidebar-student-info span {&#13;
+&#13;
+  color:&#13;
+    #b9add7 !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.campus360-interviews .c360-student-arrow {&#13;
+&#13;
+  color:&#13;
+    #aaa0c2 !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.campus360-interviews .c360-sidebar-nav {&#13;
+&#13;
+  background:&#13;
+    transparent !important;&#13;
+&#13;
+  overflow-y:&#13;
+    auto !important;&#13;
+&#13;
+  overflow-x:&#13;
+    hidden !important;&#13;
+&#13;
+  scrollbar-width:&#13;
+    none !important;&#13;
+&#13;
+  -ms-overflow-style:&#13;
+    none !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.campus360-interviews .c360-sidebar-nav::-webkit-scrollbar {&#13;
+&#13;
+  width:&#13;
+    0 !important;&#13;
+&#13;
+  height:&#13;
+    0 !important;&#13;
+&#13;
+  display:&#13;
+    none !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.campus360-interviews .c360-nav-heading {&#13;
+&#13;
+  color:&#13;
+    #9f94bd !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.campus360-interviews .c360-nav-link {&#13;
+&#13;
+  color:&#13;
+    #ddd8e8 !important;&#13;
+&#13;
+  background:&#13;
+    transparent !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.campus360-interviews .c360-nav-link:hover {&#13;
+&#13;
+  color:&#13;
+    #ffffff !important;&#13;
+&#13;
+  background:&#13;
+    rgba(124,58,237,.16) !important;&#13;
+&#13;
+  transform:&#13;
+    translateX(2px) !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.campus360-interviews .c360-nav-link.active {&#13;
+&#13;
+  color:&#13;
+    #ffffff !important;&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      90deg,&#13;
+      #7c3aed 0%,&#13;
+      #8b3ff2 100%&#13;
+    ) !important;&#13;
+&#13;
+  font-weight:&#13;
+    900 !important;&#13;
+&#13;
+  box-shadow:&#13;
+    0 7px 18px&#13;
+    rgba(124,58,237,.28) !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.campus360-interviews .c360-nav-link.active::before {&#13;
+&#13;
+  background:&#13;
+    #c4b5fd !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.campus360-interviews .c360-nav-icon {&#13;
+&#13;
+  color:&#13;
+    #b8aecb !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.campus360-interviews .c360-nav-link:hover .c360-nav-icon {&#13;
+&#13;
+  color:&#13;
+    #ffffff !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.campus360-interviews .c360-nav-link.active .c360-nav-icon {&#13;
+&#13;
+  color:&#13;
+    #ffffff !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.campus360-interviews .c360-nav-text {&#13;
+&#13;
+  color:&#13;
+    inherit !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.campus360-interviews .c360-sidebar-footer {&#13;
+&#13;
+  border-top:&#13;
+    1px solid rgba(255,255,255,.08) !important;&#13;
+&#13;
+  background:&#13;
+    #120c2d !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.campus360-interviews .c360-journey-mini {&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      145deg,&#13;
+      #1e143f,&#13;
+      #21164a&#13;
+    ) !important;&#13;
+&#13;
+  border:&#13;
+    1px solid #382963 !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.campus360-interviews .c360-journey-label {&#13;
+&#13;
+  color:&#13;
+    #a69abd !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.campus360-interviews .c360-journey-progress {&#13;
+&#13;
+  background:&#13;
+    #30234f !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.campus360-interviews .c360-journey-fill {&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      90deg,&#13;
+      #7c3aed,&#13;
+      #a855f7&#13;
+    ) !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.campus360-interviews .c360-journey-score {&#13;
+&#13;
+  color:&#13;
+    #c1b7d3 !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   FINAL HERO CARD OVERRIDE&#13;
+   DARK PURPLE CARD&#13;
+   ========================================================= */&#13;
+&#13;
+.campus360-interviews .interviews-header {&#13;
+&#13;
+  position:&#13;
+    relative !important;&#13;
+&#13;
+  z-index:&#13;
+    1 !important;&#13;
+&#13;
+  margin-top:&#13;
+    0 !important;&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      135deg,&#13;
+      #241044 0%,&#13;
+      #32145b 52%,&#13;
+      #45206d 100%&#13;
+    ) !important;&#13;
+&#13;
+  border:&#13;
+    1px solid #5a357d !important;&#13;
+&#13;
+  color:&#13;
+    #ffffff !important;&#13;
+&#13;
+  box-shadow:&#13;
+    0 12px 30px&#13;
+    rgba(50,20,80,.18) !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.campus360-interviews .interviews-eyebrow {&#13;
+&#13;
+  color:&#13;
+    #dccbff !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.campus360-interviews .interviews-eyebrow-dot {&#13;
+&#13;
+  background:&#13;
+    #c4b5fd !important;&#13;
+&#13;
+  box-shadow:&#13;
+    0 0 0 6px&#13;
+    rgba(196,181,253,.16) !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.campus360-interviews .interviews-header h1 {&#13;
+&#13;
+  color:&#13;
+    #ffffff !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.campus360-interviews .interviews-header p {&#13;
+&#13;
+  color:&#13;
+    #e5dcf0 !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   NAVBAR / CARD SEPARATION&#13;
+   ========================================================= */&#13;
+&#13;
+.campus360-interviews .c360-topbar {&#13;
+&#13;
+  position:&#13;
+    sticky !important;&#13;
+&#13;
+  top:&#13;
+    0 !important;&#13;
+&#13;
+  z-index:&#13;
+    5000 !important;&#13;
+&#13;
+  background:&#13;
+    #ffffff !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.campus360-interviews .c360-page-content {&#13;
+&#13;
+  position:&#13;
+    relative !important;&#13;
+&#13;
+  z-index:&#13;
+    1 !important;&#13;
+&#13;
+  padding-top:&#13;
+    24px !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+@media (max-width:900px) {&#13;
+&#13;
+  .campus360-interviews .c360-page-content {&#13;
+&#13;
+    padding-top:&#13;
+      18px !important;&#13;
+&#13;
+  }&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+@media (max-width:650px) {&#13;
+&#13;
+  .campus360-interviews .c360-page-content {&#13;
+&#13;
+    padding-top:&#13;
+      14px !important;&#13;
+&#13;
+  }&#13;
+&#13;
+}</css>
+        <data_table>sp_instance</data_table>
+        <demo_data/>
+        <description>Campus360 student interview management</description>
+        <docs/>
+        <field_list/>
+        <has_preview>false</has_preview>
+        <id>campus360_interviews_widget</id>
+        <internal>false</internal>
+        <link><![CDATA[function link(scope, element, attrs, controller) {
+  
+}]]></link>
+        <name>Campus360 Interviews</name>
+        <option_schema/>
+        <public>false</public>
+        <roles/>
+        <script><![CDATA[(function() {
+
+
+    /* =====================================================
+       INITIAL DATA
+       ===================================================== */
+
+    data.stats = {
+
+        total: 0,
+
+        upcoming: 0,
+
+        completed: 0,
+
+        avgScore: null
+
+    };
+
+
+    data.interviews = [];
+
+    data.upcoming = [];
+
+    data.history = [];
+
+
+    /* =====================================================
+       GET STUDENT
+       ===================================================== */
+
+    var studentId =
+        $sp.getParameter('student') ||
+        'STU_TEST_001';
+
+
+    var studentGR =
+        new GlideRecord(
+            'x_snc_campus360_student_master'
+        );
+
+
+    studentGR.addQuery(
+        'student_id',
+        studentId
+    );
+
+
+    studentGR.query();
+
+
+    if (!studentGR.next()) {
+
+        data.error =
+            'Student record not found: ' +
+            studentId;
+
+        return;
+
+    }
+
+
+    var studentSysId =
+        studentGR.getUniqueValue();
+
+
+    /* =====================================================
+       LOAD MOCK INTERVIEWS
+       ===================================================== */
+
+    var interviewGR =
+        new GlideRecord(
+            'x_snc_campus360_mock_interview'
+        );
+
+
+    interviewGR.addQuery(
+        'student',
+        studentSysId
+    );
+
+
+    interviewGR.orderByDesc(
+        'interview_date'
+    );
+
+
+    interviewGR.query();
+
+
+    var totalScore = 0;
+
+    var scoreCount = 0;
+
+
+    /* =====================================================
+       PROCESS INTERVIEWS
+       ===================================================== */
+
+    while (
+        interviewGR.next()
+    ) {
+
+
+        var interview = {
+
+            sys_id:
+                interviewGR.getUniqueValue(),
+
+
+            interview_id:
+                interviewGR.getDisplayValue(
+                    'interview_id'
+                ),
+
+
+            interview_status:
+                interviewGR.getDisplayValue(
+                    'interview_status'
+                ),
+
+
+            interview_type:
+                interviewGR.getDisplayValue(
+                    'interview_type'
+                ),
+
+
+            interview_date:
+                interviewGR.getDisplayValue(
+                    'interview_date'
+                ),
+
+
+            start_time:
+                interviewGR.getDisplayValue(
+                    'start_time'
+                ),
+
+
+            end_time:
+                interviewGR.getDisplayValue(
+                    'end_time'
+                ),
+
+
+            trainer:
+                interviewGR.getDisplayValue(
+                    'trainer'
+                ),
+
+
+            attendance_status:
+                interviewGR.getDisplayValue(
+                    'attendance_status'
+                ),
+
+
+            qr_status:
+                interviewGR.getDisplayValue(
+                    'qr_status'
+                ),
+
+
+            qr_code:
+                interviewGR.getValue(
+                    'qr_code'
+                ),
+
+
+            qr_url:
+                interviewGR.getValue(
+                    'qr_url'
+                ),
+
+
+            feedback: null
+
+        };
+
+
+        /* =================================================
+           FEEDBACK
+           ================================================= */
+
+        var feedbackGR =
+            new GlideRecord(
+                'x_snc_campus360_interview_feedback'
+            );
+
+
+        feedbackGR.addQuery(
+            'interview',
+            interviewGR.getUniqueValue()
+        );
+
+
+        feedbackGR.orderByDesc(
+            'sys_created_on'
+        );
+
+
+        feedbackGR.setLimit(1);
+
+
+        feedbackGR.query();
+
+
+        if (
+            feedbackGR.next()
+        ) {
+
+
+            interview.feedback = {
+
+                feedback_id:
+                    feedbackGR.getDisplayValue(
+                        'feedback_id'
+                    ),
+
+
+                technical_score:
+                    getInteger(
+                        feedbackGR,
+                        'technical_score'
+                    ),
+
+
+                communication_score:
+                    getInteger(
+                        feedbackGR,
+                        'communication_score'
+                    ),
+
+
+                problem_solving_score:
+                    getInteger(
+                        feedbackGR,
+                        'problem_solving_score'
+                    ),
+
+
+                overall_score:
+                    getInteger(
+                        feedbackGR,
+                        'overall_score'
+                    ),
+
+
+                strengths:
+                    feedbackGR.getDisplayValue(
+                        'strengths'
+                    ),
+
+
+                improvement_areas:
+                    feedbackGR.getDisplayValue(
+                        'improvement_areas'
+                    ),
+
+
+                recommendation:
+                    feedbackGR.getDisplayValue(
+                        'recommendation'
+                    ),
+
+
+                feedback_date:
+                    feedbackGR.getDisplayValue(
+                        'feedback_date'
+                    ),
+
+
+                trainer:
+                    feedbackGR.getDisplayValue(
+                        'trainer'
+                    )
+
+            };
+
+
+            if (
+                interview.feedback.overall_score !== null
+            ) {
+
+                totalScore +=
+                    interview.feedback.overall_score;
+
+                scoreCount++;
+
+            }
+
+        }
+
+
+        /* =================================================
+           ALL INTERVIEWS
+           ================================================= */
+
+        data.interviews.push(
+            interview
+        );
+
+
+        /* =================================================
+           UPCOMING / HISTORY
+           ================================================= */
+
+        var status =
+            String(
+                interview.interview_status ||
+                ''
+            ).toLowerCase();
+
+
+        if (
+            status === 'completed'
+        ) {
+
+            data.history.push(
+                interview
+            );
+
+            data.stats.completed++;
+
+        }
+        else {
+
+            data.upcoming.push(
+                interview
+            );
+
+            data.stats.upcoming++;
+
+        }
+
+    }
+
+
+    /* =====================================================
+       STATS
+       ===================================================== */
+
+    data.stats.total =
+        data.interviews.length;
+
+
+    if (
+        scoreCount > 0
+    ) {
+
+        data.stats.avgScore =
+            Math.round(
+                (
+                    totalScore /
+                    scoreCount
+                ) * 10
+            ) / 10;
+
+    }
+
+
+    /* =====================================================
+       INTEGER HELPER
+       ===================================================== */
+
+    function getInteger(
+        gr,
+        fieldName
+    ) {
+
+        if (
+            !gr.isValidField(
+                fieldName
+            )
+        ) {
+
+            return null;
+
+        }
+
+
+        var value =
+            gr.getValue(
+                fieldName
+            );
+
+
+        if (
+            value === null ||
+            value === undefined ||
+            value === ''
+        ) {
+
+            return null;
+
+        }
+
+
+        var number =
+            parseInt(
+                value,
+                10
+            );
+
+
+        if (
+            isNaN(number)
+        ) {
+
+            return null;
+
+        }
+
+
+        return number;
+
+    }
+
+
+})();
+
+data.aiWidget = $sp.getWidget('campus360_ai_assistant');
+]]></script>
+        <servicenow>false</servicenow>
+        <sys_class_name>sp_widget</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-21 17:38:51</sys_created_on>
+        <sys_id>11eac69874ab03107f44ff2471f7e925</sys_id>
+        <sys_mod_count>32</sys_mod_count>
+        <sys_name>Campus360 Interviews</sys_name>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name>sp_widget_11eac69874ab03107f44ff2471f7e925</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-10-01 12:56:40</sys_updated_on>
+        <template><![CDATA[<div
+  class="campus360-interviews"
+  ng-class="{
+    'sidebar-open': c.sidebarOpen,
+    'sidebar-closed': !c.sidebarOpen
+  }">
+
+
+  <!-- =========================================================
+       CAMPUS360 SIDEBAR
+       ========================================================= -->
+
+  <aside class="c360-left-sidebar">
+
+
+    <!-- BRAND -->
+
+    <div class="c360-sidebar-brand">
+
+      <div class="c360-brand-logo">
+        C
+      </div>
+
+      <div class="c360-brand-name">
+
+        <strong>
+          Campus360
+        </strong>
+
+        <span>
+          Student Portal
+        </span>
+
+      </div>
+
+    </div>
+
+
+    <!-- STUDENT PROFILE -->
+
+    <a
+      class="c360-sidebar-student"
+      ng-href="?id=campus360_profile&student={{c.data.studentId}}">
+
+      <div class="c360-sidebar-avatar">
+        {{c.data.studentInitials || 'TC'}}
+      </div>
+
+      <div class="c360-sidebar-student-info">
+
+        <strong>
+          {{c.data.studentName || 'Test Student Campus360'}}
+        </strong>
+
+        <span>
+          {{c.data.studentId || 'STU_TEST_001'}}
+        </span>
+
+      </div>
+
+      <span class="c360-student-arrow">
+        ›
+      </span>
+
+    </a>
+
+
+    <!-- =====================================================
+         NAVIGATION
+         ===================================================== -->
+
+    <nav class="c360-sidebar-nav">
+
+
+      <!-- OVERVIEW -->
+
+      <div class="c360-nav-group">
+
+        <div class="c360-nav-heading">
+          OVERVIEW
+        </div>
+
+
+        <a
+          class="c360-nav-link"
+          ng-href="?id=campus360_student_dashboard&student={{c.data.studentId}}">
+
+          <span class="c360-nav-icon">
+
+            <svg viewBox="0 0 24 24">
+
+              <path
+                d="M4 10.5L12 4l8 6.5v8.2a1.3 1.3 0 0 1-1.3 1.3h-13A1.3 1.3 0 0 1 4 18.7z"/>
+
+              <path d="M9.5 20v-5h5v5"/>
+
+            </svg>
+
+          </span>
+
+          <span class="c360-nav-text">
+            Dashboard
+          </span>
+
+        </a>
+
+      </div>
+
+
+      <!-- =====================================================
+           PLACEMENT JOURNEY
+           ===================================================== -->
+
+      <div class="c360-nav-group">
+
+        <div class="c360-nav-heading">
+          PLACEMENT JOURNEY
+        </div>
+
+
+        <!-- OPPORTUNITIES -->
+
+        <a
+          class="c360-nav-link"
+          ng-href="?id=campus360_opportunities&student={{c.data.studentId}}">
+
+          <span class="c360-nav-icon">
+
+            <svg viewBox="0 0 24 24">
+
+              <path d="M12 3l3 6 6 3-6 3-3 6-3-6-6-3 6-3 3-6z"/>
+
+            </svg>
+
+          </span>
+
+          <span class="c360-nav-text">
+            Opportunities
+          </span>
+
+        </a>
+
+
+        <!-- APPLICATIONS -->
+
+        <a
+          class="c360-nav-link"
+          ng-href="?id=campus360_applications&student={{c.data.studentId}}">
+
+          <span class="c360-nav-icon">
+
+            <svg viewBox="0 0 24 24">
+
+              <rect
+                x="5"
+                y="3.5"
+                width="14"
+                height="17"
+                rx="2"/>
+
+              <path d="M8 8h8"/>
+              <path d="M8 12h8"/>
+              <path d="M8 16h5"/>
+
+            </svg>
+
+          </span>
+
+          <span class="c360-nav-text">
+            Applications
+          </span>
+
+        </a>
+
+
+        <!-- INTERVIEWS ACTIVE -->
+
+        <a
+          class="c360-nav-link active"
+          ng-href="?id=campus360_interviews&student={{c.data.studentId}}">
+
+          <span class="c360-nav-icon">
+
+            <svg viewBox="0 0 24 24">
+
+              <circle
+                cx="12"
+                cy="12"
+                r="8"/>
+
+              <circle
+                cx="12"
+                cy="12"
+                r="3"/>
+
+            </svg>
+
+          </span>
+
+          <span class="c360-nav-text">
+            Interviews
+          </span>
+
+        </a>
+
+
+        <!-- TRAINING -->
+
+        <a
+          class="c360-nav-link"
+          ng-href="?id=campus360_training&student={{c.data.studentId}}">
+
+          <span class="c360-nav-icon">
+
+            <svg viewBox="0 0 24 24">
+
+              <path
+                d="M4 7.5L12 4l8 3.5L12 11 4 7.5z"/>
+
+              <path
+                d="M7 10.2v4.1c0 1.7 2.2 3.1 5 3.1s5-1.4 5-3.1v-4.1"/>
+
+              <path d="M20 8v5"/>
+
+            </svg>
+
+          </span>
+
+          <span class="c360-nav-text">
+            Training
+          </span>
+
+        </a>
+
+
+        <!-- MOCK SLOTS -->
+
+        <a
+          class="c360-nav-link"
+          ng-href="?id=mock_interview_booking&student={{c.data.studentId}}">
+
+          <span class="c360-nav-icon">
+
+            <svg viewBox="0 0 24 24">
+
+              <path d="M12 3v4"/>
+              <path d="M12 17v4"/>
+              <path d="M3 12h4"/>
+              <path d="M17 12h4"/>
+
+              <circle
+                cx="12"
+                cy="12"
+                r="5"/>
+
+            </svg>
+
+          </span>
+
+          <span class="c360-nav-text">
+            Mock Slots
+          </span>
+
+        </a>
+
+      </div>
+
+
+      <!-- =====================================================
+           INTELLIGENCE
+           ===================================================== -->
+
+      <div class="c360-nav-group">
+
+        <div class="c360-nav-heading">
+          INTELLIGENCE
+        </div>
+
+
+        <!-- MY PROGRESS -->
+
+        <a
+          class="c360-nav-link"
+          ng-href="?id=campus360_progress&student={{c.data.studentId}}">
+
+          <span class="c360-nav-icon">
+
+            <svg viewBox="0 0 24 24">
+
+              <path d="M5 18V10"/>
+              <path d="M12 18V6"/>
+              <path d="M19 18V3"/>
+              <path d="M3 20h18"/>
+
+            </svg>
+
+          </span>
+
+          <span class="c360-nav-text">
+           	Assessments
+          </span>
+
+        </a>
+
+
+        <!-- PLACEMENT READINESS -->
+
+        <a
+          class="c360-nav-link"
+          ng-href="?id=placement_readiness&student={{c.data.studentId}}">
+
+          <span class="c360-nav-icon">
+
+            <svg viewBox="0 0 24 24">
+
+              <path
+                d="M12 3l2.4 5 5.6.8-4 3.9.9 5.5-4.9-2.6-4.9 2.6.9-5.5-4-3.9 5.6-.8L12 3z"/>
+
+            </svg>
+
+          </span>
+
+          <span class="c360-nav-text">
+            Placement Readiness
+          </span>
+
+        </a>
+
+      </div>
+
+
+      <!-- =====================================================
+           ACCOUNT
+           ===================================================== -->
+
+      <div class="c360-nav-group">
+
+        <div class="c360-nav-heading">
+          ACCOUNT
+        </div>
+
+
+        <!-- MY PROFILE -->
+
+        <a
+          class="c360-nav-link"
+          ng-href="?id=campus360_profile&student={{c.data.studentId}}">
+
+          <span class="c360-nav-icon">
+
+            <svg viewBox="0 0 24 24">
+
+              <circle
+                cx="12"
+                cy="8"
+                r="3.5"/>
+
+              <path
+                d="M5 20c.7-3.7 3.1-5.5 7-5.5s6.3 1.8 7 5.5"/>
+
+            </svg>
+
+          </span>
+
+          <span class="c360-nav-text">
+            My Profile
+          </span>
+
+        </a>
+
+      </div>
+
+
+    </nav>
+
+
+    <!-- =====================================================
+         SIDEBAR FOOTER
+         ===================================================== -->
+
+    <div class="c360-sidebar-footer">
+
+      <div class="c360-journey-mini">
+
+        <div class="c360-journey-label">
+          PLACEMENT JOURNEY
+        </div>
+
+
+        <div class="c360-journey-progress">
+
+          <div
+            class="c360-journey-fill"
+            ng-style="{
+              width:
+                (
+                  c.data.readiness &&
+                  c.data.readiness.score !== undefined
+                )
+                ? c.data.readiness.score + '%'
+                : ((c.data.readinessScore || 0) + '%')
+            }">
+          </div>
+
+        </div>
+
+
+        <div class="c360-journey-score">
+
+          {{
+            (
+              c.data.readiness &&
+              c.data.readiness.score !== undefined
+            )
+            ? c.data.readiness.score
+            : (c.data.readinessScore || 0)
+          }}% readiness
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+  </aside>
+
+
+  <!-- =========================================================
+       MOBILE SIDEBAR OVERLAY
+       ========================================================= -->
+
+  <div
+    class="c360-sidebar-overlay"
+    ng-if="c.sidebarOpen"
+    ng-click="c.closeSidebar()">
+  </div>
+
+
+  <!-- =========================================================
+       RIGHT PAGE
+       ========================================================= -->
+
+  <main class="c360-right-page">
+
+
+    <!-- =======================================================
+         TOP NAVBAR
+         ======================================================= -->
+
+    <header class="c360-topbar">
+
+
+      <!-- LEFT -->
+
+      <div class="c360-topbar-left">
+
+
+        <!-- HAMBURGER -->
+
+        <button
+          type="button"
+          class="c360-menu-button"
+          ng-click="c.toggleSidebar()"
+          aria-label="Toggle Campus360 sidebar">
+
+          <span></span>
+          <span></span>
+          <span></span>
+
+        </button>
+
+
+        <!-- PAGE HEADING -->
+
+        <div class="c360-page-heading">
+
+          <span>
+            CAMPUS360
+          </span>
+
+          <strong>
+            Interviews
+          </strong>
+
+        </div>
+
+      </div>
+
+
+      <!-- RIGHT -->
+
+      <div class="c360-topbar-right">
+
+
+        <!-- REFRESH -->
+
+        <button
+          type="button"
+          class="c360-top-icon"
+          ng-click="c.refresh()"
+          ng-disabled="c.refreshing"
+          title="Refresh">
+
+          <svg viewBox="0 0 24 24">
+
+            <path d="M20 11a8 8 0 0 0-14.8-4L4 9"/>
+            <path d="M4 5v4h4"/>
+            <path d="M4 13a8 8 0 0 0 14.8 4L20 15"/>
+            <path d="M20 19v-4h-4"/>
+
+          </svg>
+
+        </button>
+
+
+        <!-- NOTIFICATION -->
+
+        <button
+          type="button"
+          class="c360-top-icon c360-notification-button"
+          title="Notifications">
+
+          <svg viewBox="0 0 24 24">
+
+            <path
+              d="M18 10a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/>
+
+            <path d="M10 21h4"/>
+
+          </svg>
+
+          <span class="c360-notification-dot"></span>
+
+        </button>
+
+
+        <!-- STUDENT PROFILE -->
+
+        <a
+          class="c360-top-profile"
+          ng-href="?id=campus360_profile&student={{c.data.studentId}}">
+
+
+          <div class="c360-top-avatar">
+
+            {{c.data.studentInitials || 'TC'}}
+
+          </div>
+
+
+          <div class="c360-top-profile-info">
+
+            <strong>
+
+              {{c.data.studentName || 'Test Student Campus360'}}
+
+            </strong>
+
+            <span>
+
+              {{c.data.studentId || 'STU_TEST_001'}}
+
+            </span>
+
+          </div>
+
+
+          <span class="c360-profile-chevron">
+            ˅
+          </span>
+
+
+        </a>
+
+      </div>
+
+
+    </header>
+
+
+    <!-- =======================================================
+         PAGE CONTENT
+         ======================================================= -->
+
+    <div class="c360-page-content">
+
+
+      <!-- =====================================================
+           PAGE HEADER
+           ===================================================== -->
+
+      <section class="interviews-header">
+
+        <div class="interviews-header-content">
+
+
+          <div class="interviews-eyebrow">
+
+            <span class="interviews-eyebrow-dot"></span>
+
+            PLACEMENT JOURNEY
+
+          </div>
+
+
+          <h1>
+            Interviews
+          </h1>
+
+
+          <p>
+            Practice your interview skills, attend mock interviews,
+            and review your performance.
+          </p>
+
+
+        </div>
+
+      </section>
+
+
+      <!-- =====================================================
+           LOADING
+           ===================================================== -->
+
+      <div
+        class="interviews-loading"
+        ng-if="c.loading">
+
+        <div class="interviews-spinner"></div>
+
+        <span>
+          Loading interviews...
+        </span>
+
+      </div>
+
+
+      <!-- =====================================================
+           MAIN CONTENT
+           ===================================================== -->
+
+      <div
+        class="interviews-main-content"
+        ng-if="!c.loading">
+
+
+        <!-- ===================================================
+             KPI
+             =================================================== -->
+
+        <section class="interviews-kpi-grid">
+
+
+          <!-- TOTAL -->
+
+          <div class="interviews-kpi-card interviews-kpi-purple">
+
+            <div class="interviews-kpi-icon">
+              ▣
+            </div>
+
+            <div class="interviews-kpi-text">
+
+              <span>
+                TOTAL INTERVIEWS
+              </span>
+
+              <strong>
+                {{c.data.stats.total}}
+              </strong>
+
+              <p>
+                All assigned interviews
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <!-- UPCOMING -->
+
+          <div class="interviews-kpi-card interviews-kpi-blue">
+
+            <div class="interviews-kpi-icon">
+              ◷
+            </div>
+
+            <div class="interviews-kpi-text">
+
+              <span>
+                UPCOMING
+              </span>
+
+              <strong>
+                {{c.data.stats.upcoming}}
+              </strong>
+
+              <p>
+                Scheduled or active
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <!-- COMPLETED -->
+
+          <div class="interviews-kpi-card interviews-kpi-green">
+
+            <div class="interviews-kpi-icon">
+              ✓
+            </div>
+
+            <div class="interviews-kpi-text">
+
+              <span>
+                COMPLETED
+              </span>
+
+              <strong>
+                {{c.data.stats.completed}}
+              </strong>
+
+              <p>
+                Finished interviews
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <!-- AVG SCORE -->
+
+          <div class="interviews-kpi-card interviews-kpi-orange">
+
+            <div class="interviews-kpi-icon">
+              ★
+            </div>
+
+            <div class="interviews-kpi-text">
+
+              <span>
+                AVG SCORE
+              </span>
+
+              <strong>
+
+                <span
+                  ng-if="c.data.stats.avgScore !== null">
+
+                  {{c.data.stats.avgScore}}
+
+                </span>
+
+                <span
+                  ng-if="c.data.stats.avgScore === null">
+
+                  —
+
+                </span>
+
+              </strong>
+
+              <p>
+                Across completed interviews
+              </p>
+
+            </div>
+
+          </div>
+
+
+        </section>
+
+
+        <!-- ===================================================
+             UPCOMING
+             =================================================== -->
+
+        <section class="interviews-section">
+
+
+          <div class="interviews-section-heading">
+
+            <div>
+
+              <div class="interviews-section-title">
+
+                <span
+                  class="interviews-section-marker upcoming-marker">
+                </span>
+
+                <h2>
+                  Upcoming Interviews
+                </h2>
+
+              </div>
+
+              <p>
+                Your scheduled and active mock interviews.
+              </p>
+
+            </div>
+
+
+            <span
+              class="interviews-updated"
+              ng-if="c.lastUpdated">
+
+              Updated {{c.lastUpdated}}
+
+            </span>
+
+          </div>
+
+
+          <!-- EMPTY -->
+
+          <div
+            class="interviews-empty"
+            ng-if="!c.data.upcoming.length">
+
+            <div class="interviews-empty-icon">
+              ✓
+            </div>
+
+            <h3>
+              No upcoming interviews
+            </h3>
+
+            <p>
+              You currently have no scheduled or active interviews.
+            </p>
+
+          </div>
+
+
+          <!-- LIST -->
+
+          <div
+            class="interviews-list"
+            ng-if="c.data.upcoming.length">
+
+
+            <article
+              class="interview-card"
+              ng-repeat="
+                interview in c.data.upcoming
+                track by interview.sys_id
+              ">
+
+
+              <div
+                class="interview-card-status"
+                ng-class="
+                  c.getStatusLineClass(
+                    interview.interview_status
+                  )
+                ">
+              </div>
+
+
+              <div class="interview-card-inner">
+
+
+                <!-- INTERVIEW INFO -->
+
+                <div class="interview-main-info">
+
+
+                  <div
+                    class="interview-main-icon"
+                    ng-class="
+                      c.getIconClass(
+                        interview.interview_status
+                      )
+                    ">
+
+                    <span
+                      ng-if="
+                        interview.interview_status ==
+                        'Scheduled'
+                      ">
+
+                      ◷
+
+                    </span>
+
+                    <span
+                      ng-if="
+                        interview.interview_status ==
+                        'In Progress'
+                      ">
+
+                      ●
+
+                    </span>
+
+                    <span
+                      ng-if="
+                        interview.interview_status ==
+                        'Completed'
+                      ">
+
+                      ✓
+
+                    </span>
+
+                  </div>
+
+
+                  <div class="interview-main-text">
+
+
+                    <div class="interview-title-row">
+
+                      <h3>
+                        {{interview.interview_id}}
+                      </h3>
+
+
+                      <span
+                        class="interview-status-pill"
+                        ng-class="
+                          c.getStatusClass(
+                            interview.interview_status
+                          )
+                        ">
+
+                        <span
+                          class="interview-status-dot">
+                        </span>
+
+                        {{interview.interview_status}}
+
+                      </span>
+
+                    </div>
+
+
+                    <div class="interview-type">
+
+                      {{interview.interview_type}}
+                      Interview
+
+                    </div>
+
+
+                    <div
+                      class="interview-attendance"
+                      ng-class="
+                        c.getAttendanceClass(
+                          interview.attendance_status
+                        )
+                      ">
+
+                      <span
+                        ng-if="
+                          interview.attendance_status ==
+                          'Present'
+                        ">
+
+                        ✓
+
+                      </span>
+
+                      <span
+                        ng-if="
+                          interview.attendance_status !=
+                          'Present'
+                        ">
+
+                        ○
+
+                      </span>
+
+                      Attendance:
+
+                      <strong>
+                        {{interview.attendance_status}}
+                      </strong>
+
+                    </div>
+
+
+                  </div>
+
+
+                </div>
+
+
+                <!-- DETAILS -->
+
+                <div class="interview-detail-grid">
+
+
+                  <div class="interview-detail-item">
+
+                    <span class="interview-detail-icon">
+                      ]]>📅
+<![CDATA[                    </span>
+
+                    <div>
+
+                      <small>
+                        DATE
+                      </small>
+
+                      <strong>
+                        {{interview.interview_date}}
+                      </strong>
+
+                    </div>
+
+                  </div>
+
+
+                  <div class="interview-detail-item">
+
+                    <span class="interview-detail-icon">
+                      ◷
+                    </span>
+
+                    <div>
+
+                      <small>
+                        TIME
+                      </small>
+
+                      <strong>
+                        {{interview.start_time}}
+                        -
+                        {{interview.end_time}}
+                      </strong>
+
+                    </div>
+
+                  </div>
+
+
+                  <div class="interview-detail-item">
+
+                    <span class="interview-detail-icon">
+                      ]]>👤
+<![CDATA[                    </span>
+
+                    <div>
+
+                      <small>
+                        TRAINER
+                      </small>
+
+                      <strong>
+                        {{interview.trainer || 'Not assigned'}}
+                      </strong>
+
+                    </div>
+
+                  </div>
+
+
+                </div>
+
+
+                <!-- ACTIONS -->
+
+                <div class="interview-actions">
+
+
+                  <button
+                    type="button"
+                    class="interview-view-button"
+                    ng-click="c.viewInterview(interview)">
+
+                    View Details
+
+                  </button>
+
+
+                  <button
+                    type="button"
+                    class="interview-start-button"
+                    ng-if="
+                      interview.interview_status ==
+                      'Scheduled'
+                    "
+                    ng-click="c.startInterview(interview)"
+                    ng-disabled="c.actionLoading">
+
+                    <span
+                      ng-if="!c.actionLoading">
+
+                      ▣ Start Interview
+
+                    </span>
+
+                    <span
+                      ng-if="c.actionLoading">
+
+                      Starting...
+
+                    </span>
+
+                  </button>
+
+
+                  <button
+                    type="button"
+                    class="interview-progress-button"
+                    ng-if="
+                      interview.interview_status ==
+                      'In Progress'
+                    "
+                    disabled>
+
+                    ● Interview In Progress
+
+                  </button>
+
+
+                </div>
+
+
+              </div>
+
+
+            </article>
+
+
+          </div>
+
+
+        </section>
+
+
+        <!-- ===================================================
+             HISTORY
+             =================================================== -->
+
+        <section class="interviews-section">
+
+
+          <div class="interviews-section-heading">
+
+            <div>
+
+              <div class="interviews-section-title">
+
+                <span
+                  class="interviews-section-marker history-marker">
+                </span>
+
+                <h2>
+                  Interview History
+                </h2>
+
+              </div>
+
+              <p>
+                Review your completed interview performance.
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <!-- EMPTY -->
+
+          <div
+            class="interviews-empty"
+            ng-if="!c.data.history.length">
+
+            <div class="interviews-empty-icon">
+              —
+            </div>
+
+            <h3>
+              No completed interviews
+            </h3>
+
+            <p>
+              Your completed interviews will appear here.
+            </p>
+
+          </div>
+
+
+          <!-- HISTORY -->
+
+          <div
+            class="interviews-history-list"
+            ng-if="c.data.history.length">
+
+
+            <article
+              class="interview-history-card"
+              ng-repeat="
+                interview in c.data.history
+                track by interview.sys_id
+              ">
+
+
+              <div class="history-left">
+
+
+                <div class="history-icon">
+                  ✓
+                </div>
+
+
+                <div class="history-information">
+
+
+                  <div class="history-title-row">
+
+                    <h3>
+                      {{interview.interview_id}}
+                    </h3>
+
+                    <span
+                      class="history-completed-pill">
+
+                      Completed
+
+                    </span>
+
+                  </div>
+
+
+                  <div class="history-type">
+
+                    {{interview.interview_type}}
+                    Interview
+
+                  </div>
+
+
+                  <div class="history-meta">
+
+                    <span>
+                      ]]>📅<![CDATA[ {{interview.interview_date}}
+                    </span>
+
+                    <span>
+                      ]]>👤<![CDATA[ {{interview.trainer || 'Not assigned'}}
+                    </span>
+
+                  </div>
+
+
+                </div>
+
+
+              </div>
+
+
+              <div class="history-right">
+
+
+                <div
+                  class="history-score"
+                  ng-if="
+                    interview.feedback &&
+                    interview.feedback.overall_score !== null
+                  ">
+
+                  <strong>
+                    {{interview.feedback.overall_score}}
+                  </strong>
+
+                  <span>
+                    Overall Score
+                  </span>
+
+                </div>
+
+
+                <div
+                  class="history-no-score"
+                  ng-if="
+                    !interview.feedback ||
+                    interview.feedback.overall_score === null
+                  ">
+
+                  No score yet
+
+                </div>
+
+
+                <button
+                  type="button"
+                  class="interview-view-button"
+                  ng-click="c.viewPerformance(interview)">
+
+                  View Performance
+
+                </button>
+
+
+              </div>
+
+
+            </article>
+
+
+          </div>
+
+
+        </section>
+
+
+      </div>
+
+    </div>
+
+
+  </main>
+
+
+  <!-- =========================================================
+       INTERVIEW DETAILS MODAL
+       ========================================================= -->
+
+  <div
+    class="interview-modal-backdrop"
+    ng-if="c.selectedInterview">
+
+
+    <div
+      class="interview-modal"
+      ng-click="$event.stopPropagation()">
+
+
+      <button
+        type="button"
+        class="interview-modal-close"
+        ng-click="c.closeInterview()">
+
+        ×
+
+      </button>
+
+
+      <div class="interview-modal-header">
+
+        <div class="interview-modal-eyebrow">
+          INTERVIEW DETAILS
+        </div>
+
+        <h2>
+          {{c.selectedInterview.interview_id}}
+        </h2>
+
+        <span
+          class="interview-status-pill"
+          ng-class="
+            c.getStatusClass(
+              c.selectedInterview.interview_status
+            )
+          ">
+
+          <span class="interview-status-dot"></span>
+
+          {{c.selectedInterview.interview_status}}
+
+        </span>
+
+      </div>
+
+
+      <div class="interview-modal-details">
+
+
+        <div class="modal-detail-item">
+
+          <span>
+            Interview Type
+          </span>
+
+          <strong>
+            {{c.selectedInterview.interview_type}}
+          </strong>
+
+        </div>
+
+
+        <div class="modal-detail-item">
+
+          <span>
+            Attendance
+          </span>
+
+          <strong>
+            {{c.selectedInterview.attendance_status}}
+          </strong>
+
+        </div>
+
+
+        <div class="modal-detail-item">
+
+          <span>
+            Date
+          </span>
+
+          <strong>
+            {{c.selectedInterview.interview_date}}
+          </strong>
+
+        </div>
+
+
+        <div class="modal-detail-item">
+
+          <span>
+            Time
+          </span>
+
+          <strong>
+            {{c.selectedInterview.start_time}}
+            -
+            {{c.selectedInterview.end_time}}
+          </strong>
+
+        </div>
+
+
+        <div class="modal-detail-item">
+
+          <span>
+            Trainer
+          </span>
+
+          <strong>
+            {{c.selectedInterview.trainer || 'Not assigned'}}
+          </strong>
+
+        </div>
+
+
+        <div class="modal-detail-item">
+
+          <span>
+            QR Status
+          </span>
+
+          <strong>
+            {{c.selectedInterview.qr_status || 'Not generated'}}
+          </strong>
+
+        </div>
+
+
+      </div>
+
+
+      <div class="interview-modal-footer">
+
+        <button
+          type="button"
+          class="interview-view-button"
+          ng-click="c.closeInterview()">
+
+          Close
+
+        </button>
+
+      </div>
+
+
+    </div>
+
+
+  </div>
+
+
+  <!-- =========================================================
+       QR MODAL
+       ========================================================= -->
+
+  <div
+    class="interview-modal-backdrop"
+    ng-if="c.qrInterview">
+
+
+    <div class="interview-qr-modal">
+
+
+      <button
+        type="button"
+        class="interview-modal-close"
+        ng-click="c.closeQR()">
+
+        ×
+
+      </button>
+
+
+      <div class="qr-header">
+
+
+        <div class="qr-icon">
+          ▣
+        </div>
+
+
+        <div class="interview-modal-eyebrow">
+          INTERVIEW CHECK-IN
+        </div>
+
+
+        <h2>
+          {{c.qrInterview.interview_id}}
+        </h2>
+
+
+        <p>
+          Ask your trainer to scan this QR code.
+        </p>
+
+
+      </div>
+
+
+      <div class="qr-frame-wrapper">
+
+        <iframe
+          ng-if="c.qrFrameUrl"
+          ng-src="{{c.qrFrameUrl}}"
+          class="qr-frame"
+          title="Campus360 Interview QR">
+        </iframe>
+
+      </div>
+
+
+      <div class="qr-information">
+
+        <strong>
+          Waiting for trainer check-in
+        </strong>
+
+        <span>
+          Attendance and interview status will update
+          after the trainer scans the QR code.
+        </span>
+
+      </div>
+
+
+      <div class="interview-modal-footer">
+
+
+        <button
+          type="button"
+          class="qr-refresh-button"
+          ng-click="c.refreshAfterQR()">
+
+          ↻ Refresh Status
+
+        </button>
+
+
+        <button
+          type="button"
+          class="interview-view-button"
+          ng-click="c.closeQR()">
+
+          Close
+
+        </button>
+
+
+      </div>
+
+
+    </div>
+
+
+  </div>
+
+
+  <!-- =========================================================
+       PERFORMANCE MODAL
+       ========================================================= -->
+
+  <div
+    class="interview-modal-backdrop"
+    ng-if="c.performanceInterview">
+
+
+    <div class="interview-modal performance-modal">
+
+
+      <button
+        type="button"
+        class="interview-modal-close"
+        ng-click="c.closePerformance()">
+
+        ×
+
+      </button>
+
+
+      <div class="interview-modal-header">
+
+
+        <div class="interview-modal-eyebrow">
+          INTERVIEW PERFORMANCE
+        </div>
+
+
+        <h2>
+          {{c.performanceInterview.interview_id}}
+        </h2>
+
+
+        <p>
+          Read-only performance feedback from your trainer.
+        </p>
+
+
+      </div>
+
+
+      <div
+        class="performance-content"
+        ng-if="c.performanceInterview.feedback">
+
+
+        <div class="performance-score-grid">
+
+
+          <div class="performance-score-item">
+
+            <span>
+              Technical
+            </span>
+
+            <strong>
+              {{c.performanceInterview.feedback.technical_score}}
+            </strong>
+
+          </div>
+
+
+          <div class="performance-score-item">
+
+            <span>
+              Communication
+            </span>
+
+            <strong>
+              {{c.performanceInterview.feedback.communication_score}}
+            </strong>
+
+          </div>
+
+
+          <div class="performance-score-item">
+
+            <span>
+              Problem Solving
+            </span>
+
+            <strong>
+              {{c.performanceInterview.feedback.problem_solving_score}}
+            </strong>
+
+          </div>
+
+
+          <div class="performance-score-item overall">
+
+            <span>
+              Overall
+            </span>
+
+            <strong>
+              {{c.performanceInterview.feedback.overall_score}}
+            </strong>
+
+          </div>
+
+
+        </div>
+
+
+        <div class="feedback-section">
+
+
+          <div class="feedback-box">
+
+            <h4>
+              Strengths
+            </h4>
+
+            <p>
+              {{
+                c.performanceInterview.feedback.strengths ||
+                'Not provided'
+              }}
+            </p>
+
+          </div>
+
+
+          <div class="feedback-box">
+
+            <h4>
+              Improvement Areas
+            </h4>
+
+            <p>
+              {{
+                c.performanceInterview.feedback.improvement_areas ||
+                'Not provided'
+              }}
+            </p>
+
+          </div>
+
+
+          <div class="feedback-box">
+
+            <h4>
+              Recommendation
+            </h4>
+
+            <p>
+              {{
+                c.performanceInterview.feedback.recommendation ||
+                'Not provided'
+              }}
+            </p>
+
+          </div>
+
+
+        </div>
+
+
+      </div>
+
+
+      <div
+        class="performance-empty"
+        ng-if="!c.performanceInterview.feedback">
+
+        <h3>
+          Performance feedback not available
+        </h3>
+
+        <p>
+          Your trainer has not entered feedback for this interview yet.
+        </p>
+
+      </div>
+
+
+      <div class="interview-modal-footer">
+
+        <button
+          type="button"
+          class="interview-view-button"
+          ng-click="c.closePerformance()">
+
+          Close
+
+        </button>
+
+      </div>
+
+
+    </div>
+
+
+  </div>
+
+
+
+  <!-- Campus360 AI Assistant Floating Widget -->
+  <sp-widget widget="data.aiWidget"></sp-widget>
+</div>]]></template>
+    </sp_widget>
+</record_update>

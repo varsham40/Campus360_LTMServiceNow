@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update>
+    <sys_documentation element="problem_solving_score" label="Problem Solving Score" language="en" table="x_snc_campus360_recruiter_interview">
+        <sys_documentation action="INSERT_OR_UPDATE">
+            <element>problem_solving_score</element>
+            <help/>
+            <hint/>
+            <label>Problem Solving Score</label>
+            <language>en</language>
+            <name>x_snc_campus360_recruiter_interview</name>
+            <plural/>
+            <sys_class_name>sys_documentation</sys_class_name>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-09-25 05:53:51</sys_created_on>
+            <sys_mod_count>3</sys_mod_count>
+            <sys_name>Problem Solving Score</sys_name>
+            <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+            <sys_policy/>
+            <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+            <sys_update_name>sys_documentation_x_snc_campus360_recruiter_interview_problem_solving_score_en</sys_update_name>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-09-25 05:53:58</sys_updated_on>
+            <url/>
+            <url_target/>
+        </sys_documentation>
+    </sys_documentation>
+</record_update>

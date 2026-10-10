@@ -1,0 +1,3481 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_widget">
+    <sp_widget action="DELETE">
+        <category>custom</category>
+        <client_script><![CDATA[api.controller=function() {
+  /* widget controller */
+  var c = this;
+};]]></client_script>
+        <controller_as>c</controller_as>
+        <css>.analytics-page {&#13;
+    max-width: 1080px;&#13;
+    margin: 0 auto;&#13;
+    padding: 28px;&#13;
+    color: #102a56;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   HEADER&#13;
+========================================= */&#13;
+&#13;
+.analytics-header {&#13;
+&#13;
+    background: linear-gradient(&#13;
+        135deg,&#13;
+        #f4f3ff,&#13;
+        #eef1ff&#13;
+    );&#13;
+&#13;
+    border: 1px solid #dfe3ff;&#13;
+    border-radius: 18px;&#13;
+&#13;
+    padding: 30px;&#13;
+&#13;
+    display: flex;&#13;
+    justify-content: space-between;&#13;
+    align-items: center;&#13;
+&#13;
+    margin-bottom: 22px;&#13;
+}&#13;
+&#13;
+&#13;
+.eyebrow {&#13;
+&#13;
+    font-size: 11px;&#13;
+&#13;
+    letter-spacing: 2px;&#13;
+&#13;
+    font-weight: 700;&#13;
+&#13;
+    color: #5267e8;&#13;
+}&#13;
+&#13;
+&#13;
+.analytics-header h1 {&#13;
+&#13;
+    margin: 8px 0 5px;&#13;
+&#13;
+    font-size: 28px;&#13;
+&#13;
+    color: #082b62;&#13;
+}&#13;
+&#13;
+&#13;
+.analytics-header p {&#13;
+&#13;
+    margin: 0 0 12px;&#13;
+&#13;
+    color: #66789b;&#13;
+}&#13;
+&#13;
+&#13;
+.company-label {&#13;
+&#13;
+    display: inline-block;&#13;
+&#13;
+    padding: 6px 10px;&#13;
+&#13;
+    border-radius: 7px;&#13;
+&#13;
+    background: #eef1ff;&#13;
+&#13;
+    color: #5267e8;&#13;
+&#13;
+    font-size: 12px;&#13;
+&#13;
+    font-weight: 600;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   BUTTON&#13;
+========================================= */&#13;
+&#13;
+.btn {&#13;
+&#13;
+    display: inline-block;&#13;
+&#13;
+    padding: 11px 18px;&#13;
+&#13;
+    border-radius: 9px;&#13;
+&#13;
+    text-decoration: none;&#13;
+&#13;
+    font-size: 13px;&#13;
+&#13;
+    font-weight: 600;&#13;
+}&#13;
+&#13;
+&#13;
+.btn-secondary {&#13;
+&#13;
+    border: 1px solid #cbd5ef;&#13;
+&#13;
+    background: white;&#13;
+&#13;
+    color: #3156e8;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   KPI GRID&#13;
+========================================= */&#13;
+&#13;
+.kpi-grid {&#13;
+&#13;
+    display: grid;&#13;
+&#13;
+    grid-template-columns:&#13;
+        repeat(4, 1fr);&#13;
+&#13;
+    gap: 14px;&#13;
+&#13;
+    margin-bottom: 20px;&#13;
+}&#13;
+&#13;
+&#13;
+.kpi-card {&#13;
+&#13;
+    background: white;&#13;
+&#13;
+    border: 1px solid #dce3f0;&#13;
+&#13;
+    border-radius: 14px;&#13;
+&#13;
+    padding: 20px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 14px;&#13;
+&#13;
+    box-shadow:&#13;
+        0 5px 18px&#13;
+        rgba(40, 65, 110, 0.05);&#13;
+}&#13;
+&#13;
+&#13;
+.kpi-icon {&#13;
+&#13;
+    width: 42px;&#13;
+&#13;
+    height: 42px;&#13;
+&#13;
+    border-radius: 11px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    justify-content: center;&#13;
+&#13;
+    font-size: 18px;&#13;
+&#13;
+    font-weight: 700;&#13;
+}&#13;
+&#13;
+&#13;
+.kpi-icon.purple {&#13;
+&#13;
+    background: #eef0ff;&#13;
+&#13;
+    color: #5267e8;&#13;
+}&#13;
+&#13;
+&#13;
+.kpi-icon.blue {&#13;
+&#13;
+    background: #edf5ff;&#13;
+&#13;
+    color: #2875d6;&#13;
+}&#13;
+&#13;
+&#13;
+.kpi-icon.green {&#13;
+&#13;
+    background: #eaf8f0;&#13;
+&#13;
+    color: #16834a;&#13;
+}&#13;
+&#13;
+&#13;
+.kpi-icon.orange {&#13;
+&#13;
+    background: #fff6e5;&#13;
+&#13;
+    color: #d88900;&#13;
+}&#13;
+&#13;
+&#13;
+.kpi-label {&#13;
+&#13;
+    font-size: 11px;&#13;
+&#13;
+    color: #7a89a5;&#13;
+&#13;
+    margin-bottom: 5px;&#13;
+}&#13;
+&#13;
+&#13;
+.kpi-value {&#13;
+&#13;
+    font-size: 24px;&#13;
+&#13;
+    font-weight: 700;&#13;
+&#13;
+    color: #102e61;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   ANALYTICS GRID&#13;
+========================================= */&#13;
+&#13;
+.analytics-grid {&#13;
+&#13;
+    display: grid;&#13;
+&#13;
+    grid-template-columns:&#13;
+        repeat(2, 1fr);&#13;
+&#13;
+    gap: 18px;&#13;
+&#13;
+    margin-bottom: 18px;&#13;
+}&#13;
+&#13;
+&#13;
+.analytics-card {&#13;
+&#13;
+    background: white;&#13;
+&#13;
+    border: 1px solid #dce3f0;&#13;
+&#13;
+    border-radius: 16px;&#13;
+&#13;
+    padding: 24px;&#13;
+&#13;
+    box-shadow:&#13;
+        0 6px 20px&#13;
+        rgba(40, 65, 110, 0.05);&#13;
+&#13;
+    margin-bottom: 18px;&#13;
+}&#13;
+&#13;
+&#13;
+.card-header {&#13;
+&#13;
+    margin-bottom: 22px;&#13;
+}&#13;
+&#13;
+&#13;
+.card-header h2 {&#13;
+&#13;
+    margin: 0 0 5px;&#13;
+&#13;
+    color: #173b70;&#13;
+&#13;
+    font-size: 17px;&#13;
+}&#13;
+&#13;
+&#13;
+.card-header p {&#13;
+&#13;
+    margin: 0;&#13;
+&#13;
+    color: #8290aa;&#13;
+&#13;
+    font-size: 12px;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   STATUS / LOCATION&#13;
+========================================= */&#13;
+&#13;
+.status-row,&#13;
+.location-row {&#13;
+&#13;
+    margin-bottom: 18px;&#13;
+}&#13;
+&#13;
+&#13;
+.status-info,&#13;
+.location-name {&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    justify-content: space-between;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    margin-bottom: 7px;&#13;
+&#13;
+    font-size: 13px;&#13;
+&#13;
+    color: #42577a;&#13;
+}&#13;
+&#13;
+&#13;
+.status-info strong,&#13;
+.location-name strong {&#13;
+&#13;
+    color: #173b70;&#13;
+}&#13;
+&#13;
+&#13;
+.progress {&#13;
+&#13;
+    height: 7px;&#13;
+&#13;
+    background: #edf0f7;&#13;
+&#13;
+    border-radius: 10px;&#13;
+&#13;
+    overflow: hidden;&#13;
+}&#13;
+&#13;
+&#13;
+.progress-bar {&#13;
+&#13;
+    height: 100%;&#13;
+&#13;
+    background: #5267e8;&#13;
+&#13;
+    border-radius: 10px;&#13;
+&#13;
+    transition:&#13;
+        width 0.3s ease;&#13;
+}&#13;
+&#13;
+&#13;
+.location-bar {&#13;
+&#13;
+    background: #2875d6;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   PIPELINE&#13;
+========================================= */&#13;
+&#13;
+.pipeline-card {&#13;
+&#13;
+    margin-bottom: 18px;&#13;
+}&#13;
+&#13;
+&#13;
+.pipeline {&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    justify-content: space-between;&#13;
+&#13;
+    gap: 8px;&#13;
+&#13;
+    overflow-x: auto;&#13;
+&#13;
+    padding: 5px 0;&#13;
+}&#13;
+&#13;
+&#13;
+.pipeline-step {&#13;
+&#13;
+    min-width: 105px;&#13;
+&#13;
+    text-align: center;&#13;
+}&#13;
+&#13;
+&#13;
+.pipeline-number {&#13;
+&#13;
+    width: 54px;&#13;
+&#13;
+    height: 54px;&#13;
+&#13;
+    margin: 0 auto 8px;&#13;
+&#13;
+    border-radius: 50%;&#13;
+&#13;
+    background: #eef1ff;&#13;
+&#13;
+    color: #5267e8;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    justify-content: center;&#13;
+&#13;
+    font-size: 17px;&#13;
+&#13;
+    font-weight: 700;&#13;
+}&#13;
+&#13;
+&#13;
+.pipeline-label {&#13;
+&#13;
+    font-size: 11px;&#13;
+&#13;
+    color: #647694;&#13;
+&#13;
+    white-space: nowrap;&#13;
+}&#13;
+&#13;
+&#13;
+.pipeline-arrow {&#13;
+&#13;
+    color: #a3aec3;&#13;
+&#13;
+    font-size: 18px;&#13;
+&#13;
+    flex-shrink: 0;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   OUTCOME&#13;
+========================================= */&#13;
+&#13;
+.outcome-grid {&#13;
+&#13;
+    display: grid;&#13;
+&#13;
+    grid-template-columns:&#13;
+        repeat(3, 1fr);&#13;
+&#13;
+    gap: 14px;&#13;
+}&#13;
+&#13;
+&#13;
+.outcome-item {&#13;
+&#13;
+    background: #f8f9ff;&#13;
+&#13;
+    border: 1px solid #e4e8f8;&#13;
+&#13;
+    border-radius: 12px;&#13;
+&#13;
+    padding: 18px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 14px;&#13;
+}&#13;
+&#13;
+&#13;
+.outcome-icon {&#13;
+&#13;
+    width: 40px;&#13;
+&#13;
+    height: 40px;&#13;
+&#13;
+    border-radius: 10px;&#13;
+&#13;
+    background: #eaf8f0;&#13;
+&#13;
+    color: #16834a;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    justify-content: center;&#13;
+&#13;
+    font-weight: 700;&#13;
+}&#13;
+&#13;
+&#13;
+.outcome-item span {&#13;
+&#13;
+    display: block;&#13;
+&#13;
+    font-size: 11px;&#13;
+&#13;
+    color: #7b89a3;&#13;
+&#13;
+    margin-bottom: 4px;&#13;
+}&#13;
+&#13;
+&#13;
+.outcome-item strong {&#13;
+&#13;
+    font-size: 20px;&#13;
+&#13;
+    color: #173b70;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   EMPTY STATE&#13;
+========================================= */&#13;
+&#13;
+.empty-state {&#13;
+&#13;
+    padding: 25px;&#13;
+&#13;
+    text-align: center;&#13;
+&#13;
+    color: #8793a8;&#13;
+&#13;
+    font-size: 13px;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   ERROR&#13;
+========================================= */&#13;
+&#13;
+.error-message {&#13;
+&#13;
+    padding: 18px;&#13;
+&#13;
+    background: #fff2f2;&#13;
+&#13;
+    border: 1px solid #ffd2d2;&#13;
+&#13;
+    border-radius: 10px;&#13;
+&#13;
+    color: #c62828;&#13;
+&#13;
+    margin-bottom: 20px;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   FOOTER&#13;
+========================================= */&#13;
+&#13;
+.analytics-footer {&#13;
+&#13;
+    text-align: center;&#13;
+&#13;
+    color: #8995aa;&#13;
+&#13;
+    font-size: 12px;&#13;
+&#13;
+    padding: 10px;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   RESPONSIVE&#13;
+========================================= */&#13;
+&#13;
+@media (max-width: 900px) {&#13;
+&#13;
+    .kpi-grid {&#13;
+&#13;
+        grid-template-columns:&#13;
+            repeat(2, 1fr);&#13;
+&#13;
+    }&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+@media (max-width: 700px) {&#13;
+&#13;
+    .analytics-header {&#13;
+&#13;
+        flex-direction: column;&#13;
+&#13;
+        align-items: flex-start;&#13;
+&#13;
+        gap: 20px;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .analytics-grid {&#13;
+&#13;
+        grid-template-columns: 1fr;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .kpi-grid {&#13;
+&#13;
+        grid-template-columns: 1fr;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .outcome-grid {&#13;
+&#13;
+        grid-template-columns: 1fr;&#13;
+&#13;
+    }&#13;
+&#13;
+}</css>
+        <data_table>sp_instance</data_table>
+        <demo_data/>
+        <description/>
+        <docs/>
+        <field_list/>
+        <has_preview>false</has_preview>
+        <id>campus360_recruiter_analytics</id>
+        <internal>false</internal>
+        <link><![CDATA[function link(scope, element, attrs, controller) {
+  
+}]]></link>
+        <name>Recruiter Analytics</name>
+        <option_schema/>
+        <public>false</public>
+        <roles/>
+        <script><![CDATA[(function() {
+
+    // =====================================================
+    // CURRENT TEST RECRUITER
+    // =====================================================
+
+    // We are intentionally using the same sample recruiter
+    // until the complete recruiter portal is finished.
+
+    data.recruiter_name = 'Ananya Mehta';
+    data.recruiter_id = 'RCR001';
+
+
+    // =====================================================
+    // CURRENT TEST COMPANY
+    // =====================================================
+
+    // TechNova Solutions - CMP001
+
+    var companySysId =
+        'e9268662acd303107f44b432e349694b';
+
+
+    // =====================================================
+    // INITIAL DATA
+    // =====================================================
+
+    data.error = '';
+
+    data.company = {
+        name: 'TechNova Solutions',
+        id: 'CMP001'
+    };
+
+
+    data.kpi = {
+
+        total_opportunities: 0,
+        active_opportunities: 0,
+
+        total_applications: 0,
+        shortlisted: 0,
+
+        total_interviews: 0,
+        selected: 0,
+
+        offers: 0,
+        placements: 0
+
+    };
+
+
+    data.application_status = [];
+
+    data.locations = [];
+
+    data.pipeline = {
+
+        applications: 0,
+        shortlisted: 0,
+        interviews: 0,
+        selected: 0,
+        offers: 0,
+        placements: 0
+
+    };
+
+
+    data.outcomes = {
+
+        selected: 0,
+        on_campus: 0,
+        off_campus: 0
+
+    };
+
+
+    // =====================================================
+    // GET COMPANY
+    // =====================================================
+
+    var companyGR =
+        new GlideRecord(
+            'x_snc_campus360_company_master'
+        );
+
+
+    if (!companyGR.get(companySysId)) {
+
+        data.error =
+            'Company record could not be found.';
+
+        return;
+
+    }
+
+
+    data.company.name =
+        companyGR.getValue('company_name');
+
+    data.company.id =
+        companyGR.getValue('company_id');
+
+
+    // =====================================================
+    // 1. PLACEMENT OPPORTUNITIES
+    // =====================================================
+
+    var oppGR =
+        new GlideRecord(
+            'x_snc_campus360_placement_opportunity'
+        );
+
+
+    oppGR.addQuery(
+        'company',
+        companySysId
+    );
+
+    oppGR.query();
+
+
+    var opportunityIds = [];
+
+    var locationMap = {};
+
+    while (oppGR.next()) {
+
+        data.kpi.total_opportunities++;
+
+        opportunityIds.push(
+            oppGR.getUniqueValue()
+        );
+
+
+        // ---------------------------------------------
+        // ACTIVE / OPEN OPPORTUNITIES
+        // ---------------------------------------------
+
+        var oppStatus =
+            oppGR.getValue('status');
+
+
+        if (
+            oppStatus == 'Open' ||
+            oppStatus == 'open'
+        ) {
+
+            data.kpi.active_opportunities++;
+
+        }
+
+
+        // ---------------------------------------------
+        // LOCATION ANALYTICS
+        // ---------------------------------------------
+
+        var location =
+            oppGR.getValue('location');
+
+
+        if (location) {
+
+            if (!locationMap[location]) {
+
+                locationMap[location] = 0;
+
+            }
+
+            locationMap[location]++;
+
+        }
+
+    }
+
+
+    // =====================================================
+    // CONVERT LOCATION MAP TO ARRAY
+    // =====================================================
+
+    for (var locationName in locationMap) {
+
+        data.locations.push({
+
+            name: locationName,
+
+            count:
+                locationMap[locationName]
+
+        });
+
+    }
+
+
+    // =====================================================
+    // 2. STUDENT APPLICATIONS
+    // =====================================================
+
+    if (opportunityIds.length > 0) {
+
+        var appGR =
+            new GlideRecord(
+                'x_snc_campus360_student_application'
+            );
+
+
+        appGR.addQuery(
+            'opportunity',
+            'IN',
+            opportunityIds.join(',')
+        );
+
+        appGR.query();
+
+
+        var applicationStatusMap = {};
+
+
+        while (appGR.next()) {
+
+            data.kpi.total_applications++;
+
+            data.pipeline.applications++;
+
+
+            // -----------------------------------------
+            // APPLICATION STATUS
+            // -----------------------------------------
+
+            var applicationStatus =
+                appGR.getDisplayValue(
+                    'application_status'
+                );
+
+
+            if (!applicationStatus) {
+
+                applicationStatus = 'Unknown';
+
+            }
+
+
+            if (
+                !applicationStatusMap[
+                    applicationStatus
+                ]
+            ) {
+
+                applicationStatusMap[
+                    applicationStatus
+                ] = 0;
+
+            }
+
+
+            applicationStatusMap[
+                applicationStatus
+            ]++;
+
+
+            // -----------------------------------------
+            // SHORTLISTED
+            // -----------------------------------------
+
+            var shortlisted =
+                appGR.getValue(
+                    'shortlisted'
+                );
+
+
+            if (
+                shortlisted == 'true' ||
+                shortlisted == '1'
+            ) {
+
+                data.kpi.shortlisted++;
+
+                data.pipeline.shortlisted++;
+
+            }
+
+
+            // -----------------------------------------
+            // OFFER STATUS
+            // -----------------------------------------
+
+            var offerStatus =
+                appGR.getDisplayValue(
+                    'offer_status'
+                );
+
+
+            if (
+                offerStatus == 'Offered' ||
+                offerStatus == 'offered'
+            ) {
+
+                data.kpi.offers++;
+
+                data.pipeline.offers++;
+
+            }
+
+        }
+
+
+        // =================================================
+        // APPLICATION STATUS ARRAY
+        // =================================================
+
+        for (
+            var statusName in applicationStatusMap
+        ) {
+
+            data.application_status.push({
+
+                name: statusName,
+
+                count:
+                    applicationStatusMap[
+                        statusName
+                    ]
+
+            });
+
+        }
+
+    }
+
+
+    // =====================================================
+    // 3. RECRUITER INTERVIEWS
+    // =====================================================
+
+    var interviewGR =
+        new GlideRecord(
+            'x_snc_campus360_recruiter_interview'
+        );
+
+
+    interviewGR.addQuery(
+        'company',
+        companySysId
+    );
+
+    interviewGR.query();
+
+
+    while (interviewGR.next()) {
+
+        data.kpi.total_interviews++;
+
+        data.pipeline.interviews++;
+
+
+        // ---------------------------------------------
+        // RESULT = SELECTED
+        // ---------------------------------------------
+
+        var interviewResult =
+            interviewGR.getDisplayValue(
+                'result'
+            );
+
+
+        if (
+            interviewResult == 'Selected' ||
+            interviewResult == 'selected'
+        ) {
+
+            data.kpi.selected++;
+
+            data.pipeline.selected++;
+
+        }
+
+    }
+
+
+    // =====================================================
+    // 4. PLACEMENT OUTCOMES
+    // =====================================================
+
+    var outcomeGR =
+        new GlideRecord(
+            'x_snc_campus360_placement_outcome'
+        );
+
+
+    outcomeGR.addQuery(
+        'company',
+        companySysId
+    );
+
+    outcomeGR.query();
+
+
+    while (outcomeGR.next()) {
+
+        data.kpi.placements++;
+
+        data.pipeline.placements++;
+
+
+        // ---------------------------------------------
+        // OUTCOME TYPE
+        // ---------------------------------------------
+
+        var outcomeType =
+            outcomeGR.getDisplayValue(
+                'outcome_type'
+            );
+
+
+        if (
+            outcomeType == 'Selected' ||
+            outcomeType == 'selected'
+        ) {
+
+            data.outcomes.selected++;
+
+        }
+
+
+        // ---------------------------------------------
+        // PLACEMENT TYPE
+        // ---------------------------------------------
+
+        var placementType =
+            outcomeGR.getDisplayValue(
+                'placement_type'
+            );
+
+
+        if (
+            placementType == 'On Campus' ||
+            placementType == 'On campus'
+        ) {
+
+            data.outcomes.on_campus++;
+
+        }
+
+
+        if (
+            placementType == 'Off Campus' ||
+            placementType == 'Off campus'
+        ) {
+
+            data.outcomes.off_campus++;
+
+        }
+
+    }
+
+
+})();]]></script>
+        <servicenow>false</servicenow>
+        <sys_class_name>sp_widget</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-29 17:41:39</sys_created_on>
+        <sys_id>0c88dfbe086703107f44368bf163ed3a</sys_id>
+        <sys_mod_count>1</sys_mod_count>
+        <sys_name>Recruiter Analytics</sys_name>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name>sp_widget_0c88dfbe086703107f44368bf163ed3a</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-29 17:48:20</sys_updated_on>
+        <template><![CDATA[<div class="analytics-page">
+
+  <!-- =========================================
+       HEADER
+  ========================================== -->
+
+  <div class="analytics-header">
+
+    <div>
+
+      <span class="eyebrow">
+        COMPANY ANALYTICS
+      </span>
+
+      <h1>
+        Recruitment Analytics
+      </h1>
+
+      <p>
+        Placement and recruitment insights for
+        {{c.data.company_name}}.
+      </p>
+
+      <div class="company-info">
+        {{c.data.company_name}}
+        ·
+        {{c.data.company_id}}
+      </div>
+
+    </div>
+
+    <div>
+
+      <a
+        class="btn btn-secondary"
+        href="?id=campus360_recruiter_dashboard_new">
+
+        ← Dashboard
+
+      </a>
+
+    </div>
+
+  </div>
+
+
+  <!-- =========================================
+       ERROR
+  ========================================== -->
+
+  <div
+    class="error-message"
+    ng-if="c.data.error">
+
+    {{c.data.error}}
+
+  </div>
+
+
+  <!-- =========================================
+       KPI CARDS
+  ========================================== -->
+
+  <div class="stats-grid">
+
+
+    <!-- OPPORTUNITIES -->
+
+    <div class="stat-card">
+
+      <div class="stat-icon">
+        ▣
+      </div>
+
+      <div>
+
+        <div class="stat-label">
+          Opportunities
+        </div>
+
+        <div class="stat-value">
+          {{c.data.stats.opportunities}}
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- APPLICATIONS -->
+
+    <div class="stat-card">
+
+      <div class="stat-icon applications">
+        ♙
+      </div>
+
+      <div>
+
+        <div class="stat-label">
+          Applications
+        </div>
+
+        <div class="stat-value">
+          {{c.data.stats.applications}}
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- INTERVIEWS -->
+
+    <div class="stat-card">
+
+      <div class="stat-icon interviews">
+        ◎
+      </div>
+
+      <div>
+
+        <div class="stat-label">
+          Interviews
+        </div>
+
+        <div class="stat-value">
+          {{c.data.stats.interviews}}
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- OFFERS -->
+
+    <div class="stat-card">
+
+      <div class="stat-icon offers">
+        ★
+      </div>
+
+      <div>
+
+        <div class="stat-label">
+          Offers
+        </div>
+
+        <div class="stat-value">
+          {{c.data.stats.offers}}
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- SELECTED -->
+
+    <div class="stat-card">
+
+      <div class="stat-icon selected">
+        ✓
+      </div>
+
+      <div>
+
+        <div class="stat-label">
+          Selected
+        </div>
+
+        <div class="stat-value">
+          {{c.data.stats.selected}}
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- =========================================
+       APPLICATION STATUS
+  ========================================== -->
+
+  <div class="analytics-grid">
+
+
+    <div class="analytics-card">
+
+      <div class="card-header">
+
+        <div>
+
+          <h2>
+            Application Status
+          </h2>
+
+          <p>
+            Current application distribution
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <div class="status-list">
+
+        <div
+          class="status-row"
+          ng-repeat="item in c.data.application_status">
+
+          <div class="status-name">
+
+            <span class="status-dot"></span>
+
+            {{item.status}}
+
+          </div>
+
+          <div class="status-count">
+
+            {{item.count}}
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- =======================================
+         INTERVIEW RESULTS
+    ======================================== -->
+
+    <div class="analytics-card">
+
+      <div class="card-header">
+
+        <div>
+
+          <h2>
+            Interview Results
+          </h2>
+
+          <p>
+            Candidate interview outcomes
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <div class="status-list">
+
+        <div
+          class="status-row"
+          ng-repeat="item in c.data.interview_results">
+
+          <div class="status-name">
+
+            <span class="status-dot interview-dot"></span>
+
+            {{item.result}}
+
+          </div>
+
+          <div class="status-count">
+
+            {{item.count}}
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- =========================================
+       OPPORTUNITY APPLICATIONS
+  ========================================== -->
+
+  <div class="analytics-card full-card">
+
+    <div class="card-header">
+
+      <div>
+
+        <h2>
+          Applications by Opportunity
+        </h2>
+
+        <p>
+          Number of students applying to each opportunity
+        </p>
+
+      </div>
+
+    </div>
+
+
+    <div
+      class="opportunity-list"
+      ng-if="c.data.opportunity_applications.length">
+
+
+      <div
+        class="opportunity-row"
+        ng-repeat="item in c.data.opportunity_applications">
+
+        <div class="opportunity-name">
+
+          {{item.opportunity}}
+
+        </div>
+
+
+        <div class="opportunity-bar-container">
+
+          <div
+            class="opportunity-bar"
+            ng-style="{
+              width:
+              ((item.count /
+              c.data.stats.applications) * 100) + '%'
+            }">
+
+          </div>
+
+        </div>
+
+
+        <div class="opportunity-count">
+
+          {{item.count}}
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <div
+      class="empty-message"
+      ng-if="!c.data.opportunity_applications.length">
+
+      No applications found.
+
+    </div>
+
+  </div>
+
+
+  <!-- =========================================
+       OFFER SUMMARY
+  ========================================== -->
+
+  <div class="analytics-grid">
+
+
+    <div class="analytics-card">
+
+      <div class="card-header">
+
+        <div>
+
+          <h2>
+            Offer Distribution
+          </h2>
+
+          <p>
+            Placement source of offered candidates
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <div class="offer-grid">
+
+        <div
+          class="offer-box"
+          ng-repeat="item in c.data.offer_summary">
+
+          <div class="offer-number">
+            {{item.count}}
+          </div>
+
+          <div class="offer-label">
+            {{item.type}}
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- =======================================
+         PLACEMENT SUMMARY
+    ======================================== -->
+
+    <div class="analytics-card">
+
+      <div class="card-header">
+
+        <div>
+
+          <h2>
+            Placement Summary
+          </h2>
+
+          <p>
+            Current placement pipeline
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <div class="funnel">
+
+
+        <div class="funnel-row">
+
+          <span>
+            Applications
+          </span>
+
+          <strong>
+            {{c.data.stats.applications}}
+          </strong>
+
+        </div>
+
+
+        <div class="funnel-line"></div>
+
+
+        <div class="funnel-row">
+
+          <span>
+            Interviews
+          </span>
+
+          <strong>
+            {{c.data.stats.interviews}}
+          </strong>
+
+        </div>
+
+
+        <div class="funnel-line"></div>
+
+
+        <div class="funnel-row">
+
+          <span>
+            Selected
+          </span>
+
+          <strong>
+            {{c.data.stats.selected}}
+          </strong>
+
+        </div>
+
+
+        <div class="funnel-line"></div>
+
+
+        <div class="funnel-row final">
+
+          <span>
+            Offers
+          </span>
+
+          <strong>
+            {{c.data.stats.offers}}
+          </strong>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- =========================================
+       PLACEMENT OUTCOMES
+  ========================================== -->
+
+  <div class="analytics-card full-card">
+
+    <div class="card-header">
+
+      <div>
+
+        <h2>
+          Placement Outcomes
+        </h2>
+
+        <p>
+          Students who reached the placement outcome stage
+        </p>
+
+      </div>
+
+      <div class="record-count">
+
+        {{c.data.outcomes.length}}
+        records
+
+      </div>
+
+    </div>
+
+
+    <div
+      class="table-wrapper"
+      ng-if="c.data.outcomes.length">
+
+
+      <table class="outcome-table">
+
+        <thead>
+
+          <tr>
+
+            <th>
+              Student
+            </th>
+
+            <th>
+              Opportunity
+            </th>
+
+            <th>
+              Outcome
+            </th>
+
+            <th>
+              Placement Type
+            </th>
+
+            <th>
+              CTC
+            </th>
+
+            <th>
+              Joining Date
+            </th>
+
+            <th>
+              Verification
+            </th>
+
+          </tr>
+
+        </thead>
+
+
+        <tbody>
+
+          <tr
+            ng-repeat="outcome in c.data.outcomes">
+
+            <td>
+              {{outcome.student || '—'}}
+            </td>
+
+            <td>
+              {{outcome.opportunity || '—'}}
+            </td>
+
+            <td>
+
+              <span class="outcome-badge">
+                {{outcome.outcome_type || '—'}}
+              </span>
+
+            </td>
+
+            <td>
+              {{outcome.placement_type || '—'}}
+            </td>
+
+            <td>
+              {{outcome.ctc || '—'}}
+            </td>
+
+            <td>
+              {{outcome.joining_date || '—'}}
+            </td>
+
+            <td>
+              {{outcome.verification_status || '—'}}
+            </td>
+
+          </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+
+    <div
+      class="empty-message"
+      ng-if="!c.data.outcomes.length">
+
+      No placement outcomes available.
+
+    </div>
+
+  </div>
+
+</div>]]></template>
+    </sp_widget>
+    <sys_update_version action="INSERT_OR_UPDATE">
+        <action>DELETE</action>
+        <application display_value="Campus360">7cd68adee41703107f44d305db800ec3</application>
+        <file_path/>
+        <instance_id>82d18dc7c38fcf94a03197af0501316c</instance_id>
+        <instance_name>ltm-hck-2876-0027</instance_name>
+        <name>sp_widget_0c88dfbe086703107f44368bf163ed3a</name>
+        <payload>&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;record_update table="sp_widget"&gt;&lt;sp_widget action="INSERT_OR_UPDATE"&gt;&lt;category&gt;custom&lt;/category&gt;&lt;client_script&gt;&lt;![CDATA[api.controller=function() {
+  /* widget controller */
+  var c = this;
+};]]&gt;&lt;/client_script&gt;&lt;controller_as&gt;c&lt;/controller_as&gt;&lt;css&gt;.analytics-page {&amp;#13;
+    max-width: 1080px;&amp;#13;
+    margin: 0 auto;&amp;#13;
+    padding: 28px;&amp;#13;
+    color: #102a56;&amp;#13;
+}&amp;#13;
+&amp;#13;
+&amp;#13;
+/* =========================================&amp;#13;
+   HEADER&amp;#13;
+========================================= */&amp;#13;
+&amp;#13;
+.analytics-header {&amp;#13;
+&amp;#13;
+    background: linear-gradient(&amp;#13;
+        135deg,&amp;#13;
+        #f4f3ff,&amp;#13;
+        #eef1ff&amp;#13;
+    );&amp;#13;
+&amp;#13;
+    border: 1px solid #dfe3ff;&amp;#13;
+    border-radius: 18px;&amp;#13;
+&amp;#13;
+    padding: 30px;&amp;#13;
+&amp;#13;
+    display: flex;&amp;#13;
+    justify-content: space-between;&amp;#13;
+    align-items: center;&amp;#13;
+&amp;#13;
+    margin-bottom: 22px;&amp;#13;
+}&amp;#13;
+&amp;#13;
+&amp;#13;
+.eyebrow {&amp;#13;
+&amp;#13;
+    font-size: 11px;&amp;#13;
+&amp;#13;
+    letter-spacing: 2px;&amp;#13;
+&amp;#13;
+    font-weight: 700;&amp;#13;
+&amp;#13;
+    color: #5267e8;&amp;#13;
+}&amp;#13;
+&amp;#13;
+&amp;#13;
+.analytics-header h1 {&amp;#13;
+&amp;#13;
+    margin: 8px 0 5px;&amp;#13;
+&amp;#13;
+    font-size: 28px;&amp;#13;
+&amp;#13;
+    color: #082b62;&amp;#13;
+}&amp;#13;
+&amp;#13;
+&amp;#13;
+.analytics-header p {&amp;#13;
+&amp;#13;
+    margin: 0 0 12px;&amp;#13;
+&amp;#13;
+    color: #66789b;&amp;#13;
+}&amp;#13;
+&amp;#13;
+&amp;#13;
+.company-label {&amp;#13;
+&amp;#13;
+    display: inline-block;&amp;#13;
+&amp;#13;
+    padding: 6px 10px;&amp;#13;
+&amp;#13;
+    border-radius: 7px;&amp;#13;
+&amp;#13;
+    background: #eef1ff;&amp;#13;
+&amp;#13;
+    color: #5267e8;&amp;#13;
+&amp;#13;
+    font-size: 12px;&amp;#13;
+&amp;#13;
+    font-weight: 600;&amp;#13;
+}&amp;#13;
+&amp;#13;
+&amp;#13;
+/* =========================================&amp;#13;
+   BUTTON&amp;#13;
+========================================= */&amp;#13;
+&amp;#13;
+.btn {&amp;#13;
+&amp;#13;
+    display: inline-block;&amp;#13;
+&amp;#13;
+    padding: 11px 18px;&amp;#13;
+&amp;#13;
+    border-radius: 9px;&amp;#13;
+&amp;#13;
+    text-decoration: none;&amp;#13;
+&amp;#13;
+    font-size: 13px;&amp;#13;
+&amp;#13;
+    font-weight: 600;&amp;#13;
+}&amp;#13;
+&amp;#13;
+&amp;#13;
+.btn-secondary {&amp;#13;
+&amp;#13;
+    border: 1px solid #cbd5ef;&amp;#13;
+&amp;#13;
+    background: white;&amp;#13;
+&amp;#13;
+    color: #3156e8;&amp;#13;
+}&amp;#13;
+&amp;#13;
+&amp;#13;
+/* =========================================&amp;#13;
+   KPI GRID&amp;#13;
+========================================= */&amp;#13;
+&amp;#13;
+.kpi-grid {&amp;#13;
+&amp;#13;
+    display: grid;&amp;#13;
+&amp;#13;
+    grid-template-columns:&amp;#13;
+        repeat(4, 1fr);&amp;#13;
+&amp;#13;
+    gap: 14px;&amp;#13;
+&amp;#13;
+    margin-bottom: 20px;&amp;#13;
+}&amp;#13;
+&amp;#13;
+&amp;#13;
+.kpi-card {&amp;#13;
+&amp;#13;
+    background: white;&amp;#13;
+&amp;#13;
+    border: 1px solid #dce3f0;&amp;#13;
+&amp;#13;
+    border-radius: 14px;&amp;#13;
+&amp;#13;
+    padding: 20px;&amp;#13;
+&amp;#13;
+    display: flex;&amp;#13;
+&amp;#13;
+    align-items: center;&amp;#13;
+&amp;#13;
+    gap: 14px;&amp;#13;
+&amp;#13;
+    box-shadow:&amp;#13;
+        0 5px 18px&amp;#13;
+        rgba(40, 65, 110, 0.05);&amp;#13;
+}&amp;#13;
+&amp;#13;
+&amp;#13;
+.kpi-icon {&amp;#13;
+&amp;#13;
+    width: 42px;&amp;#13;
+&amp;#13;
+    height: 42px;&amp;#13;
+&amp;#13;
+    border-radius: 11px;&amp;#13;
+&amp;#13;
+    display: flex;&amp;#13;
+&amp;#13;
+    align-items: center;&amp;#13;
+&amp;#13;
+    justify-content: center;&amp;#13;
+&amp;#13;
+    font-size: 18px;&amp;#13;
+&amp;#13;
+    font-weight: 700;&amp;#13;
+}&amp;#13;
+&amp;#13;
+&amp;#13;
+.kpi-icon.purple {&amp;#13;
+&amp;#13;
+    background: #eef0ff;&amp;#13;
+&amp;#13;
+    color: #5267e8;&amp;#13;
+}&amp;#13;
+&amp;#13;
+&amp;#13;
+.kpi-icon.blue {&amp;#13;
+&amp;#13;
+    background: #edf5ff;&amp;#13;
+&amp;#13;
+    color: #2875d6;&amp;#13;
+}&amp;#13;
+&amp;#13;
+&amp;#13;
+.kpi-icon.green {&amp;#13;
+&amp;#13;
+    background: #eaf8f0;&amp;#13;
+&amp;#13;
+    color: #16834a;&amp;#13;
+}&amp;#13;
+&amp;#13;
+&amp;#13;
+.kpi-icon.orange {&amp;#13;
+&amp;#13;
+    background: #fff6e5;&amp;#13;
+&amp;#13;
+    color: #d88900;&amp;#13;
+}&amp;#13;
+&amp;#13;
+&amp;#13;
+.kpi-label {&amp;#13;
+&amp;#13;
+    font-size: 11px;&amp;#13;
+&amp;#13;
+    color: #7a89a5;&amp;#13;
+&amp;#13;
+    margin-bottom: 5px;&amp;#13;
+}&amp;#13;
+&amp;#13;
+&amp;#13;
+.kpi-value {&amp;#13;
+&amp;#13;
+    font-size: 24px;&amp;#13;
+&amp;#13;
+    font-weight: 700;&amp;#13;
+&amp;#13;
+    color: #102e61;&amp;#13;
+}&amp;#13;
+&amp;#13;
+&amp;#13;
+/* =========================================&amp;#13;
+   ANALYTICS GRID&amp;#13;
+========================================= */&amp;#13;
+&amp;#13;
+.analytics-grid {&amp;#13;
+&amp;#13;
+    display: grid;&amp;#13;
+&amp;#13;
+    grid-template-columns:&amp;#13;
+        repeat(2, 1fr);&amp;#13;
+&amp;#13;
+    gap: 18px;&amp;#13;
+&amp;#13;
+    margin-bottom: 18px;&amp;#13;
+}&amp;#13;
+&amp;#13;
+&amp;#13;
+.analytics-card {&amp;#13;
+&amp;#13;
+    background: white;&amp;#13;
+&amp;#13;
+    border: 1px solid #dce3f0;&amp;#13;
+&amp;#13;
+    border-radius: 16px;&amp;#13;
+&amp;#13;
+    padding: 24px;&amp;#13;
+&amp;#13;
+    box-shadow:&amp;#13;
+        0 6px 20px&amp;#13;
+        rgba(40, 65, 110, 0.05);&amp;#13;
+&amp;#13;
+    margin-bottom: 18px;&amp;#13;
+}&amp;#13;
+&amp;#13;
+&amp;#13;
+.card-header {&amp;#13;
+&amp;#13;
+    margin-bottom: 22px;&amp;#13;
+}&amp;#13;
+&amp;#13;
+&amp;#13;
+.card-header h2 {&amp;#13;
+&amp;#13;
+    margin: 0 0 5px;&amp;#13;
+&amp;#13;
+    color: #173b70;&amp;#13;
+&amp;#13;
+    font-size: 17px;&amp;#13;
+}&amp;#13;
+&amp;#13;
+&amp;#13;
+.card-header p {&amp;#13;
+&amp;#13;
+    margin: 0;&amp;#13;
+&amp;#13;
+    color: #8290aa;&amp;#13;
+&amp;#13;
+    font-size: 12px;&amp;#13;
+}&amp;#13;
+&amp;#13;
+&amp;#13;
+/* =========================================&amp;#13;
+   STATUS / LOCATION&amp;#13;
+========================================= */&amp;#13;
+&amp;#13;
+.status-row,&amp;#13;
+.location-row {&amp;#13;
+&amp;#13;
+    margin-bottom: 18px;&amp;#13;
+}&amp;#13;
+&amp;#13;
+&amp;#13;
+.status-info,&amp;#13;
+.location-name {&amp;#13;
+&amp;#13;
+    display: flex;&amp;#13;
+&amp;#13;
+    justify-content: space-between;&amp;#13;
+&amp;#13;
+    align-items: center;&amp;#13;
+&amp;#13;
+    margin-bottom: 7px;&amp;#13;
+&amp;#13;
+    font-size: 13px;&amp;#13;
+&amp;#13;
+    color: #42577a;&amp;#13;
+}&amp;#13;
+&amp;#13;
+&amp;#13;
+.status-info strong,&amp;#13;
+.location-name strong {&amp;#13;
+&amp;#13;
+    color: #173b70;&amp;#13;
+}&amp;#13;
+&amp;#13;
+&amp;#13;
+.progress {&amp;#13;
+&amp;#13;
+    height: 7px;&amp;#13;
+&amp;#13;
+    background: #edf0f7;&amp;#13;
+&amp;#13;
+    border-radius: 10px;&amp;#13;
+&amp;#13;
+    overflow: hidden;&amp;#13;
+}&amp;#13;
+&amp;#13;
+&amp;#13;
+.progress-bar {&amp;#13;
+&amp;#13;
+    height: 100%;&amp;#13;
+&amp;#13;
+    background: #5267e8;&amp;#13;
+&amp;#13;
+    border-radius: 10px;&amp;#13;
+&amp;#13;
+    transition:&amp;#13;
+        width 0.3s ease;&amp;#13;
+}&amp;#13;
+&amp;#13;
+&amp;#13;
+.location-bar {&amp;#13;
+&amp;#13;
+    background: #2875d6;&amp;#13;
+}&amp;#13;
+&amp;#13;
+&amp;#13;
+/* =========================================&amp;#13;
+   PIPELINE&amp;#13;
+========================================= */&amp;#13;
+&amp;#13;
+.pipeline-card {&amp;#13;
+&amp;#13;
+    margin-bottom: 18px;&amp;#13;
+}&amp;#13;
+&amp;#13;
+&amp;#13;
+.pipeline {&amp;#13;
+&amp;#13;
+    display: flex;&amp;#13;
+&amp;#13;
+    align-items: center;&amp;#13;
+&amp;#13;
+    justify-content: space-between;&amp;#13;
+&amp;#13;
+    gap: 8px;&amp;#13;
+&amp;#13;
+    overflow-x: auto;&amp;#13;
+&amp;#13;
+    padding: 5px 0;&amp;#13;
+}&amp;#13;
+&amp;#13;
+&amp;#13;
+.pipeline-step {&amp;#13;
+&amp;#13;
+    min-width: 105px;&amp;#13;
+&amp;#13;
+    text-align: center;&amp;#13;
+}&amp;#13;
+&amp;#13;
+&amp;#13;
+.pipeline-number {&amp;#13;
+&amp;#13;
+    width: 54px;&amp;#13;
+&amp;#13;
+    height: 54px;&amp;#13;
+&amp;#13;
+    margin: 0 auto 8px;&amp;#13;
+&amp;#13;
+    border-radius: 50%;&amp;#13;
+&amp;#13;
+    background: #eef1ff;&amp;#13;
+&amp;#13;
+    color: #5267e8;&amp;#13;
+&amp;#13;
+    display: flex;&amp;#13;
+&amp;#13;
+    align-items: center;&amp;#13;
+&amp;#13;
+    justify-content: center;&amp;#13;
+&amp;#13;
+    font-size: 17px;&amp;#13;
+&amp;#13;
+    font-weight: 700;&amp;#13;
+}&amp;#13;
+&amp;#13;
+&amp;#13;
+.pipeline-label {&amp;#13;
+&amp;#13;
+    font-size: 11px;&amp;#13;
+&amp;#13;
+    color: #647694;&amp;#13;
+&amp;#13;
+    white-space: nowrap;&amp;#13;
+}&amp;#13;
+&amp;#13;
+&amp;#13;
+.pipeline-arrow {&amp;#13;
+&amp;#13;
+    color: #a3aec3;&amp;#13;
+&amp;#13;
+    font-size: 18px;&amp;#13;
+&amp;#13;
+    flex-shrink: 0;&amp;#13;
+}&amp;#13;
+&amp;#13;
+&amp;#13;
+/* =========================================&amp;#13;
+   OUTCOME&amp;#13;
+========================================= */&amp;#13;
+&amp;#13;
+.outcome-grid {&amp;#13;
+&amp;#13;
+    display: grid;&amp;#13;
+&amp;#13;
+    grid-template-columns:&amp;#13;
+        repeat(3, 1fr);&amp;#13;
+&amp;#13;
+    gap: 14px;&amp;#13;
+}&amp;#13;
+&amp;#13;
+&amp;#13;
+.outcome-item {&amp;#13;
+&amp;#13;
+    background: #f8f9ff;&amp;#13;
+&amp;#13;
+    border: 1px solid #e4e8f8;&amp;#13;
+&amp;#13;
+    border-radius: 12px;&amp;#13;
+&amp;#13;
+    padding: 18px;&amp;#13;
+&amp;#13;
+    display: flex;&amp;#13;
+&amp;#13;
+    align-items: center;&amp;#13;
+&amp;#13;
+    gap: 14px;&amp;#13;
+}&amp;#13;
+&amp;#13;
+&amp;#13;
+.outcome-icon {&amp;#13;
+&amp;#13;
+    width: 40px;&amp;#13;
+&amp;#13;
+    height: 40px;&amp;#13;
+&amp;#13;
+    border-radius: 10px;&amp;#13;
+&amp;#13;
+    background: #eaf8f0;&amp;#13;
+&amp;#13;
+    color: #16834a;&amp;#13;
+&amp;#13;
+    display: flex;&amp;#13;
+&amp;#13;
+    align-items: center;&amp;#13;
+&amp;#13;
+    justify-content: center;&amp;#13;
+&amp;#13;
+    font-weight: 700;&amp;#13;
+}&amp;#13;
+&amp;#13;
+&amp;#13;
+.outcome-item span {&amp;#13;
+&amp;#13;
+    display: block;&amp;#13;
+&amp;#13;
+    font-size: 11px;&amp;#13;
+&amp;#13;
+    color: #7b89a3;&amp;#13;
+&amp;#13;
+    margin-bottom: 4px;&amp;#13;
+}&amp;#13;
+&amp;#13;
+&amp;#13;
+.outcome-item strong {&amp;#13;
+&amp;#13;
+    font-size: 20px;&amp;#13;
+&amp;#13;
+    color: #173b70;&amp;#13;
+}&amp;#13;
+&amp;#13;
+&amp;#13;
+/* =========================================&amp;#13;
+   EMPTY STATE&amp;#13;
+========================================= */&amp;#13;
+&amp;#13;
+.empty-state {&amp;#13;
+&amp;#13;
+    padding: 25px;&amp;#13;
+&amp;#13;
+    text-align: center;&amp;#13;
+&amp;#13;
+    color: #8793a8;&amp;#13;
+&amp;#13;
+    font-size: 13px;&amp;#13;
+}&amp;#13;
+&amp;#13;
+&amp;#13;
+/* =========================================&amp;#13;
+   ERROR&amp;#13;
+========================================= */&amp;#13;
+&amp;#13;
+.error-message {&amp;#13;
+&amp;#13;
+    padding: 18px;&amp;#13;
+&amp;#13;
+    background: #fff2f2;&amp;#13;
+&amp;#13;
+    border: 1px solid #ffd2d2;&amp;#13;
+&amp;#13;
+    border-radius: 10px;&amp;#13;
+&amp;#13;
+    color: #c62828;&amp;#13;
+&amp;#13;
+    margin-bottom: 20px;&amp;#13;
+}&amp;#13;
+&amp;#13;
+&amp;#13;
+/* =========================================&amp;#13;
+   FOOTER&amp;#13;
+========================================= */&amp;#13;
+&amp;#13;
+.analytics-footer {&amp;#13;
+&amp;#13;
+    text-align: center;&amp;#13;
+&amp;#13;
+    color: #8995aa;&amp;#13;
+&amp;#13;
+    font-size: 12px;&amp;#13;
+&amp;#13;
+    padding: 10px;&amp;#13;
+}&amp;#13;
+&amp;#13;
+&amp;#13;
+/* =========================================&amp;#13;
+   RESPONSIVE&amp;#13;
+========================================= */&amp;#13;
+&amp;#13;
+@media (max-width: 900px) {&amp;#13;
+&amp;#13;
+    .kpi-grid {&amp;#13;
+&amp;#13;
+        grid-template-columns:&amp;#13;
+            repeat(2, 1fr);&amp;#13;
+&amp;#13;
+    }&amp;#13;
+&amp;#13;
+}&amp;#13;
+&amp;#13;
+&amp;#13;
+@media (max-width: 700px) {&amp;#13;
+&amp;#13;
+    .analytics-header {&amp;#13;
+&amp;#13;
+        flex-direction: column;&amp;#13;
+&amp;#13;
+        align-items: flex-start;&amp;#13;
+&amp;#13;
+        gap: 20px;&amp;#13;
+&amp;#13;
+    }&amp;#13;
+&amp;#13;
+&amp;#13;
+    .analytics-grid {&amp;#13;
+&amp;#13;
+        grid-template-columns: 1fr;&amp;#13;
+&amp;#13;
+    }&amp;#13;
+&amp;#13;
+&amp;#13;
+    .kpi-grid {&amp;#13;
+&amp;#13;
+        grid-template-columns: 1fr;&amp;#13;
+&amp;#13;
+    }&amp;#13;
+&amp;#13;
+&amp;#13;
+    .outcome-grid {&amp;#13;
+&amp;#13;
+        grid-template-columns: 1fr;&amp;#13;
+&amp;#13;
+    }&amp;#13;
+&amp;#13;
+}&lt;/css&gt;&lt;data_table&gt;sp_instance&lt;/data_table&gt;&lt;demo_data/&gt;&lt;description/&gt;&lt;docs/&gt;&lt;field_list/&gt;&lt;has_preview&gt;false&lt;/has_preview&gt;&lt;id&gt;campus360_recruiter_analytics&lt;/id&gt;&lt;internal&gt;false&lt;/internal&gt;&lt;link&gt;&lt;![CDATA[function link(scope, element, attrs, controller) {
+  
+}]]&gt;&lt;/link&gt;&lt;name&gt;Recruiter Analytics&lt;/name&gt;&lt;option_schema/&gt;&lt;public&gt;false&lt;/public&gt;&lt;roles/&gt;&lt;script&gt;&lt;![CDATA[(function() {
+
+    // =====================================================
+    // CURRENT TEST RECRUITER
+    // =====================================================
+
+    // We are intentionally using the same sample recruiter
+    // until the complete recruiter portal is finished.
+
+    data.recruiter_name = 'Ananya Mehta';
+    data.recruiter_id = 'RCR001';
+
+
+    // =====================================================
+    // CURRENT TEST COMPANY
+    // =====================================================
+
+    // TechNova Solutions - CMP001
+
+    var companySysId =
+        'e9268662acd303107f44b432e349694b';
+
+
+    // =====================================================
+    // INITIAL DATA
+    // =====================================================
+
+    data.error = '';
+
+    data.company = {
+        name: 'TechNova Solutions',
+        id: 'CMP001'
+    };
+
+
+    data.kpi = {
+
+        total_opportunities: 0,
+        active_opportunities: 0,
+
+        total_applications: 0,
+        shortlisted: 0,
+
+        total_interviews: 0,
+        selected: 0,
+
+        offers: 0,
+        placements: 0
+
+    };
+
+
+    data.application_status = [];
+
+    data.locations = [];
+
+    data.pipeline = {
+
+        applications: 0,
+        shortlisted: 0,
+        interviews: 0,
+        selected: 0,
+        offers: 0,
+        placements: 0
+
+    };
+
+
+    data.outcomes = {
+
+        selected: 0,
+        on_campus: 0,
+        off_campus: 0
+
+    };
+
+
+    // =====================================================
+    // GET COMPANY
+    // =====================================================
+
+    var companyGR =
+        new GlideRecord(
+            'x_snc_campus360_company_master'
+        );
+
+
+    if (!companyGR.get(companySysId)) {
+
+        data.error =
+            'Company record could not be found.';
+
+        return;
+
+    }
+
+
+    data.company.name =
+        companyGR.getValue('company_name');
+
+    data.company.id =
+        companyGR.getValue('company_id');
+
+
+    // =====================================================
+    // 1. PLACEMENT OPPORTUNITIES
+    // =====================================================
+
+    var oppGR =
+        new GlideRecord(
+            'x_snc_campus360_placement_opportunity'
+        );
+
+
+    oppGR.addQuery(
+        'company',
+        companySysId
+    );
+
+    oppGR.query();
+
+
+    var opportunityIds = [];
+
+    var locationMap = {};
+
+    while (oppGR.next()) {
+
+        data.kpi.total_opportunities++;
+
+        opportunityIds.push(
+            oppGR.getUniqueValue()
+        );
+
+
+        // ---------------------------------------------
+        // ACTIVE / OPEN OPPORTUNITIES
+        // ---------------------------------------------
+
+        var oppStatus =
+            oppGR.getValue('status');
+
+
+        if (
+            oppStatus == 'Open' ||
+            oppStatus == 'open'
+        ) {
+
+            data.kpi.active_opportunities++;
+
+        }
+
+
+        // ---------------------------------------------
+        // LOCATION ANALYTICS
+        // ---------------------------------------------
+
+        var location =
+            oppGR.getValue('location');
+
+
+        if (location) {
+
+            if (!locationMap[location]) {
+
+                locationMap[location] = 0;
+
+            }
+
+            locationMap[location]++;
+
+        }
+
+    }
+
+
+    // =====================================================
+    // CONVERT LOCATION MAP TO ARRAY
+    // =====================================================
+
+    for (var locationName in locationMap) {
+
+        data.locations.push({
+
+            name: locationName,
+
+            count:
+                locationMap[locationName]
+
+        });
+
+    }
+
+
+    // =====================================================
+    // 2. STUDENT APPLICATIONS
+    // =====================================================
+
+    if (opportunityIds.length &gt; 0) {
+
+        var appGR =
+            new GlideRecord(
+                'x_snc_campus360_student_application'
+            );
+
+
+        appGR.addQuery(
+            'opportunity',
+            'IN',
+            opportunityIds.join(',')
+        );
+
+        appGR.query();
+
+
+        var applicationStatusMap = {};
+
+
+        while (appGR.next()) {
+
+            data.kpi.total_applications++;
+
+            data.pipeline.applications++;
+
+
+            // -----------------------------------------
+            // APPLICATION STATUS
+            // -----------------------------------------
+
+            var applicationStatus =
+                appGR.getDisplayValue(
+                    'application_status'
+                );
+
+
+            if (!applicationStatus) {
+
+                applicationStatus = 'Unknown';
+
+            }
+
+
+            if (
+                !applicationStatusMap[
+                    applicationStatus
+                ]
+            ) {
+
+                applicationStatusMap[
+                    applicationStatus
+                ] = 0;
+
+            }
+
+
+            applicationStatusMap[
+                applicationStatus
+            ]++;
+
+
+            // -----------------------------------------
+            // SHORTLISTED
+            // -----------------------------------------
+
+            var shortlisted =
+                appGR.getValue(
+                    'shortlisted'
+                );
+
+
+            if (
+                shortlisted == 'true' ||
+                shortlisted == '1'
+            ) {
+
+                data.kpi.shortlisted++;
+
+                data.pipeline.shortlisted++;
+
+            }
+
+
+            // -----------------------------------------
+            // OFFER STATUS
+            // -----------------------------------------
+
+            var offerStatus =
+                appGR.getDisplayValue(
+                    'offer_status'
+                );
+
+
+            if (
+                offerStatus == 'Offered' ||
+                offerStatus == 'offered'
+            ) {
+
+                data.kpi.offers++;
+
+                data.pipeline.offers++;
+
+            }
+
+        }
+
+
+        // =================================================
+        // APPLICATION STATUS ARRAY
+        // =================================================
+
+        for (
+            var statusName in applicationStatusMap
+        ) {
+
+            data.application_status.push({
+
+                name: statusName,
+
+                count:
+                    applicationStatusMap[
+                        statusName
+                    ]
+
+            });
+
+        }
+
+    }
+
+
+    // =====================================================
+    // 3. RECRUITER INTERVIEWS
+    // =====================================================
+
+    var interviewGR =
+        new GlideRecord(
+            'x_snc_campus360_recruiter_interview'
+        );
+
+
+    interviewGR.addQuery(
+        'company',
+        companySysId
+    );
+
+    interviewGR.query();
+
+
+    while (interviewGR.next()) {
+
+        data.kpi.total_interviews++;
+
+        data.pipeline.interviews++;
+
+
+        // ---------------------------------------------
+        // RESULT = SELECTED
+        // ---------------------------------------------
+
+        var interviewResult =
+            interviewGR.getDisplayValue(
+                'result'
+            );
+
+
+        if (
+            interviewResult == 'Selected' ||
+            interviewResult == 'selected'
+        ) {
+
+            data.kpi.selected++;
+
+            data.pipeline.selected++;
+
+        }
+
+    }
+
+
+    // =====================================================
+    // 4. PLACEMENT OUTCOMES
+    // =====================================================
+
+    var outcomeGR =
+        new GlideRecord(
+            'x_snc_campus360_placement_outcome'
+        );
+
+
+    outcomeGR.addQuery(
+        'company',
+        companySysId
+    );
+
+    outcomeGR.query();
+
+
+    while (outcomeGR.next()) {
+
+        data.kpi.placements++;
+
+        data.pipeline.placements++;
+
+
+        // ---------------------------------------------
+        // OUTCOME TYPE
+        // ---------------------------------------------
+
+        var outcomeType =
+            outcomeGR.getDisplayValue(
+                'outcome_type'
+            );
+
+
+        if (
+            outcomeType == 'Selected' ||
+            outcomeType == 'selected'
+        ) {
+
+            data.outcomes.selected++;
+
+        }
+
+
+        // ---------------------------------------------
+        // PLACEMENT TYPE
+        // ---------------------------------------------
+
+        var placementType =
+            outcomeGR.getDisplayValue(
+                'placement_type'
+            );
+
+
+        if (
+            placementType == 'On Campus' ||
+            placementType == 'On campus'
+        ) {
+
+            data.outcomes.on_campus++;
+
+        }
+
+
+        if (
+            placementType == 'Off Campus' ||
+            placementType == 'Off campus'
+        ) {
+
+            data.outcomes.off_campus++;
+
+        }
+
+    }
+
+
+})();]]&gt;&lt;/script&gt;&lt;servicenow&gt;false&lt;/servicenow&gt;&lt;sys_class_name&gt;sp_widget&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-29 17:41:39&lt;/sys_created_on&gt;&lt;sys_id&gt;0c88dfbe086703107f44368bf163ed3a&lt;/sys_id&gt;&lt;sys_mod_count&gt;1&lt;/sys_mod_count&gt;&lt;sys_name&gt;Recruiter Analytics&lt;/sys_name&gt;&lt;sys_package display_value="Campus360" source="x_snc_campus360"&gt;7cd68adee41703107f44d305db800ec3&lt;/sys_package&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="Campus360"&gt;7cd68adee41703107f44d305db800ec3&lt;/sys_scope&gt;&lt;sys_update_name&gt;sp_widget_0c88dfbe086703107f44368bf163ed3a&lt;/sys_update_name&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-29 17:48:20&lt;/sys_updated_on&gt;&lt;template&gt;&lt;![CDATA[&lt;div class="analytics-page"&gt;
+
+  &lt;!-- =========================================
+       HEADER
+  ========================================== --&gt;
+
+  &lt;div class="analytics-header"&gt;
+
+    &lt;div&gt;
+
+      &lt;span class="eyebrow"&gt;
+        COMPANY ANALYTICS
+      &lt;/span&gt;
+
+      &lt;h1&gt;
+        Recruitment Analytics
+      &lt;/h1&gt;
+
+      &lt;p&gt;
+        Placement and recruitment insights for
+        {{c.data.company_name}}.
+      &lt;/p&gt;
+
+      &lt;div class="company-info"&gt;
+        {{c.data.company_name}}
+        ·
+        {{c.data.company_id}}
+      &lt;/div&gt;
+
+    &lt;/div&gt;
+
+    &lt;div&gt;
+
+      &lt;a
+        class="btn btn-secondary"
+        href="?id=campus360_recruiter_dashboard_new"&gt;
+
+        ← Dashboard
+
+      &lt;/a&gt;
+
+    &lt;/div&gt;
+
+  &lt;/div&gt;
+
+
+  &lt;!-- =========================================
+       ERROR
+  ========================================== --&gt;
+
+  &lt;div
+    class="error-message"
+    ng-if="c.data.error"&gt;
+
+    {{c.data.error}}
+
+  &lt;/div&gt;
+
+
+  &lt;!-- =========================================
+       KPI CARDS
+  ========================================== --&gt;
+
+  &lt;div class="stats-grid"&gt;
+
+
+    &lt;!-- OPPORTUNITIES --&gt;
+
+    &lt;div class="stat-card"&gt;
+
+      &lt;div class="stat-icon"&gt;
+        ▣
+      &lt;/div&gt;
+
+      &lt;div&gt;
+
+        &lt;div class="stat-label"&gt;
+          Opportunities
+        &lt;/div&gt;
+
+        &lt;div class="stat-value"&gt;
+          {{c.data.stats.opportunities}}
+        &lt;/div&gt;
+
+      &lt;/div&gt;
+
+    &lt;/div&gt;
+
+
+    &lt;!-- APPLICATIONS --&gt;
+
+    &lt;div class="stat-card"&gt;
+
+      &lt;div class="stat-icon applications"&gt;
+        ♙
+      &lt;/div&gt;
+
+      &lt;div&gt;
+
+        &lt;div class="stat-label"&gt;
+          Applications
+        &lt;/div&gt;
+
+        &lt;div class="stat-value"&gt;
+          {{c.data.stats.applications}}
+        &lt;/div&gt;
+
+      &lt;/div&gt;
+
+    &lt;/div&gt;
+
+
+    &lt;!-- INTERVIEWS --&gt;
+
+    &lt;div class="stat-card"&gt;
+
+      &lt;div class="stat-icon interviews"&gt;
+        ◎
+      &lt;/div&gt;
+
+      &lt;div&gt;
+
+        &lt;div class="stat-label"&gt;
+          Interviews
+        &lt;/div&gt;
+
+        &lt;div class="stat-value"&gt;
+          {{c.data.stats.interviews}}
+        &lt;/div&gt;
+
+      &lt;/div&gt;
+
+    &lt;/div&gt;
+
+
+    &lt;!-- OFFERS --&gt;
+
+    &lt;div class="stat-card"&gt;
+
+      &lt;div class="stat-icon offers"&gt;
+        ★
+      &lt;/div&gt;
+
+      &lt;div&gt;
+
+        &lt;div class="stat-label"&gt;
+          Offers
+        &lt;/div&gt;
+
+        &lt;div class="stat-value"&gt;
+          {{c.data.stats.offers}}
+        &lt;/div&gt;
+
+      &lt;/div&gt;
+
+    &lt;/div&gt;
+
+
+    &lt;!-- SELECTED --&gt;
+
+    &lt;div class="stat-card"&gt;
+
+      &lt;div class="stat-icon selected"&gt;
+        ✓
+      &lt;/div&gt;
+
+      &lt;div&gt;
+
+        &lt;div class="stat-label"&gt;
+          Selected
+        &lt;/div&gt;
+
+        &lt;div class="stat-value"&gt;
+          {{c.data.stats.selected}}
+        &lt;/div&gt;
+
+      &lt;/div&gt;
+
+    &lt;/div&gt;
+
+  &lt;/div&gt;
+
+
+  &lt;!-- =========================================
+       APPLICATION STATUS
+  ========================================== --&gt;
+
+  &lt;div class="analytics-grid"&gt;
+
+
+    &lt;div class="analytics-card"&gt;
+
+      &lt;div class="card-header"&gt;
+
+        &lt;div&gt;
+
+          &lt;h2&gt;
+            Application Status
+          &lt;/h2&gt;
+
+          &lt;p&gt;
+            Current application distribution
+          &lt;/p&gt;
+
+        &lt;/div&gt;
+
+      &lt;/div&gt;
+
+
+      &lt;div class="status-list"&gt;
+
+        &lt;div
+          class="status-row"
+          ng-repeat="item in c.data.application_status"&gt;
+
+          &lt;div class="status-name"&gt;
+
+            &lt;span class="status-dot"&gt;&lt;/span&gt;
+
+            {{item.status}}
+
+          &lt;/div&gt;
+
+          &lt;div class="status-count"&gt;
+
+            {{item.count}}
+
+          &lt;/div&gt;
+
+        &lt;/div&gt;
+
+      &lt;/div&gt;
+
+    &lt;/div&gt;
+
+
+    &lt;!-- =======================================
+         INTERVIEW RESULTS
+    ======================================== --&gt;
+
+    &lt;div class="analytics-card"&gt;
+
+      &lt;div class="card-header"&gt;
+
+        &lt;div&gt;
+
+          &lt;h2&gt;
+            Interview Results
+          &lt;/h2&gt;
+
+          &lt;p&gt;
+            Candidate interview outcomes
+          &lt;/p&gt;
+
+        &lt;/div&gt;
+
+      &lt;/div&gt;
+
+
+      &lt;div class="status-list"&gt;
+
+        &lt;div
+          class="status-row"
+          ng-repeat="item in c.data.interview_results"&gt;
+
+          &lt;div class="status-name"&gt;
+
+            &lt;span class="status-dot interview-dot"&gt;&lt;/span&gt;
+
+            {{item.result}}
+
+          &lt;/div&gt;
+
+          &lt;div class="status-count"&gt;
+
+            {{item.count}}
+
+          &lt;/div&gt;
+
+        &lt;/div&gt;
+
+      &lt;/div&gt;
+
+    &lt;/div&gt;
+
+  &lt;/div&gt;
+
+
+  &lt;!-- =========================================
+       OPPORTUNITY APPLICATIONS
+  ========================================== --&gt;
+
+  &lt;div class="analytics-card full-card"&gt;
+
+    &lt;div class="card-header"&gt;
+
+      &lt;div&gt;
+
+        &lt;h2&gt;
+          Applications by Opportunity
+        &lt;/h2&gt;
+
+        &lt;p&gt;
+          Number of students applying to each opportunity
+        &lt;/p&gt;
+
+      &lt;/div&gt;
+
+    &lt;/div&gt;
+
+
+    &lt;div
+      class="opportunity-list"
+      ng-if="c.data.opportunity_applications.length"&gt;
+
+
+      &lt;div
+        class="opportunity-row"
+        ng-repeat="item in c.data.opportunity_applications"&gt;
+
+        &lt;div class="opportunity-name"&gt;
+
+          {{item.opportunity}}
+
+        &lt;/div&gt;
+
+
+        &lt;div class="opportunity-bar-container"&gt;
+
+          &lt;div
+            class="opportunity-bar"
+            ng-style="{
+              width:
+              ((item.count /
+              c.data.stats.applications) * 100) + '%'
+            }"&gt;
+
+          &lt;/div&gt;
+
+        &lt;/div&gt;
+
+
+        &lt;div class="opportunity-count"&gt;
+
+          {{item.count}}
+
+        &lt;/div&gt;
+
+      &lt;/div&gt;
+
+    &lt;/div&gt;
+
+
+    &lt;div
+      class="empty-message"
+      ng-if="!c.data.opportunity_applications.length"&gt;
+
+      No applications found.
+
+    &lt;/div&gt;
+
+  &lt;/div&gt;
+
+
+  &lt;!-- =========================================
+       OFFER SUMMARY
+  ========================================== --&gt;
+
+  &lt;div class="analytics-grid"&gt;
+
+
+    &lt;div class="analytics-card"&gt;
+
+      &lt;div class="card-header"&gt;
+
+        &lt;div&gt;
+
+          &lt;h2&gt;
+            Offer Distribution
+          &lt;/h2&gt;
+
+          &lt;p&gt;
+            Placement source of offered candidates
+          &lt;/p&gt;
+
+        &lt;/div&gt;
+
+      &lt;/div&gt;
+
+
+      &lt;div class="offer-grid"&gt;
+
+        &lt;div
+          class="offer-box"
+          ng-repeat="item in c.data.offer_summary"&gt;
+
+          &lt;div class="offer-number"&gt;
+            {{item.count}}
+          &lt;/div&gt;
+
+          &lt;div class="offer-label"&gt;
+            {{item.type}}
+          &lt;/div&gt;
+
+        &lt;/div&gt;
+
+      &lt;/div&gt;
+
+    &lt;/div&gt;
+
+
+    &lt;!-- =======================================
+         PLACEMENT SUMMARY
+    ======================================== --&gt;
+
+    &lt;div class="analytics-card"&gt;
+
+      &lt;div class="card-header"&gt;
+
+        &lt;div&gt;
+
+          &lt;h2&gt;
+            Placement Summary
+          &lt;/h2&gt;
+
+          &lt;p&gt;
+            Current placement pipeline
+          &lt;/p&gt;
+
+        &lt;/div&gt;
+
+      &lt;/div&gt;
+
+
+      &lt;div class="funnel"&gt;
+
+
+        &lt;div class="funnel-row"&gt;
+
+          &lt;span&gt;
+            Applications
+          &lt;/span&gt;
+
+          &lt;strong&gt;
+            {{c.data.stats.applications}}
+          &lt;/strong&gt;
+
+        &lt;/div&gt;
+
+
+        &lt;div class="funnel-line"&gt;&lt;/div&gt;
+
+
+        &lt;div class="funnel-row"&gt;
+
+          &lt;span&gt;
+            Interviews
+          &lt;/span&gt;
+
+          &lt;strong&gt;
+            {{c.data.stats.interviews}}
+          &lt;/strong&gt;
+
+        &lt;/div&gt;
+
+
+        &lt;div class="funnel-line"&gt;&lt;/div&gt;
+
+
+        &lt;div class="funnel-row"&gt;
+
+          &lt;span&gt;
+            Selected
+          &lt;/span&gt;
+
+          &lt;strong&gt;
+            {{c.data.stats.selected}}
+          &lt;/strong&gt;
+
+        &lt;/div&gt;
+
+
+        &lt;div class="funnel-line"&gt;&lt;/div&gt;
+
+
+        &lt;div class="funnel-row final"&gt;
+
+          &lt;span&gt;
+            Offers
+          &lt;/span&gt;
+
+          &lt;strong&gt;
+            {{c.data.stats.offers}}
+          &lt;/strong&gt;
+
+        &lt;/div&gt;
+
+      &lt;/div&gt;
+
+    &lt;/div&gt;
+
+  &lt;/div&gt;
+
+
+  &lt;!-- =========================================
+       PLACEMENT OUTCOMES
+  ========================================== --&gt;
+
+  &lt;div class="analytics-card full-card"&gt;
+
+    &lt;div class="card-header"&gt;
+
+      &lt;div&gt;
+
+        &lt;h2&gt;
+          Placement Outcomes
+        &lt;/h2&gt;
+
+        &lt;p&gt;
+          Students who reached the placement outcome stage
+        &lt;/p&gt;
+
+      &lt;/div&gt;
+
+      &lt;div class="record-count"&gt;
+
+        {{c.data.outcomes.length}}
+        records
+
+      &lt;/div&gt;
+
+    &lt;/div&gt;
+
+
+    &lt;div
+      class="table-wrapper"
+      ng-if="c.data.outcomes.length"&gt;
+
+
+      &lt;table class="outcome-table"&gt;
+
+        &lt;thead&gt;
+
+          &lt;tr&gt;
+
+            &lt;th&gt;
+              Student
+            &lt;/th&gt;
+
+            &lt;th&gt;
+              Opportunity
+            &lt;/th&gt;
+
+            &lt;th&gt;
+              Outcome
+            &lt;/th&gt;
+
+            &lt;th&gt;
+              Placement Type
+            &lt;/th&gt;
+
+            &lt;th&gt;
+              CTC
+            &lt;/th&gt;
+
+            &lt;th&gt;
+              Joining Date
+            &lt;/th&gt;
+
+            &lt;th&gt;
+              Verification
+            &lt;/th&gt;
+
+          &lt;/tr&gt;
+
+        &lt;/thead&gt;
+
+
+        &lt;tbody&gt;
+
+          &lt;tr
+            ng-repeat="outcome in c.data.outcomes"&gt;
+
+            &lt;td&gt;
+              {{outcome.student || '—'}}
+            &lt;/td&gt;
+
+            &lt;td&gt;
+              {{outcome.opportunity || '—'}}
+            &lt;/td&gt;
+
+            &lt;td&gt;
+
+              &lt;span class="outcome-badge"&gt;
+                {{outcome.outcome_type || '—'}}
+              &lt;/span&gt;
+
+            &lt;/td&gt;
+
+            &lt;td&gt;
+              {{outcome.placement_type || '—'}}
+            &lt;/td&gt;
+
+            &lt;td&gt;
+              {{outcome.ctc || '—'}}
+            &lt;/td&gt;
+
+            &lt;td&gt;
+              {{outcome.joining_date || '—'}}
+            &lt;/td&gt;
+
+            &lt;td&gt;
+              {{outcome.verification_status || '—'}}
+            &lt;/td&gt;
+
+          &lt;/tr&gt;
+
+        &lt;/tbody&gt;
+
+      &lt;/table&gt;
+
+    &lt;/div&gt;
+
+
+    &lt;div
+      class="empty-message"
+      ng-if="!c.data.outcomes.length"&gt;
+
+      No placement outcomes available.
+
+    &lt;/div&gt;
+
+  &lt;/div&gt;
+
+&lt;/div&gt;]]&gt;&lt;/template&gt;&lt;/sp_widget&gt;&lt;/record_update&gt;</payload>
+        <payload_hash>-525209326</payload_hash>
+        <record_name>Recruiter Analytics</record_name>
+        <reverted_from/>
+        <source>70d68adee41703107f44d305db800ec8</source>
+        <source_table>sys_update_set</source_table>
+        <state>previous</state>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-29 17:48:20</sys_created_on>
+        <sys_id>bf1a9fb208a703107f44368bf163ed9d</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_recorded_at>1a0ee4822f60000001</sys_recorded_at>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-29 17:48:20</sys_updated_on>
+        <type>Widget</type>
+        <update_guid>ff1a9fb2aea70310c7749cfb19c2a39c</update_guid>
+        <update_guid_history>ff1a9fb2aea70310c7749cfb19c2a39c:-525209326,4e9897fe4f67031083f57ba54cbf3382:695474239</update_guid_history>
+    </sys_update_version>
+    <sys_metadata_delete action="INSERT_OR_UPDATE">
+        <sys_audit_delete display_value="Recruiter Analytics">f5eb9b7e086703107f44368bf163edc9</sys_audit_delete>
+        <sys_class_name>sys_metadata_delete</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-29 17:56:07</sys_created_on>
+        <sys_db_object display_value="" name="sp_widget">sp_widget</sys_db_object>
+        <sys_id>2655d5d11cbf46c3b2d326d3e5ce1371</sys_id>
+        <sys_metadata>0c88dfbe086703107f44368bf163ed3a</sys_metadata>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>Recruiter Analytics</sys_name>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_parent/>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_scope_delete display_value="">1cde9626740d46978b846077c1615101</sys_scope_delete>
+        <sys_update_name>sp_widget_0c88dfbe086703107f44368bf163ed3a</sys_update_name>
+        <sys_update_version display_value="sp_widget_0c88dfbe086703107f44368bf163ed3a">bf1a9fb208a703107f44368bf163ed9d</sys_update_version>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-29 17:56:07</sys_updated_on>
+    </sys_metadata_delete>
+</record_update>

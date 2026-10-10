@@ -1,0 +1,562 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_widget">
+    <sp_widget action="INSERT_OR_UPDATE">
+        <category>custom</category>
+        <client_script><![CDATA[api.controller = function($timeout) {
+
+  var c = this;
+
+  c.loading = true;
+
+
+  /*
+   * The actual validation is performed by the
+   * Check-In widget Server Script.
+   *
+   * Wait briefly so the server response is rendered
+   * cleanly in the portal.
+   */
+
+  $timeout(function() {
+
+    c.loading = false;
+
+  }, 300);
+
+};]]></client_script>
+        <controller_as>c</controller_as>
+        <css>.campus360-checkin {&#13;
+  min-height: 70vh;&#13;
+  display: flex;&#13;
+  align-items: center;&#13;
+  justify-content: center;&#13;
+  padding: 30px 20px;&#13;
+  background: #f7f8fa;&#13;
+  font-family: Arial, sans-serif;&#13;
+}&#13;
+&#13;
+.checkin-card {&#13;
+  width: 100%;&#13;
+  max-width: 560px;&#13;
+  background: #ffffff;&#13;
+  border: 1px solid #e2e6ed;&#13;
+  border-radius: 16px;&#13;
+  padding: 40px;&#13;
+  text-align: center;&#13;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.07);&#13;
+}&#13;
+&#13;
+.eyebrow {&#13;
+  font-size: 11px;&#13;
+  font-weight: 700;&#13;
+  letter-spacing: 1.4px;&#13;
+  color: #737b8c;&#13;
+  margin-bottom: 10px;&#13;
+}&#13;
+&#13;
+.checkin-card h1 {&#13;
+  margin: 0;&#13;
+  font-size: 28px;&#13;
+  color: #172033;&#13;
+}&#13;
+&#13;
+.checkin-card h2 {&#13;
+  margin: 0 0 8px;&#13;
+  color: #172033;&#13;
+}&#13;
+&#13;
+.checkin-card p {&#13;
+  margin: 12px auto 0;&#13;
+  color: #687184;&#13;
+  line-height: 1.6;&#13;
+}&#13;
+&#13;
+.success-icon,&#13;
+.info-icon,&#13;
+.error-icon {&#13;
+  width: 65px;&#13;
+  height: 65px;&#13;
+  border-radius: 50%;&#13;
+  margin: 0 auto 20px;&#13;
+  display: flex;&#13;
+  align-items: center;&#13;
+  justify-content: center;&#13;
+  font-size: 28px;&#13;
+  font-weight: 700;&#13;
+}&#13;
+&#13;
+.success-icon {&#13;
+  background: #e9f8ef;&#13;
+  color: #197044;&#13;
+}&#13;
+&#13;
+.info-icon {&#13;
+  background: #eaf3ff;&#13;
+  color: #1769aa;&#13;
+}&#13;
+&#13;
+.error-icon {&#13;
+  background: #fff0f0;&#13;
+  color: #b42318;&#13;
+}&#13;
+&#13;
+.checkin-details {&#13;
+  margin-top: 28px;&#13;
+  display: grid;&#13;
+  grid-template-columns: 1fr 1fr;&#13;
+  gap: 12px;&#13;
+  text-align: left;&#13;
+}&#13;
+&#13;
+.checkin-details div {&#13;
+  background: #f7f8fa;&#13;
+  border-radius: 9px;&#13;
+  padding: 14px;&#13;
+}&#13;
+&#13;
+.checkin-details span {&#13;
+  display: block;&#13;
+  font-size: 10px;&#13;
+  color: #737b8c;&#13;
+  margin-bottom: 5px;&#13;
+}&#13;
+&#13;
+.checkin-details strong {&#13;
+  display: block;&#13;
+  font-size: 14px;&#13;
+  color: #172033;&#13;
+  word-break: break-word;&#13;
+}&#13;
+&#13;
+.checkin-spinner {&#13;
+  width: 35px;&#13;
+  height: 35px;&#13;
+  border: 3px solid #e5e7eb;&#13;
+  border-top-color: #172033;&#13;
+  border-radius: 50%;&#13;
+  margin: 0 auto 18px;&#13;
+  animation: checkinSpin 0.8s linear infinite;&#13;
+}&#13;
+&#13;
+@keyframes checkinSpin {&#13;
+  to {&#13;
+    transform: rotate(360deg);&#13;
+  }&#13;
+}&#13;
+&#13;
+@media (max-width: 600px) {&#13;
+&#13;
+  .checkin-card {&#13;
+    padding: 30px 20px;&#13;
+  }&#13;
+&#13;
+  .checkin-details {&#13;
+    grid-template-columns: 1fr;&#13;
+  }&#13;
+&#13;
+}</css>
+        <data_table>sp_instance</data_table>
+        <demo_data/>
+        <description/>
+        <docs/>
+        <field_list/>
+        <has_preview>false</has_preview>
+        <id>campus360_interview_checkin_widget</id>
+        <internal>false</internal>
+        <link><![CDATA[function link(scope, element, attrs, controller) {
+  
+}]]></link>
+        <name>campus360_interview_checkin</name>
+        <option_schema/>
+        <public>false</public>
+        <roles/>
+        <script><![CDATA[(function() {
+
+  /* =========================================================
+     INITIAL RESPONSE
+     ========================================================= */
+
+  data.success = false;
+  data.already_scanned = false;
+
+  data.message =
+    'The interview QR code is incomplete or invalid. Please ask the student to open the interview again and display a valid QR code.';
+
+  data.interview_id = '';
+  data.student = '';
+  data.attendance_status = '';
+  data.interview_status = '';
+
+
+  /* =========================================================
+     GET QR PARAMETERS
+     ========================================================= */
+
+  var interviewSysId =
+    $sp.getParameter('interview');
+
+  var token =
+    $sp.getParameter('token');
+
+  interviewSysId =
+    String(interviewSysId || '').trim();
+
+  token =
+    String(token || '').trim();
+
+
+  /* =========================================================
+     VALIDATE PARAMETERS
+     ========================================================= */
+
+  if (!interviewSysId || !token) {
+    return;
+  }
+
+
+  /* =========================================================
+     LOAD MOCK INTERVIEW
+     ========================================================= */
+
+  var interviewGR =
+    new GlideRecord(
+      'x_snc_campus360_mock_interview'
+    );
+
+  if (!interviewGR.get(interviewSysId)) {
+
+    data.message =
+      'The interview linked to this QR code could not be found.';
+
+    return;
+  }
+
+
+  /* =========================================================
+     VERIFY QR TOKEN
+     ========================================================= */
+
+  var storedToken =
+    String(
+      interviewGR.getValue('qr_code') || ''
+    ).trim();
+
+  if (!storedToken || storedToken !== token) {
+
+    data.message =
+      'This QR code is not valid for this interview. Please generate a new QR code.';
+
+    return;
+  }
+
+
+  /* =========================================================
+     BASIC INFORMATION
+     ========================================================= */
+
+  data.interview_id =
+    interviewGR.getDisplayValue(
+      'interview_id'
+    );
+
+  data.student =
+    interviewGR.getDisplayValue(
+      'student'
+    );
+
+  data.attendance_status =
+    interviewGR.getDisplayValue(
+      'attendance_status'
+    );
+
+  data.interview_status =
+    interviewGR.getDisplayValue(
+      'interview_status'
+    );
+
+
+  /* =========================================================
+     CHECK IF ALREADY SCANNED
+     ========================================================= */
+
+  var currentQRStatus =
+    interviewGR.getDisplayValue(
+      'qr_status'
+    );
+
+  var currentAttendance =
+    interviewGR.getDisplayValue(
+      'attendance_status'
+    );
+
+
+  if (
+    String(currentQRStatus).toLowerCase() === 'scanned' ||
+    String(currentAttendance).toLowerCase() === 'present'
+  ) {
+
+    data.already_scanned = true;
+
+    data.success = false;
+
+    data.message =
+      'This interview has already been checked in.';
+
+    return;
+  }
+
+
+  /* =========================================================
+     VERIFY REQUIRED FIELDS
+     ========================================================= */
+
+  if (!interviewGR.isValidField('attendance_status')) {
+
+    data.message =
+      'The attendance_status field is missing from Mock Interview.';
+
+    return;
+  }
+
+  if (!interviewGR.isValidField('qr_status')) {
+
+    data.message =
+      'The qr_status field is missing from Mock Interview.';
+
+    return;
+  }
+
+  if (!interviewGR.isValidField('interview_status')) {
+
+    data.message =
+      'The interview_status field is missing from Mock Interview.';
+
+    return;
+  }
+
+
+  /* =========================================================
+     UPDATE ATTENDANCE STATUS
+     
+     IMPORTANT:
+     Using setValue() because setDisplayValue()
+     is not allowed in the x_snc_campus360 scope.
+     ========================================================= */
+
+  interviewGR.setValue(
+    'attendance_status',
+    'Present'
+  );
+
+
+  /* =========================================================
+     UPDATE QR STATUS
+     ========================================================= */
+
+  interviewGR.setValue(
+    'qr_status',
+    'Scanned'
+  );
+
+
+  /* =========================================================
+     UPDATE INTERVIEW STATUS
+     ========================================================= */
+
+  interviewGR.setValue(
+    'interview_status',
+    'In Progress'
+  );
+
+
+  /* =========================================================
+     SAVE RECORD
+     ========================================================= */
+
+  var updatedSysId =
+    interviewGR.update();
+
+
+  if (!updatedSysId) {
+
+    data.message =
+      'The QR was valid, but ServiceNow could not update the interview. Check ACLs or Business Rules on Mock Interview.';
+
+    return;
+  }
+
+
+  /* =========================================================
+     SUCCESS
+     ========================================================= */
+
+  data.success = true;
+
+  data.already_scanned = false;
+
+  data.message =
+    'Interview check-in completed successfully.';
+
+
+  data.interview_id =
+    interviewGR.getDisplayValue(
+      'interview_id'
+    );
+
+  data.student =
+    interviewGR.getDisplayValue(
+      'student'
+    );
+
+  data.attendance_status =
+    interviewGR.getDisplayValue(
+      'attendance_status'
+    );
+
+  data.interview_status =
+    interviewGR.getDisplayValue(
+      'interview_status'
+    );
+
+
+})();]]></script>
+        <servicenow>false</servicenow>
+        <sys_class_name>sp_widget</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-21 18:13:21</sys_created_on>
+        <sys_id>0bf25e9874eb03107f44ff2471f7e9ff</sys_id>
+        <sys_mod_count>4</sys_mod_count>
+        <sys_name>campus360_interview_checkin</sys_name>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name>sp_widget_0bf25e9874eb03107f44ff2471f7e9ff</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-21 19:20:42</sys_updated_on>
+        <template><![CDATA[<div class="campus360-checkin">
+
+  <div class="checkin-card" ng-if="c.loading">
+
+    <div class="checkin-spinner"></div>
+
+    <h2>Checking Interview</h2>
+
+    <p>
+      Please wait while we validate the interview QR code.
+    </p>
+
+  </div>
+
+
+  <!-- SUCCESS -->
+  <div class="checkin-card success-card"
+       ng-if="!c.loading && c.data.success">
+
+    <div class="success-icon">
+      ✓
+    </div>
+
+    <div class="eyebrow">INTERVIEW CHECK-IN</div>
+
+    <h1>Check-In Successful</h1>
+
+    <p>
+      The student has been successfully checked in.
+    </p>
+
+
+    <div class="checkin-details">
+
+      <div>
+        <span>Interview</span>
+        <strong>{{c.data.interview_id}}</strong>
+      </div>
+
+      <div>
+        <span>Student</span>
+        <strong>{{c.data.student}}</strong>
+      </div>
+
+      <div>
+        <span>Attendance</span>
+        <strong>{{c.data.attendance_status}}</strong>
+      </div>
+
+      <div>
+        <span>Interview Status</span>
+        <strong>{{c.data.interview_status}}</strong>
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- ALREADY SCANNED -->
+  <div class="checkin-card"
+       ng-if="!c.loading &&
+              !c.data.success &&
+              c.data.already_scanned">
+
+    <div class="info-icon">
+      ✓
+    </div>
+
+    <div class="eyebrow">INTERVIEW CHECK-IN</div>
+
+    <h1>Already Checked In</h1>
+
+    <p>
+      This interview has already been checked in.
+    </p>
+
+
+    <div class="checkin-details">
+
+      <div>
+        <span>Interview</span>
+        <strong>{{c.data.interview_id}}</strong>
+      </div>
+
+      <div>
+        <span>Student</span>
+        <strong>{{c.data.student}}</strong>
+      </div>
+
+      <div>
+        <span>Attendance</span>
+        <strong>{{c.data.attendance_status}}</strong>
+      </div>
+
+      <div>
+        <span>Interview Status</span>
+        <strong>{{c.data.interview_status}}</strong>
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- ERROR -->
+  <div class="checkin-card error-card"
+       ng-if="!c.loading &&
+              !c.data.success &&
+              !c.data.already_scanned">
+
+    <div class="error-icon">
+      !
+    </div>
+
+    <div class="eyebrow">INTERVIEW CHECK-IN</div>
+
+    <h1>Invalid Check-In</h1>
+
+    <p>
+      {{c.data.message}}
+    </p>
+
+  </div>
+
+</div>]]></template>
+    </sp_widget>
+</record_update>

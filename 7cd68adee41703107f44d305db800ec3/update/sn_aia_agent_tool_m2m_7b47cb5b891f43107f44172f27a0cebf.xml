@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update sys_domain="global" table="sn_aia_agent_tool_m2m">
+    <sn_aia_agent_tool_m2m action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <agent display_value="Campus360 Placement Diagnosis Agent">488f2a97895b43107f44172f27a0ce73</agent>
+        <description>Retrieve the complete Campus360 placement evidence for a specific student.
+
+Input:
+- student: the exact sys_id of the student whose placement diagnosis is being requested.
+
+Use the provided student sys_id exactly as received. Do not invent, modify, or substitute a student sys_id.
+
+Return the available placement evidence for that student, including student, skills, assessments, applications, training, interviews, interview_feedback, and placement_intelligence.</description>
+        <display_mode>inline</display_mode>
+        <display_output>true</display_output>
+        <document_status/>
+        <entity>sn_aia_agent</entity>
+        <entity_id>488f2a97895b43107f44172f27a0ce73</entity_id>
+        <execution_mode>autopilot</execution_mode>
+        <inputs>[]</inputs>
+        <max_auto_executions>10</max_auto_executions>
+        <name>Get Campus360 Placement Evidence</name>
+        <output_transformation_strategy>none</output_transformation_strategy>
+        <post_message/>
+        <post_processing_script/>
+        <pre_message/>
+        <pre_run>false</pre_run>
+        <requires_text_refined_message>false</requires_text_refined_message>
+        <requires_widget_transformation>true</requires_widget_transformation>
+        <should_display_refined_message>false</should_display_refined_message>
+        <sys_class_name>sn_aia_agent_tool_m2m</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-18 19:27:24</sys_created_on>
+        <sys_domain>global</sys_domain>
+        <sys_id>7b47cb5b891f43107f44172f27a0cebf</sys_id>
+        <sys_mod_count>2</sys_mod_count>
+        <sys_name>Get Campus360 Placement Evidence</sys_name>
+        <sys_overrides/>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name>sn_aia_agent_tool_m2m_7b47cb5b891f43107f44172f27a0cebf</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 05:38:37</sys_updated_on>
+        <timeout/>
+        <tool display_value="Get Campus360 Placement Evidence">b7474b5b891f43107f44172f27a0ce4a</tool>
+        <tool_attributes>{}</tool_attributes>
+        <transformation_instructions/>
+        <widgets>db0e858eff62b210f465ffffffffff2c</widgets>
+    </sn_aia_agent_tool_m2m>
+</record_update>

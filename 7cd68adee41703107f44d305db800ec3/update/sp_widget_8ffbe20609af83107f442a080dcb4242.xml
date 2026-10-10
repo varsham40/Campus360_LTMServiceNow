@@ -1,0 +1,892 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_widget">
+    <sp_widget action="INSERT_OR_UPDATE">
+        <category>custom</category>
+        <client_script><![CDATA[api.controller=function($scope, $window) {
+
+    var c = this;
+
+
+    // -----------------------------------------
+    // CREATE ASSESSMENT
+    // -----------------------------------------
+
+    c.createAssessment = function() {
+
+        $window.location.href =
+            '?id=campus360_create_assessment';
+
+    };
+
+
+    // -----------------------------------------
+    // VIEW ASSESSMENT
+    // -----------------------------------------
+
+    c.viewAssessment = function(assessment) {
+
+        if (!assessment || !assessment.sys_id) {
+            return;
+        }
+
+        $window.location.href =
+            '?id=campus360_assessment_view&sys_id=' +
+            assessment.sys_id;
+    };
+
+}]]></client_script>
+        <controller_as>c</controller_as>
+        <css>/* =========================================&#13;
+   CAMPUS360 ASSESSMENTS PAGE&#13;
+   ========================================= */&#13;
+&#13;
+.c360-assessments-page {&#13;
+  width: 100%;&#13;
+  min-height: 100vh;&#13;
+  background: #f5f7fb;&#13;
+  padding: 30px 24px 60px;&#13;
+  box-sizing: border-box;&#13;
+}&#13;
+&#13;
+.c360-assessments-container {&#13;
+  max-width: 1150px;&#13;
+  margin: 0 auto;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   PAGE HEADER&#13;
+   ========================================= */&#13;
+&#13;
+.c360-page-header {&#13;
+  display: flex;&#13;
+  align-items: flex-start;&#13;
+  justify-content: space-between;&#13;
+  margin-bottom: 22px;&#13;
+}&#13;
+&#13;
+.c360-eyebrow {&#13;
+  color: #5b52e8;&#13;
+  font-size: 10px;&#13;
+  font-weight: 700;&#13;
+  letter-spacing: 1px;&#13;
+  margin-bottom: 6px;&#13;
+}&#13;
+&#13;
+.c360-page-header h1 {&#13;
+  margin: 0;&#13;
+  color: #10194f;&#13;
+  font-size: 24px;&#13;
+  font-weight: 600;&#13;
+}&#13;
+&#13;
+.c360-page-header p {&#13;
+  margin: 7px 0 0;&#13;
+  color: #7b7f9c;&#13;
+  font-size: 12px;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   CREATE BUTTON&#13;
+   ========================================= */&#13;
+&#13;
+.c360-create-btn {&#13;
+  display: flex;&#13;
+  align-items: center;&#13;
+  gap: 7px;&#13;
+&#13;
+  height: 38px;&#13;
+  padding: 0 16px;&#13;
+&#13;
+  border: none;&#13;
+  border-radius: 6px;&#13;
+&#13;
+  background: #5b52e8;&#13;
+  color: #ffffff;&#13;
+&#13;
+  font-size: 11px;&#13;
+  font-weight: 600;&#13;
+&#13;
+  cursor: pointer;&#13;
+&#13;
+  transition: background 0.2s ease,&#13;
+              transform 0.1s ease;&#13;
+}&#13;
+&#13;
+.c360-create-btn span {&#13;
+  font-size: 17px;&#13;
+  font-weight: 400;&#13;
+}&#13;
+&#13;
+.c360-create-btn:hover {&#13;
+  background: #493fd2;&#13;
+}&#13;
+&#13;
+.c360-create-btn:active {&#13;
+  transform: translateY(1px);&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   MAIN PANEL&#13;
+   ========================================= */&#13;
+&#13;
+.c360-panel {&#13;
+  background: #ffffff;&#13;
+  border: 1px solid #dedff0;&#13;
+  border-radius: 12px;&#13;
+  padding: 20px;&#13;
+  box-shadow: 0 3px 12px rgba(50, 55, 110, 0.03);&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   PANEL HEADER&#13;
+   ========================================= */&#13;
+&#13;
+.panel-header {&#13;
+  display: flex;&#13;
+  align-items: center;&#13;
+  justify-content: space-between;&#13;
+&#13;
+  padding-bottom: 16px;&#13;
+  border-bottom: 1px solid #eeeeF5;&#13;
+}&#13;
+&#13;
+.panel-eyebrow {&#13;
+  color: #5b52e8;&#13;
+  font-size: 9px;&#13;
+  font-weight: 700;&#13;
+  letter-spacing: 1px;&#13;
+  margin-bottom: 5px;&#13;
+}&#13;
+&#13;
+.panel-header h2 {&#13;
+  margin: 0;&#13;
+  color: #111a4d;&#13;
+  font-size: 17px;&#13;
+  font-weight: 600;&#13;
+}&#13;
+&#13;
+.assessment-count {&#13;
+  color: #777b9a;&#13;
+  font-size: 11px;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   ASSESSMENT TABLE&#13;
+   ========================================= */&#13;
+&#13;
+.assessment-table {&#13;
+  width: 100%;&#13;
+  margin-top: 5px;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   TABLE HEADER&#13;
+   ========================================= */&#13;
+&#13;
+.assessment-table-header {&#13;
+  display: grid;&#13;
+&#13;
+  grid-template-columns:&#13;
+    1.5fr&#13;
+    1.35fr&#13;
+    1fr&#13;
+    1fr&#13;
+    0.8fr&#13;
+    0.9fr&#13;
+    0.65fr;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  min-height: 42px;&#13;
+&#13;
+  padding: 0 10px;&#13;
+&#13;
+  color: #777b9a;&#13;
+&#13;
+  font-size: 9px;&#13;
+  font-weight: 700;&#13;
+&#13;
+  letter-spacing: 0.5px;&#13;
+&#13;
+  border-bottom: 1px solid #e6e7f2;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   TABLE ROW&#13;
+   ========================================= */&#13;
+&#13;
+.assessment-row {&#13;
+  display: grid;&#13;
+&#13;
+  grid-template-columns:&#13;
+    1.5fr&#13;
+    1.35fr&#13;
+    1fr&#13;
+    1fr&#13;
+    0.8fr&#13;
+    0.9fr&#13;
+    0.65fr;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  min-height: 62px;&#13;
+&#13;
+  padding: 0 10px;&#13;
+&#13;
+  border-bottom: 1px solid #eeeeF5;&#13;
+&#13;
+  color: #20275a;&#13;
+&#13;
+  font-size: 11px;&#13;
+}&#13;
+&#13;
+.assessment-row:last-child {&#13;
+  border-bottom: none;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   ASSESSMENT NAME&#13;
+   ========================================= */&#13;
+&#13;
+.assessment-name-cell {&#13;
+  display: flex;&#13;
+  flex-direction: column;&#13;
+  gap: 4px;&#13;
+}&#13;
+&#13;
+.assessment-name-cell strong {&#13;
+  color: #111a4d;&#13;
+  font-size: 12px;&#13;
+  font-weight: 600;&#13;
+}&#13;
+&#13;
+.assessment-name-cell small {&#13;
+  color: #9296b1;&#13;
+  font-size: 9px;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   OTHER CELLS&#13;
+   ========================================= */&#13;
+&#13;
+.assessment-opportunity {&#13;
+  color: #4f5680;&#13;
+  font-size: 11px;&#13;
+}&#13;
+&#13;
+.assessment-type {&#13;
+  color: #4f5680;&#13;
+  font-size: 11px;&#13;
+}&#13;
+&#13;
+.assessment-date {&#13;
+  color: #5d6385;&#13;
+  font-size: 10px;&#13;
+}&#13;
+&#13;
+.assessment-score {&#13;
+  color: #111a4d;&#13;
+  font-size: 11px;&#13;
+  font-weight: 600;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   STATUS&#13;
+   ========================================= */&#13;
+&#13;
+.assessment-status {&#13;
+  display: inline-flex;&#13;
+&#13;
+  align-items: center;&#13;
+  justify-content: center;&#13;
+&#13;
+  padding: 5px 9px;&#13;
+&#13;
+  border-radius: 6px;&#13;
+&#13;
+  font-size: 9px;&#13;
+  font-weight: 600;&#13;
+&#13;
+  white-space: nowrap;&#13;
+}&#13;
+&#13;
+&#13;
+/* PUBLISHED */&#13;
+&#13;
+.status-published {&#13;
+  background: #dcf8ed;&#13;
+  color: #16845c;&#13;
+}&#13;
+&#13;
+&#13;
+/* DRAFT */&#13;
+&#13;
+.status-draft {&#13;
+  background: #eee9ff;&#13;
+  color: #635bdb;&#13;
+}&#13;
+&#13;
+&#13;
+/* CLOSED */&#13;
+&#13;
+.status-closed {&#13;
+  background: #ffe5e5;&#13;
+  color: #d84b4b;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   VIEW BUTTON&#13;
+   ========================================= */&#13;
+&#13;
+.assessment-view {&#13;
+  border: none;&#13;
+  background: transparent;&#13;
+&#13;
+  color: #5b52e8;&#13;
+&#13;
+  font-size: 10px;&#13;
+  font-weight: 500;&#13;
+&#13;
+  padding: 4px 0;&#13;
+&#13;
+  cursor: pointer;&#13;
+}&#13;
+&#13;
+.assessment-view:hover {&#13;
+  color: #3f36c9;&#13;
+  text-decoration: underline;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   EMPTY STATE&#13;
+   ========================================= */&#13;
+&#13;
+.assessment-empty {&#13;
+  display: flex;&#13;
+  flex-direction: column;&#13;
+  align-items: center;&#13;
+  justify-content: center;&#13;
+&#13;
+  min-height: 280px;&#13;
+&#13;
+  text-align: center;&#13;
+}&#13;
+&#13;
+.empty-icon {&#13;
+  display: flex;&#13;
+  align-items: center;&#13;
+  justify-content: center;&#13;
+&#13;
+  width: 52px;&#13;
+  height: 52px;&#13;
+&#13;
+  margin-bottom: 14px;&#13;
+&#13;
+  border-radius: 14px;&#13;
+&#13;
+  background: #f0efff;&#13;
+&#13;
+  color: #5b52e8;&#13;
+&#13;
+  font-size: 24px;&#13;
+}&#13;
+&#13;
+.assessment-empty strong {&#13;
+  color: #111a4d;&#13;
+  font-size: 13px;&#13;
+  font-weight: 600;&#13;
+}&#13;
+&#13;
+.assessment-empty p {&#13;
+  margin: 7px 0 15px;&#13;
+&#13;
+  color: #9296b1;&#13;
+&#13;
+  font-size: 11px;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   EMPTY CREATE BUTTON&#13;
+   ========================================= */&#13;
+&#13;
+.empty-create-btn {&#13;
+  height: 34px;&#13;
+&#13;
+  padding: 0 15px;&#13;
+&#13;
+  border: 1px solid #d9d7ff;&#13;
+  border-radius: 6px;&#13;
+&#13;
+  background: #f8f7ff;&#13;
+&#13;
+  color: #5b52e8;&#13;
+&#13;
+  font-size: 10px;&#13;
+  font-weight: 600;&#13;
+&#13;
+  cursor: pointer;&#13;
+}&#13;
+&#13;
+.empty-create-btn:hover {&#13;
+  background: #efedff;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   RESPONSIVE&#13;
+   ========================================= */&#13;
+&#13;
+@media (max-width: 900px) {&#13;
+&#13;
+  .assessment-table {&#13;
+    overflow-x: auto;&#13;
+  }&#13;
+&#13;
+  .assessment-table-header,&#13;
+  .assessment-row {&#13;
+    min-width: 900px;&#13;
+  }&#13;
+&#13;
+}&#13;
+&#13;
+@media (max-width: 600px) {&#13;
+&#13;
+  .c360-assessments-page {&#13;
+    padding: 20px 12px 40px;&#13;
+  }&#13;
+&#13;
+  .c360-page-header {&#13;
+    flex-direction: column;&#13;
+    gap: 14px;&#13;
+  }&#13;
+&#13;
+  .c360-create-btn {&#13;
+    width: 100%;&#13;
+    justify-content: center;&#13;
+  }&#13;
+&#13;
+  .c360-panel {&#13;
+    padding: 14px;&#13;
+  }&#13;
+&#13;
+}</css>
+        <data_table>sp_instance</data_table>
+        <demo_data/>
+        <description/>
+        <docs/>
+        <field_list/>
+        <has_preview>false</has_preview>
+        <id>campus360_assessments</id>
+        <internal>false</internal>
+        <link><![CDATA[function link(scope, element, attrs, controller) {
+  
+}]]></link>
+        <name>Campus360 Assessments</name>
+        <option_schema/>
+        <public>false</public>
+        <roles/>
+        <script><![CDATA[(function() {
+
+    data.assessments = [];
+
+
+    // -----------------------------------------
+    // GET ASSESSMENTS
+    // -----------------------------------------
+
+    var assessments = new GlideRecord(
+        'x_snc_campus360_student_assessment'
+    );
+
+    assessments.orderByDesc('assessment_date');
+    assessments.query();
+
+
+    // -----------------------------------------
+    // PREVENT DUPLICATE ASSESSMENTS
+    // -----------------------------------------
+
+    var seen = {};
+
+
+    while (assessments.next()) {
+
+        var assessmentId =
+            assessments.getValue('assessment_id');
+
+        /*
+         * Student Assessment contains one record
+         * for each student.
+         *
+         * Therefore the same assessment may appear
+         * multiple times.
+         *
+         * Use Assessment ID to display it only once.
+         */
+
+        if (assessmentId && seen[assessmentId]) {
+            continue;
+        }
+
+        if (assessmentId) {
+            seen[assessmentId] = true;
+        }
+
+
+        var assessment = {};
+
+
+        // -----------------------------------------
+        // SYS ID
+        // -----------------------------------------
+
+        assessment.sys_id =
+            assessments.getUniqueValue();
+
+
+        // -----------------------------------------
+        // ASSESSMENT ID
+        // -----------------------------------------
+
+        assessment.assessment_id =
+            assessments.getValue('assessment_id');
+
+
+        // -----------------------------------------
+        // ASSESSMENT NAME
+        // -----------------------------------------
+
+        assessment.assessment_name =
+            assessments.getValue('assessment_name');
+
+
+        // -----------------------------------------
+        // ASSESSMENT TYPE
+        // -----------------------------------------
+
+        assessment.assessment_type =
+            assessments.getDisplayValue('assessment_type');
+
+
+        // -----------------------------------------
+        // ASSESSMENT DATE
+        // -----------------------------------------
+
+        assessment.assessment_date =
+            assessments.getDisplayValue('assessment_date');
+
+
+        // -----------------------------------------
+        // MAXIMUM SCORE
+        // -----------------------------------------
+
+        assessment.maximum_score =
+            assessments.getValue('maximum_score');
+
+
+        // -----------------------------------------
+        // STATUS
+        // -----------------------------------------
+
+        if (assessments.status) {
+
+            assessment.status =
+                assessments.getDisplayValue('status');
+
+        } else {
+
+            // Fallback for records created before
+            // Status field was added.
+
+            assessment.status = 'Published';
+
+        }
+
+
+        // -----------------------------------------
+        // OPPORTUNITY
+        // -----------------------------------------
+
+        if (assessments.opportunity) {
+
+            assessment.opportunity =
+                assessments.opportunity.getDisplayValue();
+
+        } else {
+
+            assessment.opportunity =
+                'Placement Opportunity';
+
+        }
+
+
+        // -----------------------------------------
+        // STUDENT COUNT
+        // -----------------------------------------
+
+        var studentCount = new GlideAggregate(
+            'x_snc_campus360_student_assessment'
+        );
+
+        studentCount.addQuery(
+            'assessment_id',
+            assessmentId
+        );
+
+        studentCount.addAggregate('COUNT');
+        studentCount.query();
+
+
+        assessment.student_count = 0;
+
+        if (studentCount.next()) {
+
+            assessment.student_count =
+                parseInt(
+                    studentCount.getAggregate('COUNT'),
+                    10
+                );
+
+        }
+
+
+        data.assessments.push(assessment);
+
+    }
+
+
+})();
+
+data.aiWidget = $sp.getWidget('campus360_ai_assistant');
+]]></script>
+        <servicenow>false</servicenow>
+        <sys_class_name>sp_widget</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-27 06:32:12</sys_created_on>
+        <sys_id>8ffbe20609af83107f442a080dcb4242</sys_id>
+        <sys_mod_count>4</sys_mod_count>
+        <sys_name>Campus360 Assessments</sys_name>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name>sp_widget_8ffbe20609af83107f442a080dcb4242</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-30 11:16:33</sys_updated_on>
+        <template><![CDATA[<div class="c360-assessments-page">
+
+  <div class="c360-assessments-container">
+
+    <!-- PAGE HEADER -->
+    <div class="c360-page-header">
+
+      <div>
+        <div class="c360-eyebrow">
+          RECRUITMENT
+        </div>
+
+        <h1>Assessments</h1>
+
+        <p>
+          Manage assessments for your placement opportunities.
+        </p>
+      </div>
+
+      <button
+        class="c360-create-btn"
+        ng-click="c.createAssessment()">
+
+        <span>+</span>
+        Create Assessment
+
+      </button>
+
+    </div>
+
+
+    <!-- ASSESSMENT PANEL -->
+    <div class="c360-panel">
+
+      <!-- PANEL HEADER -->
+      <div class="panel-header">
+
+        <div>
+          <div class="panel-eyebrow">
+            ASSESSMENT MANAGEMENT
+          </div>
+
+          <h2>
+            All Assessments
+          </h2>
+        </div>
+
+        <div class="assessment-count"
+             ng-if="data.assessments.length > 0">
+
+          {{data.assessments.length}}
+          Assessments
+
+        </div>
+
+      </div>
+
+
+      <!-- TABLE -->
+      <div
+        class="assessment-table"
+        ng-if="data.assessments.length > 0">
+
+        <!-- HEADER -->
+        <div class="assessment-table-header">
+
+          <span>ASSESSMENT</span>
+          <span>OPPORTUNITY</span>
+          <span>TYPE</span>
+          <span>DATE</span>
+          <span>MAX SCORE</span>
+          <span>STATUS</span>
+          <span>ACTION</span>
+
+        </div>
+
+
+        <!-- ROWS -->
+        <div
+          class="assessment-row"
+          ng-repeat="assessment in data.assessments">
+
+          <!-- ASSESSMENT -->
+          <div class="assessment-name-cell">
+
+            <strong>
+              {{assessment.assessment_name}}
+            </strong>
+
+            <small>
+              {{assessment.assessment_id}}
+            </small>
+
+          </div>
+
+
+          <!-- OPPORTUNITY -->
+          <div class="assessment-opportunity">
+
+            {{assessment.opportunity}}
+
+          </div>
+
+
+          <!-- TYPE -->
+          <div class="assessment-type">
+
+            {{assessment.assessment_type}}
+
+          </div>
+
+
+          <!-- DATE -->
+          <div class="assessment-date">
+
+            {{assessment.assessment_date}}
+
+          </div>
+
+
+          <!-- SCORE -->
+          <div class="assessment-score">
+
+            {{assessment.maximum_score}}
+
+          </div>
+
+
+          <!-- STATUS -->
+          <div>
+
+            <span
+              class="assessment-status"
+              ng-class="{
+                'status-published':
+                  assessment.status == 'Published',
+
+                'status-draft':
+                  assessment.status == 'Draft',
+
+                'status-closed':
+                  assessment.status == 'Closed'
+              }">
+
+              {{assessment.status}}
+
+            </span>
+
+          </div>
+
+
+          <!-- ACTION -->
+          <div>
+
+            <td>
+              <button class="assessment-view"
+                      ng-click="c.viewAssessment(assessment)">
+                View →
+              </button>
+            </td>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- EMPTY STATE -->
+      <div
+        class="assessment-empty"
+        ng-if="!data.assessments ||
+               data.assessments.length == 0">
+
+        <div class="empty-icon">
+          ◎
+        </div>
+
+        <strong>
+          No assessments created yet
+        </strong>
+
+        <p>
+          Create an assessment for one of your placement opportunities.
+        </p>
+
+        <button
+          class="empty-create-btn"
+          ng-click="c.createAssessment()">
+
+          + Create Assessment
+
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+<!-- Campus360 AI Assistant Floating Widget -->
+<sp-widget widget="data.aiWidget"></sp-widget>
+]]></template>
+    </sp_widget>
+</record_update>

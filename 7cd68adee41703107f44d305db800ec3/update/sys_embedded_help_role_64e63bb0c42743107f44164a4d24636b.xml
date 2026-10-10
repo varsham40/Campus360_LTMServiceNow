@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_embedded_help_role">
+    <sys_embedded_help_role action="INSERT_OR_UPDATE">
+        <order>1000</order>
+        <role display_value="x_snc_campus360.training_attendance_user" name="x_snc_campus360.training_attendance_user">1ce63bb0c42743107f44164a4d246367</role>
+        <sys_class_name>sys_embedded_help_role</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-23 14:46:08</sys_created_on>
+        <sys_id>64e63bb0c42743107f44164a4d24636b</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>1ce63bb0c42743107f44164a4d246367</sys_name>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name>sys_embedded_help_role_64e63bb0c42743107f44164a4d24636b</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-23 14:46:08</sys_updated_on>
+    </sys_embedded_help_role>
+</record_update>

@@ -1,0 +1,7889 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_widget">
+    <sp_widget action="INSERT_OR_UPDATE">
+        <category>custom</category>
+        <client_script><![CDATA[api.controller = function($timeout) {
+
+  var c = this;
+
+
+  /* ============================================================
+     INITIAL STATE
+  ============================================================ */
+
+  c.searchText = '';
+
+  c.selectedInterview = null;
+
+  c.saving = false;
+
+  c.formError = '';
+
+  c.formSuccess = '';
+
+
+  c.form = {
+    technical_score: null,
+    communication_score: null,
+    problem_solving_score: null,
+    overall_score: null,
+    strengths: '',
+    improvement_areas: '',
+    recommendation: ''
+  };
+
+
+  /* ============================================================
+     SEARCH
+  ============================================================ */
+
+  c.filteredInterviews = function() {
+
+    if (!c.data || !c.data.interviews) {
+      return [];
+    }
+
+
+    var search =
+      String(c.searchText || '')
+        .toLowerCase()
+        .trim();
+
+
+    if (!search) {
+      return c.data.interviews;
+    }
+
+
+    return c.data.interviews.filter(
+      function(interview) {
+
+        var values = [
+          interview.studentName,
+          interview.studentId,
+          interview.interviewId,
+          interview.interviewType,
+          interview.interviewDate
+        ];
+
+
+        for (
+          var i = 0;
+          i < values.length;
+          i++
+        ) {
+
+          if (
+            String(values[i] || '')
+              .toLowerCase()
+              .indexOf(search) !== -1
+          ) {
+
+            return true;
+          }
+        }
+
+
+        return false;
+      }
+    );
+  };
+
+
+  c.clearSearch = function() {
+
+    c.searchText = '';
+
+  };
+
+
+  /* ============================================================
+     OPEN INTERVIEW
+  ============================================================ */
+
+  c.openInterview = function(interview) {
+
+    if (!interview) {
+      return;
+    }
+
+
+    c.selectedInterview = interview;
+
+
+    c.formError = '';
+
+    c.formSuccess = '';
+
+
+    c.form = {
+
+      technical_score:
+        interview.feedback &&
+        interview.feedback.technical_score !== null
+          ? interview.feedback.technical_score
+          : null,
+
+      communication_score:
+        interview.feedback &&
+        interview.feedback.communication_score !== null
+          ? interview.feedback.communication_score
+          : null,
+
+      problem_solving_score:
+        interview.feedback &&
+        interview.feedback.problem_solving_score !== null
+          ? interview.feedback.problem_solving_score
+          : null,
+
+      overall_score:
+        interview.feedback &&
+        interview.feedback.overall_score !== null
+          ? interview.feedback.overall_score
+          : null,
+
+      strengths:
+        interview.feedback &&
+        interview.feedback.strengths
+          ? interview.feedback.strengths
+          : '',
+
+      improvement_areas:
+        interview.feedback &&
+        interview.feedback.improvement_areas
+          ? interview.feedback.improvement_areas
+          : '',
+
+      recommendation:
+        interview.feedback &&
+        interview.feedback.recommendation
+          ? interview.feedback.recommendation
+          : ''
+    };
+
+
+    $timeout(
+      function() {
+
+        var form =
+          document.querySelector(
+            '.c360-feedback-form-panel'
+          );
+
+
+        if (form) {
+
+          form.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
+          });
+
+        }
+
+      },
+      100
+    );
+
+  };
+
+
+  /* ============================================================
+     CLOSE INTERVIEW
+  ============================================================ */
+
+  c.closeInterview = function() {
+
+    c.selectedInterview = null;
+
+    c.formError = '';
+
+    c.formSuccess = '';
+
+  };
+
+
+  /* ============================================================
+     SCORE VALIDATION
+  ============================================================ */
+
+  function validateScore(
+    value,
+    label
+  ) {
+
+    if (
+      value === null ||
+      value === undefined ||
+      value === ''
+    ) {
+
+      return {
+        valid: false,
+        message:
+          label +
+          ' is required.'
+      };
+    }
+
+
+    var number =
+      Number(value);
+
+
+    if (
+      isNaN(number) ||
+      number < 0 ||
+      number > 100
+    ) {
+
+      return {
+        valid: false,
+        message:
+          label +
+          ' must be between 0 and 100.'
+      };
+    }
+
+
+    return {
+      valid: true
+    };
+  }
+
+
+  /* ============================================================
+     SAVE FEEDBACK
+  ============================================================ */
+
+  c.saveFeedback = function() {
+
+    if (
+      !c.selectedInterview ||
+      !c.selectedInterview.sys_id
+    ) {
+
+      return;
+    }
+
+
+    c.formError = '';
+
+    c.formSuccess = '';
+
+
+    /* SCORE VALIDATION */
+
+    var technical =
+      validateScore(
+        c.form.technical_score,
+        'Technical Score'
+      );
+
+
+    if (!technical.valid) {
+
+      c.formError =
+        technical.message;
+
+      return;
+    }
+
+
+    var communication =
+      validateScore(
+        c.form.communication_score,
+        'Communication Score'
+      );
+
+
+    if (!communication.valid) {
+
+      c.formError =
+        communication.message;
+
+      return;
+    }
+
+
+    var problemSolving =
+      validateScore(
+        c.form.problem_solving_score,
+        'Problem Solving Score'
+      );
+
+
+    if (!problemSolving.valid) {
+
+      c.formError =
+        problemSolving.message;
+
+      return;
+    }
+
+
+    var overall =
+      validateScore(
+        c.form.overall_score,
+        'Overall Score'
+      );
+
+
+    if (!overall.valid) {
+
+      c.formError =
+        overall.message;
+
+      return;
+    }
+
+
+    /* TEXT VALIDATION */
+
+    if (
+      !String(
+        c.form.strengths || ''
+      ).trim()
+    ) {
+
+      c.formError =
+        'Please enter the student strengths.';
+
+      return;
+    }
+
+
+    if (
+      !String(
+        c.form.improvement_areas || ''
+      ).trim()
+    ) {
+
+      c.formError =
+        'Please enter the improvement areas.';
+
+      return;
+    }
+
+
+    if (
+      !String(
+        c.form.recommendation || ''
+      ).trim()
+    ) {
+
+      c.formError =
+        'Please enter a recommendation.';
+
+      return;
+    }
+
+
+    c.saving = true;
+
+
+    c.server.get({
+
+      action: 'save_feedback',
+
+      interview_sys_id:
+        c.selectedInterview.sys_id,
+
+      technical_score:
+        c.form.technical_score,
+
+      communication_score:
+        c.form.communication_score,
+
+      problem_solving_score:
+        c.form.problem_solving_score,
+
+      overall_score:
+        c.form.overall_score,
+
+      strengths:
+        c.form.strengths,
+
+      improvement_areas:
+        c.form.improvement_areas,
+
+      recommendation:
+        c.form.recommendation
+
+    }).then(
+
+      function(response) {
+
+        c.saving = false;
+
+
+        var result =
+          response &&
+          response.data
+            ? response.data
+            : null;
+
+
+        if (
+          !result ||
+          !result.success
+        ) {
+
+          c.formError =
+            result &&
+            result.message
+              ? result.message
+              : 'Unable to save feedback.';
+
+          return;
+        }
+
+
+        c.formSuccess =
+          result.message ||
+          'Feedback saved successfully.';
+
+
+        /*
+         * Update the selected interview locally
+         * so the card immediately changes from
+         * Pending to Feedback Given.
+         */
+
+        c.selectedInterview.hasFeedback =
+          true;
+
+
+        c.selectedInterview.feedback = {
+
+          technical_score:
+            Number(
+              c.form.technical_score
+            ),
+
+          communication_score:
+            Number(
+              c.form.communication_score
+            ),
+
+          problem_solving_score:
+            Number(
+              c.form.problem_solving_score
+            ),
+
+          overall_score:
+            Number(
+              c.form.overall_score
+            ),
+
+          strengths:
+            c.form.strengths,
+
+          improvement_areas:
+            c.form.improvement_areas,
+
+          recommendation:
+            c.form.recommendation
+
+        };
+
+
+        if (c.data) {
+
+          c.data.feedbackCount =
+            result.feedbackCount !== undefined
+              ? result.feedbackCount
+              : c.data.feedbackCount;
+
+
+          c.data.pendingCount =
+            result.pendingCount !== undefined
+              ? result.pendingCount
+              : c.data.pendingCount;
+
+        }
+
+
+        /*
+         * Refresh the server data after a short delay.
+         * This ensures the new record is reflected
+         * everywhere on the page.
+         */
+
+        $timeout(
+          function() {
+
+            c.server.update();
+
+          },
+          700
+        );
+
+      },
+
+      function() {
+
+        c.saving = false;
+
+        c.formError =
+          'Unable to communicate with the server.';
+
+      }
+    );
+
+  };
+
+
+  /* ============================================================
+     REFRESH
+  ============================================================ */
+
+  c.refresh = function() {
+
+    c.server.update();
+
+  };
+
+
+  /* ============================================================
+     ESC KEY
+  ============================================================ */
+
+  c.onKeyDown = function(event) {
+
+    if (
+      event &&
+      event.keyCode === 27 &&
+      c.selectedInterview
+    ) {
+
+      c.closeInterview();
+
+    }
+
+  };
+
+};]]></client_script>
+        <controller_as>c</controller_as>
+        <css>/* =========================================================&#13;
+   CAMPUS360 TRAINER&#13;
+   FEEDBACK &amp; PERFORMANCE&#13;
+&#13;
+   FULL SCREEN&#13;
+   TRAINER DASHBOARD STYLE SIDEBAR&#13;
+   TRAINER DASHBOARD STYLE TOPBAR&#13;
+   FULL 100% PC VIEW&#13;
+   DARK PURPLE SIDEBAR&#13;
+   ========================================================= */&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   RESET&#13;
+   ========================================================= */&#13;
+&#13;
+html,&#13;
+body {&#13;
+&#13;
+  width:100% !important;&#13;
+  height:100% !important;&#13;
+&#13;
+  margin:0 !important;&#13;
+  padding:0 !important;&#13;
+&#13;
+  min-width:100% !important;&#13;
+  min-height:100% !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+body {&#13;
+&#13;
+  overflow-x:hidden !important;&#13;
+&#13;
+  background:#f3f6fb !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-app,&#13;
+.c360-feedback-app *,&#13;
+.c360-feedback-app *::before,&#13;
+.c360-feedback-app *::after {&#13;
+&#13;
+  box-sizing:border-box;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   SERVICENOW WRAPPER RESET&#13;
+   ========================================================= */&#13;
+&#13;
+.container:has(.c360-feedback-app),&#13;
+.container-fluid:has(.c360-feedback-app),&#13;
+.row:has(.c360-feedback-app),&#13;
+[class*="col-"]:has(.c360-feedback-app),&#13;
+.well:has(.c360-feedback-app),&#13;
+.panel:has(.c360-feedback-app) {&#13;
+&#13;
+  width:100% !important;&#13;
+&#13;
+  max-width:none !important;&#13;
+&#13;
+  min-width:0 !important;&#13;
+&#13;
+  margin:0 !important;&#13;
+&#13;
+  padding:0 !important;&#13;
+&#13;
+  border:0 !important;&#13;
+&#13;
+  background:transparent !important;&#13;
+&#13;
+  box-shadow:none !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.panel:has(.c360-feedback-app)&#13;
+.panel-body {&#13;
+&#13;
+  width:100% !important;&#13;
+&#13;
+  max-width:none !important;&#13;
+&#13;
+  margin:0 !important;&#13;
+&#13;
+  padding:0 !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   ROOT APPLICATION&#13;
+   ========================================================= */&#13;
+&#13;
+.c360-feedback-app {&#13;
+&#13;
+  position:fixed !important;&#13;
+&#13;
+  top:0 !important;&#13;
+  left:0 !important;&#13;
+  right:0 !important;&#13;
+  bottom:0 !important;&#13;
+&#13;
+  width:100vw !important;&#13;
+  height:100vh !important;&#13;
+&#13;
+  min-width:100vw !important;&#13;
+  min-height:100vh !important;&#13;
+&#13;
+  max-width:100vw !important;&#13;
+  max-height:100vh !important;&#13;
+&#13;
+  margin:0 !important;&#13;
+  padding:0 !important;&#13;
+&#13;
+  z-index:2147483647 !important;&#13;
+&#13;
+  display:flex !important;&#13;
+&#13;
+  flex-direction:row !important;&#13;
+&#13;
+  overflow:hidden !important;&#13;
+&#13;
+  isolation:isolate;&#13;
+&#13;
+  background:&#13;
+&#13;
+    radial-gradient(&#13;
+      circle at 7% 8%,&#13;
+      rgba(239,232,255,.60),&#13;
+      transparent 24%&#13;
+    ),&#13;
+&#13;
+    radial-gradient(&#13;
+      circle at 97% 7%,&#13;
+      rgba(228,244,255,.58),&#13;
+      transparent 25%&#13;
+    ),&#13;
+&#13;
+    linear-gradient(&#13;
+      135deg,&#13;
+      #f7f9fc 0%,&#13;
+      #f3f7fb 55%,&#13;
+      #faf7ff 100%&#13;
+    );&#13;
+&#13;
+  color:#24384e;&#13;
+&#13;
+  font-family:&#13;
+    "Segoe UI",&#13;
+    "Inter",&#13;
+    Arial,&#13;
+    Helvetica,&#13;
+    sans-serif;&#13;
+&#13;
+  -webkit-font-smoothing:antialiased;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   SIDEBAR&#13;
+   DARK PURPLE - SAME STYLE AS STUDENT PAGES&#13;
+   ========================================================= */&#13;
+&#13;
+.c360-feedback-sidebar {&#13;
+&#13;
+  position:relative !important;&#13;
+&#13;
+  top:0 !important;&#13;
+  left:0 !important;&#13;
+&#13;
+  width:280px !important;&#13;
+&#13;
+  min-width:280px !important;&#13;
+  max-width:280px !important;&#13;
+&#13;
+  height:100vh !important;&#13;
+&#13;
+  min-height:100vh !important;&#13;
+  max-height:100vh !important;&#13;
+&#13;
+  flex:0 0 280px !important;&#13;
+&#13;
+  display:flex;&#13;
+&#13;
+  flex-direction:column;&#13;
+&#13;
+  overflow:hidden;&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      180deg,&#13;
+      #130d2f 0%,&#13;
+      #160d38 48%,&#13;
+      #100a29 100%&#13;
+    ) !important;&#13;
+&#13;
+  border-right:1px solid #2d2157 !important;&#13;
+&#13;
+  box-shadow:&#13;
+    5px&#13;
+    0&#13;
+    18px&#13;
+    rgba(10,7,30,.18);&#13;
+&#13;
+  z-index:100;&#13;
+&#13;
+  transition:&#13;
+    width .25s ease,&#13;
+    min-width .25s ease,&#13;
+    max-width .25s ease,&#13;
+    flex-basis .25s ease;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   COLLAPSED SIDEBAR&#13;
+   ========================================================= */&#13;
+&#13;
+.sidebar-collapsed&#13;
+.c360-feedback-sidebar {&#13;
+&#13;
+  width:0 !important;&#13;
+&#13;
+  min-width:0 !important;&#13;
+&#13;
+  max-width:0 !important;&#13;
+&#13;
+  flex-basis:0 !important;&#13;
+&#13;
+  border-right:0 !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   SIDEBAR BRAND&#13;
+   ========================================================= */&#13;
+&#13;
+.c360-feedback-brand {&#13;
+&#13;
+  height:98px;&#13;
+&#13;
+  min-height:98px;&#13;
+&#13;
+  padding:0 17px;&#13;
+&#13;
+  display:flex;&#13;
+&#13;
+  align-items:center;&#13;
+&#13;
+  gap:13px;&#13;
+&#13;
+  flex-shrink:0;&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      135deg,&#13;
+      #170e38,&#13;
+      #1c1045&#13;
+    ) !important;&#13;
+&#13;
+  border-bottom:1px solid #2d2157 !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-brand-mark {&#13;
+&#13;
+  width:50px;&#13;
+&#13;
+  height:50px;&#13;
+&#13;
+  min-width:50px;&#13;
+&#13;
+  display:flex;&#13;
+&#13;
+  align-items:center;&#13;
+&#13;
+  justify-content:center;&#13;
+&#13;
+  border-radius:14px;&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      135deg,&#13;
+      #7c3aed,&#13;
+      #8b3ff2&#13;
+    ) !important;&#13;
+&#13;
+  color:#ffffff;&#13;
+&#13;
+  font-size:23px;&#13;
+&#13;
+  box-shadow:&#13;
+    0&#13;
+    8px&#13;
+    18px&#13;
+    rgba(124,58,237,.28);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-brand-text {&#13;
+&#13;
+  min-width:0;&#13;
+&#13;
+  display:flex;&#13;
+&#13;
+  flex-direction:column;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-brand-text strong {&#13;
+&#13;
+  display:block;&#13;
+&#13;
+  color:#ffffff !important;&#13;
+&#13;
+  font-size:21px;&#13;
+&#13;
+  line-height:1;&#13;
+&#13;
+  font-weight:900;&#13;
+&#13;
+  letter-spacing:-.3px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-brand-text span {&#13;
+&#13;
+  display:block;&#13;
+&#13;
+  margin-top:5px;&#13;
+&#13;
+  color:#b9abd8 !important;&#13;
+&#13;
+  font-size:10px;&#13;
+&#13;
+  line-height:1;&#13;
+&#13;
+  font-weight:900;&#13;
+&#13;
+  letter-spacing:1.25px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   TRAINER MINI PROFILE&#13;
+   ========================================================= */&#13;
+&#13;
+.c360-feedback-profile {&#13;
+&#13;
+  margin:&#13;
+    18px&#13;
+    10px&#13;
+    15px;&#13;
+&#13;
+  min-height:74px;&#13;
+&#13;
+  padding:11px;&#13;
+&#13;
+  display:flex;&#13;
+&#13;
+  align-items:center;&#13;
+&#13;
+  gap:10px;&#13;
+&#13;
+  flex-shrink:0;&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      135deg,&#13;
+      #211342,&#13;
+      #29164f&#13;
+    ) !important;&#13;
+&#13;
+  border:1px solid #4b3475 !important;&#13;
+&#13;
+  border-radius:13px;&#13;
+&#13;
+  text-decoration:none !important;&#13;
+&#13;
+  transition:&#13;
+    background .18s ease,&#13;
+    border-color .18s ease;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-profile:hover {&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      135deg,&#13;
+      #29174f,&#13;
+      #321d5d&#13;
+    ) !important;&#13;
+&#13;
+  border-color:#60458e !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-avatar {&#13;
+&#13;
+  width:46px;&#13;
+&#13;
+  height:46px;&#13;
+&#13;
+  min-width:46px;&#13;
+&#13;
+  display:flex;&#13;
+&#13;
+  align-items:center;&#13;
+&#13;
+  justify-content:center;&#13;
+&#13;
+  border-radius:12px;&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      135deg,&#13;
+      #7c3aed,&#13;
+      #8b3ff2&#13;
+    ) !important;&#13;
+&#13;
+  color:#ffffff;&#13;
+&#13;
+  font-size:13px;&#13;
+&#13;
+  font-weight:900;&#13;
+&#13;
+  box-shadow:&#13;
+    0&#13;
+    5px&#13;
+    14px&#13;
+    rgba(124,58,237,.20);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-profile-info {&#13;
+&#13;
+  min-width:0;&#13;
+&#13;
+  flex:1;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-profile-info strong {&#13;
+&#13;
+  display:block;&#13;
+&#13;
+  overflow:hidden;&#13;
+&#13;
+  color:#ffffff !important;&#13;
+&#13;
+  font-size:13px;&#13;
+&#13;
+  line-height:1.2;&#13;
+&#13;
+  font-weight:900;&#13;
+&#13;
+  white-space:nowrap;&#13;
+&#13;
+  text-overflow:ellipsis;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-profile-info span {&#13;
+&#13;
+  display:block;&#13;
+&#13;
+  margin-top:4px;&#13;
+&#13;
+  color:#b9abd8 !important;&#13;
+&#13;
+  font-size:9px;&#13;
+&#13;
+  font-weight:800;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-profile &gt; i {&#13;
+&#13;
+  color:#a99bc7 !important;&#13;
+&#13;
+  font-size:19px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   SIDEBAR NAVIGATION&#13;
+   ========================================================= */&#13;
+&#13;
+.c360-feedback-nav {&#13;
+&#13;
+  flex:1;&#13;
+&#13;
+  min-height:0;&#13;
+&#13;
+  padding:&#13;
+    0&#13;
+    6px&#13;
+    20px;&#13;
+&#13;
+  overflow-x:hidden;&#13;
+&#13;
+  overflow-y:auto;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-nav::-webkit-scrollbar {&#13;
+&#13;
+  width:0 !important;&#13;
+  height:0 !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-nav {&#13;
+&#13;
+  scrollbar-width:none !important;&#13;
+&#13;
+  -ms-overflow-style:none !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-nav-label {&#13;
+&#13;
+  margin:&#13;
+    18px&#13;
+    7px&#13;
+    8px;&#13;
+&#13;
+  color:#9283b6 !important;&#13;
+&#13;
+  font-size:10px;&#13;
+&#13;
+  line-height:1;&#13;
+&#13;
+  font-weight:900;&#13;
+&#13;
+  letter-spacing:1.15px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-nav-item {&#13;
+&#13;
+  position:relative;&#13;
+&#13;
+  width:100%;&#13;
+&#13;
+  min-height:48px;&#13;
+&#13;
+  margin:&#13;
+    2px&#13;
+    0;&#13;
+&#13;
+  padding:&#13;
+    0&#13;
+    11px;&#13;
+&#13;
+  display:flex;&#13;
+&#13;
+  align-items:center;&#13;
+&#13;
+  gap:11px;&#13;
+&#13;
+  border-radius:10px;&#13;
+&#13;
+  background:transparent;&#13;
+&#13;
+  color:#c4b8dc !important;&#13;
+&#13;
+  text-decoration:none !important;&#13;
+&#13;
+  font-size:13px;&#13;
+&#13;
+  line-height:1.25;&#13;
+&#13;
+  font-weight:850;&#13;
+&#13;
+  transition:&#13;
+    background .18s ease,&#13;
+    color .18s ease,&#13;
+    transform .18s ease;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-nav-item:hover {&#13;
+&#13;
+  background:&#13;
+    rgba(124,58,237,.18) !important;&#13;
+&#13;
+  color:#ffffff !important;&#13;
+&#13;
+  transform:translateX(1px);&#13;
+&#13;
+  text-decoration:none !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-nav-item.active {&#13;
+&#13;
+  color:#ffffff !important;&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      90deg,&#13;
+      #7c3aed 0%,&#13;
+      #8b3ff2 100%&#13;
+    ) !important;&#13;
+&#13;
+  border-left:&#13;
+    4px&#13;
+    solid&#13;
+    #a78bfa !important;&#13;
+&#13;
+  padding-left:7px;&#13;
+&#13;
+  box-shadow:&#13;
+    inset&#13;
+    0&#13;
+    0&#13;
+    0&#13;
+    1px&#13;
+    rgba(196,181,253,.12),&#13;
+&#13;
+    0&#13;
+    7px&#13;
+    18px&#13;
+    rgba(124,58,237,.18);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-nav-icon {&#13;
+&#13;
+  width:28px;&#13;
+&#13;
+  min-width:28px;&#13;
+&#13;
+  height:28px;&#13;
+&#13;
+  display:flex;&#13;
+&#13;
+  align-items:center;&#13;
+&#13;
+  justify-content:center;&#13;
+&#13;
+  color:#a99ac8 !important;&#13;
+&#13;
+  font-size:18px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-nav-item:hover&#13;
+.c360-feedback-nav-icon {&#13;
+&#13;
+  color:#ffffff !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-nav-item.active&#13;
+.c360-feedback-nav-icon {&#13;
+&#13;
+  color:#ffffff !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-nav-count {&#13;
+&#13;
+  min-width:23px;&#13;
+&#13;
+  height:23px;&#13;
+&#13;
+  margin-left:auto;&#13;
+&#13;
+  padding:&#13;
+    0&#13;
+    6px;&#13;
+&#13;
+  display:flex;&#13;
+&#13;
+  align-items:center;&#13;
+&#13;
+  justify-content:center;&#13;
+&#13;
+  border-radius:20px;&#13;
+&#13;
+  background:#3a2764 !important;&#13;
+&#13;
+  color:#d9ceef !important;&#13;
+&#13;
+  font-size:9px;&#13;
+&#13;
+  line-height:1;&#13;
+&#13;
+  font-weight:900;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-nav-item.active&#13;
+.c360-feedback-nav-count {&#13;
+&#13;
+  background:rgba(255,255,255,.18) !important;&#13;
+&#13;
+  color:#ffffff !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-nav-count.warning {&#13;
+&#13;
+  background:#5a3511 !important;&#13;
+&#13;
+  color:#ffd08a !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   SIDEBAR OVERLAY&#13;
+   ========================================================= */&#13;
+&#13;
+.c360-feedback-sidebar-overlay {&#13;
+&#13;
+  display:none;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   MAIN&#13;
+   ========================================================= */&#13;
+&#13;
+.c360-feedback-main {&#13;
+&#13;
+  width:&#13;
+    calc(100vw - 280px) !important;&#13;
+&#13;
+  max-width:&#13;
+    calc(100vw - 280px) !important;&#13;
+&#13;
+  min-width:0 !important;&#13;
+&#13;
+  height:100vh !important;&#13;
+&#13;
+  min-height:100vh !important;&#13;
+&#13;
+  max-height:100vh !important;&#13;
+&#13;
+  flex:1 1 auto;&#13;
+&#13;
+  margin:0 !important;&#13;
+&#13;
+  padding:0 !important;&#13;
+&#13;
+  overflow-x:hidden !important;&#13;
+&#13;
+  overflow-y:auto !important;&#13;
+&#13;
+  background:#f3f6fb;&#13;
+&#13;
+  transition:&#13;
+    width .25s ease,&#13;
+    max-width .25s ease;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.sidebar-collapsed&#13;
+.c360-feedback-main {&#13;
+&#13;
+  width:100% !important;&#13;
+&#13;
+  max-width:100% !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   TOP NAVBAR&#13;
+   ========================================================= */&#13;
+&#13;
+.c360-feedback-topbar {&#13;
+&#13;
+  position:sticky;&#13;
+&#13;
+  top:0;&#13;
+&#13;
+  z-index:500;&#13;
+&#13;
+  width:100%;&#13;
+&#13;
+  height:72px;&#13;
+&#13;
+  min-height:72px;&#13;
+&#13;
+  padding:&#13;
+    0&#13;
+    19px&#13;
+    0&#13;
+    22px;&#13;
+&#13;
+  display:flex;&#13;
+&#13;
+  align-items:center;&#13;
+&#13;
+  justify-content:space-between;&#13;
+&#13;
+  gap:18px;&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      90deg,&#13;
+      #ffffff,&#13;
+      #fbfdff&#13;
+    );&#13;
+&#13;
+  border-bottom:1px solid #dce4ec;&#13;
+&#13;
+  box-shadow:&#13;
+    0&#13;
+    2px&#13;
+    10px&#13;
+    rgba(23,43,67,.035);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   TOPBAR LEFT&#13;
+   ========================================================= */&#13;
+&#13;
+.c360-feedback-topbar-left {&#13;
+&#13;
+  min-width:0;&#13;
+&#13;
+  display:flex;&#13;
+&#13;
+  align-items:center;&#13;
+&#13;
+  gap:12px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-hamburger {&#13;
+&#13;
+  width:44px;&#13;
+&#13;
+  height:44px;&#13;
+&#13;
+  min-width:44px;&#13;
+&#13;
+  display:flex;&#13;
+&#13;
+  align-items:center;&#13;
+&#13;
+  justify-content:center;&#13;
+&#13;
+  border:&#13;
+    1px&#13;
+    solid&#13;
+    #d6e0e8;&#13;
+&#13;
+  border-radius:10px;&#13;
+&#13;
+  background:#ffffff;&#13;
+&#13;
+  color:#536a81;&#13;
+&#13;
+  font-size:18px;&#13;
+&#13;
+  cursor:pointer;&#13;
+&#13;
+  transition:&#13;
+    background .18s ease,&#13;
+    color .18s ease,&#13;
+    border-color .18s ease;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-hamburger:hover {&#13;
+&#13;
+  color:#6843df;&#13;
+&#13;
+  background:#f5f1ff;&#13;
+&#13;
+  border-color:#cec1f4;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-page-heading {&#13;
+&#13;
+  min-width:0;&#13;
+&#13;
+  display:flex;&#13;
+&#13;
+  flex-direction:column;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-top-eyebrow {&#13;
+&#13;
+  display:block;&#13;
+&#13;
+  color:#7244e8;&#13;
+&#13;
+  font-size:9px;&#13;
+&#13;
+  line-height:1;&#13;
+&#13;
+  font-weight:950;&#13;
+&#13;
+  letter-spacing:1.7px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-top-title {&#13;
+&#13;
+  display:block;&#13;
+&#13;
+  margin-top:4px;&#13;
+&#13;
+  color:#1a304a;&#13;
+&#13;
+  font-size:16px;&#13;
+&#13;
+  line-height:1.1;&#13;
+&#13;
+  font-weight:900;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   TOPBAR RIGHT&#13;
+   ========================================================= */&#13;
+&#13;
+.c360-feedback-top-actions {&#13;
+&#13;
+  display:flex;&#13;
+&#13;
+  align-items:center;&#13;
+&#13;
+  gap:9px;&#13;
+&#13;
+  flex-shrink:0;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-top-icon {&#13;
+&#13;
+  position:relative;&#13;
+&#13;
+  width:42px;&#13;
+&#13;
+  height:42px;&#13;
+&#13;
+  min-width:42px;&#13;
+&#13;
+  display:flex;&#13;
+&#13;
+  align-items:center;&#13;
+&#13;
+  justify-content:center;&#13;
+&#13;
+  border:&#13;
+    1px&#13;
+    solid&#13;
+    #d7e0e8;&#13;
+&#13;
+  border-radius:10px;&#13;
+&#13;
+  background:#ffffff;&#13;
+&#13;
+  color:#5b7187;&#13;
+&#13;
+  font-size:16px;&#13;
+&#13;
+  cursor:pointer;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-top-icon:hover {&#13;
+&#13;
+  color:#6843df;&#13;
+&#13;
+  background:#f5f1ff;&#13;
+&#13;
+  border-color:#cfc2f6;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   NOTIFICATION&#13;
+   ========================================================= */&#13;
+&#13;
+.c360-feedback-notification {&#13;
+&#13;
+  overflow:visible;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-notification&#13;
+.fa-bell {&#13;
+&#13;
+  color:#f3a100;&#13;
+&#13;
+  font-size:17px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-notification-dot {&#13;
+&#13;
+  position:absolute;&#13;
+&#13;
+  top:7px;&#13;
+&#13;
+  right:7px;&#13;
+&#13;
+  width:8px;&#13;
+&#13;
+  height:8px;&#13;
+&#13;
+  border-radius:50%;&#13;
+&#13;
+  background:#ef4444;&#13;
+&#13;
+  border:&#13;
+    2px&#13;
+    solid&#13;
+    #ffffff;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   TOP PROFILE&#13;
+   ========================================================= */&#13;
+&#13;
+.c360-feedback-top-profile {&#13;
+&#13;
+  min-height:43px;&#13;
+&#13;
+  padding-left:11px;&#13;
+&#13;
+  display:flex;&#13;
+&#13;
+  align-items:center;&#13;
+&#13;
+  gap:8px;&#13;
+&#13;
+  border-left:1px solid #e2e7ed;&#13;
+&#13;
+  color:inherit;&#13;
+&#13;
+  text-decoration:none !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-top-avatar {&#13;
+&#13;
+  width:42px;&#13;
+&#13;
+  height:42px;&#13;
+&#13;
+  min-width:42px;&#13;
+&#13;
+  display:flex;&#13;
+&#13;
+  align-items:center;&#13;
+&#13;
+  justify-content:center;&#13;
+&#13;
+  border-radius:10px;&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      135deg,&#13;
+      #693ef2,&#13;
+      #8053ff&#13;
+    );&#13;
+&#13;
+  color:#ffffff;&#13;
+&#13;
+  font-size:10px;&#13;
+&#13;
+  font-weight:900;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-top-profile-text {&#13;
+&#13;
+  min-width:75px;&#13;
+&#13;
+  display:flex;&#13;
+&#13;
+  flex-direction:column;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-top-profile-text strong {&#13;
+&#13;
+  display:block;&#13;
+&#13;
+  color:#23384f;&#13;
+&#13;
+  font-size:11px;&#13;
+&#13;
+  line-height:1.1;&#13;
+&#13;
+  font-weight:900;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-top-profile-text span {&#13;
+&#13;
+  display:block;&#13;
+&#13;
+  margin-top:3px;&#13;
+&#13;
+  color:#7c8a9c;&#13;
+&#13;
+  font-size:8px;&#13;
+&#13;
+  line-height:1;&#13;
+&#13;
+  font-weight:750;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   CONTENT&#13;
+   ========================================================= */&#13;
+&#13;
+.c360-feedback-content {&#13;
+&#13;
+  width:100% !important;&#13;
+&#13;
+  max-width:none !important;&#13;
+&#13;
+  min-width:0;&#13;
+&#13;
+  margin:0 !important;&#13;
+&#13;
+  padding:&#13;
+    24px&#13;
+    25px&#13;
+    40px;&#13;
+&#13;
+  background:&#13;
+&#13;
+    radial-gradient(&#13;
+      circle at 96% 12%,&#13;
+      rgba(229,244,255,.30),&#13;
+      transparent 24%&#13;
+    ),&#13;
+&#13;
+    radial-gradient(&#13;
+      circle at 2% 58%,&#13;
+      rgba(240,231,255,.32),&#13;
+      transparent 24%&#13;
+    ),&#13;
+&#13;
+    #f3f6fb;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   PAGE HEADER&#13;
+   ========================================================= */&#13;
+&#13;
+.c360-feedback-page-header {&#13;
+&#13;
+  width:100%;&#13;
+&#13;
+  margin-bottom:19px;&#13;
+&#13;
+  display:flex;&#13;
+&#13;
+  align-items:center;&#13;
+&#13;
+  justify-content:space-between;&#13;
+&#13;
+  gap:24px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-eyebrow {&#13;
+&#13;
+  display:block;&#13;
+&#13;
+  color:#6942df;&#13;
+&#13;
+  font-size:9px;&#13;
+&#13;
+  font-weight:950;&#13;
+&#13;
+  line-height:1;&#13;
+&#13;
+  letter-spacing:1.7px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-page-header h1 {&#13;
+&#13;
+  margin:&#13;
+    7px&#13;
+    0&#13;
+    0;&#13;
+&#13;
+  color:#182d48;&#13;
+&#13;
+  font-size:34px;&#13;
+&#13;
+  line-height:1.08;&#13;
+&#13;
+  font-weight:950;&#13;
+&#13;
+  letter-spacing:-.7px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-page-header p {&#13;
+&#13;
+  margin:&#13;
+    7px&#13;
+    0&#13;
+    0;&#13;
+&#13;
+  color:#617289;&#13;
+&#13;
+  font-size:13px;&#13;
+&#13;
+  line-height:1.6;&#13;
+&#13;
+  font-weight:600;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-trainer-card {&#13;
+&#13;
+  min-width:205px;&#13;
+&#13;
+  padding:&#13;
+    12px&#13;
+    14px;&#13;
+&#13;
+  display:flex;&#13;
+&#13;
+  align-items:center;&#13;
+&#13;
+  gap:10px;&#13;
+&#13;
+  border:&#13;
+    1px&#13;
+    solid&#13;
+    #ddd3f7;&#13;
+&#13;
+  border-radius:12px;&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      135deg,&#13;
+      #f8f4ff,&#13;
+      #f2f8ff&#13;
+    );&#13;
+&#13;
+  box-shadow:&#13;
+    0&#13;
+    5px&#13;
+    14px&#13;
+    rgba(62,54,96,.045);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-trainer-card-avatar {&#13;
+&#13;
+  width:45px;&#13;
+&#13;
+  height:45px;&#13;
+&#13;
+  min-width:45px;&#13;
+&#13;
+  display:flex;&#13;
+&#13;
+  align-items:center;&#13;
+&#13;
+  justify-content:center;&#13;
+&#13;
+  border-radius:11px;&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      135deg,&#13;
+      #6b3df4,&#13;
+      #8054ff&#13;
+    );&#13;
+&#13;
+  color:#ffffff;&#13;
+&#13;
+  font-size:11px;&#13;
+&#13;
+  font-weight:900;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-trainer-card &gt; div:last-child &gt; span {&#13;
+&#13;
+  display:block;&#13;
+&#13;
+  color:#8490a0;&#13;
+&#13;
+  font-size:8px;&#13;
+&#13;
+  line-height:1;&#13;
+&#13;
+  font-weight:950;&#13;
+&#13;
+  letter-spacing:1px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-trainer-card strong {&#13;
+&#13;
+  display:block;&#13;
+&#13;
+  margin-top:4px;&#13;
+&#13;
+  color:#263b51;&#13;
+&#13;
+  font-size:12px;&#13;
+&#13;
+  line-height:1.15;&#13;
+&#13;
+  font-weight:900;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-trainer-card small {&#13;
+&#13;
+  display:block;&#13;
+&#13;
+  margin-top:3px;&#13;
+&#13;
+  color:#7b899a;&#13;
+&#13;
+  font-size:9px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   SUMMARY&#13;
+   ========================================================= */&#13;
+&#13;
+.c360-feedback-summary-grid {&#13;
+&#13;
+  width:100%;&#13;
+&#13;
+  display:grid;&#13;
+&#13;
+  grid-template-columns:&#13;
+    repeat(&#13;
+      4,&#13;
+      minmax(0,1fr)&#13;
+    );&#13;
+&#13;
+  gap:14px;&#13;
+&#13;
+  margin-bottom:18px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-summary-card {&#13;
+&#13;
+  min-height:125px;&#13;
+&#13;
+  padding:18px;&#13;
+&#13;
+  display:flex;&#13;
+&#13;
+  align-items:center;&#13;
+&#13;
+  gap:13px;&#13;
+&#13;
+  border:1px solid;&#13;
+&#13;
+  border-radius:15px;&#13;
+&#13;
+  box-shadow:&#13;
+    0&#13;
+    5px&#13;
+    15px&#13;
+    rgba(36,51,70,.04);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-summary-card.lavender {&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      135deg,&#13;
+      #f1eaff,&#13;
+      #e6dcff&#13;
+    );&#13;
+&#13;
+  border-color:#d4c4fb;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-summary-card.peach {&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      135deg,&#13;
+      #fff2e7,&#13;
+      #ffe4cf&#13;
+    );&#13;
+&#13;
+  border-color:#f1d0b2;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-summary-card.blue {&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      135deg,&#13;
+      #eaf7ff,&#13;
+      #d9edff&#13;
+    );&#13;
+&#13;
+  border-color:#bfdcf2;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-summary-card.green {&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      135deg,&#13;
+      #e9f8f1,&#13;
+      #d7efe3&#13;
+    );&#13;
+&#13;
+  border-color:#bee2cf;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-summary-icon {&#13;
+&#13;
+  width:51px;&#13;
+&#13;
+  height:51px;&#13;
+&#13;
+  min-width:51px;&#13;
+&#13;
+  display:flex;&#13;
+&#13;
+  align-items:center;&#13;
+&#13;
+  justify-content:center;&#13;
+&#13;
+  border-radius:14px;&#13;
+&#13;
+  background:&#13;
+    rgba(255,255,255,.86);&#13;
+&#13;
+  font-size:21px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.lavender&#13;
+.c360-feedback-summary-icon {&#13;
+&#13;
+  color:#6944dc;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.peach&#13;
+.c360-feedback-summary-icon {&#13;
+&#13;
+  color:#cd7841;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.blue&#13;
+.c360-feedback-summary-icon {&#13;
+&#13;
+  color:#277bb8;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.green&#13;
+.c360-feedback-summary-icon {&#13;
+&#13;
+  color:#23865c;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-summary-card span {&#13;
+&#13;
+  display:block;&#13;
+&#13;
+  color:#68778a;&#13;
+&#13;
+  font-size:8px;&#13;
+&#13;
+  line-height:1.2;&#13;
+&#13;
+  font-weight:950;&#13;
+&#13;
+  letter-spacing:.9px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-summary-card strong {&#13;
+&#13;
+  display:block;&#13;
+&#13;
+  margin-top:6px;&#13;
+&#13;
+  color:#142d48;&#13;
+&#13;
+  font-size:29px;&#13;
+&#13;
+  line-height:1;&#13;
+&#13;
+  font-weight:950;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   FILTER PANEL&#13;
+   ========================================================= */&#13;
+&#13;
+.c360-feedback-filter-panel {&#13;
+&#13;
+  width:100%;&#13;
+&#13;
+  margin-bottom:18px;&#13;
+&#13;
+  padding:&#13;
+    21px;&#13;
+&#13;
+  border:&#13;
+    1px&#13;
+    solid&#13;
+    #dce4ec;&#13;
+&#13;
+  border-radius:15px;&#13;
+&#13;
+  background:#ffffff;&#13;
+&#13;
+  box-shadow:&#13;
+    0&#13;
+    5px&#13;
+    16px&#13;
+    rgba(31,45,61,.04);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-filter-title {&#13;
+&#13;
+  display:flex;&#13;
+&#13;
+  align-items:flex-start;&#13;
+&#13;
+  justify-content:space-between;&#13;
+&#13;
+  gap:15px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-filter-title &gt; div &gt; span {&#13;
+&#13;
+  display:block;&#13;
+&#13;
+  margin-bottom:5px;&#13;
+&#13;
+  color:#6c48dc;&#13;
+&#13;
+  font-size:8px;&#13;
+&#13;
+  font-weight:950;&#13;
+&#13;
+  letter-spacing:1.5px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-filter-title h2 {&#13;
+&#13;
+  margin:0;&#13;
+&#13;
+  color:#182d48;&#13;
+&#13;
+  font-size:21px;&#13;
+&#13;
+  line-height:1.15;&#13;
+&#13;
+  font-weight:950;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-filter-title p {&#13;
+&#13;
+  margin:&#13;
+    5px&#13;
+    0&#13;
+    0;&#13;
+&#13;
+  color:#718095;&#13;
+&#13;
+  font-size:10px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-clear-button {&#13;
+&#13;
+  height:35px;&#13;
+&#13;
+  padding:&#13;
+    0&#13;
+    11px;&#13;
+&#13;
+  display:flex;&#13;
+&#13;
+  align-items:center;&#13;
+&#13;
+  gap:6px;&#13;
+&#13;
+  border:&#13;
+    1px&#13;
+    solid&#13;
+    #d8e0e8;&#13;
+&#13;
+  border-radius:8px;&#13;
+&#13;
+  background:#ffffff;&#13;
+&#13;
+  color:#637488;&#13;
+&#13;
+  font-size:9px;&#13;
+&#13;
+  font-weight:850;&#13;
+&#13;
+  cursor:pointer;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-clear-button:hover {&#13;
+&#13;
+  background:#f5f1ff;&#13;
+&#13;
+  border-color:#cdc0f4;&#13;
+&#13;
+  color:#6540d8;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-search {&#13;
+&#13;
+  position:relative;&#13;
+&#13;
+  margin-top:15px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-search i {&#13;
+&#13;
+  position:absolute;&#13;
+&#13;
+  top:50%;&#13;
+&#13;
+  left:14px;&#13;
+&#13;
+  transform:translateY(-50%);&#13;
+&#13;
+  color:#8796a6;&#13;
+&#13;
+  font-size:14px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-search input {&#13;
+&#13;
+  width:100%;&#13;
+&#13;
+  height:46px;&#13;
+&#13;
+  padding:&#13;
+    0&#13;
+    14px&#13;
+    0&#13;
+    40px;&#13;
+&#13;
+  border:&#13;
+    1px&#13;
+    solid&#13;
+    #d8e1ea;&#13;
+&#13;
+  border-radius:9px;&#13;
+&#13;
+  background:#fbfcfe;&#13;
+&#13;
+  color:#23384f;&#13;
+&#13;
+  font-size:11px;&#13;
+&#13;
+  outline:none;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-search input:focus {&#13;
+&#13;
+  background:#ffffff;&#13;
+&#13;
+  border-color:#9f89e9;&#13;
+&#13;
+  box-shadow:&#13;
+    0&#13;
+    0&#13;
+    0&#13;
+    3px&#13;
+    rgba(103,60,255,.07);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   INTERVIEW PANEL&#13;
+   ========================================================= */&#13;
+&#13;
+.c360-feedback-interview-panel {&#13;
+&#13;
+  width:100%;&#13;
+&#13;
+  margin-bottom:18px;&#13;
+&#13;
+  padding:&#13;
+    21px;&#13;
+&#13;
+  border:&#13;
+    1px&#13;
+    solid&#13;
+    #dce4ec;&#13;
+&#13;
+  border-top:&#13;
+    4px&#13;
+    solid&#13;
+    #9879e8;&#13;
+&#13;
+  border-radius:15px;&#13;
+&#13;
+  background:#ffffff;&#13;
+&#13;
+  box-shadow:&#13;
+    0&#13;
+    6px&#13;
+    18px&#13;
+    rgba(31,45,61,.045);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-panel-header {&#13;
+&#13;
+  display:flex;&#13;
+&#13;
+  align-items:center;&#13;
+&#13;
+  justify-content:space-between;&#13;
+&#13;
+  gap:15px;&#13;
+&#13;
+  margin-bottom:16px;&#13;
+&#13;
+  padding-bottom:14px;&#13;
+&#13;
+  border-bottom:1px solid #e8edf2;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-panel-header &gt; div &gt; span {&#13;
+&#13;
+  display:block;&#13;
+&#13;
+  margin-bottom:5px;&#13;
+&#13;
+  color:#6945da;&#13;
+&#13;
+  font-size:8px;&#13;
+&#13;
+  font-weight:950;&#13;
+&#13;
+  letter-spacing:1.5px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-panel-header h2 {&#13;
+&#13;
+  margin:0;&#13;
+&#13;
+  color:#182d48;&#13;
+&#13;
+  font-size:21px;&#13;
+&#13;
+  line-height:1.15;&#13;
+&#13;
+  font-weight:950;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-result-count {&#13;
+&#13;
+  padding:&#13;
+    7px&#13;
+    10px;&#13;
+&#13;
+  border-radius:18px;&#13;
+&#13;
+  background:#eee8ff;&#13;
+&#13;
+  border:1px solid #ddd0ff;&#13;
+&#13;
+  color:#6544cc;&#13;
+&#13;
+  font-size:8px;&#13;
+&#13;
+  font-weight:900;&#13;
+&#13;
+  white-space:nowrap;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   INTERVIEW LIST&#13;
+   ========================================================= */&#13;
+&#13;
+.c360-feedback-interview-list {&#13;
+&#13;
+  display:flex;&#13;
+&#13;
+  flex-direction:column;&#13;
+&#13;
+  gap:11px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   INTERVIEW CARD&#13;
+   ========================================================= */&#13;
+&#13;
+.c360-feedback-interview-card {&#13;
+&#13;
+  position:relative;&#13;
+&#13;
+  overflow:hidden;&#13;
+&#13;
+  width:100%;&#13;
+&#13;
+  min-height:100px;&#13;
+&#13;
+  display:grid;&#13;
+&#13;
+  grid-template-columns:&#13;
+    minmax(190px,1.15fr)&#13;
+    minmax(360px,2fr)&#13;
+    minmax(130px,.7fr)&#13;
+    auto;&#13;
+&#13;
+  align-items:center;&#13;
+&#13;
+  gap:16px;&#13;
+&#13;
+  padding:&#13;
+    15px&#13;
+    16px;&#13;
+&#13;
+  border:&#13;
+    1px&#13;
+    solid&#13;
+    #dce4ec;&#13;
+&#13;
+  border-radius:12px;&#13;
+&#13;
+  background:#ffffff;&#13;
+&#13;
+  transition:&#13;
+    transform .18s ease,&#13;
+    box-shadow .18s ease,&#13;
+    border-color .18s ease;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-interview-card:hover {&#13;
+&#13;
+  transform:translateY(-2px);&#13;
+&#13;
+  box-shadow:&#13;
+    0&#13;
+    8px&#13;
+    19px&#13;
+    rgba(37,48,70,.075);&#13;
+&#13;
+  border-color:#cfc3f1;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-interview-card::before {&#13;
+&#13;
+  content:"";&#13;
+&#13;
+  position:absolute;&#13;
+&#13;
+  left:0;&#13;
+&#13;
+  top:0;&#13;
+&#13;
+  bottom:0;&#13;
+&#13;
+  width:4px;&#13;
+&#13;
+  background:#8a6de5;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-interview-card:nth-child(4n + 1) {&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      110deg,&#13;
+      #fcfaff,&#13;
+      #ffffff&#13;
+    );&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-interview-card:nth-child(4n + 2) {&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      110deg,&#13;
+      #f9fcff,&#13;
+      #ffffff&#13;
+    );&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-interview-card:nth-child(4n + 3) {&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      110deg,&#13;
+      #fffaf5,&#13;
+      #ffffff&#13;
+    );&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-interview-card:nth-child(4n + 4) {&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      110deg,&#13;
+      #f7fcf9,&#13;
+      #ffffff&#13;
+    );&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-interview-card:nth-child(4n + 1)::before {&#13;
+&#13;
+  background:#8769e5;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-interview-card:nth-child(4n + 2)::before {&#13;
+&#13;
+  background:#62a4d0;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-interview-card:nth-child(4n + 3)::before {&#13;
+&#13;
+  background:#df9b59;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-interview-card:nth-child(4n + 4)::before {&#13;
+&#13;
+  background:#57a180;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   STUDENT&#13;
+   ========================================================= */&#13;
+&#13;
+.c360-feedback-student-block {&#13;
+&#13;
+  min-width:0;&#13;
+&#13;
+  display:flex;&#13;
+&#13;
+  align-items:center;&#13;
+&#13;
+  gap:10px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-student-avatar {&#13;
+&#13;
+  width:44px;&#13;
+&#13;
+  height:44px;&#13;
+&#13;
+  min-width:44px;&#13;
+&#13;
+  display:flex;&#13;
+&#13;
+  align-items:center;&#13;
+&#13;
+  justify-content:center;&#13;
+&#13;
+  border-radius:11px;&#13;
+&#13;
+  background:#e9e0ff;&#13;
+&#13;
+  color:#6543d3;&#13;
+&#13;
+  font-size:11px;&#13;
+&#13;
+  font-weight:950;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-interview-card:nth-child(4n + 2)&#13;
+.c360-feedback-student-avatar {&#13;
+&#13;
+  background:#deefff;&#13;
+&#13;
+  color:#307bad;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-interview-card:nth-child(4n + 3)&#13;
+.c360-feedback-student-avatar {&#13;
+&#13;
+  background:#ffe9d7;&#13;
+&#13;
+  color:#b56d2c;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-interview-card:nth-child(4n + 4)&#13;
+.c360-feedback-student-avatar {&#13;
+&#13;
+  background:#dff1e7;&#13;
+&#13;
+  color:#2e805e;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-student-block &gt; div:last-child {&#13;
+&#13;
+  min-width:0;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-student-block strong {&#13;
+&#13;
+  display:block;&#13;
+&#13;
+  overflow:hidden;&#13;
+&#13;
+  color:#1d3148;&#13;
+&#13;
+  font-size:12px;&#13;
+&#13;
+  line-height:1.2;&#13;
+&#13;
+  font-weight:950;&#13;
+&#13;
+  white-space:nowrap;&#13;
+&#13;
+  text-overflow:ellipsis;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-student-block span {&#13;
+&#13;
+  display:block;&#13;
+&#13;
+  margin-top:3px;&#13;
+&#13;
+  color:#768598;&#13;
+&#13;
+  font-size:9px;&#13;
+&#13;
+  font-weight:750;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   DETAILS&#13;
+   ========================================================= */&#13;
+&#13;
+.c360-feedback-interview-details {&#13;
+&#13;
+  min-width:0;&#13;
+&#13;
+  display:grid;&#13;
+&#13;
+  grid-template-columns:&#13;
+    repeat(4,minmax(0,1fr));&#13;
+&#13;
+  gap:10px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-detail-item {&#13;
+&#13;
+  min-width:0;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-detail-item &gt; span {&#13;
+&#13;
+  display:block;&#13;
+&#13;
+  color:#8794a5;&#13;
+&#13;
+  font-size:7px;&#13;
+&#13;
+  line-height:1;&#13;
+&#13;
+  font-weight:950;&#13;
+&#13;
+  letter-spacing:.8px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-detail-item &gt; strong {&#13;
+&#13;
+  display:block;&#13;
+&#13;
+  overflow:hidden;&#13;
+&#13;
+  margin-top:5px;&#13;
+&#13;
+  color:#30465b;&#13;
+&#13;
+  font-size:10px;&#13;
+&#13;
+  line-height:1.25;&#13;
+&#13;
+  font-weight:850;&#13;
+&#13;
+  text-overflow:ellipsis;&#13;
+&#13;
+  white-space:nowrap;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   STATUS&#13;
+   ========================================================= */&#13;
+&#13;
+.c360-feedback-interview-status {&#13;
+&#13;
+  display:flex;&#13;
+&#13;
+  flex-direction:column;&#13;
+&#13;
+  align-items:flex-start;&#13;
+&#13;
+  gap:6px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-status,&#13;
+.c360-feedback-feedback-status {&#13;
+&#13;
+  display:inline-flex;&#13;
+&#13;
+  align-items:center;&#13;
+&#13;
+  gap:5px;&#13;
+&#13;
+  padding:&#13;
+    6px&#13;
+    9px;&#13;
+&#13;
+  border-radius:18px;&#13;
+&#13;
+  font-size:8px;&#13;
+&#13;
+  line-height:1;&#13;
+&#13;
+  font-weight:950;&#13;
+&#13;
+  white-space:nowrap;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-status.completed {&#13;
+&#13;
+  background:#e3f6eb;&#13;
+&#13;
+  border:1px solid #c5e7d4;&#13;
+&#13;
+  color:#19744e;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-feedback-status.given {&#13;
+&#13;
+  background:#eee8ff;&#13;
+&#13;
+  border:1px solid #ddd0ff;&#13;
+&#13;
+  color:#6342ca;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-feedback-status.pending {&#13;
+&#13;
+  background:#fff0dc;&#13;
+&#13;
+  border:1px solid #f0d3b0;&#13;
+&#13;
+  color:#aa650d;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   ACTION&#13;
+   ========================================================= */&#13;
+&#13;
+.c360-feedback-action {&#13;
+&#13;
+  display:flex;&#13;
+&#13;
+  align-items:center;&#13;
+&#13;
+  justify-content:flex-end;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-button {&#13;
+&#13;
+  min-height:38px;&#13;
+&#13;
+  padding:&#13;
+    0&#13;
+    13px;&#13;
+&#13;
+  display:inline-flex;&#13;
+&#13;
+  align-items:center;&#13;
+&#13;
+  justify-content:center;&#13;
+&#13;
+  gap:6px;&#13;
+&#13;
+  border:0;&#13;
+&#13;
+  border-radius:8px;&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      135deg,&#13;
+      #6740df,&#13;
+      #7d5ceb&#13;
+    );&#13;
+&#13;
+  color:#ffffff;&#13;
+&#13;
+  font-size:8px;&#13;
+&#13;
+  line-height:1;&#13;
+&#13;
+  font-weight:950;&#13;
+&#13;
+  cursor:pointer;&#13;
+&#13;
+  white-space:nowrap;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-button:hover {&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      135deg,&#13;
+      #5931cf,&#13;
+      #704bdc&#13;
+    );&#13;
+&#13;
+  box-shadow:&#13;
+    0&#13;
+    6px&#13;
+    14px&#13;
+    rgba(103,64,223,.18);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   EMPTY&#13;
+   ========================================================= */&#13;
+&#13;
+.c360-feedback-empty {&#13;
+&#13;
+  padding:&#13;
+    48px&#13;
+    20px;&#13;
+&#13;
+  text-align:center;&#13;
+&#13;
+  border:&#13;
+    1px&#13;
+    dashed&#13;
+    #ded8eb;&#13;
+&#13;
+  border-radius:10px;&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      135deg,&#13;
+      #fcfbff,&#13;
+      #f8fbff&#13;
+    );&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-empty-icon {&#13;
+&#13;
+  width:52px;&#13;
+&#13;
+  height:52px;&#13;
+&#13;
+  margin:&#13;
+    0&#13;
+    auto&#13;
+    11px;&#13;
+&#13;
+  display:flex;&#13;
+&#13;
+  align-items:center;&#13;
+&#13;
+  justify-content:center;&#13;
+&#13;
+  border-radius:13px;&#13;
+&#13;
+  background:#ece5ff;&#13;
+&#13;
+  color:#6745ce;&#13;
+&#13;
+  font-size:20px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-empty h3 {&#13;
+&#13;
+  margin:0;&#13;
+&#13;
+  color:#304359;&#13;
+&#13;
+  font-size:16px;&#13;
+&#13;
+  font-weight:900;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-empty p {&#13;
+&#13;
+  margin:&#13;
+    6px&#13;
+    0&#13;
+    0;&#13;
+&#13;
+  color:#8491a1;&#13;
+&#13;
+  font-size:10px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   FEEDBACK FORM&#13;
+   ========================================================= */&#13;
+&#13;
+.c360-feedback-form-panel {&#13;
+&#13;
+  width:100%;&#13;
+&#13;
+  margin-bottom:18px;&#13;
+&#13;
+  padding:&#13;
+    0&#13;
+    21px&#13;
+    21px;&#13;
+&#13;
+  border:&#13;
+    1px&#13;
+    solid&#13;
+    #dce4ec;&#13;
+&#13;
+  border-top:&#13;
+    4px&#13;
+    solid&#13;
+    #8d70e7;&#13;
+&#13;
+  border-radius:15px;&#13;
+&#13;
+  background:#ffffff;&#13;
+&#13;
+  box-shadow:&#13;
+    0&#13;
+    7px&#13;
+    22px&#13;
+    rgba(50,47,84,.055);&#13;
+&#13;
+  scroll-margin-top:20px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-form-header {&#13;
+&#13;
+  margin:&#13;
+    0&#13;
+    -21px;&#13;
+&#13;
+  padding:&#13;
+    18px&#13;
+    21px;&#13;
+&#13;
+  display:flex;&#13;
+&#13;
+  align-items:flex-start;&#13;
+&#13;
+  justify-content:space-between;&#13;
+&#13;
+  gap:15px;&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      90deg,&#13;
+      #faf7ff,&#13;
+      #ffffff&#13;
+    );&#13;
+&#13;
+  border-bottom:1px solid #e7e3f0;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-form-header &gt; div &gt; span {&#13;
+&#13;
+  display:block;&#13;
+&#13;
+  color:#7456d5;&#13;
+&#13;
+  font-size:8px;&#13;
+&#13;
+  font-weight:950;&#13;
+&#13;
+  letter-spacing:1.5px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-form-header h2 {&#13;
+&#13;
+  margin:&#13;
+    5px&#13;
+    0&#13;
+    0;&#13;
+&#13;
+  color:#182d48;&#13;
+&#13;
+  font-size:23px;&#13;
+&#13;
+  line-height:1.1;&#13;
+&#13;
+  font-weight:950;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-form-header p {&#13;
+&#13;
+  margin:&#13;
+    5px&#13;
+    0&#13;
+    0;&#13;
+&#13;
+  color:#68798c;&#13;
+&#13;
+  font-size:10px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-close-button {&#13;
+&#13;
+  width:35px;&#13;
+&#13;
+  height:35px;&#13;
+&#13;
+  min-width:35px;&#13;
+&#13;
+  display:flex;&#13;
+&#13;
+  align-items:center;&#13;
+&#13;
+  justify-content:center;&#13;
+&#13;
+  border:&#13;
+    1px&#13;
+    solid&#13;
+    #d9d1ef;&#13;
+&#13;
+  border-radius:9px;&#13;
+&#13;
+  background:#f8f5ff;&#13;
+&#13;
+  color:#6a5b8d;&#13;
+&#13;
+  cursor:pointer;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-close-button:hover {&#13;
+&#13;
+  background:#eee8ff;&#13;
+&#13;
+  color:#5a3bc1;&#13;
+&#13;
+  border-color:#cabbe9;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   SELECTED INTERVIEW SUMMARY&#13;
+   ========================================================= */&#13;
+&#13;
+.c360-feedback-selected-summary {&#13;
+&#13;
+  width:100%;&#13;
+&#13;
+  margin:&#13;
+    18px&#13;
+    0;&#13;
+&#13;
+  padding:9px;&#13;
+&#13;
+  display:grid;&#13;
+&#13;
+  grid-template-columns:&#13;
+    repeat(&#13;
+      6,&#13;
+      minmax(0,1fr)&#13;
+    );&#13;
+&#13;
+  gap:9px;&#13;
+&#13;
+  border:&#13;
+    1px&#13;
+    solid&#13;
+    #e0e3ea;&#13;
+&#13;
+  border-radius:10px;&#13;
+&#13;
+  background:#fafbfd;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-selected-summary &gt; div {&#13;
+&#13;
+  min-width:0;&#13;
+&#13;
+  min-height:57px;&#13;
+&#13;
+  padding:&#13;
+    9px&#13;
+    10px;&#13;
+&#13;
+  border:&#13;
+    1px&#13;
+    solid&#13;
+    #e3e7ed;&#13;
+&#13;
+  border-radius:8px;&#13;
+&#13;
+  background:#ffffff;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-selected-summary &gt; div:nth-child(1) {&#13;
+&#13;
+  background:#f5efff;&#13;
+&#13;
+  border-color:#ddd1fb;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-selected-summary &gt; div:nth-child(2) {&#13;
+&#13;
+  background:#eef7ff;&#13;
+&#13;
+  border-color:#d2e5f5;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-selected-summary &gt; div:nth-child(3) {&#13;
+&#13;
+  background:#fff7ed;&#13;
+&#13;
+  border-color:#eedbc4;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-selected-summary &gt; div:nth-child(4) {&#13;
+&#13;
+  background:#eff9f4;&#13;
+&#13;
+  border-color:#d0e7da;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-selected-summary &gt; div:nth-child(5) {&#13;
+&#13;
+  background:#fff0f3;&#13;
+&#13;
+  border-color:#efd5dd;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-selected-summary &gt; div:nth-child(6) {&#13;
+&#13;
+  background:#fff9e7;&#13;
+&#13;
+  border-color:#efdfb8;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-selected-summary span {&#13;
+&#13;
+  display:block;&#13;
+&#13;
+  color:#8491a1;&#13;
+&#13;
+  font-size:7px;&#13;
+&#13;
+  line-height:1;&#13;
+&#13;
+  font-weight:950;&#13;
+&#13;
+  letter-spacing:.8px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-selected-summary strong {&#13;
+&#13;
+  display:block;&#13;
+&#13;
+  overflow:hidden;&#13;
+&#13;
+  margin-top:5px;&#13;
+&#13;
+  color:#31465b;&#13;
+&#13;
+  font-size:10px;&#13;
+&#13;
+  line-height:1.2;&#13;
+&#13;
+  font-weight:850;&#13;
+&#13;
+  text-overflow:ellipsis;&#13;
+&#13;
+  white-space:nowrap;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   FORM SECTIONS&#13;
+   ========================================================= */&#13;
+&#13;
+.c360-feedback-form-section {&#13;
+&#13;
+  padding:&#13;
+    19px&#13;
+    0;&#13;
+&#13;
+  border-top:&#13;
+    1px&#13;
+    solid&#13;
+    #e9edf2;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-section-title {&#13;
+&#13;
+  margin-bottom:15px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-section-title &gt; span {&#13;
+&#13;
+  display:block;&#13;
+&#13;
+  color:#6b48d7;&#13;
+&#13;
+  font-size:8px;&#13;
+&#13;
+  font-weight:950;&#13;
+&#13;
+  letter-spacing:1.4px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-section-title h3 {&#13;
+&#13;
+  margin:&#13;
+    5px&#13;
+    0&#13;
+    0;&#13;
+&#13;
+  color:#1a2f48;&#13;
+&#13;
+  font-size:18px;&#13;
+&#13;
+  font-weight:950;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   SCORES&#13;
+   ========================================================= */&#13;
+&#13;
+.c360-feedback-score-grid {&#13;
+&#13;
+  display:grid;&#13;
+&#13;
+  grid-template-columns:&#13;
+    repeat(&#13;
+      4,&#13;
+      minmax(0,1fr)&#13;
+    );&#13;
+&#13;
+  gap:12px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-score-field {&#13;
+&#13;
+  padding:&#13;
+    13px;&#13;
+&#13;
+  border:&#13;
+    1px&#13;
+    solid&#13;
+    #e1e5eb;&#13;
+&#13;
+  border-radius:10px;&#13;
+&#13;
+  background:#fbfcfe;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-score-field:nth-child(1) {&#13;
+&#13;
+  background:#f6f2ff;&#13;
+&#13;
+  border-color:#ded5f6;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-score-field:nth-child(2) {&#13;
+&#13;
+  background:#f1f8ff;&#13;
+&#13;
+  border-color:#d2e5f2;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-score-field:nth-child(3) {&#13;
+&#13;
+  background:#fff7ef;&#13;
+&#13;
+  border-color:#eddac3;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-score-field:nth-child(4) {&#13;
+&#13;
+  background:#f1faf5;&#13;
+&#13;
+  border-color:#cde6d8;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-score-field label {&#13;
+&#13;
+  display:block;&#13;
+&#13;
+  margin-bottom:7px;&#13;
+&#13;
+  color:#45596e;&#13;
+&#13;
+  font-size:10px;&#13;
+&#13;
+  font-weight:900;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-score-field:nth-child(1) label {&#13;
+&#13;
+  color:#7055c8;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-score-field:nth-child(2) label {&#13;
+&#13;
+  color:#4e81a8;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-score-field:nth-child(3) label {&#13;
+&#13;
+  color:#ad7139;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-score-field:nth-child(4) label {&#13;
+&#13;
+  color:#39805f;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-score-input {&#13;
+&#13;
+  display:flex;&#13;
+&#13;
+  align-items:center;&#13;
+&#13;
+  border:&#13;
+    1px&#13;
+    solid&#13;
+    #d7dfe8;&#13;
+&#13;
+  border-radius:8px;&#13;
+&#13;
+  background:#ffffff;&#13;
+&#13;
+  overflow:hidden;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-score-input:focus-within {&#13;
+&#13;
+  border-color:#9d88e8;&#13;
+&#13;
+  box-shadow:&#13;
+    0&#13;
+    0&#13;
+    0&#13;
+    3px&#13;
+    rgba(103,60,255,.07);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-score-input input {&#13;
+&#13;
+  width:100%;&#13;
+&#13;
+  height:42px;&#13;
+&#13;
+  padding:&#13;
+    0&#13;
+    9px;&#13;
+&#13;
+  border:0;&#13;
+&#13;
+  outline:0;&#13;
+&#13;
+  background:transparent;&#13;
+&#13;
+  color:#1d3249;&#13;
+&#13;
+  font-size:13px;&#13;
+&#13;
+  font-weight:850;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-score-input span {&#13;
+&#13;
+  padding-right:9px;&#13;
+&#13;
+  color:#8996a5;&#13;
+&#13;
+  font-size:9px;&#13;
+&#13;
+  font-weight:800;&#13;
+&#13;
+  white-space:nowrap;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   TEXT FEEDBACK&#13;
+   ========================================================= */&#13;
+&#13;
+.c360-feedback-text-grid {&#13;
+&#13;
+  display:grid;&#13;
+&#13;
+  grid-template-columns:&#13;
+    1fr&#13;
+    1fr;&#13;
+&#13;
+  gap:13px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-text-field {&#13;
+&#13;
+  position:relative;&#13;
+&#13;
+  padding:&#13;
+    13px;&#13;
+&#13;
+  border:&#13;
+    1px&#13;
+    solid&#13;
+    #e0e5eb;&#13;
+&#13;
+  border-radius:10px;&#13;
+&#13;
+  background:#fbfcfe;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-text-field:nth-child(1) {&#13;
+&#13;
+  background:#f3faf7;&#13;
+&#13;
+  border-color:#cfe5da;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-text-field:nth-child(2) {&#13;
+&#13;
+  background:#fff7ef;&#13;
+&#13;
+  border-color:#eddac2;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-text-field.full {&#13;
+&#13;
+  margin-top:13px;&#13;
+&#13;
+  background:#f7f4ff;&#13;
+&#13;
+  border-color:#ded5f3;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-text-field label {&#13;
+&#13;
+  display:block;&#13;
+&#13;
+  margin-bottom:7px;&#13;
+&#13;
+  color:#455a70;&#13;
+&#13;
+  font-size:10px;&#13;
+&#13;
+  font-weight:900;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-text-field:nth-child(1) label {&#13;
+&#13;
+  color:#39805f;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-text-field:nth-child(2) label {&#13;
+&#13;
+  color:#ad7137;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-text-field.full label {&#13;
+&#13;
+  color:#7055c7;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-text-field textarea {&#13;
+&#13;
+  width:100%;&#13;
+&#13;
+  min-height:120px;&#13;
+&#13;
+  padding:&#13;
+    10px;&#13;
+&#13;
+  resize:vertical;&#13;
+&#13;
+  border:&#13;
+    1px&#13;
+    solid&#13;
+    #d7dfe8;&#13;
+&#13;
+  border-radius:8px;&#13;
+&#13;
+  background:&#13;
+    rgba(255,255,255,.92);&#13;
+&#13;
+  color:#21364d;&#13;
+&#13;
+  font-size:10px;&#13;
+&#13;
+  line-height:1.55;&#13;
+&#13;
+  outline:none;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-text-field textarea:focus {&#13;
+&#13;
+  border-color:#a08be8;&#13;
+&#13;
+  background:#ffffff;&#13;
+&#13;
+  box-shadow:&#13;
+    0&#13;
+    0&#13;
+    0&#13;
+    3px&#13;
+    rgba(103,60,255,.07);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-text-field small {&#13;
+&#13;
+  display:block;&#13;
+&#13;
+  margin-top:5px;&#13;
+&#13;
+  color:#8995a4;&#13;
+&#13;
+  font-size:8px;&#13;
+&#13;
+  text-align:right;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   FORM MESSAGES&#13;
+   ========================================================= */&#13;
+&#13;
+.c360-feedback-error,&#13;
+.c360-feedback-success {&#13;
+&#13;
+  margin-top:13px;&#13;
+&#13;
+  padding:&#13;
+    11px&#13;
+    13px;&#13;
+&#13;
+  display:flex;&#13;
+&#13;
+  align-items:center;&#13;
+&#13;
+  gap:8px;&#13;
+&#13;
+  border-radius:8px;&#13;
+&#13;
+  font-size:10px;&#13;
+&#13;
+  font-weight:850;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-error {&#13;
+&#13;
+  background:#fff0f1;&#13;
+&#13;
+  border:&#13;
+    1px&#13;
+    solid&#13;
+    #f0c8cd;&#13;
+&#13;
+  color:#b33745;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-success {&#13;
+&#13;
+  background:#eaf8f1;&#13;
+&#13;
+  border:&#13;
+    1px&#13;
+    solid&#13;
+    #c8e7d6;&#13;
+&#13;
+  color:#1c7651;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   FORM ACTIONS&#13;
+   ========================================================= */&#13;
+&#13;
+.c360-feedback-form-actions {&#13;
+&#13;
+  padding-top:17px;&#13;
+&#13;
+  display:flex;&#13;
+&#13;
+  justify-content:flex-end;&#13;
+&#13;
+  gap:9px;&#13;
+&#13;
+  border-top:&#13;
+    1px&#13;
+    solid&#13;
+    #e9edf2;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-cancel-button,&#13;
+.c360-feedback-save-button {&#13;
+&#13;
+  min-height:39px;&#13;
+&#13;
+  padding:&#13;
+    0&#13;
+    16px;&#13;
+&#13;
+  border-radius:8px;&#13;
+&#13;
+  font-size:9px;&#13;
+&#13;
+  font-weight:950;&#13;
+&#13;
+  cursor:pointer;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-cancel-button {&#13;
+&#13;
+  border:&#13;
+    1px&#13;
+    solid&#13;
+    #d7dfe8;&#13;
+&#13;
+  background:#ffffff;&#13;
+&#13;
+  color:#5f7185;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-cancel-button:hover {&#13;
+&#13;
+  background:#f7f9fb;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-save-button {&#13;
+&#13;
+  border:0;&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      135deg,&#13;
+      #6740df,&#13;
+      #7d5ceb&#13;
+    );&#13;
+&#13;
+  color:#ffffff;&#13;
+&#13;
+  box-shadow:&#13;
+    0&#13;
+    5px&#13;
+    12px&#13;
+    rgba(103,64,223,.15);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-save-button:hover {&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      135deg,&#13;
+      #5931cf,&#13;
+      #7049db&#13;
+    );&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-save-button:disabled {&#13;
+&#13;
+  opacity:.65;&#13;
+&#13;
+  cursor:not-allowed;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   TRACKING&#13;
+   ========================================================= */&#13;
+&#13;
+.c360-feedback-tracking-panel {&#13;
+&#13;
+  width:100%;&#13;
+&#13;
+  margin-bottom:17px;&#13;
+&#13;
+  padding:&#13;
+    16px&#13;
+    17px;&#13;
+&#13;
+  display:flex;&#13;
+&#13;
+  align-items:center;&#13;
+&#13;
+  gap:13px;&#13;
+&#13;
+  border:&#13;
+    1px&#13;
+    solid&#13;
+    #efd3c9;&#13;
+&#13;
+  border-left:&#13;
+    4px&#13;
+    solid&#13;
+    #dd8b74;&#13;
+&#13;
+  border-radius:11px;&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      100deg,&#13;
+      #fff5f1,&#13;
+      #fffaf6&#13;
+    );&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-tracking-icon {&#13;
+&#13;
+  width:44px;&#13;
+&#13;
+  height:44px;&#13;
+&#13;
+  min-width:44px;&#13;
+&#13;
+  display:flex;&#13;
+&#13;
+  align-items:center;&#13;
+&#13;
+  justify-content:center;&#13;
+&#13;
+  border-radius:11px;&#13;
+&#13;
+  background:#ffe2d9;&#13;
+&#13;
+  color:#bc634d;&#13;
+&#13;
+  font-size:18px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-tracking-panel &gt; div:last-child &gt; span {&#13;
+&#13;
+  display:block;&#13;
+&#13;
+  color:#b76250;&#13;
+&#13;
+  font-size:8px;&#13;
+&#13;
+  font-weight:950;&#13;
+&#13;
+  letter-spacing:1.2px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-tracking-panel strong {&#13;
+&#13;
+  display:block;&#13;
+&#13;
+  margin-top:4px;&#13;
+&#13;
+  color:#684239;&#13;
+&#13;
+  font-size:12px;&#13;
+&#13;
+  font-weight:900;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-tracking-panel p {&#13;
+&#13;
+  margin:&#13;
+    4px&#13;
+    0&#13;
+    0;&#13;
+&#13;
+  color:#718092;&#13;
+&#13;
+  font-size:9px;&#13;
+&#13;
+  line-height:1.5;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   FOOTER&#13;
+   ========================================================= */&#13;
+&#13;
+.c360-feedback-footer {&#13;
+&#13;
+  width:100%;&#13;
+&#13;
+  padding:&#13;
+    7px&#13;
+    2px&#13;
+    2px;&#13;
+&#13;
+  display:flex;&#13;
+&#13;
+  align-items:center;&#13;
+&#13;
+  justify-content:space-between;&#13;
+&#13;
+  color:#8491a1;&#13;
+&#13;
+  font-size:8px;&#13;
+&#13;
+  font-weight:700;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   LOADING&#13;
+   ========================================================= */&#13;
+&#13;
+.c360-feedback-loading {&#13;
+&#13;
+  position:fixed;&#13;
+&#13;
+  inset:0;&#13;
+&#13;
+  z-index:2147483647;&#13;
+&#13;
+  width:100vw;&#13;
+&#13;
+  height:100vh;&#13;
+&#13;
+  display:flex;&#13;
+&#13;
+  align-items:center;&#13;
+&#13;
+  justify-content:center;&#13;
+&#13;
+  gap:9px;&#13;
+&#13;
+  background:#f3f6fb;&#13;
+&#13;
+  color:#6f7e91;&#13;
+&#13;
+  font-size:12px;&#13;
+&#13;
+  font-weight:800;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-loading i {&#13;
+&#13;
+  color:#6740df;&#13;
+&#13;
+  font-size:18px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   DESKTOP WIDTH&#13;
+   ========================================================= */&#13;
+&#13;
+@media (min-width:1500px){&#13;
+&#13;
+  .c360-feedback-content {&#13;
+&#13;
+    padding:&#13;
+      24px&#13;
+      25px&#13;
+      40px;&#13;
+&#13;
+  }&#13;
+&#13;
+  .c360-feedback-page-header h1 {&#13;
+&#13;
+    font-size:35px;&#13;
+&#13;
+  }&#13;
+&#13;
+  .c360-feedback-interview-card {&#13;
+&#13;
+    grid-template-columns:&#13;
+      minmax(205px,1.1fr)&#13;
+      minmax(420px,2.2fr)&#13;
+      minmax(145px,.7fr)&#13;
+      180px;&#13;
+&#13;
+  }&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   1200px&#13;
+   ========================================================= */&#13;
+&#13;
+@media (max-width:1200px){&#13;
+&#13;
+  .c360-feedback-sidebar {&#13;
+&#13;
+    width:260px !important;&#13;
+&#13;
+    min-width:260px !important;&#13;
+&#13;
+    max-width:260px !important;&#13;
+&#13;
+    flex-basis:260px !important;&#13;
+&#13;
+    background:&#13;
+      linear-gradient(&#13;
+        180deg,&#13;
+        #130d2f 0%,&#13;
+        #160d38 48%,&#13;
+        #100a29 100%&#13;
+      ) !important;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .c360-feedback-main {&#13;
+&#13;
+    width:&#13;
+      calc(100vw - 260px) !important;&#13;
+&#13;
+    max-width:&#13;
+      calc(100vw - 260px) !important;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .c360-feedback-summary-grid {&#13;
+&#13;
+    grid-template-columns:&#13;
+      repeat(&#13;
+        2,&#13;
+        minmax(0,1fr)&#13;
+      );&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .c360-feedback-interview-card {&#13;
+&#13;
+    grid-template-columns:&#13;
+      210px&#13;
+      1fr&#13;
+      145px;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .c360-feedback-action {&#13;
+&#13;
+    grid-column:1 / -1;&#13;
+&#13;
+    justify-content:flex-end;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .c360-feedback-selected-summary {&#13;
+&#13;
+    grid-template-columns:&#13;
+      repeat(&#13;
+        3,&#13;
+        minmax(0,1fr)&#13;
+      );&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .c360-feedback-score-grid {&#13;
+&#13;
+    grid-template-columns:&#13;
+      repeat(&#13;
+        2,&#13;
+        minmax(0,1fr)&#13;
+      );&#13;
+&#13;
+  }&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   TABLET&#13;
+   ========================================================= */&#13;
+&#13;
+@media (max-width:950px){&#13;
+&#13;
+  .c360-feedback-sidebar {&#13;
+&#13;
+    position:fixed !important;&#13;
+&#13;
+    top:0 !important;&#13;
+&#13;
+    left:0 !important;&#13;
+&#13;
+    bottom:0 !important;&#13;
+&#13;
+    width:280px !important;&#13;
+&#13;
+    min-width:280px !important;&#13;
+&#13;
+    max-width:280px !important;&#13;
+&#13;
+    flex-basis:280px !important;&#13;
+&#13;
+    height:100vh !important;&#13;
+&#13;
+    transform:translateX(-100%);&#13;
+&#13;
+    background:&#13;
+      linear-gradient(&#13;
+        180deg,&#13;
+        #130d2f 0%,&#13;
+        #160d38 48%,&#13;
+        #100a29 100%&#13;
+      ) !important;&#13;
+&#13;
+    box-shadow:&#13;
+      9px&#13;
+      0&#13;
+      30px&#13;
+      rgba(10,7,30,.30);&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .c360-feedback-app:not(.sidebar-collapsed)&#13;
+  .c360-feedback-sidebar {&#13;
+&#13;
+    transform:translateX(0);&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .c360-feedback-app.sidebar-collapsed&#13;
+  .c360-feedback-sidebar {&#13;
+&#13;
+    transform:translateX(-100%);&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .c360-feedback-main {&#13;
+&#13;
+    width:100% !important;&#13;
+&#13;
+    max-width:100% !important;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .c360-feedback-sidebar-overlay {&#13;
+&#13;
+    position:fixed;&#13;
+&#13;
+    inset:0;&#13;
+&#13;
+    z-index:1900;&#13;
+&#13;
+    display:block;&#13;
+&#13;
+    background:&#13;
+      rgba(20,34,54,.34);&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .c360-feedback-app.sidebar-collapsed&#13;
+  .c360-feedback-sidebar-overlay {&#13;
+&#13;
+    display:none;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .c360-feedback-content {&#13;
+&#13;
+    padding:&#13;
+      19px&#13;
+      17px&#13;
+      35px;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .c360-feedback-page-header {&#13;
+&#13;
+    align-items:flex-start;&#13;
+&#13;
+    flex-direction:column;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .c360-feedback-trainer-card {&#13;
+&#13;
+    width:100%;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .c360-feedback-interview-card {&#13;
+&#13;
+    grid-template-columns:1fr;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .c360-feedback-interview-details {&#13;
+&#13;
+    grid-template-columns:&#13;
+      repeat(&#13;
+        2,&#13;
+        minmax(0,1fr)&#13;
+      );&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .c360-feedback-interview-status {&#13;
+&#13;
+    flex-direction:row;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .c360-feedback-action {&#13;
+&#13;
+    justify-content:flex-start;&#13;
+&#13;
+  }&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   MOBILE&#13;
+   ========================================================= */&#13;
+&#13;
+@media (max-width:650px){&#13;
+&#13;
+  .c360-feedback-topbar {&#13;
+&#13;
+    height:64px;&#13;
+&#13;
+    min-height:64px;&#13;
+&#13;
+    padding:&#13;
+      0&#13;
+      10px;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .c360-feedback-hamburger {&#13;
+&#13;
+    width:38px;&#13;
+&#13;
+    height:38px;&#13;
+&#13;
+    min-width:38px;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .c360-feedback-top-icon {&#13;
+&#13;
+    width:37px;&#13;
+&#13;
+    height:37px;&#13;
+&#13;
+    min-width:37px;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .c360-feedback-top-profile-text {&#13;
+&#13;
+    display:none;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .c360-feedback-top-profile {&#13;
+&#13;
+    padding-left:5px;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .c360-feedback-top-avatar {&#13;
+&#13;
+    width:37px;&#13;
+&#13;
+    height:37px;&#13;
+&#13;
+    min-width:37px;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .c360-feedback-top-title {&#13;
+&#13;
+    font-size:12px;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .c360-feedback-top-eyebrow {&#13;
+&#13;
+    font-size:8px;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .c360-feedback-content {&#13;
+&#13;
+    padding:&#13;
+      15px&#13;
+      11px&#13;
+      30px;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .c360-feedback-page-header h1 {&#13;
+&#13;
+    font-size:27px;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .c360-feedback-page-header p {&#13;
+&#13;
+    font-size:11px;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .c360-feedback-summary-grid {&#13;
+&#13;
+    grid-template-columns:1fr;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .c360-feedback-filter-panel,&#13;
+  .c360-feedback-interview-panel,&#13;
+  .c360-feedback-form-panel {&#13;
+&#13;
+    padding:&#13;
+      16px;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .c360-feedback-form-header {&#13;
+&#13;
+    margin:&#13;
+      0&#13;
+      -16px;&#13;
+&#13;
+    padding:&#13;
+      17px&#13;
+      16px;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .c360-feedback-selected-summary {&#13;
+&#13;
+    grid-template-columns:&#13;
+      repeat(&#13;
+        2,&#13;
+        minmax(0,1fr)&#13;
+      );&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .c360-feedback-score-grid {&#13;
+&#13;
+    grid-template-columns:1fr;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .c360-feedback-text-grid {&#13;
+&#13;
+    grid-template-columns:1fr;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .c360-feedback-text-field.full {&#13;
+&#13;
+    margin-top:13px;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .c360-feedback-tracking-panel {&#13;
+&#13;
+    align-items:flex-start;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .c360-feedback-footer {&#13;
+&#13;
+    flex-direction:column;&#13;
+&#13;
+    align-items:flex-start;&#13;
+&#13;
+    gap:5px;&#13;
+&#13;
+  }&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   VERY SMALL&#13;
+   ========================================================= */&#13;
+&#13;
+@media (max-width:430px){&#13;
+&#13;
+  .c360-feedback-page-heading {&#13;
+&#13;
+    max-width:150px;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .c360-feedback-page-header h1 {&#13;
+&#13;
+    font-size:24px;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .c360-feedback-selected-summary {&#13;
+&#13;
+    grid-template-columns:1fr;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .c360-feedback-form-actions {&#13;
+&#13;
+    flex-direction:column;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .c360-feedback-cancel-button,&#13;
+  .c360-feedback-save-button {&#13;
+&#13;
+    width:100%;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .c360-feedback-interview-status {&#13;
+&#13;
+    flex-direction:column;&#13;
+&#13;
+  }&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   FOCUS&#13;
+   ========================================================= */&#13;
+&#13;
+.c360-feedback-app&#13;
+button:focus-visible,&#13;
+.c360-feedback-app&#13;
+a:focus-visible,&#13;
+.c360-feedback-app&#13;
+input:focus-visible,&#13;
+.c360-feedback-app&#13;
+textarea:focus-visible,&#13;
+.c360-feedback-app&#13;
+select:focus-visible {&#13;
+&#13;
+  outline:&#13;
+    3px&#13;
+    solid&#13;
+    rgba(103,60,255,.18);&#13;
+&#13;
+  outline-offset:2px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   BUTTON / LINK RESET&#13;
+   ========================================================= */&#13;
+&#13;
+.c360-feedback-app button {&#13;
+&#13;
+  font-family:inherit;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-app a {&#13;
+&#13;
+  text-decoration:none !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   FINAL FULL WIDTH SAFETY&#13;
+   ========================================================= */&#13;
+&#13;
+.c360-feedback-app {&#13;
+&#13;
+  width:100vw !important;&#13;
+&#13;
+  max-width:100vw !important;&#13;
+&#13;
+  min-width:100vw !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-app&#13;
+.c360-feedback-main {&#13;
+&#13;
+  min-width:0 !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-app&#13;
+.c360-feedback-content {&#13;
+&#13;
+  width:100% !important;&#13;
+&#13;
+  max-width:none !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   FINAL DARK PURPLE SIDEBAR SAFETY&#13;
+   ========================================================= */&#13;
+&#13;
+.c360-feedback-app&#13;
+.c360-feedback-sidebar {&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      180deg,&#13;
+      #130d2f 0%,&#13;
+      #160d38 48%,&#13;
+      #100a29 100%&#13;
+    ) !important;&#13;
+&#13;
+  border-right:1px solid #2d2157 !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-app&#13;
+.c360-feedback-brand {&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      135deg,&#13;
+      #170e38,&#13;
+      #1c1045&#13;
+    ) !important;&#13;
+&#13;
+  border-bottom:1px solid #2d2157 !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-app&#13;
+.c360-feedback-nav-item {&#13;
+&#13;
+  color:#c4b8dc !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-app&#13;
+.c360-feedback-nav-item:hover {&#13;
+&#13;
+  background:&#13;
+    rgba(124,58,237,.18) !important;&#13;
+&#13;
+  color:#ffffff !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-feedback-app&#13;
+.c360-feedback-nav-item.active {&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      90deg,&#13;
+      #7c3aed 0%,&#13;
+      #8b3ff2 100%&#13;
+    ) !important;&#13;
+&#13;
+  color:#ffffff !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   END&#13;
+   ========================================================= */</css>
+        <data_table>sp_instance</data_table>
+        <demo_data/>
+        <description/>
+        <docs/>
+        <field_list/>
+        <has_preview>false</has_preview>
+        <id>campus360_trainer_interview_feedback</id>
+        <internal>false</internal>
+        <link><![CDATA[function link(scope, element, attrs, controller) {
+  
+}]]></link>
+        <name>Campus360 Trainer Interview Feedback</name>
+        <option_schema/>
+        <public>false</public>
+        <roles/>
+        <script><![CDATA[(function() {
+
+  /* ============================================================
+     CAMPUS360 TRAINER FEEDBACK
+     ============================================================
+
+     TABLES USED:
+
+     Trainer Master:
+     x_snc_campus360_trainer_master
+
+     Mock Interview:
+     x_snc_campus360_mock_interview
+
+     Interview Feedback:
+     x_snc_campus360_interview_feedback
+
+     Student Master:
+     x_snc_campus360_student_master
+
+     ============================================================ */
+
+
+  var TRAINER_TABLE =
+    'x_snc_campus360_trainer_master';
+
+  var INTERVIEW_TABLE =
+    'x_snc_campus360_mock_interview';
+
+  var FEEDBACK_TABLE =
+    'x_snc_campus360_interview_feedback';
+
+  var STUDENT_TABLE =
+    'x_snc_campus360_student_master';
+
+
+  /* ============================================================
+     INITIAL DATA
+  ============================================================ */
+
+  data.loaded = false;
+
+  data.error = '';
+
+  data.trainer = null;
+
+  data.interviews = [];
+
+  data.completedCount = 0;
+
+  data.feedbackCount = 0;
+
+  data.pendingCount = 0;
+
+  data.reviewedStudentCount = 0;
+
+
+  /* ============================================================
+     CURRENT TRAINER
+  ============================================================ */
+
+  var requestedTrainerId =
+    String(
+      $sp.getParameter('trainer') || ''
+    ).trim();
+
+
+  var trainerGR =
+    new GlideRecord(
+      TRAINER_TABLE
+    );
+
+
+  if (requestedTrainerId) {
+
+    trainerGR.addQuery(
+      'trainer_id',
+      requestedTrainerId
+    );
+
+    trainerGR.setLimit(1);
+
+    trainerGR.query();
+
+  } else {
+
+    trainerGR.addQuery(
+      'status',
+      'Active'
+    );
+
+    trainerGR.orderBy(
+      'trainer_id'
+    );
+
+    trainerGR.setLimit(1);
+
+    trainerGR.query();
+
+  }
+
+
+  /* ============================================================
+     TRAINER NOT FOUND
+  ============================================================ */
+
+  if (!trainerGR.next()) {
+
+    data.loaded = true;
+
+    data.error =
+      'No trainer record found in Trainer Master.';
+
+    return;
+
+  }
+
+
+  var trainerSysId =
+    trainerGR.getUniqueValue();
+
+
+  var trainerId =
+    trainerGR.getValue(
+      'trainer_id'
+    ) || '';
+
+
+  var trainerName =
+    trainerGR.getValue(
+      'trainer_name'
+    ) || '';
+
+
+  data.trainer = {
+
+    sys_id:
+      trainerSysId,
+
+    id:
+      trainerId,
+
+    name:
+      trainerName,
+
+    email:
+      trainerGR.getValue(
+        'email'
+      ) || '',
+
+    expertise:
+      trainerGR.getValue(
+        'expertise'
+      ) || '',
+
+    experience:
+      trainerGR.getValue(
+        'experience'
+      ) || '0',
+
+    rating:
+      trainerGR.getValue(
+        'rating'
+      ) || '0',
+
+    status:
+      trainerGR.getValue(
+        'status'
+      ) || '',
+
+    totalInterviews:
+      parseInt(
+        trainerGR.getValue(
+          'total_interviews'
+        ),
+        10
+      ) || 0,
+
+    initials:
+      getInitials(
+        trainerName
+      )
+
+  };
+
+
+  /* ============================================================
+     SAVE FEEDBACK ACTION
+  ============================================================ */
+
+  if (
+    input &&
+    input.action == 'save_feedback'
+  ) {
+
+    saveFeedback(
+      trainerSysId
+    );
+
+    data.loaded = true;
+
+    return;
+
+  }
+
+
+  /* ============================================================
+     LOAD COMPLETED INTERVIEWS
+  ============================================================ */
+
+  loadCompletedInterviews(
+    trainerSysId
+  );
+
+
+  data.loaded = true;
+
+
+  /* ============================================================
+     LOAD COMPLETED INTERVIEWS
+  ============================================================ */
+
+  function loadCompletedInterviews(
+    trainerSysId
+  ) {
+
+    var studentMap = {};
+
+    var interviewGR =
+      new GlideRecord(
+        INTERVIEW_TABLE
+      );
+
+
+    if (
+      !interviewGR.isValidField(
+        'trainer'
+      )
+    ) {
+
+      data.error =
+        'Trainer field was not found in Mock Interview table.';
+
+      return;
+
+    }
+
+
+    interviewGR.addQuery(
+      'trainer',
+      trainerSysId
+    );
+
+
+    if (
+      interviewGR.isValidField(
+        'interview_status'
+      )
+    ) {
+
+      interviewGR.addQuery(
+        'interview_status',
+        'Completed'
+      );
+
+    }
+
+
+    if (
+      interviewGR.isValidField(
+        'interview_date'
+      )
+    ) {
+
+      interviewGR.orderByDesc(
+        'interview_date'
+      );
+
+    }
+
+
+    interviewGR.query();
+
+
+    while (
+      interviewGR.next()
+    ) {
+
+      var interviewSysId =
+        interviewGR.getUniqueValue();
+
+
+      var studentSysId =
+        interviewGR.getValue(
+          'student'
+        ) || '';
+
+
+      var studentInfo =
+        getStudentInfo(
+          studentSysId,
+          interviewGR.getDisplayValue(
+            'student'
+          )
+        );
+
+
+      var feedback =
+        getFeedbackForInterview(
+          interviewSysId
+        );
+
+
+      var interviewId =
+        interviewGR.getValue(
+          'interview_id'
+        ) ||
+        interviewGR.getDisplayValue(
+          'interview_id'
+        ) ||
+        interviewSysId;
+
+
+      var interviewType =
+        interviewGR.getDisplayValue(
+          'interview_type'
+        ) ||
+        interviewGR.getValue(
+          'interview_type'
+        ) ||
+        'Mock Interview';
+
+
+      var interviewDate =
+        formatDate(
+          interviewGR.getValue(
+            'interview_date'
+          )
+        );
+
+
+      var startTime =
+        interviewGR.getValue(
+          'start_time'
+        ) || '';
+
+
+      var endTime =
+        interviewGR.getValue(
+          'end_time'
+        ) || '';
+
+
+      var attendanceStatus =
+        interviewGR.getDisplayValue(
+          'attendance_status'
+        ) ||
+        interviewGR.getValue(
+          'attendance_status'
+        ) ||
+        '';
+
+
+      var interviewObject = {
+
+        sys_id:
+          interviewSysId,
+
+        studentName:
+          studentInfo.name,
+
+        studentId:
+          studentInfo.id,
+
+        studentInitials:
+          getInitials(
+            studentInfo.name
+          ),
+
+        interviewId:
+          interviewId,
+
+        interviewType:
+          interviewType,
+
+        interviewDate:
+          interviewDate,
+
+        startTime:
+          startTime,
+
+        endTime:
+          endTime,
+
+        attendanceStatus:
+          attendanceStatus,
+
+        hasFeedback:
+          feedback !== null,
+
+        feedback:
+          feedback
+
+      };
+
+
+      data.interviews.push(
+        interviewObject
+      );
+
+
+      data.completedCount++;
+
+
+      if (
+        feedback !== null
+      ) {
+
+        data.feedbackCount++;
+
+
+        if (
+          studentSysId &&
+          !studentMap[
+            studentSysId
+          ]
+        ) {
+
+          studentMap[
+            studentSysId
+          ] = true;
+
+        }
+
+      } else {
+
+        data.pendingCount++;
+
+      }
+
+    }
+
+
+    data.reviewedStudentCount =
+      countKeys(
+        studentMap
+      );
+
+  }
+
+
+  /* ============================================================
+     STUDENT INFORMATION
+  ============================================================ */
+
+  function getStudentInfo(
+    studentSysId,
+    fallbackName
+  ) {
+
+    var result = {
+
+      id: '',
+
+      name:
+        fallbackName ||
+        'Student'
+
+    };
+
+
+    if (
+      !studentSysId
+    ) {
+
+      return result;
+
+    }
+
+
+    var studentGR =
+      new GlideRecord(
+        STUDENT_TABLE
+      );
+
+
+    if (
+      !studentGR.get(
+        studentSysId
+      )
+    ) {
+
+      return result;
+
+    }
+
+
+    if (
+      studentGR.isValidField(
+        'student_id'
+      )
+    ) {
+
+      result.id =
+        studentGR.getValue(
+          'student_id'
+        ) || '';
+
+    }
+
+
+    if (
+      studentGR.isValidField(
+        'student_name'
+      )
+    ) {
+
+      result.name =
+        studentGR.getValue(
+          'student_name'
+        ) ||
+        studentGR.getDisplayValue() ||
+        result.name;
+
+    } else {
+
+      result.name =
+        studentGR.getDisplayValue() ||
+        result.name;
+
+    }
+
+
+    return result;
+
+  }
+
+
+  /* ============================================================
+     EXISTING FEEDBACK FOR INTERVIEW
+  ============================================================ */
+
+  function getFeedbackForInterview(
+    interviewSysId
+  ) {
+
+    if (
+      !interviewSysId
+    ) {
+
+      return null;
+
+    }
+
+
+    var feedbackGR =
+      new GlideRecord(
+        FEEDBACK_TABLE
+      );
+
+
+    if (
+      !feedbackGR.isValidField(
+        'interview'
+      )
+    ) {
+
+      return null;
+
+    }
+
+
+    feedbackGR.addQuery(
+      'interview',
+      interviewSysId
+    );
+
+
+    feedbackGR.orderByDesc(
+      'sys_created_on'
+    );
+
+
+    feedbackGR.setLimit(1);
+
+    feedbackGR.query();
+
+
+    if (
+      !feedbackGR.next()
+    ) {
+
+      return null;
+
+    }
+
+
+    return {
+
+      sys_id:
+        feedbackGR.getUniqueValue(),
+
+      feedback_id:
+        getValue(
+          feedbackGR,
+          'feedback_id'
+        ),
+
+      technical_score:
+        getNumber(
+          feedbackGR,
+          'technical_score'
+        ),
+
+      communication_score:
+        getNumber(
+          feedbackGR,
+          'communication_score'
+        ),
+
+      problem_solving_score:
+        getNumber(
+          feedbackGR,
+          'problem_solving_score'
+        ),
+
+      overall_score:
+        getNumber(
+          feedbackGR,
+          'overall_score'
+        ),
+
+      strengths:
+        getValue(
+          feedbackGR,
+          'strengths'
+        ),
+
+      improvement_areas:
+        getValue(
+          feedbackGR,
+          'improvement_areas'
+        ),
+
+      recommendation:
+        getValue(
+          feedbackGR,
+          'recommendation'
+        ),
+
+      feedback_date:
+        feedbackGR.getDisplayValue(
+          'feedback_date'
+        )
+
+    };
+
+  }
+
+
+  /* ============================================================
+     SAVE FEEDBACK
+  ============================================================ */
+
+  function saveFeedback(
+    trainerSysId
+  ) {
+
+    var result = {
+
+      success: false,
+
+      message: '',
+
+      feedbackCount:
+        0,
+
+      pendingCount:
+        0
+
+    };
+
+
+    /* ------------------------------------------------------------
+       REQUIRED INTERVIEW
+    ------------------------------------------------------------ */
+
+    var interviewSysId =
+      String(
+        input.interview_sys_id || ''
+      ).trim();
+
+
+    if (
+      !interviewSysId
+    ) {
+
+      result.message =
+        'No mock interview was selected.';
+
+      data.success =
+        false;
+
+      data.message =
+        result.message;
+
+      return;
+
+    }
+
+
+    /* ------------------------------------------------------------
+       VERIFY INTERVIEW
+       Trainer must own this interview.
+    ------------------------------------------------------------ */
+
+    var interviewGR =
+      new GlideRecord(
+        INTERVIEW_TABLE
+      );
+
+
+    if (
+      !interviewGR.get(
+        interviewSysId
+      )
+    ) {
+
+      result.message =
+        'The selected mock interview could not be found.';
+
+      data.success =
+        false;
+
+      data.message =
+        result.message;
+
+      return;
+
+    }
+
+
+    if (
+      interviewGR.getValue(
+        'trainer'
+      ) != trainerSysId
+    ) {
+
+      result.message =
+        'You are not allowed to give feedback for this interview.';
+
+      data.success =
+        false;
+
+      data.message =
+        result.message;
+
+      return;
+
+    }
+
+
+    var interviewStatus =
+      interviewGR.getValue(
+        'interview_status'
+      ) || '';
+
+
+    if (
+      String(
+        interviewStatus
+      ).toLowerCase() !=
+      'completed'
+    ) {
+
+      result.message =
+        'Feedback can only be submitted for a completed mock interview.';
+
+      data.success =
+        false;
+
+      data.message =
+        result.message;
+
+      return;
+
+    }
+
+
+    /* ------------------------------------------------------------
+       STUDENT
+    ------------------------------------------------------------ */
+
+    var studentSysId =
+      interviewGR.getValue(
+        'student'
+      ) || '';
+
+
+    if (
+      !studentSysId
+    ) {
+
+      result.message =
+        'The selected interview does not have a student.';
+
+      data.success =
+        false;
+
+      data.message =
+        result.message;
+
+      return;
+
+    }
+
+
+    /* ------------------------------------------------------------
+       SCORE VALIDATION
+    ------------------------------------------------------------ */
+
+    var technical =
+      validateScore(
+        input.technical_score,
+        'Technical Score'
+      );
+
+
+    if (!technical.valid) {
+
+      data.success =
+        false;
+
+      data.message =
+        technical.message;
+
+      return;
+
+    }
+
+
+    var communication =
+      validateScore(
+        input.communication_score,
+        'Communication Score'
+      );
+
+
+    if (!communication.valid) {
+
+      data.success =
+        false;
+
+      data.message =
+        communication.message;
+
+      return;
+
+    }
+
+
+    var problemSolving =
+      validateScore(
+        input.problem_solving_score,
+        'Problem Solving Score'
+      );
+
+
+    if (!problemSolving.valid) {
+
+      data.success =
+        false;
+
+      data.message =
+        problemSolving.message;
+
+      return;
+
+    }
+
+
+    var overall =
+      validateScore(
+        input.overall_score,
+        'Overall Score'
+      );
+
+
+    if (!overall.valid) {
+
+      data.success =
+        false;
+
+      data.message =
+        overall.message;
+
+      return;
+
+    }
+
+
+    /* ------------------------------------------------------------
+       TEXT VALIDATION
+    ------------------------------------------------------------ */
+
+    var strengths =
+      String(
+        input.strengths || ''
+      ).trim();
+
+
+    var improvementAreas =
+      String(
+        input.improvement_areas || ''
+      ).trim();
+
+
+    var recommendation =
+      String(
+        input.recommendation || ''
+      ).trim();
+
+
+    if (
+      !strengths
+    ) {
+
+      data.success =
+        false;
+
+      data.message =
+        'Strengths are required.';
+
+      return;
+
+    }
+
+
+    if (
+      !improvementAreas
+    ) {
+
+      data.success =
+        false;
+
+      data.message =
+        'Improvement Areas are required.';
+
+      return;
+
+    }
+
+
+    if (
+      !recommendation
+    ) {
+
+      data.success =
+        false;
+
+      data.message =
+        'Recommendation is required.';
+
+      return;
+
+    }
+
+
+    /* ------------------------------------------------------------
+       FIND EXISTING FEEDBACK
+       ------------------------------------------------------------
+
+       One feedback record is maintained for one interview.
+
+       If feedback already exists, update it.
+
+       Otherwise create a new record.
+    */
+
+    var feedbackGR =
+      new GlideRecord(
+        FEEDBACK_TABLE
+      );
+
+
+    feedbackGR.addQuery(
+      'interview',
+      interviewSysId
+    );
+
+
+    feedbackGR.setLimit(1);
+
+    feedbackGR.query();
+
+
+    var isNew =
+      false;
+
+
+    if (
+      feedbackGR.next()
+    ) {
+
+      /* Existing feedback */
+
+    } else {
+
+      /* New feedback */
+
+      feedbackGR =
+        new GlideRecord(
+          FEEDBACK_TABLE
+        );
+
+      feedbackGR.initialize();
+
+      isNew = true;
+
+    }
+
+
+    /* ------------------------------------------------------------
+       SET REFERENCES
+    ------------------------------------------------------------ */
+
+    if (
+      feedbackGR.isValidField(
+        'student'
+      )
+    ) {
+
+      feedbackGR.setValue(
+        'student',
+        studentSysId
+      );
+
+    }
+
+
+    if (
+      feedbackGR.isValidField(
+        'trainer'
+      )
+    ) {
+
+      feedbackGR.setValue(
+        'trainer',
+        trainerSysId
+      );
+
+    }
+
+
+    if (
+      feedbackGR.isValidField(
+        'interview'
+      )
+    ) {
+
+      feedbackGR.setValue(
+        'interview',
+        interviewSysId
+      );
+
+    }
+
+
+    /* ------------------------------------------------------------
+       SET SCORES
+    ------------------------------------------------------------ */
+
+    feedbackGR.setValue(
+      'technical_score',
+      String(
+        technical.value
+      )
+    );
+
+
+    feedbackGR.setValue(
+      'communication_score',
+      String(
+        communication.value
+      )
+    );
+
+
+    feedbackGR.setValue(
+      'problem_solving_score',
+      String(
+        problemSolving.value
+      )
+    );
+
+
+    feedbackGR.setValue(
+      'overall_score',
+      String(
+        overall.value
+      )
+    );
+
+
+    /* ------------------------------------------------------------
+       SET TEXT
+    ------------------------------------------------------------ */
+
+    feedbackGR.setValue(
+      'strengths',
+      strengths
+    );
+
+
+    feedbackGR.setValue(
+      'improvement_areas',
+      improvementAreas
+    );
+
+
+    feedbackGR.setValue(
+      'recommendation',
+      recommendation
+    );
+
+
+    /* ------------------------------------------------------------
+       FEEDBACK DATE
+    ------------------------------------------------------------ */
+
+    if (
+      feedbackGR.isValidField(
+        'feedback_date'
+      )
+    ) {
+
+      feedbackGR.setValue(
+        'feedback_date',
+        new GlideDateTime()
+      );
+
+    }
+
+
+    /* ------------------------------------------------------------
+       FEEDBACK ID
+    ------------------------------------------------------------ */
+
+    if (
+      isNew &&
+      feedbackGR.isValidField(
+        'feedback_id'
+      )
+    ) {
+
+      feedbackGR.setValue(
+        'feedback_id',
+        generateFeedbackId()
+      );
+
+    }
+
+
+    /* ------------------------------------------------------------
+       SAVE
+    ------------------------------------------------------------ */
+
+    var savedId;
+
+
+    if (
+      isNew
+    ) {
+
+      savedId =
+        feedbackGR.insert();
+
+    } else {
+
+      savedId =
+        feedbackGR.update();
+
+    }
+
+
+    if (
+      !savedId
+    ) {
+
+      result.message =
+        'The feedback record could not be saved.';
+
+      data.success =
+        false;
+
+      data.message =
+        result.message;
+
+      return;
+
+    }
+
+
+    /* ------------------------------------------------------------
+       RETURN UPDATED COUNTS
+    ------------------------------------------------------------ */
+
+    result.success =
+      true;
+
+
+    result.message =
+      isNew
+        ? 'Interview feedback saved successfully.'
+        : 'Interview feedback updated successfully.';
+
+
+    result.feedbackCount =
+      countTrainerFeedback(
+        trainerSysId
+      );
+
+
+    result.pendingCount =
+      countPendingFeedback(
+        trainerSysId
+      );
+
+
+    data.success =
+      true;
+
+    data.message =
+      result.message;
+
+    data.feedbackCount =
+      result.feedbackCount;
+
+    data.pendingCount =
+      result.pendingCount;
+
+  }
+
+
+  /* ============================================================
+     SCORE VALIDATION
+  ============================================================ */
+
+  function validateScore(
+    rawValue,
+    label
+  ) {
+
+    if (
+      rawValue === null ||
+      rawValue === undefined ||
+      rawValue === ''
+    ) {
+
+      return {
+
+        valid: false,
+
+        message:
+          label +
+          ' is required.'
+
+      };
+
+    }
+
+
+    var number =
+      parseFloat(
+        rawValue
+      );
+
+
+    if (
+      isNaN(number) ||
+      number < 0 ||
+      number > 100
+    ) {
+
+      return {
+
+        valid: false,
+
+        message:
+          label +
+          ' must be between 0 and 100.'
+
+      };
+
+    }
+
+
+    return {
+
+      valid: true,
+
+      value: number
+
+    };
+
+  }
+
+
+  /* ============================================================
+     COUNT TRAINER FEEDBACK
+  ============================================================ */
+
+  function countTrainerFeedback(
+    trainerSysId
+  ) {
+
+    var gr =
+      new GlideRecord(
+        FEEDBACK_TABLE
+      );
+
+
+    gr.addQuery(
+      'trainer',
+      trainerSysId
+    );
+
+
+    gr.query();
+
+
+    var count =
+      0;
+
+
+    while (
+      gr.next()
+    ) {
+
+      count++;
+
+    }
+
+
+    return count;
+
+  }
+
+
+  /* ============================================================
+     COUNT PENDING FEEDBACK
+  ============================================================ */
+
+  function countPendingFeedback(
+    trainerSysId
+  ) {
+
+    var count =
+      0;
+
+
+    var interviewGR =
+      new GlideRecord(
+        INTERVIEW_TABLE
+      );
+
+
+    interviewGR.addQuery(
+      'trainer',
+      trainerSysId
+    );
+
+
+    interviewGR.addQuery(
+      'interview_status',
+      'Completed'
+    );
+
+
+    interviewGR.query();
+
+
+    while (
+      interviewGR.next()
+    ) {
+
+      var feedbackGR =
+        new GlideRecord(
+          FEEDBACK_TABLE
+        );
+
+
+      feedbackGR.addQuery(
+        'interview',
+        interviewGR.getUniqueValue()
+      );
+
+
+      feedbackGR.setLimit(1);
+
+      feedbackGR.query();
+
+
+      if (
+        !feedbackGR.next()
+      ) {
+
+        count++;
+
+      }
+
+    }
+
+
+    return count;
+
+  }
+
+
+  /* ============================================================
+     FEEDBACK ID
+  ============================================================ */
+
+  function generateFeedbackId() {
+
+    var base =
+      'FDB' +
+      String(
+        new GlideDateTime()
+          .getNumericValue()
+      );
+
+
+    /*
+     * Feedback ID field has max length 20.
+     */
+
+    if (
+      base.length > 20
+    ) {
+
+      base =
+        base.substring(
+          0,
+          20
+        );
+
+    }
+
+
+    var candidate =
+      base;
+
+
+    var suffix =
+      1;
+
+
+    while (
+      feedbackIdExists(
+        candidate
+      )
+    ) {
+
+      var suffixText =
+        String(
+          suffix
+        );
+
+
+      candidate =
+        base.substring(
+          0,
+          20 -
+          suffixText.length
+        ) +
+        suffixText;
+
+
+      suffix++;
+
+    }
+
+
+    return candidate;
+
+  }
+
+
+  /* ============================================================
+     FEEDBACK ID EXISTS
+  ============================================================ */
+
+  function feedbackIdExists(
+    feedbackId
+  ) {
+
+    var gr =
+      new GlideRecord(
+        FEEDBACK_TABLE
+      );
+
+
+    gr.addQuery(
+      'feedback_id',
+      feedbackId
+    );
+
+
+    gr.setLimit(1);
+
+    gr.query();
+
+
+    return gr.next();
+
+  }
+
+
+  /* ============================================================
+     GENERIC VALUE
+  ============================================================ */
+
+  function getValue(
+    gr,
+    fieldName
+  ) {
+
+    if (
+      !gr ||
+      !fieldName ||
+      !gr.isValidField(
+        fieldName
+      )
+    ) {
+
+      return '';
+
+    }
+
+
+    return (
+      gr.getValue(
+        fieldName
+      ) || ''
+    );
+
+  }
+
+
+  /* ============================================================
+     GENERIC NUMBER
+  ============================================================ */
+
+  function getNumber(
+    gr,
+    fieldName
+  ) {
+
+    var raw =
+      getValue(
+        gr,
+        fieldName
+      );
+
+
+    if (
+      raw === ''
+    ) {
+
+      return null;
+
+    }
+
+
+    var number =
+      parseFloat(
+        raw
+      );
+
+
+    return isNaN(
+      number
+    )
+      ? null
+      : number;
+
+  }
+
+
+  /* ============================================================
+     DATE FORMAT
+  ============================================================ */
+
+  function formatDate(
+    value
+  ) {
+
+    if (
+      !value
+    ) {
+
+      return '';
+
+    }
+
+
+    var text =
+      String(
+        value
+      );
+
+
+    if (
+      text.length >= 10
+    ) {
+
+      return text.substring(
+        0,
+        10
+      );
+
+    }
+
+
+    return text;
+
+  }
+
+
+  /* ============================================================
+     INITIALS
+  ============================================================ */
+
+  function getInitials(
+    name
+  ) {
+
+    if (
+      !name
+    ) {
+
+      return 'TR';
+
+    }
+
+
+    var parts =
+      String(
+        name
+      )
+      .trim()
+      .split(
+        /\s+/
+      );
+
+
+    var result =
+      '';
+
+
+    if (
+      parts.length > 0
+    ) {
+
+      result +=
+        parts[0]
+          .charAt(0);
+
+    }
+
+
+    if (
+      parts.length > 1
+    ) {
+
+      result +=
+        parts[
+          parts.length - 1
+        ].charAt(0);
+
+    }
+
+
+    return result
+      .toUpperCase()
+      .substring(
+        0,
+        2
+      );
+
+  }
+
+
+  /* ============================================================
+     COUNT OBJECT KEYS
+  ============================================================ */
+
+  function countKeys(
+    object
+  ) {
+
+    var count =
+      0;
+
+
+    for (
+      var key in object
+    ) {
+
+      if (
+        object.hasOwnProperty(
+          key
+        )
+      ) {
+
+        count++;
+
+      }
+
+    }
+
+
+    return count;
+
+  }
+
+
+})();
+
+data.aiWidget = $sp.getWidget('campus360_ai_assistant');
+]]></script>
+        <servicenow>false</servicenow>
+        <sys_class_name>sp_widget</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-25 18:42:33</sys_created_on>
+        <sys_id>71afb66da0eb43107f44e28050a33b07</sys_id>
+        <sys_mod_count>14</sys_mod_count>
+        <sys_name>Campus360 Trainer Interview Feedback</sys_name>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name>sp_widget_71afb66da0eb43107f44e28050a33b07</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-10-01 13:22:43</sys_updated_on>
+        <template><![CDATA[<div
+  class="c360-feedback-app"
+  ng-if="c.data.loaded"
+  ng-init="c.sidebarOpen = true"
+  ng-class="{'sidebar-collapsed': !c.sidebarOpen}"
+>
+
+  <!-- =========================================================
+       SIDEBAR OVERLAY
+       ========================================================= -->
+
+  <div
+    class="c360-feedback-sidebar-overlay"
+    ng-if="c.sidebarOpen"
+    ng-click="c.sidebarOpen = false"
+  ></div>
+
+
+  <!-- =========================================================
+       CAMPUS360 TRAINER SIDEBAR
+       ========================================================= -->
+
+  <aside class="c360-feedback-sidebar">
+
+    <!-- BRAND -->
+
+    <div class="c360-feedback-brand">
+
+      <div class="c360-feedback-brand-mark">
+        <i class="fa fa-graduation-cap"></i>
+      </div>
+
+      <div class="c360-feedback-brand-text">
+
+        <strong>
+          Campus360
+        </strong>
+
+        <span>
+          TRAINER PORTAL
+        </span>
+
+      </div>
+
+    </div>
+
+
+    <!-- TRAINER PROFILE -->
+
+    <a
+      class="c360-feedback-profile"
+      ng-href="?id=campus360_trainer_profile&trainer={{c.data.trainer.id}}"
+    >
+
+      <div class="c360-feedback-avatar">
+        {{c.data.trainer.initials}}
+      </div>
+
+      <div class="c360-feedback-profile-info">
+
+        <strong>
+          {{c.data.trainer.name}}
+        </strong>
+
+        <span>
+          {{c.data.trainer.id}}
+        </span>
+
+      </div>
+
+      <i class="fa fa-angle-right"></i>
+
+    </a>
+
+
+    <!-- =========================================================
+         NAVIGATION
+         ========================================================= -->
+
+    <nav class="c360-feedback-nav">
+
+      <!-- OVERVIEW -->
+
+      <div class="c360-feedback-nav-label">
+        OVERVIEW
+      </div>
+
+      <a
+        class="c360-feedback-nav-item"
+        ng-href="?id=campus360_trainer_dashboard&trainer={{c.data.trainer.id}}"
+      >
+
+        <span class="c360-feedback-nav-icon">
+          <i class="fa fa-th-large"></i>
+        </span>
+
+        <span>
+          Dashboard
+        </span>
+
+      </a>
+
+
+      <!-- TRAINING -->
+
+      <div class="c360-feedback-nav-label">
+        TRAINING
+      </div>
+
+      <a
+        class="c360-feedback-nav-item"
+        ng-href="?id=campus360_trainer_my_training&trainer={{c.data.trainer.id}}"
+      >
+
+        <span class="c360-feedback-nav-icon">
+          <i class="fa fa-book"></i>
+        </span>
+
+        <span>
+          My Training
+        </span>
+
+        <span
+          class="c360-feedback-nav-count"
+          ng-if="
+            c.data.metrics &&
+            c.data.metrics.trainingPrograms > 0
+          "
+        >
+          {{c.data.metrics.trainingPrograms}}
+        </span>
+
+      </a>
+
+
+      <!-- MOCK INTERVIEWS -->
+
+      <div class="c360-feedback-nav-label">
+        MOCK INTERVIEWS
+      </div>
+
+      <a
+        class="c360-feedback-nav-item"
+        ng-href="?id=campus360_trainer_mock_slots&trainer={{c.data.trainer.id}}"
+      >
+
+        <span class="c360-feedback-nav-icon">
+          <i class="fa fa-calendar-check-o"></i>
+        </span>
+
+        <span>
+          Slot Availability &amp; Requests
+        </span>
+
+        <span
+          class="c360-feedback-nav-count warning"
+          ng-if="
+            c.data.metrics &&
+            c.data.metrics.interviewRequests > 0
+          "
+        >
+          {{c.data.metrics.interviewRequests}}
+        </span>
+
+      </a>
+
+
+      <!-- FEEDBACK -->
+
+      <a
+        class="c360-feedback-nav-item active"
+        ng-href="?id=campus360_trainer_interview_feedback&trainer={{c.data.trainer.id}}"
+      >
+
+        <span class="c360-feedback-nav-icon">
+          <i class="fa fa-commenting-o"></i>
+        </span>
+
+        <span>
+          Feedback &amp; Performance
+        </span>
+
+        <span
+          class="c360-feedback-nav-count"
+          ng-if="c.data.pendingCount > 0"
+        >
+          {{c.data.pendingCount}}
+        </span>
+
+      </a>
+
+
+      <!-- INTELLIGENCE -->
+
+      <div class="c360-feedback-nav-label">
+        INTELLIGENCE
+      </div>
+
+      <a
+        class="c360-feedback-nav-item"
+        ng-href="?id=campus360_trainer_placement_intelligence&trainer={{c.data.trainer.id}}"
+      >
+
+        <span class="c360-feedback-nav-icon">
+          <i class="fa fa-line-chart"></i>
+        </span>
+
+        <span>
+          Placement Intelligence
+        </span>
+
+      </a>
+
+
+      <!-- TPO -->
+
+      <div class="c360-feedback-nav-label">
+        TPO COORDINATION
+      </div>
+
+      <a
+        class="c360-feedback-nav-item"
+        ng-href="?id=campus360_trainer_opportunities&trainer={{c.data.trainer.id}}"
+      >
+
+        <span class="c360-feedback-nav-icon">
+          <i class="fa fa-university"></i>
+        </span>
+
+        <span>
+          Opportunities &amp; Rooms
+        </span>
+
+      </a>
+
+
+      <!-- ACCOUNT -->
+
+      <div class="c360-feedback-nav-label">
+        ACCOUNT
+      </div>
+
+      <a
+        class="c360-feedback-nav-item"
+        ng-href="?id=campus360_trainer_profile&trainer={{c.data.trainer.id}}"
+      >
+
+        <span class="c360-feedback-nav-icon">
+          <i class="fa fa-user-circle-o"></i>
+        </span>
+
+        <span>
+          Trainer Profile
+        </span>
+
+      </a>
+
+    </nav>
+
+  </aside>
+
+
+  <!-- =========================================================
+       MAIN
+       ========================================================= -->
+
+  <main class="c360-feedback-main">
+
+
+    <!-- =======================================================
+         TOP NAVBAR
+         ======================================================= -->
+
+    <header class="c360-feedback-topbar">
+
+      <!-- LEFT -->
+
+      <div class="c360-feedback-topbar-left">
+
+        <button
+          type="button"
+          class="c360-feedback-hamburger"
+          ng-click="c.sidebarOpen = !c.sidebarOpen"
+          title="Open / Close Sidebar"
+          aria-label="Open or close sidebar"
+        >
+
+          <i class="fa fa-bars"></i>
+
+        </button>
+
+
+        <div class="c360-feedback-page-heading">
+
+          <span class="c360-feedback-top-eyebrow">
+            CAMPUS360
+          </span>
+
+          <span class="c360-feedback-top-title">
+            Feedback &amp; Performance
+          </span>
+
+        </div>
+
+      </div>
+
+
+      <!-- RIGHT -->
+
+      <div class="c360-feedback-top-actions">
+
+
+        <!-- REFRESH -->
+
+        <button
+          type="button"
+          class="c360-feedback-top-icon"
+          ng-click="c.refresh()"
+          title="Refresh"
+          aria-label="Refresh"
+        >
+
+          <i class="fa fa-refresh"></i>
+
+        </button>
+
+
+        <!-- NOTIFICATION -->
+
+        <button
+          type="button"
+          class="c360-feedback-top-icon c360-feedback-notification"
+          title="Notifications"
+          aria-label="Notifications"
+        >
+
+          <i class="fa fa-bell"></i>
+
+          <span class="c360-feedback-notification-dot"></span>
+
+        </button>
+
+
+        <!-- TRAINER PROFILE -->
+
+        <a
+          class="c360-feedback-top-profile"
+          ng-href="?id=campus360_trainer_profile&trainer={{c.data.trainer.id}}"
+        >
+
+          <div class="c360-feedback-top-avatar">
+            {{c.data.trainer.initials}}
+          </div>
+
+          <div class="c360-feedback-top-profile-text">
+
+            <strong>
+              {{c.data.trainer.name}}
+            </strong>
+
+            <span>
+              {{c.data.trainer.id}}
+            </span>
+
+          </div>
+
+        </a>
+
+      </div>
+
+    </header>
+
+
+    <!-- =======================================================
+         CONTENT
+         ======================================================= -->
+
+    <section class="c360-feedback-content">
+
+
+      <!-- =====================================================
+           PAGE HEADER
+           ===================================================== -->
+
+      <div class="c360-feedback-page-header">
+
+        <div>
+
+          <span class="c360-feedback-eyebrow">
+            MOCK INTERVIEW PERFORMANCE
+          </span>
+
+          <h1>
+            Interview Feedback
+          </h1>
+
+          <p>
+            Review completed mock interviews and provide structured
+            feedback for your students.
+          </p>
+
+        </div>
+
+
+        <div class="c360-feedback-trainer-card">
+
+          <div class="c360-feedback-trainer-card-avatar">
+            {{c.data.trainer.initials}}
+          </div>
+
+          <div>
+
+            <span>
+              TRAINER
+            </span>
+
+            <strong>
+              {{c.data.trainer.name}}
+            </strong>
+
+            <small>
+              {{c.data.trainer.id}}
+            </small>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- =====================================================
+           SUMMARY CARDS
+           ===================================================== -->
+
+      <div class="c360-feedback-summary-grid">
+
+
+        <div class="c360-feedback-summary-card lavender">
+
+          <div class="c360-feedback-summary-icon">
+            <i class="fa fa-users"></i>
+          </div>
+
+          <div>
+
+            <span>
+              COMPLETED INTERVIEWS
+            </span>
+
+            <strong>
+              {{c.data.completedCount}}
+            </strong>
+
+          </div>
+
+        </div>
+
+
+        <div class="c360-feedback-summary-card peach">
+
+          <div class="c360-feedback-summary-icon">
+            <i class="fa fa-commenting-o"></i>
+          </div>
+
+          <div>
+
+            <span>
+              FEEDBACK GIVEN
+            </span>
+
+            <strong>
+              {{c.data.feedbackCount}}
+            </strong>
+
+          </div>
+
+        </div>
+
+
+        <div class="c360-feedback-summary-card blue">
+
+          <div class="c360-feedback-summary-icon">
+            <i class="fa fa-clock-o"></i>
+          </div>
+
+          <div>
+
+            <span>
+              WAITING FOR FEEDBACK
+            </span>
+
+            <strong>
+              {{c.data.pendingCount}}
+            </strong>
+
+          </div>
+
+        </div>
+
+
+        <div class="c360-feedback-summary-card green">
+
+          <div class="c360-feedback-summary-icon">
+            <i class="fa fa-check-circle"></i>
+          </div>
+
+          <div>
+
+            <span>
+              STUDENTS REVIEWED
+            </span>
+
+            <strong>
+              {{c.data.reviewedStudentCount}}
+            </strong>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- =====================================================
+           FILTER
+           ===================================================== -->
+
+      <div class="c360-feedback-filter-panel">
+
+        <div class="c360-feedback-filter-title">
+
+          <div>
+
+            <span>
+              INTERVIEW TRACKING
+            </span>
+
+            <h2>
+              Completed Mock Interviews
+            </h2>
+
+            <p>
+              Search by student ID, student name, interview ID
+              or interview type.
+            </p>
+
+          </div>
+
+
+          <button
+            type="button"
+            class="c360-feedback-clear-button"
+            ng-click="c.clearSearch()"
+          >
+
+            <i class="fa fa-times"></i>
+
+            Clear
+
+          </button>
+
+        </div>
+
+
+        <div class="c360-feedback-search">
+
+          <i class="fa fa-search"></i>
+
+          <input
+            type="text"
+            ng-model="c.searchText"
+            placeholder="Search student ID, student name, interview ID..."
+            autocomplete="off"
+          >
+
+        </div>
+
+      </div>
+
+
+      <!-- =====================================================
+           INTERVIEW LIST
+           ===================================================== -->
+
+      <div class="c360-feedback-interview-panel">
+
+        <div class="c360-feedback-panel-header">
+
+          <div>
+
+            <span>
+              COMPLETED INTERVIEWS
+            </span>
+
+            <h2>
+              Students Ready for Feedback
+            </h2>
+
+          </div>
+
+
+          <span class="c360-feedback-result-count">
+
+            {{c.filteredInterviews().length}}
+
+            records
+
+          </span>
+
+        </div>
+
+
+        <!-- LIST -->
+
+        <div class="c360-feedback-interview-list">
+
+
+          <div
+            class="c360-feedback-interview-card"
+            ng-repeat="
+              interview in c.filteredInterviews()
+              track by interview.sys_id
+            "
+          >
+
+
+            <!-- STUDENT -->
+
+            <div class="c360-feedback-student-block">
+
+              <div class="c360-feedback-student-avatar">
+
+                {{interview.studentInitials}}
+
+              </div>
+
+              <div>
+
+                <strong>
+                  {{interview.studentName}}
+                </strong>
+
+                <span>
+                  {{interview.studentId}}
+                </span>
+
+              </div>
+
+            </div>
+
+
+            <!-- INTERVIEW DETAILS -->
+
+            <div class="c360-feedback-interview-details">
+
+
+              <div class="c360-feedback-detail-item">
+
+                <span>
+                  INTERVIEW ID
+                </span>
+
+                <strong>
+                  {{interview.interviewId}}
+                </strong>
+
+              </div>
+
+
+              <div class="c360-feedback-detail-item">
+
+                <span>
+                  INTERVIEW TYPE
+                </span>
+
+                <strong>
+                  {{interview.interviewType || '—'}}
+                </strong>
+
+              </div>
+
+
+              <div class="c360-feedback-detail-item">
+
+                <span>
+                  DATE
+                </span>
+
+                <strong>
+                  {{interview.interviewDate || '—'}}
+                </strong>
+
+              </div>
+
+
+              <div class="c360-feedback-detail-item">
+
+                <span>
+                  TIME
+                </span>
+
+                <strong>
+
+                  {{interview.startTime || '—'}}
+
+                  <span ng-if="interview.endTime">
+                    – {{interview.endTime}}
+                  </span>
+
+                </strong>
+
+              </div>
+
+
+            </div>
+
+
+            <!-- STATUS -->
+
+            <div class="c360-feedback-interview-status">
+
+
+              <span class="c360-feedback-status completed">
+
+                <i class="fa fa-check-circle"></i>
+
+                Completed
+
+              </span>
+
+
+              <span
+                class="c360-feedback-feedback-status"
+                ng-class="{
+                  'given': interview.hasFeedback,
+                  'pending': !interview.hasFeedback
+                }"
+              >
+
+                <i
+                  class="fa"
+                  ng-class="{
+                    'fa-check': interview.hasFeedback,
+                    'fa-clock-o': !interview.hasFeedback
+                  }"
+                ></i>
+
+                {{
+                  interview.hasFeedback
+                  ? 'Feedback Given'
+                  : 'Feedback Pending'
+                }}
+
+              </span>
+
+
+            </div>
+
+
+            <!-- ACTION -->
+
+            <div class="c360-feedback-action">
+
+              <button
+                type="button"
+                class="c360-feedback-button"
+                ng-click="c.openInterview(interview)"
+              >
+
+                <i
+                  class="fa"
+                  ng-class="{
+                    'fa-pencil': !interview.hasFeedback,
+                    'fa-eye': interview.hasFeedback
+                  }"
+                ></i>
+
+                {{
+                  interview.hasFeedback
+                  ? 'View / Edit Feedback'
+                  : 'Give Feedback'
+                }}
+
+              </button>
+
+            </div>
+
+          </div>
+
+
+          <!-- EMPTY -->
+
+          <div
+            class="c360-feedback-empty"
+            ng-if="!c.filteredInterviews().length"
+          >
+
+            <div class="c360-feedback-empty-icon">
+              <i class="fa fa-comments-o"></i>
+            </div>
+
+            <h3>
+              No completed interviews found
+            </h3>
+
+            <p>
+              There are currently no completed mock interviews
+              matching your search.
+            </p>
+
+          </div>
+
+
+        </div>
+
+      </div>
+
+
+      <!-- =====================================================
+           FEEDBACK FORM
+           ===================================================== -->
+
+      <section
+        class="c360-feedback-form-panel"
+        ng-if="c.selectedInterview"
+      >
+
+
+        <!-- FORM HEADER -->
+
+        <div class="c360-feedback-form-header">
+
+          <div>
+
+            <span>
+              {{
+                c.selectedInterview.hasFeedback
+                ? 'UPDATE FEEDBACK'
+                : 'TRAINER FEEDBACK'
+              }}
+            </span>
+
+            <h2>
+              {{c.selectedInterview.studentName}}
+            </h2>
+
+            <p>
+
+              {{c.selectedInterview.studentId}}
+
+              ·
+
+              {{c.selectedInterview.interviewId}}
+
+              ·
+
+              {{c.selectedInterview.interviewType || 'Mock Interview'}}
+
+            </p>
+
+          </div>
+
+
+          <button
+            type="button"
+            class="c360-feedback-close-button"
+            ng-click="c.closeInterview()"
+            aria-label="Close feedback form"
+          >
+
+            <i class="fa fa-times"></i>
+
+          </button>
+
+        </div>
+
+
+        <!-- ===================================================
+             INTERVIEW SUMMARY
+             =================================================== -->
+
+        <div class="c360-feedback-selected-summary">
+
+
+          <div>
+
+            <span>
+              STUDENT
+            </span>
+
+            <strong>
+              {{c.selectedInterview.studentName}}
+            </strong>
+
+          </div>
+
+
+          <div>
+
+            <span>
+              STUDENT ID
+            </span>
+
+            <strong>
+              {{c.selectedInterview.studentId}}
+            </strong>
+
+          </div>
+
+
+          <div>
+
+            <span>
+              INTERVIEW
+            </span>
+
+            <strong>
+              {{c.selectedInterview.interviewId}}
+            </strong>
+
+          </div>
+
+
+          <div>
+
+            <span>
+              DATE
+            </span>
+
+            <strong>
+              {{c.selectedInterview.interviewDate || '—'}}
+            </strong>
+
+          </div>
+
+
+          <div>
+
+            <span>
+              TYPE
+            </span>
+
+            <strong>
+              {{c.selectedInterview.interviewType || '—'}}
+            </strong>
+
+          </div>
+
+
+          <div>
+
+            <span>
+              ATTENDANCE
+            </span>
+
+            <strong>
+              {{c.selectedInterview.attendanceStatus || '—'}}
+            </strong>
+
+          </div>
+
+
+        </div>
+
+
+        <!-- ===================================================
+             PERFORMANCE
+             =================================================== -->
+
+        <div class="c360-feedback-form-section">
+
+          <div class="c360-feedback-section-title">
+
+            <span>
+              PERFORMANCE SCORES
+            </span>
+
+            <h3>
+              Rate the student's interview performance
+            </h3>
+
+          </div>
+
+
+          <div class="c360-feedback-score-grid">
+
+
+            <div class="c360-feedback-score-field">
+
+              <label>
+                Technical Score
+              </label>
+
+              <div class="c360-feedback-score-input">
+
+                <input
+                  type="number"
+                  min="0"
+                  max="100"
+                  ng-model="c.form.technical_score"
+                  placeholder="0 - 100"
+                >
+
+                <span>
+                  / 100
+                </span>
+
+              </div>
+
+            </div>
+
+
+            <div class="c360-feedback-score-field">
+
+              <label>
+                Communication Score
+              </label>
+
+              <div class="c360-feedback-score-input">
+
+                <input
+                  type="number"
+                  min="0"
+                  max="100"
+                  ng-model="c.form.communication_score"
+                  placeholder="0 - 100"
+                >
+
+                <span>
+                  / 100
+                </span>
+
+              </div>
+
+            </div>
+
+
+            <div class="c360-feedback-score-field">
+
+              <label>
+                Problem Solving Score
+              </label>
+
+              <div class="c360-feedback-score-input">
+
+                <input
+                  type="number"
+                  min="0"
+                  max="100"
+                  ng-model="c.form.problem_solving_score"
+                  placeholder="0 - 100"
+                >
+
+                <span>
+                  / 100
+                </span>
+
+              </div>
+
+            </div>
+
+
+            <div class="c360-feedback-score-field overall">
+
+              <label>
+                Overall Score
+              </label>
+
+              <div class="c360-feedback-score-input">
+
+                <input
+                  type="number"
+                  min="0"
+                  max="100"
+                  ng-model="c.form.overall_score"
+                  placeholder="0 - 100"
+                >
+
+                <span>
+                  / 100
+                </span>
+
+              </div>
+
+            </div>
+
+
+          </div>
+
+        </div>
+
+
+        <!-- ===================================================
+             QUALITATIVE FEEDBACK
+             =================================================== -->
+
+        <div class="c360-feedback-form-section">
+
+          <div class="c360-feedback-section-title">
+
+            <span>
+              QUALITATIVE FEEDBACK
+            </span>
+
+            <h3>
+              Share detailed observations
+            </h3>
+
+          </div>
+
+
+          <div class="c360-feedback-text-grid">
+
+
+            <div class="c360-feedback-text-field">
+
+              <label>
+                Strengths
+              </label>
+
+              <textarea
+                ng-model="c.form.strengths"
+                rows="5"
+                maxlength="2000"
+                placeholder="Describe the student's strengths demonstrated during the interview..."
+              ></textarea>
+
+              <small>
+                {{(c.form.strengths || '').length}} / 2000
+              </small>
+
+            </div>
+
+
+            <div class="c360-feedback-text-field">
+
+              <label>
+                Improvement Areas
+              </label>
+
+              <textarea
+                ng-model="c.form.improvement_areas"
+                rows="5"
+                maxlength="2000"
+                placeholder="Mention the areas where the student should improve..."
+              ></textarea>
+
+              <small>
+                {{(c.form.improvement_areas || '').length}} / 2000
+              </small>
+
+            </div>
+
+
+          </div>
+
+
+          <div class="c360-feedback-text-field full">
+
+            <label>
+              Recommendation
+            </label>
+
+            <textarea
+              ng-model="c.form.recommendation"
+              rows="5"
+              maxlength="2000"
+              placeholder="Provide your recommendation and next steps for the student..."
+            ></textarea>
+
+            <small>
+              {{(c.form.recommendation || '').length}} / 2000
+            </small>
+
+          </div>
+
+        </div>
+
+
+        <!-- ERROR -->
+
+        <div
+          class="c360-feedback-error"
+          ng-if="c.formError"
+        >
+
+          <i class="fa fa-exclamation-circle"></i>
+
+          <span>
+            {{c.formError}}
+          </span>
+
+        </div>
+
+
+        <!-- SUCCESS -->
+
+        <div
+          class="c360-feedback-success"
+          ng-if="c.formSuccess"
+        >
+
+          <i class="fa fa-check-circle"></i>
+
+          <span>
+            {{c.formSuccess}}
+          </span>
+
+        </div>
+
+
+        <!-- FORM ACTIONS -->
+
+        <div class="c360-feedback-form-actions">
+
+          <button
+            type="button"
+            class="c360-feedback-cancel-button"
+            ng-click="c.closeInterview()"
+          >
+            Cancel
+          </button>
+
+
+          <button
+            type="button"
+            class="c360-feedback-save-button"
+            ng-click="c.saveFeedback()"
+            ng-disabled="c.saving"
+          >
+
+            <i
+              class="fa"
+              ng-class="{
+                'fa-save': !c.saving,
+                'fa-spinner fa-spin': c.saving
+              }"
+            ></i>
+
+            {{
+              c.saving
+              ? 'Saving...'
+              : 'Save Feedback'
+            }}
+
+          </button>
+
+        </div>
+
+
+      </section>
+
+
+      <!-- =====================================================
+           PERFORMANCE TRACKING
+           ===================================================== -->
+
+      <div class="c360-feedback-tracking-panel">
+
+        <div class="c360-feedback-tracking-icon">
+
+          <i class="fa fa-line-chart"></i>
+
+        </div>
+
+
+        <div>
+
+          <span>
+            STUDENT PERFORMANCE TRACKING
+          </span>
+
+          <strong>
+            Feedback is linked to the specific student and interview
+          </strong>
+
+          <p>
+            Once saved, the feedback is stored against the selected
+            student, trainer and mock interview. The student's dashboard
+            can then display the same interview performance and feedback.
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <!-- =====================================================
+           FOOTER
+           ===================================================== -->
+
+      <footer class="c360-feedback-footer">
+
+        <span>
+          Campus360 Trainer Feedback
+        </span>
+
+        <span>
+          Trainer ID: {{c.data.trainer.id}}
+        </span>
+
+      </footer>
+
+
+    </section>
+
+  </main>
+
+</div>
+
+
+<!-- =========================================================
+     LOADING
+     ========================================================= -->
+
+<div
+  class="c360-feedback-loading"
+  ng-if="!c.data.loaded"
+>
+
+  <i class="fa fa-spinner fa-spin"></i>
+
+  Loading Interview Feedback...
+
+
+  <!-- Campus360 AI Assistant Floating Widget -->
+  <sp-widget widget="data.aiWidget"></sp-widget>
+</div>]]></template>
+    </sp_widget>
+</record_update>

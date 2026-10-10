@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?><database>
+    <element attributes="enforce_dot_walk_cross_scope_access=true" db_object_id="08a95a56e4d703107f44d305db800e75" label="Recruiter College Relationship" max_length="40" name="x_snc_campus360_recruiter_college_relationship" type="collection">
+        <element choice="3" default="Active" label="Relationship Status" max_length="20" name="relationship_status" type="choice">
+            <choice>
+                <element inactive_on_update="false" label="Terminated" sequence="3" value="terminated"/>
+                <element inactive_on_update="false" label="Active" sequence="0" value="active"/>
+                <element inactive_on_update="false" label="On Hold" sequence="2" value="on_hold"/>
+                <element inactive_on_update="false" label="Inactive" sequence="1" value="inactive"/>
+            </choice>
+        </element>
+        <element choice="3" default="Hiring" label="Relationship Type" max_length="30" name="relationship_type" type="choice">
+            <choice>
+                <element inactive_on_update="false" label="Mentorship" sequence="5" value="mentorship"/>
+                <element inactive_on_update="false" label="Internship" sequence="1" value="internship"/>
+                <element inactive_on_update="false" label="Sponsorship" sequence="4" value="sponsorship"/>
+                <element inactive_on_update="false" label="Campus Partnership" sequence="3" value="campus_partnership"/>
+                <element inactive_on_update="false" label="Training" sequence="2" value="training"/>
+                <element inactive_on_update="false" label="Hiring" sequence="0" value="hiring"/>
+            </choice>
+        </element>
+        <element label="Company" max_length="32" name="company" reference="x_snc_campus360_company_master" type="reference"/>
+        <element display="true" label="Relationship ID" max_length="20" name="relationship_id" type="string"/>
+        <element label="Notes" max_length="500" name="notes" type="string"/>
+        <element label="College" max_length="100" name="college" type="string"/>
+        <element default="0" label="Drives Conducted" max_length="40" name="drives_conducted" type="integer"/>
+        <element default="0" label="Students Hired" max_length="40" name="students_hired" type="integer"/>
+        <element label="Last Hiring Date" max_length="40" name="last_hiring_date" type="glide_date"/>
+        <index name="index">
+            <element name="company"/>
+        </index>
+    </element>
+</database>

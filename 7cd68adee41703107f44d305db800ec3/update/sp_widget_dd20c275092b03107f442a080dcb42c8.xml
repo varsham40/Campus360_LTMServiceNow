@@ -1,0 +1,6490 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_widget">
+    <sp_widget action="INSERT_OR_UPDATE">
+        <category>custom</category>
+        <client_script><![CDATA[api.controller = function($scope, $window, $timeout) {
+
+  var c = this;
+
+
+  /* ============================================================
+     INITIAL STATE
+     ============================================================ */
+
+  c.sidebarOpen = true;
+
+  c.searchText = '';
+
+  c.selectedStudent = null;
+
+  c.filteredRecords = [];
+
+
+  /* ============================================================
+     SIDEBAR
+     ============================================================ */
+
+  c.toggleSidebar = function() {
+
+    c.sidebarOpen = !c.sidebarOpen;
+
+  };
+
+
+  c.openSidebar = function() {
+
+    c.sidebarOpen = true;
+
+  };
+
+
+  c.closeSidebar = function() {
+
+    c.sidebarOpen = false;
+
+  };
+
+
+  /* ============================================================
+     NAVIGATION
+     ============================================================ */
+
+  c.openPage = function(pageId) {
+
+    if (!pageId) {
+      return;
+    }
+
+    var trainerId = '';
+
+    if (
+      c.data &&
+      c.data.trainer &&
+      c.data.trainer.id
+    ) {
+
+      trainerId =
+        c.data.trainer.id;
+
+    }
+
+
+    var url =
+      '?id=' +
+      encodeURIComponent(pageId);
+
+
+    if (trainerId) {
+
+      url +=
+        '&trainer=' +
+        encodeURIComponent(trainerId);
+
+    }
+
+
+    $window.location.href = url;
+
+  };
+
+
+  /* ============================================================
+     PREPARE RECORDS
+     ============================================================ */
+
+  c.prepareRecords = function() {
+
+    if (
+      !c.data ||
+      !angular.isArray(
+        c.data.records
+      )
+    ) {
+
+      c.filteredRecords = [];
+
+      return;
+
+    }
+
+
+    c.filteredRecords =
+      angular.copy(
+        c.data.records
+      );
+
+  };
+
+
+  /* ============================================================
+     SEARCH
+     ============================================================ */
+
+  c.filterStudents = function() {
+
+    if (
+      !c.data ||
+      !angular.isArray(
+        c.data.records
+      )
+    ) {
+
+      c.filteredRecords = [];
+
+      return;
+
+    }
+
+
+    var search =
+      (
+        c.searchText ||
+        ''
+      )
+      .toString()
+      .toLowerCase()
+      .trim();
+
+
+    if (!search) {
+
+      c.filteredRecords =
+        angular.copy(
+          c.data.records
+        );
+
+      return;
+
+    }
+
+
+    c.filteredRecords =
+      c.data.records.filter(
+        function(record) {
+
+          var studentId =
+            (
+              record.student_id ||
+              ''
+            )
+            .toString()
+            .toLowerCase();
+
+
+          var studentName =
+            (
+              record.name ||
+              ''
+            )
+            .toString()
+            .toLowerCase();
+
+
+          var intelligenceId =
+            (
+              record.intelligence_id ||
+              ''
+            )
+            .toString()
+            .toLowerCase();
+
+
+          return (
+            studentId.indexOf(search) !== -1 ||
+            studentName.indexOf(search) !== -1 ||
+            intelligenceId.indexOf(search) !== -1
+          );
+
+        }
+      );
+
+  };
+
+
+  c.clearSearch = function() {
+
+    c.searchText = '';
+
+    c.filterStudents();
+
+  };
+
+
+  /* ============================================================
+     OPEN STUDENT
+     ============================================================ */
+
+  c.openStudent = function(student) {
+
+    if (!student) {
+      return;
+    }
+
+
+    c.selectedStudent =
+      angular.copy(student);
+
+
+    $timeout(
+      function() {
+
+        var detail =
+          document.querySelector(
+            '.placement-detail-panel'
+          );
+
+
+        if (detail) {
+
+          detail.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
+          });
+
+        }
+
+      },
+      80
+    );
+
+  };
+
+
+  /* ============================================================
+     CLOSE STUDENT
+     ============================================================ */
+
+  c.closeStudent = function() {
+
+    c.selectedStudent = null;
+
+
+    $timeout(
+      function() {
+
+        var search =
+          document.querySelector(
+            '.placement-search-box input'
+          );
+
+
+        if (search) {
+
+          search.focus();
+
+        }
+
+      },
+      80
+    );
+
+  };
+
+
+  /* ============================================================
+     RISK CLASS
+     ============================================================ */
+
+  c.getRiskClass = function(risk) {
+
+    var value =
+      (
+        risk ||
+        ''
+      )
+      .toString()
+      .toLowerCase()
+      .trim();
+
+
+    if (value === 'low') {
+
+      return 'risk-low';
+
+    }
+
+
+    if (value === 'medium') {
+
+      return 'risk-medium';
+
+    }
+
+
+    if (value === 'high') {
+
+      return 'risk-high';
+
+    }
+
+
+    return 'risk-default';
+
+  };
+
+
+  /* ============================================================
+     REFRESH
+     ============================================================ */
+
+  c.refresh = function() {
+
+    c.selectedStudent = null;
+
+    c.searchText = '';
+
+
+    c.server.update().then(
+      function() {
+
+        c.prepareRecords();
+
+      }
+    );
+
+  };
+
+
+  /* ============================================================
+     KEYBOARD
+     ============================================================ */
+
+  c.keyHandler = function(event) {
+
+    if (
+      event &&
+      event.keyCode === 27 &&
+      c.selectedStudent
+    ) {
+
+      c.closeStudent();
+
+    }
+
+  };
+
+
+  document.addEventListener(
+    'keydown',
+    c.keyHandler
+  );
+
+
+  /* ============================================================
+     INITIAL LOAD
+     ============================================================ */
+
+  c.prepareRecords();
+
+
+  /* ============================================================
+     CLEANUP
+     ============================================================ */
+
+  c.$onDestroy = function() {
+
+    document.removeEventListener(
+      'keydown',
+      c.keyHandler
+    );
+
+  };
+
+};]]></client_script>
+        <controller_as>c</controller_as>
+        <css>/* ============================================================&#13;
+   CAMPUS360 TRAINER&#13;
+   PLACEMENT INTELLIGENCE&#13;
+&#13;
+   FULL SCREEN / 100% VIEW&#13;
+   DASHBOARD STYLE SIDEBAR&#13;
+   DASHBOARD STYLE TOPBAR&#13;
+   SERVICE NOW CHROME HIDDEN&#13;
+   ============================================================ */&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   VARIABLES&#13;
+   ============================================================ */&#13;
+&#13;
+.campus360-trainer-app {&#13;
+&#13;
+    --sidebar-width: 280px;&#13;
+&#13;
+    --purple: #6847e8;&#13;
+    --purple-dark: #4d2fc2;&#13;
+    --purple-soft: #eee8ff;&#13;
+    --purple-border: #d5c8f5;&#13;
+&#13;
+    --teal: #159b95;&#13;
+    --teal-dark: #08756f;&#13;
+    --teal-soft: #ddf7f3;&#13;
+    --teal-border: #b8dfda;&#13;
+&#13;
+    --blue: #397cc8;&#13;
+    --blue-dark: #245d9c;&#13;
+    --blue-soft: #e5f1ff;&#13;
+    --blue-border: #c7dff5;&#13;
+&#13;
+    --orange: #df8440;&#13;
+    --orange-dark: #b96122;&#13;
+    --orange-soft: #fff0e2;&#13;
+    --orange-border: #efd0b3;&#13;
+&#13;
+    --pink: #d45d86;&#13;
+    --pink-dark: #b44169;&#13;
+    --pink-soft: #fde9f0;&#13;
+    --pink-border: #edc4d5;&#13;
+&#13;
+    --coral: #dc6c58;&#13;
+    --coral-dark: #b84b39;&#13;
+    --coral-soft: #ffe9e3;&#13;
+&#13;
+    --green: #329268;&#13;
+    --green-dark: #24744f;&#13;
+    --green-soft: #e5f6ed;&#13;
+&#13;
+    --yellow-dark: #946b12;&#13;
+&#13;
+    --navy: #132c47;&#13;
+    --text: #2d4057;&#13;
+    --muted: #7c8da0;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   GLOBAL RESET&#13;
+   ============================================================ */&#13;
+&#13;
+html,&#13;
+body {&#13;
+&#13;
+    margin: 0 !important;&#13;
+&#13;
+    padding: 0 !important;&#13;
+&#13;
+    width: 100% !important;&#13;
+&#13;
+    min-width: 100% !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+body {&#13;
+&#13;
+    overflow-x: hidden !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   REMOVE SERVICE NOW OUTER CHROME&#13;
+   THIS REMOVES THE "SYSTEM ADMINISTRATOR" HEADER&#13;
+   WHEN THIS CAMPUS360 PAGE IS PRESENT&#13;
+   ============================================================ */&#13;
+&#13;
+body:has(.campus360-trainer-app) {&#13;
+&#13;
+    overflow: hidden !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* Common ServiceNow portal/navbar elements */&#13;
+&#13;
+body:has(.campus360-trainer-app) .navbar,&#13;
+body:has(.campus360-trainer-app) .navbar-inverse,&#13;
+body:has(.campus360-trainer-app) .sp-navbar,&#13;
+body:has(.campus360-trainer-app) .sp-nav,&#13;
+body:has(.campus360-trainer-app) #sp-nav-bar,&#13;
+body:has(.campus360-trainer-app) #sp-navbar,&#13;
+body:has(.campus360-trainer-app) #sp-nav-header,&#13;
+body:has(.campus360-trainer-app) .sp-navbar-top {&#13;
+&#13;
+    display: none !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   SERVICENOW OUTER WRAPPERS&#13;
+   ============================================================ */&#13;
+&#13;
+body:has(.campus360-trainer-app) .container,&#13;
+body:has(.campus360-trainer-app) .container-fluid,&#13;
+body:has(.campus360-trainer-app) .row,&#13;
+body:has(.campus360-trainer-app) [class*="col-"],&#13;
+body:has(.campus360-trainer-app) .well,&#13;
+body:has(.campus360-trainer-app) .panel,&#13;
+body:has(.campus360-trainer-app) .panel-body {&#13;
+&#13;
+    width: 100% !important;&#13;
+&#13;
+    max-width: none !important;&#13;
+&#13;
+    min-width: 0 !important;&#13;
+&#13;
+    margin: 0 !important;&#13;
+&#13;
+    padding-left: 0 !important;&#13;
+&#13;
+    padding-right: 0 !important;&#13;
+&#13;
+    border: 0 !important;&#13;
+&#13;
+    box-shadow: none !important;&#13;
+&#13;
+    background: transparent !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   APPLICATION&#13;
+   ============================================================ */&#13;
+&#13;
+.campus360-trainer-app {&#13;
+&#13;
+    position: fixed !important;&#13;
+&#13;
+    left: 0 !important;&#13;
+&#13;
+    top: 0 !important;&#13;
+&#13;
+    right: 0 !important;&#13;
+&#13;
+    bottom: 0 !important;&#13;
+&#13;
+    width: 100vw !important;&#13;
+&#13;
+    height: 100vh !important;&#13;
+&#13;
+    min-width: 100vw !important;&#13;
+&#13;
+    max-width: 100vw !important;&#13;
+&#13;
+    min-height: 100vh !important;&#13;
+&#13;
+    max-height: 100vh !important;&#13;
+&#13;
+    margin: 0 !important;&#13;
+&#13;
+    padding: 0 !important;&#13;
+&#13;
+    display: block !important;&#13;
+&#13;
+    z-index: 999999 !important;&#13;
+&#13;
+    overflow: hidden !important;&#13;
+&#13;
+    background:&#13;
+&#13;
+        linear-gradient(&#13;
+            135deg,&#13;
+            #f4f7fc 0%,&#13;
+            #f8f9fc 55%,&#13;
+            #f6f8fc 100%&#13;
+        );&#13;
+&#13;
+    color: var(--text);&#13;
+&#13;
+    font-family:&#13;
+        Inter,&#13;
+        "Segoe UI",&#13;
+        Arial,&#13;
+        Helvetica,&#13;
+        sans-serif;&#13;
+&#13;
+    -webkit-font-smoothing: antialiased;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.campus360-trainer-app,&#13;
+.campus360-trainer-app *,&#13;
+.campus360-trainer-app *::before,&#13;
+.campus360-trainer-app *::after {&#13;
+&#13;
+    box-sizing: border-box;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   SIDEBAR&#13;
+   ============================================================ */&#13;
+&#13;
+.campus360-trainer-sidebar {&#13;
+&#13;
+    position: fixed !important;&#13;
+&#13;
+    left: 0 !important;&#13;
+&#13;
+    top: 0 !important;&#13;
+&#13;
+    bottom: 0 !important;&#13;
+&#13;
+    width: var(--sidebar-width) !important;&#13;
+&#13;
+    height: 100vh !important;&#13;
+&#13;
+    min-height: 100vh !important;&#13;
+&#13;
+    max-height: 100vh !important;&#13;
+&#13;
+    z-index: 1000000 !important;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    flex-direction: column;&#13;
+&#13;
+    background:&#13;
+&#13;
+        linear-gradient(&#13;
+            180deg,&#13;
+            #ffffff 0%,&#13;
+            #ffffff 70%,&#13;
+            #fbf9ff 100%&#13;
+        );&#13;
+&#13;
+    border-right: 1px solid #dfe5ec;&#13;
+&#13;
+    box-shadow:&#13;
+&#13;
+        5px&#13;
+        0&#13;
+        20px&#13;
+        rgba(30,43,61,.045);&#13;
+&#13;
+    overflow: hidden;&#13;
+&#13;
+    transition:&#13;
+&#13;
+        width .24s ease,&#13;
+        transform .24s ease;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* COLLAPSED */&#13;
+&#13;
+.campus360-trainer-app.sidebar-collapsed&#13;
+.campus360-trainer-sidebar {&#13;
+&#13;
+    width: 0 !important;&#13;
+&#13;
+    min-width: 0 !important;&#13;
+&#13;
+    border-right: 0 !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   BRAND&#13;
+   ============================================================ */&#13;
+&#13;
+.trainer-brand {&#13;
+&#13;
+    height: 96px;&#13;
+&#13;
+    min-height: 96px;&#13;
+&#13;
+    flex-shrink: 0;&#13;
+&#13;
+    padding:&#13;
+        0&#13;
+        18px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 13px;&#13;
+&#13;
+    background:&#13;
+&#13;
+        linear-gradient(&#13;
+            135deg,&#13;
+            #ffffff,&#13;
+            #faf7ff&#13;
+        );&#13;
+&#13;
+    border-bottom:&#13;
+        1px&#13;
+        solid&#13;
+        #edf0f5;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.trainer-brand-mark {&#13;
+&#13;
+    width: 50px;&#13;
+&#13;
+    height: 50px;&#13;
+&#13;
+    min-width: 50px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    justify-content: center;&#13;
+&#13;
+    border-radius: 14px;&#13;
+&#13;
+    background:&#13;
+&#13;
+        linear-gradient(&#13;
+            135deg,&#13;
+            #693df4,&#13;
+            #8054ff&#13;
+        );&#13;
+&#13;
+    color: #ffffff;&#13;
+&#13;
+    font-size: 23px;&#13;
+&#13;
+    box-shadow:&#13;
+&#13;
+        0&#13;
+        8px&#13;
+        19px&#13;
+        rgba(104,61,242,.22);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.trainer-brand-text {&#13;
+&#13;
+    min-width: 0;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    flex-direction: column;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.trainer-brand-text strong {&#13;
+&#13;
+    display: block;&#13;
+&#13;
+    color: #182c3b;&#13;
+&#13;
+    font-size: 20px;&#13;
+&#13;
+    line-height: 1;&#13;
+&#13;
+    font-weight: 900;&#13;
+&#13;
+    letter-spacing: -.3px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.trainer-brand-text span {&#13;
+&#13;
+    display: block;&#13;
+&#13;
+    margin-top: 5px;&#13;
+&#13;
+    color: #66778c;&#13;
+&#13;
+    font-size: 9px;&#13;
+&#13;
+    line-height: 1;&#13;
+&#13;
+    font-weight: 900;&#13;
+&#13;
+    letter-spacing: 1.35px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   PROFILE&#13;
+   ============================================================ */&#13;
+&#13;
+.trainer-profile-mini {&#13;
+&#13;
+    margin:&#13;
+        18px&#13;
+        10px&#13;
+        14px;&#13;
+&#13;
+    min-height: 70px;&#13;
+&#13;
+    padding: 11px;&#13;
+&#13;
+    flex-shrink: 0;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 10px;&#13;
+&#13;
+    background:&#13;
+&#13;
+        linear-gradient(&#13;
+            135deg,&#13;
+            #faf7ff,&#13;
+            #f1ebff&#13;
+        );&#13;
+&#13;
+    border:&#13;
+        1px&#13;
+        solid&#13;
+        #ded3f7;&#13;
+&#13;
+    border-radius: 13px;&#13;
+&#13;
+    text-decoration: none !important;&#13;
+&#13;
+    transition: .18s ease;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.trainer-profile-mini:hover {&#13;
+&#13;
+    background:&#13;
+&#13;
+        linear-gradient(&#13;
+            135deg,&#13;
+            #f3edff,&#13;
+            #eae2ff&#13;
+        );&#13;
+&#13;
+    border-color:&#13;
+        #cfc1ee;&#13;
+&#13;
+    transform:&#13;
+        translateY(-1px);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.trainer-avatar {&#13;
+&#13;
+    width: 45px;&#13;
+&#13;
+    height: 45px;&#13;
+&#13;
+    min-width: 45px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    justify-content: center;&#13;
+&#13;
+    border-radius: 12px;&#13;
+&#13;
+    background:&#13;
+&#13;
+        linear-gradient(&#13;
+            135deg,&#13;
+            #693df4,&#13;
+            #8054ff&#13;
+        );&#13;
+&#13;
+    color: #ffffff;&#13;
+&#13;
+    font-size: 12px;&#13;
+&#13;
+    font-weight: 950;&#13;
+&#13;
+    box-shadow:&#13;
+&#13;
+        0&#13;
+        6px&#13;
+        13px&#13;
+        rgba(104,61,242,.17);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.trainer-profile-info {&#13;
+&#13;
+    min-width: 0;&#13;
+&#13;
+    flex: 1;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.trainer-profile-info strong {&#13;
+&#13;
+    display: block;&#13;
+&#13;
+    overflow: hidden;&#13;
+&#13;
+    color: #263b4f;&#13;
+&#13;
+    font-size: 13px;&#13;
+&#13;
+    line-height: 1.15;&#13;
+&#13;
+    font-weight: 900;&#13;
+&#13;
+    white-space: nowrap;&#13;
+&#13;
+    text-overflow: ellipsis;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.trainer-profile-info span {&#13;
+&#13;
+    display: block;&#13;
+&#13;
+    margin-top: 4px;&#13;
+&#13;
+    color: #758598;&#13;
+&#13;
+    font-size: 9px;&#13;
+&#13;
+    font-weight: 750;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.trainer-profile-arrow {&#13;
+&#13;
+    color: #8a98a7;&#13;
+&#13;
+    font-size: 19px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   NAV&#13;
+   ============================================================ */&#13;
+&#13;
+.trainer-nav {&#13;
+&#13;
+    flex: 1;&#13;
+&#13;
+    min-height: 0;&#13;
+&#13;
+    padding:&#13;
+        0&#13;
+        7px&#13;
+        20px;&#13;
+&#13;
+    overflow-x: hidden;&#13;
+&#13;
+    overflow-y: auto;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.trainer-nav::-webkit-scrollbar {&#13;
+&#13;
+    width: 5px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.trainer-nav::-webkit-scrollbar-track {&#13;
+&#13;
+    background: transparent;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.trainer-nav::-webkit-scrollbar-thumb {&#13;
+&#13;
+    background: #ddd5f1;&#13;
+&#13;
+    border-radius: 10px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.trainer-nav-label {&#13;
+&#13;
+    margin:&#13;
+        18px&#13;
+        7px&#13;
+        8px;&#13;
+&#13;
+    color: #7a899a;&#13;
+&#13;
+    font-size: 9px;&#13;
+&#13;
+    line-height: 1;&#13;
+&#13;
+    font-weight: 950;&#13;
+&#13;
+    letter-spacing: 1.3px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.trainer-nav-item {&#13;
+&#13;
+    position: relative;&#13;
+&#13;
+    width: 100%;&#13;
+&#13;
+    min-height: 48px;&#13;
+&#13;
+    margin:&#13;
+        2px&#13;
+        0;&#13;
+&#13;
+    padding:&#13;
+        0&#13;
+        11px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 11px;&#13;
+&#13;
+    border-radius: 10px;&#13;
+&#13;
+    color: #40556b;&#13;
+&#13;
+    text-decoration: none !important;&#13;
+&#13;
+    font-size: 13px;&#13;
+&#13;
+    line-height: 1.2;&#13;
+&#13;
+    font-weight: 850;&#13;
+&#13;
+    transition:&#13;
+        background .18s ease,&#13;
+        color .18s ease,&#13;
+        transform .18s ease;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.trainer-nav-item:hover {&#13;
+&#13;
+    background:&#13;
+&#13;
+        linear-gradient(&#13;
+            90deg,&#13;
+            #f2ecff,&#13;
+            #faf8ff&#13;
+        );&#13;
+&#13;
+    color: #6541d8;&#13;
+&#13;
+    transform:&#13;
+        translateX(1px);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.trainer-nav-item.active {&#13;
+&#13;
+    color: #6540d7;&#13;
+&#13;
+    background:&#13;
+&#13;
+        linear-gradient(&#13;
+            90deg,&#13;
+            #ebe4ff,&#13;
+            #f5f1ff&#13;
+        );&#13;
+&#13;
+    border-left:&#13;
+        4px&#13;
+        solid&#13;
+        #1976d2;&#13;
+&#13;
+    padding-left: 7px;&#13;
+&#13;
+    box-shadow:&#13;
+&#13;
+        inset&#13;
+        0&#13;
+        0&#13;
+        0&#13;
+        1px&#13;
+        #ded4f5;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.trainer-nav-item.active::before {&#13;
+&#13;
+    content: "";&#13;
+&#13;
+    position: absolute;&#13;
+&#13;
+    left: 0;&#13;
+&#13;
+    top: 8px;&#13;
+&#13;
+    bottom: 8px;&#13;
+&#13;
+    width: 4px;&#13;
+&#13;
+    border-radius:&#13;
+        0&#13;
+        4px&#13;
+        4px&#13;
+        0;&#13;
+&#13;
+    background:&#13;
+&#13;
+        linear-gradient(&#13;
+            180deg,&#13;
+            #7e5af0,&#13;
+            #5d3ad0&#13;
+        );&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.trainer-nav-icon {&#13;
+&#13;
+    width: 28px;&#13;
+&#13;
+    min-width: 28px;&#13;
+&#13;
+    height: 28px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    justify-content: center;&#13;
+&#13;
+    color: #63758b;&#13;
+&#13;
+    font-size: 17px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.trainer-nav-item.active&#13;
+.trainer-nav-icon {&#13;
+&#13;
+    color: #6541da;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.trainer-nav-text {&#13;
+&#13;
+    flex: 1;&#13;
+&#13;
+    min-width: 0;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.trainer-nav-count {&#13;
+&#13;
+    margin-left: auto;&#13;
+&#13;
+    min-width: 23px;&#13;
+&#13;
+    height: 23px;&#13;
+&#13;
+    display: inline-flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    justify-content: center;&#13;
+&#13;
+    border-radius: 20px;&#13;
+&#13;
+    background: #e8e0ff;&#13;
+&#13;
+    color: #6340d1;&#13;
+&#13;
+    font-size: 9px;&#13;
+&#13;
+    font-weight: 900;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   SIDEBAR BACKDROP&#13;
+   ============================================================ */&#13;
+&#13;
+.trainer-sidebar-backdrop {&#13;
+&#13;
+    display: none;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   MAIN&#13;
+   ============================================================ */&#13;
+&#13;
+.campus360-trainer-main {&#13;
+&#13;
+    position: absolute;&#13;
+&#13;
+    left: var(--sidebar-width);&#13;
+&#13;
+    top: 0;&#13;
+&#13;
+    right: 0;&#13;
+&#13;
+    bottom: 0;&#13;
+&#13;
+    width:&#13;
+        calc(100vw - var(--sidebar-width)) !important;&#13;
+&#13;
+    max-width:&#13;
+        calc(100vw - var(--sidebar-width)) !important;&#13;
+&#13;
+    min-width: 0 !important;&#13;
+&#13;
+    height: 100vh;&#13;
+&#13;
+    min-height: 100vh;&#13;
+&#13;
+    margin: 0 !important;&#13;
+&#13;
+    padding: 0 !important;&#13;
+&#13;
+    background:&#13;
+&#13;
+        linear-gradient(&#13;
+            180deg,&#13;
+            #f3f7fc 0%,&#13;
+            #f8f9fc 55%,&#13;
+            #f5faf9 100%&#13;
+        );&#13;
+&#13;
+    overflow-x: hidden;&#13;
+&#13;
+    overflow-y: auto;&#13;
+&#13;
+    transition:&#13;
+&#13;
+        left .24s ease,&#13;
+        width .24s ease,&#13;
+        max-width .24s ease;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.campus360-trainer-app.sidebar-collapsed&#13;
+.campus360-trainer-main {&#13;
+&#13;
+    left: 0;&#13;
+&#13;
+    width: 100vw !important;&#13;
+&#13;
+    max-width: 100vw !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   TOPBAR&#13;
+   ============================================================ */&#13;
+&#13;
+.trainer-topbar {&#13;
+&#13;
+    position: sticky;&#13;
+&#13;
+    top: 0;&#13;
+&#13;
+    z-index: 900;&#13;
+&#13;
+    width: 100%;&#13;
+&#13;
+    height: 72px;&#13;
+&#13;
+    min-height: 72px;&#13;
+&#13;
+    padding:&#13;
+        0&#13;
+        20px&#13;
+        0&#13;
+        24px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    justify-content: space-between;&#13;
+&#13;
+    gap: 18px;&#13;
+&#13;
+    background:&#13;
+&#13;
+        linear-gradient(&#13;
+            90deg,&#13;
+            #ffffff 0%,&#13;
+            #fbfdff 60%,&#13;
+            #f7fcfb 100%&#13;
+        );&#13;
+&#13;
+    border-bottom:&#13;
+        1px&#13;
+        solid&#13;
+        #dce4ec;&#13;
+&#13;
+    box-shadow:&#13;
+&#13;
+        0&#13;
+        2px&#13;
+        10px&#13;
+        rgba(26,43,62,.035);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.trainer-topbar-left {&#13;
+&#13;
+    min-width: 0;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 12px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.trainer-hamburger {&#13;
+&#13;
+    width: 43px;&#13;
+&#13;
+    height: 43px;&#13;
+&#13;
+    min-width: 43px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    justify-content: center;&#13;
+&#13;
+    border:&#13;
+        1px&#13;
+        solid&#13;
+        #d5dfe8;&#13;
+&#13;
+    border-radius: 10px;&#13;
+&#13;
+    background: #ffffff;&#13;
+&#13;
+    color: #526a81;&#13;
+&#13;
+    font-size: 18px;&#13;
+&#13;
+    cursor: pointer;&#13;
+&#13;
+    transition: .18s ease;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.trainer-hamburger:hover {&#13;
+&#13;
+    color: #6943dd;&#13;
+&#13;
+    background: #f5f1ff;&#13;
+&#13;
+    border-color: #cec0f1;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.trainer-page-heading {&#13;
+&#13;
+    min-width: 0;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    flex-direction: column;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.trainer-topbar-eyebrow {&#13;
+&#13;
+    display: block;&#13;
+&#13;
+    color: #7043e4;&#13;
+&#13;
+    font-size: 9px;&#13;
+&#13;
+    line-height: 1;&#13;
+&#13;
+    font-weight: 950;&#13;
+&#13;
+    letter-spacing: 1.7px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.trainer-topbar-title {&#13;
+&#13;
+    display: block;&#13;
+&#13;
+    margin-top: 4px;&#13;
+&#13;
+    color: #19324b;&#13;
+&#13;
+    font-size: 16px;&#13;
+&#13;
+    line-height: 1.1;&#13;
+&#13;
+    font-weight: 900;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.trainer-topbar-actions {&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 9px;&#13;
+&#13;
+    flex-shrink: 0;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.trainer-top-icon {&#13;
+&#13;
+    position: relative;&#13;
+&#13;
+    width: 42px;&#13;
+&#13;
+    height: 42px;&#13;
+&#13;
+    min-width: 42px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    justify-content: center;&#13;
+&#13;
+    border:&#13;
+        1px&#13;
+        solid&#13;
+        #d6e0e8;&#13;
+&#13;
+    border-radius: 10px;&#13;
+&#13;
+    background: #ffffff;&#13;
+&#13;
+    color: #586f84;&#13;
+&#13;
+    font-size: 16px;&#13;
+&#13;
+    cursor: pointer;&#13;
+&#13;
+    transition: .18s ease;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.trainer-top-icon:hover {&#13;
+&#13;
+    color: #6843dc;&#13;
+&#13;
+    background: #f5f1ff;&#13;
+&#13;
+    border-color: #cfc1f3;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.trainer-notification-button {&#13;
+&#13;
+    overflow: visible;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.trainer-notification-button&#13;
+.fa-bell {&#13;
+&#13;
+    color: #efa100;&#13;
+&#13;
+    font-size: 17px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.trainer-notification-dot {&#13;
+&#13;
+    position: absolute;&#13;
+&#13;
+    top: 7px;&#13;
+&#13;
+    right: 7px;&#13;
+&#13;
+    width: 8px;&#13;
+&#13;
+    height: 8px;&#13;
+&#13;
+    border-radius: 50%;&#13;
+&#13;
+    background: #ef4444;&#13;
+&#13;
+    border:&#13;
+        2px&#13;
+        solid&#13;
+        #ffffff;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.trainer-top-profile {&#13;
+&#13;
+    min-height: 43px;&#13;
+&#13;
+    padding-left: 11px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 8px;&#13;
+&#13;
+    border-left:&#13;
+        1px&#13;
+        solid&#13;
+        #e2e7ed;&#13;
+&#13;
+    text-decoration: none !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.trainer-top-avatar {&#13;
+&#13;
+    width: 42px;&#13;
+&#13;
+    height: 42px;&#13;
+&#13;
+    min-width: 42px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    justify-content: center;&#13;
+&#13;
+    border-radius: 10px;&#13;
+&#13;
+    background:&#13;
+&#13;
+        linear-gradient(&#13;
+            135deg,&#13;
+            #6840ee,&#13;
+            #8054ff&#13;
+        );&#13;
+&#13;
+    color: #ffffff;&#13;
+&#13;
+    font-size: 10px;&#13;
+&#13;
+    font-weight: 950;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.trainer-top-profile-text {&#13;
+&#13;
+    min-width: 78px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    flex-direction: column;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.trainer-top-profile-text strong {&#13;
+&#13;
+    display: block;&#13;
+&#13;
+    color: #23394f;&#13;
+&#13;
+    font-size: 11px;&#13;
+&#13;
+    line-height: 1.1;&#13;
+&#13;
+    font-weight: 900;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.trainer-top-profile-text span {&#13;
+&#13;
+    display: block;&#13;
+&#13;
+    margin-top: 3px;&#13;
+&#13;
+    color: #7a899a;&#13;
+&#13;
+    font-size: 8px;&#13;
+&#13;
+    font-weight: 750;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   PAGE CONTENT&#13;
+   ============================================================ */&#13;
+&#13;
+.placement-intelligence-page {&#13;
+&#13;
+    width: 100% !important;&#13;
+&#13;
+    max-width: none !important;&#13;
+&#13;
+    min-width: 0 !important;&#13;
+&#13;
+    margin: 0 !important;&#13;
+&#13;
+    padding:&#13;
+        23px&#13;
+        27px&#13;
+        42px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   PAGE HEADER&#13;
+   ============================================================ */&#13;
+&#13;
+.placement-page-header {&#13;
+&#13;
+    position: relative;&#13;
+&#13;
+    width: 100%;&#13;
+&#13;
+    min-height: 145px;&#13;
+&#13;
+    padding:&#13;
+        24px&#13;
+        27px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    justify-content: space-between;&#13;
+&#13;
+    gap: 20px;&#13;
+&#13;
+    overflow: hidden;&#13;
+&#13;
+    border:&#13;
+        1px&#13;
+        solid&#13;
+        #d4c8ee;&#13;
+&#13;
+    border-radius: 15px;&#13;
+&#13;
+    background:&#13;
+&#13;
+        linear-gradient(&#13;
+            110deg,&#13;
+            #f0e9ff 0%,&#13;
+            #ffffff 52%,&#13;
+            #eefaf8 100%&#13;
+        );&#13;
+&#13;
+    box-shadow:&#13;
+&#13;
+        0&#13;
+        7px&#13;
+        20px&#13;
+        rgba(60,50,100,.065);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.placement-page-header::before {&#13;
+&#13;
+    content: "";&#13;
+&#13;
+    position: absolute;&#13;
+&#13;
+    left: 0;&#13;
+&#13;
+    top: 0;&#13;
+&#13;
+    bottom: 0;&#13;
+&#13;
+    width: 5px;&#13;
+&#13;
+    background:&#13;
+&#13;
+        linear-gradient(&#13;
+            180deg,&#13;
+            #6945e6,&#13;
+            #48aaa1&#13;
+        );&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.placement-page-header-copy {&#13;
+&#13;
+    min-width: 0;&#13;
+&#13;
+    flex: 1;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.placement-eyebrow {&#13;
+&#13;
+    display: block;&#13;
+&#13;
+    color: #6842d6;&#13;
+&#13;
+    font-size: 8px;&#13;
+&#13;
+    line-height: 1;&#13;
+&#13;
+    font-weight: 950;&#13;
+&#13;
+    letter-spacing: 1.6px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.placement-page-header h1 {&#13;
+&#13;
+    margin:&#13;
+        7px&#13;
+        0&#13;
+        6px;&#13;
+&#13;
+    color: #122d48;&#13;
+&#13;
+    font-size: 32px;&#13;
+&#13;
+    line-height: 1.08;&#13;
+&#13;
+    font-weight: 950;&#13;
+&#13;
+    letter-spacing: -.5px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.placement-page-header p {&#13;
+&#13;
+    max-width: 1050px;&#13;
+&#13;
+    margin: 0;&#13;
+&#13;
+    color: #62758a;&#13;
+&#13;
+    font-size: 12px;&#13;
+&#13;
+    line-height: 1.6;&#13;
+&#13;
+    font-weight: 600;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.placement-readonly {&#13;
+&#13;
+    flex-shrink: 0;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 8px;&#13;
+&#13;
+    padding:&#13;
+        10px&#13;
+        14px;&#13;
+&#13;
+    border:&#13;
+        1px&#13;
+        solid&#13;
+        #b8ddd8;&#13;
+&#13;
+    border-radius: 9px;&#13;
+&#13;
+    background:&#13;
+        linear-gradient(&#13;
+            135deg,&#13;
+            #e2f8f4,&#13;
+            #f2fcfb&#13;
+        );&#13;
+&#13;
+    color: #26776e;&#13;
+&#13;
+    font-size: 9px;&#13;
+&#13;
+    font-weight: 900;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   SEARCH&#13;
+   ============================================================ */&#13;
+&#13;
+.placement-search-panel {&#13;
+&#13;
+    width: 100%;&#13;
+&#13;
+    margin-top: 16px;&#13;
+&#13;
+    padding:&#13;
+        20px&#13;
+        23px;&#13;
+&#13;
+    border:&#13;
+        1px&#13;
+        solid&#13;
+        #d2dfeb;&#13;
+&#13;
+    border-radius: 14px;&#13;
+&#13;
+    background:&#13;
+&#13;
+        linear-gradient(&#13;
+            135deg,&#13;
+            #ffffff,&#13;
+            #f7fbff&#13;
+        );&#13;
+&#13;
+    box-shadow:&#13;
+&#13;
+        0&#13;
+        6px&#13;
+        18px&#13;
+        rgba(37,52,73,.045);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.placement-section-heading {&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    justify-content: space-between;&#13;
+&#13;
+    gap: 16px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.placement-section-heading &gt; div:first-child {&#13;
+&#13;
+    min-width: 0;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.placement-section-heading &gt; div:first-child span {&#13;
+&#13;
+    display: block;&#13;
+&#13;
+    color: #6a49d5;&#13;
+&#13;
+    font-size: 8px;&#13;
+&#13;
+    font-weight: 950;&#13;
+&#13;
+    letter-spacing: 1.5px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.placement-search-panel&#13;
+.placement-section-heading &gt; div:first-child span {&#13;
+&#13;
+    color: #3571b0;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.placement-section-heading h2 {&#13;
+&#13;
+    margin:&#13;
+        5px&#13;
+        0&#13;
+        3px;&#13;
+&#13;
+    color: #172e48;&#13;
+&#13;
+    font-size: 20px;&#13;
+&#13;
+    line-height: 1.15;&#13;
+&#13;
+    font-weight: 950;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.placement-section-heading p {&#13;
+&#13;
+    margin: 0;&#13;
+&#13;
+    color: #718196;&#13;
+&#13;
+    font-size: 10px;&#13;
+&#13;
+    line-height: 1.45;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.placement-record-count {&#13;
+&#13;
+    flex-shrink: 0;&#13;
+&#13;
+    padding:&#13;
+        7px&#13;
+        11px;&#13;
+&#13;
+    border:&#13;
+        1px&#13;
+        solid&#13;
+        #b9e0dc;&#13;
+&#13;
+    border-radius: 18px;&#13;
+&#13;
+    background:&#13;
+        linear-gradient(&#13;
+            135deg,&#13;
+            #e3f7f4,&#13;
+            #f0fbfa&#13;
+        );&#13;
+&#13;
+    color: #24776f;&#13;
+&#13;
+    font-size: 8px;&#13;
+&#13;
+    line-height: 1;&#13;
+&#13;
+    font-weight: 900;&#13;
+&#13;
+    white-space: nowrap;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   SEARCH INPUT&#13;
+   ============================================================ */&#13;
+&#13;
+.placement-search-box {&#13;
+&#13;
+    position: relative;&#13;
+&#13;
+    width: 100%;&#13;
+&#13;
+    margin-top: 15px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.placement-search-box &gt; i {&#13;
+&#13;
+    position: absolute;&#13;
+&#13;
+    left: 14px;&#13;
+&#13;
+    top: 50%;&#13;
+&#13;
+    transform: translateY(-50%);&#13;
+&#13;
+    color: #397cc8;&#13;
+&#13;
+    font-size: 14px;&#13;
+&#13;
+    z-index: 2;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.placement-search-box input {&#13;
+&#13;
+    width: 100%;&#13;
+&#13;
+    height: 46px;&#13;
+&#13;
+    padding:&#13;
+        0&#13;
+        40px;&#13;
+&#13;
+    border:&#13;
+        1px&#13;
+        solid&#13;
+        #c4d6e8;&#13;
+&#13;
+    border-radius: 9px;&#13;
+&#13;
+    background:&#13;
+&#13;
+        linear-gradient(&#13;
+            90deg,&#13;
+            #f6faff,&#13;
+            #ffffff&#13;
+        );&#13;
+&#13;
+    color: #263d54;&#13;
+&#13;
+    font-size: 11px;&#13;
+&#13;
+    outline: none;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.placement-search-box input:focus {&#13;
+&#13;
+    background: #ffffff;&#13;
+&#13;
+    border-color: #82aeda;&#13;
+&#13;
+    box-shadow:&#13;
+        0&#13;
+        0&#13;
+        0&#13;
+        3px&#13;
+        rgba(57,124,200,.09);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.placement-search-box button {&#13;
+&#13;
+    position: absolute;&#13;
+&#13;
+    top: 50%;&#13;
+&#13;
+    right: 9px;&#13;
+&#13;
+    transform:&#13;
+        translateY(-50%);&#13;
+&#13;
+    width: 27px;&#13;
+&#13;
+    height: 27px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    justify-content: center;&#13;
+&#13;
+    border: 0;&#13;
+&#13;
+    border-radius: 7px;&#13;
+&#13;
+    background: #edf2f7;&#13;
+&#13;
+    color: #65778a;&#13;
+&#13;
+    cursor: pointer;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.placement-search-box button:hover {&#13;
+&#13;
+    background: #e8e1ff;&#13;
+&#13;
+    color: #6440d2;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   STUDENT PANEL&#13;
+   ============================================================ */&#13;
+&#13;
+.placement-student-panel {&#13;
+&#13;
+    width: 100%;&#13;
+&#13;
+    margin-top: 16px;&#13;
+&#13;
+    overflow: hidden;&#13;
+&#13;
+    border:&#13;
+        1px&#13;
+        solid&#13;
+        #d8e2e9;&#13;
+&#13;
+    border-radius: 14px;&#13;
+&#13;
+    background: #ffffff;&#13;
+&#13;
+    box-shadow:&#13;
+&#13;
+        0&#13;
+        6px&#13;
+        18px&#13;
+        rgba(35,52,72,.045);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.placement-student-panel&#13;
+.placement-section-heading {&#13;
+&#13;
+    min-height: 78px;&#13;
+&#13;
+    padding:&#13;
+        17px&#13;
+        23px;&#13;
+&#13;
+    border-left:&#13;
+        5px&#13;
+        solid&#13;
+        #159b95;&#13;
+&#13;
+    border-bottom:&#13;
+        1px&#13;
+        solid&#13;
+        #e6edf1;&#13;
+&#13;
+    background:&#13;
+&#13;
+        linear-gradient(&#13;
+            90deg,&#13;
+            #effaf8,&#13;
+            #ffffff 55%,&#13;
+            #f9f6ff&#13;
+        );&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   STUDENT ROWS&#13;
+   ============================================================ */&#13;
+&#13;
+.placement-student-row {&#13;
+&#13;
+    position: relative;&#13;
+&#13;
+    width: 100%;&#13;
+&#13;
+    min-height: 81px;&#13;
+&#13;
+    padding:&#13;
+        12px&#13;
+        22px;&#13;
+&#13;
+    display: grid;&#13;
+&#13;
+    grid-template-columns:&#13;
+        minmax(280px,2.4fr)&#13;
+        minmax(125px,.8fr)&#13;
+        minmax(135px,.85fr)&#13;
+        25px;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 18px;&#13;
+&#13;
+    border-bottom:&#13;
+        1px&#13;
+        solid&#13;
+        #e8edf2;&#13;
+&#13;
+    cursor: pointer;&#13;
+&#13;
+    transition:&#13;
+&#13;
+        background .16s ease,&#13;
+        transform .16s ease,&#13;
+        box-shadow .16s ease;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.placement-student-row:last-child {&#13;
+&#13;
+    border-bottom: 0;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.placement-student-row.student-color-0 {&#13;
+&#13;
+    border-left:&#13;
+        4px&#13;
+        solid&#13;
+        #6847e8;&#13;
+&#13;
+    background:&#13;
+&#13;
+        linear-gradient(&#13;
+            90deg,&#13;
+            #f7f3ff 0%,&#13;
+            #ffffff 38%&#13;
+        );&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.placement-student-row.student-color-1 {&#13;
+&#13;
+    border-left:&#13;
+        4px&#13;
+        solid&#13;
+        #159b95;&#13;
+&#13;
+    background:&#13;
+&#13;
+        linear-gradient(&#13;
+            90deg,&#13;
+            #f0faf8 0%,&#13;
+            #ffffff 38%&#13;
+        );&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.placement-student-row.student-color-2 {&#13;
+&#13;
+    border-left:&#13;
+        4px&#13;
+        solid&#13;
+        #397cc8;&#13;
+&#13;
+    background:&#13;
+&#13;
+        linear-gradient(&#13;
+            90deg,&#13;
+            #f1f7ff 0%,&#13;
+            #ffffff 38%&#13;
+        );&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.placement-student-row.student-color-3 {&#13;
+&#13;
+    border-left:&#13;
+        4px&#13;
+        solid&#13;
+        #df8440;&#13;
+&#13;
+    background:&#13;
+&#13;
+        linear-gradient(&#13;
+            90deg,&#13;
+            #fff6ed 0%,&#13;
+            #ffffff 38%&#13;
+        );&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.placement-student-row.student-color-4 {&#13;
+&#13;
+    border-left:&#13;
+        4px&#13;
+        solid&#13;
+        #d45d86;&#13;
+&#13;
+    background:&#13;
+&#13;
+        linear-gradient(&#13;
+            90deg,&#13;
+            #fff2f6 0%,&#13;
+            #ffffff 38%&#13;
+        );&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.placement-student-row:hover {&#13;
+&#13;
+    transform:&#13;
+        translateX(2px);&#13;
+&#13;
+    background:&#13;
+&#13;
+        linear-gradient(&#13;
+            90deg,&#13;
+            #eee8ff,&#13;
+            #f6fbff 62%,&#13;
+            #ffffff&#13;
+        ) !important;&#13;
+&#13;
+    box-shadow:&#13;
+&#13;
+        inset&#13;
+        0&#13;
+        1px&#13;
+        0&#13;
+        rgba(104,71,232,.06);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   STUDENT&#13;
+   ============================================================ */&#13;
+&#13;
+.placement-student-person {&#13;
+&#13;
+    min-width: 0;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.placement-student-avatar {&#13;
+&#13;
+    width: 44px;&#13;
+&#13;
+    height: 44px;&#13;
+&#13;
+    min-width: 44px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    justify-content: center;&#13;
+&#13;
+    border-radius: 11px;&#13;
+&#13;
+    color: #ffffff;&#13;
+&#13;
+    font-size: 10px;&#13;
+&#13;
+    font-weight: 950;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.student-color-0&#13;
+.placement-student-avatar {&#13;
+&#13;
+    background:&#13;
+        linear-gradient(&#13;
+            135deg,&#13;
+            #6847e8,&#13;
+            #896af3&#13;
+        );&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.student-color-1&#13;
+.placement-student-avatar {&#13;
+&#13;
+    background:&#13;
+        linear-gradient(&#13;
+            135deg,&#13;
+            #159b95,&#13;
+            #45b6af&#13;
+        );&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.student-color-2&#13;
+.placement-student-avatar {&#13;
+&#13;
+    background:&#13;
+        linear-gradient(&#13;
+            135deg,&#13;
+            #397cc8,&#13;
+            #67a0db&#13;
+        );&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.student-color-3&#13;
+.placement-student-avatar {&#13;
+&#13;
+    background:&#13;
+        linear-gradient(&#13;
+            135deg,&#13;
+            #df8440,&#13;
+            #eca36b&#13;
+        );&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.student-color-4&#13;
+.placement-student-avatar {&#13;
+&#13;
+    background:&#13;
+        linear-gradient(&#13;
+            135deg,&#13;
+            #d45d86,&#13;
+            #e487a5&#13;
+        );&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.placement-student-person &gt; div:last-child {&#13;
+&#13;
+    min-width: 0;&#13;
+&#13;
+    margin-left: 11px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.placement-student-person strong {&#13;
+&#13;
+    display: block;&#13;
+&#13;
+    overflow: hidden;&#13;
+&#13;
+    color: #19334c;&#13;
+&#13;
+    font-size: 12px;&#13;
+&#13;
+    line-height: 1.2;&#13;
+&#13;
+    font-weight: 950;&#13;
+&#13;
+    white-space: nowrap;&#13;
+&#13;
+    text-overflow: ellipsis;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.placement-student-person small {&#13;
+&#13;
+    display: block;&#13;
+&#13;
+    margin-top: 4px;&#13;
+&#13;
+    color: #6b7e92;&#13;
+&#13;
+    font-size: 8px;&#13;
+&#13;
+    font-weight: 750;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   READINESS&#13;
+   ============================================================ */&#13;
+&#13;
+.placement-readiness {&#13;
+&#13;
+    min-width: 0;&#13;
+&#13;
+    padding:&#13;
+        8px&#13;
+        11px;&#13;
+&#13;
+    border:&#13;
+        1px&#13;
+        solid&#13;
+        #dfd8f5;&#13;
+&#13;
+    border-radius: 9px;&#13;
+&#13;
+    background:&#13;
+        linear-gradient(&#13;
+            135deg,&#13;
+            #f7f3ff,&#13;
+            #fcfbff&#13;
+        );&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.placement-readiness span,&#13;
+.placement-risk span {&#13;
+&#13;
+    display: block;&#13;
+&#13;
+    margin-bottom: 5px;&#13;
+&#13;
+    font-size: 7px;&#13;
+&#13;
+    line-height: 1;&#13;
+&#13;
+    font-weight: 950;&#13;
+&#13;
+    letter-spacing: 1px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.placement-readiness span {&#13;
+&#13;
+    color: #7052d7;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.placement-readiness strong {&#13;
+&#13;
+    color: #5235bd;&#13;
+&#13;
+    font-size: 15px;&#13;
+&#13;
+    line-height: 1;&#13;
+&#13;
+    font-weight: 950;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   RISK&#13;
+   ============================================================ */&#13;
+&#13;
+.placement-risk {&#13;
+&#13;
+    min-width: 0;&#13;
+&#13;
+    padding:&#13;
+        8px&#13;
+        11px;&#13;
+&#13;
+    border:&#13;
+        1px&#13;
+        solid&#13;
+        #dce5ef;&#13;
+&#13;
+    border-radius: 9px;&#13;
+&#13;
+    background:&#13;
+        linear-gradient(&#13;
+            135deg,&#13;
+            #f5f8fc,&#13;
+            #ffffff&#13;
+        );&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.placement-risk span {&#13;
+&#13;
+    color: #60758b;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.placement-risk b {&#13;
+&#13;
+    display: inline-flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    padding:&#13;
+        5px&#13;
+        9px;&#13;
+&#13;
+    border-radius: 17px;&#13;
+&#13;
+    font-size: 8px;&#13;
+&#13;
+    line-height: 1;&#13;
+&#13;
+    font-weight: 950;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.risk-low {&#13;
+&#13;
+    background:&#13;
+        linear-gradient(&#13;
+            135deg,&#13;
+            #e3f7eb,&#13;
+            #d9f1e4&#13;
+        );&#13;
+&#13;
+    color: var(--green-dark);&#13;
+&#13;
+    border:&#13;
+        1px&#13;
+        solid&#13;
+        #bde1ca;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.risk-medium {&#13;
+&#13;
+    background:&#13;
+        linear-gradient(&#13;
+            135deg,&#13;
+            #fff6d9,&#13;
+            #ffefc2&#13;
+        );&#13;
+&#13;
+    color: var(--yellow-dark);&#13;
+&#13;
+    border:&#13;
+        1px&#13;
+        solid&#13;
+        #ead496;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.risk-high {&#13;
+&#13;
+    background:&#13;
+        linear-gradient(&#13;
+            135deg,&#13;
+            #ffe9e4,&#13;
+            #ffddd5&#13;
+        );&#13;
+&#13;
+    color: var(--coral-dark);&#13;
+&#13;
+    border:&#13;
+        1px&#13;
+        solid&#13;
+        #efc2b7;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.risk-default {&#13;
+&#13;
+    background: #edf2f6;&#13;
+&#13;
+    color: #687b8d;&#13;
+&#13;
+    border:&#13;
+        1px&#13;
+        solid&#13;
+        #dbe3ea;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   ARROW&#13;
+   ============================================================ */&#13;
+&#13;
+.placement-row-arrow {&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    justify-content: center;&#13;
+&#13;
+    color: #8799a9;&#13;
+&#13;
+    font-size: 18px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.placement-student-row:hover&#13;
+.placement-row-arrow {&#13;
+&#13;
+    color: #6845dc;&#13;
+&#13;
+    transform:&#13;
+        translateX(3px);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   EMPTY&#13;
+   ============================================================ */&#13;
+&#13;
+.placement-empty {&#13;
+&#13;
+    padding:&#13;
+        52px&#13;
+        20px;&#13;
+&#13;
+    text-align: center;&#13;
+&#13;
+    background:&#13;
+        linear-gradient(&#13;
+            135deg,&#13;
+            #fbfaff,&#13;
+            #f8fcfb&#13;
+        );&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.placement-empty &gt; i {&#13;
+&#13;
+    width: 50px;&#13;
+&#13;
+    height: 50px;&#13;
+&#13;
+    margin: auto;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    justify-content: center;&#13;
+&#13;
+    border-radius: 13px;&#13;
+&#13;
+    background:&#13;
+        linear-gradient(&#13;
+            135deg,&#13;
+            #ece5ff,&#13;
+            #e1f5f1&#13;
+        );&#13;
+&#13;
+    color: #6845da;&#13;
+&#13;
+    font-size: 18px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.placement-empty h3 {&#13;
+&#13;
+    margin:&#13;
+        11px&#13;
+        0&#13;
+        5px;&#13;
+&#13;
+    color: #263c53;&#13;
+&#13;
+    font-size: 15px;&#13;
+&#13;
+    font-weight: 950;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.placement-empty p {&#13;
+&#13;
+    margin: 0;&#13;
+&#13;
+    color: #8190a1;&#13;
+&#13;
+    font-size: 10px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   DETAIL&#13;
+   ============================================================ */&#13;
+&#13;
+.placement-detail-panel {&#13;
+&#13;
+    width: 100%;&#13;
+&#13;
+    margin-top: 16px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   BACK&#13;
+   ============================================================ */&#13;
+&#13;
+.placement-back-button {&#13;
+&#13;
+    margin-bottom: 12px;&#13;
+&#13;
+    padding:&#13;
+        8px&#13;
+        12px;&#13;
+&#13;
+    display: inline-flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 7px;&#13;
+&#13;
+    border:&#13;
+        1px&#13;
+        solid&#13;
+        #cec1f1;&#13;
+&#13;
+    border-radius: 8px;&#13;
+&#13;
+    background: #ffffff;&#13;
+&#13;
+    color: #5635c6;&#13;
+&#13;
+    font-size: 9px;&#13;
+&#13;
+    font-weight: 900;&#13;
+&#13;
+    cursor: pointer;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.placement-back-button:hover {&#13;
+&#13;
+    background: #f2ecff;&#13;
+&#13;
+    border-color: #baaae9;&#13;
+&#13;
+    transform:&#13;
+        translateX(-2px);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   DETAIL HEADER&#13;
+   ============================================================ */&#13;
+&#13;
+.placement-detail-header {&#13;
+&#13;
+    width: 100%;&#13;
+&#13;
+    min-height: 108px;&#13;
+&#13;
+    padding:&#13;
+        19px&#13;
+        22px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 13px;&#13;
+&#13;
+    border:&#13;
+        1px&#13;
+        solid&#13;
+        #cec1ef;&#13;
+&#13;
+    border-radius: 14px;&#13;
+&#13;
+    background:&#13;
+&#13;
+        linear-gradient(&#13;
+            110deg,&#13;
+            #f0e9ff,&#13;
+            #ffffff 53%,&#13;
+            #e9f9f6&#13;
+        );&#13;
+&#13;
+    box-shadow:&#13;
+&#13;
+        0&#13;
+        7px&#13;
+        20px&#13;
+        rgba(70,57,126,.075);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.placement-detail-avatar {&#13;
+&#13;
+    width: 55px;&#13;
+&#13;
+    height: 55px;&#13;
+&#13;
+    min-width: 55px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    justify-content: center;&#13;
+&#13;
+    border-radius: 13px;&#13;
+&#13;
+    background:&#13;
+        linear-gradient(&#13;
+            135deg,&#13;
+            #6847e8,&#13;
+            #896bf3&#13;
+        );&#13;
+&#13;
+    color: #ffffff;&#13;
+&#13;
+    font-size: 12px;&#13;
+&#13;
+    font-weight: 950;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.placement-detail-person {&#13;
+&#13;
+    min-width: 0;&#13;
+&#13;
+    flex: 1;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.placement-detail-person &gt; span {&#13;
+&#13;
+    display: block;&#13;
+&#13;
+    color: #6b49d3;&#13;
+&#13;
+    font-size: 7px;&#13;
+&#13;
+    line-height: 1;&#13;
+&#13;
+    font-weight: 950;&#13;
+&#13;
+    letter-spacing: 1.25px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.placement-detail-person h2 {&#13;
+&#13;
+    margin:&#13;
+        5px&#13;
+        0;&#13;
+&#13;
+    overflow: hidden;&#13;
+&#13;
+    color: #142e49;&#13;
+&#13;
+    font-size: 21px;&#13;
+&#13;
+    line-height: 1.1;&#13;
+&#13;
+    font-weight: 950;&#13;
+&#13;
+    white-space: nowrap;&#13;
+&#13;
+    text-overflow: ellipsis;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.placement-detail-meta {&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 16px;&#13;
+&#13;
+    flex-wrap: wrap;&#13;
+&#13;
+    color: #71849a;&#13;
+&#13;
+    font-size: 8px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.placement-detail-meta strong {&#13;
+&#13;
+    color: #415870;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.placement-detail-risk {&#13;
+&#13;
+    flex-shrink: 0;&#13;
+&#13;
+    margin-left: auto;&#13;
+&#13;
+    padding-left: 18px;&#13;
+&#13;
+    border-left:&#13;
+        1px&#13;
+        solid&#13;
+        #d2dce5;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.placement-detail-risk span {&#13;
+&#13;
+    display: block;&#13;
+&#13;
+    color: #7c8d9f;&#13;
+&#13;
+    font-size: 7px;&#13;
+&#13;
+    font-weight: 950;&#13;
+&#13;
+    letter-spacing: 1px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.placement-detail-risk b {&#13;
+&#13;
+    display: inline-flex;&#13;
+&#13;
+    margin-top: 5px;&#13;
+&#13;
+    padding:&#13;
+        6px&#13;
+        10px;&#13;
+&#13;
+    border-radius: 18px;&#13;
+&#13;
+    font-size: 8px;&#13;
+&#13;
+    font-weight: 950;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   METRICS&#13;
+   ============================================================ */&#13;
+&#13;
+.placement-metrics-grid {&#13;
+&#13;
+    width: 100%;&#13;
+&#13;
+    margin-top: 14px;&#13;
+&#13;
+    display: grid;&#13;
+&#13;
+    grid-template-columns:&#13;
+        repeat(&#13;
+            4,&#13;
+            minmax(0,1fr)&#13;
+        );&#13;
+&#13;
+    gap: 13px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.placement-metric-card {&#13;
+&#13;
+    min-height: 110px;&#13;
+&#13;
+    padding: 16px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 10px;&#13;
+&#13;
+    border:&#13;
+        1px&#13;
+        solid;&#13;
+&#13;
+    border-radius: 12px;&#13;
+&#13;
+    box-shadow:&#13;
+        0&#13;
+        5px&#13;
+        15px&#13;
+        rgba(36,52,69,.045);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.placement-metric-card.lavender {&#13;
+&#13;
+    background:&#13;
+        linear-gradient(&#13;
+            135deg,&#13;
+            #e6ddff,&#13;
+            #f5f0ff&#13;
+        );&#13;
+&#13;
+    border-color: #cdbdf4;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.placement-metric-card.teal {&#13;
+&#13;
+    background:&#13;
+        linear-gradient(&#13;
+            135deg,&#13;
+            #d9f5f0,&#13;
+            #eefbf9&#13;
+        );&#13;
+&#13;
+    border-color: #acdcd6;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.placement-metric-card.coral {&#13;
+&#13;
+    background:&#13;
+        linear-gradient(&#13;
+            135deg,&#13;
+            #ffddd5,&#13;
+            #fff2ee&#13;
+        );&#13;
+&#13;
+    border-color: #edbbb0;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.placement-metric-card.pink {&#13;
+&#13;
+    background:&#13;
+        linear-gradient(&#13;
+            135deg,&#13;
+            #f9dce7,&#13;
+            #fff1f5&#13;
+        );&#13;
+&#13;
+    border-color: #e8b7c9;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.placement-metric-icon {&#13;
+&#13;
+    width: 43px;&#13;
+&#13;
+    height: 43px;&#13;
+&#13;
+    min-width: 43px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    justify-content: center;&#13;
+&#13;
+    border-radius: 11px;&#13;
+&#13;
+    background: #ffffff;&#13;
+&#13;
+    font-size: 17px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.placement-metric-card.lavender&#13;
+.placement-metric-icon {&#13;
+&#13;
+    color: #6745d8;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.placement-metric-card.teal&#13;
+.placement-metric-icon {&#13;
+&#13;
+    color: #16877f;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.placement-metric-card.coral&#13;
+.placement-metric-icon {&#13;
+&#13;
+    color: #c55746;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.placement-metric-card.pink&#13;
+.placement-metric-icon {&#13;
+&#13;
+    color: #bd4a70;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.placement-metric-card &gt; div:last-child {&#13;
+&#13;
+    min-width: 0;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.placement-metric-card span {&#13;
+&#13;
+    display: block;&#13;
+&#13;
+    color: #718195;&#13;
+&#13;
+    font-size: 7px;&#13;
+&#13;
+    line-height: 1;&#13;
+&#13;
+    font-weight: 950;&#13;
+&#13;
+    letter-spacing: .95px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.placement-metric-card strong {&#13;
+&#13;
+    display: block;&#13;
+&#13;
+    margin-top: 5px;&#13;
+&#13;
+    overflow: hidden;&#13;
+&#13;
+    color: #17324c;&#13;
+&#13;
+    font-size: 20px;&#13;
+&#13;
+    line-height: 1.05;&#13;
+&#13;
+    font-weight: 950;&#13;
+&#13;
+    white-space: nowrap;&#13;
+&#13;
+    text-overflow: ellipsis;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.placement-metric-card small {&#13;
+&#13;
+    display: block;&#13;
+&#13;
+    margin-top: 4px;&#13;
+&#13;
+    color: #738499;&#13;
+&#13;
+    font-size: 8px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   DETAIL GRID&#13;
+   ============================================================ */&#13;
+&#13;
+.placement-detail-grid {&#13;
+&#13;
+    width: 100%;&#13;
+&#13;
+    margin-top: 14px;&#13;
+&#13;
+    display: grid;&#13;
+&#13;
+    grid-template-columns:&#13;
+        repeat(&#13;
+            2,&#13;
+            minmax(0,1fr)&#13;
+        );&#13;
+&#13;
+    gap: 14px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   INFORMATION CARD&#13;
+   ============================================================ */&#13;
+&#13;
+.placement-information-card {&#13;
+&#13;
+    position: relative;&#13;
+&#13;
+    width: 100%;&#13;
+&#13;
+    padding:&#13;
+        19px&#13;
+        21px;&#13;
+&#13;
+    border:&#13;
+        1px&#13;
+        solid&#13;
+        #dce4ec;&#13;
+&#13;
+    border-radius: 12px;&#13;
+&#13;
+    background: #ffffff;&#13;
+&#13;
+    box-shadow:&#13;
+&#13;
+        0&#13;
+        5px&#13;
+        16px&#13;
+        rgba(35,50,69,.045);&#13;
+&#13;
+    overflow: hidden;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.placement-information-card::before {&#13;
+&#13;
+    content: "";&#13;
+&#13;
+    position: absolute;&#13;
+&#13;
+    left: 0;&#13;
+&#13;
+    top: 0;&#13;
+&#13;
+    width: 100%;&#13;
+&#13;
+    height: 4px;&#13;
+&#13;
+    background:&#13;
+        linear-gradient(&#13;
+            90deg,&#13;
+            #6847e8,&#13;
+            #397cc8&#13;
+        );&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.placement-detail-grid&#13;
+.placement-information-card:nth-child(2)::before {&#13;
+&#13;
+    background:&#13;
+        linear-gradient(&#13;
+            90deg,&#13;
+            #159b95,&#13;
+            #397cc8&#13;
+        );&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.placement-ai-card {&#13;
+&#13;
+    margin-top: 14px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.placement-ai-card::before {&#13;
+&#13;
+    background:&#13;
+        linear-gradient(&#13;
+            90deg,&#13;
+            #dc6c58,&#13;
+            #df8440&#13;
+        );&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.placement-card-title {&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 10px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.placement-card-icon {&#13;
+&#13;
+    width: 41px;&#13;
+&#13;
+    height: 41px;&#13;
+&#13;
+    min-width: 41px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    justify-content: center;&#13;
+&#13;
+    border-radius: 10px;&#13;
+&#13;
+    font-size: 16px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.lavender-icon {&#13;
+&#13;
+    background: #eee7ff;&#13;
+&#13;
+    color: #6542d5;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.teal-icon {&#13;
+&#13;
+    background: #ddf7f3;&#13;
+&#13;
+    color: #107870;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.coral-icon {&#13;
+&#13;
+    background: #ffe7e1;&#13;
+&#13;
+    color: #b84e3c;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.pink-icon {&#13;
+&#13;
+    background: #fde7ef;&#13;
+&#13;
+    color: #b54169;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.placement-card-title &gt; div:last-child {&#13;
+&#13;
+    min-width: 0;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.placement-card-title span {&#13;
+&#13;
+    display: block;&#13;
+&#13;
+    color: #7c8d9f;&#13;
+&#13;
+    font-size: 7px;&#13;
+&#13;
+    line-height: 1;&#13;
+&#13;
+    font-weight: 950;&#13;
+&#13;
+    letter-spacing: 1.1px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.placement-card-title h3 {&#13;
+&#13;
+    margin:&#13;
+        4px&#13;
+        0&#13;
+        0;&#13;
+&#13;
+    color: #19324c;&#13;
+&#13;
+    font-size: 16px;&#13;
+&#13;
+    font-weight: 950;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.placement-card-body {&#13;
+&#13;
+    margin-top: 17px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.placement-card-body label {&#13;
+&#13;
+    display: block;&#13;
+&#13;
+    margin-bottom: 7px;&#13;
+&#13;
+    color: #7b8d9f;&#13;
+&#13;
+    font-size: 7px;&#13;
+&#13;
+    font-weight: 950;&#13;
+&#13;
+    letter-spacing: .95px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.placement-card-body p {&#13;
+&#13;
+    margin:&#13;
+        8px&#13;
+        0&#13;
+        0;&#13;
+&#13;
+    color: #607287;&#13;
+&#13;
+    font-size: 10px;&#13;
+&#13;
+    line-height: 1.65;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.placement-highlight {&#13;
+&#13;
+    margin-bottom: 15px;&#13;
+&#13;
+    padding:&#13;
+        11px&#13;
+        12px;&#13;
+&#13;
+    border-radius: 8px;&#13;
+&#13;
+    font-size: 10px;&#13;
+&#13;
+    line-height: 1.4;&#13;
+&#13;
+    font-weight: 900;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.lavender-highlight {&#13;
+&#13;
+    background:&#13;
+        linear-gradient(&#13;
+            135deg,&#13;
+            #efe8ff,&#13;
+            #f8f5ff&#13;
+        );&#13;
+&#13;
+    border:&#13;
+        1px&#13;
+        solid&#13;
+        #d4c6f5;&#13;
+&#13;
+    color: #5135b7;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.teal-highlight {&#13;
+&#13;
+    background:&#13;
+        linear-gradient(&#13;
+            135deg,&#13;
+            #ddf7f3,&#13;
+            #f2fcfa&#13;
+        );&#13;
+&#13;
+    border:&#13;
+        1px&#13;
+        solid&#13;
+        #b5dfda;&#13;
+&#13;
+    color: #0d726b;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   AI&#13;
+   ============================================================ */&#13;
+&#13;
+.placement-ai-content {&#13;
+&#13;
+    margin-top: 15px;&#13;
+&#13;
+    padding:&#13;
+        14px&#13;
+        16px;&#13;
+&#13;
+    border:&#13;
+        1px&#13;
+        solid&#13;
+        #f0d1c8;&#13;
+&#13;
+    border-radius: 9px;&#13;
+&#13;
+    background:&#13;
+        linear-gradient(&#13;
+            135deg,&#13;
+            #fff7f4,&#13;
+            #fffdfb&#13;
+        );&#13;
+&#13;
+    color: #614d48;&#13;
+&#13;
+    font-size: 10px;&#13;
+&#13;
+    line-height: 1.7;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   PROFILE GRID&#13;
+   ============================================================ */&#13;
+&#13;
+.placement-profile-grid {&#13;
+&#13;
+    width: 100%;&#13;
+&#13;
+    margin-top: 17px;&#13;
+&#13;
+    display: grid;&#13;
+&#13;
+    grid-template-columns:&#13;
+        repeat(&#13;
+            2,&#13;
+            minmax(0,1fr)&#13;
+        );&#13;
+&#13;
+    border:&#13;
+        1px&#13;
+        solid&#13;
+        #e2e8ed;&#13;
+&#13;
+    border-radius: 9px;&#13;
+&#13;
+    overflow: hidden;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.placement-profile-grid &gt; div {&#13;
+&#13;
+    min-width: 0;&#13;
+&#13;
+    padding:&#13;
+        11px&#13;
+        12px;&#13;
+&#13;
+    background:&#13;
+        linear-gradient(&#13;
+            135deg,&#13;
+            #fbfcff,&#13;
+            #ffffff&#13;
+        );&#13;
+&#13;
+    border-bottom:&#13;
+        1px&#13;
+        solid&#13;
+        #e7ecf1;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.placement-profile-grid &gt; div:nth-child(odd) {&#13;
+&#13;
+    border-right:&#13;
+        1px&#13;
+        solid&#13;
+        #e7ecf1;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.placement-profile-grid span {&#13;
+&#13;
+    display: block;&#13;
+&#13;
+    margin-bottom: 5px;&#13;
+&#13;
+    color: #7d8fa1;&#13;
+&#13;
+    font-size: 7px;&#13;
+&#13;
+    line-height: 1;&#13;
+&#13;
+    font-weight: 900;&#13;
+&#13;
+    letter-spacing: .7px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.placement-profile-grid strong {&#13;
+&#13;
+    display: block;&#13;
+&#13;
+    overflow: hidden;&#13;
+&#13;
+    color: #17324d;&#13;
+&#13;
+    font-size: 10px;&#13;
+&#13;
+    line-height: 1.3;&#13;
+&#13;
+    font-weight: 850;&#13;
+&#13;
+    word-break: break-word;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   READ ONLY&#13;
+   ============================================================ */&#13;
+&#13;
+.placement-readonly-note {&#13;
+&#13;
+    width: 100%;&#13;
+&#13;
+    margin-top: 14px;&#13;
+&#13;
+    padding:&#13;
+        14px&#13;
+        17px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: flex-start;&#13;
+&#13;
+    gap: 11px;&#13;
+&#13;
+    border:&#13;
+        1px&#13;
+        solid&#13;
+        #bddde4;&#13;
+&#13;
+    border-left:&#13;
+        4px&#13;
+        solid&#13;
+        #4e98ab;&#13;
+&#13;
+    border-radius: 10px;&#13;
+&#13;
+    background:&#13;
+        linear-gradient(&#13;
+            135deg,&#13;
+            #eaf8fb,&#13;
+            #f5fbfd&#13;
+        );&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.placement-readonly-note &gt; i {&#13;
+&#13;
+    width: 35px;&#13;
+&#13;
+    height: 35px;&#13;
+&#13;
+    min-width: 35px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    justify-content: center;&#13;
+&#13;
+    border-radius: 9px;&#13;
+&#13;
+    background: #d9eff4;&#13;
+&#13;
+    color: #35768a;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.placement-readonly-note strong {&#13;
+&#13;
+    display: block;&#13;
+&#13;
+    color: #275e70;&#13;
+&#13;
+    font-size: 10px;&#13;
+&#13;
+    font-weight: 950;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.placement-readonly-note p {&#13;
+&#13;
+    margin:&#13;
+        4px&#13;
+        0&#13;
+        0;&#13;
+&#13;
+    color: #617b87;&#13;
+&#13;
+    font-size: 9px;&#13;
+&#13;
+    line-height: 1.5;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   FOOTER&#13;
+   ============================================================ */&#13;
+&#13;
+.placement-page-footer {&#13;
+&#13;
+    width: 100%;&#13;
+&#13;
+    margin-top: 17px;&#13;
+&#13;
+    padding:&#13;
+        7px&#13;
+        2px&#13;
+        3px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    justify-content: space-between;&#13;
+&#13;
+    color: #8290a0;&#13;
+&#13;
+    font-size: 8px;&#13;
+&#13;
+    font-weight: 700;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   FOCUS&#13;
+   ============================================================ */&#13;
+&#13;
+.campus360-trainer-app&#13;
+button:focus-visible,&#13;
+.campus360-trainer-app&#13;
+a:focus-visible,&#13;
+.campus360-trainer-app&#13;
+input:focus-visible {&#13;
+&#13;
+    outline:&#13;
+        3px&#13;
+        solid&#13;
+        rgba(104,71,232,.17);&#13;
+&#13;
+    outline-offset: 2px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   TABLET&#13;
+   ============================================================ */&#13;
+&#13;
+@media (max-width:1100px) {&#13;
+&#13;
+    .campus360-trainer-app {&#13;
+&#13;
+        --sidebar-width: 260px;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .placement-intelligence-page {&#13;
+&#13;
+        padding:&#13;
+            19px&#13;
+            20px&#13;
+            35px;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .placement-metrics-grid {&#13;
+&#13;
+        grid-template-columns:&#13;
+            repeat(&#13;
+                2,&#13;
+                minmax(0,1fr)&#13;
+            );&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .placement-student-row {&#13;
+&#13;
+        grid-template-columns:&#13;
+            minmax(250px,2fr)&#13;
+            minmax(110px,.8fr)&#13;
+            minmax(120px,.8fr)&#13;
+            20px;&#13;
+&#13;
+        gap: 12px;&#13;
+&#13;
+    }&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   MOBILE SIDEBAR&#13;
+   ============================================================ */&#13;
+&#13;
+@media (max-width:900px) {&#13;
+&#13;
+    .campus360-trainer-sidebar {&#13;
+&#13;
+        width: 280px !important;&#13;
+&#13;
+        transform:&#13;
+            translateX(-100%);&#13;
+&#13;
+        box-shadow:&#13;
+&#13;
+            9px&#13;
+            0&#13;
+            30px&#13;
+            rgba(25,40,60,.18);&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .campus360-trainer-app:not(.sidebar-collapsed)&#13;
+    .campus360-trainer-sidebar {&#13;
+&#13;
+        transform:&#13;
+            translateX(0);&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .campus360-trainer-app&#13;
+    .trainer-sidebar-backdrop {&#13;
+&#13;
+        display: none;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .campus360-trainer-app:not(.sidebar-collapsed)&#13;
+    .trainer-sidebar-backdrop {&#13;
+&#13;
+        position: fixed;&#13;
+&#13;
+        inset: 0;&#13;
+&#13;
+        z-index: 999998;&#13;
+&#13;
+        display: block;&#13;
+&#13;
+        background:&#13;
+            rgba(20,34,54,.34);&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .campus360-trainer-main {&#13;
+&#13;
+        left: 0;&#13;
+&#13;
+        width: 100vw !important;&#13;
+&#13;
+        max-width: 100vw !important;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .placement-detail-grid {&#13;
+&#13;
+        grid-template-columns: 1fr;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .placement-page-header {&#13;
+&#13;
+        min-height: 125px;&#13;
+&#13;
+    }&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   SMALL MOBILE&#13;
+   ============================================================ */&#13;
+&#13;
+@media (max-width:650px) {&#13;
+&#13;
+    .trainer-topbar {&#13;
+&#13;
+        height: 64px;&#13;
+&#13;
+        min-height: 64px;&#13;
+&#13;
+        padding:&#13;
+            0&#13;
+            10px;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .trainer-hamburger {&#13;
+&#13;
+        width: 38px;&#13;
+&#13;
+        height: 38px;&#13;
+&#13;
+        min-width: 38px;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .trainer-top-icon {&#13;
+&#13;
+        width: 37px;&#13;
+&#13;
+        height: 37px;&#13;
+&#13;
+        min-width: 37px;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .trainer-top-profile-text {&#13;
+&#13;
+        display: none;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .trainer-top-profile {&#13;
+&#13;
+        padding-left: 4px;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .trainer-top-avatar {&#13;
+&#13;
+        width: 37px;&#13;
+&#13;
+        height: 37px;&#13;
+&#13;
+        min-width: 37px;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .trainer-topbar-title {&#13;
+&#13;
+        font-size: 12px;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .trainer-topbar-eyebrow {&#13;
+&#13;
+        font-size: 8px;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .placement-intelligence-page {&#13;
+&#13;
+        padding:&#13;
+            14px&#13;
+            11px&#13;
+            30px;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .placement-page-header {&#13;
+&#13;
+        flex-direction: column;&#13;
+&#13;
+        align-items: flex-start;&#13;
+&#13;
+        min-height: auto;&#13;
+&#13;
+        padding: 20px;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .placement-page-header h1 {&#13;
+&#13;
+        font-size: 25px;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .placement-page-header p {&#13;
+&#13;
+        font-size: 10px;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .placement-section-heading {&#13;
+&#13;
+        align-items: flex-start;&#13;
+&#13;
+        flex-direction: column;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .placement-search-panel {&#13;
+&#13;
+        padding: 17px;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .placement-student-panel&#13;
+    .placement-section-heading {&#13;
+&#13;
+        padding:&#13;
+            16px&#13;
+            18px;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .placement-student-row {&#13;
+&#13;
+        grid-template-columns:&#13;
+            1fr&#13;
+            1fr;&#13;
+&#13;
+        gap: 9px;&#13;
+&#13;
+        padding:&#13;
+            14px&#13;
+            16px;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .placement-student-person {&#13;
+&#13;
+        grid-column:&#13;
+            1 / -1;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .placement-readiness,&#13;
+    .placement-risk {&#13;
+&#13;
+        width: 100%;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .placement-row-arrow {&#13;
+&#13;
+        display: none;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .placement-metrics-grid {&#13;
+&#13;
+        grid-template-columns: 1fr;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .placement-detail-header {&#13;
+&#13;
+        flex-wrap: wrap;&#13;
+&#13;
+        padding: 17px;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .placement-detail-risk {&#13;
+&#13;
+        width: 100%;&#13;
+&#13;
+        margin-left: 0;&#13;
+&#13;
+        padding:&#13;
+            11px&#13;
+            0&#13;
+            0;&#13;
+&#13;
+        border-left: 0;&#13;
+&#13;
+        border-top:&#13;
+            1px&#13;
+            solid&#13;
+            #d5dee7;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .placement-profile-grid {&#13;
+&#13;
+        grid-template-columns: 1fr;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .placement-profile-grid &gt; div:nth-child(odd) {&#13;
+&#13;
+        border-right: 0;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .placement-page-footer {&#13;
+&#13;
+        flex-direction: column;&#13;
+&#13;
+        align-items: flex-start;&#13;
+&#13;
+        gap: 5px;&#13;
+&#13;
+    }&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   VERY SMALL&#13;
+   ============================================================ */&#13;
+&#13;
+@media (max-width:430px) {&#13;
+&#13;
+    .trainer-topbar-actions {&#13;
+&#13;
+        gap: 5px;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .trainer-page-heading {&#13;
+&#13;
+        max-width: 145px;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .placement-page-header h1 {&#13;
+&#13;
+        font-size: 22px;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .placement-section-heading h2 {&#13;
+&#13;
+        font-size: 18px;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .placement-detail-person h2 {&#13;
+&#13;
+        font-size: 18px;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .placement-detail-meta {&#13;
+&#13;
+        flex-direction: column;&#13;
+&#13;
+        align-items: flex-start;&#13;
+&#13;
+        gap: 5px;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .placement-card-title h3 {&#13;
+&#13;
+        font-size: 14px;&#13;
+&#13;
+    }&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   FINAL WIDTH SAFETY&#13;
+   ============================================================ */&#13;
+&#13;
+.campus360-trainer-app,&#13;
+.campus360-trainer-main,&#13;
+.placement-intelligence-page {&#13;
+&#13;
+    max-width: none !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.campus360-trainer-main {&#13;
+&#13;
+    min-width: 0 !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.placement-intelligence-page {&#13;
+&#13;
+    overflow-x: hidden;&#13;
+&#13;
+}&#13;
+/* ============================================================&#13;
+   CAMPUS360 TRAINER&#13;
+   SIDEBAR ONLY - DARK PURPLE&#13;
+   ============================================================ */&#13;
+&#13;
+/* MAIN SIDEBAR */&#13;
+.campus360-trainer-app .campus360-trainer-sidebar {&#13;
+&#13;
+    background:&#13;
+        linear-gradient(&#13;
+            180deg,&#13;
+            #130d2f 0%,&#13;
+            #160d38 48%,&#13;
+            #100a29 100%&#13;
+        ) !important;&#13;
+&#13;
+    border-right:&#13;
+        1px solid&#13;
+        #2d2157 !important;&#13;
+&#13;
+    box-shadow:&#13;
+        5px&#13;
+        0&#13;
+        20px&#13;
+        rgba(10,7,25,.22) !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* BRAND */&#13;
+.campus360-trainer-app .trainer-brand {&#13;
+&#13;
+    background:&#13;
+        linear-gradient(&#13;
+            135deg,&#13;
+            #170e38,&#13;
+            #1c1045&#13;
+        ) !important;&#13;
+&#13;
+    border-bottom:&#13;
+        1px&#13;
+        solid&#13;
+        #2d2157 !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.campus360-trainer-app .trainer-brand-text strong {&#13;
+&#13;
+    color:&#13;
+        #ffffff !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.campus360-trainer-app .trainer-brand-text span {&#13;
+&#13;
+    color:&#13;
+        #b9abd8 !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* BRAND ICON */&#13;
+.campus360-trainer-app .trainer-brand-mark {&#13;
+&#13;
+    background:&#13;
+        linear-gradient(&#13;
+            135deg,&#13;
+            #704cf4,&#13;
+            #563dd5&#13;
+        ) !important;&#13;
+&#13;
+    color:&#13;
+        #ffffff !important;&#13;
+&#13;
+    box-shadow:&#13;
+        0&#13;
+        8px&#13;
+        19px&#13;
+        rgba(91,70,230,.30) !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* TRAINER PROFILE */&#13;
+.campus360-trainer-app .trainer-profile-mini {&#13;
+&#13;
+    background:&#13;
+        linear-gradient(&#13;
+            135deg,&#13;
+            #211342,&#13;
+            #29164f&#13;
+        ) !important;&#13;
+&#13;
+    border:&#13;
+        1px&#13;
+        solid&#13;
+        #4b3475 !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.campus360-trainer-app .trainer-profile-mini:hover {&#13;
+&#13;
+    background:&#13;
+        linear-gradient(&#13;
+            135deg,&#13;
+            #29164f,&#13;
+            #321a5d&#13;
+        ) !important;&#13;
+&#13;
+    border-color:&#13;
+        #62478c !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.campus360-trainer-app .trainer-profile-info strong {&#13;
+&#13;
+    color:&#13;
+        #ffffff !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.campus360-trainer-app .trainer-profile-info span {&#13;
+&#13;
+    color:&#13;
+        #b9abd8 !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.campus360-trainer-app .trainer-profile-arrow {&#13;
+&#13;
+    color:&#13;
+        #a99bc7 !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* SIDEBAR NAVIGATION */&#13;
+.campus360-trainer-app .trainer-nav-label {&#13;
+&#13;
+    color:&#13;
+        #9283b6 !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.campus360-trainer-app .trainer-nav-item {&#13;
+&#13;
+    background:&#13;
+        transparent !important;&#13;
+&#13;
+    color:&#13;
+        #c4b8dc !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.campus360-trainer-app .trainer-nav-item:hover {&#13;
+&#13;
+    background:&#13;
+        rgba(124,58,237,.18) !important;&#13;
+&#13;
+    color:&#13;
+        #ffffff !important;&#13;
+&#13;
+    transform:&#13;
+        translateX(1px);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* ACTIVE NAV ITEM */&#13;
+.campus360-trainer-app .trainer-nav-item.active {&#13;
+&#13;
+    background:&#13;
+        linear-gradient(&#13;
+            90deg,&#13;
+            #7c3aed 0%,&#13;
+            #8b3ff2 100%&#13;
+        ) !important;&#13;
+&#13;
+    color:&#13;
+        #ffffff !important;&#13;
+&#13;
+    border-left:&#13;
+        4px&#13;
+        solid&#13;
+        #a78bfa !important;&#13;
+&#13;
+    padding-left:&#13;
+        7px !important;&#13;
+&#13;
+    box-shadow:&#13;
+        none !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.campus360-trainer-app .trainer-nav-item.active::before {&#13;
+&#13;
+    display:&#13;
+        none !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* NAV ICONS */&#13;
+.campus360-trainer-app .trainer-nav-icon {&#13;
+&#13;
+    color:&#13;
+        #a99ac8 !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.campus360-trainer-app .trainer-nav-item:hover&#13;
+.trainer-nav-icon,&#13;
+&#13;
+.campus360-trainer-app .trainer-nav-item.active&#13;
+.trainer-nav-icon {&#13;
+&#13;
+    color:&#13;
+        #ffffff !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* NAV COUNTS */&#13;
+.campus360-trainer-app .trainer-nav-count {&#13;
+&#13;
+    background:&#13;
+        #3a2764 !important;&#13;
+&#13;
+    color:&#13;
+        #d9ceef !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.campus360-trainer-app .trainer-nav-item.active&#13;
+.trainer-nav-count {&#13;
+&#13;
+    background:&#13;
+        rgba(255,255,255,.18) !important;&#13;
+&#13;
+    color:&#13;
+        #ffffff !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* SIDEBAR SCROLLBAR */&#13;
+.campus360-trainer-app .trainer-nav {&#13;
+&#13;
+    scrollbar-width:&#13;
+        none;&#13;
+&#13;
+    -ms-overflow-style:&#13;
+        none;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.campus360-trainer-app .trainer-nav::-webkit-scrollbar {&#13;
+&#13;
+    width:&#13;
+        0;&#13;
+&#13;
+    height:&#13;
+        0;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* MOBILE SIDEBAR */&#13;
+@media (max-width:900px) {&#13;
+&#13;
+    .campus360-trainer-app .campus360-trainer-sidebar {&#13;
+&#13;
+        background:&#13;
+            linear-gradient(&#13;
+                180deg,&#13;
+                #130d2f 0%,&#13;
+                #160d38 48%,&#13;
+                #100a29 100%&#13;
+            ) !important;&#13;
+&#13;
+        border-right:&#13;
+            1px&#13;
+            solid&#13;
+            #2d2157 !important;&#13;
+&#13;
+        box-shadow:&#13;
+            9px&#13;
+            0&#13;
+            30px&#13;
+            rgba(10,7,25,.32) !important;&#13;
+&#13;
+    }&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* FINAL SAFETY OVERRIDE - SIDEBAR ONLY */&#13;
+.campus360-trainer-app&#13;
+.campus360-trainer-sidebar {&#13;
+&#13;
+    background:&#13;
+        linear-gradient(&#13;
+            180deg,&#13;
+            #130d2f 0%,&#13;
+            #160d38 48%,&#13;
+            #100a29 100%&#13;
+        ) !important;&#13;
+&#13;
+}</css>
+        <data_table>sp_instance</data_table>
+        <demo_data/>
+        <description/>
+        <docs/>
+        <field_list/>
+        <has_preview>false</has_preview>
+        <id>campus360_trainer_placement_intelligence</id>
+        <internal>false</internal>
+        <link><![CDATA[function link(scope, element, attrs, controller) {
+  
+}]]></link>
+        <name>Campus360 Trainer Placement Intelligence</name>
+        <option_schema/>
+        <public>false</public>
+        <roles/>
+        <script><![CDATA[(function() {
+
+
+  /* ============================================================
+     INITIAL DATA
+     ============================================================ */
+
+  data.loaded = true;
+
+  data.records = [];
+
+  data.trainer = {
+
+    id: '',
+    name: 'Trainer',
+    initials: 'TR'
+
+  };
+
+
+  /* ============================================================
+     TRAINER
+     ============================================================ */
+
+  var trainerId =
+    $sp.getParameter('trainer') ||
+    '';
+
+
+  if (
+    input &&
+    input.trainer
+  ) {
+
+    trainerId =
+      input.trainer;
+
+  }
+
+
+  if (trainerId) {
+
+    var trainerGR =
+      new GlideRecord(
+        'x_snc_campus360_trainer_master'
+      );
+
+
+    if (
+      trainerGR.isValid()
+    ) {
+
+      trainerGR.addQuery(
+        'trainer_id',
+        trainerId
+      );
+
+      trainerGR.setLimit(1);
+
+      trainerGR.query();
+
+
+      if (
+        trainerGR.next()
+      ) {
+
+        data.trainer.id =
+          trainerGR.getValue(
+            'trainer_id'
+          ) ||
+          trainerId;
+
+
+        data.trainer.name =
+          trainerGR.getValue(
+            'trainer_name'
+          ) ||
+          'Trainer';
+
+      }
+
+    }
+
+  }
+
+
+  function getInitials(name) {
+
+    if (!name) {
+      return 'TR';
+    }
+
+
+    var parts =
+      name
+        .toString()
+        .trim()
+        .split(/\s+/);
+
+
+    if (
+      parts.length === 1
+    ) {
+
+      return parts[0]
+        .substring(0, 2)
+        .toUpperCase();
+
+    }
+
+
+    return (
+      parts[0].charAt(0) +
+      parts[
+        parts.length - 1
+      ].charAt(0)
+    ).toUpperCase();
+
+  }
+
+
+  data.trainer.initials =
+    getInitials(
+      data.trainer.name
+    );
+
+
+  /* ============================================================
+     STUDENT IDS CONNECTED TO TRAINER
+     ============================================================ */
+
+  var trainerStudentIds = {};
+
+
+  /*
+   * Training Enrollment is used to determine
+   * which students belong to this trainer.
+   */
+
+  var enrollmentGR =
+    new GlideRecord(
+      'x_snc_campus360_training_enrollment'
+    );
+
+
+  if (
+    enrollmentGR.isValid()
+  ) {
+
+    if (trainerId) {
+
+      var trainerSysId = '';
+
+
+      var trainerLookup =
+        new GlideRecord(
+          'x_snc_campus360_trainer_master'
+        );
+
+
+      if (
+        trainerLookup.isValid()
+      ) {
+
+        trainerLookup.addQuery(
+          'trainer_id',
+          trainerId
+        );
+
+        trainerLookup.setLimit(1);
+
+        trainerLookup.query();
+
+
+        if (
+          trainerLookup.next()
+        ) {
+
+          trainerSysId =
+            trainerLookup.getUniqueValue();
+
+        }
+
+      }
+
+
+      if (trainerSysId) {
+
+        enrollmentGR.addQuery(
+          'trainer',
+          trainerSysId
+        );
+
+      }
+
+    }
+
+
+    enrollmentGR.query();
+
+
+    while (
+      enrollmentGR.next()
+    ) {
+
+      var enrolledStudent =
+        enrollmentGR.getValue(
+          'student'
+        );
+
+
+      if (enrolledStudent) {
+
+        trainerStudentIds[
+          enrolledStudent
+        ] = true;
+
+      }
+
+    }
+
+  }
+
+
+  /* ============================================================
+     PLACEMENT INTELLIGENCE
+     ============================================================ */
+
+  var intelligenceGR =
+    new GlideRecord(
+      'x_snc_campus360_placement_intelligence'
+    );
+
+
+  intelligenceGR.orderByDesc(
+    'last_updated'
+  );
+
+
+  intelligenceGR.query();
+
+
+  while (
+    intelligenceGR.next()
+  ) {
+
+
+    var studentSysId =
+      intelligenceGR.getValue(
+        'student'
+      );
+
+
+    /*
+     * If trainer/student relationships exist,
+     * only show the trainer's students.
+     *
+     * If no enrollment relationship exists yet,
+     * keep the intelligence visible so the page
+     * does not incorrectly appear empty.
+     */
+
+    if (
+      Object.keys(
+        trainerStudentIds
+      ).length > 0 &&
+      !trainerStudentIds[
+        studentSysId
+      ]
+    ) {
+
+      continue;
+
+    }
+
+
+    /* ==========================================================
+       STUDENT
+       ========================================================== */
+
+    var studentGR =
+      new GlideRecord(
+        'x_snc_campus360_student_master'
+      );
+
+
+    var studentName =
+      'Student';
+
+    var studentId =
+      '';
+
+    var email =
+      '';
+
+    var phone =
+      '';
+
+    var branch =
+      '';
+
+    var degree =
+      '';
+
+    var batch =
+      '';
+
+    var cgpa =
+      '';
+
+    var placementStatus =
+      '';
+
+    var profileStatus =
+      '';
+
+
+    if (
+      studentSysId &&
+      studentGR.get(
+        studentSysId
+      )
+    ) {
+
+      studentName =
+        studentGR.getValue(
+          'student_name'
+        ) ||
+        studentGR.getDisplayValue();
+
+
+      studentId =
+        studentGR.getValue(
+          'student_id'
+        ) ||
+        '';
+
+
+      email =
+        studentGR.getValue(
+          'email'
+        ) ||
+        '';
+
+
+      phone =
+        studentGR.getValue(
+          'phone_number'
+        ) ||
+        '';
+
+
+      branch =
+        studentGR.getDisplayValue(
+          'branch'
+        ) ||
+        '';
+
+
+      degree =
+        studentGR.getDisplayValue(
+          'degree'
+        ) ||
+        '';
+
+
+      batch =
+        studentGR.getValue(
+          'batch'
+        ) ||
+        '';
+
+
+      cgpa =
+        studentGR.getValue(
+          'cgpa'
+        ) ||
+        '';
+
+
+      placementStatus =
+        studentGR.getDisplayValue(
+          'placement_status'
+        ) ||
+        '';
+
+
+      profileStatus =
+        studentGR.getDisplayValue(
+          'profile_status'
+        ) ||
+        '';
+
+    }
+
+
+    /* ==========================================================
+       INTELLIGENCE
+       ========================================================== */
+
+    var readiness =
+      parseInt(
+        intelligenceGR.getValue(
+          'readiness_score'
+        ),
+        10
+      ) || 0;
+
+
+    var participation =
+      parseInt(
+        intelligenceGR.getValue(
+          'participation_score'
+        ),
+        10
+      ) || 0;
+
+
+    var missedOpportunities =
+      parseInt(
+        intelligenceGR.getValue(
+          'missed_opportunities'
+        ),
+        10
+      ) || 0;
+
+
+    var risk =
+      intelligenceGR.getDisplayValue(
+        'risk_level'
+      ) ||
+      'Not Available';
+
+
+    var primarySkillGap =
+      intelligenceGR.getDisplayValue(
+        'primary_skill_gap'
+      ) ||
+      '';
+
+
+    var skillGapSummary =
+      intelligenceGR.getValue(
+        'skill_gap_summary'
+      ) ||
+      '';
+
+
+    var recommendedAction =
+      intelligenceGR.getValue(
+        'recommended_action'
+      ) ||
+      '';
+
+
+    var bottleneckStage =
+      intelligenceGR.getDisplayValue(
+        'bottleneck_stage'
+      ) ||
+      '';
+
+
+    var aiInsight =
+      intelligenceGR.getValue(
+        'ai_insight'
+      ) ||
+      '';
+
+
+    var intelligenceId =
+      intelligenceGR.getValue(
+        'intelligence_id'
+      ) ||
+      '';
+
+
+    /* ==========================================================
+       RECORD
+       ========================================================== */
+
+    data.records.push({
+
+      sys_id:
+        intelligenceGR.getUniqueValue(),
+
+      intelligence_id:
+        intelligenceId,
+
+      student_id:
+        studentId,
+
+      name:
+        studentName,
+
+      initials:
+        getInitials(
+          studentName
+        ),
+
+      email:
+        email,
+
+      phone_number:
+        phone,
+
+      branch:
+        branch,
+
+      degree:
+        degree,
+
+      batch:
+        batch,
+
+      cgpa:
+        cgpa,
+
+      placement_status:
+        placementStatus,
+
+      profile_status:
+        profileStatus,
+
+      readiness:
+        readiness,
+
+      participation:
+        participation,
+
+      risk:
+        risk,
+
+      primary_skill_gap:
+        primarySkillGap,
+
+      skill_gap_summary:
+        skillGapSummary,
+
+      recommended_action:
+        recommendedAction,
+
+      bottleneck_stage:
+        bottleneckStage,
+
+      ai_insight:
+        aiInsight,
+
+      missed_opportunities:
+        missedOpportunities
+
+    });
+
+  }
+
+
+  /* ============================================================
+     FALLBACK TEST DATA HANDLING
+     ============================================================ */
+
+  if (
+    data.records.length === 0
+  ) {
+
+    /*
+     * Do not create fake placement intelligence.
+     * The page will correctly show the empty state
+     * until actual records exist for the trainer's students.
+     */
+
+    data.records = [];
+
+  }
+
+
+})();
+
+data.aiWidget = $sp.getWidget('campus360_ai_assistant');
+]]></script>
+        <servicenow>false</servicenow>
+        <sys_class_name>sp_widget</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-26 08:42:05</sys_created_on>
+        <sys_id>dd20c275092b03107f442a080dcb42c8</sys_id>
+        <sys_mod_count>16</sys_mod_count>
+        <sys_name>Campus360 Trainer Placement Intelligence</sys_name>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name>sp_widget_dd20c275092b03107f442a080dcb42c8</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-10-01 16:19:11</sys_updated_on>
+        <template><![CDATA[<div
+  class="campus360-trainer-app"
+  ng-init="c.sidebarOpen = true"
+  ng-class="{'sidebar-collapsed': !c.sidebarOpen}"
+>
+
+  <!-- ============================================================
+       MOBILE SIDEBAR BACKDROP
+       ============================================================ -->
+
+  <div
+    class="trainer-sidebar-backdrop"
+    ng-if="c.sidebarOpen"
+    ng-click="c.sidebarOpen = false"
+  ></div>
+
+
+  <!-- ============================================================
+       SIDEBAR
+       ============================================================ -->
+
+  <aside class="campus360-trainer-sidebar">
+
+    <!-- BRAND -->
+
+    <div class="trainer-brand">
+
+      <div class="trainer-brand-mark">
+        <i class="fa fa-graduation-cap"></i>
+      </div>
+
+      <div class="trainer-brand-text">
+
+        <strong>
+          Campus360
+        </strong>
+
+        <span>
+          TRAINER PORTAL
+        </span>
+
+      </div>
+
+    </div>
+
+
+    <!-- TRAINER PROFILE -->
+
+    <a
+      class="trainer-profile-mini"
+      ng-href="?id=campus360_trainer_profile&trainer={{c.data.trainer.id}}"
+    >
+
+      <div class="trainer-avatar">
+        {{c.data.trainer.initials}}
+      </div>
+
+      <div class="trainer-profile-info">
+
+        <strong>
+          {{c.data.trainer.name}}
+        </strong>
+
+        <span>
+          {{c.data.trainer.id}}
+        </span>
+
+      </div>
+
+      <i class="fa fa-angle-right trainer-profile-arrow"></i>
+
+    </a>
+
+
+    <!-- ==========================================================
+         NAVIGATION
+         ========================================================== -->
+
+    <nav class="trainer-nav">
+
+      <!-- OVERVIEW -->
+
+      <div class="trainer-nav-label">
+        OVERVIEW
+      </div>
+
+      <a
+        class="trainer-nav-item"
+        ng-href="?id=campus360_trainer_dashboard&trainer={{c.data.trainer.id}}"
+      >
+
+        <span class="trainer-nav-icon">
+          <i class="fa fa-th-large"></i>
+        </span>
+
+        <span class="trainer-nav-text">
+          Dashboard
+        </span>
+
+      </a>
+
+
+      <!-- TRAINING -->
+
+      <div class="trainer-nav-label">
+        TRAINING
+      </div>
+
+      <a
+        class="trainer-nav-item"
+        ng-href="?id=campus360_trainer_my_training&trainer={{c.data.trainer.id}}"
+      >
+
+        <span class="trainer-nav-icon">
+          <i class="fa fa-book"></i>
+        </span>
+
+        <span class="trainer-nav-text">
+          My Training
+        </span>
+
+      </a>
+
+
+      <!-- MOCK INTERVIEWS -->
+
+      <div class="trainer-nav-label">
+        MOCK INTERVIEWS
+      </div>
+
+      <a
+        class="trainer-nav-item"
+        ng-href="?id=campus360_trainer_mock_slots&trainer={{c.data.trainer.id}}"
+      >
+
+        <span class="trainer-nav-icon">
+          <i class="fa fa-calendar-check-o"></i>
+        </span>
+
+        <span class="trainer-nav-text">
+          Slot Availability &amp; Requests
+        </span>
+
+      </a>
+
+
+      <a
+        class="trainer-nav-item"
+        ng-href="?id=campus360_trainer_interview_feedback&trainer={{c.data.trainer.id}}"
+      >
+
+        <span class="trainer-nav-icon">
+          <i class="fa fa-commenting-o"></i>
+        </span>
+
+        <span class="trainer-nav-text">
+          Feedback &amp; Performance
+        </span>
+
+      </a>
+
+
+      <!-- INTELLIGENCE -->
+
+      <div class="trainer-nav-label">
+        INTELLIGENCE
+      </div>
+
+      <a
+        class="trainer-nav-item active"
+        ng-href="?id=campus360_trainer_placement_intelligence&trainer={{c.data.trainer.id}}"
+      >
+
+        <span class="trainer-nav-icon">
+          <i class="fa fa-line-chart"></i>
+        </span>
+
+        <span class="trainer-nav-text">
+          Placement Intelligence
+        </span>
+
+      </a>
+
+
+      <!-- TPO COORDINATION -->
+
+      <div class="trainer-nav-label">
+        TPO COORDINATION
+      </div>
+
+      <a
+        class="trainer-nav-item"
+        ng-href="?id=campus360_trainer_opportunities&trainer={{c.data.trainer.id}}"
+      >
+
+        <span class="trainer-nav-icon">
+          <i class="fa fa-building-o"></i>
+        </span>
+
+        <span class="trainer-nav-text">
+          Opportunities &amp; Rooms
+        </span>
+
+      </a>
+
+
+      <!-- ACCOUNT -->
+
+      <div class="trainer-nav-label">
+        ACCOUNT
+      </div>
+
+      <a
+        class="trainer-nav-item"
+        ng-href="?id=campus360_trainer_profile&trainer={{c.data.trainer.id}}"
+      >
+
+        <span class="trainer-nav-icon">
+          <i class="fa fa-user-circle-o"></i>
+        </span>
+
+        <span class="trainer-nav-text">
+          Trainer Profile
+        </span>
+
+      </a>
+
+    </nav>
+
+  </aside>
+
+
+  <!-- ============================================================
+       MAIN
+       ============================================================ -->
+
+  <main class="campus360-trainer-main">
+
+
+    <!-- ==========================================================
+         TOP NAVBAR
+         ========================================================== -->
+
+    <header class="trainer-topbar">
+
+
+      <!-- LEFT -->
+
+      <div class="trainer-topbar-left">
+
+        <button
+          type="button"
+          class="trainer-hamburger"
+          ng-click="c.toggleSidebar()"
+          title="Open / Close Sidebar"
+          aria-label="Open or close sidebar"
+        >
+
+          <i class="fa fa-bars"></i>
+
+        </button>
+
+
+        <div class="trainer-page-heading">
+
+          <span class="trainer-topbar-eyebrow">
+            CAMPUS360
+          </span>
+
+          <span class="trainer-topbar-title">
+            Placement Intelligence
+          </span>
+
+        </div>
+
+      </div>
+
+
+      <!-- RIGHT -->
+
+      <div class="trainer-topbar-actions">
+
+
+        <!-- REFRESH -->
+
+        <button
+          type="button"
+          class="trainer-top-icon"
+          ng-click="c.refresh()"
+          title="Refresh"
+          aria-label="Refresh"
+        >
+
+          <i class="fa fa-refresh"></i>
+
+        </button>
+
+
+        <!-- NOTIFICATIONS -->
+
+        <button
+          type="button"
+          class="trainer-top-icon trainer-notification-button"
+          title="Notifications"
+          aria-label="Notifications"
+        >
+
+          <i class="fa fa-bell"></i>
+
+          <span class="trainer-notification-dot"></span>
+
+        </button>
+
+
+        <!-- TRAINER PROFILE -->
+
+        <a
+          class="trainer-top-profile"
+          ng-href="?id=campus360_trainer_profile&trainer={{c.data.trainer.id}}"
+        >
+
+          <div class="trainer-top-avatar">
+            {{c.data.trainer.initials}}
+          </div>
+
+          <div class="trainer-top-profile-text">
+
+            <strong>
+              {{c.data.trainer.name}}
+            </strong>
+
+            <span>
+              {{c.data.trainer.id}}
+            </span>
+
+          </div>
+
+        </a>
+
+      </div>
+
+    </header>
+
+
+    <!-- ==========================================================
+         PAGE CONTENT
+         ========================================================== -->
+
+    <section class="placement-intelligence-page">
+
+
+      <!-- ========================================================
+           PAGE HEADER
+           ======================================================== -->
+
+      <div class="placement-page-header">
+
+        <div class="placement-page-header-copy">
+
+          <span class="placement-eyebrow">
+            STUDENT PLACEMENT INTELLIGENCE
+          </span>
+
+          <h1>
+            Placement Intelligence
+          </h1>
+
+          <p>
+            Review placement readiness, skill gaps, risk indicators,
+            missed opportunities and recommended actions for your students.
+          </p>
+
+        </div>
+
+
+        <div class="placement-readonly">
+
+          <i class="fa fa-eye"></i>
+
+          <span>
+            Read Only
+          </span>
+
+        </div>
+
+      </div>
+
+
+      <!-- ========================================================
+           SEARCH
+           ======================================================== -->
+
+      <div class="placement-search-panel">
+
+        <div class="placement-section-heading">
+
+          <div>
+
+            <span>
+              STUDENT SEARCH
+            </span>
+
+            <h2>
+              Find Student Intelligence
+            </h2>
+
+            <p>
+              Search by Student ID, student name or Intelligence ID.
+            </p>
+
+          </div>
+
+
+          <div class="placement-record-count">
+
+            {{c.filteredRecords.length}}
+
+            records
+
+          </div>
+
+        </div>
+
+
+        <div class="placement-search-box">
+
+          <i class="fa fa-search"></i>
+
+          <input
+            type="text"
+            ng-model="c.searchText"
+            ng-change="c.filterStudents()"
+            placeholder="Search student ID, student name or Intelligence ID..."
+            autocomplete="off"
+          >
+
+
+          <button
+            type="button"
+            ng-if="c.searchText"
+            ng-click="c.clearSearch()"
+            title="Clear search"
+            aria-label="Clear search"
+          >
+
+            <i class="fa fa-times"></i>
+
+          </button>
+
+        </div>
+
+      </div>
+
+
+      <!-- ========================================================
+           STUDENT PANEL
+           ======================================================== -->
+
+      <div class="placement-student-panel">
+
+
+        <!-- HEADER -->
+
+        <div class="placement-section-heading">
+
+          <div>
+
+            <span>
+              PLACEMENT INTELLIGENCE
+            </span>
+
+            <h2>
+              Students
+            </h2>
+
+          </div>
+
+
+          <div class="placement-record-count">
+
+            {{c.filteredRecords.length}}
+
+            students
+
+          </div>
+
+        </div>
+
+
+        <!-- EMPTY -->
+
+        <div
+          class="placement-empty"
+          ng-if="!c.filteredRecords.length"
+        >
+
+          <i class="fa fa-search"></i>
+
+          <h3>
+            No placement intelligence found
+          </h3>
+
+          <p>
+            Try another Student ID, student name or Intelligence ID.
+          </p>
+
+        </div>
+
+
+        <!-- STUDENT ROWS -->
+
+        <div
+          class="placement-student-row"
+          ng-repeat="
+            student in c.filteredRecords
+            track by student.sys_id
+          "
+          ng-class="'student-color-' + ($index % 5)"
+          ng-click="c.openStudent(student)"
+        >
+
+
+          <!-- STUDENT -->
+
+          <div class="placement-student-person">
+
+            <div class="placement-student-avatar">
+
+              {{student.initials}}
+
+            </div>
+
+            <div>
+
+              <strong>
+                {{student.name}}
+              </strong>
+
+              <small>
+                {{student.student_id}}
+              </small>
+
+            </div>
+
+          </div>
+
+
+          <!-- READINESS -->
+
+          <div class="placement-readiness">
+
+            <span>
+              READINESS
+            </span>
+
+            <strong>
+              {{student.readiness}}
+            </strong>
+
+          </div>
+
+
+          <!-- RISK -->
+
+          <div class="placement-risk">
+
+            <span>
+              RISK
+            </span>
+
+            <b ng-class="c.getRiskClass(student.risk)">
+              {{student.risk || 'Not Available'}}
+            </b>
+
+          </div>
+
+
+          <!-- ARROW -->
+
+          <div class="placement-row-arrow">
+
+            <i class="fa fa-angle-right"></i>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- ========================================================
+           STUDENT DETAIL
+           ======================================================== -->
+
+      <div
+        class="placement-detail-panel"
+        ng-if="c.selectedStudent"
+      >
+
+
+        <!-- BACK -->
+
+        <button
+          type="button"
+          class="placement-back-button"
+          ng-click="c.closeStudent()"
+        >
+
+          <i class="fa fa-arrow-left"></i>
+
+          Back to Students
+
+        </button>
+
+
+        <!-- STUDENT HEADER -->
+
+        <div class="placement-detail-header">
+
+
+          <div class="placement-detail-avatar">
+
+            {{c.selectedStudent.initials}}
+
+          </div>
+
+
+          <div class="placement-detail-person">
+
+            <span>
+              STUDENT PLACEMENT PROFILE
+            </span>
+
+            <h2>
+              {{c.selectedStudent.name}}
+            </h2>
+
+
+            <div class="placement-detail-meta">
+
+              <span>
+
+                Student ID:
+
+                <strong>
+                  {{c.selectedStudent.student_id}}
+                </strong>
+
+              </span>
+
+
+              <span>
+
+                Intelligence ID:
+
+                <strong>
+                  {{c.selectedStudent.intelligence_id}}
+                </strong>
+
+              </span>
+
+            </div>
+
+          </div>
+
+
+          <div class="placement-detail-risk">
+
+            <span>
+              RISK LEVEL
+            </span>
+
+            <b
+              ng-class="
+                c.getRiskClass(
+                  c.selectedStudent.risk
+                )
+              "
+            >
+
+              {{
+                c.selectedStudent.risk
+                || 'Not Available'
+              }}
+
+            </b>
+
+          </div>
+
+        </div>
+
+
+        <!-- ======================================================
+             METRICS
+             ====================================================== -->
+
+        <div class="placement-metrics-grid">
+
+
+          <!-- READINESS -->
+
+          <div class="placement-metric-card lavender">
+
+            <div class="placement-metric-icon">
+
+              <i class="fa fa-line-chart"></i>
+
+            </div>
+
+            <div>
+
+              <span>
+                READINESS
+              </span>
+
+              <strong>
+                {{c.selectedStudent.readiness}}
+              </strong>
+
+              <small>
+                Placement readiness score
+              </small>
+
+            </div>
+
+          </div>
+
+
+          <!-- PARTICIPATION -->
+
+          <div class="placement-metric-card teal">
+
+            <div class="placement-metric-icon">
+
+              <i class="fa fa-users"></i>
+
+            </div>
+
+            <div>
+
+              <span>
+                PARTICIPATION
+              </span>
+
+              <strong>
+                {{c.selectedStudent.participation}}
+              </strong>
+
+              <small>
+                Participation score
+              </small>
+
+            </div>
+
+          </div>
+
+
+          <!-- MISSED OPPORTUNITIES -->
+
+          <div class="placement-metric-card coral">
+
+            <div class="placement-metric-icon">
+
+              <i class="fa fa-exclamation-triangle"></i>
+
+            </div>
+
+            <div>
+
+              <span>
+                MISSED OPPORTUNITIES
+              </span>
+
+              <strong>
+                {{c.selectedStudent.missed_opportunities}}
+              </strong>
+
+              <small>
+                Missed opportunities
+              </small>
+
+            </div>
+
+          </div>
+
+
+          <!-- BOTTLENECK -->
+
+          <div class="placement-metric-card pink">
+
+            <div class="placement-metric-icon">
+
+              <i class="fa fa-flag"></i>
+
+            </div>
+
+            <div>
+
+              <span>
+                BOTTLENECK
+              </span>
+
+              <strong>
+                {{c.selectedStudent.bottleneck_stage || '—'}}
+              </strong>
+
+              <small>
+                Current placement stage
+              </small>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- ======================================================
+             TWO COLUMN SECTION
+             ====================================================== -->
+
+        <div class="placement-detail-grid">
+
+
+          <!-- SKILL GAP -->
+
+          <div class="placement-information-card">
+
+            <div class="placement-card-title">
+
+              <div class="placement-card-icon lavender-icon">
+
+                <i class="fa fa-puzzle-piece"></i>
+
+              </div>
+
+
+              <div>
+
+                <span>
+                  SKILL ANALYSIS
+                </span>
+
+                <h3>
+                  Skill Gap
+                </h3>
+
+              </div>
+
+            </div>
+
+
+            <div class="placement-card-body">
+
+              <label>
+                PRIMARY SKILL GAP
+              </label>
+
+              <div class="placement-highlight lavender-highlight">
+
+                {{
+                  c.selectedStudent.primary_skill_gap
+                  || 'No primary skill gap recorded'
+                }}
+
+              </div>
+
+
+              <label>
+                SKILL GAP SUMMARY
+              </label>
+
+              <p>
+
+                {{
+                  c.selectedStudent.skill_gap_summary
+                  || 'No skill gap summary has been recorded.'
+                }}
+
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <!-- BOTTLENECK -->
+
+          <div class="placement-information-card">
+
+            <div class="placement-card-title">
+
+              <div class="placement-card-icon teal-icon">
+
+                <i class="fa fa-flag"></i>
+
+              </div>
+
+
+              <div>
+
+                <span>
+                  PLACEMENT TRACKING
+                </span>
+
+                <h3>
+                  Bottleneck &amp; Action
+                </h3>
+
+              </div>
+
+            </div>
+
+
+            <div class="placement-card-body">
+
+              <label>
+                BOTTLENECK STAGE
+              </label>
+
+              <div class="placement-highlight teal-highlight">
+
+                {{
+                  c.selectedStudent.bottleneck_stage
+                  || 'Not identified'
+                }}
+
+              </div>
+
+
+              <label>
+                RECOMMENDED ACTION
+              </label>
+
+              <p>
+
+                {{
+                  c.selectedStudent.recommended_action
+                  || 'No recommended action has been recorded.'
+                }}
+
+              </p>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- ======================================================
+             AI INSIGHT
+             ====================================================== -->
+
+        <div class="placement-information-card placement-ai-card">
+
+          <div class="placement-card-title">
+
+            <div class="placement-card-icon coral-icon">
+
+              <i class="fa fa-lightbulb-o"></i>
+
+            </div>
+
+
+            <div>
+
+              <span>
+                PLACEMENT INSIGHT
+              </span>
+
+              <h3>
+                AI Insight
+              </h3>
+
+            </div>
+
+          </div>
+
+
+          <div class="placement-ai-content">
+
+            {{
+              c.selectedStudent.ai_insight
+              || 'No AI insight has been recorded for this student.'
+            }}
+
+          </div>
+
+        </div>
+
+
+        <!-- ======================================================
+             STUDENT PROFILE
+             ====================================================== -->
+
+        <div class="placement-information-card">
+
+          <div class="placement-card-title">
+
+            <div class="placement-card-icon pink-icon">
+
+              <i class="fa fa-user"></i>
+
+            </div>
+
+
+            <div>
+
+              <span>
+                STUDENT INFORMATION
+              </span>
+
+              <h3>
+                Student Profile
+              </h3>
+
+            </div>
+
+          </div>
+
+
+          <div class="placement-profile-grid">
+
+            <div>
+
+              <span>
+                Student Name
+              </span>
+
+              <strong>
+                {{c.selectedStudent.name || '—'}}
+              </strong>
+
+            </div>
+
+
+            <div>
+
+              <span>
+                Student ID
+              </span>
+
+              <strong>
+                {{c.selectedStudent.student_id || '—'}}
+              </strong>
+
+            </div>
+
+
+            <div>
+
+              <span>
+                Email
+              </span>
+
+              <strong>
+                {{c.selectedStudent.email || '—'}}
+              </strong>
+
+            </div>
+
+
+            <div>
+
+              <span>
+                Phone Number
+              </span>
+
+              <strong>
+                {{c.selectedStudent.phone_number || '—'}}
+              </strong>
+
+            </div>
+
+
+            <div>
+
+              <span>
+                Branch
+              </span>
+
+              <strong>
+                {{c.selectedStudent.branch || '—'}}
+              </strong>
+
+            </div>
+
+
+            <div>
+
+              <span>
+                Degree
+              </span>
+
+              <strong>
+                {{c.selectedStudent.degree || '—'}}
+              </strong>
+
+            </div>
+
+
+            <div>
+
+              <span>
+                Batch
+              </span>
+
+              <strong>
+                {{c.selectedStudent.batch || '—'}}
+              </strong>
+
+            </div>
+
+
+            <div>
+
+              <span>
+                CGPA
+              </span>
+
+              <strong>
+                {{c.selectedStudent.cgpa || '—'}}
+              </strong>
+
+            </div>
+
+
+            <div>
+
+              <span>
+                Placement Status
+              </span>
+
+              <strong>
+                {{c.selectedStudent.placement_status || '—'}}
+              </strong>
+
+            </div>
+
+
+            <div>
+
+              <span>
+                Profile Status
+              </span>
+
+              <strong>
+                {{c.selectedStudent.profile_status || '—'}}
+              </strong>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- ======================================================
+             READ ONLY NOTE
+             ====================================================== -->
+
+        <div class="placement-readonly-note">
+
+          <i class="fa fa-lock"></i>
+
+          <div>
+
+            <strong>
+              Trainer Read-Only View
+            </strong>
+
+            <p>
+              Placement intelligence is displayed for student guidance
+              and tracking. This page does not modify student intelligence data.
+            </p>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- ========================================================
+           FOOTER
+           ======================================================== -->
+
+      <footer class="placement-page-footer">
+
+        <span>
+          Campus360 Trainer Portal
+        </span>
+
+        <span>
+          Trainer ID: {{c.data.trainer.id}}
+        </span>
+
+      </footer>
+
+    </section>
+
+  </main>
+
+
+  <!-- Campus360 AI Assistant Floating Widget -->
+  <sp-widget widget="data.aiWidget"></sp-widget>
+</div>]]></template>
+    </sp_widget>
+</record_update>

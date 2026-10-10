@@ -1,0 +1,1490 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_widget">
+    <sp_widget action="INSERT_OR_UPDATE">
+        <category>custom</category>
+        <client_script><![CDATA[api.controller = function($scope, $window) {
+
+    var c = this;
+
+
+    c.search = "";
+    c.roundFilter = "";
+    c.statusFilter = "";
+
+
+    // =========================================
+    // FILTER
+    // =========================================
+
+    c.filterInterview = function(interview) {
+
+        if (!interview) {
+            return false;
+        }
+
+
+        // Search
+        if (c.search) {
+
+            var searchText =
+                c.search.toLowerCase();
+
+
+            var student =
+                (interview.student_name || "")
+                .toLowerCase();
+
+
+            var opportunity =
+                (interview.opportunity || "")
+                .toLowerCase();
+
+
+            var application =
+                (interview.application_id || "")
+                .toLowerCase();
+
+
+            var round =
+                (interview.round || "")
+                .toLowerCase();
+
+
+            var matchesSearch =
+                student.indexOf(searchText) >= 0 ||
+                opportunity.indexOf(searchText) >= 0 ||
+                application.indexOf(searchText) >= 0 ||
+                round.indexOf(searchText) >= 0;
+
+
+            if (!matchesSearch) {
+                return false;
+            }
+
+        }
+
+
+        // Round filter
+        if (
+            c.roundFilter &&
+            interview.round != c.roundFilter
+        ) {
+            return false;
+        }
+
+
+        // Status filter
+        if (
+            c.statusFilter &&
+            interview.status != c.statusFilter
+        ) {
+            return false;
+        }
+
+
+        return true;
+
+    };
+
+
+    // =========================================
+    // NEW INTERVIEW
+    // =========================================
+    // Header button = create completely new interview
+
+    c.newInterview = function() {
+
+        $window.location.href =
+            "?id=campus360_recruiter_schedule";
+
+    };
+
+
+    // =========================================
+    // SCHEDULE SELECTED CANDIDATE
+    // =========================================
+
+    c.scheduleInterview = function(interview) {
+
+        if (!interview || !interview.sys_id) {
+
+            console.log(
+                "No interview selected for scheduling"
+            );
+
+            return;
+
+        }
+
+
+        var url =
+            "?id=campus360_recruiter_schedule" +
+            "&interview_sys_id=" +
+            encodeURIComponent(interview.sys_id);
+
+
+        console.log(
+            "Opening schedule page:",
+            url
+        );
+
+
+        $window.location.href = url;
+
+    };
+
+
+    // =========================================
+    // VIEW INTERVIEW
+    // =========================================
+
+    c.viewInterview = function(interview) {
+
+        if (!interview || !interview.sys_id) {
+            return;
+        }
+
+
+        $window.location.href =
+            "?id=campus360_recruiter_interview_details" +
+            "&sys_id=" +
+            encodeURIComponent(interview.sys_id);
+
+    };
+	
+
+
+    // =========================================
+    // REFRESH
+    // =========================================
+
+    c.refresh = function() {
+
+        c.server.update();
+
+    };
+
+};]]></client_script>
+        <controller_as>c</controller_as>
+        <css>/* =========================================&#13;
+   MAIN PAGE&#13;
+   ========================================= */&#13;
+&#13;
+.interview-page {&#13;
+    width: 100%;&#13;
+    max-width: 1180px;&#13;
+    margin: 0 auto;&#13;
+    padding: 28px 24px 60px;&#13;
+    box-sizing: border-box;&#13;
+    color: #102a56;&#13;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   PAGE HEADER&#13;
+   ========================================= */&#13;
+&#13;
+.page-header {&#13;
+    background: #ffffff;&#13;
+    border: 1px solid #e1e7f2;&#13;
+    border-radius: 18px;&#13;
+    padding: 30px 32px;&#13;
+    margin-bottom: 24px;&#13;
+    box-shadow: 0 6px 20px rgba(30, 60, 100, 0.06);&#13;
+}&#13;
+&#13;
+.header-content {&#13;
+    display: flex;&#13;
+    justify-content: space-between;&#13;
+    align-items: center;&#13;
+    gap: 25px;&#13;
+}&#13;
+&#13;
+.section-label {&#13;
+    font-size: 11px;&#13;
+    font-weight: 700;&#13;
+    letter-spacing: 1.6px;&#13;
+    color: #5367ee;&#13;
+    margin-bottom: 7px;&#13;
+}&#13;
+&#13;
+.page-header h1 {&#13;
+    margin: 0;&#13;
+    font-size: 29px;&#13;
+    font-weight: 700;&#13;
+    color: #092a5c;&#13;
+}&#13;
+&#13;
+.page-header p {&#13;
+    margin: 7px 0 0;&#13;
+    font-size: 14px;&#13;
+    color: #71809c;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   HEADER BUTTONS&#13;
+   ========================================= */&#13;
+&#13;
+.header-actions {&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    gap: 10px;&#13;
+}&#13;
+&#13;
+.btn {&#13;
+    display: inline-flex;&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+    min-height: 40px;&#13;
+    padding: 0 17px;&#13;
+    border-radius: 9px;&#13;
+    text-decoration: none !important;&#13;
+    font-size: 13px;&#13;
+    font-weight: 600;&#13;
+    cursor: pointer;&#13;
+    transition: 0.2s ease;&#13;
+    box-sizing: border-box;&#13;
+}&#13;
+&#13;
+.btn-primary {&#13;
+    background: #5367ee;&#13;
+    border: 1px solid #5367ee;&#13;
+    color: #ffffff !important;&#13;
+}&#13;
+&#13;
+.btn-primary:hover {&#13;
+    background: #4357dc;&#13;
+    border-color: #4357dc;&#13;
+}&#13;
+&#13;
+.btn-secondary {&#13;
+    background: #ffffff;&#13;
+    border: 1px solid #cbd5e7;&#13;
+    color: #40577c !important;&#13;
+}&#13;
+&#13;
+.btn-secondary:hover {&#13;
+    background: #f5f7fb;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   STATISTICS&#13;
+   ========================================= */&#13;
+&#13;
+.stats-grid {&#13;
+    display: grid;&#13;
+    grid-template-columns: repeat(4, 1fr);&#13;
+    gap: 16px;&#13;
+    margin-bottom: 24px;&#13;
+}&#13;
+&#13;
+.stat-card {&#13;
+    background: #ffffff;&#13;
+    border: 1px solid #e1e7f2;&#13;
+    border-radius: 15px;&#13;
+    padding: 22px;&#13;
+    min-height: 105px;&#13;
+    box-sizing: border-box;&#13;
+    box-shadow: 0 5px 16px rgba(30, 60, 100, 0.045);&#13;
+}&#13;
+&#13;
+.stat-label {&#13;
+    font-size: 12px;&#13;
+    color: #70809d;&#13;
+    margin-bottom: 8px;&#13;
+}&#13;
+&#13;
+.stat-value {&#13;
+    font-size: 25px;&#13;
+    font-weight: 700;&#13;
+    color: #102a56;&#13;
+    line-height: 1.2;&#13;
+}&#13;
+&#13;
+.stat-description {&#13;
+    font-size: 11px;&#13;
+    color: #8a97ad;&#13;
+    margin-top: 5px;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   FILTER PANEL&#13;
+   ========================================= */&#13;
+&#13;
+.filter-panel {&#13;
+    background: #ffffff;&#13;
+    border: 1px solid #e1e7f2;&#13;
+    border-radius: 15px;&#13;
+    padding: 14px;&#13;
+    display: grid;&#13;
+    grid-template-columns: 1fr 190px 190px 44px;&#13;
+    gap: 10px;&#13;
+    margin-bottom: 34px;&#13;
+    box-shadow: 0 5px 16px rgba(30, 60, 100, 0.045);&#13;
+}&#13;
+&#13;
+.search-box {&#13;
+    position: relative;&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+}&#13;
+&#13;
+.search-icon {&#13;
+    position: absolute;&#13;
+    left: 13px;&#13;
+    font-size: 13px;&#13;
+    color: #71809c;&#13;
+    pointer-events: none;&#13;
+}&#13;
+&#13;
+.search-box input {&#13;
+    width: 100%;&#13;
+    height: 43px;&#13;
+    padding: 0 14px 0 36px;&#13;
+    border: 1px solid #d6deec;&#13;
+    border-radius: 8px;&#13;
+    background: #ffffff;&#13;
+    color: #233d65;&#13;
+    font-size: 13px;&#13;
+    outline: none;&#13;
+    box-sizing: border-box;&#13;
+}&#13;
+&#13;
+.search-box input:focus {&#13;
+    border-color: #5367ee;&#13;
+    box-shadow: 0 0 0 2px rgba(83, 103, 238, 0.08);&#13;
+}&#13;
+&#13;
+.filter-select {&#13;
+    height: 43px;&#13;
+    border: 1px solid #d6deec;&#13;
+    border-radius: 8px;&#13;
+    padding: 0 12px;&#13;
+    background: #ffffff;&#13;
+    color: #263e65;&#13;
+    font-size: 13px;&#13;
+    outline: none;&#13;
+    cursor: pointer;&#13;
+}&#13;
+&#13;
+.filter-select:focus {&#13;
+    border-color: #5367ee;&#13;
+}&#13;
+&#13;
+.refresh-btn {&#13;
+    width: 44px;&#13;
+    height: 43px;&#13;
+    border: 1px solid #d6deec;&#13;
+    border-radius: 8px;&#13;
+    background: #ffffff;&#13;
+    color: #5367ee;&#13;
+    font-size: 20px;&#13;
+    cursor: pointer;&#13;
+}&#13;
+&#13;
+.refresh-btn:hover {&#13;
+    background: #f3f5ff;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   PIPELINE&#13;
+   ========================================= */&#13;
+&#13;
+.pipeline-section {&#13;
+    width: 100%;&#13;
+}&#13;
+&#13;
+.pipeline-header {&#13;
+    display: flex;&#13;
+    justify-content: space-between;&#13;
+    align-items: flex-end;&#13;
+    margin-bottom: 16px;&#13;
+}&#13;
+&#13;
+.pipeline-header h2 {&#13;
+    margin: 0;&#13;
+    font-size: 19px;&#13;
+    font-weight: 600;&#13;
+    color: #092a5c;&#13;
+}&#13;
+&#13;
+.pipeline-header p {&#13;
+    margin: 5px 0 0;&#13;
+    color: #71809c;&#13;
+    font-size: 12px;&#13;
+}&#13;
+&#13;
+.candidate-count {&#13;
+    color: #71809c;&#13;
+    font-size: 12px;&#13;
+    font-weight: 500;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   CANDIDATE LIST&#13;
+   ========================================= */&#13;
+&#13;
+.candidate-list {&#13;
+    display: flex;&#13;
+    flex-direction: column;&#13;
+    gap: 10px;&#13;
+}&#13;
+&#13;
+.candidate-row {&#13;
+    background: #ffffff;&#13;
+    border: 1px solid #e1e7f2;&#13;
+    border-radius: 14px;&#13;
+    min-height: 90px;&#13;
+    padding: 16px 18px;&#13;
+    display: grid;&#13;
+    grid-template-columns:&#13;
+        48px&#13;
+        1.25fr&#13;
+        0.9fr&#13;
+        0.9fr&#13;
+        1fr&#13;
+        1.25fr&#13;
+        0.85fr&#13;
+        auto;&#13;
+    align-items: center;&#13;
+    gap: 18px;&#13;
+    box-sizing: border-box;&#13;
+    box-shadow: 0 4px 13px rgba(30, 60, 100, 0.04);&#13;
+    transition: 0.2s ease;&#13;
+}&#13;
+&#13;
+.candidate-row:hover {&#13;
+    border-color: #ccd5ea;&#13;
+    box-shadow: 0 7px 18px rgba(30, 60, 100, 0.07);&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   AVATAR&#13;
+   ========================================= */&#13;
+&#13;
+.candidate-avatar {&#13;
+    width: 42px;&#13;
+    height: 42px;&#13;
+    border-radius: 50%;&#13;
+    background: #5367ee;&#13;
+    color: #ffffff;&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+    font-size: 15px;&#13;
+    font-weight: 700;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   COLUMNS&#13;
+   ========================================= */&#13;
+&#13;
+.candidate-column {&#13;
+    min-width: 0;&#13;
+}&#13;
+&#13;
+.column-label {&#13;
+    font-size: 9px;&#13;
+    font-weight: 700;&#13;
+    color: #8995aa;&#13;
+    margin-bottom: 6px;&#13;
+    letter-spacing: 0.3px;&#13;
+}&#13;
+&#13;
+.column-value {&#13;
+    color: #122d58;&#13;
+    font-size: 12px;&#13;
+    font-weight: 600;&#13;
+    white-space: nowrap;&#13;
+    overflow: hidden;&#13;
+    text-overflow: ellipsis;&#13;
+}&#13;
+&#13;
+.candidate-name {&#13;
+    color: #122d58;&#13;
+    font-size: 13px;&#13;
+    font-weight: 600;&#13;
+    white-space: nowrap;&#13;
+    overflow: hidden;&#13;
+    text-overflow: ellipsis;&#13;
+}&#13;
+&#13;
+.date-column .column-value {&#13;
+    font-size: 11px;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   STATUS&#13;
+   ========================================= */&#13;
+&#13;
+.status-badge {&#13;
+    display: inline-flex;&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+    min-height: 25px;&#13;
+    padding: 0 9px;&#13;
+    border-radius: 7px;&#13;
+    font-size: 10px;&#13;
+    font-weight: 600;&#13;
+    white-space: nowrap;&#13;
+    background: #eef2ff;&#13;
+    color: #5367ee;&#13;
+}&#13;
+&#13;
+.status-scheduled {&#13;
+    background: #eef2ff;&#13;
+    color: #5367ee;&#13;
+}&#13;
+&#13;
+.status-upcoming {&#13;
+    background: #fff5e5;&#13;
+    color: #c47b12;&#13;
+}&#13;
+&#13;
+.status-completed {&#13;
+    background: #e9f8f0;&#13;
+    color: #218452;&#13;
+}&#13;
+&#13;
+.status-cancelled {&#13;
+    background: #fff0f0;&#13;
+    color: #d34d4d;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   ACTIONS&#13;
+   ========================================= */&#13;
+&#13;
+.candidate-actions {&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    justify-content: flex-end;&#13;
+    gap: 7px;&#13;
+}&#13;
+&#13;
+.action-btn {&#13;
+    height: 31px;&#13;
+    padding: 0 11px;&#13;
+    border-radius: 7px;&#13;
+    font-size: 11px;&#13;
+    font-weight: 600;&#13;
+    cursor: pointer;&#13;
+    transition: 0.2s ease;&#13;
+}&#13;
+&#13;
+.schedule-btn {&#13;
+    background: #5367ee;&#13;
+    color: #ffffff;&#13;
+    border: 1px solid #5367ee;&#13;
+}&#13;
+&#13;
+.schedule-btn:hover {&#13;
+    background: #4357dc;&#13;
+}&#13;
+&#13;
+.view-btn {&#13;
+    background: #eef1ff;&#13;
+    color: #5367ee;&#13;
+    border: 1px solid #eef1ff;&#13;
+}&#13;
+&#13;
+.view-btn:hover {&#13;
+    background: #e1e6ff;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   EMPTY STATE&#13;
+   ========================================= */&#13;
+&#13;
+.empty-state {&#13;
+    background: #ffffff;&#13;
+    border: 1px solid #e1e7f2;&#13;
+    border-radius: 15px;&#13;
+    min-height: 240px;&#13;
+    display: flex;&#13;
+    flex-direction: column;&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+    text-align: center;&#13;
+    padding: 35px;&#13;
+    box-sizing: border-box;&#13;
+}&#13;
+&#13;
+.empty-icon {&#13;
+    width: 48px;&#13;
+    height: 48px;&#13;
+    border-radius: 12px;&#13;
+    background: #eef1ff;&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+    font-size: 21px;&#13;
+    margin-bottom: 15px;&#13;
+}&#13;
+&#13;
+.empty-state h3 {&#13;
+    margin: 0;&#13;
+    font-size: 17px;&#13;
+    color: #102a56;&#13;
+}&#13;
+&#13;
+.empty-state p {&#13;
+    margin: 7px 0 18px;&#13;
+    font-size: 12px;&#13;
+    color: #7a879d;&#13;
+}&#13;
+&#13;
+.empty-action {&#13;
+    min-width: 170px;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   RESPONSIVE&#13;
+   ========================================= */&#13;
+&#13;
+@media (max-width: 1100px) {&#13;
+&#13;
+    .candidate-row {&#13;
+        grid-template-columns:&#13;
+            45px&#13;
+            1.2fr&#13;
+            0.8fr&#13;
+            0.9fr&#13;
+            1fr&#13;
+            auto;&#13;
+    }&#13;
+&#13;
+    .candidate-row .date-column {&#13;
+        display: none;&#13;
+    }&#13;
+&#13;
+    .stats-grid {&#13;
+        grid-template-columns: repeat(2, 1fr);&#13;
+    }&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+@media (max-width: 800px) {&#13;
+&#13;
+    .interview-page {&#13;
+        padding: 18px 14px 40px;&#13;
+    }&#13;
+&#13;
+    .header-content {&#13;
+        flex-direction: column;&#13;
+        align-items: flex-start;&#13;
+    }&#13;
+&#13;
+    .header-actions {&#13;
+        width: 100%;&#13;
+        flex-wrap: wrap;&#13;
+    }&#13;
+&#13;
+    .filter-panel {&#13;
+        grid-template-columns: 1fr;&#13;
+    }&#13;
+&#13;
+    .refresh-btn {&#13;
+        width: 100%;&#13;
+    }&#13;
+&#13;
+    .candidate-row {&#13;
+        grid-template-columns: 45px 1fr auto;&#13;
+        gap: 12px;&#13;
+    }&#13;
+&#13;
+    .candidate-row .candidate-column:not(.candidate-info),&#13;
+    .candidate-row .status-column {&#13;
+        display: none;&#13;
+    }&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+@media (max-width: 520px) {&#13;
+&#13;
+    .page-header {&#13;
+        padding: 22px;&#13;
+    }&#13;
+&#13;
+    .page-header h1 {&#13;
+        font-size: 23px;&#13;
+    }&#13;
+&#13;
+    .stats-grid {&#13;
+        grid-template-columns: 1fr;&#13;
+    }&#13;
+&#13;
+    .header-actions {&#13;
+        flex-direction: column;&#13;
+        align-items: stretch;&#13;
+    }&#13;
+&#13;
+    .btn {&#13;
+        width: 100%;&#13;
+    }&#13;
+&#13;
+    .candidate-row {&#13;
+        grid-template-columns: 40px 1fr;&#13;
+    }&#13;
+&#13;
+    .candidate-actions {&#13;
+        grid-column: 1 / -1;&#13;
+        justify-content: flex-start;&#13;
+        padding-top: 8px;&#13;
+    }&#13;
+&#13;
+}</css>
+        <data_table>sp_instance</data_table>
+        <demo_data/>
+        <description>Recruiter-side real interview scheduling and management</description>
+        <docs/>
+        <field_list/>
+        <has_preview>false</has_preview>
+        <id>campus360_recruiter_interviews</id>
+        <internal>false</internal>
+        <link><![CDATA[function link(scope, element, attrs, controller) {
+  
+}]]></link>
+        <name>Recruiter Interview Management</name>
+        <option_schema/>
+        <public>false</public>
+        <roles/>
+        <script><![CDATA[(function() {
+
+    data.interviews = [];
+
+    data.counts = {
+        scheduled: 0,
+        upcoming: 0,
+        completed: 0,
+        pending: 0
+    };
+
+
+    /*
+     * =========================================
+     * CURRENT TEST RECRUITER
+     * =========================================
+     *
+     * Temporary company mapping.
+     *
+     * Ananya Mehta
+     * Recruiter ID: RCR001
+     * Company: TechNova Solutions
+     * Company ID: CMP001
+     *
+     * Later this will come from
+     * the logged-in recruiter.
+     */
+
+    data.recruiter_name = 'Ananya Mehta';
+    data.recruiter_id = 'RCR001';
+
+
+    /*
+     * =========================================
+     * FIND CMP001 COMPANY
+     * =========================================
+     */
+
+    var companyGR = new GlideRecord(
+        'x_snc_campus360_company_master'
+    );
+
+    companyGR.addQuery(
+        'company_id',
+        'CMP001'
+    );
+
+    companyGR.setLimit(1);
+    companyGR.query();
+
+
+    var companySysId = '';
+
+
+    if (companyGR.next()) {
+
+        companySysId =
+            companyGR.getUniqueValue();
+
+        data.company_name =
+            companyGR.getValue('company_name');
+
+        data.company_id =
+            companyGR.getValue('company_id');
+
+    }
+
+
+    /*
+     * =========================================
+     * SAFETY CHECK
+     * =========================================
+     */
+
+    if (!companySysId) {
+
+        data.error =
+            'Company CMP001 was not found.';
+
+        return;
+
+    }
+
+
+    /*
+     * =========================================
+     * LOAD INTERVIEWS
+     * =========================================
+     */
+
+    var gr = new GlideRecord(
+        'x_snc_campus360_recruiter_interview'
+    );
+
+
+    /*
+     * =========================================
+     * COMPANY FILTER
+     * =========================================
+     *
+     * Interview
+     *      ↓
+     * Opportunity
+     *      ↓
+     * Company
+     *
+     * Only interviews belonging to
+     * CMP001 will be displayed.
+     */
+
+    gr.addQuery(
+        'opportunity.company',
+        companySysId
+    );
+
+
+    gr.orderByDesc('interview_date');
+
+    gr.query();
+
+
+    var now = new GlideDateTime();
+
+
+    /*
+     * =========================================
+     * BUILD INTERVIEW DATA
+     * =========================================
+     */
+
+    while (gr.next()) {
+
+        var interview = {};
+
+
+        interview.sys_id =
+            gr.getUniqueValue();
+
+
+        /*
+         * Interview ID
+         */
+
+        interview.interview_id =
+            gr.getValue('interview_id') || '';
+
+
+        /*
+         * Student
+         */
+
+        interview.student_name =
+            gr.getDisplayValue('student') || '';
+
+        interview.student_sys_id =
+            gr.getValue('student') || '';
+
+
+        /*
+         * Application
+         */
+
+        interview.application_id =
+            gr.getDisplayValue('application') || '';
+
+        interview.application_sys_id =
+            gr.getValue('application') || '';
+
+
+        /*
+         * Opportunity
+         */
+
+        interview.opportunity =
+            gr.getDisplayValue('opportunity') || '';
+
+        interview.opportunity_sys_id =
+            gr.getValue('opportunity') || '';
+
+
+        /*
+         * Interview Round
+         */
+
+        interview.round =
+            gr.getDisplayValue('interview_round') || '';
+
+
+        /*
+         * Interview Mode
+         */
+
+        interview.mode =
+            gr.getDisplayValue('interview_mode') || '';
+
+
+        /*
+         * Interviewer
+         */
+
+        interview.interviewer =
+            gr.getValue('interviewer') || '';
+
+
+        /*
+         * Interview Date
+         */
+
+        interview.interview_date =
+            gr.getDisplayValue('interview_date') || '';
+
+
+        /*
+         * Meeting Link
+         */
+
+        interview.meeting_link =
+            gr.getValue('meeting_link') || '';
+
+
+        /*
+         * Status
+         */
+
+        interview.status =
+            gr.getDisplayValue('status') || '';
+
+
+        /*
+         * Result
+         */
+
+        interview.result =
+            gr.getDisplayValue('result') || '';
+
+
+        /*
+         * Feedback
+         */
+
+        interview.feedback =
+            gr.getValue('feedback') || '';
+
+
+        /*
+         * Add interview
+         */
+
+        data.interviews.push(interview);
+
+
+        /*
+         * =====================================
+         * COUNTERS
+         * =====================================
+         */
+
+        var status =
+            (
+                gr.getDisplayValue('status') || ''
+            ).toLowerCase();
+
+
+        var result =
+            (
+                gr.getDisplayValue('result') || ''
+            ).toLowerCase();
+
+
+        /*
+         * Scheduled
+         */
+
+        if (
+            status == 'scheduled' ||
+            status.indexOf('schedule') >= 0
+        ) {
+
+            data.counts.scheduled++;
+
+        }
+
+
+        /*
+         * Upcoming
+         */
+
+        var interviewDate =
+            gr.getValue('interview_date');
+
+
+        if (
+            interviewDate &&
+            interviewDate > now.getValue() &&
+            status.indexOf('cancel') < 0
+        ) {
+
+            data.counts.upcoming++;
+
+        }
+
+
+        /*
+         * Completed
+         */
+
+        if (
+            status == 'completed' ||
+            status.indexOf('complete') >= 0
+        ) {
+
+            data.counts.completed++;
+
+        }
+
+
+        /*
+         * Pending Result
+         */
+
+        if (
+            result == '' ||
+            result == 'pending'
+        ) {
+
+            data.counts.pending++;
+
+        }
+
+    }
+
+})();]]></script>
+        <servicenow>false</servicenow>
+        <sys_class_name>sp_widget</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-23 19:09:28</sys_created_on>
+        <sys_id>ee5d68c1c4eb43107f44164a4d2463ec</sys_id>
+        <sys_mod_count>19</sys_mod_count>
+        <sys_name>Recruiter Interview Management</sys_name>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name>sp_widget_ee5d68c1c4eb43107f44164a4d2463ec</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-27 16:25:40</sys_updated_on>
+        <template><![CDATA[<div class="interview-page">
+
+    <!-- HEADER -->
+    <section class="page-header">
+        <div class="header-content">
+
+            <div>
+                <div class="section-label">RECRUITMENT</div>
+
+                <h1>Interview Management</h1>
+
+                <p>
+                    Manage interviews for shortlisted candidates
+                </p>
+            </div>
+
+            <div class="header-actions">
+
+                <a
+                    class="btn btn-secondary"
+                    href="?id=campus360_recruiter_dashboard_new">
+                    ← Back to Dashboard
+                </a>
+
+                <!-- This is for creating a completely new interview -->
+                <button
+                    type="button"
+                    class="btn btn-primary"
+                    ng-click="c.newInterview()">
+                    + Schedule Interview
+                </button>
+
+            </div>
+
+        </div>
+    </section>
+
+
+    <!-- STATISTICS -->
+    <section class="stats-grid">
+
+        <div class="stat-card">
+            <div class="stat-label">Scheduled</div>
+
+            <div class="stat-value">
+                {{c.data.counts.scheduled || 0}}
+            </div>
+
+            <div class="stat-description">
+                Interviews scheduled
+            </div>
+        </div>
+
+
+        <div class="stat-card">
+            <div class="stat-label">Upcoming</div>
+
+            <div class="stat-value">
+                {{c.data.counts.upcoming || 0}}
+            </div>
+
+            <div class="stat-description">
+                Upcoming interviews
+            </div>
+        </div>
+
+
+        <div class="stat-card">
+            <div class="stat-label">Completed</div>
+
+            <div class="stat-value">
+                {{c.data.counts.completed || 0}}
+            </div>
+
+            <div class="stat-description">
+                Completed interviews
+            </div>
+        </div>
+
+
+        <div class="stat-card">
+            <div class="stat-label">Pending Result</div>
+
+            <div class="stat-value">
+                {{c.data.counts.pending || 0}}
+            </div>
+
+            <div class="stat-description">
+                Results pending
+            </div>
+        </div>
+
+    </section>
+
+
+    <!-- FILTERS -->
+    <section class="filter-panel">
+
+        <div class="search-box">
+
+            <span class="search-icon">]]>🔍<![CDATA[</span>
+
+            <input
+                type="text"
+                ng-model="c.search"
+                placeholder="Search candidate or opportunity..." />
+
+        </div>
+
+
+        <select
+            class="filter-select"
+            ng-model="c.roundFilter">
+
+            <option value="">All Rounds</option>
+
+            <option value="Technical Round">
+                Technical Round
+            </option>
+
+            <option value="HR Round">
+                HR Round
+            </option>
+
+            <option value="Managerial Round">
+                Managerial Round
+            </option>
+
+            <option value="Final Round">
+                Final Round
+            </option>
+
+        </select>
+
+
+        <select
+            class="filter-select"
+            ng-model="c.statusFilter">
+
+            <option value="">All Status</option>
+
+            <option value="Scheduled">
+                Scheduled
+            </option>
+
+            <option value="Completed">
+                Completed
+            </option>
+
+            <option value="Cancelled">
+                Cancelled
+            </option>
+
+        </select>
+
+
+        <button
+            class="refresh-btn"
+            ng-click="c.refresh()"
+            title="Refresh">
+
+            ↻
+
+        </button>
+
+    </section>
+
+
+    <!-- PIPELINE -->
+    <section class="pipeline-section">
+
+        <div class="pipeline-header">
+
+            <div>
+
+                <div class="section-label">
+                    HIRING PIPELINE
+                </div>
+
+                <h2>
+                    Interview Candidates
+                </h2>
+
+                <p>
+                    Candidates who cleared assessment and moved to interview stage
+                </p>
+
+            </div>
+
+            <div class="candidate-count">
+
+                {{
+                    (c.data.interviews | filter:c.filterInterview).length
+                }}
+
+                Candidates
+
+            </div>
+
+        </div>
+
+
+        <!-- CANDIDATES -->
+        <div
+            class="candidate-list"
+            ng-if="c.data.interviews.length > 0">
+
+            <div
+                class="candidate-row"
+                ng-repeat="
+                    interview in c.data.interviews
+                    | filter:c.filterInterview
+                    track by interview.sys_id
+                ">
+
+                <!-- Avatar -->
+                <div class="candidate-avatar">
+
+                    {{
+                        (interview.student_name || 'C')
+                        .charAt(0)
+                        .toUpperCase()
+                    }}
+
+                </div>
+
+
+                <!-- Candidate -->
+                <div class="candidate-column candidate-info">
+
+                    <div class="column-label">
+                        CANDIDATE
+                    </div>
+
+                    <div class="candidate-name">
+                        {{interview.student_name || 'Unknown Candidate'}}
+                    </div>
+
+                </div>
+
+
+                <!-- Opportunity -->
+                <div class="candidate-column">
+
+                    <div class="column-label">
+                        OPPORTUNITY
+                    </div>
+
+                    <div class="column-value">
+                        {{interview.opportunity || '-'}}
+                    </div>
+
+                </div>
+
+
+                <!-- Application -->
+                <div class="candidate-column">
+
+                    <div class="column-label">
+                        APPLICATION
+                    </div>
+
+                    <div class="column-value">
+                        {{interview.application_id || '-'}}
+                    </div>
+
+                </div>
+
+
+                <!-- Round -->
+                <div class="candidate-column">
+
+                    <div class="column-label">
+                        INTERVIEW ROUND
+                    </div>
+
+                    <div class="column-value">
+                        {{interview.round || '-'}}
+                    </div>
+
+                </div>
+
+
+                <!-- Date -->
+                <div class="candidate-column date-column">
+
+                    <div class="column-label">
+                        DATE & TIME
+                    </div>
+
+                    <div class="column-value">
+                        {{interview.interview_date || '-'}}
+                    </div>
+
+                </div>
+
+
+                <!-- Status -->
+                <div class="candidate-column status-column">
+
+                    <div class="column-label">
+                        STATUS
+                    </div>
+
+                    <span
+                        class="status-badge"
+                        ng-class="{
+                            'status-scheduled':
+                                interview.status == 'Scheduled',
+
+                            'status-completed':
+                                interview.status == 'Completed',
+
+                            'status-cancelled':
+                                interview.status == 'Cancelled'
+                        }">
+
+                        {{interview.status || 'Pending'}}
+
+                    </span>
+
+                </div>
+
+
+                <!-- ACTIONS -->
+                <div class="candidate-actions">
+
+                    <!-- IMPORTANT:
+                         Pass THIS interview record -->
+                    <button
+                        type="button"
+                        class="action-btn schedule-btn"
+                        ng-if="!interview.interview_date"
+                        ng-click="c.scheduleInterview(interview)">
+
+                        Schedule
+
+                    </button>
+                  	
+
+
+                    <button
+                        type="button"
+                        class="btn-view"
+                        ng-click="c.viewInterview(interview)">
+
+                        View
+
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- EMPTY -->
+        <div
+            class="empty-state"
+            ng-if="c.data.interviews.length === 0">
+
+            <div class="empty-icon">
+                ]]>📅
+<![CDATA[            </div>
+
+            <h3>
+                No interview candidates
+            </h3>
+
+            <p>
+                Candidates who clear the assessment will appear here.
+            </p>
+
+        </div>
+
+    </section>
+
+</div>]]></template>
+    </sp_widget>
+</record_update>

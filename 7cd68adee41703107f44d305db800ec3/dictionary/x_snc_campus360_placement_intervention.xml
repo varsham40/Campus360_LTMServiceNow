@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?><database>
+    <element attributes="enforce_dot_walk_cross_scope_access=true" db_object_id="a316d29ee49703107f44d305db800ef5" label=" Placement Intervention" max_length="40" name="x_snc_campus360_placement_intervention" type="collection">
+        <element choice="3" default="AI" label="Recommended By" max_length="20" name="recommended_by" type="choice">
+            <choice>
+                <element inactive_on_update="false" label="Recruiter" sequence="4" value="recruiter"/>
+                <element inactive_on_update="false" label="Mentor" sequence="3" value="mentor"/>
+                <element inactive_on_update="false" label="AI" sequence="0" value="ai"/>
+                <element inactive_on_update="false" label="Trainer" sequence="2" value="trainer"/>
+                <element inactive_on_update="false" label="TPO" sequence="1" value="tpo"/>
+            </choice>
+        </element>
+        <element label="Student" max_length="32" name="student" reference="x_snc_campus360_student_master" type="reference"/>
+        <element label="Before Score" max_length="40" name="before_score" type="integer"/>
+        <element display="true" label="Intervention ID" max_length="20" name="intervention_id" type="string"/>
+        <element label="Activity/Action" max_length="2000" name="activity_action" type="string"/>
+        <element choice="3" default="Training" label="Intervention Type" max_length="30" name="intervention_type" type="choice">
+            <choice>
+                <element inactive_on_update="false" label="Skill Development" sequence="3" value="skill_development"/>
+                <element inactive_on_update="false" label="Training" sequence="0" value="training"/>
+                <element inactive_on_update="false" label="Placement Drive" sequence="6" value="placement_drive"/>
+                <element inactive_on_update="false" label="Mock Interview" sequence="2" value="mock_interview"/>
+                <element inactive_on_update="false" label="Counseling" sequence="5" value="counseling"/>
+                <element inactive_on_update="false" label="Mentoring" sequence="1" value="mentoring"/>
+                <element inactive_on_update="false" label="Resume Improvement" sequence="4" value="resume_improvement"/>
+            </choice>
+        </element>
+        <element label="Completion Date" max_length="40" name="completion_date" type="glide_date"/>
+        <element label="After Score" max_length="40" name="after_score" type="integer"/>
+        <element label="Trainer" max_length="32" name="trainer" reference="x_snc_campus360_trainer_master" type="reference"/>
+        <element choice="3" default="Recommended" label="Status" max_length="20" name="status" type="choice">
+            <choice>
+                <element inactive_on_update="false" label="Recommended" sequence="0" value="recommended"/>
+                <element inactive_on_update="false" label="In Progress" sequence="2" value="in_progress"/>
+                <element inactive_on_update="false" label="Failed" sequence="5" value="failed"/>
+                <element inactive_on_update="false" label="Planned" sequence="1" value="planned"/>
+                <element inactive_on_update="false" label="Cancelled" sequence="4" value="cancelled"/>
+                <element inactive_on_update="false" label="Completed" sequence="3" value="completed"/>
+            </choice>
+        </element>
+        <element label="Effectiveness Score" max_length="40" name="effectiveness_score" type="integer"/>
+        <element choice="3" default="Not Started" label="Progress Status" max_length="255" name="progress_status" type="choice">
+            <choice>
+                <element inactive_on_update="false" label="Not Started" sequence="0" value="Not Started"/>
+                <element inactive_on_update="false" label="Assigned" sequence="1" value="Assigned"/>
+                <element inactive_on_update="false" label="Cancelled" sequence="4" value="Cancelled"/>
+                <element inactive_on_update="false" label="Completed" sequence="3" value="Completed"/>
+                <element inactive_on_update="false" label="In Progress" sequence="2" value="In Progress"/>
+            </choice>
+        </element>
+        <element default="0" label="Progress Percentage" max_length="255" name="progress_percentage" type="integer"/>
+        <element label="Start Date" max_length="40" name="start_date" type="glide_date"/>
+        <element label="Reason" max_length="2000" name="reason" type="string"/>
+        <element label="Training" max_length="32" name="training" reference="x_snc_campus360_training_program" type="reference"/>
+        <index name="index">
+            <element name="training"/>
+        </index>
+        <index name="index2">
+            <element name="trainer"/>
+        </index>
+        <index name="index3">
+            <element name="student"/>
+        </index>
+    </element>
+</database>

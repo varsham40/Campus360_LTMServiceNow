@@ -1,0 +1,1471 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_widget">
+    <sp_widget action="INSERT_OR_UPDATE">
+        <category>custom</category>
+        <client_script><![CDATA[api.controller = function() {
+    var c = this;
+
+    c.search = '';
+    c.statusFilter = 'all';
+    c.modeFilter = 'all';
+    c.selectedInterview = null;
+
+    c.getFilteredInterviews = function() {
+
+        var interviews = c.data.interviews || [];
+        var results = [];
+        var searchText = String(c.search || '').toLowerCase().trim();
+
+        for (var i = 0; i < interviews.length; i++) {
+
+            var interview = interviews[i];
+
+            var matchesSearch = true;
+            var matchesStatus = true;
+            var matchesMode = true;
+
+            if (searchText) {
+
+                var searchable =
+                    String(interview.student || '') + ' ' +
+                    String(interview.studentId || '') + ' ' +
+                    String(interview.opportunity || '') + ' ' +
+                    String(interview.company || '') + ' ' +
+                    String(interview.interviewer || '');
+
+                matchesSearch =
+                    searchable.toLowerCase().indexOf(searchText) !== -1;
+            }
+
+            if (c.statusFilter !== 'all') {
+                matchesStatus =
+                    String(interview.status || '') ===
+                    String(c.statusFilter);
+            }
+
+            if (c.modeFilter !== 'all') {
+                matchesMode =
+                    String(interview.mode || '') ===
+                    String(c.modeFilter);
+            }
+
+            if (matchesSearch && matchesStatus && matchesMode) {
+                results.push(interview);
+            }
+        }
+
+        return results;
+    };
+
+    c.openInterview = function(interview) {
+        c.selectedInterview = interview;
+    };
+
+    c.closeInterview = function() {
+        c.selectedInterview = null;
+    };
+
+    c.refresh = function() {
+        c.server.update();
+    };
+};]]></client_script>
+        <controller_as>c</controller_as>
+        <css>
+/* ==========================================================================
+   ULTIMATE FULLSCREEN EDGE-TO-EDGE RESET (HIDES SERVICENOW TOP BANNER)
+   ========================================================================== */
+
+/* HIDE SERVICENOW PORTAL HEADER FOR ALL TPO PAGE ROOT CONTAINERS */
+body:has(.campus360-company-app) #sp-header,
+body:has(.campus360-company-app) .sp-header,
+body:has(.campus360-company-app) .sp-navbar,
+body:has(.campus360-company-app) #sp-nav-bar,
+body:has(.campus360-company-app) .sp-nav-bar,
+body:has(.campus360-company-app) header#sp-header,
+body:has(.campus360-company-app) header.sp-header,
+body:has(.campus360-company-app) header.navbar,
+body:has(.campus360-company-app) nav.navbar,
+body:has(.campus360-company-app) .navbar.sp-navbar,
+body:has(.campus360-company-app) .navbar.navbar-default,
+body:has(.campus360-company-app) .navbar.navbar-inverse,
+body:has(.campus360-company-page) #sp-header,
+body:has(.campus360-company-page) .sp-header,
+body:has(.campus360-company-page) .sp-navbar,
+body:has(.campus360-company-page) #sp-nav-bar,
+body:has(.campus360-company-page) .sp-nav-bar,
+body:has(.campus360-company-page) header#sp-header,
+body:has(.campus360-company-page) header.sp-header,
+body:has(.campus360-company-page) header.navbar,
+body:has(.campus360-company-page) nav.navbar,
+body:has(.campus360-company-page) .navbar.sp-navbar,
+body:has(.campus360-company-page) .navbar.navbar-default,
+body:has(.campus360-company-page) .navbar.navbar-inverse,
+body:has(.campus360-interviews-app) #sp-header,
+body:has(.campus360-interviews-app) .sp-header,
+body:has(.campus360-interviews-app) .sp-navbar,
+body:has(.campus360-interviews-app) #sp-nav-bar,
+body:has(.campus360-interviews-app) .sp-nav-bar,
+body:has(.campus360-interviews-app) header#sp-header,
+body:has(.campus360-interviews-app) header.sp-header,
+body:has(.campus360-interviews-app) header.navbar,
+body:has(.campus360-interviews-app) nav.navbar,
+body:has(.campus360-interviews-app) .navbar.sp-navbar,
+body:has(.campus360-interviews-app) .navbar.navbar-default,
+body:has(.campus360-interviews-app) .navbar.navbar-inverse,
+body:has(.campus360-interviews-page) #sp-header,
+body:has(.campus360-interviews-page) .sp-header,
+body:has(.campus360-interviews-page) .sp-navbar,
+body:has(.campus360-interviews-page) #sp-nav-bar,
+body:has(.campus360-interviews-page) .sp-nav-bar,
+body:has(.campus360-interviews-page) header#sp-header,
+body:has(.campus360-interviews-page) header.sp-header,
+body:has(.campus360-interviews-page) header.navbar,
+body:has(.campus360-interviews-page) nav.navbar,
+body:has(.campus360-interviews-page) .navbar.sp-navbar,
+body:has(.campus360-interviews-page) .navbar.navbar-default,
+body:has(.campus360-interviews-page) .navbar.navbar-inverse,
+body:has(.c360-page) #sp-header,
+body:has(.c360-page) .sp-header,
+body:has(.c360-page) .sp-navbar,
+body:has(.c360-page) #sp-nav-bar,
+body:has(.c360-page) .sp-nav-bar,
+body:has(.c360-page) header#sp-header,
+body:has(.c360-page) header.sp-header,
+body:has(.c360-page) header.navbar,
+body:has(.c360-page) nav.navbar,
+body:has(.c360-page) .navbar.sp-navbar,
+body:has(.c360-page) .navbar.navbar-default,
+body:has(.c360-page) .navbar.navbar-inverse,
+body:has(.campus360-tpo-app) #sp-header,
+body:has(.campus360-tpo-app) .sp-header,
+body:has(.campus360-tpo-app) .sp-navbar,
+body:has(.campus360-tpo-app) #sp-nav-bar,
+body:has(.campus360-tpo-app) .sp-nav-bar,
+body:has(.campus360-tpo-app) header#sp-header,
+body:has(.campus360-tpo-app) header.sp-header,
+body:has(.campus360-tpo-app) header.navbar,
+body:has(.campus360-tpo-app) nav.navbar,
+body:has(.campus360-tpo-app) .navbar.sp-navbar,
+body:has(.campus360-tpo-app) .navbar.navbar-default,
+body:has(.campus360-tpo-app) .navbar.navbar-inverse,
+body:has(.campus360-tpo-layout) #sp-header,
+body:has(.campus360-tpo-layout) .sp-header,
+body:has(.campus360-tpo-layout) .sp-navbar,
+body:has(.campus360-tpo-layout) #sp-nav-bar,
+body:has(.campus360-tpo-layout) .sp-nav-bar,
+body:has(.campus360-tpo-layout) header#sp-header,
+body:has(.campus360-tpo-layout) header.sp-header,
+body:has(.campus360-tpo-layout) header.navbar,
+body:has(.campus360-tpo-layout) nav.navbar,
+body:has(.campus360-tpo-layout) .navbar.sp-navbar,
+body:has(.campus360-tpo-layout) .navbar.navbar-default,
+body:has(.campus360-tpo-layout) .navbar.navbar-inverse,
+body:has([class*="campus360"]) #sp-header,
+body:has([class*="campus360"]) .sp-header,
+body:has([class*="campus360"]) .sp-navbar,
+body:has([class*="campus360"]) #sp-nav-bar,
+body:has([class*="campus360"]) .sp-nav-bar,
+body:has([class*="campus360"]) header#sp-header,
+body:has([class*="campus360"]) header.sp-header,
+body:has([class*="campus360"]) header.navbar,
+body:has([class*="campus360"]) nav.navbar,
+body:has([class*="campus360"]) .navbar.sp-navbar,
+body:has([class*="campus360"]) .navbar.navbar-default,
+body:has([class*="campus360"]) .navbar.navbar-inverse {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  min-height: 0 !important;
+  max-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+}
+
+/* ZERO MARGIN &amp; PADDING ON SERVICENOW PAGE CONTAINERS WHEN ANY TPO WIDGET PRESENT */
+body:has([class*="campus360"]) .page,
+body:has([class*="campus360"]) #sp-page,
+body:has([class*="campus360"]) #sp-main,
+body:has([class*="campus360"]) .sp-page,
+body:has([class*="campus360"]) .sp-main,
+body:has([class*="campus360"]) .page-wrapper,
+body:has([class*="campus360"]) .main-content,
+body:has([class*="campus360"]) .container,
+body:has([class*="campus360"]) .container-fluid,
+body:has([class*="campus360"]) .row,
+body:has(.c360-page) .page,
+body:has(.c360-page) #sp-page,
+body:has(.c360-page) #sp-main,
+body:has(.c360-page) .sp-page,
+body:has(.c360-page) .sp-main,
+body:has(.c360-page) .page-wrapper,
+body:has(.c360-page) .main-content,
+body:has(.c360-page) .container,
+body:has(.c360-page) .container-fluid,
+body:has(.c360-page) .row {
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+}
+
+
+
+/* ==========================================================================
+   COMPANIES &amp; INTERVIEWS - FULLSCREEN EDGE-TO-EDGE &amp; PURPLE SIDEBAR FIX
+   ========================================================================== */
+
+/* 1. HIDE SERVICENOW TOP BANNER COMPLETELY */
+body #sp-header,
+body .sp-header,
+body .sp-navbar,
+body .navbar.sp-navbar,
+body #sp-nav-bar,
+body .sp-nav-bar,
+body header#sp-header,
+body header.sp-header,
+body .nav.navbar-nav,
+#sp-header,
+.sp-header,
+.sp-navbar,
+header#sp-header,
+header.sp-header,
+.navbar {
+  display: none !important;
+  height: 0 !important;
+  min-height: 0 !important;
+  max-height: 0 !important;
+  visibility: hidden !important;
+  overflow: hidden !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+html, body, #sp-page, .sp-page-container, #page_content, .page, main {
+  width: 100% !important;
+  height: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  background-color: #f8fafc !important;
+}
+
+/* 2. LAYOUT CONTAINER EDGE-TO-EDGE */
+.campus360-tpo-app,
+.campus360-tpo-layout,
+.tpo-layout,
+.tpo-container,
+.campus360-company-page,
+.campus360-interviews-page {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  z-index: 9999 !important;
+  overflow: hidden !important;
+  display: flex !important;
+  background: #f8fafc !important;
+}
+
+/* 3. PURPLE SIDEBAR &amp; WHITE PROFILE TEXT */
+.campus360-sidebar,
+.tpo-sidebar,
+.skill-sidebar,
+aside.campus360-sidebar,
+aside.tpo-sidebar {
+  width: 242px !important;
+  min-width: 242px !important;
+  max-width: 242px !important;
+  height: 100vh !important;
+  flex: 0 0 242px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  position: relative !important;
+  overflow-y: auto !important;
+  background: linear-gradient(180deg, #10092a 0%, #130d31 55%, #0d0822 100%) !important;
+  border-right: 1px solid #2b2247 !important;
+  color: #ffffff !important;
+  z-index: 100 !important;
+}
+
+/* HIDE SIDEBAR SCROLLBAR */
+.campus360-sidebar,
+.campus360-sidebar *,
+.tpo-sidebar,
+.tpo-sidebar *,
+.sidebar-navigation,
+.tpo-sidebar-nav {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+.campus360-sidebar::-webkit-scrollbar,
+.campus360-sidebar *::-webkit-scrollbar,
+.tpo-sidebar::-webkit-scrollbar,
+.sidebar-navigation::-webkit-scrollbar,
+.tpo-sidebar-nav::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+/* BRIGHT WHITE SIDEBAR PROFILE TEXT */
+.tpo-sidebar .user-name,
+.tpo-sidebar .sidebar-user strong,
+.tpo-sidebar .tpo-profile-info strong,
+.tpo-sidebar .tpo-profile-text strong,
+.sidebar-user .user-name,
+.sidebar-user strong,
+.tpo-profile-card strong {
+  font-size: 13px !important;
+  font-weight: 800 !important;
+  color: #ffffff !important;
+}
+
+.tpo-sidebar .user-role,
+.tpo-sidebar .user-dept,
+.tpo-sidebar .tpo-role,
+.tpo-sidebar .sidebar-user span,
+.tpo-sidebar .tpo-profile-info span,
+.tpo-sidebar .tpo-profile-text span,
+.sidebar-user .user-role,
+.sidebar-user span,
+.tpo-profile-card span {
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  color: #bcaeff !important;
+}
+
+/* 4. MAIN CONTENT AREA &amp; FAR-RIGHT SCROLLBAR */
+.campus360-main,
+.tpo-main-wrapper,
+.tpo-main,
+.main-content,
+.tpo-content {
+  flex: 1 1 auto !important;
+  height: 100vh !important;
+  max-height: 100vh !important;
+  overflow-y: scroll !important;
+  overflow-x: hidden !important;
+  background-color: #f8fafc !important;
+  min-width: 0 !important;
+  position: relative !important;
+}
+
+.campus360-main::-webkit-scrollbar,
+.tpo-main-wrapper::-webkit-scrollbar,
+.tpo-main::-webkit-scrollbar,
+.main-content::-webkit-scrollbar,
+.tpo-content::-webkit-scrollbar {
+  width: 10px !important;
+  display: block !important;
+}
+
+.campus360-main::-webkit-scrollbar-track,
+.tpo-main-wrapper::-webkit-scrollbar-track,
+.tpo-main::-webkit-scrollbar-track,
+.main-content::-webkit-scrollbar-track,
+.tpo-content::-webkit-scrollbar-track {
+  background: #f1f5f9 !important;
+  border-left: 1px solid #e2e8f0 !important;
+}
+
+.campus360-main::-webkit-scrollbar-thumb,
+.tpo-main-wrapper::-webkit-scrollbar-thumb,
+.tpo-main::-webkit-scrollbar-thumb,
+.main-content::-webkit-scrollbar-thumb,
+.tpo-content::-webkit-scrollbar-thumb {
+  background: #7c3aed !important;
+  border-radius: 5px !important;
+}
+
+.campus360-main::-webkit-scrollbar-thumb:hover,
+.tpo-main-wrapper::-webkit-scrollbar-thumb:hover,
+.tpo-main::-webkit-scrollbar-thumb:hover,
+.main-content::-webkit-scrollbar-thumb:hover,
+.tpo-content::-webkit-scrollbar-thumb:hover {
+  background: #6d28d9 !important;
+}
+
+
+
+/* ==========================================================================
+   SIDEBAR USER PROFILE CARD - BRIGHT WHITE TEXT FIX (CRITICAL)
+   ========================================================================== */
+
+.tpo-sidebar .sidebar-user,
+.tpo-sidebar .tpo-profile,
+.tpo-sidebar .tpo-profile-card,
+.sidebar-user,
+.tpo-profile-card {
+  margin: 14px 12px 8px !important;
+  padding: 10px 12px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  border: 1px solid #35285b !important;
+  border-radius: 14px !important;
+  background: linear-gradient(145deg, #1c1340, #21174a) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+}
+
+.tpo-sidebar .user-avatar,
+.tpo-sidebar .tpo-avatar,
+.tpo-sidebar .tpo-profile-avatar,
+.sidebar-user .user-avatar,
+.tpo-profile-card .tpo-profile-avatar {
+  width: 40px !important;
+  height: 40px !important;
+  min-width: 40px !important;
+  border-radius: 50% !important;
+  background: linear-gradient(135deg, #7540f4, #944ff5) !important;
+  color: #ffffff !important;
+  font-size: 11px !important;
+  font-weight: 950 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-shadow: 0 4px 12px rgba(117, 64, 244, 0.4) !important;
+}
+
+.tpo-sidebar .user-info,
+.tpo-sidebar .tpo-profile-text,
+.tpo-sidebar .tpo-profile-info,
+.sidebar-user .user-info,
+.tpo-profile-card .tpo-profile-info {
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+}
+
+.tpo-sidebar .user-name,
+.tpo-sidebar .sidebar-user strong,
+.tpo-sidebar .tpo-profile-info strong,
+.tpo-sidebar .tpo-profile-text strong,
+.sidebar-user .user-name,
+.sidebar-user strong,
+.tpo-profile-card strong {
+  font-size: 13px !important;
+  font-weight: 800 !important;
+  color: #ffffff !important; /* CRITICAL BRIGHT WHITE COLOR */
+}
+
+.tpo-sidebar .user-role,
+.tpo-sidebar .user-dept,
+.tpo-sidebar .tpo-role,
+.tpo-sidebar .sidebar-user span,
+.tpo-sidebar .tpo-profile-info span,
+.tpo-sidebar .tpo-profile-text span,
+.sidebar-user .user-role,
+.sidebar-user span,
+.tpo-profile-card span {
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  color: #bcaeff !important; /* LIGHT LAVENDER PURPLE COLOR */
+}
+
+/* SCOPE TOPBAR USER PROFILE EXCLUSIVELY TO TOPBAR */
+.topbar-user .topbar-user-info strong,
+.topbar-user-info strong {
+  font-size: 13px !important;
+  font-weight: 800 !important;
+  color: #0f172a !important;
+}
+
+.topbar-user .topbar-user-info span,
+.topbar-user-info span {
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  color: #64748b !important;
+}
+
+
+
+/* ==========================================================================
+   FAR RIGHT PAGE SCROLLBAR &amp; HIDE SIDEBAR SCROLLBAR (PERFECT FIX)
+   ========================================================================== */
+
+/* 1. HIDE ALL SCROLLBARS ON THE LEFT SIDEBAR / NAVBAR COMPLETELY */
+.tpo-sidebar,
+.tpo-sidebar *,
+.skill-sidebar,
+.skill-sidebar *,
+.sidebar-nav,
+.tpo-sidebar-nav,
+aside.tpo-sidebar {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+.tpo-sidebar::-webkit-scrollbar,
+.tpo-sidebar *::-webkit-scrollbar,
+.skill-sidebar::-webkit-scrollbar,
+.sidebar-nav::-webkit-scrollbar,
+.tpo-sidebar-nav::-webkit-scrollbar,
+aside.tpo-sidebar::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  background: transparent !important;
+}
+
+/* 2. MAKE MAIN PAGE CONTAINER WRAPPER SCROLLABLE ON FAR RIGHT */
+html, body, #sp-page, .sp-page-container, #page_content, .page, main {
+  width: 100% !important;
+  height: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  background-color: #f8fafc !important;
+}
+
+.campus360-tpo-layout,
+.tpo-layout,
+.tpo-container,
+.campus360-skill-intel,
+.tpo-dashboard-center {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  z-index: 9999 !important;
+  overflow: hidden !important;
+  display: flex !important;
+  background: #f8fafc !important;
+}
+
+.tpo-sidebar,
+.skill-sidebar,
+aside.tpo-sidebar {
+  width: 242px !important;
+  min-width: 242px !important;
+  max-width: 242px !important;
+  height: 100vh !important;
+  flex: 0 0 242px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  position: relative !important;
+  overflow-y: auto !important;
+  background: linear-gradient(180deg, #10092a 0%, #130d31 55%, #0d0822 100%) !important;
+  border-right: 1px solid #2b2247 !important;
+  color: #ffffff !important;
+  z-index: 100 !important;
+}
+
+/* MAIN CONTENT WRAPPER - SCROLLBAR FORCED TO FAR RIGHT BROWSER EDGE */
+.tpo-main-wrapper,
+.tpo-main,
+.main-content,
+.tpo-content {
+  flex: 1 1 auto !important;
+  height: 100vh !important;
+  max-height: 100vh !important;
+  overflow-y: scroll !important;
+  overflow-x: hidden !important;
+  background-color: #f8fafc !important;
+  min-width: 0 !important;
+  position: relative !important;
+}
+
+.tpo-content-container,
+.campus360-skill-page,
+.tpo-body {
+  height: auto !important;
+  min-height: 100% !important;
+  overflow: visible !important;
+}
+
+/* CUSTOM HIGH-VISIBILITY PURPLE SCROLLBAR ON THE FAR RIGHT */
+.tpo-main-wrapper::-webkit-scrollbar,
+.tpo-main::-webkit-scrollbar,
+.main-content::-webkit-scrollbar,
+.tpo-content::-webkit-scrollbar {
+  width: 10px !important;
+  display: block !important;
+}
+
+.tpo-main-wrapper::-webkit-scrollbar-track,
+.tpo-main::-webkit-scrollbar-track,
+.main-content::-webkit-scrollbar-track,
+.tpo-content::-webkit-scrollbar-track {
+  background: #f1f5f9 !important;
+  border-left: 1px solid #e2e8f0 !important;
+}
+
+.tpo-main-wrapper::-webkit-scrollbar-thumb,
+.tpo-main::-webkit-scrollbar-thumb,
+.main-content::-webkit-scrollbar-thumb,
+.tpo-content::-webkit-scrollbar-thumb {
+  background: #7c3aed !important;
+  border-radius: 5px !important;
+}
+
+.tpo-main-wrapper::-webkit-scrollbar-thumb:hover,
+.tpo-main::-webkit-scrollbar-thumb:hover,
+.main-content::-webkit-scrollbar-thumb:hover,
+.tpo-content::-webkit-scrollbar-thumb:hover {
+  background: #6d28d9 !important;
+}
+
+
+
+/* =========================================================
+   CAMPUS360 TPO FULL SCREEN EDGE-TO-EDGE RESET
+   ========================================================= */
+
+body #sp-header,
+body .sp-header,
+body .sp-navbar,
+body .navbar.sp-navbar,
+body #sp-nav-bar,
+body .sp-nav-bar,
+body header#sp-header,
+body header.sp-header,
+body .nav.navbar-nav {
+    display: none !important;
+}
+
+html, body {
+    width: 100% !important;
+    height: 100% !important;
+    min-width: 100% !important;
+    min-height: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    background: #f8fafc !important;
+}
+
+body .page,
+body #sp-page,
+body #sp-main,
+body .sp-page,
+body .sp-main,
+body main,
+body .container,
+body .container-fluid,
+body .row,
+body [class*="col-"] {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    border: none !important;
+}
+
+.c360-page {&#13;
+  padding: 28px;&#13;
+  background: #f6f8fb;&#13;
+  min-height: 100vh;&#13;
+  color: #172033;&#13;
+  font-family: Arial, sans-serif;&#13;
+}&#13;
+&#13;
+.c360-header {&#13;
+  display: flex;&#13;
+  justify-content: space-between;&#13;
+  align-items: flex-start;&#13;
+  margin-bottom: 24px;&#13;
+}&#13;
+&#13;
+.c360-eyebrow {&#13;
+  font-size: 11px;&#13;
+  font-weight: 700;&#13;
+  letter-spacing: 1.2px;&#13;
+  color: #64748b;&#13;
+  margin-bottom: 7px;&#13;
+}&#13;
+&#13;
+.c360-header h1 {&#13;
+  margin: 0;&#13;
+  font-size: 28px;&#13;
+}&#13;
+&#13;
+.c360-header p {&#13;
+  margin: 7px 0 0;&#13;
+  color: #64748b;&#13;
+}&#13;
+&#13;
+.c360-refresh {&#13;
+  border: 1px solid #d8dee8;&#13;
+  background: white;&#13;
+  padding: 10px 15px;&#13;
+  border-radius: 8px;&#13;
+  cursor: pointer;&#13;
+  font-weight: 600;&#13;
+}&#13;
+&#13;
+.c360-refresh span {&#13;
+  margin-right: 5px;&#13;
+}&#13;
+&#13;
+.c360-stats {&#13;
+  display: grid;&#13;
+  grid-template-columns: repeat(4, 1fr);&#13;
+  gap: 16px;&#13;
+  margin-bottom: 20px;&#13;
+}&#13;
+&#13;
+.c360-stat {&#13;
+  background: white;&#13;
+  border: 1px solid #e4e8ef;&#13;
+  border-radius: 12px;&#13;
+  padding: 19px;&#13;
+}&#13;
+&#13;
+.stat-label {&#13;
+  font-size: 12px;&#13;
+  color: #64748b;&#13;
+}&#13;
+&#13;
+.stat-value {&#13;
+  font-size: 29px;&#13;
+  font-weight: 700;&#13;
+  margin-top: 8px;&#13;
+}&#13;
+&#13;
+.stat-sub {&#13;
+  font-size: 11px;&#13;
+  color: #94a3b8;&#13;
+  margin-top: 5px;&#13;
+}&#13;
+&#13;
+.c360-toolbar {&#13;
+  display: flex;&#13;
+  gap: 12px;&#13;
+  margin-bottom: 18px;&#13;
+}&#13;
+&#13;
+.search-box {&#13;
+  flex: 1;&#13;
+  display: flex;&#13;
+  align-items: center;&#13;
+  gap: 8px;&#13;
+  background: white;&#13;
+  border: 1px solid #dce2ea;&#13;
+  border-radius: 8px;&#13;
+  padding: 0 12px;&#13;
+}&#13;
+&#13;
+.search-box input {&#13;
+  width: 100%;&#13;
+  border: 0;&#13;
+  outline: none;&#13;
+  padding: 11px 0;&#13;
+}&#13;
+&#13;
+.c360-toolbar select {&#13;
+  border: 1px solid #dce2ea;&#13;
+  background: white;&#13;
+  border-radius: 8px;&#13;
+  padding: 0 13px;&#13;
+  min-width: 150px;&#13;
+}&#13;
+&#13;
+.c360-card {&#13;
+  background: white;&#13;
+  border: 1px solid #e4e8ef;&#13;
+  border-radius: 12px;&#13;
+  overflow: hidden;&#13;
+}&#13;
+&#13;
+.card-header {&#13;
+  padding: 20px;&#13;
+  display: flex;&#13;
+  justify-content: space-between;&#13;
+  align-items: center;&#13;
+  border-bottom: 1px solid #edf0f4;&#13;
+}&#13;
+&#13;
+.card-header h2 {&#13;
+  margin: 0;&#13;
+  font-size: 17px;&#13;
+}&#13;
+&#13;
+.card-header p {&#13;
+  margin: 5px 0 0;&#13;
+  color: #64748b;&#13;
+  font-size: 12px;&#13;
+}&#13;
+&#13;
+.result-count {&#13;
+  color: #64748b;&#13;
+  font-size: 12px;&#13;
+}&#13;
+&#13;
+.table-wrap {&#13;
+  overflow-x: auto;&#13;
+}&#13;
+&#13;
+.c360-table {&#13;
+  width: 100%;&#13;
+  border-collapse: collapse;&#13;
+  min-width: 1100px;&#13;
+}&#13;
+&#13;
+.c360-table th {&#13;
+  background: #f8fafc;&#13;
+  text-align: left;&#13;
+  padding: 12px 15px;&#13;
+  font-size: 11px;&#13;
+  color: #64748b;&#13;
+  text-transform: uppercase;&#13;
+  letter-spacing: .4px;&#13;
+}&#13;
+&#13;
+.c360-table td {&#13;
+  padding: 14px 15px;&#13;
+  border-top: 1px solid #edf0f4;&#13;
+  font-size: 12px;&#13;
+}&#13;
+&#13;
+.student-cell {&#13;
+  display: flex;&#13;
+  align-items: center;&#13;
+  gap: 9px;&#13;
+}&#13;
+&#13;
+.student-cell strong {&#13;
+  display: block;&#13;
+}&#13;
+&#13;
+.student-cell small,&#13;
+.c360-table td small {&#13;
+  display: block;&#13;
+  color: #94a3b8;&#13;
+  margin-top: 3px;&#13;
+}&#13;
+&#13;
+.avatar {&#13;
+  width: 32px;&#13;
+  height: 32px;&#13;
+  border-radius: 50%;&#13;
+  background: #eef2ff;&#13;
+  display: flex;&#13;
+  align-items: center;&#13;
+  justify-content: center;&#13;
+  font-size: 11px;&#13;
+  font-weight: 700;&#13;
+}&#13;
+&#13;
+.status-pill,&#13;
+.feedback-pill,&#13;
+.mode-pill {&#13;
+  display: inline-block;&#13;
+  padding: 5px 9px;&#13;
+  border-radius: 20px;&#13;
+  font-size: 10px;&#13;
+  font-weight: 700;&#13;
+}&#13;
+&#13;
+.status-scheduled {&#13;
+  background: #eff6ff;&#13;
+  color: #2563eb;&#13;
+}&#13;
+&#13;
+.status-completed {&#13;
+  background: #ecfdf5;&#13;
+  color: #047857;&#13;
+}&#13;
+&#13;
+.status-cancelled {&#13;
+  background: #fef2f2;&#13;
+  color: #b91c1c;&#13;
+}&#13;
+&#13;
+.status-rescheduled {&#13;
+  background: #fff7ed;&#13;
+  color: #c2410c;&#13;
+}&#13;
+&#13;
+.mode-pill {&#13;
+  background: #f1f5f9;&#13;
+  color: #475569;&#13;
+}&#13;
+&#13;
+.feedback-done {&#13;
+  background: #ecfdf5;&#13;
+  color: #047857;&#13;
+}&#13;
+&#13;
+.feedback-pending {&#13;
+  background: #fff7ed;&#13;
+  color: #c2410c;&#13;
+}&#13;
+&#13;
+.view-btn {&#13;
+  border: 0;&#13;
+  background: transparent;&#13;
+  color: #2563eb;&#13;
+  font-weight: 600;&#13;
+  cursor: pointer;&#13;
+}&#13;
+&#13;
+.empty-state {&#13;
+  text-align: center;&#13;
+  padding: 45px !important;&#13;
+  color: #94a3b8;&#13;
+}&#13;
+&#13;
+.c360-overlay {&#13;
+  position: fixed;&#13;
+  inset: 0;&#13;
+  background: rgba(15, 23, 42, .35);&#13;
+  z-index: 1000;&#13;
+}&#13;
+&#13;
+.detail-panel {&#13;
+  position: absolute;&#13;
+  right: 0;&#13;
+  top: 0;&#13;
+  height: 100%;&#13;
+  width: 430px;&#13;
+  background: white;&#13;
+  padding: 26px;&#13;
+  overflow-y: auto;&#13;
+  box-shadow: -8px 0 30px rgba(15, 23, 42, .12);&#13;
+}&#13;
+&#13;
+.detail-header {&#13;
+  display: flex;&#13;
+  justify-content: space-between;&#13;
+  align-items: flex-start;&#13;
+  padding-bottom: 20px;&#13;
+  border-bottom: 1px solid #edf0f4;&#13;
+}&#13;
+&#13;
+.detail-header h2 {&#13;
+  margin: 0;&#13;
+  font-size: 22px;&#13;
+}&#13;
+&#13;
+.close-btn {&#13;
+  border: 0;&#13;
+  background: #f1f5f9;&#13;
+  width: 32px;&#13;
+  height: 32px;&#13;
+  border-radius: 50%;&#13;
+  font-size: 20px;&#13;
+  cursor: pointer;&#13;
+}&#13;
+&#13;
+.detail-section {&#13;
+  padding-top: 18px;&#13;
+}&#13;
+&#13;
+.detail-row {&#13;
+  display: flex;&#13;
+  justify-content: space-between;&#13;
+  gap: 20px;&#13;
+  padding: 13px 0;&#13;
+  border-bottom: 1px solid #f1f5f9;&#13;
+}&#13;
+&#13;
+.detail-row span {&#13;
+  color: #64748b;&#13;
+  font-size: 12px;&#13;
+}&#13;
+&#13;
+.detail-row strong {&#13;
+  text-align: right;&#13;
+  font-size: 12px;&#13;
+}&#13;
+&#13;
+@media (max-width: 900px) {&#13;
+  .c360-stats {&#13;
+    grid-template-columns: repeat(2, 1fr);&#13;
+  }&#13;
+&#13;
+  .c360-toolbar {&#13;
+    flex-direction: column;&#13;
+  }&#13;
+&#13;
+  .c360-toolbar select {&#13;
+    min-height: 40px;&#13;
+  }&#13;
+}
+.campus360-tpo-layout,
+.tpo-layout,
+.tpo-container,
+.campus360-skill-intel,
+.tpo-dashboard-center {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  z-index: 9999 !important;
+  overflow: hidden !important;
+  background: #f8fafc !important;
+}
+
+.campus360-tpo-layout,
+.tpo-layout,
+.tpo-container,
+.campus360-skill-intel,
+.tpo-dashboard-center {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  z-index: 9999 !important;
+  overflow: hidden !important;
+  background: #f8fafc !important;
+}
+</css>
+        <data_table>sp_instance</data_table>
+        <demo_data/>
+        <description/>
+        <docs/>
+        <field_list/>
+        <has_preview>false</has_preview>
+        <id>campus360_tpo_interviews</id>
+        <internal>false</internal>
+        <link><![CDATA[function link(scope, element, attrs, controller) {
+  
+}]]></link>
+        <name>Campus360 TPO Interviews</name>
+        <option_schema/>
+        <public>false</public>
+        <roles/>
+        <script><![CDATA[(function() {
+  try { data.chatbotWidget = $sp.getWidget('c4ae634574e703107f4410c9fee0cde5', {}); } catch(e) {}
+
+    data.interviews = [];
+
+    data.stats = {
+        total: 0,
+        scheduled: 0,
+        completed: 0,
+        feedbackPending: 0
+    };
+
+    var interviewGR = new GlideRecord(
+        'x_snc_campus360_mock_interview'
+    );
+
+    interviewGR.query();
+
+    while (interviewGR.next()) {
+
+        var student = '';
+        var studentId = '';
+
+        if (interviewGR.student_reference) {
+
+            var studentGR =
+                interviewGR.student_reference.getRefRecord();
+
+            if (studentGR && studentGR.isValidRecord()) {
+
+                student =
+                    studentGR.getDisplayValue() || '';
+
+                studentId =
+                    studentGR.getValue('student_id') || '';
+            }
+        }
+
+        var opportunity =
+            interviewGR.getDisplayValue(
+                'opportunity_reference'
+            ) || '';
+
+        var company = '';
+
+        if (interviewGR.opportunity_reference) {
+
+            var opportunityGR =
+                interviewGR.opportunity_reference.getRefRecord();
+
+            if (opportunityGR &&
+                opportunityGR.isValidRecord()) {
+
+                company =
+                    opportunityGR.getDisplayValue(
+                        'company_reference'
+                    ) || '';
+            }
+        }
+
+        var status =
+            interviewGR.getDisplayValue('interview_status') ||
+            interviewGR.getValue('interview_status') ||
+            '';
+
+        var mode =
+            interviewGR.getDisplayValue('interview_mode') ||
+            interviewGR.getValue('interview_mode') ||
+            '';
+
+        var interviewer =
+            interviewGR.getDisplayValue('interviewer') ||
+            interviewGR.getValue('interviewer') ||
+            '';
+
+        var interviewDate =
+            interviewGR.getDisplayValue('interview_date') || '';
+
+        var interviewTime =
+            interviewGR.getDisplayValue('interview_time') || '';
+
+        var feedbackStatus =
+            interviewGR.getDisplayValue('feedback_status') ||
+            interviewGR.getValue('feedback_status') ||
+            '';
+
+        var initials = '';
+
+        if (student) {
+
+            var words =
+                student.trim().split(/\s+/);
+
+            if (words.length === 1) {
+
+                initials =
+                    words[0].substring(0, 2);
+
+            } else {
+
+                initials =
+                    words[0].charAt(0) +
+                    words[1].charAt(0);
+            }
+        }
+
+        initials = initials.toUpperCase();
+
+        data.interviews.push({
+
+            sys_id: interviewGR.getUniqueValue(),
+
+            student: student,
+
+            studentId: studentId,
+
+            opportunity: opportunity,
+
+            company: company,
+
+            interviewDate: interviewDate,
+
+            interviewTime: interviewTime,
+
+            mode: mode,
+
+            interviewer: interviewer,
+
+            status: status,
+
+            feedbackStatus: feedbackStatus,
+
+            initials: initials
+        });
+
+        data.stats.total++;
+
+        if (status === 'Scheduled') {
+            data.stats.scheduled++;
+        }
+
+        if (status === 'Completed') {
+            data.stats.completed++;
+        }
+
+        if (!feedbackStatus ||
+            feedbackStatus === 'Pending') {
+
+            data.stats.feedbackPending++;
+        }
+    }
+
+})();
+
+try {
+  data.aiWidget = $sp.getWidget('c4ae634574e703107f4410c9fee0cde5', {});
+  data.chatbotWidget = data.aiWidget;
+} catch(e) {}
+]]></script>
+        <servicenow>false</servicenow>
+        <sys_class_name>sp_widget</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-23 19:05:55</sys_created_on>
+        <sys_id>110234cdc4eb43107f44164a4d246302</sys_id>
+        <sys_mod_count>7</sys_mod_count>
+        <sys_name>Campus360 TPO Interviews</sys_name>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name>sp_widget_110234cdc4eb43107f44164a4d246302</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-30 18:57:26</sys_updated_on>
+        <template><![CDATA[<div class="c360-page">
+
+  <div class="c360-header">
+    <div>
+      <div class="c360-eyebrow">PLACEMENT OPERATIONS</div>
+      <h1>Interview Management</h1>
+      <p>Track interviews, schedules, interviewers and feedback progress.</p>
+    </div>
+
+    <button class="c360-refresh" ng-click="c.refresh()">
+      <span>↻</span> Refresh
+    </button>
+  </div>
+
+  <div class="c360-stats">
+
+    <div class="c360-stat">
+      <div class="stat-label">Total Interviews</div>
+      <div class="stat-value">{{c.data.stats.total}}</div>
+      <div class="stat-sub">All recorded interviews</div>
+    </div>
+
+    <div class="c360-stat">
+      <div class="stat-label">Scheduled</div>
+      <div class="stat-value">{{c.data.stats.scheduled}}</div>
+      <div class="stat-sub">Upcoming interviews</div>
+    </div>
+
+    <div class="c360-stat">
+      <div class="stat-label">Completed</div>
+      <div class="stat-value">{{c.data.stats.completed}}</div>
+      <div class="stat-sub">Interviews completed</div>
+    </div>
+
+    <div class="c360-stat">
+      <div class="stat-label">Feedback Pending</div>
+      <div class="stat-value">{{c.data.stats.feedbackPending}}</div>
+      <div class="stat-sub">Require interviewer feedback</div>
+    </div>
+
+  </div>
+
+  <div class="c360-toolbar">
+
+    <div class="search-box">
+      <span>⌕</span>
+      <input
+        type="text"
+        ng-model="c.search"
+        placeholder="Search student, company or opportunity...">
+    </div>
+
+    <select ng-model="c.statusFilter">
+      <option value="all">All Statuses</option>
+      <option value="Scheduled">Scheduled</option>
+      <option value="Completed">Completed</option>
+      <option value="Cancelled">Cancelled</option>
+      <option value="Rescheduled">Rescheduled</option>
+    </select>
+
+    <select ng-model="c.modeFilter">
+      <option value="all">All Modes</option>
+      <option value="Online">Online</option>
+      <option value="Offline">Offline</option>
+      <option value="Hybrid">Hybrid</option>
+    </select>
+
+  </div>
+
+  <div class="c360-card">
+
+    <div class="card-header">
+      <div>
+        <h2>Interview Schedule</h2>
+        <p>Monitor interview activity across placement drives.</p>
+      </div>
+
+      <div class="result-count">
+        {{c.getFilteredInterviews().length}} interviews
+      </div>
+    </div>
+
+    <div class="table-wrap">
+
+      <table class="c360-table">
+
+        <thead>
+          <tr>
+            <th>Student</th>
+            <th>Opportunity</th>
+            <th>Company</th>
+            <th>Date / Time</th>
+            <th>Mode</th>
+            <th>Interviewer</th>
+            <th>Status</th>
+            <th>Feedback</th>
+            <th></th>
+          </tr>
+        </thead>
+
+        <tbody>
+
+          <tr ng-repeat="interview in c.getFilteredInterviews()">
+
+            <td>
+              <div class="student-cell">
+                <div class="avatar">
+                  {{interview.initials}}
+                </div>
+                <div>
+                  <strong>{{interview.student}}</strong>
+                  <small>{{interview.studentId}}</small>
+                </div>
+              </div>
+            </td>
+
+            <td>{{interview.opportunity}}</td>
+
+            <td>{{interview.company}}</td>
+
+            <td>
+              <strong>{{interview.interviewDate}}</strong>
+              <small>{{interview.interviewTime}}</small>
+            </td>
+
+            <td>
+              <span class="mode-pill">{{interview.mode}}</span>
+            </td>
+
+            <td>{{interview.interviewer}}</td>
+
+            <td>
+              <span
+                class="status-pill"
+                ng-class="{
+                  'status-scheduled': interview.status === 'Scheduled',
+                  'status-completed': interview.status === 'Completed',
+                  'status-cancelled': interview.status === 'Cancelled',
+                  'status-rescheduled': interview.status === 'Rescheduled'
+                }">
+                {{interview.status}}
+              </span>
+            </td>
+
+            <td>
+              <span
+                class="feedback-pill"
+                ng-class="{
+                  'feedback-done': interview.feedbackStatus === 'Submitted',
+                  'feedback-pending': interview.feedbackStatus !== 'Submitted'
+                }">
+                {{interview.feedbackStatus}}
+              </span>
+            </td>
+
+            <td>
+              <button
+                class="view-btn"
+                ng-click="c.openInterview(interview)">
+                View
+              </button>
+            </td>
+
+          </tr>
+
+          <tr ng-if="!c.getFilteredInterviews().length">
+            <td colspan="9" class="empty-state">
+              No interviews found.
+            </td>
+          </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+  </div>
+
+  <div class="c360-overlay" ng-if="c.selectedInterview">
+
+    <div class="detail-panel">
+
+      <div class="detail-header">
+        <div>
+          <div class="c360-eyebrow">INTERVIEW DETAILS</div>
+          <h2>{{c.selectedInterview.student}}</h2>
+        </div>
+
+        <button
+          class="close-btn"
+          ng-click="c.closeInterview()">
+          ×
+        </button>
+      </div>
+
+      <div class="detail-section">
+
+        <div class="detail-row">
+          <span>Student ID</span>
+          <strong>{{c.selectedInterview.studentId}}</strong>
+        </div>
+
+        <div class="detail-row">
+          <span>Opportunity</span>
+          <strong>{{c.selectedInterview.opportunity}}</strong>
+        </div>
+
+        <div class="detail-row">
+          <span>Company</span>
+          <strong>{{c.selectedInterview.company}}</strong>
+        </div>
+
+        <div class="detail-row">
+          <span>Date</span>
+          <strong>{{c.selectedInterview.interviewDate}}</strong>
+        </div>
+
+        <div class="detail-row">
+          <span>Time</span>
+          <strong>{{c.selectedInterview.interviewTime}}</strong>
+        </div>
+
+        <div class="detail-row">
+          <span>Mode</span>
+          <strong>{{c.selectedInterview.mode}}</strong>
+        </div>
+
+        <div class="detail-row">
+          <span>Interviewer</span>
+          <strong>{{c.selectedInterview.interviewer}}</strong>
+        </div>
+
+        <div class="detail-row">
+          <span>Status</span>
+          <strong>{{c.selectedInterview.status}}</strong>
+        </div>
+
+        <div class="detail-row">
+          <span>Feedback</span>
+          <strong>{{c.selectedInterview.feedbackStatus}}</strong>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+<div style="position: fixed; bottom: 24px; right: 24px; z-index: 999999;">
+  
+</div>
+<div style="position: fixed; bottom: 24px; right: 24px; z-index: 999999;">
+  <sp-widget widget="data.aiWidget"></sp-widget>
+</div>
+]]></template>
+    </sp_widget>
+</record_update>

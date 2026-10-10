@@ -1,0 +1,1216 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update sys_domain="global" table="sys_hub_flow">
+    <sys_hub_flow action="INSERT_OR_UPDATE">
+        <access>public</access>
+        <acls/>
+        <active>true</active>
+        <allow_high_security_roles>false</allow_high_security_roles>
+        <annotation/>
+        <attributes>browserActivatedIn=chrome,integrationActivatedIn=standalone,timeFromCreateToActivate=164645000,viewActivatedIn=naturalLanguage</attributes>
+        <authored_on_release_version>29000</authored_on_release_version>
+        <callable_by_client_api>false</callable_by_client_api>
+        <category/>
+        <copied_from>eeeac6897743011031e3b3c64b5a99bd</copied_from>
+        <copied_from_name>FlowTemplate: Record Trigger</copied_from_name>
+        <description>Student updates response opportunity notified</description>
+        <display_name_after_preview/>
+        <flow_priority/>
+        <generation_source/>
+        <internal_name>campus360__student_response_update_application</internal_name>
+        <label_cache>[{"name":"Updated_1.current.student_response","label":"Trigger - Record Updated➛ Record➛Student Response","reference":"","reference_display":"Student Response","type":"choice","base_type":"choice","parent_table_name":"x_snc_campus360_student_application","column_name":"student_response","choices":[{"label":"-- None --","sequence":-1.0,"reference":false,"used":false,"image":"","rawLabel":"-- None --","selected":false,"missing":false,"value":""},{"sequence":0.0,"reference":false,"used":false,"label":"Pending","image":"","rawLabel":"Pending","selected":false,"missing":false,"value":"pending","parameters":{"name":"x_snc_campus360_student_application","dependent_values":[""],"dependent_values_map":{"":"Pending"}}},{"sequence":1.0,"reference":false,"used":false,"label":"Apply","image":"","rawLabel":"Apply","selected":false,"missing":false,"value":"apply","parameters":{"name":"x_snc_campus360_student_application","dependent_values":[""],"dependent_values_map":{"":"Apply"}}},{"sequence":2.0,"reference":false,"used":false,"label":"Ignored","image":"","rawLabel":"Ignored","selected":false,"missing":false,"value":"ignored","parameters":{"name":"x_snc_campus360_student_application","dependent_values":[""],"dependent_values_map":{"":"Ignored"}}},{"sequence":3.0,"reference":false,"used":false,"label":"Not Interested","image":"","rawLabel":"Not Interested","selected":false,"missing":false,"value":"not_interested","parameters":{"name":"x_snc_campus360_student_application","dependent_values":[""],"dependent_values_map":{"":"Not Interested"}}}],"usedInstances":{"65c90e96-9876-4733-83cb-376e18a9540b":["condition"],"073a2864-255d-4d15-a139-06d18b304af8":["condition"],"ae891b30-d26a-449f-b8ee-6b253f95e9cf":["condition"]}},{"name":"Updated_1.current","label":"Trigger - Record Updated➛ Record","reference":"x_snc_campus360_student_application","reference_display":"Student Application","type":"reference","base_type":"reference","choices":[{"order":0.0}],"usedInstances":{"b44af758-339e-4f42-9c42-f2bff184b3b8":["record"],"cf8e6280-2fb9-48ae-99a3-3ebbe312c0fb":["record"],"92db2f0b-ab9d-4bc9-9f15-570ac416aa86":["record"]},"attributes":{"":""}}]</label_cache>
+        <master_snapshot>55fefa2fa89343107f44321b8bcb5627</master_snapshot>
+        <master_snapshot_digest/>
+        <name>Campus360 - Student Response Update Application</name>
+        <natlang/>
+        <outputs/>
+        <pre_compiled>false</pre_compiled>
+        <remote_trigger_id>61fefa2fa89343107f44321b8bcb5683</remote_trigger_id>
+        <run_as>user</run_as>
+        <run_with_roles/>
+        <sc_callable>false</sc_callable>
+        <show_draft_actions>false</show_draft_actions>
+        <show_triggered_flows>false</show_triggered_flows>
+        <status>published</status>
+        <substatus/>
+        <sys_class_name>sys_hub_flow</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-17 15:45:18</sys_created_on>
+        <sys_domain>global</sys_domain>
+        <sys_domain_path>/</sys_domain_path>
+        <sys_id>68ea89cbfd1743107f44e0b0f427db1b</sys_id>
+        <sys_mod_count>26</sys_mod_count>
+        <sys_name>Campus360 - Student Response Update Application</sys_name>
+        <sys_overrides/>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name>sys_hub_flow_68ea89cbfd1743107f44e0b0f427db1b</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:29:25</sys_updated_on>
+        <type>flow</type>
+        <updation_source/>
+        <version>2</version>
+        <version_record>39fefa2fa89343107f44321b8bcb56ce</version_record>
+    </sys_hub_flow>
+    <sys_translated_text action="delete_multiple" query="documentkey=68ea89cbfd1743107f44e0b0f427db1b"/>
+    <sys_variable_value action="delete_multiple" query="document_key=68ea89cbfd1743107f44e0b0f427db1b"/>
+    <sys_flow_record_trigger action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <condition table="x_snc_campus360_student_application">student_response!=pending<item display_value="Pending" endquery="false" field="student_response" goto="false" newquery="false" operator="!=" or="false" value="pending"/>
+        </condition>
+        <name/>
+        <on_delete>false</on_delete>
+        <on_insert>false</on_insert>
+        <on_update>true</on_update>
+        <published_version/>
+        <run_flow_in>background</run_flow_in>
+        <run_on_extended>false</run_on_extended>
+        <run_when_setting>both</run_when_setting>
+        <run_when_user_list/>
+        <run_when_user_setting>any</run_when_user_setting>
+        <sys_class_name>sys_flow_record_trigger</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 13:29:25</sys_created_on>
+        <sys_domain>global</sys_domain>
+        <sys_domain_path>/</sys_domain_path>
+        <sys_id>61fefa2fa89343107f44321b8bcb5683</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_overrides/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:29:25</sys_updated_on>
+        <table>x_snc_campus360_student_application</table>
+        <trigger_definition/>
+    </sys_flow_record_trigger>
+    <sys_trigger_runner_mapping action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <data>{"run_flow_in":"background","run_when_user_list":[],"run_when_setting":"both","run_when_user_setting":"any","run_on_extended":"false"}</data>
+        <identifier>68ea89cbfd1743107f44e0b0f427db1b</identifier>
+        <identifier_type>flow</identifier_type>
+        <runner>FDTriggerRunner</runner>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 13:29:25</sys_created_on>
+        <sys_id>61fefa2fa89343107f44321b8bcb5684</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:29:25</sys_updated_on>
+        <trigger display_value="">61fefa2fa89343107f44321b8bcb5683</trigger>
+    </sys_trigger_runner_mapping>
+    <sys_trigger_runner_mapping action="delete_multiple" query="identifier=68ea89cbfd1743107f44e0b0f427db1b^sys_idNOT IN61fefa2fa89343107f44321b8bcb5684"/>
+    <sys_hub_flow_stage action="delete_multiple" query="flow=68ea89cbfd1743107f44e0b0f427db1b"/>
+    <sys_flow_cat_variable_model action="delete_multiple" query="id=68ea89cbfd1743107f44e0b0f427db1b^sys_idNOT IN2cea89cbfd1743107f44e0b0f427db1c"/>
+    <sys_flow_cat_variable_model action="INSERT_OR_UPDATE">
+        <id>68ea89cbfd1743107f44e0b0f427db1b</id>
+        <name>Campus360 - Student Response Update Application</name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-17 15:45:18</sys_created_on>
+        <sys_id>2cea89cbfd1743107f44e0b0f427db1c</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_scope/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-17 15:45:18</sys_updated_on>
+    </sys_flow_cat_variable_model>
+    <sys_flow_cat_variable action="delete_multiple" query="flow_catalog_model=2cea89cbfd1743107f44e0b0f427db1c"/>
+    <sys_hub_flow_input action="delete_multiple" query="model=68ea89cbfd1743107f44e0b0f427db1b^sys_idNOT IN68ea89cbfd1743107f44e0b0f427db2b,a8ea89cbfd1743107f44e0b0f427db24,e8ea89cbfd1743107f44e0b0f427db30"/>
+    <sys_hub_flow_input action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <array>false</array>
+        <array_denormalized>false</array_denormalized>
+        <attributes>element_mapping_provider=com.glide.flow_design.action.data.FlowDesignVariableMapper,uiType=document_id,uiTypeLabel=Document ID</attributes>
+        <audit>false</audit>
+        <calculation><![CDATA[(function calculatedFieldValue(current) {
+
+	// Add your code here
+	return '';  // return the calculated value
+
+})(current);]]></calculation>
+        <choice/>
+        <choice_field/>
+        <choice_table/>
+        <column_label/>
+        <comments/>
+        <create_roles/>
+        <default_value/>
+        <defaultsort/>
+        <delete_roles/>
+        <dependent>table_name</dependent>
+        <dependent_on_field>table_name</dependent_on_field>
+        <display>false</display>
+        <dynamic_creation>false</dynamic_creation>
+        <dynamic_creation_script/>
+        <dynamic_default_value/>
+        <dynamic_ref_qual/>
+        <element>current</element>
+        <element_reference>false</element_reference>
+        <foreign_database/>
+        <formula/>
+        <function_definition/>
+        <function_field>false</function_field>
+        <help/>
+        <hint/>
+        <internal_type display_value="">document_id</internal_type>
+        <label>Record</label>
+        <mandatory>true</mandatory>
+        <max_length>200</max_length>
+        <model display_value="Campus360 - Student Response Update Application">68ea89cbfd1743107f44e0b0f427db1b</model>
+        <model_id>68ea89cbfd1743107f44e0b0f427db1b</model_id>
+        <model_table>sys_hub_flow</model_table>
+        <name>var__m_sys_hub_flow_input_68ea89cbfd1743107f44e0b0f427db1b</name>
+        <next_element/>
+        <order>100</order>
+        <primary>false</primary>
+        <read_only>false</read_only>
+        <read_only_option/>
+        <read_roles/>
+        <reference/>
+        <reference_cascade_rule/>
+        <reference_floats>false</reference_floats>
+        <reference_key/>
+        <reference_qual/>
+        <reference_qual_condition/>
+        <reference_type/>
+        <sizeclass/>
+        <spell_check>false</spell_check>
+        <staged>false</staged>
+        <sys_class_name>sys_hub_flow_input</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-17 15:45:18</sys_created_on>
+        <sys_id>68ea89cbfd1743107f44e0b0f427db2b</sys_id>
+        <sys_mod_count>1</sys_mod_count>
+        <sys_name/>
+        <sys_package/>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:29:23</sys_updated_on>
+        <table_reference>false</table_reference>
+        <text_index>false</text_index>
+        <unique>false</unique>
+        <use_dependent_field>true</use_dependent_field>
+        <use_dynamic_default>false</use_dynamic_default>
+        <use_reference_qualifier>simple</use_reference_qualifier>
+        <virtual>false</virtual>
+        <virtual_type>script</virtual_type>
+        <widget/>
+        <write_roles/>
+        <xml_view>false</xml_view>
+    </sys_hub_flow_input>
+    <sys_hub_action_input_action_instance action="delete_multiple" query="action_input=68ea89cbfd1743107f44e0b0f427db2b"/>
+    <sys_hub_flow_input action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <array>false</array>
+        <array_denormalized>false</array_denormalized>
+        <attributes>element_mapping_provider=com.glide.flow_design.action.data.FlowDesignVariableMapper,test_input_hidden=true,uiType=table_name,uiTypeLabel=Table Name</attributes>
+        <audit>false</audit>
+        <calculation><![CDATA[(function calculatedFieldValue(current) {
+
+	// Add your code here
+	return '';  // return the calculated value
+
+})(current);]]></calculation>
+        <choice/>
+        <choice_field/>
+        <choice_table/>
+        <column_label/>
+        <comments/>
+        <create_roles/>
+        <default_value/>
+        <defaultsort/>
+        <delete_roles/>
+        <dependent/>
+        <dependent_on_field/>
+        <display>false</display>
+        <dynamic_creation>false</dynamic_creation>
+        <dynamic_creation_script/>
+        <dynamic_default_value/>
+        <dynamic_ref_qual/>
+        <element>table_name</element>
+        <element_reference>false</element_reference>
+        <foreign_database/>
+        <formula/>
+        <function_definition/>
+        <function_field>false</function_field>
+        <help/>
+        <hint/>
+        <internal_type display_value="">table_name</internal_type>
+        <label>Table Name</label>
+        <mandatory>false</mandatory>
+        <max_length>200</max_length>
+        <model display_value="Campus360 - Student Response Update Application">68ea89cbfd1743107f44e0b0f427db1b</model>
+        <model_id>68ea89cbfd1743107f44e0b0f427db1b</model_id>
+        <model_table>sys_hub_flow</model_table>
+        <name>var__m_sys_hub_flow_input_68ea89cbfd1743107f44e0b0f427db1b</name>
+        <next_element/>
+        <order>101</order>
+        <primary>false</primary>
+        <read_only>false</read_only>
+        <read_only_option/>
+        <read_roles/>
+        <reference/>
+        <reference_cascade_rule/>
+        <reference_floats>false</reference_floats>
+        <reference_key/>
+        <reference_qual/>
+        <reference_qual_condition/>
+        <reference_type/>
+        <sizeclass/>
+        <spell_check>false</spell_check>
+        <staged>false</staged>
+        <sys_class_name>sys_hub_flow_input</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-17 15:45:18</sys_created_on>
+        <sys_id>a8ea89cbfd1743107f44e0b0f427db24</sys_id>
+        <sys_mod_count>1</sys_mod_count>
+        <sys_name/>
+        <sys_package/>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:29:23</sys_updated_on>
+        <table_reference>false</table_reference>
+        <text_index>false</text_index>
+        <unique>false</unique>
+        <use_dependent_field>false</use_dependent_field>
+        <use_dynamic_default>false</use_dynamic_default>
+        <use_reference_qualifier>simple</use_reference_qualifier>
+        <virtual>false</virtual>
+        <virtual_type>script</virtual_type>
+        <widget/>
+        <write_roles/>
+        <xml_view>false</xml_view>
+    </sys_hub_flow_input>
+    <sys_hub_action_input_action_instance action="delete_multiple" query="action_input=a8ea89cbfd1743107f44e0b0f427db24"/>
+    <sys_hub_flow_input action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <array>false</array>
+        <array_denormalized>false</array_denormalized>
+        <attributes>child_label=FDChangeDetails,child_name=FDChangeDetails,child_type=object,child_type_label=Object,co_type_name=FDCollection,element_mapping_provider=com.glide.flow_design.action.data.FlowDesignVariableMapper,pwd2droppable=true,uiType=array.object,uiTypeLabel=Array.Object</attributes>
+        <audit>false</audit>
+        <calculation><![CDATA[(function calculatedFieldValue(current) {
+
+	// Add your code here
+	return '';  // return the calculated value
+
+})(current);]]></calculation>
+        <choice/>
+        <choice_field/>
+        <choice_table/>
+        <column_label/>
+        <comments/>
+        <create_roles/>
+        <default_value/>
+        <defaultsort/>
+        <delete_roles/>
+        <dependent/>
+        <dependent_on_field/>
+        <display>false</display>
+        <dynamic_creation>false</dynamic_creation>
+        <dynamic_creation_script/>
+        <dynamic_default_value/>
+        <dynamic_ref_qual/>
+        <element>changed_fields</element>
+        <element_reference>false</element_reference>
+        <foreign_database/>
+        <formula/>
+        <function_definition/>
+        <function_field>false</function_field>
+        <help/>
+        <hint/>
+        <internal_type display_value="String">string</internal_type>
+        <label>Changed Fields</label>
+        <mandatory>false</mandatory>
+        <max_length>4000</max_length>
+        <model display_value="Campus360 - Student Response Update Application">68ea89cbfd1743107f44e0b0f427db1b</model>
+        <model_id>68ea89cbfd1743107f44e0b0f427db1b</model_id>
+        <model_table>sys_hub_flow</model_table>
+        <name>var__m_sys_hub_flow_input_68ea89cbfd1743107f44e0b0f427db1b</name>
+        <next_element/>
+        <order>100</order>
+        <primary>false</primary>
+        <read_only>false</read_only>
+        <read_only_option/>
+        <read_roles/>
+        <reference/>
+        <reference_cascade_rule/>
+        <reference_floats>false</reference_floats>
+        <reference_key/>
+        <reference_qual/>
+        <reference_qual_condition/>
+        <reference_type/>
+        <sizeclass/>
+        <spell_check>false</spell_check>
+        <staged>false</staged>
+        <sys_class_name>sys_hub_flow_input</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-17 15:45:19</sys_created_on>
+        <sys_id>e8ea89cbfd1743107f44e0b0f427db30</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name/>
+        <sys_package/>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-17 15:45:19</sys_updated_on>
+        <table_reference>false</table_reference>
+        <text_index>false</text_index>
+        <unique>false</unique>
+        <use_dependent_field>false</use_dependent_field>
+        <use_dynamic_default>false</use_dynamic_default>
+        <use_reference_qualifier>simple</use_reference_qualifier>
+        <virtual>false</virtual>
+        <virtual_type>script</virtual_type>
+        <widget/>
+        <write_roles/>
+        <xml_view>false</xml_view>
+    </sys_hub_flow_input>
+    <sys_hub_action_input_action_instance action="delete_multiple" query="action_input=e8ea89cbfd1743107f44e0b0f427db30"/>
+    <sys_hub_flow_output action="delete_multiple" query="model=68ea89cbfd1743107f44e0b0f427db1b"/>
+    <sys_hub_alias_mapping action="delete_multiple" query="source_id=68ea89cbfd1743107f44e0b0f427db1b"/>
+    <sys_hub_trigger_instance_v2 action="delete_multiple" query="flow=68ea89cbfd1743107f44e0b0f427db1b^sys_idNOT IN78ea89cbfd1743107f44e0b0f427db9f"/>
+    <sys_hub_trigger_instance_v2 action="INSERT_OR_UPDATE">
+        <comment/>
+        <display_text/>
+        <flow display_value="Campus360 - Student Response Update Application">68ea89cbfd1743107f44e0b0f427db1b</flow>
+        <generation_source/>
+        <name>Updated</name>
+        <published_version/>
+        <remote_sys_id/>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-17 15:45:19</sys_created_on>
+        <sys_id>78ea89cbfd1743107f44e0b0f427db9f</sys_id>
+        <sys_mod_count>4</sys_mod_count>
+        <sys_scope/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:29:23</sys_updated_on>
+        <trigger_definition display_value="Updated">bb695e60c31322002841b63b12d3aea5</trigger_definition>
+        <trigger_inputs>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</trigger_inputs>
+        <trigger_outputs/>
+        <trigger_type>record_update</trigger_type>
+        <updation_source/>
+    </sys_hub_trigger_instance_v2>
+    <sys_hub_action_instance_v2 action="delete_multiple" query="flow=68ea89cbfd1743107f44e0b0f427db1b^sys_idNOT IN4eebcd0ffd1743107f44e0b0f427dbe6,1e8d0903fd5743107f44e0b0f427db5a,88101547fd5743107f44e0b0f427dbe3"/>
+    <sys_hub_action_instance_v2 action="INSERT_OR_UPDATE">
+        <action_type display_value="Update Record">f9d01dd2c31332002841b63b12d3aea1</action_type>
+        <action_type_parent/>
+        <attributes/>
+        <comment/>
+        <compiled_snapshot>f9d01dd2c31332002841b63b12d3aea1</compiled_snapshot>
+        <display_text/>
+        <flow display_value="Campus360 - Student Response Update Application">68ea89cbfd1743107f44e0b0f427db1b</flow>
+        <generation_source/>
+        <order>2</order>
+        <parent_ui_id>ae891b30-d26a-449f-b8ee-6b253f95e9cf</parent_ui_id>
+        <sys_class_name>sys_hub_action_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-17 15:49:47</sys_created_on>
+        <sys_id>4eebcd0ffd1743107f44e0b0f427dbe6</sys_id>
+        <sys_mod_count>3</sys_mod_count>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-22 06:54:33</sys_updated_on>
+        <ui_id>b44af758-339e-4f42-9c42-f2bff184b3b8</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/+1WXW/TMBT9K5afYJQsWbdpK08TY4AEm7SNvawQOc5Na+Q4wR/dStX/zrXjtGXANMQeQKIvq++Xz7m+567XCypKOqK7UKbZYbbPh9lwuJOmOwe7WbE/LLKdcsgAMjqgitWAkRp4o0s8z5h03rBYfGhLZqHMs4Q7rUHZ5RL9pTCtZPOrGIYWPhWyRD8dXX8c0JZprGhB09HijuuhkCQrQGLoeY/pLkY7b/25bLirEVcueuO7mHkcPeTtMXowycPJ0gGFWwuqBARSMWlgQGumkGWj53RktUODBlaeKTlfRUyFsh3Rmt0a8RVv3k19XAXIjMcmrI55bFBnro6ZZRdYmVunV/1qBAfT9aSEijlpX27auoCz1opGdSmWFbLPbqSr1WnXEboqsPEeziAIaD1Pj7yjVV1Mm5vzHuSJUKElkaJsOJOrE7NWi8JZD2dBQULocc3aVqhJ3upmJkIyQqmTicRDUsnmBu80YqISxj3uBLvKkhO0HwfzFdPCk3iPZTB5OaBmbl5KZsyaCvYw/+I8ko5YpJCHLoQW5GESfDLXorVHeNUMVsA7owcdJwW/3RtI6XK5HEStpDv3Dias5zBIxGxoBTlJwZnnnRvLrDNjl6bD0riiFhY19ClEoJa8ojpfVT7vYED5o6r+vODvifIB3HtRngiQpflJM6IoLdTIxELeNed7XV5GJ7mKzpU0H02b2X4aPv8V+jcptKO4Fujm+P4o0++j6fbWWG1tHXFsvyEe8PZRYEA8A+IMkiZ2CqQK9Rhpis/AbUIuQgFSO2OJBnxeRRgJY5kQX/HMDx9Rri7wjzCkqSoDlhRz8iwjQpFXWjeavMEplP6KC+j6FsDMmJCeL2nCEBgSh4q4FoG1GqH6nDFNxpSwCqXXw/PpcMtQCDBCNJqYaaMtvgEnnZD7wAQfeTIB3f/7TUKgf8TAC2994WtFZqsq3rg9VtGs4Ia89hOAYw6XooYnT19sbr1i7z7l88O10Deed735bnOjeM6RjTPD/RSXlQsDsbHAHuE3wwNA9uvpMujw56D7DXXX9m4zl5x2jriZ9h5tMR38Sysp0vjnd9IvfissP34D27+qTyILAAA=</values>
+    </sys_hub_action_instance_v2>
+    <sys_hub_alias_mapping action="delete_multiple" query="source_id=4eebcd0ffd1743107f44e0b0f427dbe6"/>
+    <sys_hub_action_instance_v2 action="INSERT_OR_UPDATE">
+        <action_type display_value="Update Record">f9d01dd2c31332002841b63b12d3aea1</action_type>
+        <action_type_parent/>
+        <attributes/>
+        <comment/>
+        <compiled_snapshot>f9d01dd2c31332002841b63b12d3aea1</compiled_snapshot>
+        <display_text/>
+        <flow display_value="Campus360 - Student Response Update Application">68ea89cbfd1743107f44e0b0f427db1b</flow>
+        <generation_source/>
+        <order>4</order>
+        <parent_ui_id>073a2864-255d-4d15-a139-06d18b304af8</parent_ui_id>
+        <sys_class_name>sys_hub_action_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-17 15:56:53</sys_created_on>
+        <sys_id>1e8d0903fd5743107f44e0b0f427db5a</sys_id>
+        <sys_mod_count>3</sys_mod_count>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-22 06:54:33</sys_updated_on>
+        <ui_id>cf8e6280-2fb9-48ae-99a3-3ebbe312c0fb</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/+1Vy27aQBT9FTRrhGxMUMKuCkKqlCZSkrJJI+t65gIjjcfuPHgU8e+9tsdAaRpRiUUjld19zjnH94iXLZOCjdgARRTfxEOexEnSj6L+9SDOhkkW90UCiDHrMg05UqdBXhhB8RKUrxLb7ddSgEORxj3ujUHtdjuqC2lLBZtpaKMMX0glqM5GL69dVoKhjQ4NG21PSudCUpChotbHFtMpRrcpq1gU3OeEK5Vt8i5MjkOl83lMFRqq4MRRl+HaoRZIQGagLHZZDppYFmbDRs54ShgE8aDVZt+xkNo1RHNYW/mDXh5EVd8MiRkPIuzDNAjUpGdjcPBEm7nzZq9XITnaRhOBM/DK3R7nmoaH0slCNyMOMtVOF8rn+r5RhO0XHH0PbwkElhXPCnlDa/a0KFaPLciJ1LUkgaIqOKh9BM4ZmXlXwdkyVFhrnENZSj1PS1MsZT1MUPLeXFHQm6liRW9aOdc94BXuHqkKvQnlx3V6CkZWJL7QGhredZnd2FsF1h6okIbpd18haYgFCmmtQi1BWl9CNcyNLN0nemqJAfiuG44+6r97YXg4qPrW7dHREzglOVQEUuvAefvNR1EiVtIthIGV/t0A54z8nUPOwN86ZCJRCfsGoeAQhzlhdZg2BH81yXModqahuPfJxYwSD6P6998u/65dsqv3zo3fHK7raOfBMuvUap5yyEtvk2FEHvA1iiNfXOBf4wyQrSee64//NujWFqe5u+PZzn1TCHa4upgbrj+SDwKND2+EP53/60+MVJMSJAkAAA==</values>
+    </sys_hub_action_instance_v2>
+    <sys_hub_alias_mapping action="delete_multiple" query="source_id=1e8d0903fd5743107f44e0b0f427db5a"/>
+    <sys_hub_action_instance_v2 action="INSERT_OR_UPDATE">
+        <action_type display_value="Update Record">f9d01dd2c31332002841b63b12d3aea1</action_type>
+        <action_type_parent/>
+        <attributes/>
+        <comment/>
+        <compiled_snapshot>f9d01dd2c31332002841b63b12d3aea1</compiled_snapshot>
+        <display_text/>
+        <flow display_value="Campus360 - Student Response Update Application">68ea89cbfd1743107f44e0b0f427db1b</flow>
+        <generation_source/>
+        <order>6</order>
+        <parent_ui_id>65c90e96-9876-4733-83cb-376e18a9540b</parent_ui_id>
+        <sys_class_name>sys_hub_action_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-17 16:07:55</sys_created_on>
+        <sys_id>88101547fd5743107f44e0b0f427dbe3</sys_id>
+        <sys_mod_count>3</sys_mod_count>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-22 06:54:33</sys_updated_on>
+        <ui_id>92db2f0b-ab9d-4bc9-9f15-570ac416aa86</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/+1Vy27aQBT9FTRrhGxMUMKuCkKqlCZSkrJJI+t65gIjjcfuPHgU8e+9tsdAaRpRiUUjld19zjnH94iXLZOCjdgARRTfxEOexEnSj6L+9SDOhkkW90UCiDHrMg05UqdBXhhB8RKUrxLb7ddSgEORxj3ujUHtdjuqC2lLBZtpaKMMX0glqM5GL69dVoKhjQ4NG21PSudCUpChotbHFtMpRrcpq1gU3OeEK5Vt8i5MjkOl83lMFRqq4MRRl+HaoRZIQGagLHZZDppYFmbDRs54ShgE8aDVZt+xkNo1RHNYW/mDXh5EVd8MiRkPIuzDNAjUpGdjcPBEm7nzZq9XITnaRhOBM/DK3R7nmoaH0slCNyMOMtVOF8rn+r5RhO0XHH0PbwkElhXPCnlDa/a0KFaPLciJ1LUkgaIqOKh9BM4ZmXlXwdkyVFhrnENZSj1PS1MsZT1MUPLeXFHQm6liRW9aOdc94BXuHqkKvQnlx3V6CkZWJL7QGhredZnd2FsF1h6okIbpd18haYgFCmmtQi1BWl9CNcyNLN0nemqJAfiuG44+6r97YXg4qPrW7dHREzglOVQEUuvAefvNR1EiVtIthIGV/t0A54z8nUPOwN86ZCJRCfsGoeAQhzlhdZg2BH81yXModqahuPfJxYwSD6P6998u/65dsqv3zo3fHK7raOfBMuvUap5yyEtvk2FEHvA1iiNfXOBf4wyQrSee64//NujWFqe5u+PZzn1TCHa4upgbrj+SDwKND2+EP53/60+MVJMSJAkAAA==</values>
+    </sys_hub_action_instance_v2>
+    <sys_hub_alias_mapping action="delete_multiple" query="source_id=88101547fd5743107f44e0b0f427dbe3"/>
+    <sys_hub_sub_flow_instance_v2 action="delete_multiple" query="flow=68ea89cbfd1743107f44e0b0f427db1b"/>
+    <sys_hub_flow_logic_instance_v2 action="delete_multiple" query="flow=68ea89cbfd1743107f44e0b0f427db1b^sys_idNOT INe99bcd0ffd1743107f44e0b0f427db41,262d89cffd1743107f44e0b0f427dbee,9cdf8907fd5743107f44e0b0f427dbc2"/>
+    <sys_hub_flow_logic_instance_v2 action="INSERT_OR_UPDATE">
+        <attributes/>
+        <block display_value="">e99bcd0ffd1743107f44e0b0f427db40</block>
+        <comment/>
+        <connected_to/>
+        <decision_table/>
+        <display_text/>
+        <flow display_value="Campus360 - Student Response Update Application">68ea89cbfd1743107f44e0b0f427db1b</flow>
+        <flow_variables_assigned/>
+        <generation_source/>
+        <logic_definition display_value="If">af4e1945c3e232002841b63b12d3ae3e</logic_definition>
+        <order>1</order>
+        <outputs_assigned/>
+        <parent_ui_id/>
+        <sys_class_name>sys_hub_flow_logic_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-17 15:48:23</sys_created_on>
+        <sys_id>e99bcd0ffd1743107f44e0b0f427db41</sys_id>
+        <sys_mod_count>4</sys_mod_count>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:29:23</sys_updated_on>
+        <ui_id>ae891b30-d26a-449f-b8ee-6b253f95e9cf</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/+1Uy27bMBD8FYNnQ5Cs2Gh8C1IEKNA2QJPm0gbCilzZRCiS5cOOa/jfu9QjCWoHLdoee5I43MfM7oB7ZmKwMfhbc+G9XGm2/HI/ZVInjP73TEOLbMm40UIGaTSbsg2omLD9/rMVEFBURcajc6hD5kMU9K0cemu0x8Pha8zzUoC1ake5QnqrYHf3FyX4WipBkT1VC44YBnRsuf/pKuwsVgpqVNTpJjipV5QuBZ3OYd7Mi3zOy9minOX57M1ZUS/KupiJEvBsQXFj4uUL5SeGkZoQ5MfyxonEZZZPGT4G1AKpXwPK45S1oEmscTu2DC4S4BDEtSZVY8Ra6kDVWIp99PI7pkp5niIbJGEc+9unYzUMtIf52kiO17bj1iEBajXkcKNiqz/2EtIqsIGowrgKQqKnemgT6URj4NTcrM3209jwSupO4HCpDAf1dIJAY6hjQJ+2gQrbtMiWNkfDqawzG9klE5c2Wyk6ZI0yW2qavJcBT8QzmhFkV4S/7eA7cDKp+EBlKJk26CvPnbSjtq45O3RTqb7FxKfXNyip+mFQQJ92QW02OJA+TI89XnXAs9H5GvnDZPDlZPTlsZtfjfsXlm1yaIpzXpy2LJSnLDt53yHHxh0VvuLe4hfuHZDfsu98/t+9L92baNbgJa+6V5bKpbfgj+17n2zat/C9hwRy6YnJbcLejS95utjR1iV/CW2Ne0ganrHDD8M15D4TBgAA</values>
+        <workflow_reference/>
+    </sys_hub_flow_logic_instance_v2>
+    <sys_hub_flow_logic_instance_v2 action="INSERT_OR_UPDATE">
+        <attributes/>
+        <block display_value="">6e2d89cffd1743107f44e0b0f427dbed</block>
+        <comment/>
+        <connected_to>ae891b30-d26a-449f-b8ee-6b253f95e9cf</connected_to>
+        <decision_table/>
+        <display_text/>
+        <flow display_value="Campus360 - Student Response Update Application">68ea89cbfd1743107f44e0b0f427db1b</flow>
+        <flow_variables_assigned/>
+        <generation_source/>
+        <logic_definition display_value="Else If">666e5545c3e232002841b63b12d3ae99</logic_definition>
+        <order>3</order>
+        <outputs_assigned/>
+        <parent_ui_id/>
+        <sys_class_name>sys_hub_flow_logic_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-17 15:55:16</sys_created_on>
+        <sys_id>262d89cffd1743107f44e0b0f427dbee</sys_id>
+        <sys_mod_count>8</sys_mod_count>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:29:23</sys_updated_on>
+        <ui_id>073a2864-255d-4d15-a139-06d18b304af8</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/+1U227UMBD9FeTnVZRkaQV5q0CVkIBKtPQFqsixJ7sWjm182W1Y7b8zk8t2xRa1AoknnhIfz+WcmZPsmE3RpRhu7EUIamVY9eVuwZQhDN93zPAOWMWENVJFZQ1bsA3XibDd7rOTPIKsi0wk78HELMQk8Vl7CM6aAPv915TnS4mlrQeJ2VIFp3l/+1dFxFppibEjXcc9sozgWbX75Sr2DmrNG9DY6zp6ZVaYriSe2py3xWtRiGV5vizzvHz1smjOl01RyiUHXmDcnPjmSP0jA6EmCIW5vPWSuJT5gsF9BCORc9VyHWDBOm5QrvU9q6JPCHjg8sro/hCxViZiNUax90H9AKqU5xTZAgoTMN4ejvU00hEWa6sEXLmB24BE3ugpR1idOvNxlEDLgJYnHedlIJIC1gNHpInGxKm9Xtvtp7nhpTKDwOlSW8H14cQjjqFJEQJtAzR0tMqOO4fDqZ23GzUkI5cuW2k8ZK22W2xK/su4IOIZzohnl4i/HeBb7hWp+IBlMBk3GOogvHKztqE52w9Tqb8n4jPqm5TU4zAwYEy7wDYbmEjvF6c+rwfgweynzv03Niwfs+GL9wNyasaZ9W8cWTzhyAl5liXPzv478tiRRLPhQYl6+HtiOfq+/9iSd2S9sUUYPSRBqIBMbgh7N/+h6aLHrStxDG2t/0YaHrD9T05FZ+PrBQAA</values>
+        <workflow_reference/>
+    </sys_hub_flow_logic_instance_v2>
+    <sys_hub_flow_logic_instance_v2 action="INSERT_OR_UPDATE">
+        <attributes/>
+        <block display_value="">d4df8907fd5743107f44e0b0f427dbc2</block>
+        <comment/>
+        <connected_to>ae891b30-d26a-449f-b8ee-6b253f95e9cf</connected_to>
+        <decision_table/>
+        <display_text/>
+        <flow display_value="Campus360 - Student Response Update Application">68ea89cbfd1743107f44e0b0f427db1b</flow>
+        <flow_variables_assigned/>
+        <generation_source/>
+        <logic_definition display_value="Else If">666e5545c3e232002841b63b12d3ae99</logic_definition>
+        <order>5</order>
+        <outputs_assigned/>
+        <parent_ui_id/>
+        <sys_class_name>sys_hub_flow_logic_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-17 16:06:51</sys_created_on>
+        <sys_id>9cdf8907fd5743107f44e0b0f427dbc2</sys_id>
+        <sys_mod_count>5</sys_mod_count>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:29:23</sys_updated_on>
+        <ui_id>65c90e96-9876-4733-83cb-376e18a9540b</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/+1U227TQBD9FbTPkWU7tIK8VaBKSEAlWvoC1Wq9O05WrHeXvSQNUf6dGV/SiBS1Qognnuw5czszc+wdczn5nOKNu4hRLy1bfLmbMW0Jw/cds6IDtmDSWaWTdpbN2FqYTNhu99krkUDxqpA5BLCpiCkrfPIA0TsbYb//mstyrqxLXNsEiGMCFlE6eiO2t3+jllxpozBlIO9FQM7oZovdL6609cCNaMBgy+sUtF1iulZotaVoq9eykvP6fF6XZf3qZdWcz5uqVnMBosK4KfHN0S4eWQ81QShO5V1QxKUuZwzuE1iFnBetMBFmrBMWp3ZhyxYpZAQCCHVlzfYQscJJsRqj2PuofwBVKkuKbHEDVsLgPZh83OwAy5XTEq58z61HkmjMmCOdyZ39OIxAN4FWZJOmmyCSI9YDT6SJxsipvV65zaep4aW2/YCj0zgpzMESCdfQ5ASRrgEGOrpoJ7zH5XAf3Fr3ycilK5YGjaI1boNNSY2FkES8wB2J4hLxtz18K4KmKT5gGUzGC0YeZdB+mq1vzvb9Vvj3THyG+cZJ+LAMDBjSLrDNGkbS+9mp6nkPPEj/VMD/Rob1YzJ88b5HTsU4sf6NIqsnFDkiz5Lk2dl/RR4rkmg2ImrJ+38plqPv+48leUfSG1rEQUMKpI7I5Iawd9P/mhxbvLqWx9DGhW80wwO2/wkyY5gN+QUAAA==</values>
+        <workflow_reference/>
+    </sys_hub_flow_logic_instance_v2>
+    <sys_hub_pill_compound action="delete_multiple" query="attached_to=68ea89cbfd1743107f44e0b0f427db1b"/>
+    <sys_hub_flow_variable action="delete_multiple" query="model=68ea89cbfd1743107f44e0b0f427db1b"/>
+    <sys_documentation action="INSERT_OR_UPDATE">
+        <element>changed_fields</element>
+        <help/>
+        <hint/>
+        <label>Changed Fields</label>
+        <language>en</language>
+        <name>var__m_sys_hub_flow_input_68ea89cbfd1743107f44e0b0f427db1b</name>
+        <plural/>
+        <sys_class_name>sys_documentation</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-17 15:45:19</sys_created_on>
+        <sys_id>24ea89cbfd1743107f44e0b0f427db34</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name/>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-17 15:45:19</sys_updated_on>
+        <url/>
+        <url_target/>
+    </sys_documentation>
+    <sys_documentation action="INSERT_OR_UPDATE">
+        <element>table_name</element>
+        <help/>
+        <hint/>
+        <label>Table Name</label>
+        <language>en</language>
+        <name>var__m_sys_hub_flow_input_68ea89cbfd1743107f44e0b0f427db1b</name>
+        <plural/>
+        <sys_class_name>sys_documentation</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-17 15:45:18</sys_created_on>
+        <sys_id>6cea89cbfd1743107f44e0b0f427db28</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name/>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-17 15:45:18</sys_updated_on>
+        <url/>
+        <url_target/>
+    </sys_documentation>
+    <sys_documentation action="INSERT_OR_UPDATE">
+        <element>current</element>
+        <help/>
+        <hint/>
+        <label>Record</label>
+        <language>en</language>
+        <name>var__m_sys_hub_flow_input_68ea89cbfd1743107f44e0b0f427db1b</name>
+        <plural/>
+        <sys_class_name>sys_documentation</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-17 15:45:19</sys_created_on>
+        <sys_id>e8ea89cbfd1743107f44e0b0f427db2e</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name/>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-17 15:45:19</sys_updated_on>
+        <url/>
+        <url_target/>
+    </sys_documentation>
+    <sys_choice action="delete_multiple" query="name=var__m_sys_hub_flow_input_68ea89cbfd1743107f44e0b0f427db1b"/>
+    <sys_choice action="delete_multiple" query="name=var__m_sys_hub_flow_output_68ea89cbfd1743107f44e0b0f427db1b"/>
+    <sys_hub_flow_snapshot action="INSERT_OR_UPDATE">
+        <access>public</access>
+        <acls/>
+        <active>true</active>
+        <allow_high_security_roles>false</allow_high_security_roles>
+        <annotation/>
+        <attributes>browserActivatedIn=chrome,integrationActivatedIn=standalone,viewActivatedIn=naturalLanguage</attributes>
+        <authored_on_release_version>29000</authored_on_release_version>
+        <callable_by_client_api>false</callable_by_client_api>
+        <category/>
+        <copied_from>eeeac6897743011031e3b3c64b5a99bd</copied_from>
+        <copied_from_name/>
+        <description>Student updates response opportunity notified</description>
+        <flow_priority/>
+        <internal_name>campus360__student_response_update_application</internal_name>
+        <label_cache>[{"name":"Updated_1.current.student_response","label":"Trigger - Record Updated➛ Record➛Student Response","reference":"","reference_display":"Student Response","type":"choice","base_type":"choice","parent_table_name":"x_snc_campus360_student_application","column_name":"student_response","choices":[{"label":"-- None --","sequence":-1.0,"reference":false,"used":false,"image":"","rawLabel":"-- None --","selected":false,"missing":false,"value":""},{"sequence":0.0,"reference":false,"used":false,"label":"Pending","image":"","rawLabel":"Pending","selected":false,"missing":false,"value":"pending","parameters":{"name":"x_snc_campus360_student_application","dependent_values":[""],"dependent_values_map":{"":"Pending"}}},{"sequence":1.0,"reference":false,"used":false,"label":"Apply","image":"","rawLabel":"Apply","selected":false,"missing":false,"value":"apply","parameters":{"name":"x_snc_campus360_student_application","dependent_values":[""],"dependent_values_map":{"":"Apply"}}},{"sequence":2.0,"reference":false,"used":false,"label":"Ignored","image":"","rawLabel":"Ignored","selected":false,"missing":false,"value":"ignored","parameters":{"name":"x_snc_campus360_student_application","dependent_values":[""],"dependent_values_map":{"":"Ignored"}}},{"sequence":3.0,"reference":false,"used":false,"label":"Not Interested","image":"","rawLabel":"Not Interested","selected":false,"missing":false,"value":"not_interested","parameters":{"name":"x_snc_campus360_student_application","dependent_values":[""],"dependent_values_map":{"":"Not Interested"}}}],"usedInstances":{"65c90e96-9876-4733-83cb-376e18a9540b":["condition"],"073a2864-255d-4d15-a139-06d18b304af8":["condition"],"ae891b30-d26a-449f-b8ee-6b253f95e9cf":["condition"]}},{"name":"Updated_1.current","label":"Trigger - Record Updated➛ Record","reference":"x_snc_campus360_student_application","reference_display":"Student Application","type":"reference","base_type":"reference","choices":[{"order":0.0}],"usedInstances":{"b44af758-339e-4f42-9c42-f2bff184b3b8":["record"],"cf8e6280-2fb9-48ae-99a3-3ebbe312c0fb":["record"],"92db2f0b-ab9d-4bc9-9f15-570ac416aa86":["record"]},"attributes":{"":""}}]</label_cache>
+        <master>true</master>
+        <name>Campus360 - Student Response Update Application</name>
+        <natlang/>
+        <outputs/>
+        <parent_flow display_value="Campus360 - Student Response Update Application">68ea89cbfd1743107f44e0b0f427db1b</parent_flow>
+        <remote_trigger_id/>
+        <run_as>user</run_as>
+        <run_with_roles/>
+        <sc_callable>false</sc_callable>
+        <status>published</status>
+        <sys_class_name>sys_hub_flow_snapshot</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 13:29:24</sys_created_on>
+        <sys_domain>global</sys_domain>
+        <sys_domain_path>/</sys_domain_path>
+        <sys_id>55fefa2fa89343107f44321b8bcb5627</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name/>
+        <sys_overrides/>
+        <sys_package/>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:29:24</sys_updated_on>
+        <type>flow</type>
+        <version>2</version>
+    </sys_hub_flow_snapshot>
+    <sys_translated_text action="delete_multiple" query="documentkey=55fefa2fa89343107f44321b8bcb5627"/>
+    <sys_variable_value action="delete_multiple" query="document_key=55fefa2fa89343107f44321b8bcb5627"/>
+    <sys_hub_flow_stage action="delete_multiple" query="flow=55fefa2fa89343107f44321b8bcb5627"/>
+    <sys_flow_cat_variable_model action="delete_multiple" query="id=55fefa2fa89343107f44321b8bcb5627^sys_idNOT IN95fefa2fa89343107f44321b8bcb5628"/>
+    <sys_flow_cat_variable_model action="INSERT_OR_UPDATE">
+        <id>55fefa2fa89343107f44321b8bcb5627</id>
+        <name>Campus360 - Student Response Update Application</name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 13:29:24</sys_created_on>
+        <sys_id>95fefa2fa89343107f44321b8bcb5628</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_scope/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:29:24</sys_updated_on>
+    </sys_flow_cat_variable_model>
+    <sys_flow_cat_variable action="delete_multiple" query="flow_catalog_model=95fefa2fa89343107f44321b8bcb5628"/>
+    <sys_hub_flow_input action="delete_multiple" query="model=55fefa2fa89343107f44321b8bcb5627^sys_idNOT IN11fefa2fa89343107f44321b8bcb562a,55fefa2fa89343107f44321b8bcb5654,d1fefa2fa89343107f44321b8bcb565f"/>
+    <sys_hub_flow_input action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <array>false</array>
+        <array_denormalized>false</array_denormalized>
+        <attributes>element_mapping_provider=com.glide.flow_design.action.data.FlowDesignVariableMapper,uiType=document_id,uiTypeLabel=Document ID</attributes>
+        <audit>false</audit>
+        <calculation><![CDATA[(function calculatedFieldValue(current) {
+
+	// Add your code here
+	return '';  // return the calculated value
+
+})(current);]]></calculation>
+        <choice/>
+        <choice_field/>
+        <choice_table/>
+        <column_label/>
+        <comments/>
+        <create_roles/>
+        <default_value/>
+        <defaultsort/>
+        <delete_roles/>
+        <dependent>table_name</dependent>
+        <dependent_on_field>table_name</dependent_on_field>
+        <display>false</display>
+        <dynamic_creation>false</dynamic_creation>
+        <dynamic_creation_script/>
+        <dynamic_default_value/>
+        <dynamic_ref_qual/>
+        <element>current</element>
+        <element_reference>false</element_reference>
+        <foreign_database/>
+        <formula/>
+        <function_definition/>
+        <function_field>false</function_field>
+        <help/>
+        <hint/>
+        <internal_type display_value="">document_id</internal_type>
+        <label>Record</label>
+        <mandatory>true</mandatory>
+        <max_length>200</max_length>
+        <model display_value="Campus360 - Student Response Update Application">55fefa2fa89343107f44321b8bcb5627</model>
+        <model_id>55fefa2fa89343107f44321b8bcb5627</model_id>
+        <model_table>sys_hub_flow_snapshot</model_table>
+        <name>var__m_sys_hub_flow_input_55fefa2fa89343107f44321b8bcb5627</name>
+        <next_element/>
+        <order>100</order>
+        <primary>false</primary>
+        <read_only>false</read_only>
+        <read_only_option/>
+        <read_roles/>
+        <reference/>
+        <reference_cascade_rule/>
+        <reference_floats>false</reference_floats>
+        <reference_key/>
+        <reference_qual/>
+        <reference_qual_condition/>
+        <reference_type/>
+        <sizeclass/>
+        <spell_check>false</spell_check>
+        <staged>false</staged>
+        <sys_class_name>sys_hub_flow_input</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 13:29:24</sys_created_on>
+        <sys_id>11fefa2fa89343107f44321b8bcb562a</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name/>
+        <sys_package/>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:29:24</sys_updated_on>
+        <table_reference>false</table_reference>
+        <text_index>false</text_index>
+        <unique>false</unique>
+        <use_dependent_field>true</use_dependent_field>
+        <use_dynamic_default>false</use_dynamic_default>
+        <use_reference_qualifier>simple</use_reference_qualifier>
+        <virtual>false</virtual>
+        <virtual_type>script</virtual_type>
+        <widget/>
+        <write_roles/>
+        <xml_view>false</xml_view>
+    </sys_hub_flow_input>
+    <sys_hub_action_input_action_instance action="delete_multiple" query="action_input=11fefa2fa89343107f44321b8bcb562a"/>
+    <sys_hub_flow_input action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <array>false</array>
+        <array_denormalized>false</array_denormalized>
+        <attributes>child_label=FDChangeDetails,child_name=FDChangeDetails,child_type=object,child_type_label=Object,element_mapping_provider=com.glide.flow_design.action.data.FlowDesignVariableMapper,pwd2droppable=true,uiType=array.object,uiTypeLabel=Array.Object</attributes>
+        <audit>false</audit>
+        <calculation><![CDATA[(function calculatedFieldValue(current) {
+
+	// Add your code here
+	return '';  // return the calculated value
+
+})(current);]]></calculation>
+        <choice/>
+        <choice_field/>
+        <choice_table/>
+        <column_label/>
+        <comments/>
+        <create_roles/>
+        <default_value/>
+        <defaultsort/>
+        <delete_roles/>
+        <dependent/>
+        <dependent_on_field/>
+        <display>false</display>
+        <dynamic_creation>false</dynamic_creation>
+        <dynamic_creation_script/>
+        <dynamic_default_value/>
+        <dynamic_ref_qual/>
+        <element>changed_fields</element>
+        <element_reference>false</element_reference>
+        <foreign_database/>
+        <formula/>
+        <function_definition/>
+        <function_field>false</function_field>
+        <help/>
+        <hint/>
+        <internal_type display_value="String">string</internal_type>
+        <label>Changed Fields</label>
+        <mandatory>false</mandatory>
+        <max_length>4000</max_length>
+        <model display_value="Campus360 - Student Response Update Application">55fefa2fa89343107f44321b8bcb5627</model>
+        <model_id>55fefa2fa89343107f44321b8bcb5627</model_id>
+        <model_table>sys_hub_flow_snapshot</model_table>
+        <name>var__m_sys_hub_flow_input_55fefa2fa89343107f44321b8bcb5627</name>
+        <next_element/>
+        <order>100</order>
+        <primary>false</primary>
+        <read_only>false</read_only>
+        <read_only_option/>
+        <read_roles/>
+        <reference/>
+        <reference_cascade_rule/>
+        <reference_floats>false</reference_floats>
+        <reference_key/>
+        <reference_qual/>
+        <reference_qual_condition/>
+        <reference_type/>
+        <sizeclass/>
+        <spell_check>false</spell_check>
+        <staged>false</staged>
+        <sys_class_name>sys_hub_flow_input</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 13:29:24</sys_created_on>
+        <sys_id>55fefa2fa89343107f44321b8bcb5654</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name/>
+        <sys_package/>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:29:24</sys_updated_on>
+        <table_reference>false</table_reference>
+        <text_index>false</text_index>
+        <unique>false</unique>
+        <use_dependent_field>false</use_dependent_field>
+        <use_dynamic_default>false</use_dynamic_default>
+        <use_reference_qualifier>simple</use_reference_qualifier>
+        <virtual>false</virtual>
+        <virtual_type>script</virtual_type>
+        <widget/>
+        <write_roles/>
+        <xml_view>false</xml_view>
+    </sys_hub_flow_input>
+    <sys_hub_action_input_action_instance action="delete_multiple" query="action_input=55fefa2fa89343107f44321b8bcb5654"/>
+    <sys_hub_flow_input action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <array>false</array>
+        <array_denormalized>false</array_denormalized>
+        <attributes>element_mapping_provider=com.glide.flow_design.action.data.FlowDesignVariableMapper,test_input_hidden=true,uiType=table_name,uiTypeLabel=Table Name</attributes>
+        <audit>false</audit>
+        <calculation><![CDATA[(function calculatedFieldValue(current) {
+
+	// Add your code here
+	return '';  // return the calculated value
+
+})(current);]]></calculation>
+        <choice/>
+        <choice_field/>
+        <choice_table/>
+        <column_label/>
+        <comments/>
+        <create_roles/>
+        <default_value/>
+        <defaultsort/>
+        <delete_roles/>
+        <dependent/>
+        <dependent_on_field/>
+        <display>false</display>
+        <dynamic_creation>false</dynamic_creation>
+        <dynamic_creation_script/>
+        <dynamic_default_value/>
+        <dynamic_ref_qual/>
+        <element>table_name</element>
+        <element_reference>false</element_reference>
+        <foreign_database/>
+        <formula/>
+        <function_definition/>
+        <function_field>false</function_field>
+        <help/>
+        <hint/>
+        <internal_type display_value="">table_name</internal_type>
+        <label>Table Name</label>
+        <mandatory>false</mandatory>
+        <max_length>200</max_length>
+        <model display_value="Campus360 - Student Response Update Application">55fefa2fa89343107f44321b8bcb5627</model>
+        <model_id>55fefa2fa89343107f44321b8bcb5627</model_id>
+        <model_table>sys_hub_flow_snapshot</model_table>
+        <name>var__m_sys_hub_flow_input_55fefa2fa89343107f44321b8bcb5627</name>
+        <next_element/>
+        <order>101</order>
+        <primary>false</primary>
+        <read_only>false</read_only>
+        <read_only_option/>
+        <read_roles/>
+        <reference/>
+        <reference_cascade_rule/>
+        <reference_floats>false</reference_floats>
+        <reference_key/>
+        <reference_qual/>
+        <reference_qual_condition/>
+        <reference_type/>
+        <sizeclass/>
+        <spell_check>false</spell_check>
+        <staged>false</staged>
+        <sys_class_name>sys_hub_flow_input</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 13:29:24</sys_created_on>
+        <sys_id>d1fefa2fa89343107f44321b8bcb565f</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name/>
+        <sys_package/>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:29:24</sys_updated_on>
+        <table_reference>false</table_reference>
+        <text_index>false</text_index>
+        <unique>false</unique>
+        <use_dependent_field>false</use_dependent_field>
+        <use_dynamic_default>false</use_dynamic_default>
+        <use_reference_qualifier>simple</use_reference_qualifier>
+        <virtual>false</virtual>
+        <virtual_type>script</virtual_type>
+        <widget/>
+        <write_roles/>
+        <xml_view>false</xml_view>
+    </sys_hub_flow_input>
+    <sys_hub_action_input_action_instance action="delete_multiple" query="action_input=d1fefa2fa89343107f44321b8bcb565f"/>
+    <sys_hub_flow_output action="delete_multiple" query="model=55fefa2fa89343107f44321b8bcb5627"/>
+    <sys_hub_alias_mapping action="delete_multiple" query="source_id=55fefa2fa89343107f44321b8bcb5627"/>
+    <sys_hub_trigger_instance_v2 action="delete_multiple" query="flow=55fefa2fa89343107f44321b8bcb5627^sys_idNOT IN55fefa2fa89343107f44321b8bcb5676"/>
+    <sys_hub_trigger_instance_v2 action="INSERT_OR_UPDATE">
+        <comment/>
+        <display_text/>
+        <flow display_value="Campus360 - Student Response Update Application">55fefa2fa89343107f44321b8bcb5627</flow>
+        <generation_source/>
+        <name>Updated</name>
+        <published_version/>
+        <remote_sys_id/>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 13:29:25</sys_created_on>
+        <sys_id>55fefa2fa89343107f44321b8bcb5676</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_scope/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:29:25</sys_updated_on>
+        <trigger_definition display_value="Updated">bb695e60c31322002841b63b12d3aea5</trigger_definition>
+        <trigger_inputs>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</trigger_inputs>
+        <trigger_outputs/>
+        <trigger_type>record_update</trigger_type>
+        <updation_source/>
+    </sys_hub_trigger_instance_v2>
+    <sys_hub_action_instance_v2 action="delete_multiple" query="flow=55fefa2fa89343107f44321b8bcb5627^sys_idNOT IN9dfefa2fa89343107f44321b8bcb5673,59fefa2fa89343107f44321b8bcb5674,11fefa2fa89343107f44321b8bcb5675"/>
+    <sys_hub_action_instance_v2 action="INSERT_OR_UPDATE">
+        <action_type display_value="Update Record">f9d01dd2c31332002841b63b12d3aea1</action_type>
+        <action_type_parent display_value="Update Record">baf174c8c3c232002841b63b12d3aee4</action_type_parent>
+        <attributes/>
+        <comment/>
+        <compiled_snapshot>f9d01dd2c31332002841b63b12d3aea1</compiled_snapshot>
+        <display_text/>
+        <flow display_value="Campus360 - Student Response Update Application">55fefa2fa89343107f44321b8bcb5627</flow>
+        <generation_source/>
+        <order>2</order>
+        <parent_ui_id>ae891b30-d26a-449f-b8ee-6b253f95e9cf</parent_ui_id>
+        <sys_class_name>sys_hub_action_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 13:29:25</sys_created_on>
+        <sys_id>9dfefa2fa89343107f44321b8bcb5673</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:29:25</sys_updated_on>
+        <ui_id>b44af758-339e-4f42-9c42-f2bff184b3b8</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/+1WXW/TMBT9K5afYJQsWbdpK08TY4AEm7SNvawQOc5Na+Q4wR/dStX/zrXjtGXANMQeQKIvq++Xz7m+567XCypKOqK7UKbZYbbPh9lwuJOmOwe7WbE/LLKdcsgAMjqgitWAkRp4o0s8z5h03rBYfGhLZqHMs4Q7rUHZ5RL9pTCtZPOrGIYWPhWyRD8dXX8c0JZprGhB09HijuuhkCQrQGLoeY/pLkY7b/25bLirEVcueuO7mHkcPeTtMXowycPJ0gGFWwuqBARSMWlgQGumkGWj53RktUODBlaeKTlfRUyFsh3Rmt0a8RVv3k19XAXIjMcmrI55bFBnro6ZZRdYmVunV/1qBAfT9aSEijlpX27auoCz1opGdSmWFbLPbqSr1WnXEboqsPEeziAIaD1Pj7yjVV1Mm5vzHuSJUKElkaJsOJOrE7NWi8JZD2dBQULocc3aVqhJ3upmJkIyQqmTicRDUsnmBu80YqISxj3uBLvKkhO0HwfzFdPCk3iPZTB5OaBmbl5KZsyaCvYw/+I8ko5YpJCHLoQW5GESfDLXorVHeNUMVsA7owcdJwW/3RtI6XK5HEStpDv3Dias5zBIxGxoBTlJwZnnnRvLrDNjl6bD0riiFhY19ClEoJa8ojpfVT7vYED5o6r+vODvifIB3HtRngiQpflJM6IoLdTIxELeNed7XV5GJ7mKzpU0H02b2X4aPv8V+jcptKO4Fujm+P4o0++j6fbWWG1tHXFsvyEe8PZRYEA8A+IMkiZ2CqQK9Rhpis/AbUIuQgFSO2OJBnxeRRgJY5kQX/HMDx9Rri7wjzCkqSoDlhRz8iwjQpFXWjeavMEplP6KC+j6FsDMmJCeL2nCEBgSh4q4FoG1GqH6nDFNxpSwCqXXw/PpcMtQCDBCNJqYaaMtvgEnnZD7wAQfeTIB3f/7TUKgf8TAC2994WtFZqsq3rg9VtGs4Ia89hOAYw6XooYnT19sbr1i7z7l88O10Deed735bnOjeM6RjTPD/RSXlQsDsbHAHuE3wwNA9uvpMujw56D7DXXX9m4zl5x2jriZ9h5tMR38Sysp0vjnd9IvfissP34D27+qTyILAAA=</values>
+    </sys_hub_action_instance_v2>
+    <sys_hub_alias_mapping action="delete_multiple" query="source_id=9dfefa2fa89343107f44321b8bcb5673"/>
+    <sys_hub_action_instance_v2 action="INSERT_OR_UPDATE">
+        <action_type display_value="Update Record">f9d01dd2c31332002841b63b12d3aea1</action_type>
+        <action_type_parent display_value="Update Record">baf174c8c3c232002841b63b12d3aee4</action_type_parent>
+        <attributes/>
+        <comment/>
+        <compiled_snapshot>f9d01dd2c31332002841b63b12d3aea1</compiled_snapshot>
+        <display_text/>
+        <flow display_value="Campus360 - Student Response Update Application">55fefa2fa89343107f44321b8bcb5627</flow>
+        <generation_source/>
+        <order>4</order>
+        <parent_ui_id>073a2864-255d-4d15-a139-06d18b304af8</parent_ui_id>
+        <sys_class_name>sys_hub_action_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 13:29:25</sys_created_on>
+        <sys_id>59fefa2fa89343107f44321b8bcb5674</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:29:25</sys_updated_on>
+        <ui_id>cf8e6280-2fb9-48ae-99a3-3ebbe312c0fb</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/+1Vy27aQBT9FTRrhGxMUMKuCkKqlCZSkrJJI+t65gIjjcfuPHgU8e+9tsdAaRpRiUUjld19zjnH94iXLZOCjdgARRTfxEOexEnSj6L+9SDOhkkW90UCiDHrMg05UqdBXhhB8RKUrxLb7ddSgEORxj3ujUHtdjuqC2lLBZtpaKMMX0glqM5GL69dVoKhjQ4NG21PSudCUpChotbHFtMpRrcpq1gU3OeEK5Vt8i5MjkOl83lMFRqq4MRRl+HaoRZIQGagLHZZDppYFmbDRs54ShgE8aDVZt+xkNo1RHNYW/mDXh5EVd8MiRkPIuzDNAjUpGdjcPBEm7nzZq9XITnaRhOBM/DK3R7nmoaH0slCNyMOMtVOF8rn+r5RhO0XHH0PbwkElhXPCnlDa/a0KFaPLciJ1LUkgaIqOKh9BM4ZmXlXwdkyVFhrnENZSj1PS1MsZT1MUPLeXFHQm6liRW9aOdc94BXuHqkKvQnlx3V6CkZWJL7QGhredZnd2FsF1h6okIbpd18haYgFCmmtQi1BWl9CNcyNLN0nemqJAfiuG44+6r97YXg4qPrW7dHREzglOVQEUuvAefvNR1EiVtIthIGV/t0A54z8nUPOwN86ZCJRCfsGoeAQhzlhdZg2BH81yXModqahuPfJxYwSD6P6998u/65dsqv3zo3fHK7raOfBMuvUap5yyEtvk2FEHvA1iiNfXOBf4wyQrSee64//NujWFqe5u+PZzn1TCHa4upgbrj+SDwKND2+EP53/60+MVJMSJAkAAA==</values>
+    </sys_hub_action_instance_v2>
+    <sys_hub_alias_mapping action="delete_multiple" query="source_id=59fefa2fa89343107f44321b8bcb5674"/>
+    <sys_hub_action_instance_v2 action="INSERT_OR_UPDATE">
+        <action_type display_value="Update Record">f9d01dd2c31332002841b63b12d3aea1</action_type>
+        <action_type_parent display_value="Update Record">baf174c8c3c232002841b63b12d3aee4</action_type_parent>
+        <attributes/>
+        <comment/>
+        <compiled_snapshot>f9d01dd2c31332002841b63b12d3aea1</compiled_snapshot>
+        <display_text/>
+        <flow display_value="Campus360 - Student Response Update Application">55fefa2fa89343107f44321b8bcb5627</flow>
+        <generation_source/>
+        <order>6</order>
+        <parent_ui_id>65c90e96-9876-4733-83cb-376e18a9540b</parent_ui_id>
+        <sys_class_name>sys_hub_action_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 13:29:25</sys_created_on>
+        <sys_id>11fefa2fa89343107f44321b8bcb5675</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:29:25</sys_updated_on>
+        <ui_id>92db2f0b-ab9d-4bc9-9f15-570ac416aa86</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/+1Vy27aQBT9FTRrhGxMUMKuCkKqlCZSkrJJI+t65gIjjcfuPHgU8e+9tsdAaRpRiUUjld19zjnH94iXLZOCjdgARRTfxEOexEnSj6L+9SDOhkkW90UCiDHrMg05UqdBXhhB8RKUrxLb7ddSgEORxj3ujUHtdjuqC2lLBZtpaKMMX0glqM5GL69dVoKhjQ4NG21PSudCUpChotbHFtMpRrcpq1gU3OeEK5Vt8i5MjkOl83lMFRqq4MRRl+HaoRZIQGagLHZZDppYFmbDRs54ShgE8aDVZt+xkNo1RHNYW/mDXh5EVd8MiRkPIuzDNAjUpGdjcPBEm7nzZq9XITnaRhOBM/DK3R7nmoaH0slCNyMOMtVOF8rn+r5RhO0XHH0PbwkElhXPCnlDa/a0KFaPLciJ1LUkgaIqOKh9BM4ZmXlXwdkyVFhrnENZSj1PS1MsZT1MUPLeXFHQm6liRW9aOdc94BXuHqkKvQnlx3V6CkZWJL7QGhredZnd2FsF1h6okIbpd18haYgFCmmtQi1BWl9CNcyNLN0nemqJAfiuG44+6r97YXg4qPrW7dHREzglOVQEUuvAefvNR1EiVtIthIGV/t0A54z8nUPOwN86ZCJRCfsGoeAQhzlhdZg2BH81yXModqahuPfJxYwSD6P6998u/65dsqv3zo3fHK7raOfBMuvUap5yyEtvk2FEHvA1iiNfXOBf4wyQrSee64//NujWFqe5u+PZzn1TCHa4upgbrj+SDwKND2+EP53/60+MVJMSJAkAAA==</values>
+    </sys_hub_action_instance_v2>
+    <sys_hub_alias_mapping action="delete_multiple" query="source_id=11fefa2fa89343107f44321b8bcb5675"/>
+    <sys_hub_sub_flow_instance_v2 action="delete_multiple" query="flow=55fefa2fa89343107f44321b8bcb5627"/>
+    <sys_hub_flow_logic_instance_v2 action="delete_multiple" query="flow=55fefa2fa89343107f44321b8bcb5627^sys_idNOT INd9fefa2fa89343107f44321b8bcb566f,55fefa2fa89343107f44321b8bcb5671,5dfefa2fa89343107f44321b8bcb5672"/>
+    <sys_hub_flow_logic_instance_v2 action="INSERT_OR_UPDATE">
+        <attributes/>
+        <block display_value="">e99bcd0ffd1743107f44e0b0f427db40</block>
+        <comment/>
+        <connected_to/>
+        <decision_table/>
+        <display_text/>
+        <flow display_value="Campus360 - Student Response Update Application">55fefa2fa89343107f44321b8bcb5627</flow>
+        <flow_variables_assigned/>
+        <generation_source/>
+        <logic_definition display_value="If">af4e1945c3e232002841b63b12d3ae3e</logic_definition>
+        <order>1</order>
+        <outputs_assigned/>
+        <parent_ui_id/>
+        <sys_class_name>sys_hub_flow_logic_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 13:29:25</sys_created_on>
+        <sys_id>d9fefa2fa89343107f44321b8bcb566f</sys_id>
+        <sys_mod_count>1</sys_mod_count>
+        <sys_scope/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:29:25</sys_updated_on>
+        <ui_id>ae891b30-d26a-449f-b8ee-6b253f95e9cf</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/+1Vy27bMBD8FYNnQZCs2Gh8CxwEKNA2QJPm0gbCmqRiIhTJ8mFHFfzvXephG7WLNkiPPUkc7i5nlrNSS3TwJnh3r6+cE0+KLL4+JkSoiOF7SxTUnCwI1YoJL7QiCdmADBFr2y+GgeeszFMarOXKp84Hhs/Scme0cny3+xayrGBgjGwwlwlnJDQPbyhB10IyjOypGrDI0HNLFu0vW4LhCZcwq2Z5NqPFdF5Ms2z67iJfzYtVPmUF8Is5FpSw4hJDl0caz8j2jYmQ81aop2H9YUi9G0FtWaQyzRLCXzxXjCOJCqTjCalBoVZtG7LwNiBgObBbhaLGiLVQHquRGPvixA8eK2VZjKw46qK8390vy6GfPVxdgwekEqgPdgilay0od31HGK8gSL88xvqAW9Op7FI8rOSYrWWo1ae+GWRfYLw+RIJDEtxEpZH7IKS6W+vt55HljVBdV4ZNqSnI/Qo89m4VfOTTEi55HS+/xtvGjpbG6o3okpFLnT5JXKSV1Fs8NPo1BRqJp9hYSG8Qv+7gB7AiqviIZTAZveBKR60wo7bucLJLiGvcUoJzB43Y3PJ7iAx7xYO2sm9PTOkKXeHBGz7I2CWnk1J2wGFc6JrT58ng7sno7tOZ+G3c64xfZVDllzQ/b3wozhl/0vv51P6jltfMQP6HGRiQvxqC2ez/DLx5BiLNFThBy+77juXiZ+gfDsFjNHt/6L7ZVDjkdh+x9+NfJW406ChBj6Gtts9R1QHb/QR6q/83nwYAAA==</values>
+        <workflow_reference/>
+    </sys_hub_flow_logic_instance_v2>
+    <sys_hub_flow_logic_instance_v2 action="INSERT_OR_UPDATE">
+        <attributes/>
+        <block display_value="">6e2d89cffd1743107f44e0b0f427dbed</block>
+        <comment/>
+        <connected_to>ae891b30-d26a-449f-b8ee-6b253f95e9cf</connected_to>
+        <decision_table/>
+        <display_text/>
+        <flow display_value="Campus360 - Student Response Update Application">55fefa2fa89343107f44321b8bcb5627</flow>
+        <flow_variables_assigned/>
+        <generation_source/>
+        <logic_definition display_value="Else If">666e5545c3e232002841b63b12d3ae99</logic_definition>
+        <order>3</order>
+        <outputs_assigned/>
+        <parent_ui_id/>
+        <sys_class_name>sys_hub_flow_logic_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 13:29:25</sys_created_on>
+        <sys_id>55fefa2fa89343107f44321b8bcb5671</sys_id>
+        <sys_mod_count>1</sys_mod_count>
+        <sys_scope/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:29:25</sys_updated_on>
+        <ui_id>073a2864-255d-4d15-a139-06d18b304af8</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/+1VXWvbMBT9K0PPxtjOWra8lZTCYFth7fqyFXMtyYmYLGn6SOqZ/Pdd+SuhKWylfeyTraN7r845PrY7ooM3wbtbfeGcWCuy/HGfEKEihvcdUdBwsiRUKya80IokZAsyRKzrvhsGnrMyT2mwliufOh8YXkvLndHK8f3+Z8iyBcPR2nKG3Uw4I6G9e9EQuhGSYe1A14BFlp5bsuwebQmGZ9QZ1PlHmtNFcb4osqz48D6vzhdVXrAFcMhxoISKSyxdHel8QrpvTYSct0Ktx/XnsfVmArVlkUqRJYQ/eK4YUl7WIB1PSAMK1WrbkqW3AQHLgV0r2c4VG6E8TiOx9sGJPzxOyrJYWXPURfmwOy/L0dEBri/BA1IJ1Ac7ltKNFpS7wRHGawjSr46xoeDa9Cr7Fg+VnLq1DI36OphB5gHTA0QkOCTBTVQauY9C6puN3n2bWF4J1bsybkpNQc4r8OhdFXzk0xEueRMffwPGoKOlsXor+mbk0qRriYu0lnqHh8bMpkAj8RSNhfQK8csevgMrooovOAabMQuudNQKM2nrDyf7hLjWrSQ4d9CI5pa/Q2Q4KB61lYM9saUfdIEHb/koY5+cvi1lDxxemdP8v3aYi6fC/G7I6GmkJ37PyXX+j1yPyH8F++zsLdcvznWkWYETtOy/2zguflpeMdj3McDDobPZVDjkdhuxT9PfIm60mChBj6Gdtr+iqgO2/wsfmA8DdwYAAA==</values>
+        <workflow_reference/>
+    </sys_hub_flow_logic_instance_v2>
+    <sys_hub_flow_logic_instance_v2 action="INSERT_OR_UPDATE">
+        <attributes/>
+        <block display_value="">d4df8907fd5743107f44e0b0f427dbc2</block>
+        <comment/>
+        <connected_to>ae891b30-d26a-449f-b8ee-6b253f95e9cf</connected_to>
+        <decision_table/>
+        <display_text/>
+        <flow display_value="Campus360 - Student Response Update Application">55fefa2fa89343107f44321b8bcb5627</flow>
+        <flow_variables_assigned/>
+        <generation_source/>
+        <logic_definition display_value="Else If">666e5545c3e232002841b63b12d3ae99</logic_definition>
+        <order>5</order>
+        <outputs_assigned/>
+        <parent_ui_id/>
+        <sys_class_name>sys_hub_flow_logic_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 13:29:25</sys_created_on>
+        <sys_id>5dfefa2fa89343107f44321b8bcb5672</sys_id>
+        <sys_mod_count>1</sys_mod_count>
+        <sys_scope/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:29:25</sys_updated_on>
+        <ui_id>65c90e96-9876-4733-83cb-376e18a9540b</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/+1VXW/TMBT9K8jPUZSk2wR9mzpNmgRMYmMvMEU3ttNaOLbxR7sQ9b9zna9WdBIg+shT6uN7r885OU47ooM3wbtHfe2cWCuy/PKcEKEihr87oqDhZEmoVkx4oRVJyBZkiFjXfTYMPGdlntJgLVc+dT4wfJaWO6OV4/v915BlC6a0L4XyHHFswCFMOCOhfTrHLLoRkmHLQN6ARc64TZbdL1uC4VF1BnX+juZ0UVwtiiwr3l7k1dWiygu2AA45DpRQcYmlqyPVrxjhWxMh561Q63H9fmx9mEBtWaRSZAnhL54rhpSXNUjHE9KAQtHatmTpbUDAcmD3SrZzxQaF4jQSa1+c+MHjpCyLlTUaoCgfdudlORo7wPUNeEAqgfpgx1K60YJyNzjCeA1B+tUxNhTcm15l3+KhklO3lqFRHwczyDxgeo+IBIckuIlKI/dRSP2w0btPE8tboXpXxk2pKch5BR69q4KPfDrCJW9iChowBh0tjdVb0TcjlyZdS1yktdQ7PDQmOAUaiadoLKS3iN/08BNYEVV8wDHYjFlwpaNWmElbfzjZJ8S1biXBuYNGNLf8HiLDQfGorRzsiS39oGs8eMtHGfvk9O6UPXC4QKfX4NxhLl4L85sho6eRnvj9Ta7z3+R6RP4o2JeX/3P9z7mONCtwgpb9VxzHxU/LGYP9HAM8HDqbTYVDbo8Ru5v+O+JGi4kS9Bjaafstqjpg+5/1g39EhQYAAA==</values>
+        <workflow_reference/>
+    </sys_hub_flow_logic_instance_v2>
+    <sys_hub_pill_compound action="delete_multiple" query="attached_to=55fefa2fa89343107f44321b8bcb5627"/>
+    <sys_hub_flow_variable action="delete_multiple" query="model=55fefa2fa89343107f44321b8bcb5627"/>
+    <sys_documentation action="INSERT_OR_UPDATE">
+        <element>changed_fields</element>
+        <help/>
+        <hint/>
+        <label>Changed Fields</label>
+        <language>en</language>
+        <name>var__m_sys_hub_flow_input_55fefa2fa89343107f44321b8bcb5627</name>
+        <plural/>
+        <sys_class_name>sys_documentation</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 13:29:24</sys_created_on>
+        <sys_id>1dfefa2fa89343107f44321b8bcb565a</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name/>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:29:24</sys_updated_on>
+        <url/>
+        <url_target/>
+    </sys_documentation>
+    <sys_documentation action="INSERT_OR_UPDATE">
+        <element>table_name</element>
+        <help/>
+        <hint/>
+        <label>Table Name</label>
+        <language>en</language>
+        <name>var__m_sys_hub_flow_input_55fefa2fa89343107f44321b8bcb5627</name>
+        <plural/>
+        <sys_class_name>sys_documentation</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 13:29:24</sys_created_on>
+        <sys_id>95fefa2fa89343107f44321b8bcb5665</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name/>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:29:24</sys_updated_on>
+        <url/>
+        <url_target/>
+    </sys_documentation>
+    <sys_documentation action="INSERT_OR_UPDATE">
+        <element>current</element>
+        <help/>
+        <hint/>
+        <label>Record</label>
+        <language>en</language>
+        <name>var__m_sys_hub_flow_input_55fefa2fa89343107f44321b8bcb5627</name>
+        <plural/>
+        <sys_class_name>sys_documentation</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 13:29:24</sys_created_on>
+        <sys_id>d5fefa2fa89343107f44321b8bcb5643</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name/>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:29:24</sys_updated_on>
+        <url/>
+        <url_target/>
+    </sys_documentation>
+    <sys_choice action="delete_multiple" query="name=var__m_sys_hub_flow_input_55fefa2fa89343107f44321b8bcb5627"/>
+    <sys_choice action="delete_multiple" query="name=var__m_sys_hub_flow_output_55fefa2fa89343107f44321b8bcb5627"/>
+    <sys_hub_flow action="UPDATE">
+        <sys_id>68ea89cbfd1743107f44e0b0f427db1b</sys_id>
+        <latest_snapshot>55fefa2fa89343107f44321b8bcb5627</latest_snapshot>
+        <compiler_build>glide-australia-02-11-2026__patch3-hotfix1-06-18-2026_06-19-2026_0938.zip</compiler_build>
+        <version_record/>
+    </sys_hub_flow>
+    <sys_flow_trigger_plan action="delete_multiple" query="plan_id=68ea89cbfd1743107f44e0b0f427db1b^sys_idNOT IN6dfefa2fa89343107f44321b8bcb5684"/>
+    <sys_flow_trigger_plan action="INSERT_OR_UPDATE">
+        <binding_strategy>com.snc.process_flow.engine.binding.OncePerRecord</binding_strategy>
+        <plan>{"@class":"com.snc.process_flow.engine.serialization.plan_data.ChunkingPlanData","chunk_data":{"table":"sys_flow_trigger_plan","id":"6dfefa2fa89343107f44321b8bcb5684","name":"plan","plan_signature":null},"plan_data":"CHUNKING_PLAN"}</plan>
+        <plan_id>68ea89cbfd1743107f44e0b0f427db1b</plan_id>
+        <snapshot>e2514120f1a703107f44ff560373bbeb</snapshot>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 13:29:25</sys_created_on>
+        <sys_domain>global</sys_domain>
+        <sys_domain_path>/</sys_domain_path>
+        <sys_id>6dfefa2fa89343107f44321b8bcb5684</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_overrides/>
+        <sys_scope/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 13:29:25</sys_updated_on>
+        <trigger display_value="">61fefa2fa89343107f44321b8bcb5683</trigger>
+    </sys_flow_trigger_plan>
+    <sys_flow_subflow_plan action="delete_multiple" query="plan_id=68ea89cbfd1743107f44e0b0f427db1b"/>
+</record_update>

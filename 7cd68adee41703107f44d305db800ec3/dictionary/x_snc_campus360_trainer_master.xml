@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?><database>
+    <element attributes="enforce_dot_walk_cross_scope_access=true" db_object_id="0860de92e49703107f44d305db800e95" label="Trainer Master" max_length="40" name="x_snc_campus360_trainer_master" type="collection">
+        <element display="true" label="Trainer ID" max_length="20" name="trainer_id" type="string"/>
+        <element label="Experience" max_length="40" name="experience" type="integer"/>
+        <element label="Expertise" max_length="200" name="expertise" type="string"/>
+        <element label="Email" max_length="100" name="email" type="string"/>
+        <element label="Rating" max_length="20" name="rating" type="decimal"/>
+        <element label="Total Interviews" max_length="40" name="total_interviews" type="integer"/>
+        <element label="Phone Number" max_length="20" name="phone_number" type="string"/>
+        <element label="Trainer Name" max_length="100" name="trainer_name" type="string"/>
+        <element choice="3" default="Active" label="Status" max_length="20" name="status" type="choice">
+            <choice>
+                <element inactive_on_update="false" label="On Leave" sequence="2" value="on_leave"/>
+                <element inactive_on_update="false" label="Inactive" sequence="1" value="inactive"/>
+                <element inactive_on_update="false" label="Active" sequence="0" value="active"/>
+            </choice>
+        </element>
+    </element>
+</database>

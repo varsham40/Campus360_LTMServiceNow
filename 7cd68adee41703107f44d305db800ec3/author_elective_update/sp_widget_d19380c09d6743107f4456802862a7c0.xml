@@ -1,0 +1,269 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_widget">
+    <sp_widget action="DELETE">
+        <category>custom</category>
+        <client_script><![CDATA[api.controller=function() {
+  /* widget controller */
+  var c = this;
+};]]></client_script>
+        <controller_as>c</controller_as>
+        <css/>
+        <data_table>sp_instance</data_table>
+        <demo_data/>
+        <description>Displays the interview QR code for student attendance</description>
+        <docs/>
+        <field_list/>
+        <has_preview>false</has_preview>
+        <id>campus360_interview_qr_display</id>
+        <internal>false</internal>
+        <link><![CDATA[function link(scope, element, attrs, controller) {
+  
+}]]></link>
+        <name>Campus360 Interview QR Displayssss</name>
+        <option_schema/>
+        <public>false</public>
+        <roles/>
+        <script><![CDATA[(function() {
+
+    data.interview = null;
+    data.error = '';
+
+    var interviewId = $sp.getParameter('interview_id');
+
+    if (!interviewId) {
+        data.error = 'Interview ID is missing.';
+        return;
+    }
+
+    var gr = new GlideRecord('x_snc_campus360_mock_interview');
+
+    if (!gr.get(interviewId)) {
+        data.error = 'Interview not found.';
+        return;
+    }
+
+    data.interview = {
+        sys_id: gr.getUniqueValue(),
+        interview_id: gr.getValue('interview_id'),
+        student: gr.student.getDisplayValue(),
+        interview_date: gr.getDisplayValue('interview_date'),
+        interview_type: gr.getDisplayValue('interview_type'),
+        start_time: gr.getDisplayValue('start_time'),
+        end_time: gr.getDisplayValue('end_time'),
+        attendance_status: gr.getDisplayValue('attendance_status'),
+        qr_status: gr.getDisplayValue('qr_status'),
+        qr_code: gr.getValue('qr_code')
+    };
+
+})();]]></script>
+        <servicenow>false</servicenow>
+        <sys_class_name>sp_widget</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-20 13:08:43</sys_created_on>
+        <sys_id>d19380c09d6743107f4456802862a7c0</sys_id>
+        <sys_mod_count>1</sys_mod_count>
+        <sys_name>Campus360 Interview QR Displayssss</sys_name>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name>sp_widget_d19380c09d6743107f4456802862a7c0</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-20 15:50:10</sys_updated_on>
+        <template><![CDATA[<div class="panel panel-default" ng-if="c.data.interview">
+
+    <div class="panel-heading text-center">
+        <h2>Campus360 Interview Attendance</h2>
+    </div>
+
+    <div class="panel-body text-center">
+
+        <h3>{{c.data.interview.interview_id}}</h3>
+
+        <p>
+            <strong>Student:</strong>
+            {{c.data.interview.student}}
+        </p>
+
+        <p>
+            <strong>Interview:</strong>
+            {{c.data.interview.interview_type}}
+        </p>
+
+        <p>
+            <strong>Date:</strong>
+            {{c.data.interview.interview_date}}
+        </p>
+
+        <p>
+            <strong>Time:</strong>
+            {{c.data.interview.start_time}} -
+            {{c.data.interview.end_time}}
+        </p>
+
+        <div style="margin:30px 0;">
+
+            <img
+                ng-if="c.data.interview.qr_code"
+                ng-src="{{c.data.interview.qr_code}}"
+                alt="Interview QR Code"
+                style="width:300px;height:300px;"
+            />
+
+        </div>
+
+        <h4>
+            Scan this QR code to mark your attendance
+        </h4>
+
+        <p>
+            QR Status:
+            <strong>{{c.data.interview.qr_status}}</strong>
+        </p>
+
+    </div>
+
+</div>
+
+<div class="alert alert-danger" ng-if="c.data.error">
+    {{c.data.error}}
+</div>]]></template>
+    </sp_widget>
+    <sys_update_version action="INSERT_OR_UPDATE">
+        <action>DELETE</action>
+        <application display_value="Campus360">7cd68adee41703107f44d305db800ec3</application>
+        <file_path/>
+        <instance_id>82d18dc7c38fcf94a03197af0501316c</instance_id>
+        <instance_name>ltm-hck-2876-0027</instance_name>
+        <name>sp_widget_d19380c09d6743107f4456802862a7c0</name>
+        <payload>&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;record_update table="sp_widget"&gt;&lt;sp_widget action="INSERT_OR_UPDATE"&gt;&lt;category&gt;custom&lt;/category&gt;&lt;client_script&gt;&lt;![CDATA[api.controller=function() {
+  /* widget controller */
+  var c = this;
+};]]&gt;&lt;/client_script&gt;&lt;controller_as&gt;c&lt;/controller_as&gt;&lt;css/&gt;&lt;data_table&gt;sp_instance&lt;/data_table&gt;&lt;demo_data/&gt;&lt;description&gt;Displays the interview QR code for student attendance&lt;/description&gt;&lt;docs/&gt;&lt;field_list/&gt;&lt;has_preview&gt;false&lt;/has_preview&gt;&lt;id&gt;campus360_interview_qr_display&lt;/id&gt;&lt;internal&gt;false&lt;/internal&gt;&lt;link&gt;&lt;![CDATA[function link(scope, element, attrs, controller) {
+  
+}]]&gt;&lt;/link&gt;&lt;name&gt;Campus360 Interview QR Displayssss&lt;/name&gt;&lt;option_schema/&gt;&lt;public&gt;false&lt;/public&gt;&lt;roles/&gt;&lt;script&gt;&lt;![CDATA[(function() {
+
+    data.interview = null;
+    data.error = '';
+
+    var interviewId = $sp.getParameter('interview_id');
+
+    if (!interviewId) {
+        data.error = 'Interview ID is missing.';
+        return;
+    }
+
+    var gr = new GlideRecord('x_snc_campus360_mock_interview');
+
+    if (!gr.get(interviewId)) {
+        data.error = 'Interview not found.';
+        return;
+    }
+
+    data.interview = {
+        sys_id: gr.getUniqueValue(),
+        interview_id: gr.getValue('interview_id'),
+        student: gr.student.getDisplayValue(),
+        interview_date: gr.getDisplayValue('interview_date'),
+        interview_type: gr.getDisplayValue('interview_type'),
+        start_time: gr.getDisplayValue('start_time'),
+        end_time: gr.getDisplayValue('end_time'),
+        attendance_status: gr.getDisplayValue('attendance_status'),
+        qr_status: gr.getDisplayValue('qr_status'),
+        qr_code: gr.getValue('qr_code')
+    };
+
+})();]]&gt;&lt;/script&gt;&lt;servicenow&gt;false&lt;/servicenow&gt;&lt;sys_class_name&gt;sp_widget&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-20 13:08:43&lt;/sys_created_on&gt;&lt;sys_id&gt;d19380c09d6743107f4456802862a7c0&lt;/sys_id&gt;&lt;sys_mod_count&gt;1&lt;/sys_mod_count&gt;&lt;sys_name&gt;Campus360 Interview QR Displayssss&lt;/sys_name&gt;&lt;sys_package display_value="Campus360" source="x_snc_campus360"&gt;7cd68adee41703107f44d305db800ec3&lt;/sys_package&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="Campus360"&gt;7cd68adee41703107f44d305db800ec3&lt;/sys_scope&gt;&lt;sys_update_name&gt;sp_widget_d19380c09d6743107f4456802862a7c0&lt;/sys_update_name&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-20 15:50:10&lt;/sys_updated_on&gt;&lt;template&gt;&lt;![CDATA[&lt;div class="panel panel-default" ng-if="c.data.interview"&gt;
+
+    &lt;div class="panel-heading text-center"&gt;
+        &lt;h2&gt;Campus360 Interview Attendance&lt;/h2&gt;
+    &lt;/div&gt;
+
+    &lt;div class="panel-body text-center"&gt;
+
+        &lt;h3&gt;{{c.data.interview.interview_id}}&lt;/h3&gt;
+
+        &lt;p&gt;
+            &lt;strong&gt;Student:&lt;/strong&gt;
+            {{c.data.interview.student}}
+        &lt;/p&gt;
+
+        &lt;p&gt;
+            &lt;strong&gt;Interview:&lt;/strong&gt;
+            {{c.data.interview.interview_type}}
+        &lt;/p&gt;
+
+        &lt;p&gt;
+            &lt;strong&gt;Date:&lt;/strong&gt;
+            {{c.data.interview.interview_date}}
+        &lt;/p&gt;
+
+        &lt;p&gt;
+            &lt;strong&gt;Time:&lt;/strong&gt;
+            {{c.data.interview.start_time}} -
+            {{c.data.interview.end_time}}
+        &lt;/p&gt;
+
+        &lt;div style="margin:30px 0;"&gt;
+
+            &lt;img
+                ng-if="c.data.interview.qr_code"
+                ng-src="{{c.data.interview.qr_code}}"
+                alt="Interview QR Code"
+                style="width:300px;height:300px;"
+            /&gt;
+
+        &lt;/div&gt;
+
+        &lt;h4&gt;
+            Scan this QR code to mark your attendance
+        &lt;/h4&gt;
+
+        &lt;p&gt;
+            QR Status:
+            &lt;strong&gt;{{c.data.interview.qr_status}}&lt;/strong&gt;
+        &lt;/p&gt;
+
+    &lt;/div&gt;
+
+&lt;/div&gt;
+
+&lt;div class="alert alert-danger" ng-if="c.data.error"&gt;
+    {{c.data.error}}
+&lt;/div&gt;]]&gt;&lt;/template&gt;&lt;/sp_widget&gt;&lt;/record_update&gt;</payload>
+        <payload_hash>1284683871</payload_hash>
+        <record_name>Campus360 Interview QR Displayssss</record_name>
+        <reverted_from/>
+        <source>70d68adee41703107f44d305db800ec8</source>
+        <source_table>sys_update_set</source_table>
+        <state>previous</state>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-20 15:50:10</sys_created_on>
+        <sys_id>0dc8e0c89d6b43107f4456802862a7d1</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_recorded_at>1a0bf82b9d90000001</sys_recorded_at>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-20 15:50:10</sys_updated_on>
+        <type>Widget</type>
+        <update_guid>4dc8e0c8126b431023a3e10c6bd0b2d0</update_guid>
+        <update_guid_history>4dc8e0c8126b431023a3e10c6bd0b2d0:1284683871,44d388c0946743107de70970cfba869f:-67117089</update_guid_history>
+    </sys_update_version>
+    <sys_metadata_delete action="INSERT_OR_UPDATE">
+        <sys_audit_delete display_value="Campus360 Interview QR Displayssss">c13ba00c9d6b43107f4456802862a74b</sys_audit_delete>
+        <sys_class_name>sys_metadata_delete</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-20 16:00:49</sys_created_on>
+        <sys_db_object display_value="" name="sp_widget">sp_widget</sys_db_object>
+        <sys_id>02fdfb8db1d34e8883ce03108a27e790</sys_id>
+        <sys_metadata>d19380c09d6743107f4456802862a7c0</sys_metadata>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>Campus360 Interview QR Displayssss</sys_name>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_parent/>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_scope_delete display_value="">1cde9626740d46978b846077c1615101</sys_scope_delete>
+        <sys_update_name>sp_widget_d19380c09d6743107f4456802862a7c0</sys_update_name>
+        <sys_update_version display_value="sp_widget_d19380c09d6743107f4456802862a7c0">0dc8e0c89d6b43107f4456802862a7d1</sys_update_version>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-20 16:00:49</sys_updated_on>
+    </sys_metadata_delete>
+</record_update>

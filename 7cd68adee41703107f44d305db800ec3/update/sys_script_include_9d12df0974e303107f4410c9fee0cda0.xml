@@ -1,0 +1,5713 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_script_include">
+    <sys_script_include action="INSERT_OR_UPDATE">
+        <access>package_private</access>
+        <active>true</active>
+        <api_name>x_snc_campus360.Campus360AIService</api_name>
+        <caller_access/>
+        <client_callable>false</client_callable>
+        <description/>
+        <mobile_callable>false</mobile_callable>
+        <name>Campus360AIService</name>
+        <sandbox_callable>false</sandbox_callable>
+        <script><![CDATA[var Campus360AIService = Class.create();
+
+Campus360AIService.prototype = {
+
+    initialize: function() {
+    },
+
+
+    /*
+     * ============================================================
+     * GROQ (IntegrationHub action - unchanged)
+     * ============================================================
+     */
+
+    askGroq: function(prompt) {
+
+        if (!prompt || String(prompt).trim() === '') {
+            throw new Error('Prompt is required.');
+        }
+
+        try {
+
+            var inputs = {};
+            inputs['prompt'] = JSON.stringify(String(prompt));
+
+            var result =
+                sn_fd.FlowAPI.getRunner()
+                    .action('x_snc_campus360.Campus360_Groq_Chat')
+                    .inForeground()
+                    .withInputs(inputs)
+                    .run();
+
+            var outputs = result.getOutputs();
+            var response = outputs['response'];
+
+            if (!response) {
+                throw new Error('Groq returned an empty response.');
+            }
+
+            /* Truncated on purpose: raw responses can contain user data. */
+            gs.info(
+                'CAMPUS360 GROQ RAW RESPONSE: ' +
+                String(response).substring(0, 500)
+            );
+
+            var parsed;
+
+            try {
+                parsed = JSON.parse(String(response));
+            } catch (parseEx) {
+                throw new Error(
+                    'Groq response is not valid JSON: ' + String(response)
+                );
+            }
+
+            if (parsed.error) {
+                throw new Error(
+                    'Groq API error: ' +
+                    (parsed.error.message || JSON.stringify(parsed.error))
+                );
+            }
+
+            if (
+                !parsed.choices ||
+                !parsed.choices[0] ||
+                !parsed.choices[0].message
+            ) {
+                throw new Error(
+                    'Unexpected Groq response format: ' + String(response)
+                );
+            }
+
+            var content = parsed.choices[0].message.content;
+
+            if (content === null || content === undefined) {
+                throw new Error('Groq response message content is empty.');
+            }
+
+            return String(content);
+
+        } catch (ex) {
+
+            gs.error('Campus360AIService.askGroq failed: ' + String(ex));
+            throw ex;
+        }
+    },
+
+
+    /*
+     * ============================================================
+     * HELPERS
+     * ============================================================
+     */
+
+    cleanAIJson: function(content) {
+
+        if (!content || String(content).trim() === '') {
+            throw new Error('AI returned empty content.');
+        }
+
+        return String(content)
+            .replace(/^```json\s*/i, '')
+            .replace(/^```\s*/i, '')
+            .replace(/\s*```$/i, '')
+            .trim();
+    },
+
+
+    isTechnicalField: function(fieldName) {
+
+        var technicalFields = {
+            'sys_id': true,
+            'sys_created_on': true,
+            'sys_created_by': true,
+            'sys_updated_on': true,
+            'sys_updated_by': true,
+            'sys_mod_count': true,
+            'sys_tags': true
+        };
+
+        return technicalFields[String(fieldName)] === true;
+    },
+
+
+    getFieldMap: function(schema) {
+
+        var map = {};
+
+        if (!schema || !schema.fields) {
+            return map;
+        }
+
+        for (var i = 0; i < schema.fields.length; i++) {
+            map[schema.fields[i].name] = schema.fields[i];
+        }
+
+        return map;
+    },
+
+
+    hasOwn: function(obj, propertyName) {
+
+        return (
+            obj &&
+            Object.prototype.hasOwnProperty.call(obj, propertyName)
+        );
+    },
+
+
+    hasAnyFields: function(fields) {
+
+        if (!fields || typeof fields !== 'object') {
+            return false;
+        }
+
+        return Object.keys(fields).length > 0;
+    },
+
+
+    isEmptyValue: function(value) {
+
+        return (
+            value === null ||
+            typeof value === 'undefined' ||
+            String(value).trim() === ''
+        );
+    },
+
+
+    getTableLabel: function(tableName) {
+
+        try {
+
+            var catalog = JSON.parse(this.getCampus360Tables());
+
+            for (var i = 0; i < catalog.tables.length; i++) {
+                if (catalog.tables[i].name === String(tableName)) {
+                    return String(catalog.tables[i].label);
+                }
+            }
+
+        } catch (ex) {
+        }
+
+        return String(tableName || '');
+    },
+
+
+    /*
+     * Applies AI-proposed values to a target object after validating
+     * field names and choice values.
+     *
+     * options.skipExisting : do not overwrite keys already in target
+     * options.skipIn       : do not apply keys already present in this object
+     * options.record       : optional object that also receives applied values
+     */
+    applyValidatedValues: function(
+        source,
+        validFields,
+        target,
+        rejected,
+        options
+    ) {
+
+        options = options || {};
+
+        if (!source || typeof source !== 'object') {
+            return;
+        }
+
+        for (var name in source) {
+
+            if (!this.hasOwn(source, name)) {
+                continue;
+            }
+
+            if (!validFields[name]) {
+                rejected.push(name);
+                continue;
+            }
+
+            if (options.skipExisting && this.hasOwn(target, name)) {
+                continue;
+            }
+
+            if (options.skipIn && this.hasOwn(options.skipIn, name)) {
+                continue;
+            }
+
+            var v = source[name];
+
+            if (this.isEmptyValue(v)) {
+                continue;
+            }
+
+            if (!this.validateChoiceValue(validFields[name], v)) {
+                rejected.push(name);
+                continue;
+            }
+
+            target[name] = v;
+
+            if (options.record) {
+                options.record[name] = v;
+            }
+        }
+    },
+
+
+    /*
+     * ============================================================
+     * CONVERSATIONAL FIELD POLICY
+     * ============================================================
+     */
+
+    getConversationalFieldPolicy: function(tableName, schema) {
+
+        var policy = {
+            required: [],
+            optional: [],
+            generated: []
+        };
+
+        if (tableName === 'x_snc_campus360_training_program') {
+
+            policy.required = [
+                'training_name',
+                'skill_area',
+                'trainer',
+                'start_date',
+                'status',
+                'capacity'
+            ];
+
+            policy.optional = ['end_date', 'batch'];
+            policy.generated = ['training_id'];
+
+            return policy;
+        }
+
+        if (schema && schema.fields) {
+
+            for (var i = 0; i < schema.fields.length; i++) {
+
+                var field = schema.fields[i];
+
+                if (field.mandatory === true) {
+                    policy.required.push(field.name);
+                } else {
+                    policy.optional.push(field.name);
+                }
+            }
+        }
+
+        return policy;
+    },
+
+
+    /*
+     * ============================================================
+     * REFERENCE FIELD RESOLUTION
+     * ============================================================
+     *
+     * SECURITY: a reference record is only ever resolved/returned if
+     * the CURRENT authenticated user can read it (record-level ACL via
+     * GlideRecord.canRead()). Unreadable records are treated exactly
+     * like records that do not exist, so reference resolution can never
+     * be used to bypass ACLs or to probe for hidden records.
+     * ============================================================
+     */
+
+    buildReferenceResult: function(gr, referenceTable, matchedBy) {
+
+        return JSON.stringify({
+            success: true,
+            sys_id: gr.getUniqueValue(),
+            display_value: String(gr.getDisplayValue()),
+            reference_table: referenceTable,
+            matched_by: matchedBy
+        });
+    },
+
+
+    /*
+     * Returns up to 2 matching sys_ids that the current user can READ.
+     * Records the user cannot read are skipped (treated as unavailable),
+     * so they neither resolve nor influence the "multiple matches" check.
+     */
+    findReferenceMatches: function(referenceTable, field, searchValue) {
+
+        var gr = new GlideRecord(referenceTable);
+        gr.addQuery(field, searchValue);
+        gr.setLimit(25);
+        gr.query();
+
+        var matches = [];
+
+        while (gr.next()) {
+
+            if (!gr.canRead()) {
+                continue;
+            }
+
+            matches.push(gr.getUniqueValue());
+
+            if (matches.length >= 2) {
+                break;
+            }
+        }
+
+        return matches;
+    },
+
+
+    resolveReferenceValue: function(tableName, fieldName, value) {
+
+        if (
+            !tableName ||
+            !fieldName ||
+            value === null ||
+            typeof value === 'undefined' ||
+            String(value).trim() === ''
+        ) {
+            throw new Error(
+                'Reference resolution requires table, field, and value.'
+            );
+        }
+
+        var dict = new GlideRecord('sys_dictionary');
+        dict.addQuery('name', String(tableName));
+        dict.addQuery('element', String(fieldName));
+        dict.query();
+
+        if (!dict.next()) {
+            throw new Error(
+                'Unable to find dictionary metadata for reference field: ' +
+                fieldName
+            );
+        }
+
+        var referenceTable = String(dict.getValue('reference') || '');
+
+        if (!referenceTable) {
+            throw new Error(
+                'Field ' + fieldName +
+                ' is not configured as a reference field.'
+            );
+        }
+
+        var referenceGR = new GlideRecord(referenceTable);
+
+        if (!referenceGR.isValid()) {
+            throw new Error('Invalid reference table: ' + referenceTable);
+        }
+
+        var searchValue = String(value).trim();
+
+        /* Same message for "does not exist" and "not readable" so hidden
+           records are never revealed. */
+        var unresolvedMessage =
+            'Could not resolve reference value "' + searchValue +
+            '" for ' + tableName + '.' + fieldName + '.';
+
+        /* Table-level read check on the referenced table. */
+        if (!referenceGR.canRead()) {
+            throw new Error(unresolvedMessage);
+        }
+
+        /* 1. sys_id (only if the current user can read that record) */
+        var idGR = new GlideRecord(referenceTable);
+
+        if (idGR.get(searchValue) && idGR.canRead()) {
+            return this.buildReferenceResult(
+                idGR,
+                referenceTable,
+                'sys_id'
+            );
+        }
+
+        /* 2. display field (readable matches only) */
+        var displayField = String(referenceGR.getDisplayName());
+
+        var displayMatches =
+            this.findReferenceMatches(
+                referenceTable,
+                displayField,
+                searchValue
+            );
+
+        if (displayMatches.length === 1) {
+
+            var displayMatchGR = new GlideRecord(referenceTable);
+
+            if (displayMatchGR.get(displayMatches[0]) && displayMatchGR.canRead()) {
+                return this.buildReferenceResult(
+                    displayMatchGR,
+                    referenceTable,
+                    'display_field'
+                );
+            }
+        }
+
+        /* 3. business identifier fields (trainer_id, email, etc.) */
+        var identifierFields = [
+            'trainer_id',
+            'student_id',
+            'company_id',
+            'application_id',
+            'training_id',
+            'opportunity_id',
+            'interview_id',
+            'enrollment_id',
+            'notification_id',
+            'placement_id',
+            'email'
+        ];
+
+        var probeGR = new GlideRecord(referenceTable);
+
+        for (var i = 0; i < identifierFields.length; i++) {
+
+            var identifierField = identifierFields[i];
+
+            if (!probeGR.isValidField(identifierField)) {
+                continue;
+            }
+
+            var identifierMatches =
+                this.findReferenceMatches(
+                    referenceTable,
+                    identifierField,
+                    searchValue
+                );
+
+            if (identifierMatches.length === 1) {
+
+                var identifierMatchGR = new GlideRecord(referenceTable);
+
+                if (
+                    identifierMatchGR.get(identifierMatches[0]) &&
+                    identifierMatchGR.canRead()
+                ) {
+                    return this.buildReferenceResult(
+                        identifierMatchGR,
+                        referenceTable,
+                        identifierField
+                    );
+                }
+            }
+
+            if (identifierMatches.length > 1) {
+                throw new Error(
+                    'Multiple ' + referenceTable + ' records match ' +
+                    identifierField + ' = ' + searchValue +
+                    '. Please provide a more specific value.'
+                );
+            }
+        }
+
+        throw new Error(unresolvedMessage);
+    },
+
+
+    /*
+     * ============================================================
+     * TRAINER RESOLUTION / RECOMMENDATION HELPERS
+     * ============================================================
+     */
+
+    getTrainerMasterTable: function() {
+        return 'x_snc_campus360_trainer_master';
+    },
+
+
+    isCancellationPhrase: function(text) {
+
+        var t = String(text || '').trim().toLowerCase().replace(/[.!]+$/, '');
+
+        if (!t) {
+            return false;
+        }
+
+        var exact = {
+            'cancel': true,
+            'cancel it': true,
+            'cancel this': true,
+            'cancel the request': true,
+            'cancel that': true,
+            'never mind': true,
+            'nevermind': true,
+            'never mind this': true,
+            'never mind that': true,
+            'stop': true,
+            'stop this': true,
+            'discard': true,
+            'discard it': true,
+            'discard this': true,
+            "don't create it": true,
+            'do not create it': true,
+            "don't create this": true,
+            'do not create this': true,
+            'forget it': true,
+            'forget this': true,
+            'exit': true,
+            'quit': true,
+            'abort': true
+        };
+
+        if (exact[t] === true) {
+            return true;
+        }
+
+        if (/^don'?t\s+create/.test(t)) {
+            return true;
+        }
+
+        if (/^do\s+not\s+create/.test(t)) {
+            return true;
+        }
+
+        return false;
+    },
+
+
+    containsAnyoneTrainerIntent: function(text) {
+
+        var t = String(text || '').trim().toLowerCase();
+
+        if (!t) {
+            return false;
+        }
+
+        var patterns = [
+            /\banyone\b/,
+            /\bany\s+one\b/,
+            /\bany\s+trainer\b/,
+            /\bany\s+available\s+trainer\b/,
+            /\banybody\b/,
+            /\bwhoever(?:\s+is\s+available)?\b/,
+            /\byou\s+choose\b/,
+            /\bpick\s+one\b/,
+            /\bdoesn'?t\s+matter\b/,
+            /\bdoes\s+not\s+matter\b/,
+            /\bchoose\s+for\s+me\b/,
+            /\bi\s+don'?t\s+care\b/
+        ];
+
+        for (var i = 0; i < patterns.length; i++) {
+            if (patterns[i].test(t)) {
+                return true;
+            }
+        }
+
+        return false;
+    },
+
+
+    isTrainerRecommendationConfirmation: function(text) {
+
+        var t = String(text || '').trim().toLowerCase().replace(/[.!]+$/, '');
+
+        if (!t) {
+            return false;
+        }
+
+        if (this.isConfirmationPhrase(t)) {
+            return true;
+        }
+
+        if (t === 'do it' || t === 'go ahead') {
+            return true;
+        }
+
+        var startsAffirmative =
+            /^(okay|ok|yes|yeah|yep|sure|alright|fine)\b/.test(t);
+
+        var hasAssign =
+            /\bassign\b/.test(t) || /\buse\b/.test(t) || /\bgo\s+with\b/.test(t);
+
+        var referencesRecommended =
+            /\brecommend/.test(t) ||
+            /\bthat\s+trainer\b/.test(t) ||
+            /\bthis\s+trainer\b/.test(t) ||
+            /\bhim\b/.test(t) ||
+            /\bher\b/.test(t) ||
+            /\bthem\b/.test(t);
+
+        if (startsAffirmative && (hasAssign || t.split(/\s+/).length <= 2)) {
+            return true;
+        }
+
+        if (hasAssign && referencesRecommended) {
+            return true;
+        }
+
+        return false;
+    },
+
+
+    extractTrainerIdentifierFromMessage: function(text) {
+
+        var t = String(text || '').trim();
+
+        if (!t) {
+            return null;
+        }
+
+        t = t.replace(/[.?!]+$/, '');
+
+        var patterns = [
+            /^(?:please\s+)?use\s+(.+?)\s+as\s+(?:the\s+)?trainer$/i,
+            /^(?:please\s+)?change\s+(?:the\s+)?trainer\s+to\s+(.+)$/i,
+            /^(?:please\s+)?set\s+(?:the\s+)?trainer\s+to\s+(.+)$/i,
+            /^(?:please\s+)?(?:assign|select|choose|pick)\s+(.+)$/i,
+            /^trainer\s*[:=]\s*(.+)$/i,
+            /^(.+?)\s+as\s+(?:the\s+)?trainer$/i
+        ];
+
+        for (var i = 0; i < patterns.length; i++) {
+
+            var m = t.match(patterns[i]);
+
+            if (m && m[1] && m[1].trim() !== '') {
+                return m[1].trim();
+            }
+        }
+
+        return null;
+    },
+
+
+    tryResolveExplicitTrainer: function(table, message) {
+
+        var candidate = this.extractTrainerIdentifierFromMessage(message);
+
+        if (!candidate) {
+
+            var trimmed = String(message || '').trim();
+            var wordCount = trimmed ? trimmed.split(/\s+/).length : 0;
+
+            if (wordCount > 0 && wordCount <= 6) {
+                candidate = trimmed;
+            }
+        }
+
+        if (!candidate) {
+            return null;
+        }
+
+        try {
+
+            var resolved =
+                JSON.parse(this.resolveReferenceValue(table, 'trainer', candidate));
+
+            return { sys_id: resolved.sys_id };
+
+        } catch (ex) {
+
+            return { error: String(ex) };
+        }
+    },
+
+
+    isTrainerFieldNeeded: function(state) {
+
+        return !!(
+            state &&
+            state.needs_input &&
+            state.needs_input.indexOf('trainer') !== -1
+        );
+    },
+
+
+    buildTrainingContextText: function(fields) {
+
+        fields = fields || {};
+
+        var parts = [];
+        var contextKeys = [
+            'training_name', 'skill_area', 'description',
+            'batch', 'name', 'title'
+        ];
+
+        for (var i = 0; i < contextKeys.length; i++) {
+
+            var v = fields[contextKeys[i]];
+
+            if (v !== null && typeof v !== 'undefined' && String(v).trim() !== '') {
+                parts.push(String(v).trim());
+            }
+        }
+
+        return parts.join(' ');
+    },
+
+
+    tokenizeForMatch: function(text) {
+
+        var stopWords = {
+            'the': true, 'and': true, 'for': true, 'with': true,
+            'training': true, 'program': true, 'students': true,
+            'session': true, 'new': true, 'create': true, 'a': true,
+            'an': true, 'on': true, 'of': true, 'to': true, 'in': true,
+            'course': true, 'batch': true
+        };
+
+        var raw = String(text || '').toLowerCase().split(/[^a-z0-9+]+/);
+        var tokens = [];
+
+        for (var i = 0; i < raw.length; i++) {
+
+            var w = raw[i];
+
+            if (w.length < 2 || stopWords[w]) {
+                continue;
+            }
+
+            tokens.push(w);
+        }
+
+        return tokens;
+    },
+
+
+    /*
+     * Server-side trainer recommendation. Reads Trainer Master through
+     * the same ACL-enforced readCampus360Records() used everywhere else
+     * so field-level and record-level ACLs are respected. Never invents
+     * trainer data, never claims scheduling availability that is not in
+     * the schema, and never lets rating/experience override a genuine
+     * expertise mismatch.
+     */
+    recommendTrainersForTraining: function(state) {
+
+        var output = {
+            success: false,
+            message: '',
+            candidates: [],
+            top: null,
+            context_summary: ''
+        };
+
+        try {
+
+            var trainerTable = this.getTrainerMasterTable();
+
+            if (!this.canPerformAIAction(trainerTable, 'read')) {
+                output.message =
+                    'You do not have permission to read Trainer Master records.';
+                return output;
+            }
+
+            var trainerRead = this.readCampus360Records(trainerTable, {}, 50);
+
+            if (!trainerRead.success) {
+                output.message =
+                    trainerRead.error || 'Unable to read Trainer Master records.';
+                return output;
+            }
+
+            var contextText =
+                this.buildTrainingContextText((state && state.fields) || {});
+
+            output.context_summary = contextText;
+
+            var contextTokens = this.tokenizeForMatch(contextText);
+
+            var scored = [];
+
+            for (var i = 0; i < trainerRead.records.length; i++) {
+
+                var rec = trainerRead.records[i];
+
+                var statusValue =
+                    this.hasOwn(rec, 'status')
+                        ? String(rec.status).trim().toLowerCase()
+                        : '';
+
+                var isInactive =
+                    statusValue &&
+                    (
+                        statusValue.indexOf('inactive') !== -1 ||
+                        statusValue === 'false' ||
+                        statusValue === 'no' ||
+                        statusValue === 'disabled' ||
+                        statusValue === 'retired'
+                    );
+
+                if (isInactive) {
+                    continue;
+                }
+
+                var expertiseText =
+                    (this.hasOwn(rec, 'expertise') ? String(rec.expertise) : '') + ' ' +
+                    (this.hasOwn(rec, 'trainer_name') ? String(rec.trainer_name) : '') + ' ' +
+                    (this.hasOwn(rec, 'name') ? String(rec.name) : '');
+
+                var expertiseTokens = this.tokenizeForMatch(expertiseText);
+
+                var matchedKeywords = [];
+
+                for (var c = 0; c < contextTokens.length; c++) {
+
+                    if (
+                        expertiseTokens.indexOf(contextTokens[c]) !== -1 &&
+                        matchedKeywords.indexOf(contextTokens[c]) === -1
+                    ) {
+                        matchedKeywords.push(contextTokens[c]);
+                    }
+                }
+
+                var rating = parseFloat(rec.rating);
+                if (isNaN(rating)) {
+                    rating = 0;
+                }
+
+                var experience = parseFloat(rec.experience);
+                if (isNaN(experience)) {
+                    experience = 0;
+                }
+
+                var matchScore = matchedKeywords.length;
+
+                /* Rating/experience only ever act as a tiebreaker among
+                   trainers that already matched on expertise - they can
+                   never push a mismatched trainer above a matched one. */
+                var totalScore =
+                    (matchScore * 1000) +
+                    (matchScore > 0 ? (rating * 10 + experience) : 0);
+
+                scored.push({
+                    sys_id: rec.sys_id,
+                    trainer_id: rec.trainer_id || '',
+                    trainer_name: rec.trainer_name || rec.name || rec.sys_id,
+                    expertise: rec.expertise || '',
+                    experience: this.hasOwn(rec, 'experience') ? String(rec.experience) : '',
+                    rating: this.hasOwn(rec, 'rating') ? String(rec.rating) : '',
+                    status: this.hasOwn(rec, 'status') ? String(rec.status) : '',
+                    phone_number: rec.phone_number || '',
+                    email: rec.email || '',
+                    match_score: matchScore,
+                    total_score: totalScore,
+                    matched_keywords: matchedKeywords
+                });
+            }
+
+            if (scored.length === 0) {
+                output.success = true;
+                output.candidates = [];
+                return output;
+            }
+
+            scored.sort(function(a, b) {
+                return b.total_score - a.total_score;
+            });
+
+            var hasAnyMatch = scored[0].match_score > 0;
+            var shortlisted = [];
+
+            for (var s = 0; s < scored.length && shortlisted.length < 5; s++) {
+
+                if (hasAnyMatch && scored[s].match_score === 0) {
+                    continue;
+                }
+
+                shortlisted.push(scored[s]);
+            }
+
+            if (shortlisted.length === 0) {
+                shortlisted = scored.slice(0, 5);
+            }
+
+            for (var f = 0; f < shortlisted.length; f++) {
+
+                var cand = shortlisted[f];
+
+                cand.reason =
+                    cand.matched_keywords.length > 0
+                        ? 'Expertise matches ' + cand.matched_keywords.join(', ') + '.'
+                        : 'No specific expertise match found in Trainer Master; shown as an active trainer.';
+            }
+
+            output.success = true;
+            output.candidates = shortlisted;
+            output.top = shortlisted[0];
+
+            return output;
+
+        } catch (ex) {
+
+            gs.error(
+                'Campus360AIService.recommendTrainersForTraining failed: ' +
+                String(ex)
+            );
+
+            output.success = false;
+            output.message = 'I could not generate trainer recommendations right now.';
+            return output;
+        }
+    },
+
+
+    buildTrainerRecommendationText: function(recommendation) {
+
+        var lines = [];
+
+        lines.push(
+            'I found these suitable trainers' +
+            (recommendation.context_summary ? ' for ' + recommendation.context_summary : '') +
+            ':\n'
+        );
+
+        for (var i = 0; i < recommendation.candidates.length; i++) {
+
+            var c = recommendation.candidates[i];
+            var idLabel = c.trainer_id ? ' (' + c.trainer_id + ')' : '';
+
+            lines.push((i + 1) + '. ' + c.trainer_name + idLabel);
+
+            if (c.expertise) {
+                lines.push('   Expertise: ' + c.expertise);
+            }
+            if (c.experience) {
+                lines.push('   Experience: ' + c.experience + ' years');
+            }
+            if (c.rating) {
+                lines.push('   Rating: ' + c.rating);
+            }
+            if (c.status) {
+                lines.push('   Status: ' + c.status);
+            }
+        }
+
+        var top = recommendation.top;
+        var topIdLabel = top.trainer_id ? ' (' + top.trainer_id + ')' : '';
+
+        lines.push(
+            '\nMy recommendation is ' + top.trainer_name + topIdLabel +
+            ' because ' + String(top.reason || '').replace(/\.$/, '').toLowerCase() + '.'
+        );
+
+        lines.push('\nWould you like me to assign ' + top.trainer_name + '?');
+
+        return lines.join('\n');
+    },
+
+
+    /*
+     * Interprets the user's reply while a trainer recommendation is
+     * pending. Returns { handled, sys_id, error }. Never calls
+     * resolveReferenceValue with a literal "anyone" style value -
+     * that case is filtered out first and left to the recommendation
+     * trigger instead.
+     */
+    resolveTrainerSelectionReply: function(existingState, message) {
+
+        var result = { handled: false, sys_id: '', error: '' };
+
+        if (this.containsAnyoneTrainerIntent(message)) {
+            return result;
+        }
+
+        if (this.isTrainerRecommendationConfirmation(message)) {
+
+            var rec = existingState.recommended_trainer;
+
+            if (!rec || (!rec.sys_id && !rec.trainer_id && !rec.trainer_name)) {
+                result.handled = true;
+                result.error =
+                    'I do not have a valid recommended trainer to assign. Please specify a trainer.';
+                return result;
+            }
+
+            result.handled = true;
+            result.sys_id = rec.sys_id;
+            return result;
+        }
+
+        var explicit = this.tryResolveExplicitTrainer(existingState.table, message);
+
+        if (explicit && explicit.sys_id) {
+            result.handled = true;
+            result.sys_id = explicit.sys_id;
+            return result;
+        }
+
+        if (
+            explicit &&
+            explicit.error &&
+            String(explicit.error).indexOf('Multiple') !== -1
+        ) {
+            result.handled = true;
+            result.error = explicit.error;
+        }
+
+        return result;
+    },
+
+
+    sanitizeReferenceAnyoneValues: function(state) {
+
+        if (!state || !state.table || !state.fields) {
+            return;
+        }
+
+        var schema;
+
+        try {
+            schema = JSON.parse(this.getFormSchema(state.table));
+        } catch (ex) {
+            return;
+        }
+
+        var fieldMap = this.getFieldMap(schema);
+        var changed = false;
+
+        for (var name in state.fields) {
+
+            if (!this.hasOwn(state.fields, name)) {
+                continue;
+            }
+
+            var def = fieldMap[name];
+
+            if (!def || def.type !== 'reference') {
+                continue;
+            }
+
+            var val = String(state.fields[name] || '').trim().toLowerCase();
+
+            if (this.containsAnyoneTrainerIntent(val) || val === 'anyone' || val === 'any') {
+
+                delete state.fields[name];
+
+                if (state.provided) {
+                    delete state.provided[name];
+                }
+
+                if (state.auto_fields) {
+                    delete state.auto_fields[name];
+                }
+
+                changed = true;
+            }
+        }
+
+        if (changed) {
+
+            var policy = this.getConversationalFieldPolicy(state.table, schema);
+            var needsInput = [];
+
+            for (var i = 0; i < policy.required.length; i++) {
+                if (!this.hasOwn(state.fields, policy.required[i])) {
+                    needsInput.push(policy.required[i]);
+                }
+            }
+
+            state.needs_input = this.orderFieldNames(needsInput, schema);
+            state.next_field = state.needs_input.length > 0 ? state.needs_input[0] : null;
+            state.ready_for_confirmation = false;
+        }
+    },
+
+
+    /*
+     * Recomputes needs_input/ready_for_confirmation after a field
+     * (e.g. trainer) is resolved outside the normal Groq merge path.
+     */
+    recomputeCreateTaskState: function(existingState, updatedFields) {
+
+        var table = existingState.table;
+        var schema = JSON.parse(this.getFormSchema(table));
+
+        var conversationalPolicy = this.getConversationalFieldPolicy(table, schema);
+
+        var defaultFields = this.getDefaultFieldValues(table, schema, updatedFields);
+
+        for (var dn in defaultFields) {
+
+            if (!this.hasOwn(defaultFields, dn)) {
+                continue;
+            }
+
+            if (!this.hasOwn(updatedFields, dn)) {
+                updatedFields[dn] = defaultFields[dn];
+            }
+        }
+
+        var needsInput = [];
+
+        for (var i = 0; i < conversationalPolicy.required.length; i++) {
+
+            var requiredFieldName = conversationalPolicy.required[i];
+
+            if (!this.hasOwn(updatedFields, requiredFieldName)) {
+                needsInput.push(requiredFieldName);
+            }
+        }
+
+        needsInput = this.orderFieldNames(needsInput, schema);
+
+        var ready =
+            needsInput.length === 0 && this.hasAnyFields(updatedFields);
+
+        return {
+            intent: existingState.intent || 'create',
+            table: table,
+            confidence: existingState.confidence || 'medium',
+            fields: updatedFields,
+            provided: existingState.provided || {},
+            auto_fields: existingState.auto_fields || {},
+            default_fields: defaultFields,
+            needs_input: needsInput,
+            missing_required: [],
+            missing_optional: [],
+            rejected: [],
+            notes: existingState.notes || [],
+            next_field: needsInput.length > 0 ? needsInput[0] : null,
+            ready_for_confirmation: ready
+        };
+    },
+
+
+    buildCreateTaskProgressResponse: function(state, isUpdate) {
+
+        if (state.ready_for_confirmation) {
+
+            return (
+                (isUpdate
+                    ? 'Here is the updated record I prepared:'
+                    : 'I prepared the following ' + this.getTableLabel(state.table) + ' record:') +
+                '\n\n' +
+                this.buildRecordSummary(state.table, state.fields) +
+                '\n\n' +
+                'Please review it. You can tell me what to change, or say "Create it" to confirm.'
+            );
+        }
+
+        if (state.next_field) {
+            return this.buildNextFieldQuestion(state.table, state.next_field);
+        }
+
+        return (
+            isUpdate
+                ? 'I still need more information before I can prepare the final record.'
+                : 'I can prepare the ' + this.getTableLabel(state.table) +
+                  ' request, but I need more information before I can complete the record.'
+        );
+    },
+
+
+    /*
+     * ============================================================
+     * FORM SCHEMA
+     * ============================================================
+     */
+
+    getFormSchema: function(tableName) {
+
+        if (!tableName || String(tableName).trim() === '') {
+            throw new Error('Table name is required.');
+        }
+
+        tableName = String(tableName).trim();
+
+        try {
+
+            var gr = new GlideRecord(tableName);
+
+            if (!gr.isValid()) {
+                throw new Error(
+                    'Invalid or inaccessible table: ' + tableName
+                );
+            }
+
+            var fields = [];
+            var elements = gr.getElements();
+
+            for (var i = 0; i < elements.length; i++) {
+
+                var element = elements[i];
+                var fieldName = element.getName();
+
+                if (this.isTechnicalField(fieldName)) {
+                    continue;
+                }
+
+                var field = {
+                    name: fieldName,
+                    label: element.getLabel(),
+                    type: '',
+                    mandatory: false
+                };
+
+                try {
+
+                    var ed = element.getED();
+
+                    if (ed) {
+
+                        try {
+                            field.type = String(ed.getInternalType());
+                        } catch (typeEx) {
+                            field.type = '';
+                        }
+
+                        try {
+                            field.mandatory = ed.isMandatory() === true;
+                        } catch (mandatoryEx) {
+                            field.mandatory = false;
+                        }
+                    }
+
+                } catch (edEx) {
+                }
+
+                if (field.type === 'choice') {
+
+                    field.choices = [];
+
+                    try {
+
+                        var choiceGR = new GlideRecord('sys_choice');
+                        choiceGR.addQuery('name', tableName);
+                        choiceGR.addQuery('element', fieldName);
+                        choiceGR.addActiveQuery();
+                        choiceGR.orderBy('sequence');
+                        choiceGR.query();
+
+                        while (choiceGR.next()) {
+                            field.choices.push({
+                                value: String(choiceGR.getValue('value')),
+                                label: String(choiceGR.getValue('label'))
+                            });
+                        }
+
+                    } catch (choiceEx) {
+                    }
+                }
+
+                if (field.type === 'reference') {
+                    field.reference = true;
+                }
+
+                fields.push(field);
+            }
+
+            return JSON.stringify({
+                table: tableName,
+                table_label: gr.getClassDisplayValue(),
+                fields: fields
+            });
+
+        } catch (ex) {
+
+            gs.error(
+                'Campus360AIService.getFormSchema failed: ' + String(ex)
+            );
+
+            throw ex;
+        }
+    },
+
+
+    /*
+     * ============================================================
+     * CAMPUS360 TABLE CATALOG (ALLOWLIST)
+     * ============================================================
+     */
+
+    getCampus360Tables: function() {
+
+        return JSON.stringify({
+            tables: [
+                { name: 'x_snc_campus360_student_master', label: 'Student' },
+                { name: 'x_snc_campus360_company_master', label: 'Company' },
+                { name: 'x_snc_campus360_placement_opportunity', label: 'Placement Opportunity' },
+                { name: 'x_snc_campus360_student_application', label: 'Student Application' },
+                { name: 'x_snc_campus360_training_program', label: 'Training Program' },
+                { name: 'x_snc_campus360_training_enrollment', label: 'Training Enrollment' },
+                { name: 'x_snc_campus360_mock_interview', label: 'Mock Interview' },
+                { name: 'x_snc_campus360_placement_intelligence', label: 'Placement Intelligence' },
+                { name: 'x_snc_campus360_placement_intervention', label: 'Placement Intervention' },
+                { name: 'x_snc_campus360_placement_outcome', label: 'Placement Outcome' },
+                { name: 'x_snc_campus360_student_notification', label: 'Student Notification' },
+                { name: 'x_snc_campus360_trainer_master', label: 'Trainer Master' }
+            ]
+        });
+    },
+
+
+    /*
+     * ============================================================
+     * TABLE ROUTING (used by CREATE planning)
+     * ============================================================
+     */
+
+    identifyCampus360Table: function(prompt) {
+
+        if (!prompt || String(prompt).trim() === '') {
+            throw new Error('Prompt is required.');
+        }
+
+        try {
+
+            var catalog = JSON.parse(this.getCampus360Tables());
+
+            var systemInstruction =
+                'You are the Campus360 ServiceNow table routing assistant. ' +
+                'Your job is ONLY to identify which allowed Campus360 table ' +
+                'best matches the user request. ' +
+                'The request may be a CREATE, READ, UPDATE, DELETE, or ANALYSIS request. ' +
+                'Do not perform the requested operation. ' +
+                'Do not invent a table. ' +
+                'Return ONLY valid JSON in this exact format: ' +
+                '{"intent":"create|read|update|delete|analysis|unknown",' +
+                '"table":"table_name_or_empty",' +
+                '"confidence":"high|medium|low"}';
+
+            var userMessage =
+                'Allowed Campus360 tables:\n' +
+                JSON.stringify(catalog.tables) +
+                '\n\n' +
+                'User request:\n' +
+                String(prompt);
+
+            var content = this.askGroq(systemInstruction + '\n\n' + userMessage);
+
+            content = this.cleanAIJson(content);
+
+            var routing = JSON.parse(content);
+
+            if (!routing.intent) {
+                throw new Error('AI routing response is missing intent.');
+            }
+
+            if (
+                routing.table === null ||
+                typeof routing.table === 'undefined'
+            ) {
+                throw new Error('AI routing response is missing table.');
+            }
+
+            if (!routing.confidence) {
+                throw new Error('AI routing response is missing confidence.');
+            }
+
+            var allowedTable = false;
+
+            for (var i = 0; i < catalog.tables.length; i++) {
+                if (catalog.tables[i].name === routing.table) {
+                    allowedTable = true;
+                    break;
+                }
+            }
+
+            if (routing.table !== '' && !allowedTable) {
+                throw new Error(
+                    'AI selected a table that is not allowed: ' +
+                    routing.table
+                );
+            }
+
+            return JSON.stringify(routing);
+
+        } catch (ex) {
+
+            gs.error(
+                'Campus360AIService.identifyCampus360Table failed: ' +
+                String(ex)
+            );
+
+            throw ex;
+        }
+    },
+
+
+    /*
+     * ============================================================
+     * CREATE FIELD PLANNING
+     * ============================================================
+     */
+
+    buildSchemaFieldSummary: function(schema) {
+
+        var schemaFields = [];
+
+        for (var i = 0; i < schema.fields.length; i++) {
+
+            var field = schema.fields[i];
+
+            schemaFields.push({
+                name: field.name,
+                label: field.label,
+                type: field.type,
+                serviceNow_mandatory: field.mandatory,
+                choices: field.choices || [],
+                reference: field.reference === true
+            });
+        }
+
+        return schemaFields;
+    },
+
+
+    analyzeRequestAgainstSchema: function(prompt) {
+
+        if (!prompt || String(prompt).trim() === '') {
+            throw new Error('Prompt is required.');
+        }
+
+        prompt = String(prompt).trim();
+
+        try {
+
+            var tableResult =
+                JSON.parse(this.identifyCampus360Table(prompt));
+
+            if (!tableResult || !tableResult.table) {
+                throw new Error('Unable to identify the Campus360 table.');
+            }
+
+            if (tableResult.intent !== 'create') {
+
+                return JSON.stringify({
+                    intent: tableResult.intent,
+                    table: tableResult.table,
+                    confidence: tableResult.confidence,
+                    fields: {},
+                    auto_fields: {},
+                    needs_input: [],
+                    missing_required: [],
+                    missing_optional: [],
+                    rejected: [],
+                    notes: [],
+                    ready_for_confirmation: false
+                });
+            }
+
+            var schema =
+                JSON.parse(this.getFormSchema(tableResult.table));
+
+            var schemaFields = this.buildSchemaFieldSummary(schema);
+
+            var planningPrompt =
+                'You are the Campus360 AI record preparation engine.\n\n' +
+
+                'USER REQUEST:\n' + prompt + '\n\n' +
+
+                'TARGET TABLE:\n' + tableResult.table + '\n\n' +
+
+                'FORM SCHEMA:\n' + JSON.stringify(schemaFields) + '\n\n' +
+
+                'YOUR JOB:\n' +
+                'Prepare a complete proposed record for human review.\n\n' +
+
+                'IMPORTANT WORKFLOW RULES:\n' +
+                '1. ServiceNow mandatory=true/false is NOT the conversational completion rule.\n' +
+                '2. Treat every non-technical business field in the schema as something that must eventually be resolved before final confirmation.\n' +
+                '3. A field can be resolved in one of five ways: explicit user value, safe AI-generated value, safe AI-selected choice, valid ServiceNow/default value, or a value that must be requested from the user.\n' +
+                '4. Never leave a business field silently unresolved and then mark the record ready.\n' +
+                '5. Do NOT ask the user for trivial naming fields if a sensible name can be created from information already supplied.\n' +
+                '6. If the user explicitly gives a name, preserve the user name rather than replacing it.\n' +
+                '7. If a name/title/label field is clearly implied by the request and can be generated without inventing business facts, generate a concise sensible value.\n' +
+                '8. IDs/codes may be generated when the field clearly represents an identifier and ServiceNow does not provide one automatically.\n' +
+                '9. For choice fields, inspect the ACTUAL available choices from the schema.\n' +
+                '10. Select a choice automatically only when the request/context makes the choice reasonably clear.\n' +
+                '11. For a newly created future training/program/event, a status such as Planned may be appropriate ONLY if that exact choice exists in the schema.\n' +
+                '12. Never invent a choice value that is not present in the schema.\n' +
+                '13. Do NOT infer sensitive, identity, reference, capacity, date, eligibility, or business-critical values merely because they seem convenient.\n' +
+                '14. If a reference field is needed and there is not enough information to identify the referenced record safely, put that field in needs_input.\n' +
+                '15. Do not map contextual phrases to fields incorrectly.\n' +
+                '16. For example, "for Python Full Stack students" does NOT automatically mean skill_area=Python Full Stack or training_name=Python Full Stack.\n' +
+                '17. However, if the user says "create a Python Full Stack program", you may use that phrase to generate a sensible training name if the schema supports a training-name field.\n' +
+                '18. Distinguish between information explicitly supplied and information generated by AI.\n' +
+                '19. Generated values must be conservative and easy for the user to review/change.\n' +
+                '20. The final record will ALWAYS be shown to the user before creation.\n\n' +
+                '21. A reference field value such as "anyone", "any trainer", "whoever is available", ' +
+                'or "you choose" is NOT a real reference value - if you see language like this for a ' +
+                'reference field, put that field in needs_input instead of putting the phrase in provided/auto_fields.\n\n' +
+
+                'RETURN ONLY VALID JSON with this exact structure:\n' +
+                '{"provided": {},"auto_fields": {},"needs_input": [],"notes": []}';
+
+            var planningRaw = this.cleanAIJson(this.askGroq(planningPrompt));
+
+            var planned = JSON.parse(planningRaw);
+
+            var validFields = this.getFieldMap(schema);
+
+            var provided = {};
+            var autoFields = {};
+            var rejected = [];
+            var notes = [];
+
+            if (planned.notes && planned.notes.length) {
+                for (var n = 0; n < planned.notes.length; n++) {
+                    notes.push(String(planned.notes[n]));
+                }
+            }
+
+            this.applyValidatedValues(
+                planned.provided,
+                validFields,
+                provided,
+                rejected,
+                {}
+            );
+
+            this.applyValidatedValues(
+                planned.auto_fields,
+                validFields,
+                autoFields,
+                rejected,
+                { skipIn: provided }
+            );
+
+            var resolvedFields = {};
+
+            var conversationalPolicy =
+                this.getConversationalFieldPolicy(
+                    tableResult.table,
+                    schema
+                );
+
+            for (var p = 0; p < schema.fields.length; p++) {
+
+                var currentName = schema.fields[p].name;
+
+                if (this.hasOwn(provided, currentName)) {
+                    resolvedFields[currentName] = provided[currentName];
+                    continue;
+                }
+
+                if (this.hasOwn(autoFields, currentName)) {
+                    resolvedFields[currentName] = autoFields[currentName];
+                }
+            }
+
+            var defaultValues =
+                this.getDefaultFieldValues(
+                    tableResult.table,
+                    schema,
+                    resolvedFields
+                );
+
+            for (var defaultName in defaultValues) {
+
+                if (!this.hasOwn(defaultValues, defaultName)) {
+                    continue;
+                }
+
+                if (this.hasOwn(resolvedFields, defaultName)) {
+                    continue;
+                }
+
+                resolvedFields[defaultName] = defaultValues[defaultName];
+            }
+
+            var finalNeedsInput = [];
+
+            for (var t = 0; t < conversationalPolicy.required.length; t++) {
+
+                var requiredFieldName = conversationalPolicy.required[t];
+
+                if (!this.hasOwn(resolvedFields, requiredFieldName)) {
+                    finalNeedsInput.push(requiredFieldName);
+                }
+            }
+
+            finalNeedsInput = this.orderFieldNames(finalNeedsInput, schema);
+
+            var ready =
+                finalNeedsInput.length === 0 &&
+                rejected.length === 0 &&
+                this.hasAnyFields(resolvedFields);
+
+            return JSON.stringify({
+                intent: 'create',
+                table: tableResult.table,
+                confidence: tableResult.confidence || 'medium',
+                fields: resolvedFields,
+                provided: provided,
+                auto_fields: autoFields,
+                default_fields: defaultValues,
+                needs_input: finalNeedsInput,
+                missing_required: [],
+                missing_optional: [],
+                rejected: rejected,
+                notes: notes,
+                next_field: finalNeedsInput.length > 0 ? finalNeedsInput[0] : null,
+                ready_for_confirmation: ready
+            });
+
+        } catch (ex) {
+
+            gs.error(
+                'Campus360AIService.analyzeRequestAgainstSchema failed: ' +
+                String(ex)
+            );
+
+            throw ex;
+        }
+    },
+
+
+    /*
+     * ============================================================
+     * CHOICE VALIDATION
+     * ============================================================
+     */
+
+    validateChoiceValue: function(fieldDefinition, value) {
+
+        if (!fieldDefinition) {
+            return false;
+        }
+
+        if (fieldDefinition.type !== 'choice') {
+            return true;
+        }
+
+        if (!fieldDefinition.choices || fieldDefinition.choices.length === 0) {
+            return true;
+        }
+
+        for (var i = 0; i < fieldDefinition.choices.length; i++) {
+            if (
+                String(fieldDefinition.choices[i].value) === String(value)
+            ) {
+                return true;
+            }
+        }
+
+        return false;
+    },
+
+
+    /*
+     * ============================================================
+     * DEFAULT FIELD DISCOVERY
+     * ============================================================
+     */
+
+    getDefaultFieldValues: function(tableName, schema, alreadyResolved) {
+
+        var defaults = {};
+
+        try {
+
+            var gr = new GlideRecord(tableName);
+
+            if (!gr.isValid()) {
+                return defaults;
+            }
+
+            gr.initialize();
+
+            if (!schema || !schema.fields) {
+                return defaults;
+            }
+
+            for (var i = 0; i < schema.fields.length; i++) {
+
+                var field = schema.fields[i];
+
+                if (this.hasOwn(alreadyResolved, field.name)) {
+                    continue;
+                }
+
+                try {
+
+                    var value = gr.getValue(field.name);
+
+                    if (
+                        value !== null &&
+                        typeof value !== 'undefined' &&
+                        String(value).trim() !== ''
+                    ) {
+                        if (this.validateChoiceValue(field, value)) {
+                            defaults[field.name] = String(value);
+                        }
+                    }
+
+                } catch (fieldEx) {
+                }
+            }
+
+        } catch (ex) {
+
+            gs.warn(
+                'Campus360AIService.getDefaultFieldValues warning: ' +
+                String(ex)
+            );
+        }
+
+        return defaults;
+    },
+
+
+    /*
+     * ============================================================
+     * FIELD ORDER
+     * ============================================================
+     */
+
+    getFieldCollectionOrder: function(schema) {
+
+        var preferredOrder = [
+            'training_name',
+            'name',
+            'title',
+            'skill_area',
+            'description',
+            'start_date',
+            'end_date',
+            'batch',
+            'capacity',
+            'trainer',
+            'company',
+            'role',
+            'job_title',
+            'location',
+            'salary',
+            'deadline',
+            'status',
+            'training_id'
+        ];
+
+        var result = [];
+
+        if (!schema || !schema.fields) {
+            return result;
+        }
+
+        for (var i = 0; i < preferredOrder.length; i++) {
+            for (var j = 0; j < schema.fields.length; j++) {
+                if (schema.fields[j].name === preferredOrder[i]) {
+                    if (result.indexOf(preferredOrder[i]) === -1) {
+                        result.push(preferredOrder[i]);
+                    }
+                    break;
+                }
+            }
+        }
+
+        for (var k = 0; k < schema.fields.length; k++) {
+
+            var fieldName = schema.fields[k].name;
+
+            if (result.indexOf(fieldName) === -1) {
+                result.push(fieldName);
+            }
+        }
+
+        return result;
+    },
+
+
+    orderFieldNames: function(fieldNames, schema) {
+
+        if (!fieldNames || !fieldNames.length) {
+            return [];
+        }
+
+        var preferred = this.getFieldCollectionOrder(schema);
+        var ordered = [];
+
+        for (var i = 0; i < preferred.length; i++) {
+            if (fieldNames.indexOf(preferred[i]) !== -1) {
+                ordered.push(preferred[i]);
+            }
+        }
+
+        for (var j = 0; j < fieldNames.length; j++) {
+            if (ordered.indexOf(fieldNames[j]) === -1) {
+                ordered.push(fieldNames[j]);
+            }
+        }
+
+        return ordered;
+    },
+
+
+    /*
+     * ============================================================
+     * BUILD TASK STATE (CREATE)
+     * ============================================================
+     */
+
+    buildTaskState: function(prompt) {
+
+        if (!prompt || String(prompt).trim() === '') {
+            throw new Error('Prompt is required.');
+        }
+
+        try {
+
+            var analysis =
+                JSON.parse(
+                    this.analyzeRequestAgainstSchema(String(prompt).trim())
+                );
+
+            var state = {
+                intent: analysis.intent || 'unknown',
+                table: analysis.table || '',
+                confidence: analysis.confidence || 'medium',
+                fields: analysis.fields || {},
+                provided: analysis.provided || {},
+                auto_fields: analysis.auto_fields || {},
+                default_fields: analysis.default_fields || {},
+                needs_input: analysis.needs_input || [],
+                missing_required: analysis.missing_required || [],
+                missing_optional: analysis.missing_optional || [],
+                rejected: analysis.rejected || [],
+                notes: analysis.notes || [],
+                next_field: analysis.next_field || null,
+                ready_for_confirmation: analysis.ready_for_confirmation === true
+            };
+
+            if (state.intent === 'create' && !this.hasAnyFields(state.fields)) {
+                state.ready_for_confirmation = false;
+            }
+
+            if (
+                state.intent === 'create' &&
+                state.needs_input &&
+                state.needs_input.length > 0
+            ) {
+                state.ready_for_confirmation = false;
+            }
+
+            return JSON.stringify(state);
+
+        } catch (ex) {
+
+            gs.error(
+                'Campus360AIService.buildTaskState failed: ' + String(ex)
+            );
+
+            throw ex;
+        }
+    },
+
+
+    /*
+     * ============================================================
+     * MERGE AN EXISTING CREATE TASK
+     * ============================================================
+     */
+
+    mergeTaskState: function(existingState, newPrompt) {
+
+        if (!existingState || typeof existingState !== 'object') {
+            throw new Error('Existing task state is required.');
+        }
+
+        if (!newPrompt || String(newPrompt).trim() === '') {
+            throw new Error('New user message is required.');
+        }
+
+        newPrompt = String(newPrompt).trim();
+
+        try {
+
+            var table = existingState.table;
+
+            if (!table) {
+                throw new Error(
+                    'Existing task does not contain a target table.'
+                );
+            }
+
+            var schema = JSON.parse(this.getFormSchema(table));
+
+            var schemaFields = this.buildSchemaFieldSummary(schema);
+
+            var extractionPrompt =
+                'You are the Campus360 pending-record update engine.\n\n' +
+
+                'TARGET TABLE:\n' + table + '\n\n' +
+
+                'NEW USER MESSAGE:\n' + newPrompt + '\n\n' +
+
+                'CURRENT PROPOSED FIELDS:\n' +
+                JSON.stringify(existingState.fields || {}) + '\n\n' +
+
+                'FORM SCHEMA:\n' + JSON.stringify(schemaFields) + '\n\n' +
+
+                'RULES:\n' +
+                '1. Determine whether the user is supplying a new value or changing an existing value.\n' +
+                '2. Extract ONLY information actually present in the NEW message.\n' +
+                '3. If the user says "change capacity to 40", return capacity=40.\n' +
+                '4. If the user says "make the name Java Masterclass", replace the existing name.\n' +
+                '5. Preserve all existing fields not mentioned in the new message.\n' +
+                '6. Never invent unrelated business data.\n' +
+                '7. For choice fields, use only an exact valid choice value from the schema.\n' +
+                '8. If the user asks for a change that cannot be safely mapped, put it in notes.\n' +
+                '9. If the user supplies enough context for a simple generated name/ID, that may be generated later, but do not overwrite an explicit user value.\n' +
+                '10. A reference field value such as "anyone", "any trainer", "whoever is available", or ' +
+                '"you choose" is NOT a real reference value - never return it as a provided value.\n\n' +
+
+                'Return ONLY valid JSON:\n' +
+                '{"provided": {},"notes": []}';
+
+            var extractionRaw =
+                this.cleanAIJson(this.askGroq(extractionPrompt));
+
+            var extracted = JSON.parse(extractionRaw);
+
+            var validFields = this.getFieldMap(schema);
+
+            var mergedFields = {};
+            var existingFields = existingState.fields || {};
+
+            for (var existingName in existingFields) {
+
+                if (!this.hasOwn(existingFields, existingName)) {
+                    continue;
+                }
+
+                if (validFields[existingName]) {
+                    mergedFields[existingName] = existingFields[existingName];
+                }
+            }
+
+            var rejected = [];
+
+            if (extracted && extracted.provided) {
+                this.applyValidatedValues(
+                    extracted.provided,
+                    validFields,
+                    mergedFields,
+                    rejected,
+                    {}
+                );
+            }
+
+            var remainingSchemaFields = [];
+
+            for (var r = 0; r < schema.fields.length; r++) {
+                if (!this.hasOwn(mergedFields, schema.fields[r].name)) {
+                    remainingSchemaFields.push(schema.fields[r]);
+                }
+            }
+
+            var autoFields = {};
+            var notes = [];
+
+            if (existingState.notes && existingState.notes.length) {
+                for (var oldNote = 0; oldNote < existingState.notes.length; oldNote++) {
+                    notes.push(String(existingState.notes[oldNote]));
+                }
+            }
+
+            if (extracted && extracted.notes && extracted.notes.length) {
+                for (var newNote = 0; newNote < extracted.notes.length; newNote++) {
+                    notes.push(String(extracted.notes[newNote]));
+                }
+            }
+
+            if (remainingSchemaFields.length > 0) {
+
+                var autoPrompt =
+                    'You are the Campus360 pending-record completion assistant.\n\n' +
+
+                    'TARGET TABLE:\n' + table + '\n\n' +
+
+                    'ORIGINAL / CURRENT USER CONTEXT:\n' +
+                    JSON.stringify(existingState) + '\n\n' +
+
+                    'LATEST USER MESSAGE:\n' + newPrompt + '\n\n' +
+
+                    'ALREADY RESOLVED FIELDS:\n' +
+                    JSON.stringify(mergedFields) + '\n\n' +
+
+                    'UNRESOLVED SCHEMA FIELDS:\n' +
+                    JSON.stringify(remainingSchemaFields) + '\n\n' +
+
+                    'RULES:\n' +
+                    '1. Resolve ONLY fields that can be safely generated or selected without inventing important business facts.\n' +
+                    '2. Name/title/label fields may be generated from the information already present.\n' +
+                    '3. Identifier/code fields may be generated when appropriate.\n' +
+                    '4. Choice fields may be selected when the current context clearly indicates a sensible choice and that exact choice exists.\n' +
+                    '5. For example, a newly created future training program can use Planned if Planned is an available status choice.\n' +
+                    '6. Never invent a reference record such as a trainer/company/student unless the user clearly identifies it.\n' +
+                    '7. Never invent capacity, salary, deadline, dates, eligibility criteria, or other important business values.\n' +
+                    '8. Never overwrite an already resolved field.\n' +
+                    '9. Return fields that still genuinely require user input in needs_input.\n\n' +
+
+                    'Return ONLY valid JSON:\n' +
+                    '{"auto_fields": {},"needs_input": [],"notes": []}';
+
+                var autoPlan =
+                    JSON.parse(this.cleanAIJson(this.askGroq(autoPrompt)));
+
+                this.applyValidatedValues(
+                    autoPlan.auto_fields,
+                    validFields,
+                    mergedFields,
+                    rejected,
+                    { skipExisting: true, record: autoFields }
+                );
+
+                if (autoPlan.notes && autoPlan.notes.length) {
+                    for (var autoNote = 0; autoNote < autoPlan.notes.length; autoNote++) {
+                        notes.push(String(autoPlan.notes[autoNote]));
+                    }
+                }
+            }
+
+            var defaultFields =
+                this.getDefaultFieldValues(table, schema, mergedFields);
+
+            for (var defaultName in defaultFields) {
+
+                if (!this.hasOwn(defaultFields, defaultName)) {
+                    continue;
+                }
+
+                if (!this.hasOwn(mergedFields, defaultName)) {
+                    mergedFields[defaultName] = defaultFields[defaultName];
+                }
+            }
+
+            var needsInput = [];
+
+            var conversationalPolicy =
+                this.getConversationalFieldPolicy(table, schema);
+
+            for (var f = 0; f < conversationalPolicy.required.length; f++) {
+
+                var requiredFieldName = conversationalPolicy.required[f];
+
+                if (!this.hasOwn(mergedFields, requiredFieldName)) {
+                    needsInput.push(requiredFieldName);
+                }
+            }
+
+            needsInput = this.orderFieldNames(needsInput, schema);
+
+            var ready =
+                needsInput.length === 0 &&
+                rejected.length === 0 &&
+                this.hasAnyFields(mergedFields);
+
+            return JSON.stringify({
+                intent: existingState.intent || 'create',
+                table: table,
+                confidence: existingState.confidence || 'medium',
+                fields: mergedFields,
+                provided: existingState.provided || {},
+                auto_fields: autoFields,
+                default_fields: defaultFields,
+                needs_input: needsInput,
+                missing_required: [],
+                missing_optional: [],
+                rejected: rejected,
+                notes: notes,
+                next_field: needsInput.length > 0 ? needsInput[0] : null,
+                ready_for_confirmation: ready
+            });
+
+        } catch (ex) {
+
+            gs.error(
+                'Campus360AIService.mergeTaskState failed: ' + String(ex)
+            );
+
+            throw ex;
+        }
+    },
+
+
+    /*
+     * ============================================================
+     * CREATE TASK PERSISTENCE
+     * (pending CREATE workflow state ONLY - not chat history)
+     * ============================================================
+     */
+
+    createAITask: function(
+        taskState,
+        conversationId,
+        userMessage,
+        aiResponse
+    ) {
+
+        if (!taskState) {
+            throw new Error('Task state is required.');
+        }
+
+        try {
+
+            var state =
+                (typeof taskState === 'string')
+                    ? JSON.parse(taskState)
+                    : taskState;
+
+            var gr = new GlideRecord('x_snc_campus360_campus360_ai_task');
+
+            gr.initialize();
+
+            gr.setValue('user', gs.getUserID());
+
+            if (conversationId) {
+                gr.setValue('conversation_id', String(conversationId));
+            }
+
+            gr.setValue(
+                'status',
+                state.ready_for_confirmation
+                    ? 'awaiting_confirmation'
+                    : 'awaiting_input'
+            );
+
+            gr.setValue('intent', state.intent || 'unknown');
+            gr.setValue('target_table', state.table || '');
+            gr.setValue('task_state', JSON.stringify(state));
+            gr.setValue('current_field', state.next_field || '');
+            gr.setValue('last_user_message', userMessage || '');
+            gr.setValue('last_ai_response', aiResponse || '');
+
+            var sysId = gr.insert();
+
+            if (!sysId) {
+                throw new Error('Failed to create Campus360 AI Task.');
+            }
+
+            return sysId;
+
+        } catch (ex) {
+
+            gs.error(
+                'Campus360AIService.createAITask failed: ' + String(ex)
+            );
+
+            throw ex;
+        }
+    },
+
+
+    getActiveAITask: function(conversationId) {
+
+        try {
+
+            var gr = new GlideRecord('x_snc_campus360_campus360_ai_task');
+
+            /* User isolation - always the authenticated user. */
+            gr.addQuery('user', gs.getUserID());
+
+            var statusQuery = gr.addQuery('status', 'active');
+            statusQuery.addOrCondition('status', 'awaiting_input');
+            statusQuery.addOrCondition('status', 'awaiting_confirmation');
+
+            if (conversationId) {
+                gr.addQuery('conversation_id', String(conversationId));
+            }
+
+            gr.orderByDesc('sys_updated_on');
+            gr.setLimit(1);
+            gr.query();
+
+            if (!gr.next()) {
+                return '';
+            }
+
+            return JSON.stringify({
+                sys_id: gr.getUniqueValue(),
+                user: gr.getValue('user'),
+                conversation_id: gr.getValue('conversation_id'),
+                status: gr.getValue('status'),
+                intent: gr.getValue('intent'),
+                target_table: gr.getValue('target_table'),
+                task_state: gr.getValue('task_state'),
+                current_field: gr.getValue('current_field'),
+                last_user_message: gr.getValue('last_user_message'),
+                last_ai_response: gr.getValue('last_ai_response')
+            });
+
+        } catch (ex) {
+
+            gs.error(
+                'Campus360AIService.getActiveAITask failed: ' + String(ex)
+            );
+
+            throw ex;
+        }
+    },
+
+
+    updateAITask: function(
+        taskSysId,
+        taskState,
+        status,
+        userMessage,
+        aiResponse
+    ) {
+
+        if (!taskSysId) {
+            throw new Error('AI Task sys_id is required.');
+        }
+
+        if (!taskState) {
+            throw new Error('Task state is required.');
+        }
+
+        try {
+
+            var state =
+                (typeof taskState === 'string')
+                    ? JSON.parse(taskState)
+                    : taskState;
+
+            var gr = new GlideRecord('x_snc_campus360_campus360_ai_task');
+
+            gr.addQuery('sys_id', taskSysId);
+            gr.addQuery('user', gs.getUserID());
+            gr.query();
+
+            if (!gr.next()) {
+                throw new Error(
+                    'AI Task not found or not owned by current user.'
+                );
+            }
+
+            gr.setValue(
+                'status',
+                status ||
+                (
+                    state.ready_for_confirmation
+                        ? 'awaiting_confirmation'
+                        : 'awaiting_input'
+                )
+            );
+
+            gr.setValue('intent', state.intent || 'unknown');
+            gr.setValue('target_table', state.table || '');
+            gr.setValue('task_state', JSON.stringify(state));
+            gr.setValue('current_field', state.next_field || '');
+
+            if (userMessage !== undefined) {
+                gr.setValue('last_user_message', String(userMessage));
+            }
+
+            if (aiResponse !== undefined) {
+                gr.setValue('last_ai_response', String(aiResponse));
+            }
+
+            var updated = gr.update();
+
+            if (!updated) {
+                throw new Error('Failed to update Campus360 AI Task.');
+            }
+
+            return updated;
+
+        } catch (ex) {
+
+            gs.error(
+                'Campus360AIService.updateAITask failed: ' + String(ex)
+            );
+
+            throw ex;
+        }
+    },
+
+
+    /*
+     * ============================================================
+     * HUMAN-FRIENDLY FIELD SUMMARY
+     * ============================================================
+     */
+
+    buildRecordSummary: function(table, fields) {
+
+        try {
+
+            var schema = JSON.parse(this.getFormSchema(table));
+
+            var lines = [];
+
+            for (var i = 0; i < schema.fields.length; i++) {
+
+                var field = schema.fields[i];
+
+                if (!this.hasOwn(fields, field.name)) {
+                    continue;
+                }
+
+                var value = fields[field.name];
+
+                if (this.isEmptyValue(value)) {
+                    continue;
+                }
+
+                var displayValue = String(value);
+
+                if (field.type === 'choice' && field.choices) {
+                    for (var c = 0; c < field.choices.length; c++) {
+                        if (String(field.choices[c].value) === String(value)) {
+                            displayValue = String(field.choices[c].label);
+                            break;
+                        }
+                    }
+                }
+
+                lines.push(
+                    String(field.label || field.name) + ': ' + displayValue
+                );
+            }
+
+            if (lines.length === 0) {
+                return 'No record fields have been prepared yet.';
+            }
+
+            return lines.join('\n');
+
+        } catch (ex) {
+
+            gs.error(
+                'Campus360AIService.buildRecordSummary failed: ' + String(ex)
+            );
+
+            return JSON.stringify(fields || {});
+        }
+    },
+
+
+    /*
+     * ============================================================
+     * NEXT FIELD QUESTION
+     * ============================================================
+     */
+
+    buildNextFieldQuestion: function(table, fieldName) {
+
+        if (!fieldName) {
+            return '';
+        }
+
+        try {
+
+            var schema = JSON.parse(this.getFormSchema(table));
+
+            var field = null;
+
+            for (var i = 0; i < schema.fields.length; i++) {
+                if (schema.fields[i].name === fieldName) {
+                    field = schema.fields[i];
+                    break;
+                }
+            }
+
+            if (!field) {
+                return (
+                    'Please provide the ' +
+                    String(fieldName).replace(/_/g, ' ') + '.'
+                );
+            }
+
+            var label = String(field.label || field.name).toLowerCase();
+
+            if (
+                field.type === 'choice' &&
+                field.choices &&
+                field.choices.length > 0
+            ) {
+
+                var choices = [];
+
+                for (var c = 0; c < field.choices.length; c++) {
+                    choices.push(String(field.choices[c].label));
+                }
+
+                return (
+                    'What should the ' + label + ' be? Options: ' +
+                    choices.join(', ') + '.'
+                );
+            }
+
+            if (field.type === 'reference') {
+                return 'Which ' + label + ' should I use?';
+            }
+
+            return 'What should the ' + label + ' be?';
+
+        } catch (ex) {
+
+            return (
+                'Please provide the ' +
+                String(fieldName).replace(/_/g, ' ') + '.'
+            );
+        }
+    },
+
+
+    /*
+     * ============================================================
+     * CURRENT USER IDENTITY / PERSONA
+     * ============================================================
+     *
+     * Persona is CONTEXT only. It is never used as authorization.
+     * ServiceNow ACLs remain the authority.
+     *
+     * Priority: admin -> tpo -> recruiter -> trainer -> student
+     *           -> alumni -> general
+     * ============================================================
+     */
+
+    getCurrentAIUserContext: function() {
+
+        var context = {
+            user_sys_id: '',
+            user_name: '',
+            user_display_name: '',
+            persona: 'general',
+            student_record: null,
+            capabilities: {
+                can_create_training: false,
+                can_create_opportunity: false,
+                can_view_all_students: false,
+                can_view_own_data: false
+            }
+        };
+
+        try {
+
+            context.user_sys_id = String(gs.getUserID());
+            context.user_name = String(gs.getUserName());
+            context.user_display_name = String(gs.getUserDisplayName());
+
+            if (gs.hasRole('admin') || gs.hasRole('system_administrator')) {
+                context.persona = 'admin';
+            } else if (gs.hasRole('x_snc_campus360.tpo')) {
+                context.persona = 'tpo';
+            } else if (gs.hasRole('x_snc_campus360.recruiter')) {
+                context.persona = 'recruiter';
+            } else if (gs.hasRole('x_snc_campus360.trainer')) {
+                context.persona = 'trainer';
+            } else if (gs.hasRole('x_snc_campus360.student')) {
+                context.persona = 'student';
+            } else if (gs.hasRole('x_snc_campus360.alumni')) {
+                context.persona = 'alumni';
+            } else {
+                context.persona = 'general';
+            }
+
+            /* Linked Student Master only for real student personas. */
+            if (context.persona === 'student') {
+
+                var studentRecord = this.getCurrentStudentRecord();
+
+                if (studentRecord.success && studentRecord.found) {
+                    context.student_record = studentRecord;
+                }
+            }
+
+            context.capabilities.can_create_training =
+                this.canPerformAIAction(
+                    'x_snc_campus360_training_program',
+                    'create'
+                );
+
+            context.capabilities.can_create_opportunity =
+                this.canPerformAIAction(
+                    'x_snc_campus360_placement_opportunity',
+                    'create'
+                );
+
+            context.capabilities.can_view_all_students =
+                this.canPerformAIAction(
+                    'x_snc_campus360_student_master',
+                    'read'
+                );
+
+            context.capabilities.can_view_own_data =
+                this.canPerformAIAction(
+                    'x_snc_campus360_student_application',
+                    'read'
+                );
+
+        } catch (ex) {
+
+            gs.error(
+                'Campus360AIService.getCurrentAIUserContext failed: ' +
+                String(ex)
+            );
+        }
+
+        return context;
+    },
+
+
+    getPersonaLabel: function(persona) {
+
+        var labels = {
+            admin: 'a Campus360 Administrator',
+            tpo: 'a TPO (Training and Placement Officer)',
+            recruiter: 'a Recruiter',
+            trainer: 'a Trainer',
+            student: 'a Student',
+            alumni: 'an Alumni',
+            general: 'a general Campus360 user'
+        };
+
+        return labels[String(persona)] || labels.general;
+    },
+
+
+    /*
+     * ============================================================
+     * CONVERSATION MEMORY
+     * ============================================================
+     *
+     * Two conceptually SEPARATE memories:
+     *
+     *  1. CREATE task memory  -> AI Task table
+     *                            (getActiveAITask / getCreateTaskContext)
+     *                            Pending CREATE workflow state ONLY.
+     *
+     *  2. GENERAL conversation memory -> getConversationContext()
+     *                            Reads a dedicated message table ONLY
+     *                            if one is configured through the system
+     *                            property:
+     *                            x_snc_campus360_campus360_ai_conversation
+     *                            Expected fields on that table:
+     *                            user, conversation_id, role, content.
+     *                            If the property is not set (or the table
+     *                            is missing/invalid), no history is used
+     *                            and general chat still works. No Groq
+     *                            summarization call is ever made here.
+     * ============================================================
+     */
+
+    getCreateTaskContext: function(conversationId) {
+
+        var ctx = {
+            has_active_task: false,
+            table: '',
+            status: '',
+            current_field: '',
+            last_user_message: '',
+            last_ai_response: ''
+        };
+
+        try {
+
+            var raw = this.getActiveAITask(conversationId);
+
+            if (!raw) {
+                return ctx;
+            }
+
+            var task = JSON.parse(raw);
+
+            ctx.has_active_task = true;
+            ctx.table = String(task.target_table || '');
+            ctx.status = String(task.status || '');
+            ctx.current_field = String(task.current_field || '');
+            ctx.last_user_message = String(task.last_user_message || '');
+            ctx.last_ai_response = String(task.last_ai_response || '');
+
+        } catch (ex) {
+
+            gs.warn(
+                'Campus360AIService.getCreateTaskContext warning: ' +
+                String(ex)
+            );
+        }
+
+        return ctx;
+    },
+
+
+    getConversationMessageTable: function() {
+
+        try {
+
+            var tableName =
+                String(
+                    gs.getProperty('x_snc_campus360_campus360_ai_conversation',) ||
+                    ''
+                ).trim();
+
+            if (!tableName) {
+                return '';
+            }
+
+            var probe = new GlideRecord(tableName);
+
+            if (
+                !probe.isValid() ||
+                !probe.isValidField('user') ||
+                !probe.isValidField('conversation_id') ||
+                !probe.isValidField('role') ||
+                !probe.isValidField('content')
+            ) {
+                return '';
+            }
+
+            return tableName;
+
+        } catch (ex) {
+
+            /* A missing/invalid conversation table must never break chat. */
+            gs.warn(
+                'Campus360AIService.getConversationMessageTable warning: ' +
+                String(ex)
+            );
+
+            return '';
+        }
+    },
+
+
+    getConversationContext: function(conversationId) {
+
+        var context = {
+            recent_messages: [],
+            summary: ''
+        };
+
+        if (!conversationId || String(conversationId).trim() === '') {
+            return context;
+        }
+
+        try {
+
+            var tableName = this.getConversationMessageTable();
+
+            if (!tableName) {
+                return context;
+            }
+
+            var gr = new GlideRecord(tableName);
+
+            /* User isolation: a client-supplied conversationId can never
+               expose another user's history. */
+            gr.addQuery('user', gs.getUserID());
+            gr.addQuery('conversation_id', String(conversationId));
+            gr.orderByDesc('sys_created_on');
+            gr.setLimit(6);
+            gr.query();
+
+            var messages = [];
+
+            while (gr.next()) {
+
+                var content = String(gr.getValue('content') || '').trim();
+                var role = String(gr.getValue('role') || '').trim().toLowerCase();
+
+                if (!content) {
+                    continue;
+                }
+
+                messages.push({
+                    role: (role === 'assistant') ? 'assistant' : 'user',
+                    content: content
+                });
+            }
+
+            messages.reverse();
+            context.recent_messages = messages;
+
+        } catch (ex) {
+
+            gs.error(
+                'Campus360AIService.getConversationContext failed: ' +
+                String(ex)
+            );
+        }
+
+        return context;
+    },
+
+
+    recordConversationMessage: function(conversationId, role, content) {
+
+        try {
+
+            if (
+                !conversationId ||
+                String(conversationId).trim() === '' ||
+                this.isEmptyValue(content)
+            ) {
+                return false;
+            }
+
+            var tableName = this.getConversationMessageTable();
+
+            if (!tableName) {
+                return false;
+            }
+
+            var gr = new GlideRecord(tableName);
+
+            gr.initialize();
+            gr.setValue('user', gs.getUserID());
+            gr.setValue('conversation_id', String(conversationId));
+            gr.setValue('role', String(role));
+            gr.setValue('content', String(content).substring(0, 4000));
+
+            return !!gr.insert();
+
+        } catch (ex) {
+
+            gs.warn(
+                'Campus360AIService.recordConversationMessage warning: ' +
+                String(ex)
+            );
+
+            return false;
+        }
+    },
+
+
+    /*
+     * Deterministic (no Groq call) check for messages that clearly depend
+     * on earlier turns of the SAME conversation - "what did I just tell
+     * you", "my previous question", "what did you recommend", "show me
+     * those", "change that to 40", etc. Used only AFTER the active CREATE
+     * task check and only when conversation history exists. Genuine
+     * standalone requests ("Show me all training programs", "Show me
+     * students with CGPA above 8", ...) do not match and continue through
+     * the normal intent classifier.
+     */
+    isConversationalFollowUp: function(message) {
+
+        var t = String(message || '').trim().toLowerCase();
+
+        if (!t) {
+            return false;
+        }
+
+        var patterns = [
+            /\b(did|have)\s+i\s+(just\s+)?(tell|told|say|said|mention|mentioned|share|shared|state|stated|ask|asked)\b/,
+            /\b(my|the)\s+(previous|last|earlier|prior)\s+(question|message|request|answer|response)\b/,
+            /\bwhat\s+(was|were)\s+(your|the)\s+(previous|last|earlier|prior)\b/,
+            /\bwhat\s+did\s+you\s+(just\s+)?(recommend|suggest|say|mean|tell)\b/,
+            /\byou\s+(just\s+)?(recommended|suggested)\b/,
+            /\bwhat\s+about\s+(that|this|those|these|it|them)\b/,
+            /^(show|list|give)\s+me\s+(those|these|them|that|it)\b/,
+            /^(please\s+)?(change|make|set|update)\s+(that|it|this)\s+to\b/,
+            /\b(use|pick|choose|keep)\s+the\s+same\s+(trainer|one|thing|value)\b/
+        ];
+
+        for (var i = 0; i < patterns.length; i++) {
+            if (patterns[i].test(t)) {
+                return true;
+            }
+        }
+
+        return false;
+    },
+
+
+    /*
+     * ============================================================
+     * PERSONA-AWARE NATURAL CHAT (GENERAL only)
+     * ============================================================
+     *
+     * Normal GENERAL flow = intent classification + this single
+     * Groq call. No summarization call.
+     * ============================================================
+     */
+
+    getNaturalChatResponse: function(
+        userMessage,
+        conversationId,
+        userContext
+    ) {
+
+        try {
+
+            var message = String(userMessage || '').trim();
+
+            if (!message) {
+                return JSON.stringify({
+                    success: false,
+                    response: 'Please enter a message.'
+                });
+            }
+
+            userContext = userContext || this.getCurrentAIUserContext();
+
+            var persona = userContext.persona;
+
+            var identity =
+                'The current authenticated user is ' +
+                String(userContext.user_display_name) +
+                ' (username: ' + String(userContext.user_name) + '), ' +
+                this.getPersonaLabel(persona) + '. ';
+
+            if (persona === 'student') {
+
+                if (
+                    userContext.student_record &&
+                    userContext.student_record.student_name
+                ) {
+                    identity +=
+                        'Their linked Student Master profile is: ' +
+                        String(userContext.student_record.student_name) +
+                        (
+                            userContext.student_record.student_id
+                                ? ' (Student ID: ' +
+                                  String(userContext.student_record.student_id) + ')'
+                                : ''
+                        ) + '. ';
+                } else {
+                    identity +=
+                        'No Student Master profile is linked to their account. ';
+                }
+            }
+
+            var roleDescriptions = {
+                admin:
+                    'They administer the platform. Do not assume student context unless explicitly requested. ',
+                tpo:
+                    'They manage students, companies, placement opportunities, training programs, and placement analytics. Do not assume they are a student. ',
+                recruiter:
+                    'They review candidate applications and manage placement opportunities. Do not assume they are a student. ',
+                trainer:
+                    'They manage training programs and enrolled students. Do not assume they are a student. ',
+                student:
+                    'You can help with placement preparation, training, interviews, applications, and career topics. ',
+                alumni:
+                    'You can help with career opportunities, alumni resources, and relevant Campus360 features. ',
+                general:
+                    'Be helpful and professional. '
+            };
+
+            var systemContext =
+                'You are Campus360 AI, the AI assistant for the ' +
+                'Campus360 Training and Placement Intelligence Platform. ' +
+                identity +
+                (roleDescriptions[persona] || roleDescriptions.general) +
+                'If the user asks who they are, answer using ONLY the identity ' +
+                'facts above. ' +
+                'If the user asks what they said, told you, or asked earlier, ' +
+                'or what you recommended or said earlier in this conversation, ' +
+                'answer directly from the RECENT CONVERSATION section below when ' +
+                'the answer is there, and do not ask them to repeat it. ' +
+                'In this chat mode you do NOT have access to Campus360 ' +
+                'records. Never invent ServiceNow records, statistics, names, ' +
+                'or statuses, and never claim an action was completed. ' +
+                'If the user wants specific Campus360 data, tell them to ask ' +
+                'for it directly (for example "show open placement ' +
+                'opportunities") so the controlled data tools can handle it. ' +
+                'Be helpful, concise, and professional.';
+
+            var conversationContext = this.getConversationContext(conversationId);
+
+            var prompt = systemContext;
+
+            if (
+                conversationContext.recent_messages &&
+                conversationContext.recent_messages.length > 0
+            ) {
+
+                prompt += '\n\nRECENT CONVERSATION:\n';
+
+                for (var m = 0; m < conversationContext.recent_messages.length; m++) {
+
+                    var msg = conversationContext.recent_messages[m];
+
+                    prompt +=
+                        (msg.role === 'user' ? 'User' : 'Assistant') +
+                        ': ' + String(msg.content) + '\n';
+                }
+            }
+
+            prompt += '\n\nCURRENT MESSAGE:\n' + message;
+
+            var response = String(this.askGroq(prompt));
+
+            this.recordConversationMessage(conversationId, 'user', message);
+            this.recordConversationMessage(conversationId, 'assistant', response);
+
+            return JSON.stringify({
+                success: true,
+                response: response
+            });
+
+        } catch (ex) {
+
+            gs.error('Campus360 natural chat failed: ' + String(ex));
+
+            return JSON.stringify({
+                success: false,
+                response: 'I am having trouble processing that message right now.'
+            });
+        }
+    },
+
+
+    /*
+     * ============================================================
+     * AI INTENT CLASSIFICATION
+     * ============================================================
+     */
+
+    classifyAIIntent: function(userMessage) {
+
+        if (!userMessage || String(userMessage).trim() === '') {
+            throw new Error(
+                'User message is required for intent classification.'
+            );
+        }
+
+        userMessage = String(userMessage).trim();
+
+        try {
+
+            var systemInstruction =
+                'You are the Campus360 AI intent router. ' +
+                'Your ONLY job is to classify the user message. ' +
+                'Do NOT answer the user. ' +
+                'Do NOT execute any ServiceNow operation. ' +
+                'Do NOT invent records. ' +
+                'Return ONLY valid JSON. ' +
+                '\n\n' +
+                'INTENT DEFINITIONS:\n' +
+                'GENERAL = normal conversation, greetings, thanks, ' +
+                'casual questions, "who am I", asking what Campus360 AI can do, ' +
+                'or general career/placement advice that does not ' +
+                'require retrieving a specific ServiceNow record.\n' +
+                '\n' +
+                'CREATE = the user explicitly wants to create, add, ' +
+                'register, schedule, or make a new Campus360 record.\n' +
+                '\n' +
+                'READ = the user wants to view, show, list, find, ' +
+                'check, retrieve, or inspect existing Campus360 data.\n' +
+                '\n' +
+                'UPDATE = the user wants to change, edit, modify, ' +
+                'or update an existing Campus360 record.\n' +
+                '\n' +
+                'DELETE = the user explicitly wants to delete, remove, ' +
+                'or cancel an existing Campus360 record.\n' +
+                '\n' +
+                'ANALYSIS = the user wants recommendations, matching, ' +
+                'personalized insights, comparisons, suitability analysis, ' +
+                'placement readiness analysis, training recommendations, ' +
+                'career recommendations, trends, or conclusions that require ' +
+                'Campus360 data.\n' +
+                '\n' +
+                'UNKNOWN = the message cannot be classified safely.\n' +
+                '\n\n' +
+                'IMPORTANT EXAMPLES:\n' +
+                'Hello -> GENERAL\n' +
+                'Hey -> GENERAL\n' +
+                'Good morning -> GENERAL\n' +
+                'Who am I? -> GENERAL\n' +
+                'What can you do? -> GENERAL\n' +
+                'Thanks -> GENERAL\n' +
+                'How should I prepare for an interview? -> GENERAL\n' +
+                'Create a Python training program -> CREATE\n' +
+                'Create a new placement opportunity -> CREATE\n' +
+                'Show my applications -> READ\n' +
+                'Show students -> READ\n' +
+                'Show open placement opportunities -> READ\n' +
+                'List my training programs -> READ\n' +
+                'What applications have I submitted? -> READ\n' +
+                'Update my profile -> UPDATE\n' +
+                'Change my training enrollment -> UPDATE\n' +
+                'Delete my application -> DELETE\n' +
+                'What training programs would be useful for me? -> ANALYSIS\n' +
+                'Which opportunities are suitable for me? -> ANALYSIS\n' +
+                'What skills should I improve for placements? -> ANALYSIS\n' +
+                'How placement-ready am I? -> ANALYSIS\n' +
+                'Give me placement trends -> ANALYSIS\n' +
+                'Which candidates match this opportunity? -> ANALYSIS\n' +
+                '\n\n' +
+                'OUTPUT FORMAT:\n' +
+                '{"intent":"general|create|read|update|delete|analysis|unknown",' +
+                '"confidence":"high|medium|low"}';
+
+            var routingPrompt =
+                systemInstruction + '\n\nUser message:\n' + userMessage;
+
+            var content = this.cleanAIJson(this.askGroq(routingPrompt));
+
+            var result = JSON.parse(content);
+
+            var allowedIntents = {
+                'general': true,
+                'create': true,
+                'read': true,
+                'update': true,
+                'delete': true,
+                'analysis': true,
+                'unknown': true
+            };
+
+            var intent = String(result.intent || '').trim().toLowerCase();
+
+            if (!allowedIntents[intent]) {
+                throw new Error('AI returned invalid intent: ' + intent);
+            }
+
+            var confidence =
+                String(result.confidence || 'low').trim().toLowerCase();
+
+            if (
+                confidence !== 'high' &&
+                confidence !== 'medium' &&
+                confidence !== 'low'
+            ) {
+                confidence = 'low';
+            }
+
+            return JSON.stringify({
+                intent: intent,
+                confidence: confidence
+            });
+
+        } catch (ex) {
+
+            gs.error(
+                'Campus360AIService.classifyAIIntent failed: ' + String(ex)
+            );
+
+            throw ex;
+        }
+    },
+
+
+    /*
+     * ============================================================
+     * CURRENT STUDENT / TRAINER RECORD LOOKUP
+     * ============================================================
+     *
+     * Student Master.user = gs.getUserID() is the ONLY resolution
+     * path. There is no test override.
+     * ============================================================
+     */
+
+    getCurrentStudentRecord: function() {
+
+        var result = {
+            success: false,
+            found: false,
+            sys_id: '',
+            student_id: '',
+            student_name: '',
+            user: '',
+            test_override: false
+        };
+
+        try {
+
+            var userId = String(gs.getUserID());
+
+            if (!userId) {
+                return result;
+            }
+
+            var gr = new GlideRecord('x_snc_campus360_student_master');
+
+            gr.addQuery('user', userId);
+            gr.setLimit(1);
+            gr.query();
+
+            if (!gr.next()) {
+                result.success = true;
+                result.found = false;
+                return result;
+            }
+
+            result.success = true;
+            result.found = true;
+            result.sys_id = String(gr.getUniqueValue());
+            result.student_id = String(gr.getValue('student_id') || '');
+            result.student_name = String(gr.getValue('student_name') || '');
+            result.user = String(gr.getValue('user') || '');
+
+            return result;
+
+        } catch (ex) {
+
+            gs.error(
+                'Campus360AIService.getCurrentStudentRecord failed: ' +
+                String(ex)
+            );
+
+            result.success = false;
+            result.error = String(ex);
+
+            return result;
+        }
+    },
+
+
+    /*
+     * Resolves the Trainer Master record linked to the current user,
+     * ONLY if the live schema of Trainer Master has a "user" field.
+     * No ownership rule is invented when the schema does not support it.
+     */
+    getCurrentTrainerRecord: function() {
+
+        var result = {
+            success: false,
+            found: false,
+            supported: false,
+            sys_id: ''
+        };
+
+        try {
+
+            var gr = new GlideRecord('x_snc_campus360_trainer_master');
+
+            if (!gr.isValid() || !gr.isValidField('user')) {
+                result.success = true;
+                result.supported = false;
+                return result;
+            }
+
+            result.supported = true;
+
+            gr.addQuery('user', gs.getUserID());
+            gr.setLimit(1);
+            gr.query();
+
+            result.success = true;
+
+            if (gr.next()) {
+                result.found = true;
+                result.sys_id = String(gr.getUniqueValue());
+            }
+
+            return result;
+
+        } catch (ex) {
+
+            gs.error(
+                'Campus360AIService.getCurrentTrainerRecord failed: ' +
+                String(ex)
+            );
+
+            result.success = false;
+
+            return result;
+        }
+    },
+
+
+    /*
+     * ============================================================
+     * processAIMessage - MAIN ENTRY POINT
+     * ============================================================
+     *
+     *  1. Current user context
+     *  2. Active CREATE task for (user + conversationId)?
+     *       YES -> continue / confirm the task (NO intent classification)
+     *       NO  -> conversational follow-up? (uses existing conversation
+     *              history) -> GENERAL chat with history
+     *              otherwise classify intent, then route:
+     *              GENERAL / READ / ANALYSIS / CREATE /
+     *              UPDATE + DELETE (not yet enabled) / UNKNOWN
+     * ============================================================
+     */
+
+    processAIMessage: function(userMessage, conversationId) {
+
+        if (!userMessage || String(userMessage).trim() === '') {
+            throw new Error('User message is required.');
+        }
+
+        userMessage = String(userMessage).trim();
+
+        try {
+
+            var userContext = this.getCurrentAIUserContext();
+
+            /* ---- Active CREATE task takes priority ---- */
+
+            var existingTaskRaw = this.getActiveAITask(conversationId);
+
+            if (existingTaskRaw) {
+
+                var existingTask = JSON.parse(existingTaskRaw);
+
+                var existingState = JSON.parse(existingTask.task_state);
+
+                if (
+                    String(existingState.intent || '').trim().toLowerCase() ===
+                    'create'
+                ) {
+                    return this.continueCreateTask(
+                        existingTask,
+                        existingState,
+                        userMessage
+                    );
+                }
+            }
+
+            /* ---- No active task: conversational follow-up? ----
+               Only when this user's conversation already has history and
+               the message clearly refers back to it. Answered from the
+               existing conversation context; no table lookup. */
+
+            if (this.isConversationalFollowUp(userMessage)) {
+
+                var followUpContext = this.getConversationContext(conversationId);
+
+                if (
+                    followUpContext.recent_messages &&
+                    followUpContext.recent_messages.length > 0
+                ) {
+
+                    var followUpResult =
+                        JSON.parse(
+                            this.getNaturalChatResponse(
+                                userMessage,
+                                conversationId,
+                                userContext
+                            )
+                        );
+
+                    if (!followUpResult.success) {
+                        throw new Error(
+                            followUpResult.response ||
+                            'Natural conversation failed.'
+                        );
+                    }
+
+                    return JSON.stringify({
+                        response: followUpResult.response,
+                        intent: 'general',
+                        confidence: 'high',
+                        is_new_task: false
+                    });
+                }
+            }
+
+            /* ---- Classify intent ---- */
+
+            var intentResult =
+                JSON.parse(this.classifyAIIntent(userMessage));
+
+            var intent = intentResult.intent;
+
+            if (intent === 'general') {
+
+                var naturalResult =
+                    JSON.parse(
+                        this.getNaturalChatResponse(
+                            userMessage,
+                            conversationId,
+                            userContext
+                        )
+                    );
+
+                if (!naturalResult.success) {
+                    throw new Error(
+                        naturalResult.response ||
+                        'Natural conversation failed.'
+                    );
+                }
+
+                return JSON.stringify({
+                    response: naturalResult.response,
+                    intent: 'general',
+                    confidence: intentResult.confidence,
+                    is_new_task: false
+                });
+            }
+
+            if (intent === 'read') {
+
+                var readResult =
+                    JSON.parse(
+                        this.answerReadQuestion(userMessage, userContext)
+                    );
+
+                if (!readResult.success) {
+                    throw new Error(
+                        readResult.response || 'READ operation failed.'
+                    );
+                }
+
+                /* Store the turn so later follow-ups can refer to it. */
+                this.recordConversationMessage(conversationId, 'user', userMessage);
+                this.recordConversationMessage(conversationId, 'assistant', readResult.response);
+
+                return JSON.stringify({
+                    response: readResult.response,
+                    intent: 'read',
+                    confidence: intentResult.confidence,
+                    is_new_task: false
+                });
+            }
+
+            if (intent === 'analysis') {
+
+                var analysisResult =
+                    JSON.parse(
+                        this.routeAnalysis(userMessage, userContext)
+                    );
+
+                if (!analysisResult.success) {
+                    throw new Error(
+                        analysisResult.response ||
+                        'ANALYSIS operation failed.'
+                    );
+                }
+
+                /* Store the turn so later follow-ups can refer to it. */
+                this.recordConversationMessage(conversationId, 'user', userMessage);
+                this.recordConversationMessage(conversationId, 'assistant', analysisResult.response);
+
+                return JSON.stringify({
+                    response: analysisResult.response,
+                    intent: 'analysis',
+                    confidence: intentResult.confidence,
+                    is_new_task: false
+                });
+            }
+
+            if (intent === 'update' || intent === 'delete') {
+
+                return JSON.stringify({
+                    response: 'This Campus360 AI operation is not yet enabled.',
+                    intent: intent,
+                    confidence: intentResult.confidence,
+                    is_new_task: false
+                });
+            }
+
+            if (intent === 'create') {
+
+                return this.startCreateTask(
+                    userMessage,
+                    conversationId,
+                    intentResult,
+                    userContext
+                );
+            }
+
+            /* unknown */
+            return JSON.stringify({
+                response:
+                    'I am not sure what you would like me to do. ' +
+                    'You can ask me a question, ask me to show Campus360 ' +
+                    'data, or ask me to create a record.',
+                intent: 'unknown',
+                confidence: intentResult.confidence,
+                is_new_task: false
+            });
+
+        } catch (ex) {
+
+            gs.error(
+                'Campus360AIService.processAIMessage failed: ' + String(ex)
+            );
+
+            throw ex;
+        }
+    },
+
+
+    /*
+     * ============================================================
+     * CREATE WORKFLOW - START / CONTINUE
+     * ============================================================
+     */
+
+    startCreateTask: function(
+        userMessage,
+        conversationId,
+        intentResult,
+        userContext
+    ) {
+
+        var newState = JSON.parse(this.buildTaskState(userMessage));
+
+        /* The table router disagreed about the operation or found no
+           table: never create a task or a record from that. */
+        if (newState.intent !== 'create' || !newState.table) {
+
+            return JSON.stringify({
+                response:
+                    'I could not confirm which Campus360 record you want ' +
+                    'me to create. Please rephrase your request and mention ' +
+                    'what kind of record it is.',
+                intent: 'create',
+                confidence: intentResult.confidence,
+                is_new_task: false
+            });
+        }
+
+        /* ACL check up front so the user is not walked through a form
+           they cannot submit. confirmAITask re-checks at write time. */
+        if (!this.canPerformAIAction(newState.table, 'create')) {
+
+            return JSON.stringify({
+                response:
+                    'You do not have permission to create ' +
+                    this.getTableLabel(newState.table) + ' records.',
+                intent: 'create',
+                confidence: intentResult.confidence,
+                is_new_task: false
+            });
+        }
+
+        /* Never let a literal "anyone"-style phrase sit in a reference
+           field as if it were a real value. */
+        this.sanitizeReferenceAnyoneValues(newState);
+
+        var firstResponseOverride = null;
+
+        if (
+            this.isTrainerFieldNeeded(newState) &&
+            this.containsAnyoneTrainerIntent(userMessage)
+        ) {
+
+            var initialRecommendation =
+                this.recommendTrainersForTraining(newState);
+
+            if (
+                initialRecommendation.success &&
+                initialRecommendation.candidates &&
+                initialRecommendation.candidates.length > 0
+            ) {
+
+                newState.trainer_recommendations = initialRecommendation.candidates;
+                newState.recommended_trainer = initialRecommendation.top;
+                newState.ready_for_confirmation = false;
+
+                firstResponseOverride =
+                    this.buildTrainerRecommendationText(initialRecommendation);
+            }
+        }
+
+        var firstResponse =
+            firstResponseOverride ||
+            this.buildCreateTaskProgressResponse(newState, false);
+
+        var newTaskId =
+            this.createAITask(
+                newState,
+                conversationId,
+                userMessage,
+                firstResponse
+            );
+
+        return JSON.stringify({
+            task_sys_id: newTaskId,
+            response: firstResponse,
+            state: newState,
+            is_new_task: true
+        });
+    },
+
+
+    /*
+     * State machine for an active CREATE task. Priority order:
+     *  1. Cancellation (never touches the record).
+     *  2. Final record confirmation ("Create it").
+     *  3. Reply to a pending trainer recommendation.
+     *  4. "anyone"-style trainer request -> trigger recommendation.
+     *  5. Direct trainer answer while trainer is the field being asked.
+     *  6. Relatedness check - unrelated requests do not hijack the task.
+     *  7. Normal Groq-based field merge.
+     */
+    continueCreateTask: function(existingTask, existingState, userMessage) {
+
+        var trimmedMessage = String(userMessage || '').trim();
+
+        /* 1. Cancellation always takes priority. */
+        if (this.isCancellationPhrase(trimmedMessage)) {
+            return this.cancelCreateTask(existingTask, existingState);
+        }
+
+        /* 2. Final record confirmation. */
+        if (
+            existingTask.status &&
+            String(existingTask.status).trim().toLowerCase() ===
+            'awaiting_confirmation' &&
+            !existingState.recommended_trainer
+        ) {
+
+            if (this.isConfirmationPhrase(trimmedMessage)) {
+
+                var createResultObj;
+
+                try {
+
+                    createResultObj =
+                        JSON.parse(this.confirmAITask(existingTask.sys_id));
+
+                } catch (confirmEx) {
+
+                    /* confirmAITask already logged the detailed diagnostics.
+                       The user gets a controlled message only, and the task
+                       stays awaiting_confirmation so they can retry/modify. */
+                    gs.error(
+                        'Campus360AIService.continueCreateTask final confirmation failed. ' +
+                        'task_sys_id=' + String(existingTask.sys_id) +
+                        ', user=' + String(gs.getUserID()) +
+                        ', error=' + String(confirmEx)
+                    );
+
+                    return JSON.stringify({
+                        task_sys_id: existingTask.sys_id,
+                        response:
+                            'I could not create the record. The details were ' +
+                            'logged for the administrator. You can change a ' +
+                            'value and try again, or say "cancel".',
+                        confirmed: false,
+                        is_new_task: false
+                    });
+                }
+
+                return JSON.stringify({
+                    task_sys_id: existingTask.sys_id,
+                    response: createResultObj.message,
+                    result: createResultObj,
+                    confirmed: true,
+                    is_new_task: false
+                });
+            }
+
+            /* Not a confirmation: falls through and is treated as a
+               modification / unrelated request below. */
+        }
+
+        /* 3. Reply to a pending trainer recommendation. */
+        if (existingState.recommended_trainer) {
+
+            var trainerSelectionResult =
+                this.resolveTrainerSelectionReply(existingState, trimmedMessage);
+
+            if (trainerSelectionResult.handled) {
+
+                if (trainerSelectionResult.error) {
+                    return JSON.stringify({
+                        task_sys_id: existingTask.sys_id,
+                        response: trainerSelectionResult.error,
+                        is_new_task: false
+                    });
+                }
+
+                return this.applyResolvedTrainerAndContinue(
+                    existingTask,
+                    existingState,
+                    trainerSelectionResult.sys_id,
+                    trimmedMessage
+                );
+            }
+        }
+
+        /* 4. "anyone"-style trainer request. */
+        if (
+            this.isTrainerFieldNeeded(existingState) &&
+            this.containsAnyoneTrainerIntent(trimmedMessage)
+        ) {
+            return this.triggerTrainerRecommendation(
+                existingTask, existingState, trimmedMessage
+            );
+        }
+
+        /* 5. Direct trainer answer while trainer is the field being asked. */
+        if (
+            this.isTrainerFieldNeeded(existingState) &&
+            existingState.next_field === 'trainer'
+        ) {
+
+            var directTrainer =
+                this.tryResolveExplicitTrainer(existingState.table, trimmedMessage);
+
+            if (directTrainer && directTrainer.sys_id) {
+
+                return this.applyResolvedTrainerAndContinue(
+                    existingTask, existingState, directTrainer.sys_id, trimmedMessage
+                );
+            }
+
+            if (
+                directTrainer &&
+                directTrainer.error &&
+                this.extractTrainerIdentifierFromMessage(trimmedMessage)
+            ) {
+
+                /* Only surface a resolution failure when the message clearly
+                   looked like an attempt to name a trainer, so an unrelated
+                   short message never gets misreported as a trainer error. */
+                var notFoundResponse =
+                    'I could not find a trainer matching "' + trimmedMessage +
+                    '". Please provide the trainer name, trainer ID, or email, ' +
+                    'or say "anyone" for a recommendation.';
+
+                this.updateAITask(
+                    existingTask.sys_id,
+                    existingState,
+                    existingTask.status,
+                    trimmedMessage,
+                    notFoundResponse
+                );
+
+                return JSON.stringify({
+                    task_sys_id: existingTask.sys_id,
+                    response: notFoundResponse,
+                    is_new_task: false
+                });
+            }
+        }
+
+        /* 6. Relatedness check - do not let an active CREATE task hijack
+              an unrelated request. */
+        if (!this.isLikelyCreateTaskRelated(existingState, trimmedMessage)) {
+
+            return JSON.stringify({
+                task_sys_id: existingTask.sys_id,
+                response:
+                    'You still have a pending ' +
+                    this.getTableLabel(existingState.table) +
+                    ' creation request. Would you like to finish it, cancel it, ' +
+                    'or start a new request?',
+                is_new_task: false
+            });
+        }
+
+        /* 7. Normal Groq-based field merge. */
+        var mergedState =
+            JSON.parse(this.mergeTaskState(existingState, trimmedMessage));
+
+        var nextResponse =
+            this.buildCreateTaskProgressResponse(mergedState, true);
+
+        this.updateAITask(
+            existingTask.sys_id,
+            mergedState,
+            mergedState.ready_for_confirmation
+                ? 'awaiting_confirmation'
+                : 'awaiting_input',
+            trimmedMessage,
+            nextResponse
+        );
+
+        return JSON.stringify({
+            task_sys_id: existingTask.sys_id,
+            response: nextResponse,
+            state: mergedState,
+            is_new_task: false
+        });
+    },
+
+
+    /*
+     * Determines whether a message is plausibly a continuation of the
+     * active CREATE task (a modification/addition) versus a brand new,
+     * unrelated request. Deterministic checks first; Groq is used only
+     * to interpret ambiguous free text, never to authorize anything.
+     * On any failure this defaults to "related" so a legitimate field
+     * update is never silently dropped.
+     */
+    isLikelyCreateTaskRelated: function(existingState, message) {
+
+        var t = String(message || '').trim();
+
+        if (!t) {
+            return true;
+        }
+
+        var lower = t.toLowerCase();
+
+        /* Short answers / pure values are almost always field updates. */
+        if (t.split(/\s+/).length <= 4) {
+            return true;
+        }
+
+        var obviousUnrelatedStarts =
+            /^(show|list|find|give me|what are|what is|who|display|search for|tell me about)\b/i;
+
+        var obviousModificationHints =
+            /\b(capacity|trainer|batch|status|date|deadline|name|title|skill|description|change|update|set|make it)\b/i;
+
+        if (obviousModificationHints.test(lower)) {
+            return true;
+        }
+
+        if (!obviousUnrelatedStarts.test(lower)) {
+            /* No strong signal either way: default to related to avoid
+               dropping a legitimate free-form modification. */
+            return true;
+        }
+
+        try {
+
+            var relatednessPrompt =
+                'You are the Campus360 CREATE-task relatedness checker.\n\n' +
+
+                'There is a pending, unfinished CREATE request for table: ' +
+                String(existingState.table) + '\n\n' +
+
+                'CURRENT PENDING FIELDS:\n' +
+                JSON.stringify(existingState.fields || {}) + '\n\n' +
+
+                'STILL NEEDED FIELDS:\n' +
+                JSON.stringify(existingState.needs_input || []) + '\n\n' +
+
+                'NEW USER MESSAGE:\n' + t + '\n\n' +
+
+                'Decide whether the NEW USER MESSAGE is a continuation of the ' +
+                'pending CREATE request (supplying, changing, or clarifying a ' +
+                'field of that record) or a completely different, unrelated ' +
+                'request (for example asking to view/list other data, or a ' +
+                'new unrelated question).\n\n' +
+
+                'Return ONLY valid JSON: {"relation":"modification|unrelated"}';
+
+            var parsed =
+                JSON.parse(this.cleanAIJson(this.askGroq(relatednessPrompt)));
+
+            var relation = String(parsed.relation || '').trim().toLowerCase();
+
+            if (relation === 'unrelated') {
+                return false;
+            }
+
+            return true;
+
+        } catch (ex) {
+
+            gs.warn(
+                'Campus360AIService.isLikelyCreateTaskRelated warning: ' +
+                String(ex)
+            );
+
+            return true;
+        }
+    },
+
+
+    /*
+     * Cancels ONLY the pending AI CREATE task. It changes
+     * x_snc_campus360_campus360_ai_task.status to "cancelled" and never
+     * touches any Campus360 business record.
+     */
+    cancelCreateTask: function(existingTask, existingState) {
+
+        var response =
+            'Okay, I cancelled the pending creation request. What would you like to do next?';
+
+        try {
+
+            this.updateAITask(
+                existingTask.sys_id,
+                existingState,
+                'cancelled',
+                'cancel',
+                response
+            );
+
+        } catch (ex) {
+
+            gs.error(
+                'Campus360AIService.cancelCreateTask failed: ' + String(ex)
+            );
+        }
+
+        return JSON.stringify({
+            task_sys_id: existingTask.sys_id,
+            response: response,
+            cancelled: true,
+            is_new_task: false
+        });
+    },
+
+
+    triggerTrainerRecommendation: function(existingTask, existingState, userMessage) {
+
+        var recommendation = this.recommendTrainersForTraining(existingState);
+
+        if (!recommendation.success) {
+
+            var errResponse =
+                recommendation.message ||
+                'I could not generate trainer recommendations right now.';
+
+            this.updateAITask(
+                existingTask.sys_id,
+                existingState,
+                existingTask.status,
+                userMessage,
+                errResponse
+            );
+
+            return JSON.stringify({
+                task_sys_id: existingTask.sys_id,
+                response: errResponse,
+                is_new_task: false
+            });
+        }
+
+        if (!recommendation.candidates || recommendation.candidates.length === 0) {
+
+            var noneResponse =
+                'I could not find any active trainers in Trainer Master to recommend' +
+                (recommendation.context_summary ? ' for ' + recommendation.context_summary : '') +
+                '. Please tell me which trainer to use (name, trainer ID, or email).';
+
+            this.updateAITask(
+                existingTask.sys_id,
+                existingState,
+                existingTask.status,
+                userMessage,
+                noneResponse
+            );
+
+            return JSON.stringify({
+                task_sys_id: existingTask.sys_id,
+                response: noneResponse,
+                is_new_task: false
+            });
+        }
+
+        var updatedState = {};
+
+        for (var k in existingState) {
+            if (this.hasOwn(existingState, k)) {
+                updatedState[k] = existingState[k];
+            }
+        }
+
+        updatedState.trainer_recommendations = recommendation.candidates;
+        updatedState.recommended_trainer = recommendation.top;
+        updatedState.ready_for_confirmation = false;
+
+        var response = this.buildTrainerRecommendationText(recommendation);
+
+        this.updateAITask(
+            existingTask.sys_id,
+            updatedState,
+            'awaiting_input',
+            userMessage,
+            response
+        );
+
+        return JSON.stringify({
+            task_sys_id: existingTask.sys_id,
+            response: response,
+            state: updatedState,
+            is_new_task: false
+        });
+    },
+
+
+    applyResolvedTrainerAndContinue: function(
+        existingTask,
+        existingState,
+        trainerSysId,
+        userMessage
+    ) {
+
+        var updatedFields = {};
+
+        for (var k in existingState.fields) {
+            if (this.hasOwn(existingState.fields, k)) {
+                updatedFields[k] = existingState.fields[k];
+            }
+        }
+
+        updatedFields.trainer = trainerSysId;
+
+        var cleanedState = this.recomputeCreateTaskState(existingState, updatedFields);
+
+        var nextResponse = this.buildCreateTaskProgressResponse(cleanedState, true);
+
+        this.updateAITask(
+            existingTask.sys_id,
+            cleanedState,
+            cleanedState.ready_for_confirmation
+                ? 'awaiting_confirmation'
+                : 'awaiting_input',
+            userMessage,
+            nextResponse
+        );
+
+        return JSON.stringify({
+            task_sys_id: existingTask.sys_id,
+            response: nextResponse,
+            state: cleanedState,
+            is_new_task: false
+        });
+    },
+
+
+    /*
+     * ============================================================
+     * CONFIRMATION PHRASES
+     * ============================================================
+     */
+
+    isConfirmationPhrase: function(confirmationText) {
+
+        var text = String(confirmationText || '').trim().toLowerCase();
+
+        var confirmations = {
+            'yes': true,
+            'y': true,
+            'yes please': true,
+            'proceed': true,
+            'proceed with it': true,
+            'go ahead': true,
+            'create it': true,
+            'create': true,
+            'confirm': true,
+            'confirmed': true,
+            'yes proceed': true,
+            'please proceed': true,
+            'yes please proceed': true,
+            'yes create it': true,
+            'yes, proceed': true,
+            'yes, create it': true,
+            'looks good': true,
+            'looks good create it': true,
+            'that looks good': true,
+            'approve': true,
+            'approved': true
+        };
+
+        return confirmations[text] === true;
+    },
+
+
+    /*
+     * ============================================================
+     * CENTRAL AI ACTION AUTHORIZATION
+     * ============================================================
+     *
+     * Allowlist + ServiceNow ACL. Persona is never consulted here.
+     * ============================================================
+     */
+
+    canPerformAIAction: function(tableName, operation, recordGR) {
+
+        if (!tableName || !operation) {
+            return false;
+        }
+
+        tableName = String(tableName).trim();
+        operation = String(operation).trim().toLowerCase();
+
+        var catalog;
+
+        try {
+            catalog = JSON.parse(this.getCampus360Tables());
+        } catch (catalogEx) {
+
+            gs.error(
+                'Campus360AIService.canPerformAIAction catalog parse failed: ' +
+                String(catalogEx)
+            );
+
+            return false;
+        }
+
+        var allowedTable = false;
+
+        if (catalog && catalog.tables) {
+            for (var i = 0; i < catalog.tables.length; i++) {
+                if (String(catalog.tables[i].name) === tableName) {
+                    allowedTable = true;
+                    break;
+                }
+            }
+        }
+
+        if (!allowedTable) {
+            return false;
+        }
+
+        if (operation === 'create') {
+
+            var createGR = new GlideRecord(tableName);
+
+            if (!createGR.isValid()) {
+                return false;
+            }
+
+            return createGR.canCreate() === true;
+        }
+
+        if (operation === 'read') {
+
+            var readGR = recordGR || new GlideRecord(tableName);
+
+            if (!readGR || !readGR.isValid()) {
+                return false;
+            }
+
+            return readGR.canRead() === true;
+        }
+
+        if (operation === 'write' || operation === 'update') {
+
+            var writeGR = recordGR || new GlideRecord(tableName);
+
+            if (!writeGR || !writeGR.isValid()) {
+                return false;
+            }
+
+            return writeGR.canWrite() === true;
+        }
+
+        /* DELETE is intentionally not enabled. */
+        return false;
+    },
+
+
+    canPerformAIWrite: function(tableName, operation) {
+
+        if (!operation) {
+            return false;
+        }
+
+        return this.canPerformAIAction(tableName, operation);
+    },
+
+
+    /*
+     * ============================================================
+     * FINAL CONFIRMATION + CONTROLLED INSERT
+     * ============================================================
+     *
+     * The "stage" variable records how far validation got so the
+     * System Log entry identifies exactly where a failure occurred.
+     * ============================================================
+     */
+
+    confirmAITask: function(taskSysId) {
+
+        if (!taskSysId || String(taskSysId).trim() === '') {
+            throw new Error('AI task sys_id is required.');
+        }
+
+        taskSysId = String(taskSysId).trim();
+
+        var stage = 'start';
+        var table = '';
+        var operation = 'create';
+
+        try {
+
+            stage = 'load_task';
+
+            var taskGR = new GlideRecord('x_snc_campus360_campus360_ai_task');
+
+            taskGR.addQuery('sys_id', taskSysId);
+            taskGR.addQuery('user', gs.getUserID());
+            taskGR.query();
+
+            if (!taskGR.next()) {
+                throw new Error('AI task not found or access denied.');
+            }
+
+            stage = 'check_task_status';
+
+            if (
+                String(taskGR.getValue('status')).trim().toLowerCase() !==
+                'awaiting_confirmation'
+            ) {
+                throw new Error('This AI task is not awaiting confirmation.');
+            }
+
+            stage = 'parse_task_state';
+
+            var taskStateRaw = taskGR.getValue('task_state');
+
+            if (!taskStateRaw) {
+                throw new Error('AI task does not contain task state.');
+            }
+
+            var taskState = JSON.parse(taskStateRaw);
+
+            table = String(taskState.table || '');
+            var fields = taskState.fields || {};
+            operation = String(taskState.intent || '').toLowerCase();
+
+            stage = 'check_operation';
+
+            if (operation !== 'create') {
+                throw new Error(
+                    'Unsupported AI write operation: ' + operation
+                );
+            }
+
+            stage = 'check_allowlist_and_create_acl';
+
+            if (!this.canPerformAIWrite(table, operation)) {
+                throw new Error(
+                    'You are not authorized to create records in ' + table + '.'
+                );
+            }
+
+            stage = 'load_schema';
+
+            var schema = JSON.parse(this.getFormSchema(table));
+            var validFields = this.getFieldMap(schema);
+
+            var conversationalPolicy =
+                this.getConversationalFieldPolicy(table, schema);
+
+            stage = 'check_conversational_required_fields';
+
+            for (var i = 0; i < conversationalPolicy.required.length; i++) {
+
+                var requiredFieldName = conversationalPolicy.required[i];
+
+                if (
+                    !this.hasOwn(fields, requiredFieldName) ||
+                    this.isEmptyValue(fields[requiredFieldName])
+                ) {
+                    throw new Error(
+                        'Required field is still unresolved: ' +
+                        requiredFieldName
+                    );
+                }
+            }
+
+            stage = 'check_servicenow_mandatory_fields';
+
+            for (var m = 0; m < schema.fields.length; m++) {
+
+                var mandatoryField = schema.fields[m];
+
+                if (mandatoryField.mandatory === true) {
+                    if (
+                        !this.hasOwn(fields, mandatoryField.name) ||
+                        this.isEmptyValue(fields[mandatoryField.name])
+                    ) {
+                        throw new Error(
+                            'ServiceNow mandatory field is missing: ' +
+                            String(mandatoryField.label || mandatoryField.name)
+                        );
+                    }
+                }
+            }
+
+            stage = 'validate_fields_and_choices';
+
+            for (var fieldName in fields) {
+
+                if (!this.hasOwn(fields, fieldName)) {
+                    continue;
+                }
+
+                if (!validFields[fieldName]) {
+                    throw new Error(
+                        'Invalid field supplied by AI: ' + fieldName
+                    );
+                }
+
+                var value = fields[fieldName];
+
+                if (value === null || typeof value === 'undefined') {
+                    throw new Error(
+                        'Empty value supplied for field: ' + fieldName
+                    );
+                }
+
+                if (!this.validateChoiceValue(validFields[fieldName], value)) {
+                    throw new Error(
+                        'Invalid choice value for field ' + fieldName +
+                        ': ' + value
+                    );
+                }
+            }
+
+            if (!this.hasAnyFields(fields)) {
+                throw new Error('No record fields were provided.');
+            }
+
+            stage = 'prepare_record';
+
+            var recordGR = new GlideRecord(table);
+
+            if (!recordGR.isValid()) {
+                throw new Error('Target table is invalid: ' + table);
+            }
+
+            recordGR.initialize();
+
+            for (var fieldToSet in fields) {
+
+                if (!this.hasOwn(fields, fieldToSet)) {
+                    continue;
+                }
+
+                var fieldValue = fields[fieldToSet];
+
+                if (fieldValue === null || typeof fieldValue === 'undefined') {
+                    continue;
+                }
+
+                stage = 'set_field:' + fieldToSet;
+
+                var element = recordGR.getElement(fieldToSet);
+
+                if (typeof element === 'undefined' || element === null) {
+                    throw new Error('Unable to access field: ' + fieldToSet);
+                }
+
+                var fieldDefinition = validFields[fieldToSet];
+
+                if (fieldDefinition && fieldDefinition.type === 'reference') {
+
+                    stage = 'resolve_reference:' + fieldToSet;
+
+                    /* resolveReferenceValue enforces that the current user
+                       can READ the referenced record. */
+                    var referenceResult =
+                        JSON.parse(
+                            this.resolveReferenceValue(
+                                table,
+                                fieldToSet,
+                                fieldValue
+                            )
+                        );
+
+                    if (!referenceResult.success || !referenceResult.sys_id) {
+                        throw new Error(
+                            'Unable to resolve reference field ' +
+                            fieldToSet + ' with value "' +
+                            String(fieldValue) + '".'
+                        );
+                    }
+
+                    recordGR.setValue(fieldToSet, referenceResult.sys_id);
+
+                } else {
+
+                    recordGR.setValue(fieldToSet, String(fieldValue));
+                }
+            }
+
+            stage = 'insert_record';
+
+            var createdSysId = recordGR.insert();
+
+            if (!createdSysId) {
+
+                var insertErrorDetail = '';
+
+                try {
+                    insertErrorDetail = String(recordGR.getLastErrorMessage() || '');
+                } catch (lastErrEx) {
+                }
+
+                throw new Error(
+                    'ServiceNow record creation failed.' +
+                    (insertErrorDetail ? ' Detail: ' + insertErrorDetail : '')
+                );
+            }
+
+            stage = 'complete_task';
+
+            taskGR.setValue('status', 'completed');
+            taskGR.setValue('current_field', '');
+            taskGR.setValue('last_ai_response', 'Record created successfully.');
+            taskGR.update();
+
+            return JSON.stringify({
+                success: true,
+                task_sys_id: taskSysId,
+                table: table,
+                record_sys_id: String(createdSysId),
+                record_display_value: String(recordGR.getDisplayValue()),
+                message: 'Record created successfully.'
+            });
+
+        } catch (ex) {
+
+            gs.error(
+                'Campus360AIService.confirmAITask failed. ' +
+                'task_sys_id=' + String(taskSysId) +
+                ', user=' + String(gs.getUserID()) +
+                ', target_table=' + String(table) +
+                ', operation=' + String(operation) +
+                ', stage=' + String(stage) +
+                ', error=' + String(ex)
+            );
+
+            throw ex;
+        }
+    },
+
+
+    /*
+     * ============================================================
+     * READ - LOW-LEVEL CONTROLLED DATA ACCESS
+     * ============================================================
+     *
+     * Enforces: table allowlist, table-level ACL, validated field
+     * names, record-level ACL, field-level ACL.
+     * Only simple equality filters are supported.
+     * ============================================================
+     */
+
+    readCampus360Records: function(tableName, filterSpec, limit) {
+
+        var output = {
+            success: false,
+            table: '',
+            count: 0,
+            has_more: false,
+            records: [],
+            error: ''
+        };
+
+        try {
+
+            tableName = String(tableName || '').trim();
+
+            if (!tableName) {
+                throw new Error('Table name is required.');
+            }
+
+            var allowedTables =
+                JSON.parse(String(this.getCampus360Tables())).tables || [];
+
+            var tableAllowed = false;
+
+            for (var i = 0; i < allowedTables.length; i++) {
+                if (String(allowedTables[i].name) === tableName) {
+                    tableAllowed = true;
+                    break;
+                }
+            }
+
+            if (!tableAllowed) {
+                throw new Error(
+                    'Table is not allowed for Campus360 AI READ.'
+                );
+            }
+
+            var recordLimit = parseInt(limit, 10);
+
+            if (isNaN(recordLimit) || recordLimit <= 0) {
+                recordLimit = 20;
+            }
+
+            if (recordLimit > 50) {
+                recordLimit = 50;
+            }
+
+            var gr = new GlideRecord(tableName);
+
+            if (!gr.isValid() || !gr.canRead()) {
+                throw new Error(
+                    'You do not have permission to read this data.'
+                );
+            }
+
+            filterSpec = filterSpec || {};
+
+            var filterKeys = Object.keys(filterSpec);
+
+            var schema = JSON.parse(String(this.getFormSchema(tableName)));
+
+            var validFields = { 'sys_id': true };
+
+            if (schema && schema.fields) {
+                for (var sf = 0; sf < schema.fields.length; sf++) {
+                    if (schema.fields[sf] && schema.fields[sf].name) {
+                        validFields[String(schema.fields[sf].name)] = true;
+                    }
+                }
+            }
+
+            for (var f = 0; f < filterKeys.length; f++) {
+
+                var fieldName = String(filterKeys[f]).trim();
+
+                if (!validFields[fieldName]) {
+                    throw new Error('Invalid READ field: ' + fieldName);
+                }
+
+                var value = filterSpec[fieldName];
+
+                if (value === null || typeof value === 'undefined') {
+                    continue;
+                }
+
+                gr.addQuery(fieldName, String(value));
+            }
+
+            /* One extra row tells us whether more results exist. */
+            gr.setLimit(recordLimit + 1);
+            gr.query();
+
+            while (gr.next()) {
+
+                /* Record-level ACL. */
+                if (!gr.canRead()) {
+                    continue;
+                }
+
+                if (output.records.length >= recordLimit) {
+                    output.has_more = true;
+                    break;
+                }
+
+                var record = { sys_id: String(gr.getUniqueValue()) };
+
+                var elements = gr.getElements();
+
+                for (var e = 0; e < elements.length; e++) {
+
+                    var element = elements[e];
+                    var fName = String(element.getName());
+
+                    if (this.isTechnicalField(fName)) {
+                        continue;
+                    }
+
+                    /* Field-level ACL. */
+                    try {
+                        if (element.canRead() === false) {
+                            continue;
+                        }
+                    } catch (fieldAclEx) {
+                    }
+
+                    record[fName] = String(gr.getDisplayValue(fName) || '');
+                }
+
+                output.records.push(record);
+            }
+
+            output.success = true;
+            output.table = tableName;
+            output.count = output.records.length;
+
+            return output;
+
+        } catch (ex) {
+
+            gs.error(
+                'Campus360AIService.readCampus360Records failed: ' +
+                String(ex)
+            );
+
+            output.success = false;
+            output.error = String(ex);
+
+            return output;
+        }
+    },
+
+
+    /*
+     * ============================================================
+     * READ - GENERIC CONTROLLED PLANNER / SCOPE / ANSWER
+     * ============================================================
+     *
+     *  Groq interprets the request into {table, filters, scope, limit}.
+     *  The SERVER then validates the table, fields, values, applies
+     *  user data scope, and enforces ACLs. Groq never authorizes.
+     * ============================================================
+     */
+
+    getReadableTables: function() {
+
+        var readable = [];
+
+        try {
+
+            var catalog = JSON.parse(this.getCampus360Tables());
+
+            for (var i = 0; i < catalog.tables.length; i++) {
+                if (this.canPerformAIAction(catalog.tables[i].name, 'read')) {
+                    readable.push(catalog.tables[i]);
+                }
+            }
+
+        } catch (ex) {
+
+            gs.error(
+                'Campus360AIService.getReadableTables failed: ' + String(ex)
+            );
+        }
+
+        return readable;
+    },
+
+
+    buildCompactSchemaCatalog: function(tables) {
+
+        var catalog = [];
+
+        for (var i = 0; i < tables.length; i++) {
+
+            try {
+
+                var schema = JSON.parse(this.getFormSchema(tables[i].name));
+
+                var fields = [];
+
+                for (var f = 0; f < schema.fields.length; f++) {
+
+                    var field = schema.fields[f];
+                    var desc = field.name + '(' + (field.type || 'string');
+
+                    if (
+                        field.type === 'choice' &&
+                        field.choices &&
+                        field.choices.length > 0
+                    ) {
+                        var values = [];
+
+                        for (var c = 0; c < field.choices.length; c++) {
+                            values.push(String(field.choices[c].value));
+                        }
+
+                        desc += ':' + values.join('|');
+                    }
+
+                    fields.push(desc + ')');
+                }
+
+                catalog.push({
+                    table: tables[i].name,
+                    label: tables[i].label,
+                    fields: fields
+                });
+
+            } catch (ex) {
+            }
+        }
+
+        return catalog;
+    },
+
+
+    /*
+     * Validates AI-proposed filters against the live schema.
+     * Only simple equality filters. Choice labels are mapped to values.
+     * Reference values are resolved to sys_ids on the server, and ONLY
+     * if the current user can read the referenced record
+     * (resolveReferenceValue enforces this). An unreadable, missing, or
+     * ambiguous reference produces a controlled clarification and is
+     * never turned into a filter.
+     */
+    sanitizeReadFilters: function(tableName, schema, rawFilters) {
+
+        var result = {
+            filters: {},
+            ignored: [],
+            error: ''
+        };
+
+        if (!rawFilters || typeof rawFilters !== 'object') {
+            return result;
+        }
+
+        var fieldMap = this.getFieldMap(schema);
+        var count = 0;
+
+        for (var name in rawFilters) {
+
+            if (!this.hasOwn(rawFilters, name)) {
+                continue;
+            }
+
+            if (count >= 5) {
+                result.ignored.push(name);
+                continue;
+            }
+
+            var field = fieldMap[name];
+
+            if (!field || this.isTechnicalField(name)) {
+                result.ignored.push(name);
+                continue;
+            }
+
+            var raw = rawFilters[name];
+
+            if (
+                raw === null ||
+                typeof raw === 'undefined' ||
+                typeof raw === 'object' ||
+                typeof raw === 'function'
+            ) {
+                result.ignored.push(name);
+                continue;
+            }
+
+            var value = String(raw).trim();
+
+            if (value === '' || value.length > 100) {
+                result.ignored.push(name);
+                continue;
+            }
+
+            if (field.type === 'choice' && field.choices && field.choices.length > 0) {
+
+                var mapped = '';
+
+                for (var c = 0; c < field.choices.length; c++) {
+                    if (
+                        String(field.choices[c].value).toLowerCase() ===
+                            value.toLowerCase() ||
+                        String(field.choices[c].label).toLowerCase() ===
+                            value.toLowerCase()
+                    ) {
+                        mapped = String(field.choices[c].value);
+                        break;
+                    }
+                }
+
+                if (!mapped) {
+                    result.ignored.push(name);
+                    continue;
+                }
+
+                value = mapped;
+
+            } else if (field.type === 'boolean') {
+
+                var lower = value.toLowerCase();
+
+                if (lower === 'true' || lower === 'yes') {
+                    value = 'true';
+                } else if (lower === 'false' || lower === 'no') {
+                    value = 'false';
+                } else {
+                    result.ignored.push(name);
+                    continue;
+                }
+
+            } else if (field.type === 'reference') {
+
+                try {
+
+                    var ref =
+                        JSON.parse(
+                            this.resolveReferenceValue(tableName, name, value)
+                        );
+
+                    value = String(ref.sys_id);
+
+                } catch (refEx) {
+
+                    /* Detail goes to the log only; the user gets a generic
+                       message that does not reveal whether a hidden record
+                       exists. */
+                    gs.warn(
+                        'Campus360AIService.sanitizeReadFilters reference not resolved. ' +
+                        'user=' + String(gs.getUserID()) +
+                        ', table=' + String(tableName) +
+                        ', field=' + String(name) +
+                        ', error=' + String(refEx)
+                    );
+
+                    result.error =
+                        'I could not find a unique ' +
+                        String(field.label || name).toLowerCase() +
+                        ' matching "' + String(raw).trim() + '" that you have access to. ' +
+                        'Please give me a more specific value.';
+
+                    return result;
+                }
+            }
+
+            result.filters[name] = value;
+            count++;
+        }
+
+        return result;
+    },
+
+
+    planReadRequest: function(userMessage, userContext) {
+
+        var plan = {
+            table: '',
+            filters: {},
+            ignored: [],
+            scope: 'all',
+            limit: 20,
+            clarification: ''
+        };
+
+        var readable = this.getReadableTables();
+
+        if (readable.length === 0) {
+            plan.clarification =
+                'You do not currently have permission to read Campus360 data.';
+            return plan;
+        }
+
+        var schemaCatalog = this.buildCompactSchemaCatalog(readable);
+
+        var planningPrompt =
+            'You are the Campus360 READ request planner. ' +
+            'Convert the user request into a structured READ plan. ' +
+            'Do NOT answer the request and do NOT invent data.\n\n' +
+
+            'USER ROLE CONTEXT (context only, not authorization): ' +
+            String(userContext.persona) + '\n\n' +
+
+            'ALLOWED TABLES AND FIELDS (name(type[:choice values])):\n' +
+            JSON.stringify(schemaCatalog) + '\n\n' +
+
+            'RULES:\n' +
+            '1. Choose ONLY a table from the allowed list.\n' +
+            '2. Filters must be simple equality on fields listed for that table. No operators, no encoded queries, no sys_id.\n' +
+            '3. For choice fields use an exact choice value from the list.\n' +
+            '4. For reference fields use the identifier or name the user gave (for example OPP001 or a company name).\n' +
+            '5. Set scope to "mine" ONLY if the user refers to their own records (my, me, mine, I). Otherwise "all".\n' +
+            '6. Only add filters the user actually asked for.\n' +
+            '7. limit defaults to 20 and must not exceed 50.\n' +
+            '8. If the table cannot be determined, set table to "" and write a short clarification question.\n\n' +
+
+            'USER REQUEST:\n' + String(userMessage) + '\n\n' +
+
+            'Return ONLY valid JSON:\n' +
+            '{"table":"","filters":{},"scope":"all","limit":20,"clarification":""}';
+
+        var parsed =
+            JSON.parse(this.cleanAIJson(this.askGroq(planningPrompt)));
+
+        var tableName = String(parsed.table || '').trim();
+
+        if (!tableName) {
+            plan.clarification =
+                String(parsed.clarification || '').trim() ||
+                'Which Campus360 data would you like to see?';
+            return plan;
+        }
+
+        var tableAllowed = false;
+
+        for (var i = 0; i < readable.length; i++) {
+            if (readable[i].name === tableName) {
+                tableAllowed = true;
+                break;
+            }
+        }
+
+        if (!tableAllowed) {
+            plan.clarification =
+                'I could not match your request to Campus360 data that ' +
+                'you are permitted to read. Could you rephrase it?';
+            return plan;
+        }
+
+        plan.table = tableName;
+
+        var scope = String(parsed.scope || 'all').trim().toLowerCase();
+        plan.scope = (scope === 'mine') ? 'mine' : 'all';
+
+        var limit = parseInt(parsed.limit, 10);
+
+        if (isNaN(limit) || limit <= 0) {
+            limit = 20;
+        }
+
+        plan.limit = Math.min(limit, 50);
+
+        var schema = JSON.parse(this.getFormSchema(tableName));
+
+        var sanitized =
+            this.sanitizeReadFilters(tableName, schema, parsed.filters);
+
+        if (sanitized.error) {
+            plan.table = '';
+            plan.clarification = sanitized.error;
+            return plan;
+        }
+
+        plan.filters = sanitized.filters;
+        plan.ignored = sanitized.ignored;
+
+        return plan;
+    },
+
+
+    /*
+     * Applies data scope for the current user. Returns
+     * { allowed, filters, message }.
+     *
+     * "Mine" is only honoured where a SAFE ownership link exists
+     * (Student Master.user, or Trainer Master.user if that field
+     * exists). Otherwise a controlled clarification is returned and
+     * NO global records are returned.
+     */
+    applyReadScope: function(plan, userContext) {
+
+        var out = {
+            allowed: true,
+            filters: {},
+            message: ''
+        };
+
+        for (var k in plan.filters) {
+            if (this.hasOwn(plan.filters, k)) {
+                out.filters[k] = plan.filters[k];
+            }
+        }
+
+        var table = plan.table;
+        var label = this.getTableLabel(table);
+        var persona = userContext.persona;
+
+        var schema = JSON.parse(this.getFormSchema(table));
+        var fieldMap = this.getFieldMap(schema);
+
+        var cannotDetermineMine =
+            'I cannot safely determine which records are yours for your role. ' +
+            'Please specify the student, opportunity, trainer, or other filter.';
+
+        /* ---------- Student: always limited to their own data ---------- */
+
+        if (persona === 'student') {
+
+            var student = userContext.student_record;
+
+            if (table === 'x_snc_campus360_student_master') {
+
+                if (!student) {
+                    out.allowed = false;
+                    out.message =
+                        'I could not find a Student Master profile linked to your Campus360 account.';
+                    return out;
+                }
+
+                out.filters['sys_id'] = student.sys_id;
+                return out;
+            }
+
+            if (fieldMap['student']) {
+
+                if (!student) {
+                    out.allowed = false;
+                    out.message =
+                        'I could not find a Student Master profile linked to your Campus360 account.';
+                    return out;
+                }
+
+                /* Overrides anything the AI or the user proposed. */
+                out.filters['student'] = student.sys_id;
+                return out;
+            }
+
+            /* Shared reference data a student may browse (ACL still applies). */
+            var studentSharedTables = {
+                'x_snc_campus360_placement_opportunity': true,
+                'x_snc_campus360_training_program': true
+            };
+
+            if (studentSharedTables[table] === true) {
+
+                /* These tables have no student ownership link, so "mine"
+                   cannot be mapped safely and must not return global records. */
+                if (plan.scope === 'mine') {
+                    out.allowed = false;
+                    out.message =
+                        'I cannot safely determine which ' + label.toLowerCase() +
+                        ' records are yours. You can ask to see all available ' +
+                        label.toLowerCase() + ' records, or ask about your ' +
+                        'applications or training enrollments instead.';
+                    return out;
+                }
+
+                return out;
+            }
+
+            out.allowed = false;
+            out.message =
+                label + ' data is not available to you through Campus360 AI.';
+            return out;
+        }
+
+        /* ---------- Non-student: "mine" requires a supported ownership rule ---------- */
+
+        if (plan.scope === 'mine') {
+
+            if (
+                persona === 'trainer' &&
+                table === 'x_snc_campus360_training_program' &&
+                fieldMap['trainer']
+            ) {
+
+                var trainer = this.getCurrentTrainerRecord();
+
+                if (trainer.supported && trainer.found) {
+                    out.filters['trainer'] = trainer.sys_id;
+                    return out;
+                }
+
+                out.allowed = false;
+                out.message =
+                    'I could not link your account to a Trainer Master profile, ' +
+                    'so I cannot tell which training programs are yours. ' +
+                    'You can ask for a specific trainer or program instead.';
+                return out;
+            }
+
+            out.allowed = false;
+            out.message = cannotDetermineMine;
+            return out;
+        }
+
+        /* Scope "all": ServiceNow ACLs decide what is returned. */
+        return out;
+    },
+
+
+    buildReadFallbackText: function(label, schema, readResult) {
+
+        var fieldMap = this.getFieldMap(schema);
+        var lines = [];
+
+        lines.push(
+            'Found ' + readResult.count + ' ' + label +
+            ' record(s)' + (readResult.has_more ? ' (showing the first ' + readResult.count + ')' : '') + ':'
+        );
+
+        for (var i = 0; i < readResult.records.length; i++) {
+
+            var rec = readResult.records[i];
+            var parts = [];
+
+            for (var key in rec) {
+
+                if (!this.hasOwn(rec, key) || key === 'sys_id') {
+                    continue;
+                }
+
+                if (this.isEmptyValue(rec[key])) {
+                    continue;
+                }
+
+                if (parts.length >= 8) {
+                    break;
+                }
+
+                parts.push(
+                    String(
+                        (fieldMap[key] && fieldMap[key].label) || key
+                    ) + ': ' + rec[key]
+                );
+            }
+
+            lines.push((i + 1) + '. ' + parts.join(' | '));
+        }
+
+        return lines.join('\n');
+    },
+
+
+    answerReadQuestion: function(userQuestion, userContext) {
+
+        try {
+
+            userQuestion = String(userQuestion || '').trim();
+
+            if (!userQuestion) {
+                throw new Error('READ question is required.');
+            }
+
+            userContext = userContext || this.getCurrentAIUserContext();
+
+            var plan = this.planReadRequest(userQuestion, userContext);
+
+            if (!plan.table) {
+                return JSON.stringify({
+                    success: true,
+                    response: plan.clarification ||
+                        'Which Campus360 data would you like to see?'
+                });
+            }
+
+            var scoped = this.applyReadScope(plan, userContext);
+
+            if (!scoped.allowed) {
+                return JSON.stringify({
+                    success: true,
+                    response: scoped.message
+                });
+            }
+
+            var readResult =
+                this.readCampus360Records(
+                    plan.table,
+                    scoped.filters,
+                    plan.limit
+                );
+
+            if (!readResult.success) {
+                throw new Error(readResult.error || 'READ failed.');
+            }
+
+            var label = this.getTableLabel(plan.table);
+
+            var note = '';
+
+            if (plan.ignored && plan.ignored.length > 0) {
+                note =
+                    '\n\n(I ignored filters I could not apply: ' +
+                    plan.ignored.join(', ') + '.)';
+            }
+
+            if (readResult.count === 0) {
+                return JSON.stringify({
+                    success: true,
+                    response:
+                        'I did not find any ' + label +
+                        ' records that match your request and that you ' +
+                        'have access to.' + note
+                });
+            }
+
+            var schema = JSON.parse(this.getFormSchema(plan.table));
+
+            var answer = '';
+
+            try {
+
+                var answerPrompt =
+                    'You are Campus360 AI answering a READ request. ' +
+                    'The data below was retrieved by ServiceNow using the ' +
+                    'current user\'s permissions. ' +
+                    'Use ONLY the supplied data. Do not invent records or values. ' +
+                    'Answer the user question directly and concisely. ' +
+                    'If a field is blank, say the information is not available. ' +
+                    (
+                        readResult.has_more
+                            ? 'More records exist than are shown; say only the first ' +
+                              String(readResult.count) + ' are shown. '
+                            : ''
+                    ) +
+                    '\n\nUSER ROLE: ' + String(userContext.persona) +
+                    '\n\nUSER QUESTION:\n' + userQuestion +
+                    '\n\nTABLE: ' + label +
+                    '\n\nCAMPUS360 DATA:\n' + JSON.stringify(readResult.records);
+
+                answer = String(this.askGroq(answerPrompt)).trim();
+
+            } catch (answerEx) {
+
+                gs.warn(
+                    'Campus360AIService.answerReadQuestion answer generation failed: ' +
+                    String(answerEx)
+                );
+
+                answer = '';
+            }
+
+            if (!answer) {
+                answer = this.buildReadFallbackText(label, schema, readResult);
+            }
+
+            return JSON.stringify({
+                success: true,
+                response: answer + note,
+                table: plan.table,
+                count: readResult.count
+            });
+
+        } catch (ex) {
+
+            gs.error(
+                'Campus360AIService.answerReadQuestion failed: ' + String(ex)
+            );
+
+            return JSON.stringify({
+                success: false,
+                response: 'I could not retrieve that information right now.'
+            });
+        }
+    },
+
+
+    /*
+     * ============================================================
+     * STUDENT-SPECIFIC READ HELPERS (kept)
+     * ============================================================
+     */
+
+    readCurrentStudentApplications: function(limit) {
+
+        var result = {
+            success: false,
+            student: null,
+            applications: [],
+            count: 0,
+            error: ''
+        };
+
+        try {
+
+            var student = this.getCurrentStudentRecord();
+
+            if (!student.success) {
+                throw new Error('Unable to determine the current student.');
+            }
+
+            if (!student.found) {
+                result.success = true;
+                result.student = null;
+                return result;
+            }
+
+            var applicationRead =
+                this.readCampus360Records(
+                    'x_snc_campus360_student_application',
+                    { student: student.sys_id },
+                    limit || 20
+                );
+
+            if (!applicationRead.success) {
+                throw new Error(
+                    applicationRead.error ||
+                    'Unable to read student applications.'
+                );
+            }
+
+            result.success = true;
+            result.student = student;
+            result.applications = applicationRead.records;
+            result.count = applicationRead.count;
+
+            return result;
+
+        } catch (ex) {
+
+            gs.error(
+                'Campus360AIService.readCurrentStudentApplications failed: ' +
+                String(ex)
+            );
+
+            result.success = false;
+            result.error = String(ex);
+
+            return result;
+        }
+    },
+
+
+    /*
+     * Student-only specialised READ. No longer used by the router
+     * (generic answerReadQuestion handles all personas) but kept
+     * for backward compatibility.
+     */
+    answerStudentReadQuestion: function(userQuestion) {
+
+        try {
+
+            userQuestion = String(userQuestion || '').trim();
+
+            var userContext = this.getCurrentAIUserContext();
+
+            if (userContext.persona !== 'student') {
+                return this.answerReadQuestion(userQuestion, userContext);
+            }
+
+            var context = this.getCurrentStudentAnalysisContext();
+
+            if (!context.success) {
+                throw new Error(
+                    context.error || 'Unable to retrieve student data.'
+                );
+            }
+
+            if (!context.student) {
+                return JSON.stringify({
+                    success: true,
+                    response:
+                        'I could not find a Student Master profile linked to your current Campus360 account.'
+                });
+            }
+
+            var readPayload = {
+                student: context.student,
+                applications: context.applications,
+                opportunities: context.opportunities,
+                training_programs: context.training_programs
+            };
+
+            var systemInstruction =
+                'You are Campus360 AI answering a READ request. ' +
+                'Use ONLY the supplied ServiceNow data. ' +
+                'Do not invent records or values. ' +
+                'Answer the user question directly. ' +
+                'If the user asks for applications, summarize the ' +
+                'actual applications and their statuses. ' +
+                'If a field is blank, say that the information is ' +
+                'not available rather than guessing. ' +
+                'Keep the answer clear and student-friendly.';
+
+            var prompt =
+                systemInstruction +
+                '\n\nUSER QUESTION:\n' + userQuestion +
+                '\n\nCAMPUS360 DATA:\n' + JSON.stringify(readPayload);
+
+            return JSON.stringify({
+                success: true,
+                response: String(this.askGroq(prompt))
+            });
+
+        } catch (ex) {
+
+            gs.error(
+                'Campus360AIService.answerStudentReadQuestion failed: ' +
+                String(ex)
+            );
+
+            return JSON.stringify({
+                success: false,
+                response: 'I could not retrieve that information right now.'
+            });
+        }
+    },
+
+
+    /*
+     * ============================================================
+     * ANALYSIS - ROUTING LAYER
+     * ============================================================
+     *
+     *  student            -> student self analysis (existing)
+     *  admin / tpo        -> aggregate placement overview
+     *  everyone else      -> controlled "not yet available" reply
+     *
+     * Persona only selects WHICH analysis is offered. Authorization
+     * for the underlying data is still allowlist + ServiceNow ACL.
+     * ============================================================
+     */
+
+    routeAnalysis: function(userQuestion, userContext) {
+
+        try {
+
+            userQuestion = String(userQuestion || '').trim();
+
+            if (!userQuestion) {
+                throw new Error('Analysis question is required.');
+            }
+
+            userContext = userContext || this.getCurrentAIUserContext();
+
+            var persona = userContext.persona;
+
+            if (persona === 'student') {
+                return this.analyzeCurrentStudent(userQuestion, userContext);
+            }
+
+            if (persona === 'admin' || persona === 'tpo') {
+                return this.analyzePlacementOverview(userQuestion, userContext);
+            }
+
+            return JSON.stringify({
+                success: true,
+                response:
+                    'This analysis is not yet available for your role.'
+            });
+
+        } catch (ex) {
+
+            gs.error(
+                'Campus360AIService.routeAnalysis failed: ' + String(ex)
+            );
+
+            return JSON.stringify({
+                success: false,
+                response: 'I could not complete the analysis right now.'
+            });
+        }
+    },
+
+
+    /*
+     * Aggregate-only overview for admin/TPO. Only counts grouped by
+     * status are sent to Groq - no individual student records.
+     *
+     * AUTHORIZATION BOUNDARY (explicit assumption):
+     *   - Every source table must be in the Campus360 allowlist AND the
+     *     current user must pass the TABLE-LEVEL read check
+     *     (canPerformAIAction -> GlideRecord.canRead()).
+     *   - The grouped field must also pass the FIELD-LEVEL read check
+     *     for the current user; otherwise only the total is reported.
+     *   - GlideAggregate does NOT evaluate RECORD-LEVEL (row/condition)
+     *     ACLs. These counts therefore reflect ALL rows in tables the
+     *     user is allowed to read at table level. This code deliberately
+     *     does not claim otherwise. It assumes Campus360 aggregate counts
+     *     are intended to be visible to any user who can read the table
+     *     (admin/TPO). If record-level ACLs must restrict counts, replace
+     *     the GlideAggregate queries with GlideRecord loops that call
+     *     canRead() per row.
+     *   - Only aggregate counts leave ServiceNow; no individual record
+     *     data is sent to Groq. Client-supplied role/persona is never
+     *     used as authorization.
+     */
+    analyzePlacementOverview: function(userQuestion, userContext) {
+
+        try {
+
+            userContext = userContext || this.getCurrentAIUserContext();
+
+            var sources = [
+                { table: 'x_snc_campus360_student_master', label: 'Students' },
+                { table: 'x_snc_campus360_student_application', label: 'Student Applications' },
+                { table: 'x_snc_campus360_placement_opportunity', label: 'Placement Opportunities' },
+                { table: 'x_snc_campus360_training_program', label: 'Training Programs' },
+                { table: 'x_snc_campus360_training_enrollment', label: 'Training Enrollments' },
+                { table: 'x_snc_campus360_placement_outcome', label: 'Placement Outcomes' }
+            ];
+
+            var groupCandidates = ['status', 'placement_status'];
+
+            var summary = [];
+
+            for (var i = 0; i < sources.length; i++) {
+
+                var src = sources[i];
+
+                /* Allowlist + table-level read ACL. */
+                if (!this.canPerformAIAction(src.table, 'read')) {
+                    continue;
+                }
+
+                var probe = new GlideRecord(src.table);
+
+                if (!probe.isValid()) {
+                    continue;
+                }
+
+                var total = new GlideAggregate(src.table);
+                total.addAggregate('COUNT');
+                total.query();
+
+                var totalCount = 0;
+
+                if (total.next()) {
+                    totalCount = parseInt(total.getAggregate('COUNT'), 10) || 0;
+                }
+
+                var entry = {
+                    table: src.label,
+                    total: totalCount,
+                    by_field: ''
+                };
+
+                for (var g = 0; g < groupCandidates.length; g++) {
+
+                    if (!probe.isValidField(groupCandidates[g])) {
+                        continue;
+                    }
+
+                    /* Field-level read check for the grouped field. */
+                    var groupFieldReadable = true;
+
+                    try {
+                        groupFieldReadable =
+                            probe.getElement(groupCandidates[g]).canRead() !== false;
+                    } catch (groupAclEx) {
+                        groupFieldReadable = true;
+                    }
+
+                    if (!groupFieldReadable) {
+                        continue;
+                    }
+
+                    var ga = new GlideAggregate(src.table);
+                    ga.addAggregate('COUNT');
+                    ga.groupBy(groupCandidates[g]);
+                    ga.query();
+
+                    var groups = {};
+
+                    while (ga.next()) {
+
+                        var groupLabel =
+                            String(
+                                ga.getDisplayValue(groupCandidates[g]) ||
+                                '(blank)'
+                            );
+
+                        groups[groupLabel] =
+                            parseInt(ga.getAggregate('COUNT'), 10) || 0;
+                    }
+
+                    entry.by_field = groupCandidates[g];
+                    entry.counts = groups;
+                    break;
+                }
+
+                summary.push(entry);
+            }
+
+            if (summary.length === 0) {
+                return JSON.stringify({
+                    success: true,
+                    response:
+                        'You do not currently have permission to read the Campus360 data needed for this analysis.'
+                });
+            }
+
+            var prompt =
+                'You are Campus360 AI providing an administrative placement overview. ' +
+                'You are given ONLY aggregate counts retrieved by ServiceNow. ' +
+                'Use ONLY these numbers. Do not invent figures, names, students, ' +
+                'companies, or trends over time (no time series is provided). ' +
+                'If the question needs individual records, time series, or data ' +
+                'that is not in the aggregates, say so clearly and suggest the ' +
+                'user ask to "show" the specific records instead. ' +
+                'Clearly separate facts from suggestions. Be concise.' +
+                '\n\nUSER ROLE: ' + String(userContext.persona) +
+                '\n\nUSER QUESTION:\n' + String(userQuestion) +
+                '\n\nAGGREGATE DATA:\n' + JSON.stringify(summary);
+
+            return JSON.stringify({
+                success: true,
+                response: String(this.askGroq(prompt))
+            });
+
+        } catch (ex) {
+
+            gs.error(
+                'Campus360AIService.analyzePlacementOverview failed: ' +
+                String(ex)
+            );
+
+            return JSON.stringify({
+                success: false,
+                response: 'I could not complete the analysis right now.'
+            });
+        }
+    },
+
+
+    /*
+     * ============================================================
+     * STUDENT ANALYSIS CONTEXT (kept)
+     * ============================================================
+     */
+
+    getCurrentStudentAnalysisContext: function() {
+
+        var context = {
+            success: false,
+            student: null,
+            applications: [],
+            opportunities: [],
+            training_programs: [],
+            error: ''
+        };
+
+        try {
+
+            var student = this.getCurrentStudentRecord();
+
+            if (!student.success) {
+                throw new Error('Unable to determine current student.');
+            }
+
+            if (!student.found) {
+                context.success = true;
+                context.student = null;
+                return context;
+            }
+
+            var studentRead =
+                this.readCampus360Records(
+                    'x_snc_campus360_student_master',
+                    { sys_id: student.sys_id },
+                    1
+                );
+
+            if (!studentRead.success) {
+                throw new Error(
+                    studentRead.error || 'Unable to read student profile.'
+                );
+            }
+
+            var applications =
+                this.readCampus360Records(
+                    'x_snc_campus360_student_application',
+                    { student: student.sys_id },
+                    50
+                );
+
+            if (!applications.success) {
+                throw new Error(
+                    applications.error || 'Unable to read applications.'
+                );
+            }
+
+            var opportunities =
+                this.readCampus360Records(
+                    'x_snc_campus360_placement_opportunity',
+                    { status: 'open' },
+                    50
+                );
+
+            if (!opportunities.success) {
+                throw new Error(
+                    opportunities.error ||
+                    'Unable to read placement opportunities.'
+                );
+            }
+
+            var trainingPrograms =
+                this.readCampus360Records(
+                    'x_snc_campus360_training_program',
+                    {},
+                    50
+                );
+
+            if (!trainingPrograms.success) {
+                throw new Error(
+                    trainingPrograms.error ||
+                    'Unable to read training programs.'
+                );
+            }
+
+            context.success = true;
+
+            context.student =
+                studentRead.records.length > 0
+                    ? studentRead.records[0]
+                    : null;
+
+            context.applications = applications.records;
+            context.opportunities = opportunities.records;
+            context.training_programs = trainingPrograms.records;
+
+            return context;
+
+        } catch (ex) {
+
+            gs.error(
+                'Campus360AIService.getCurrentStudentAnalysisContext failed: ' +
+                String(ex)
+            );
+
+            context.success = false;
+            context.error = String(ex);
+
+            return context;
+        }
+    },
+
+
+    /*
+     * ============================================================
+     * STUDENT SELF ANALYSIS (one specialised analysis capability)
+     * ============================================================
+     */
+
+    analyzeCurrentStudent: function(userQuestion, userContext) {
+
+        try {
+
+            userQuestion = String(userQuestion || '').trim();
+
+            if (!userQuestion) {
+                throw new Error('Analysis question is required.');
+            }
+
+            userContext = userContext || this.getCurrentAIUserContext();
+
+            /* Only genuine student-context analysis runs here. */
+            if (userContext.persona !== 'student') {
+                return JSON.stringify({
+                    success: true,
+                    response:
+                        'This analysis is not yet available for your role.'
+                });
+            }
+
+            var context = this.getCurrentStudentAnalysisContext();
+
+            if (!context.success) {
+                throw new Error(
+                    context.error || 'Unable to prepare student analysis.'
+                );
+            }
+
+            if (!context.student) {
+                return JSON.stringify({
+                    success: true,
+                    response:
+                        'I could not find a Student Master profile linked to your current Campus360 account.'
+                });
+            }
+
+            var analysisPayload = {
+                student: context.student,
+                applications: context.applications,
+                placement_opportunities: context.opportunities,
+                training_programs: context.training_programs
+            };
+
+            var systemInstruction =
+                'You are Campus360 AI, performing controlled ' +
+                'student data analysis. ' +
+                'The ServiceNow backend has already retrieved ' +
+                'the data you are allowed to analyze. ' +
+                'Use ONLY the supplied data. ' +
+                'Do not invent records, companies, skills, ' +
+                'training programs, applications, scores, ' +
+                'or opportunities. ' +
+                'Do not claim that a student applied to an ' +
+                'opportunity unless it appears in applications. ' +
+                'Do not claim that an opportunity is suitable ' +
+                'unless the supplied student profile and opportunity ' +
+                'data support the explanation. ' +
+                'Clearly distinguish facts from recommendations. ' +
+                'If information is missing, say that it is not ' +
+                'available in Campus360 data. ' +
+                'Provide practical, concise reasoning. ' +
+                'The user question is below.';
+
+            var prompt =
+                systemInstruction +
+                '\n\nUSER QUESTION:\n' + userQuestion +
+                '\n\nCAMPUS360 DATA:\n' + JSON.stringify(analysisPayload);
+
+            return JSON.stringify({
+                success: true,
+                response: String(this.askGroq(prompt))
+            });
+
+        } catch (ex) {
+
+            gs.error(
+                'Campus360AIService.analyzeCurrentStudent failed: ' +
+                String(ex)
+            );
+
+            return JSON.stringify({
+                success: false,
+                response: 'I could not complete the analysis right now.'
+            });
+        }
+    },
+
+
+    type: 'Campus360AIService'
+
+};]]></script>
+        <sys_class_name>sys_script_include</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-24 06:46:54</sys_created_on>
+        <sys_id>9d12df0974e303107f4410c9fee0cda0</sys_id>
+        <sys_mod_count>48</sys_mod_count>
+        <sys_name>Campus360AIService</sys_name>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy>read</sys_policy>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name>sys_script_include_9d12df0974e303107f4410c9fee0cda0</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-29 05:43:19</sys_updated_on>
+    </sys_script_include>
+</record_update>

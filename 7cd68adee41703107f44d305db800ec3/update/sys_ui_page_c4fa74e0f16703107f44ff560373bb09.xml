@@ -1,0 +1,1479 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_ui_page">
+    <sys_ui_page action="INSERT_OR_UPDATE">
+        <category>general</category>
+        <client_script><![CDATA[function refreshDashboard() {
+    window.location.reload();
+}
+
+function openList(tableName) {
+    if (!tableName) {
+        return;
+    }
+
+    var url = '/now/nav/ui/classic/params/target/' +
+        tableName + '_list.do';
+
+    window.location.href = url;
+}]]></client_script>
+        <description>Campus360 TPO placement intelligence dashboard</description>
+        <direct>false</direct>
+        <endpoint>x_snc_campus360_tpo_dashboard.do</endpoint>
+        <html><![CDATA[<?xml version="1.0" encoding="utf-8" ?>
+<j:jelly trim="false"
+    xmlns:j="jelly:core"
+    xmlns:g="glide"
+    xmlns:j2="null"
+    xmlns:g2="null">
+
+    <!-- ========================================================= -->
+    <!-- CAMPUS360 TPO DASHBOARD - SERVER DATA                     -->
+    <!-- ========================================================= -->
+
+    <!-- TOTAL STUDENTS -->
+    <g:evaluate var="jvar_total_students">
+        var gr = new GlideAggregate('x_snc_campus360_student_master');
+        gr.addAggregate('COUNT');
+        gr.query();
+        gr.next();
+        gr.getAggregate('COUNT');
+    </g:evaluate>
+
+    <!-- PLACED STUDENTS -->
+    <g:evaluate var="jvar_placed_students">
+        var gr = new GlideAggregate('x_snc_campus360_student_master');
+        gr.addQuery('placement_status', 'Placed');
+        gr.addAggregate('COUNT');
+        gr.query();
+        gr.next();
+        gr.getAggregate('COUNT');
+    </g:evaluate>
+
+    <!-- HIGH RISK -->
+    <g:evaluate var="jvar_high_risk">
+        var gr = new GlideAggregate('x_snc_campus360_placement_intelligence');
+        gr.addQuery('risk_level', 'High');
+        gr.addAggregate('COUNT');
+        gr.query();
+        gr.next();
+        gr.getAggregate('COUNT');
+    </g:evaluate>
+
+    <!-- MEDIUM RISK -->
+    <g:evaluate var="jvar_medium_risk">
+        var gr = new GlideAggregate('x_snc_campus360_placement_intelligence');
+        gr.addQuery('risk_level', 'Medium');
+        gr.addAggregate('COUNT');
+        gr.query();
+        gr.next();
+        gr.getAggregate('COUNT');
+    </g:evaluate>
+
+    <!-- LOW RISK -->
+    <g:evaluate var="jvar_low_risk">
+        var gr = new GlideAggregate('x_snc_campus360_placement_intelligence');
+        gr.addQuery('risk_level', 'Low');
+        gr.addAggregate('COUNT');
+        gr.query();
+        gr.next();
+        gr.getAggregate('COUNT');
+    </g:evaluate>
+
+    <!-- OPEN OPPORTUNITIES -->
+    <g:evaluate var="jvar_open_opportunities">
+        var gr = new GlideAggregate('x_snc_campus360_placement_opportunity');
+        gr.addQuery('status', 'Open');
+        gr.addAggregate('COUNT');
+        gr.query();
+        gr.next();
+        gr.getAggregate('COUNT');
+    </g:evaluate>
+
+    <!-- APPLICATIONS -->
+    <g:evaluate var="jvar_applications">
+        var gr = new GlideAggregate('x_snc_campus360_student_application');
+        gr.addAggregate('COUNT');
+        gr.query();
+        gr.next();
+        gr.getAggregate('COUNT');
+    </g:evaluate>
+
+    <!-- RECOMMENDED INTERVENTIONS -->
+    <g:evaluate var="jvar_recommended_interventions">
+        var gr = new GlideAggregate('x_snc_campus360_placement_intervention');
+        gr.addQuery('status', 'Recommended');
+        gr.addAggregate('COUNT');
+        gr.query();
+        gr.next();
+        gr.getAggregate('COUNT');
+    </g:evaluate>
+
+    <!-- IN PROGRESS INTERVENTIONS -->
+    <g:evaluate var="jvar_active_interventions">
+        var gr = new GlideAggregate('x_snc_campus360_placement_intervention');
+        gr.addQuery('status', 'In Progress');
+        gr.addAggregate('COUNT');
+        gr.query();
+        gr.next();
+        gr.getAggregate('COUNT');
+    </g:evaluate>
+
+    <!-- OPEN TRAINING PROGRAMS -->
+    <g:evaluate var="jvar_open_training">
+        var gr = new GlideAggregate('x_snc_campus360_training_program');
+        gr.addQuery('status', 'Open');
+        gr.addAggregate('COUNT');
+        gr.query();
+        gr.next();
+        gr.getAggregate('COUNT');
+    </g:evaluate>
+
+
+    <!-- ========================================================= -->
+    <!-- STYLE                                                     -->
+    <!-- ========================================================= -->
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: #f4f7fb;
+            font-family: Arial, Helvetica, sans-serif;
+            color: #172033;
+        }
+
+        .c360-page {
+            padding: 28px 32px 45px 32px;
+            min-height: 100vh;
+        }
+
+        /* HEADER */
+
+        .c360-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 28px;
+        }
+
+        .c360-brand {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .c360-logo {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #2457d6, #6639d8);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: bold;
+            box-shadow: 0 7px 18px rgba(55, 77, 180, .25);
+        }
+
+        .c360-title {
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: -.4px;
+        }
+
+        .c360-subtitle {
+            color: #69758a;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+
+        .c360-header-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .c360-btn {
+            border: 1px solid #d7deea;
+            background: white;
+            color: #344054;
+            padding: 10px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .c360-btn:hover {
+            background: #f7f9fc;
+        }
+
+        /* KPI */
+
+        .c360-kpis {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 16px;
+            margin-bottom: 22px;
+        }
+
+        .c360-kpi {
+            position: relative;
+            overflow: hidden;
+            background: white;
+            border: 1px solid #e5eaf2;
+            border-radius: 13px;
+            padding: 20px;
+            box-shadow: 0 5px 18px rgba(30, 50, 90, .06);
+        }
+
+        .c360-kpi:after {
+            content: "";
+            position: absolute;
+            right: -24px;
+            top: -24px;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: #eef3ff;
+        }
+
+        .c360-kpi-label {
+            color: #68758a;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .c360-kpi-value {
+            font-size: 31px;
+            font-weight: 700;
+            color: #172033;
+        }
+
+        .c360-kpi-foot {
+            margin-top: 8px;
+            font-size: 12px;
+            color: #8a95a8;
+        }
+
+        .c360-kpi-risk .c360-kpi-value {
+            color: #c23b3b;
+        }
+
+        .c360-kpi-success .c360-kpi-value {
+            color: #16845a;
+        }
+
+        /* MAIN GRID */
+
+        .c360-main-grid {
+            display: grid;
+            grid-template-columns: 1.35fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .c360-panel {
+            background: white;
+            border: 1px solid #e5eaf2;
+            border-radius: 13px;
+            padding: 22px;
+            box-shadow: 0 5px 18px rgba(30, 50, 90, .05);
+        }
+
+        .c360-panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .c360-panel-title {
+            font-size: 17px;
+            font-weight: 700;
+        }
+
+        .c360-panel-subtitle {
+            font-size: 12px;
+            color: #8994a7;
+            margin-top: 4px;
+        }
+
+        .c360-link {
+            color: #315bd6;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* READINESS */
+
+        .c360-readiness-score {
+            display: flex;
+            align-items: center;
+            gap: 25px;
+            margin-bottom: 25px;
+        }
+
+        .c360-score-ring {
+            width: 105px;
+            height: 105px;
+            border-radius: 50%;
+            background: conic-gradient(
+                #315bd6 0deg,
+                #315bd6 250deg,
+                #e7ebf3 250deg,
+                #e7ebf3 360deg
+            );
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .c360-score-inner {
+            width: 78px;
+            height: 78px;
+            border-radius: 50%;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            font-weight: 700;
+        }
+
+        .c360-readiness-text strong {
+            display: block;
+            font-size: 17px;
+            margin-bottom: 5px;
+        }
+
+        .c360-readiness-text span {
+            color: #778397;
+            font-size: 13px;
+        }
+
+        /* BAR CHART */
+
+        .c360-bars {
+            height: 150px;
+            display: flex;
+            align-items: flex-end;
+            gap: 18px;
+            border-bottom: 1px solid #e5eaf2;
+            padding: 0 10px;
+        }
+
+        .c360-bar-wrap {
+            flex: 1;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: center;
+        }
+
+        .c360-bar {
+            width: 34px;
+            border-radius: 6px 6px 0 0;
+            background: linear-gradient(180deg, #5277e8, #315bd6);
+        }
+
+        .c360-bar-label {
+            font-size: 10px;
+            color: #8a95a8;
+            margin-top: 7px;
+        }
+
+        /* RISK */
+
+        .c360-risk-row {
+            margin-bottom: 18px;
+        }
+
+        .c360-risk-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            margin-bottom: 7px;
+        }
+
+        .c360-risk-name {
+            font-weight: 600;
+        }
+
+        .c360-risk-number {
+            color: #68758a;
+        }
+
+        .c360-progress {
+            height: 9px;
+            background: #edf0f5;
+            border-radius: 20px;
+            overflow: hidden;
+        }
+
+        .c360-progress-fill {
+            height: 100%;
+            border-radius: 20px;
+        }
+
+        .c360-high {
+            background: #d94b4b;
+        }
+
+        .c360-medium {
+            background: #e5a82e;
+        }
+
+        .c360-low {
+            background: #28a56f;
+        }
+
+        /* TWO COLUMN LOWER GRID */
+
+        .c360-lower-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        /* FACTORS */
+
+        .c360-factor {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px solid #edf0f4;
+        }
+
+        .c360-factor:last-child {
+            border-bottom: 0;
+        }
+
+        .c360-factor-dot {
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            background: #5d76cf;
+        }
+
+        .c360-factor-name {
+            flex: 1;
+            font-size: 13px;
+            color: #465269;
+        }
+
+        .c360-factor-value {
+            font-size: 12px;
+            font-weight: 700;
+            color: #25324a;
+        }
+
+        /* BOTTLENECK */
+
+        .c360-bottleneck {
+            margin-bottom: 16px;
+        }
+
+        .c360-bottleneck-head {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 7px;
+            font-size: 13px;
+        }
+
+        .c360-bottleneck-bar {
+            height: 10px;
+            border-radius: 20px;
+            background: #edf0f5;
+            overflow: hidden;
+        }
+
+        .c360-bottleneck-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #7658d9, #9a72e5);
+            border-radius: 20px;
+        }
+
+        /* INTERVENTIONS */
+
+        .c360-intervention {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            background: #f8f9fc;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        .c360-intervention-title {
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .c360-badge {
+            font-size: 10px;
+            font-weight: 700;
+            padding: 5px 8px;
+            border-radius: 20px;
+            background: #eeeaff;
+            color: #6849c5;
+        }
+
+        /* ALERTS / DRIVES */
+
+        .c360-list-item {
+            display: flex;
+            gap: 12px;
+            padding: 13px 0;
+            border-bottom: 1px solid #edf0f4;
+        }
+
+        .c360-list-item:last-child {
+            border-bottom: 0;
+        }
+
+        .c360-alert-icon {
+            width: 34px;
+            height: 34px;
+            border-radius: 9px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #fff1f1;
+            color: #c23b3b;
+            font-weight: 700;
+        }
+
+        .c360-list-content {
+            flex: 1;
+        }
+
+        .c360-list-title {
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .c360-list-meta {
+            margin-top: 4px;
+            font-size: 11px;
+            color: #8a95a8;
+        }
+
+        /* QUICK ACTIONS */
+
+        .c360-actions {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+
+        .c360-action {
+            background: white;
+            border: 1px solid #e0e6ef;
+            border-radius: 10px;
+            padding: 17px;
+            text-align: left;
+            cursor: pointer;
+            transition: all .15s ease;
+        }
+
+        .c360-action:hover {
+            border-color: #7690e2;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(50,70,120,.10);
+        }
+
+        .c360-action-icon {
+            width: 34px;
+            height: 34px;
+            border-radius: 8px;
+            background: #edf2ff;
+            color: #315bd6;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .c360-action-title {
+            font-weight: 700;
+            font-size: 13px;
+        }
+
+        .c360-action-description {
+            color: #8792a5;
+            font-size: 11px;
+            margin-top: 4px;
+        }
+
+        @media (max-width: 1100px) {
+
+            .c360-kpis {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .c360-main-grid,
+            .c360-lower-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .c360-actions {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+    </style>
+
+
+    <!-- ========================================================= -->
+    <!-- DASHBOARD                                                  -->
+    <!-- ========================================================= -->
+
+    <div class="c360-page">
+
+        <!-- HEADER -->
+
+        <div class="c360-header">
+
+            <div class="c360-brand">
+
+                <div class="c360-logo">
+                    C
+                </div>
+
+                <div>
+                    <div class="c360-title">
+                        Campus360 TPO Command Center
+                    </div>
+
+                    <div class="c360-subtitle">
+                        Placement intelligence, student readiness &amp; recruitment operations
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="c360-header-actions">
+
+                <button class="c360-btn"
+                        onclick="refreshDashboard()">
+                    ↻ Refresh
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <!-- ===================================================== -->
+        <!-- KPI CARDS                                               -->
+        <!-- ===================================================== -->
+
+        <div class="c360-kpis">
+
+            <div class="c360-kpi">
+                <div class="c360-kpi-label">
+                    TOTAL STUDENTS
+                </div>
+
+                <div class="c360-kpi-value">
+                    ${jvar_total_students}
+                </div>
+
+                <div class="c360-kpi-foot">
+                    Students in Campus360
+                </div>
+            </div>
+
+
+            <div class="c360-kpi c360-kpi-success">
+
+                <div class="c360-kpi-label">
+                    PLACED STUDENTS
+                </div>
+
+                <div class="c360-kpi-value">
+                    ${jvar_placed_students}
+                </div>
+
+                <div class="c360-kpi-foot">
+                    Current placement status
+                </div>
+
+            </div>
+
+
+            <div class="c360-kpi c360-kpi-risk">
+
+                <div class="c360-kpi-label">
+                    HIGH AI RISK
+                </div>
+
+                <div class="c360-kpi-value">
+                    ${jvar_high_risk}
+                </div>
+
+                <div class="c360-kpi-foot">
+                    Requires attention
+                </div>
+
+            </div>
+
+
+            <div class="c360-kpi">
+
+                <div class="c360-kpi-label">
+                    ACTIVE OPPORTUNITIES
+                </div>
+
+                <div class="c360-kpi-value">
+                    ${jvar_open_opportunities}
+                </div>
+
+                <div class="c360-kpi-foot">
+                    Currently open
+                </div>
+
+            </div>
+
+
+            <div class="c360-kpi">
+
+                <div class="c360-kpi-label">
+                    APPLICATIONS
+                </div>
+
+                <div class="c360-kpi-value">
+                    ${jvar_applications}
+                </div>
+
+                <div class="c360-kpi-foot">
+                    Student applications
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- ===================================================== -->
+        <!-- READINESS + RISK                                      -->
+        <!-- ===================================================== -->
+
+        <div class="c360-main-grid">
+
+
+            <!-- READINESS -->
+
+            <div class="c360-panel">
+
+                <div class="c360-panel-header">
+
+                    <div>
+                        <div class="c360-panel-title">
+                            Placement Readiness
+                        </div>
+
+                        <div class="c360-panel-subtitle">
+                            Current student placement intelligence
+                        </div>
+                    </div>
+
+                    <div class="c360-link"
+                         onclick="openList('x_snc_campus360_placement_intelligence')">
+                        View intelligence →
+                    </div>
+
+                </div>
+
+
+                <div class="c360-readiness-score">
+
+                    <div class="c360-score-ring">
+                        <div class="c360-score-inner">
+                            AI
+                        </div>
+                    </div>
+
+                    <div class="c360-readiness-text">
+
+                        <strong>
+                            AI-powered readiness monitoring
+                        </strong>
+
+                        <span>
+                            Review readiness scores, risk levels,
+                            skill gaps and placement bottlenecks.
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <div class="c360-bars">
+
+                    <div class="c360-bar-wrap">
+                        <div class="c360-bar" style="height:35%;"></div>
+                        <div class="c360-bar-label">0-20</div>
+                    </div>
+
+                    <div class="c360-bar-wrap">
+                        <div class="c360-bar" style="height:50%;"></div>
+                        <div class="c360-bar-label">21-40</div>
+                    </div>
+
+                    <div class="c360-bar-wrap">
+                        <div class="c360-bar" style="height:68%;"></div>
+                        <div class="c360-bar-label">41-60</div>
+                    </div>
+
+                    <div class="c360-bar-wrap">
+                        <div class="c360-bar" style="height:82%;"></div>
+                        <div class="c360-bar-label">61-80</div>
+                    </div>
+
+                    <div class="c360-bar-wrap">
+                        <div class="c360-bar" style="height:100%;"></div>
+                        <div class="c360-bar-label">81-100</div>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- RISK DISTRIBUTION -->
+
+            <div class="c360-panel">
+
+                <div class="c360-panel-header">
+
+                    <div>
+                        <div class="c360-panel-title">
+                            AI Risk Distribution
+                        </div>
+
+                        <div class="c360-panel-subtitle">
+                            Students grouped by current risk level
+                        </div>
+                    </div>
+
+                </div>
+
+
+                <div class="c360-risk-row">
+
+                    <div class="c360-risk-meta">
+                        <span class="c360-risk-name">
+                            High Risk
+                        </span>
+
+                        <span class="c360-risk-number">
+                            ${jvar_high_risk}
+                        </span>
+                    </div>
+
+                    <div class="c360-progress">
+                        <div class="c360-progress-fill c360-high"
+                             style="width:70%;">
+                        </div>
+                    </div>
+
+                </div>
+
+
+                <div class="c360-risk-row">
+
+                    <div class="c360-risk-meta">
+                        <span class="c360-risk-name">
+                            Medium Risk
+                        </span>
+
+                        <span class="c360-risk-number">
+                            ${jvar_medium_risk}
+                        </span>
+                    </div>
+
+                    <div class="c360-progress">
+                        <div class="c360-progress-fill c360-medium"
+                             style="width:50%;">
+                        </div>
+                    </div>
+
+                </div>
+
+
+                <div class="c360-risk-row">
+
+                    <div class="c360-risk-meta">
+                        <span class="c360-risk-name">
+                            Low Risk
+                        </span>
+
+                        <span class="c360-risk-number">
+                            ${jvar_low_risk}
+                        </span>
+                    </div>
+
+                    <div class="c360-progress">
+                        <div class="c360-progress-fill c360-low"
+                             style="width:35%;">
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- ===================================================== -->
+        <!-- FACTORS / BOTTLENECKS / INTERVENTIONS                -->
+        <!-- ===================================================== -->
+
+        <div class="c360-lower-grid">
+
+
+            <!-- TOP RISK FACTORS -->
+
+            <div class="c360-panel">
+
+                <div class="c360-panel-header">
+
+                    <div>
+                        <div class="c360-panel-title">
+                            Top Risk Factors
+                        </div>
+
+                        <div class="c360-panel-subtitle">
+                            Areas requiring TPO attention
+                        </div>
+                    </div>
+
+                </div>
+
+
+                <div class="c360-factor">
+                    <div class="c360-factor-dot"></div>
+
+                    <div class="c360-factor-name">
+                        Skill gaps
+                    </div>
+
+                    <div class="c360-factor-value">
+                        AI
+                    </div>
+                </div>
+
+
+                <div class="c360-factor">
+                    <div class="c360-factor-dot"></div>
+
+                    <div class="c360-factor-name">
+                        Placement bottlenecks
+                    </div>
+
+                    <div class="c360-factor-value">
+                        AI
+                    </div>
+                </div>
+
+
+                <div class="c360-factor">
+                    <div class="c360-factor-dot"></div>
+
+                    <div class="c360-factor-name">
+                        Assessment performance
+                    </div>
+
+                    <div class="c360-factor-value">
+                        AI
+                    </div>
+                </div>
+
+
+                <div class="c360-factor">
+                    <div class="c360-factor-dot"></div>
+
+                    <div class="c360-factor-name">
+                        Interview readiness
+                    </div>
+
+                    <div class="c360-factor-value">
+                        AI
+                    </div>
+                </div>
+
+            </div>
+
+
+            <!-- BOTTLENECK -->
+
+            <div class="c360-panel">
+
+                <div class="c360-panel-header">
+
+                    <div>
+                        <div class="c360-panel-title">
+                            Placement Bottlenecks
+                        </div>
+
+                        <div class="c360-panel-subtitle">
+                            Where students are getting stuck
+                        </div>
+                    </div>
+
+                </div>
+
+
+                <div class="c360-bottleneck">
+
+                    <div class="c360-bottleneck-head">
+                        <span>Skills</span>
+                        <span>High</span>
+                    </div>
+
+                    <div class="c360-bottleneck-bar">
+                        <div class="c360-bottleneck-fill"
+                             style="width:82%;">
+                        </div>
+                    </div>
+
+                </div>
+
+
+                <div class="c360-bottleneck">
+
+                    <div class="c360-bottleneck-head">
+                        <span>Assessment</span>
+                        <span>Medium</span>
+                    </div>
+
+                    <div class="c360-bottleneck-bar">
+                        <div class="c360-bottleneck-fill"
+                             style="width:62%;">
+                        </div>
+                    </div>
+
+                </div>
+
+
+                <div class="c360-bottleneck">
+
+                    <div class="c360-bottleneck-head">
+                        <span>Interview</span>
+                        <span>Medium</span>
+                    </div>
+
+                    <div class="c360-bottleneck-bar">
+                        <div class="c360-bottleneck-fill"
+                             style="width:48%;">
+                        </div>
+                    </div>
+
+                </div>
+
+
+                <div class="c360-bottleneck">
+
+                    <div class="c360-bottleneck-head">
+                        <span>Offer</span>
+                        <span>Low</span>
+                    </div>
+
+                    <div class="c360-bottleneck-bar">
+                        <div class="c360-bottleneck-fill"
+                             style="width:30%;">
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- INTERVENTIONS -->
+
+            <div class="c360-panel">
+
+                <div class="c360-panel-header">
+
+                    <div>
+                        <div class="c360-panel-title">
+                            Recommended Interventions
+                        </div>
+
+                        <div class="c360-panel-subtitle">
+                            AI-driven placement actions
+                        </div>
+                    </div>
+
+                </div>
+
+
+                <div class="c360-intervention">
+
+                    <div>
+                        <div class="c360-intervention-title">
+                            Recommended
+                        </div>
+                    </div>
+
+                    <div class="c360-badge">
+                        ${jvar_recommended_interventions}
+                    </div>
+
+                </div>
+
+
+                <div class="c360-intervention">
+
+                    <div>
+                        <div class="c360-intervention-title">
+                            In Progress
+                        </div>
+                    </div>
+
+                    <div class="c360-badge">
+                        ${jvar_active_interventions}
+                    </div>
+
+                </div>
+
+
+                <div class="c360-intervention">
+
+                    <div>
+                        <div class="c360-intervention-title">
+                            Open Training Programs
+                        </div>
+                    </div>
+
+                    <div class="c360-badge">
+                        ${jvar_open_training}
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- ===================================================== -->
+        <!-- ALERTS + PLACEMENT ACTIVITY                           -->
+        <!-- ===================================================== -->
+
+        <div class="c360-main-grid">
+
+
+            <!-- ALERTS -->
+
+            <div class="c360-panel">
+
+                <div class="c360-panel-header">
+
+                    <div>
+                        <div class="c360-panel-title">
+                            Recent Alerts
+                        </div>
+
+                        <div class="c360-panel-subtitle">
+                            Items requiring TPO attention
+                        </div>
+                    </div>
+
+                    <div class="c360-link"
+                         onclick="openList('x_snc_campus360_student_notification')">
+                        View all →
+                    </div>
+
+                </div>
+
+
+                <div class="c360-list-item">
+
+                    <div class="c360-alert-icon">
+                        !
+                    </div>
+
+                    <div class="c360-list-content">
+
+                        <div class="c360-list-title">
+                            High-risk students detected
+                        </div>
+
+                        <div class="c360-list-meta">
+                            ${jvar_high_risk} currently classified as High Risk
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="c360-list-item">
+
+                    <div class="c360-alert-icon">
+                        !
+                    </div>
+
+                    <div class="c360-list-content">
+
+                        <div class="c360-list-title">
+                            Placement interventions need attention
+                        </div>
+
+                        <div class="c360-list-meta">
+                            ${jvar_recommended_interventions} recommendations available
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="c360-list-item">
+
+                    <div class="c360-alert-icon">
+                        i
+                    </div>
+
+                    <div class="c360-list-content">
+
+                        <div class="c360-list-title">
+                            Active placement opportunities
+                        </div>
+
+                        <div class="c360-list-meta">
+                            ${jvar_open_opportunities} opportunities currently open
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- PLACEMENT ACTIVITY -->
+
+            <div class="c360-panel">
+
+                <div class="c360-panel-header">
+
+                    <div>
+                        <div class="c360-panel-title">
+                            Placement Activity
+                        </div>
+
+                        <div class="c360-panel-subtitle">
+                            Recruitment activity overview
+                        </div>
+                    </div>
+
+                    <div class="c360-link"
+                         onclick="openList('x_snc_campus360_placement_opportunity')">
+                        View opportunities →
+                    </div>
+
+                </div>
+
+
+                <div class="c360-list-item">
+
+                    <div class="c360-alert-icon">
+                        O
+                    </div>
+
+                    <div class="c360-list-content">
+
+                        <div class="c360-list-title">
+                            Open opportunities
+                        </div>
+
+                        <div class="c360-list-meta">
+                            ${jvar_open_opportunities} active opportunities
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="c360-list-item">
+
+                    <div class="c360-alert-icon">
+                        A
+                    </div>
+
+                    <div class="c360-list-content">
+
+                        <div class="c360-list-title">
+                            Student applications
+                        </div>
+
+                        <div class="c360-list-meta">
+                            ${jvar_applications} applications recorded
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="c360-list-item">
+
+                    <div class="c360-alert-icon">
+                        T
+                    </div>
+
+                    <div class="c360-list-content">
+
+                        <div class="c360-list-title">
+                            Training support
+                        </div>
+
+                        <div class="c360-list-meta">
+                            ${jvar_open_training} open training programs
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- ===================================================== -->
+        <!-- QUICK ACTIONS                                          -->
+        <!-- ===================================================== -->
+
+        <div class="c360-panel">
+
+            <div class="c360-panel-header">
+
+                <div>
+                    <div class="c360-panel-title">
+                        Quick Actions
+                    </div>
+
+                    <div class="c360-panel-subtitle">
+                        Frequently used TPO operations
+                    </div>
+                </div>
+
+            </div>
+
+
+            <div class="c360-actions">
+
+
+                <button class="c360-action"
+                        onclick="openList('x_snc_campus360_student_master')">
+
+                    <div class="c360-action-icon">
+                        S
+                    </div>
+
+                    <div class="c360-action-title">
+                        Students
+                    </div>
+
+                    <div class="c360-action-description">
+                        Student master records
+                    </div>
+
+                </button>
+
+
+                <button class="c360-action"
+                        onclick="openList('x_snc_campus360_company_master')">
+
+                    <div class="c360-action-icon">
+                        C
+                    </div>
+
+                    <div class="c360-action-title">
+                        Companies
+                    </div>
+
+                    <div class="c360-action-description">
+                        Recruiter and company records
+                    </div>
+
+                </button>
+
+
+                <button class="c360-action"
+                        onclick="openList('x_snc_campus360_placement_opportunity')">
+
+                    <div class="c360-action-icon">
+                        O
+                    </div>
+
+                    <div class="c360-action-title">
+                        Opportunities
+                    </div>
+
+                    <div class="c360-action-description">
+                        Placement opportunities
+                    </div>
+
+                </button>
+
+
+                <button class="c360-action"
+                        onclick="openList('x_snc_campus360_training_program')">
+
+                    <div class="c360-action-icon">
+                        T
+                    </div>
+
+                    <div class="c360-action-title">
+                        Training
+                    </div>
+
+                    <div class="c360-action-description">
+                        Training programs
+                    </div>
+
+                </button>
+
+
+            </div>
+
+        </div>
+
+    </div>
+
+</j:jelly>]]></html>
+        <name>tpo_dashboard</name>
+        <processing_script/>
+        <sys_class_name>sys_ui_page</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-22 08:53:42</sys_created_on>
+        <sys_id>c4fa74e0f16703107f44ff560373bb09</sys_id>
+        <sys_mod_count>1</sys_mod_count>
+        <sys_name>tpo_dashboard</sys_name>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name>sys_ui_page_c4fa74e0f16703107f44ff560373bb09</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-22 11:00:45</sys_updated_on>
+    </sys_ui_page>
+</record_update>

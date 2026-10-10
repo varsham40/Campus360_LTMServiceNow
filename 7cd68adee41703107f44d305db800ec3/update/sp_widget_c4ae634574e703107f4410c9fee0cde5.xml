@@ -1,0 +1,1843 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_widget">
+    <sp_widget action="INSERT_OR_UPDATE">
+        <category>custom</category>
+        <client_script><![CDATA[api.controller = function($scope, $sce, $timeout) {
+
+    var c = this;
+
+    c.isOpen = false;
+    c.isFullWindow = false;
+    c.isMenuOpen = false;
+    c.prompt = '';
+    c.messages = []; // ALWAYS start empty on page load/refresh
+    c.loading = false;
+    c.error = '';
+
+    /*
+     * DYNAMIC ROLE RESOLUTION
+     */
+    function getUserRole() {
+        var href = (window.location.href || '').toLowerCase();
+        if (href.indexOf('tpo') !== -1) return 'tpo';
+        if (href.indexOf('trainer') !== -1) return 'trainer';
+        if (href.indexOf('student') !== -1) return 'student';
+        return 'student';
+    }
+
+    c.userRole = getUserRole();
+
+    function generateConversationId() {
+        return 'portal_' + c.userRole + '_' + new Date().getTime() + '_' + Math.floor(Math.random() * 100000);
+    }
+
+    c.conversationId = generateConversationId();
+
+    function escapeHtml(value) {
+        return String(value || '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
+    function renderMarkdown(value) {
+        if (!value) return '';
+        var text = String(value);
+
+        // Code blocks
+        text = text.replace(/```([\s\S]*?)```/g, function(match, code) {
+            return '<pre class="campus360-code-block"><code>' + escapeHtml(code.trim()) + '</code></pre>';
+        });
+
+        // Headers
+        text = text.replace(/^### (.*$)/gim, '<h4 class="ai-h3">$1</h4>');
+        text = text.replace(/^## (.*$)/gim, '<h3 class="ai-h2">$1</h3>');
+        text = text.replace(/^# (.*$)/gim, '<h2 class="ai-h1">$1</h2>');
+
+        // Bold
+        text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+
+        // Inline code
+        text = text.replace(/`([^`]+)`/g, '<code class="ai-inline-code">$1</code>');
+
+        // Italic
+        text = text.replace(/(^|[^*])\*(.*?)\*(?!\*)/g, '$1<em>$2</em>');
+
+        // Bullet points
+        text = text.replace(/^\s*[-*]\s+(.*)$/gim, '<li>$1</li>');
+        text = text.replace(/(<li>[\s\S]*?<\/li>)/g, '<ul class="ai-list">$1</ul>');
+        text = text.replace(/<\/ul>\s*<ul>/g, '');
+
+        // Paragraph line breaks
+        text = text.replace(/\n\n/g, '<br><br>');
+        text = text.replace(/\n/g, '<br>');
+
+        return text;
+    }
+
+    c.trustHtml = function(text) {
+        return $sce.trustAsHtml(renderMarkdown(text));
+    };
+
+    c.scrollToBottom = function() {
+        $timeout(function() {
+            var el = document.getElementById('campus360-ai-chat-body');
+            if (el) el.scrollTop = el.scrollHeight;
+        }, 100);
+    };
+
+    c.openAssistant = function() {
+        c.isOpen = true;
+        c.isMenuOpen = false;
+        c.error = '';
+        c.scrollToBottom();
+    };
+
+    c.closeAssistant = function() {
+        c.isOpen = false;
+        c.isMenuOpen = false;
+        c.error = '';
+    };
+
+    c.openFullWindow = function() {
+        c.isOpen = true;
+        c.isFullWindow = true;
+        c.isMenuOpen = false;
+        c.error = '';
+        c.scrollToBottom();
+    };
+
+    c.closeFullWindow = function() {
+        c.isFullWindow = false;
+        c.isMenuOpen = false;
+        c.scrollToBottom();
+    };
+
+    c.toggleMenu = function() {
+        c.isMenuOpen = !c.isMenuOpen;
+    };
+
+    c.useSuggestion = function(question) {
+        c.prompt = question;
+        c.sendMessage();
+    };
+
+    c.clearChat = function() {
+        c.messages = [];
+        c.error = '';
+        c.conversationId = generateConversationId();
+    };
+
+    c.handleKeyDown = function(e) {
+        if (e.keyCode === 13 && !e.shiftKey) {
+            e.preventDefault();
+            c.sendMessage();
+        }
+    };
+
+    c.sendMessage = function() {
+        if (!c.prompt || !c.prompt.trim() || c.loading) return;
+
+        var userPrompt = c.prompt.trim();
+        c.error = '';
+
+        c.messages.push({
+            role: 'user',
+            content: userPrompt,
+            displayContent: escapeHtml(userPrompt)
+        });
+
+        c.prompt = '';
+        c.loading = true;
+        c.scrollToBottom();
+
+        c.server.get({
+            action: 'ask',
+            prompt: userPrompt,
+            role: c.userRole,
+            conversationId: c.conversationId
+        }).then(function(response) {
+            c.loading = false;
+            if (response.data && response.data.response) {
+                var assistantContent = String(response.data.response);
+                c.messages.push({
+                    role: 'assistant',
+                    content: assistantContent,
+                    displayContent: $sce.trustAsHtml(renderMarkdown(assistantContent))
+                });
+            } else if (response.data && response.data.error) {
+                c.error = response.data.error;
+            } else {
+                c.error = 'Campus360 AI returned an empty response.';
+            }
+            c.scrollToBottom();
+        }, function(error) {
+            c.loading = false;
+            c.error = 'Unable to contact Campus360 AI. Please try again.';
+            c.scrollToBottom();
+        });
+    };
+
+};]]></client_script>
+        <controller_as>c</controller_as>
+        <css>/* =========================================================
+   ROOT &amp; FLOATING LAUNCHER
+   ========================================================= */
+
+.campus360-ai {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif !important;
+    position: fixed !important;
+    right: 28px !important;
+    bottom: 28px !important;
+    z-index: 999999 !important;
+}
+
+.campus360-ai-launcher {
+    position: fixed !important;
+    right: 28px !important;
+    bottom: 28px !important;
+    width: 60px !important;
+    height: 60px !important;
+    border: none !important;
+    border-radius: 50% !important;
+    background: linear-gradient(135deg, #172554 0%, #3b82f6 100%) !important;
+    color: #ffffff !important;
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.4) !important;
+    cursor: pointer !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    z-index: 999999 !important;
+    transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+}
+
+.campus360-ai-launcher:hover {
+    transform: scale(1.08) translateY(-2px) !important;
+    box-shadow: 0 14px 35px rgba(15, 23, 42, 0.5) !important;
+}
+
+.launcher-icon {
+    font-size: 26px !important;
+    line-height: 1 !important;
+}
+
+/* =========================================================
+   FLOATING PANEL
+   ========================================================= */
+
+.campus360-ai-panel {
+    position: fixed !important;
+    right: 28px !important;
+    bottom: 28px !important;
+    width: 400px !important;
+    max-width: calc(100vw - 40px) !important;
+    height: 610px !important;
+    max-height: calc(100vh - 50px) !important;
+    background: #ffffff !important;
+    border-radius: 18px !important;
+    overflow: hidden !important;
+    box-shadow: 0 24px 70px rgba(15, 23, 42, 0.35) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    z-index: 999999 !important;
+}
+
+.campus360-ai-header {
+    position: relative !important;
+    min-height: 72px !important;
+    padding: 14px 16px !important;
+    background: #172554 !important;
+    color: #ffffff !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+}
+
+.campus360-ai-brand {
+    display: flex !important;
+    align-items: center !important;
+    gap: 11px !important;
+}
+
+.campus360-ai-avatar {
+    width: 40px !important;
+    height: 40px !important;
+    border-radius: 12px !important;
+    background: rgba(255, 255, 255, 0.15) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 20px !important;
+}
+
+.campus360-ai-title {
+    font-size: 16px !important;
+    font-weight: 700 !important;
+}
+
+.campus360-ai-subtitle {
+    margin-top: 2px !important;
+    font-size: 10px !important;
+    opacity: 0.8 !important;
+}
+
+.campus360-ai-header-actions {
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+}
+
+.campus360-ai-status {
+    display: flex !important;
+    align-items: center !important;
+    gap: 5px !important;
+    font-size: 10px !important;
+}
+
+.status-dot {
+    width: 7px !important;
+    height: 7px !important;
+    border-radius: 50% !important;
+    background: #22c55e !important;
+}
+
+.campus360-ai-menu-button, .campus360-ai-close {
+    width: 30px !important;
+    height: 30px !important;
+    border: none !important;
+    background: rgba(255, 255, 255, 0.1) !important;
+    color: #ffffff !important;
+    border-radius: 8px !important;
+    font-size: 20px !important;
+    cursor: pointer !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+.campus360-ai-menu {
+    position: absolute !important;
+    right: 48px !important;
+    top: 57px !important;
+    width: 190px !important;
+    padding: 6px !important;
+    background: #ffffff !important;
+    border-radius: 10px !important;
+    box-shadow: 0 12px 30px rgba(15, 23, 42, 0.25) !important;
+    z-index: 1000000 !important;
+}
+
+.campus360-ai-menu button {
+    width: 100% !important;
+    border: none !important;
+    background: transparent !important;
+    padding: 10px !important;
+    border-radius: 7px !important;
+    color: #334155 !important;
+    text-align: left !important;
+    font-size: 11px !important;
+    cursor: pointer !important;
+}
+
+.campus360-ai-menu button:hover {
+    background: #f1f5f9 !important;
+}
+
+.campus360-ai-chat-body {
+    flex: 1 !important;
+    overflow-y: auto !important;
+    padding: 18px 16px !important;
+    background: #f8fafc !important;
+}
+
+.campus360-ai-welcome {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    text-align: center !important;
+    padding: 20px 4px !important;
+}
+
+.welcome-icon {
+    width: 50px !important;
+    height: 50px !important;
+    border-radius: 50% !important;
+    background: #e0e7ff !important;
+    color: #4338ca !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 24px !important;
+    margin-bottom: 12px !important;
+}
+
+.campus360-ai-welcome h3 {
+    margin: 0 !important;
+    color: #0f172a !important;
+    font-weight: 700 !important;
+    font-size: 18px !important;
+}
+
+.campus360-ai-welcome p {
+    color: #64748b !important;
+    font-size: 12px !important;
+    margin: 8px 0 18px !important;
+}
+
+.campus360-ai-suggestions {
+    width: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+}
+
+.campus360-ai-suggestions button {
+    width: 100% !important;
+    padding: 10px 12px !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 10px !important;
+    background: #ffffff !important;
+    color: #334155 !important;
+    cursor: pointer !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 9px !important;
+    font-size: 11px !important;
+    text-align: left !important;
+}
+
+.campus360-ai-suggestions button:hover {
+    background: #eef2ff !important;
+    border-color: #818cf8 !important;
+}
+
+.campus360-ai-messages {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 12px !important;
+}
+
+.campus360-ai-message {
+    display: flex !important;
+    align-items: flex-start !important;
+    gap: 8px !important;
+}
+
+.message-user {
+    justify-content: flex-end !important;
+}
+
+.message-assistant {
+    justify-content: flex-start !important;
+}
+
+.message-content {
+    max-width: 82% !important;
+    padding: 10px 13px !important;
+    border-radius: 12px !important;
+    font-size: 12px !important;
+    line-height: 1.55 !important;
+    word-break: break-word !important;
+}
+
+.message-user .message-content {
+    background: #172554 !important;
+    color: #ffffff !important;
+    border-bottom-right-radius: 4px !important;
+}
+
+.message-assistant .message-content {
+    background: #ffffff !important;
+    color: #334155 !important;
+    border: 1px solid #e2e8f0 !important;
+    border-bottom-left-radius: 4px !important;
+}
+
+.message-avatar {
+    width: 26px !important;
+    height: 26px !important;
+    border-radius: 8px !important;
+    background: #e0e7ff !important;
+    color: #4338ca !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 12px !important;
+    flex-shrink: 0 !important;
+}
+
+.campus360-ai-input-area {
+    padding: 12px 14px !important;
+    background: #ffffff !important;
+    border-top: 1px solid #e2e8f0 !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+}
+
+.campus360-ai-input {
+    flex: 1 !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 10px !important;
+    padding: 10px 12px !important;
+    font-size: 12px !important;
+    outline: none !important;
+    resize: none !important;
+}
+
+.campus360-ai-send {
+    width: 38px !important;
+    height: 38px !important;
+    border: none !important;
+    border-radius: 10px !important;
+    background: #172554 !important;
+    color: #ffffff !important;
+    cursor: pointer !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 14px !important;
+}
+
+.campus360-ai-send[disabled] {
+    opacity: 0.4 !important;
+    cursor: not-allowed !important;
+}
+
+/* Full Window Overrides */
+.campus360-ai-full-window-shell {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    background: #ffffff !important;
+    z-index: 1000000 !important;
+    display: flex !important;
+}</css>
+        <data_table>sp_instance</data_table>
+        <demo_data/>
+        <description/>
+        <docs/>
+        <field_list/>
+        <has_preview>false</has_preview>
+        <id>campus360_ai_assistant</id>
+        <internal>false</internal>
+        <link><![CDATA[function link(scope, element, attrs, controller) {
+  
+}]]></link>
+        <name>Campus360 AI Assistant</name>
+        <option_schema/>
+        <public>false</public>
+        <roles/>
+        <script><![CDATA[(function() {
+
+    data.response = '';
+    data.error = '';
+
+    if (!input) return;
+
+    if (input.action === 'clear') {
+        data.response = 'Chat cleared successfully.';
+        return;
+    }
+
+    if (input.action !== 'ask') return;
+
+    var prompt = String(input.prompt || '').trim();
+    var conversationId = String(input.conversationId || '').trim();
+
+    if (!prompt) {
+        data.error = 'Please enter a question.';
+        return;
+    }
+
+    /*
+     * ============================================================
+     * USER ROLE & IDENTITY RESOLUTION
+     * ============================================================
+     */
+    var userRole = 'student'; // 'student', 'tpo', 'trainer'
+    var requestedRole = ($sp.getParameter('role') || input.role || '').toLowerCase();
+    var pageId = ($sp.getParameter('id') || '').toLowerCase();
+
+    if (requestedRole === 'tpo' || pageId.indexOf('tpo') !== -1) {
+        userRole = 'tpo';
+    } else if (requestedRole === 'trainer' || pageId.indexOf('trainer') !== -1) {
+        userRole = 'trainer';
+    }
+
+    // Resolve Student Record (Prioritize URL parameter 'student' e.g. STU_TEST_001)
+    var studentSysId = '';
+    var studentName = 'Test Student Campus360';
+    var studentId = 'STU_TEST_001';
+
+    var reqStudent = $sp.getParameter('student') || input.student || 'STU_TEST_001';
+    var stuGR = new GlideRecord('x_snc_campus360_student_master');
+
+    if (reqStudent) {
+        stuGR.addQuery('student_id', reqStudent);
+        stuGR.query();
+        if (stuGR.next()) {
+            studentSysId = stuGR.getUniqueValue();
+            studentName = stuGR.getValue('student_name') || 'Student';
+            studentId = stuGR.getValue('student_id') || reqStudent;
+        } else {
+            stuGR = new GlideRecord('x_snc_campus360_student_master');
+            if (stuGR.get(reqStudent)) {
+                studentSysId = stuGR.getUniqueValue();
+                studentName = stuGR.getValue('student_name') || 'Student';
+                studentId = stuGR.getValue('student_id') || reqStudent;
+            }
+        }
+    }
+
+    if (!studentSysId) {
+        stuGR = new GlideRecord('x_snc_campus360_student_master');
+        stuGR.addQuery('student_id', 'STU_TEST_001');
+        stuGR.query();
+        if (stuGR.next()) {
+            studentSysId = stuGR.getUniqueValue();
+            studentName = stuGR.getValue('student_name') || 'Test Student Campus360';
+            studentId = 'STU_TEST_001';
+        }
+    }
+
+    // Resolve Trainer Record (Prioritize URL parameter 'trainer' e.g. TR001)
+    var trainerSysId = '';
+    var trainerName = 'Dr. Anil Varma';
+    var reqTrainer = $sp.getParameter('trainer') || input.trainer || 'TR001';
+    var trGR = new GlideRecord('x_snc_campus360_trainer_master');
+
+    if (reqTrainer) {
+        trGR.addQuery('trainer_id', reqTrainer);
+        trGR.query();
+        if (trGR.next()) {
+            trainerSysId = trGR.getUniqueValue();
+            trainerName = trGR.getValue('trainer_name') || 'Trainer';
+        } else {
+            trGR = new GlideRecord('x_snc_campus360_trainer_master');
+            if (trGR.get(reqTrainer)) {
+                trainerSysId = trGR.getUniqueValue();
+                trainerName = trGR.getValue('trainer_name') || 'Trainer';
+            }
+        }
+    }
+
+    if (!trainerSysId) {
+        trGR = new GlideRecord('x_snc_campus360_trainer_master');
+        trGR.addQuery('trainer_id', 'TR001');
+        trGR.query();
+        if (trGR.next()) {
+            trainerSysId = trGR.getUniqueValue();
+            trainerName = trGR.getValue('trainer_name') || 'Dr. Anil Varma';
+        }
+    }
+
+    var lowerPrompt = prompt.toLowerCase();
+    var responseMessage = '';
+
+    /*
+     * ============================================================
+     * 1. CGPA FILTERING QUERY (TPO / TRAINER / ALL ROLES)
+     * e.g. "students who have cgpa greater than 8", "cgpa with 8", "cgpa > 7.5"
+     * ============================================================
+     */
+    if (lowerPrompt.indexOf('cgpa') !== -1 || lowerPrompt.indexOf('gpa') !== -1) {
+        
+        var minCgpa = 8.0;
+        var cgpaMatch = lowerPrompt.match(/(?:greater than|above|with|>=|>|higher than|\s)(\d+(?:\.\d+)?)/);
+        if (cgpaMatch && cgpaMatch[1]) {
+            minCgpa = parseFloat(cgpaMatch[1]);
+        }
+
+        var allStudentGR = new GlideRecord('x_snc_campus360_student_master');
+        allStudentGR.query();
+
+        var matchedStudents = [];
+        while (allStudentGR.next()) {
+            var valStr = allStudentGR.getValue('cgpa') || allStudentGR.getValue('gpa') || '0';
+            var valNum = parseFloat(valStr);
+            if (valNum >= minCgpa) {
+                matchedStudents.push({
+                    name: allStudentGR.getValue('student_name') || 'Student Candidate',
+                    id: allStudentGR.getValue('student_id') || 'N/A',
+                    cgpa: valStr,
+                    cgpaNum: valNum,
+                    branch: (allStudentGR.getValue('branch') || allStudentGR.getValue('department') || 'CSE').toUpperCase(),
+                    email: allStudentGR.getValue('email') || ''
+                });
+            }
+        }
+
+        matchedStudents.sort(function(a, b) { return b.cgpaNum - a.cgpaNum; });
+
+        var cgpaList = [];
+        for (var cIdx = 0; cIdx < matchedStudents.length && cIdx < 15; cIdx++) {
+            var stItem = matchedStudents[cIdx];
+            cgpaList.push((cIdx + 1) + '. **' + stItem.name + '** (`' + stItem.id + '`) - CGPA: **' + stItem.cgpa + '** | Branch: `' + stItem.branch + '`');
+        }
+
+        responseMessage = '### ]]>🎓<![CDATA[ Student List with CGPA ≥ ' + minCgpa.toFixed(1) + ' (' + matchedStudents.length + ' Students Found)\n\n' +
+            'Here are the top performing student profiles in Campus360:\n\n' +
+            (cgpaList.length > 0 ? cgpaList.join('\n') : 'No student records found with CGPA ≥ ' + minCgpa.toFixed(1) + '.');
+    }
+
+    /*
+     * ============================================================
+     * 2. SPECIFIC OPPORTUNITY APPLICANTS QUERY (TPO / ALL ROLES)
+     * e.g. "Tell me how many students applied for Data analyst intern opportunity"
+     * ============================================================
+     */
+    else if (lowerPrompt.indexOf('applied') !== -1 || lowerPrompt.indexOf('applicant') !== -1 || (lowerPrompt.indexOf('students') !== -1 && lowerPrompt.indexOf('opportunit') !== -1)) {
+        
+        var targetOppGR = new GlideRecord('x_snc_campus360_placement_opportunity');
+        targetOppGR.orderByDesc('sys_created_on');
+        targetOppGR.query();
+
+        var matchedOpp = null;
+        var oppStopWords = ['tell','me','how','many','students','student','applied','for','the','a','an','opportunity','drive','placement','company','job','role','internship','please','show','count','what','list','which','who'];
+        var oppTokens = lowerPrompt.split(/\s+/).filter(function(t) {
+            return t.length > 2 && oppStopWords.indexOf(t) === -1;
+        });
+
+        while (targetOppGR.next()) {
+            var title = (targetOppGR.getValue('opportunity_title') || targetOppGR.getValue('title') || targetOppGR.getValue('job_role') || '').toLowerCase();
+            var oppNum = (targetOppGR.getValue('opportunity_id') || targetOppGR.getValue('number') || '').toLowerCase();
+            var compName = (targetOppGR.getDisplayValue('company') || '').toLowerCase();
+
+            var matchFound = false;
+            for (var k = 0; k < oppTokens.length; k++) {
+                if (title.indexOf(oppTokens[k]) !== -1 || oppNum.indexOf(oppTokens[k]) !== -1 || compName.indexOf(oppTokens[k]) !== -1) {
+                    matchFound = true;
+                    break;
+                }
+            }
+
+            if (matchFound) {
+                matchedOpp = {
+                    sys_id: targetOppGR.getUniqueValue(),
+                    title: targetOppGR.getValue('opportunity_title') || targetOppGR.getValue('title') || targetOppGR.getValue('job_role') || 'Placement Drive',
+                    oppId: targetOppGR.getValue('opportunity_id') || 'OPP',
+                    company: targetOppGR.getDisplayValue('company') || 'Partner Recruiter'
+                };
+                break;
+            }
+        }
+
+        if (matchedOpp) {
+            var appCountGR = new GlideRecord('x_snc_campus360_student_application');
+            appCountGR.addQuery('opportunity', matchedOpp.sys_id);
+            appCountGR.query();
+
+            var totalApplicants = appCountGR.getRowCount();
+            var applicantList = [];
+
+            while (appCountGR.next()) {
+                var sSysId = appCountGR.getValue('student');
+                var sName = appCountGR.getDisplayValue('student') || 'Student Candidate';
+                var sCgpa = '';
+
+                var sMasterGR = new GlideRecord('x_snc_campus360_student_master');
+                if (sMasterGR.get(sSysId)) {
+                    sName = sMasterGR.getValue('student_name') || sName;
+                    sCgpa = sMasterGR.getValue('cgpa') ? ' | CGPA: ' + sMasterGR.getValue('cgpa') : '';
+                }
+
+                var status = appCountGR.getDisplayValue('status') || 'Applied';
+                applicantList.push('- **' + sName + '** (' + status + sCgpa + ')');
+            }
+
+            responseMessage = '### ]]>📄<![CDATA[ Application Details for "' + matchedOpp.title + '" (' + matchedOpp.company + ')\n\n' +
+                '**Opportunity ID:** `' + matchedOpp.oppId + '` | **Total Enrolled Applicants:** **' + totalApplicants + ' Students**\n\n' +
+                (applicantList.length > 0 ? '**Applicant Students List:**\n' + applicantList.join('\n') : 'No students have applied for this drive yet.');
+        } else {
+            var allOppGR = new GlideRecord('x_snc_campus360_placement_opportunity');
+            allOppGR.setLimit(10);
+            allOppGR.query();
+
+            var driveSummary = [];
+            while (allOppGR.next()) {
+                var driveSysId = allOppGR.getUniqueValue();
+                var driveTitle = allOppGR.getValue('opportunity_title') || allOppGR.getValue('title') || 'Placement Drive';
+                var driveComp = allOppGR.getDisplayValue('company') || 'Partner Recruiter';
+
+                var driveAppGR = new GlideRecord('x_snc_campus360_student_application');
+                driveAppGR.addQuery('opportunity', driveSysId);
+                driveAppGR.query();
+
+                driveSummary.push('- **' + driveTitle + '** (' + driveComp + '): **' + driveAppGR.getRowCount() + ' applicants**');
+            }
+
+            responseMessage = '### ]]>📄<![CDATA[ Placement Opportunities Applicant Breakdown\n\n' +
+                'Here is the applicant count breakdown for placement drives:\n\n' +
+                driveSummary.join('\n');
+        }
+    }
+
+    /*
+     * ============================================================
+     * 3. STUDENT READINESS & SKILL GAP QUERY
+     * e.g. "my skill gap", "readiness", "how ready am i"
+     * ============================================================
+     */
+    else if (userRole === 'student' && (lowerPrompt.indexOf('skill gap') !== -1 || lowerPrompt.indexOf('readiness') !== -1 || lowerPrompt.indexOf('ready') !== -1 || lowerPrompt.indexOf('intelligence') !== -1)) {
+        
+        var intelGR = new GlideRecord('x_snc_campus360_placement_intelligence');
+        intelGR.addQuery('student', studentSysId);
+        intelGR.query();
+
+        if (intelGR.next()) {
+            var score = intelGR.getValue('readiness_score') || '75';
+            var skillGap = intelGR.getValue('primary_skill_gap') || 'Communication';
+            var bottleneck = intelGR.getValue('bottleneck_stage') || 'Interviews';
+            var risk = intelGR.getValue('risk_level') || 'Medium';
+            var partScore = intelGR.getValue('participation_score') || '85';
+            var missedOpp = intelGR.getValue('missed_opportunities') || '1';
+            var summaryText = intelGR.getValue('skill_gap_summary') || 'Communication needs improvement.';
+            var actionText = intelGR.getValue('recommended_action') || 'Engage in targeted communication skills training.';
+
+            responseMessage = '### ]]>📊<![CDATA[ Your Placement Readiness & Skill Intelligence\n\n' +
+                '**Student:** ' + studentName + ' (`' + studentId + '`)\n' +
+                '- **Overall Readiness Score:** **' + score + ' / 100** (Risk Level: `' + risk + '`)\n' +
+                '- **Primary Skill Gap:** **' + skillGap + '**\n' +
+                '- **Bottleneck Stage:** **' + bottleneck + '**\n' +
+                '- **Participation Score:** **' + partScore + ' / 100**\n' +
+                '- **Missed Opportunities:** **' + missedOpp + '**\n\n' +
+                '**Skill Gap Summary:**\n' + summaryText + '\n\n' +
+                '**Recommended Action:**\n' + actionText;
+        } else {
+            responseMessage = '### ]]>📊<![CDATA[ Placement Readiness Summary\n\n' +
+                '**Student:** ' + studentName + ' (`' + studentId + '`)\n' +
+                '- **Overall Readiness Score:** **75 / 100** (Risk Level: `Medium`)\n' +
+                '- **Primary Skill Gap:** **Communication**\n' +
+                '- **Bottleneck Stage:** **Interviews**';
+        }
+    }
+
+    /*
+     * ============================================================
+     * 4. MOCK INTERVIEWS QUERY (STUDENT & TRAINER & TPO)
+     * e.g. "how many mock interviews i requested for"
+     * ============================================================
+     */
+    else if (lowerPrompt.indexOf('mock') !== -1 || lowerPrompt.indexOf('requested') !== -1 || lowerPrompt.indexOf('slot') !== -1) {
+        
+        var mockGR = new GlideRecord('x_snc_campus360_mock_interview');
+        if (userRole === 'student' && studentSysId) {
+            mockGR.addQuery('student', studentSysId);
+        } else if (userRole === 'trainer' && trainerSysId) {
+            mockGR.addQuery('trainer', trainerSysId);
+        }
+        mockGR.query();
+
+        var totalMocks = mockGR.getRowCount();
+        var mockList = [];
+        var count = 0;
+
+        while (mockGR.next() && count < 8) {
+            var trName = mockGR.getDisplayValue('trainer') || 'Assigned Trainer';
+            var stName = mockGR.getDisplayValue('student') || 'Student';
+            var topic = mockGR.getValue('topic') || mockGR.getValue('interview_type') || 'Technical Practice';
+            var sDate = mockGR.getDisplayValue('scheduled_date') || mockGR.getDisplayValue('sys_created_on') || 'Scheduled';
+            var status = mockGR.getDisplayValue('status') || 'Pending';
+
+            if (userRole === 'student') {
+                mockList.push('- **Topic: ' + topic + '** with Trainer **' + trName + '** (Scheduled: ' + sDate + ' | Status: `' + status + '`)');
+            } else {
+                mockList.push('- Student: **' + stName + '** - Topic: *' + topic + '* (Scheduled: ' + sDate + ' | Status: `' + status + '`)');
+            }
+            count++;
+        }
+
+        responseMessage = '### ]]>🗓<![CDATA[️ Mock Interview Requests (' + totalMocks + ' Total Sessions)\n\n' +
+            'There are **' + totalMocks + ' practice session(s)** recorded:\n\n' +
+            (mockList.length > 0 ? mockList.join('\n') : '0 mock interview requests found.');
+    }
+
+    /*
+     * ============================================================
+     * 5. PROGRAM ENROLLMENT QUERY (TPO / TRAINER / ALL ROLES)
+     * e.g. "Can tell me students enrolled in Problem solving training program"
+     * ============================================================
+     */
+    else if (lowerPrompt.indexOf('enrolled') !== -1 || lowerPrompt.indexOf('enrollment') !== -1 || (lowerPrompt.indexOf('students') !== -1 && lowerPrompt.indexOf('program') !== -1)) {
+        
+        var progGR = new GlideRecord('x_snc_campus360_training_program');
+        progGR.query();
+
+        var matchedProg = null;
+        var stopWords = ['can','tell','me','students','student','are','enrolled','enrollment','in','the','a','an','training','program','course','batch','please','show','count','what','which','who'];
+        var tokens = lowerPrompt.split(/\s+/).filter(function(t) {
+            return t.length > 2 && stopWords.indexOf(t) === -1;
+        });
+
+        while (progGR.next()) {
+            var pName = (progGR.getValue('training_name') || progGR.getValue('name') || '').toLowerCase();
+            var pSkill = (progGR.getValue('skill_area') || '').toLowerCase();
+            var pCode = (progGR.getValue('training_id') || '').toLowerCase();
+
+            var matchFound = false;
+            for (var k = 0; k < tokens.length; k++) {
+                if (pName.indexOf(tokens[k]) !== -1 || pSkill.indexOf(tokens[k]) !== -1 || pCode.indexOf(tokens[k]) !== -1) {
+                    matchFound = true;
+                    break;
+                }
+            }
+
+            if (matchFound) {
+                matchedProg = {
+                    sys_id: progGR.getUniqueValue(),
+                    title: progGR.getValue('training_name') || progGR.getValue('name') || 'Training Program',
+                    skill: progGR.getValue('skill_area') || 'General',
+                    trainer: progGR.getDisplayValue('trainer') || 'Assigned Trainer'
+                };
+                break;
+            }
+        }
+
+        if (matchedProg) {
+            var enrollGR = new GlideRecord('x_snc_campus360_training_enrollment');
+            enrollGR.addQuery('training_program', matchedProg.sys_id);
+            enrollGR.query();
+
+            var studentList = [];
+            while (enrollGR.next()) {
+                var sSysId = enrollGR.getValue('student');
+                var sDisplay = enrollGR.getDisplayValue('student') || 'Enrolled Student';
+                
+                var sMasterGR = new GlideRecord('x_snc_campus360_student_master');
+                if (sMasterGR.get(sSysId)) {
+                    sDisplay = sMasterGR.getValue('student_name') || sDisplay;
+                }
+                studentList.push('- **' + sDisplay + '**');
+            }
+
+            responseMessage = '### ]]>🎓<![CDATA[ Enrollment Details: "' + matchedProg.title + '"\n\n' +
+                '**Skill Domain:** ' + matchedProg.skill + ' | **Trainer:** ' + matchedProg.trainer + '\n\n' +
+                '**Total Enrolled Students:** **' + enrollGR.getRowCount() + ' Students**\n\n' +
+                (studentList.length > 0 ? '**Enrolled Student Roster:**\n' + studentList.join('\n') : 'No students are currently enrolled in this training program.');
+        } else {
+            var allProgGR = new GlideRecord('x_snc_campus360_training_program');
+            allProgGR.setLimit(10);
+            allProgGR.query();
+
+            var progSummary = [];
+            while (allProgGR.next()) {
+                var pSysId = allProgGR.getUniqueValue();
+                var pTitle = allProgGR.getValue('training_name') || allProgGR.getValue('name') || 'Training Program';
+                
+                var pEnrollGR = new GlideRecord('x_snc_campus360_training_enrollment');
+                pEnrollGR.addQuery('training_program', pSysId);
+                pEnrollGR.query();
+
+                progSummary.push('- **' + pTitle + '**: **' + pEnrollGR.getRowCount() + ' enrolled students**');
+            }
+
+            responseMessage = '### ]]>🎓<![CDATA[ Campus360 Training Programs Enrollment Overview\n\n' +
+                'Here is the enrollment count for active training programs:\n\n' +
+                progSummary.join('\n');
+        }
+    }
+
+    /*
+     * ============================================================
+     * 6. TOP 2 / RECENTLY PUBLISHED OPPORTUNITIES
+     * ============================================================
+     */
+    else if (lowerPrompt.indexOf('top 2') !== -1 || lowerPrompt.indexOf('top two') !== -1 || (lowerPrompt.indexOf('recent') !== -1 && lowerPrompt.indexOf('opportunit') !== -1)) {
+        var topOppGR = new GlideRecord('x_snc_campus360_placement_opportunity');
+        topOppGR.orderByDesc('sys_created_on');
+        topOppGR.setLimit(2);
+        topOppGR.query();
+
+        var topOppList = [];
+        var idx = 1;
+
+        while (topOppGR.next()) {
+            var cName = topOppGR.getDisplayValue('company') || 'Partner Recruiter';
+            var role = topOppGR.getValue('opportunity_title') || topOppGR.getValue('title') || topOppGR.getValue('job_role') || 'Placement Drive';
+            var ctc = topOppGR.getValue('ctc_stipend') || topOppGR.getValue('ctc_package') || 'As per norms';
+            var deadline = topOppGR.getDisplayValue('application_deadline') || topOppGR.getDisplayValue('deadline') || 'Open';
+            topOppList.push(idx + '. **' + role + '** at **' + cName + '**\n   - **Package:** ' + ctc + '\n   - **Deadline:** ' + deadline);
+            idx++;
+        }
+
+        if (topOppList.length > 0) {
+            responseMessage = '### ]]>💼<![CDATA[ Top 2 Recently Published Opportunities\n\n' + topOppList.join('\n\n');
+        } else {
+            responseMessage = 'No published placement opportunities were found in Campus360.';
+        }
+    }
+
+    /*
+     * ============================================================
+     * 7. GENERAL PLACEMENT OPPORTUNITIES
+     * ============================================================
+     */
+    else if (lowerPrompt.indexOf('opportunit') !== -1 || lowerPrompt.indexOf('drive') !== -1) {
+        var oppGR = new GlideRecord('x_snc_campus360_placement_opportunity');
+        oppGR.orderByDesc('sys_created_on');
+        oppGR.setLimit(10);
+        oppGR.query();
+
+        var oppList = [];
+        while (oppGR.next()) {
+            var cName = oppGR.getDisplayValue('company') || 'Partner Company';
+            var role = oppGR.getValue('opportunity_title') || oppGR.getValue('title') || oppGR.getValue('job_role') || 'Placement Drive';
+            var ctc = oppGR.getValue('ctc_stipend') || oppGR.getValue('ctc_package') || 'As per norms';
+            var deadline = oppGR.getDisplayValue('application_deadline') || oppGR.getDisplayValue('deadline') || 'Open';
+            oppList.push('- **' + role + '** at **' + cName + '** (CTC: ' + ctc + ' | Deadline: ' + deadline + ')');
+        }
+
+        responseMessage = '### ]]>💼<![CDATA[ Active Campus Placement Opportunities (' + oppGR.getRowCount() + ' Drives)\n\n' +
+            oppList.join('\n');
+    }
+
+    /*
+     * ============================================================
+     * 8. GROQ / AI FALLBACK
+     * ============================================================
+     */
+    else {
+        try {
+            var aiService = new x_snc_campus360.Campus360AIService();
+            var rawResult = aiService.processAIMessage(prompt, conversationId);
+            var parsedResult = JSON.parse(rawResult);
+            responseMessage = parsedResult.response || 'Campus360 AI completed your request.';
+        } catch (groqEx) {
+            responseMessage = '### ✦ Campus360 AI Assistant\n\nHello **' + (userRole === 'student' ? studentName : (userRole === 'trainer' ? trainerName : 'TPO Administrator')) + '**!\n\nAsk me questions like:\n- *"Tell me how many students applied for Data Analyst Intern opportunity"* \n- *"Tell me list of students who have cgpa greater than 8"* \n- *"Can tell me students enrolled in Problem solving training program?"* \n- *"What are top 2 recently published opportunities?"*';
+        }
+    }
+
+    data.response = responseMessage;
+
+})();]]></script>
+        <servicenow>false</servicenow>
+        <sys_class_name>sp_widget</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-24 09:05:24</sys_created_on>
+        <sys_id>c4ae634574e703107f4410c9fee0cde5</sys_id>
+        <sys_mod_count>14</sys_mod_count>
+        <sys_name>Campus360 AI Assistant</sys_name>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name>sp_widget_c4ae634574e703107f4410c9fee0cde5</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-30 11:52:59</sys_updated_on>
+        <template><![CDATA[<div
+    class="campus360-ai"
+    ng-class="{
+        'campus360-ai-full-window':
+            c.isFullWindow
+    }">
+
+
+    <!-- ==================================================
+         FLOATING LAUNCHER
+         ================================================== -->
+
+    <button
+        class="campus360-ai-launcher"
+        ng-if="!c.isOpen"
+        ng-click="c.openAssistant()"
+        aria-label="Open Campus360 AI">
+
+        <span class="launcher-icon">
+            ✦
+        </span>
+
+    </button>
+
+
+    <!-- ==================================================
+         FULL WINDOW
+         ================================================== -->
+
+    <div
+        class="campus360-ai-full-window-shell"
+        ng-if="c.isOpen && c.isFullWindow">
+
+
+        <!-- ==================================================
+             LEFT SIDEBAR
+             ================================================== -->
+
+        <aside class="campus360-ai-sidebar">
+
+
+            <div class="sidebar-header">
+
+                <div class="sidebar-brand">
+
+                    <div class="sidebar-logo">
+                        C
+                    </div>
+
+                    <div>
+
+                        <div class="sidebar-title">
+                            Campus360 AI
+                        </div>
+
+                        <div class="sidebar-subtitle">
+                            Placement Intelligence
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <button
+                    class="sidebar-new-chat"
+                    ng-click="c.newChat()"
+                    ng-disabled="c.loading">
+
+                    + New chat
+
+                </button>
+
+            </div>
+
+
+            <!-- ==================================================
+                 CONVERSATIONS
+                 ================================================== -->
+
+            <div class="conversation-section">
+
+                <div class="conversation-section-title">
+                    Recent chats
+                </div>
+
+
+                <div
+                    class="conversation-list"
+                    ng-if="c.conversations.length > 0">
+
+
+                    <div
+                        class="conversation-item"
+                        ng-repeat="conversation in c.conversations track by conversation.id"
+                        ng-class="{
+                            'conversation-active':
+                                conversation.id === c.conversationId
+                        }"
+                        ng-click="c.openConversation(conversation)">
+
+
+                        <div class="conversation-icon">
+                            ◌
+                        </div>
+
+
+                        <div class="conversation-info">
+
+                            <div class="conversation-title">
+
+                                {{conversation.title}}
+
+                            </div>
+
+                            <div class="conversation-date">
+
+                                {{conversation.updated | date:'MMM d, h:mm a'}}
+
+                            </div>
+
+                        </div>
+
+
+                        <button
+                            class="conversation-delete"
+                            ng-click="c.deleteConversation(conversation, $event)"
+                            aria-label="Delete conversation">
+
+                            ×
+
+                        </button>
+
+
+                    </div>
+
+
+                </div>
+
+
+                <div
+                    class="conversation-empty"
+                    ng-if="c.conversations.length === 0">
+
+                    No previous conversations yet.
+
+                </div>
+
+            </div>
+
+
+            <!-- ==================================================
+                 SIDEBAR FOOTER
+                 ================================================== -->
+
+            <div class="sidebar-footer">
+
+                <div>
+                    Campus360 Placement Portal
+                </div>
+
+                <div>
+                    AI Assistant
+                </div>
+
+            </div>
+
+
+        </aside>
+
+
+        <!-- ==================================================
+             RIGHT CHAT AREA
+             ================================================== -->
+
+        <main class="campus360-ai-full-chat">
+
+
+            <!-- ==================================================
+                 FULL WINDOW HEADER
+                 ================================================== -->
+
+            <div class="full-chat-header">
+
+
+                <div>
+
+                    <div class="full-chat-title">
+                        Campus360 AI
+                    </div>
+
+                    <div class="full-chat-subtitle">
+
+                        Your placement &amp; career assistant
+
+                        <span class="full-online">
+                            ● Online
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <div class="full-header-actions">
+
+
+                    <button
+                        class="full-header-button"
+                        ng-click="c.clearChat()"
+                        ng-disabled="c.loading">
+
+                        Clear chat
+
+                    </button>
+
+
+                    <button
+                        class="full-header-button"
+                        ng-click="c.closeFullWindow()">
+
+                        Minimize
+
+                    </button>
+
+
+                    <button
+                        class="full-header-close"
+                        ng-click="c.closeAssistant()">
+
+                        ×
+
+                    </button>
+
+
+                </div>
+
+
+            </div>
+
+
+            <!-- ==================================================
+                 FULL WINDOW CHAT BODY
+                 ================================================== -->
+
+            <div
+                id="campus360-ai-chat-body"
+                class="campus360-ai-full-chat-body">
+
+
+                <!-- ==================================================
+                     WELCOME
+                     ================================================== -->
+
+                <div
+                    class="campus360-ai-welcome"
+                    ng-if="c.messages.length === 0">
+
+
+                    <div class="welcome-icon">
+                        ✦
+                    </div>
+
+
+                    <h2>
+                        How can I help you?
+                    </h2>
+
+
+                    <p>
+                        Ask about placements, opportunities,
+                        training, applications, interviews,
+                        or your placement readiness.
+                    </p>
+
+
+                    <div class="campus360-ai-suggestions">
+
+
+                        <button
+                            ng-click="c.useSuggestion('What placement opportunities are available for me?')">
+
+                            <span class="suggestion-icon">
+                                ↗
+                            </span>
+
+                            Placement opportunities
+
+                        </button>
+
+
+                        <button
+                            ng-click="c.useSuggestion('What training programs would be useful for me?')">
+
+                            <span class="suggestion-icon">
+                                ◈
+                            </span>
+
+                            Training recommendations
+
+                        </button>
+
+
+                        <button
+                            ng-click="c.useSuggestion('How ready am I for placements?')">
+
+                            <span class="suggestion-icon">
+                                ◎
+                            </span>
+
+                            Placement readiness
+
+                        </button>
+
+
+                        <button
+                            ng-click="c.useSuggestion('What can I improve in my placement preparation?')">
+
+                            <span class="suggestion-icon">
+                                ↑
+                            </span>
+
+                            Improve my preparation
+
+                        </button>
+
+
+                    </div>
+
+                </div>
+
+
+                <!-- ==================================================
+                     FULL WINDOW MESSAGES
+                     ================================================== -->
+
+                <div
+                    class="campus360-ai-messages"
+                    ng-if="c.messages.length > 0">
+
+
+                    <div
+                        class="campus360-ai-message"
+                        ng-repeat="message in c.messages track by $index"
+                        ng-class="'message-' + message.role">
+
+
+                        <!-- ASSISTANT AVATAR -->
+
+                        <div
+                            class="message-avatar"
+                            ng-if="message.role === 'assistant'">
+
+                            ✦
+
+                        </div>
+
+
+                        <!-- USER MESSAGE -->
+
+                        <div
+                            class="message-content"
+                            ng-if="message.role === 'user'">
+
+                            {{message.content}}
+
+                        </div>
+
+
+                        <!-- ASSISTANT MESSAGE -->
+
+                        <div
+                            class="message-content campus360-ai-rich-response"
+                            ng-if="message.role === 'assistant'"
+                            ng-bind-html="message.displayContent">
+                        </div>
+
+
+                    </div>
+
+
+                    <!-- ==================================================
+                         LOADING
+                         ================================================== -->
+
+                    <div
+                        class="campus360-ai-message message-assistant"
+                        ng-if="c.loading">
+
+
+                        <div class="message-avatar">
+                            ✦
+                        </div>
+
+
+                        <div class="message-content loading-message">
+
+                            <span class="typing-dot"></span>
+
+                            <span class="typing-dot"></span>
+
+                            <span class="typing-dot"></span>
+
+                        </div>
+
+
+                    </div>
+
+
+                </div>
+
+
+                <!-- ==================================================
+                     ERROR
+                     ================================================== -->
+
+                <div
+                    class="campus360-ai-error"
+                    ng-if="c.error">
+
+                    {{c.error}}
+
+                </div>
+
+
+            </div>
+
+
+            <!-- ==================================================
+                 FULL WINDOW INPUT
+                 ================================================== -->
+
+            <div class="campus360-ai-full-input-area">
+
+
+                <textarea
+                    class="campus360-ai-input"
+                    ng-model="c.prompt"
+                    ng-keydown="c.handleKeyDown($event)"
+                    placeholder="Message Campus360 AI..."
+                    rows="1">
+                </textarea>
+
+
+                <button
+                    class="campus360-ai-send"
+                    ng-click="c.sendMessage()"
+                    ng-disabled="c.loading || !c.prompt || !c.prompt.trim()">
+
+                    ➤
+
+                </button>
+
+
+            </div>
+
+
+            <div class="campus360-ai-footer">
+
+                Campus360 AI • Press Enter to send
+
+            </div>
+
+
+        </main>
+
+
+    </div>
+
+
+    <!-- ==================================================
+         FLOATING CHAT PANEL
+         ================================================== -->
+
+    <div
+        class="campus360-ai-panel"
+        ng-if="c.isOpen && !c.isFullWindow">
+
+
+        <!-- ==================================================
+             HEADER
+             ================================================== -->
+
+        <div class="campus360-ai-header">
+
+
+            <div class="campus360-ai-brand">
+
+                <div class="campus360-ai-avatar">
+                    ✦
+                </div>
+
+
+                <div>
+
+                    <div class="campus360-ai-title">
+                        Campus360 AI
+                    </div>
+
+                    <div class="campus360-ai-subtitle">
+                        Your placement &amp; career assistant
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="campus360-ai-header-actions">
+
+
+                <span class="campus360-ai-status">
+
+                    <span class="status-dot"></span>
+
+                    Online
+
+                </span>
+
+
+                <!-- THREE DOTS -->
+
+                <button
+                    class="campus360-ai-menu-button"
+                    ng-click="c.toggleMenu()"
+                    aria-label="AI options">
+
+                    ⋮
+
+                </button>
+
+
+                <!-- CLOSE -->
+
+                <button
+                    class="campus360-ai-close"
+                    ng-click="c.closeAssistant()">
+
+                    ×
+
+                </button>
+
+
+            </div>
+
+
+            <!-- ==================================================
+                 MENU
+                 ================================================== -->
+
+            <div
+                class="campus360-ai-menu"
+                ng-if="c.isMenuOpen">
+
+
+                <button
+                    ng-click="c.openFullWindow()">
+
+                    <span>
+                        ↗
+                    </span>
+
+                    Open in full window
+
+                </button>
+
+
+                <button
+                    ng-click="c.clearChat()">
+
+                    <span>
+                        ⌫
+                    </span>
+
+                    Clear chat
+
+                </button>
+
+
+            </div>
+
+
+        </div>
+
+
+        <!-- ==================================================
+             FLOATING CHAT BODY
+             ================================================== -->
+
+        <div
+            id="campus360-ai-chat-body"
+            class="campus360-ai-chat-body">
+
+
+            <!-- ==================================================
+                 WELCOME
+                 ================================================== -->
+
+            <div
+                class="campus360-ai-welcome"
+                ng-if="c.messages.length === 0">
+
+
+                <div class="welcome-icon">
+                    ✦
+                </div>
+
+
+                <h3>
+                    How can I help you?
+                </h3>
+
+
+                <p>
+                    Ask me about opportunities, training,
+                    applications, interviews, or your
+                    placement readiness.
+                </p>
+
+
+                <div class="campus360-ai-suggestions">
+
+
+                    <button
+                        ng-click="c.useSuggestion('What placement opportunities are available for me?')">
+
+                        <span class="suggestion-icon">
+                            ↗
+                        </span>
+
+                        Placement opportunities
+
+                    </button>
+
+
+                    <button
+                        ng-click="c.useSuggestion('What training programs would be useful for me?')">
+
+                        <span class="suggestion-icon">
+                            ◈
+                        </span>
+
+                        Training recommendations
+
+                    </button>
+
+
+                    <button
+                        ng-click="c.useSuggestion('How ready am I for placements?')">
+
+                        <span class="suggestion-icon">
+                            ◎
+                        </span>
+
+                        Placement readiness
+
+                    </button>
+
+
+                    <button
+                        ng-click="c.useSuggestion('What can I improve in my placement preparation?')">
+
+                        <span class="suggestion-icon">
+                            ↑
+                        </span>
+
+                        Improve my preparation
+
+                    </button>
+
+
+                </div>
+
+            </div>
+
+
+            <!-- ==================================================
+                 FLOATING MESSAGES
+                 ================================================== -->
+
+            <div
+                class="campus360-ai-messages"
+                ng-if="c.messages.length > 0">
+
+
+                <div
+                    class="campus360-ai-message"
+                    ng-repeat="message in c.messages track by $index"
+                    ng-class="'message-' + message.role">
+
+
+                    <!-- ASSISTANT AVATAR -->
+
+                    <div
+                        class="message-avatar"
+                        ng-if="message.role === 'assistant'">
+
+                        ✦
+
+                    </div>
+
+
+                    <!-- USER MESSAGE -->
+
+                    <div
+                        class="message-content"
+                        ng-if="message.role === 'user'">
+
+                        {{message.content}}
+
+                    </div>
+
+
+                    <!-- ASSISTANT MESSAGE -->
+
+                    <div
+                        class="message-content campus360-ai-rich-response"
+                        ng-if="message.role === 'assistant'"
+                        ng-bind-html="message.displayContent">
+                    </div>
+
+
+                </div>
+
+
+                <!-- ==================================================
+                     LOADING
+                     ================================================== -->
+
+                <div
+                    class="campus360-ai-message message-assistant"
+                    ng-if="c.loading">
+
+
+                    <div class="message-avatar">
+                        ✦
+                    </div>
+
+
+                    <div class="message-content loading-message">
+
+                        <span class="typing-dot"></span>
+
+                        <span class="typing-dot"></span>
+
+                        <span class="typing-dot"></span>
+
+                    </div>
+
+
+                </div>
+
+
+            </div>
+
+
+            <!-- ==================================================
+                 ERROR
+                 ================================================== -->
+
+            <div
+                class="campus360-ai-error"
+                ng-if="c.error">
+
+                {{c.error}}
+
+            </div>
+
+
+        </div>
+
+
+        <!-- ==================================================
+             FLOATING INPUT
+             ================================================== -->
+
+        <div class="campus360-ai-input-area">
+
+
+            <textarea
+                class="campus360-ai-input"
+                ng-model="c.prompt"
+                ng-keydown="c.handleKeyDown($event)"
+                placeholder="Ask Campus360 AI..."
+                rows="1">
+            </textarea>
+
+
+            <button
+                class="campus360-ai-send"
+                ng-click="c.sendMessage()"
+                ng-disabled="c.loading || !c.prompt || !c.prompt.trim()">
+
+                ➤
+
+            </button>
+
+
+        </div>
+
+
+        <div class="campus360-ai-footer">
+
+            Campus360 AI • Press Enter to send
+
+        </div>
+
+
+    </div>
+
+
+</div>]]></template>
+    </sp_widget>
+</record_update>

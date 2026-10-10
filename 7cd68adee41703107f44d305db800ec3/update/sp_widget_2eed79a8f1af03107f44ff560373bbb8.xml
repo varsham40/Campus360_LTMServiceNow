@@ -1,0 +1,5531 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_widget">
+    <sp_widget action="INSERT_OR_UPDATE">
+        <category>custom</category>
+        <client_script><![CDATA[api.controller = function() {
+
+    /* =========================================================
+       CAMPUS360 TPO DASHBOARD CONTROLLER
+       ========================================================= */
+
+    var c = this;
+
+
+    /* =========================================================
+       VARIABLES
+       ========================================================= */
+
+    c.search = '';
+
+    c.loading = false;
+
+
+    /* =========================================================
+       REFRESH DASHBOARD
+       ========================================================= */
+
+    c.refreshDashboard = function() {
+
+        if (c.loading) {
+
+            return;
+
+        }
+
+
+        c.loading = true;
+
+
+        c.server.refresh().then(
+
+            function(response) {
+
+                c.loading = false;
+
+            },
+
+            function() {
+
+                c.loading = false;
+
+            }
+
+        );
+
+    };
+
+
+    /* =========================================================
+       REFRESH ALIAS
+       ========================================================= */
+
+    c.refresh = function() {
+
+        c.refreshDashboard();
+
+    };
+
+
+    /* =========================================================
+       GENERAL TPO NAVIGATION
+       ========================================================= */
+
+    c.goTo = function(page) {
+
+        if (!page) {
+
+            return;
+
+        }
+
+
+        window.location.href =
+            '?id=' +
+            encodeURIComponent(page);
+
+    };
+
+
+    /* =========================================================
+       SEARCH
+       =========================================================
+       The search box is currently visual.
+       We will connect it to actual TPO search functionality
+       when we build the search/AI widget.
+       ========================================================= */
+
+    c.clearSearch = function() {
+
+        c.search = '';
+
+    };
+
+};]]></client_script>
+        <controller_as>c</controller_as>
+        <css>/* ==========================================================================
+   ULTIMATE FULLSCREEN EDGE-TO-EDGE RESET (HIDES SERVICENOW TOP BANNER &amp; NAVBAR)
+   ========================================================================== */
+
+html, body, #sp-page, .sp-page-container, #page_content, .page, main {
+  width: 100% !important;
+  height: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  background-color: #f8fafc !important;
+}
+
+/* HIDE SERVICENOW TOP BANNER &amp; NAVBAR FOR ALL TPO PAGE ROOT CONTAINERS */
+body #sp-header,
+body .sp-header,
+body .sp-navbar,
+body #sp-nav-bar,
+body .sp-nav-bar,
+body header#sp-header,
+body header.sp-header,
+body header.navbar,
+body nav.navbar,
+body .navbar.sp-navbar,
+body .navbar.navbar-default,
+body .navbar.navbar-inverse,
+#sp-header,
+.sp-header,
+.sp-navbar,
+#responsiveNav,
+header#sp-header,
+header.sp-header,
+header.navbar,
+nav.navbar {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  min-height: 0 !important;
+  max-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* ZERO MARGIN &amp; PADDING ON SERVICENOW PAGE CONTAINERS */
+.page,
+#sp-page,
+#sp-main,
+.sp-page,
+.sp-main,
+.page-wrapper,
+.main-content,
+.container,
+.container-fluid,
+.row {
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+}
+
+/* FORCE ALL TPO APP ROOT CONTAINERS TO FULLSCREEN FIXED OVERLAY (COVERING TOP NAVBAR 100%) */
+.c360-app,
+.c360-page,
+.campus360-app,
+.campus360-company-app,
+.campus360-company-page,
+.campus360-interviews-app,
+.campus360-applications-app,
+.campus360-applications-page,
+.campus360-tpo-page,
+.campus360-opportunity-page,
+.campus360-tpo-layout,
+.campus360-tpo-app,
+.campus360-skill-page,
+.campus360-tpo-assessments,
+.campus360-skill-intel,
+.interviews-shell,
+.tpo-layout,
+.tpo-container,
+div[class*="campus360"],
+div[class*="c360"] {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  z-index: 99999 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  display: flex !important;
+  background: #f5f7fb !important;
+}
+
+/* ==========================================================================
+   SIDEBAR USER PROFILE CARD - BRIGHT WHITE TEXT FIX (CRITICAL)
+   ========================================================================== */
+
+.tpo-sidebar .sidebar-user,
+.tpo-sidebar .tpo-profile,
+.tpo-sidebar .tpo-profile-card,
+.sidebar-user,
+.tpo-profile-card {
+  margin: 14px 12px 8px !important;
+  padding: 10px 12px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  border: 1px solid #35285b !important;
+  border-radius: 14px !important;
+  background: linear-gradient(145deg, #1c1340, #21174a) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+}
+
+.tpo-sidebar .user-avatar,
+.tpo-sidebar .tpo-avatar,
+.tpo-sidebar .tpo-profile-avatar,
+.sidebar-user .user-avatar,
+.tpo-profile-card .tpo-profile-avatar {
+  width: 40px !important;
+  height: 40px !important;
+  min-width: 40px !important;
+  border-radius: 50% !important;
+  background: linear-gradient(135deg, #7540f4, #944ff5) !important;
+  color: #ffffff !important;
+  font-size: 11px !important;
+  font-weight: 950 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-shadow: 0 4px 12px rgba(117, 64, 244, 0.4) !important;
+}
+
+.tpo-sidebar .user-info,
+.tpo-sidebar .tpo-profile-text,
+.tpo-sidebar .tpo-profile-info,
+.sidebar-user .user-info,
+.tpo-profile-card .tpo-profile-info {
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+}
+
+.tpo-sidebar .user-name,
+.tpo-sidebar .sidebar-user strong,
+.tpo-sidebar .tpo-profile-info strong,
+.tpo-sidebar .tpo-profile-text strong,
+.sidebar-user .user-name,
+.sidebar-user strong,
+.tpo-profile-card strong {
+  font-size: 13px !important;
+  font-weight: 800 !important;
+  color: #ffffff !important; /* CRITICAL BRIGHT WHITE COLOR */
+}
+
+.tpo-sidebar .user-role,
+.tpo-sidebar .user-dept,
+.tpo-sidebar .tpo-role,
+.tpo-sidebar .sidebar-user span,
+.tpo-sidebar .tpo-profile-info span,
+.tpo-sidebar .tpo-profile-text span,
+.sidebar-user .user-role,
+.sidebar-user span,
+.tpo-profile-card span {
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  color: #bcaeff !important; /* LIGHT LAVENDER PURPLE COLOR */
+}
+
+/* SCOPE TOPBAR USER PROFILE EXCLUSIVELY TO TOPBAR */
+.topbar-user .topbar-user-info strong,
+.topbar-user-info strong {
+  font-size: 13px !important;
+  font-weight: 800 !important;
+  color: #0f172a !important;
+}
+
+.topbar-user .topbar-user-info span,
+.topbar-user-info span {
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  color: #64748b !important;
+}
+
+
+
+/* ==========================================================================
+   FAR RIGHT PAGE SCROLLBAR &amp; HIDE SIDEBAR SCROLLBAR (PERFECT FIX)
+   ========================================================================== */
+
+/* 1. HIDE ALL SCROLLBARS ON THE LEFT SIDEBAR / NAVBAR COMPLETELY */
+.tpo-sidebar,
+.tpo-sidebar *,
+.skill-sidebar,
+.skill-sidebar *,
+.sidebar-nav,
+.tpo-sidebar-nav,
+aside.tpo-sidebar {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+.tpo-sidebar::-webkit-scrollbar,
+.tpo-sidebar *::-webkit-scrollbar,
+.skill-sidebar::-webkit-scrollbar,
+.sidebar-nav::-webkit-scrollbar,
+.tpo-sidebar-nav::-webkit-scrollbar,
+aside.tpo-sidebar::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  background: transparent !important;
+}
+
+/* 2. MAKE MAIN PAGE CONTAINER WRAPPER SCROLLABLE ON FAR RIGHT */
+html, body, #sp-page, .sp-page-container, #page_content, .page, main {
+  width: 100% !important;
+  height: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  background-color: #f8fafc !important;
+}
+
+.campus360-tpo-layout,
+.tpo-layout,
+.tpo-container,
+.campus360-skill-intel,
+.tpo-dashboard-center {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  z-index: 9999 !important;
+  overflow: hidden !important;
+  display: flex !important;
+  background: #f8fafc !important;
+}
+
+.tpo-sidebar,
+.skill-sidebar,
+aside.tpo-sidebar {
+  width: 242px !important;
+  min-width: 242px !important;
+  max-width: 242px !important;
+  height: 100vh !important;
+  flex: 0 0 242px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  position: relative !important;
+  overflow-y: auto !important;
+  background: linear-gradient(180deg, #10092a 0%, #130d31 55%, #0d0822 100%) !important;
+  border-right: 1px solid #2b2247 !important;
+  color: #ffffff !important;
+  z-index: 100 !important;
+}
+
+/* MAIN CONTENT WRAPPER - SCROLLBAR FORCED TO FAR RIGHT BROWSER EDGE */
+.tpo-main-wrapper,
+.tpo-main,
+.main-content,
+.tpo-content {
+  flex: 1 1 auto !important;
+  height: 100vh !important;
+  max-height: 100vh !important;
+  overflow-y: scroll !important;
+  overflow-x: hidden !important;
+  background-color: #f8fafc !important;
+  min-width: 0 !important;
+  position: relative !important;
+}
+
+.tpo-content-container,
+.campus360-skill-page,
+.tpo-body {
+  height: auto !important;
+  min-height: 100% !important;
+  overflow: visible !important;
+}
+
+/* CUSTOM HIGH-VISIBILITY PURPLE SCROLLBAR ON THE FAR RIGHT */
+.tpo-main-wrapper::-webkit-scrollbar,
+.tpo-main::-webkit-scrollbar,
+.main-content::-webkit-scrollbar,
+.tpo-content::-webkit-scrollbar {
+  width: 10px !important;
+  display: block !important;
+}
+
+.tpo-main-wrapper::-webkit-scrollbar-track,
+.tpo-main::-webkit-scrollbar-track,
+.main-content::-webkit-scrollbar-track,
+.tpo-content::-webkit-scrollbar-track {
+  background: #f1f5f9 !important;
+  border-left: 1px solid #e2e8f0 !important;
+}
+
+.tpo-main-wrapper::-webkit-scrollbar-thumb,
+.tpo-main::-webkit-scrollbar-thumb,
+.main-content::-webkit-scrollbar-thumb,
+.tpo-content::-webkit-scrollbar-thumb {
+  background: #7c3aed !important;
+  border-radius: 5px !important;
+}
+
+.tpo-main-wrapper::-webkit-scrollbar-thumb:hover,
+.tpo-main::-webkit-scrollbar-thumb:hover,
+.main-content::-webkit-scrollbar-thumb:hover,
+.tpo-content::-webkit-scrollbar-thumb:hover {
+  background: #6d28d9 !important;
+}
+
+
+
+/* =========================================================
+   CAMPUS360 TPO FULL SCREEN EDGE-TO-EDGE RESET
+   ========================================================= */
+
+body #sp-header,
+body .sp-header,
+body .sp-navbar,
+body .navbar.sp-navbar,
+body #sp-nav-bar,
+body .sp-nav-bar,
+body header#sp-header,
+body header.sp-header,
+body .nav.navbar-nav {
+    display: none !important;
+}
+
+html, body {
+    width: 100% !important;
+    height: 100% !important;
+    min-width: 100% !important;
+    min-height: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    background: #f8fafc !important;
+}
+
+body .page,
+body #sp-page,
+body #sp-main,
+body .sp-page,
+body .sp-main,
+body main,
+body .container,
+body .container-fluid,
+body .row,
+body [class*="col-"] {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    border: none !important;
+}
+
+/* =========================================================&#13;
+   CAMPUS360 TPO DASHBOARD&#13;
+   ========================================================= */&#13;
+&#13;
+.campus360-app {&#13;
+  width: 100vw !important;&#13;
+  max-width: none !important;&#13;
+&#13;
+  position: relative !important;&#13;
+  left: 50% !important;&#13;
+  margin-left: -50vw !important;&#13;
+  margin-right: 0 !important;&#13;
+&#13;
+  min-height: 100vh;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  background: #f4f6fa;&#13;
+  color: #172033;&#13;
+&#13;
+  font-family:&#13;
+    Inter,&#13;
+    -apple-system,&#13;
+    BlinkMacSystemFont,&#13;
+    "Segoe UI",&#13;
+    Arial,&#13;
+    sans-serif;&#13;
+&#13;
+  -webkit-font-smoothing: antialiased;&#13;
+&#13;
+  box-sizing: border-box;&#13;
+}&#13;
+&#13;
+&#13;
+.campus360-app *,&#13;
+.campus360-app *:before,&#13;
+.campus360-app *:after {&#13;
+  box-sizing: border-box;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   SIDEBAR&#13;
+   ========================================================= */&#13;
+&#13;
+.campus360-sidebar {&#13;
+  width: 250px;&#13;
+  min-width: 250px;&#13;
+&#13;
+  min-height: 100vh;&#13;
+  height: 100vh;&#13;
+&#13;
+  background: #ffffff;&#13;
+&#13;
+  border-right: 1px solid #dce2eb;&#13;
+&#13;
+  display: flex;&#13;
+  flex-direction: column;&#13;
+&#13;
+  position: sticky;&#13;
+  top: 0;&#13;
+&#13;
+  z-index: 20;&#13;
+}&#13;
+&#13;
+&#13;
+.sidebar-brand {&#13;
+  height: 78px;&#13;
+&#13;
+  padding: 0 22px;&#13;
+&#13;
+  display: flex;&#13;
+  align-items: center;&#13;
+&#13;
+  gap: 12px;&#13;
+&#13;
+  border-bottom: 1px solid #edf0f5;&#13;
+}&#13;
+&#13;
+&#13;
+.brand-mark {&#13;
+  width: 40px;&#13;
+  height: 40px;&#13;
+&#13;
+  border-radius: 11px;&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      135deg,&#13;
+      #7c3aed,&#13;
+      #4f46e5&#13;
+    );&#13;
+&#13;
+  color: #ffffff;&#13;
+&#13;
+  display: flex;&#13;
+  align-items: center;&#13;
+  justify-content: center;&#13;
+&#13;
+  font-size: 21px;&#13;
+  font-weight: 900;&#13;
+&#13;
+  box-shadow:&#13;
+    0 6px 15px&#13;
+    rgba(124, 58, 237, 0.22);&#13;
+}&#13;
+&#13;
+&#13;
+.brand-name {&#13;
+  font-size: 18px;&#13;
+  font-weight: 850;&#13;
+&#13;
+  color: #111827;&#13;
+}&#13;
+&#13;
+&#13;
+.brand-subtitle {&#13;
+  margin-top: 2px;&#13;
+&#13;
+  font-size: 12px;&#13;
+&#13;
+  color: #64748b;&#13;
+&#13;
+  font-weight: 500;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   TPO PROFILE&#13;
+   ========================================================= */&#13;
+&#13;
+.student-mini-profile {&#13;
+  margin: 16px 14px 10px;&#13;
+&#13;
+  padding: 12px;&#13;
+&#13;
+  border: 1px solid #dddff0;&#13;
+&#13;
+  border-radius: 13px;&#13;
+&#13;
+  display: flex;&#13;
+  align-items: center;&#13;
+&#13;
+  gap: 10px;&#13;
+&#13;
+  text-decoration: none !important;&#13;
+&#13;
+  background: #faf9ff;&#13;
+}&#13;
+&#13;
+&#13;
+.student-avatar,&#13;
+.top-avatar {&#13;
+  border-radius: 50%;&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      135deg,&#13;
+      #8b5cf6,&#13;
+      #6366f1&#13;
+    );&#13;
+&#13;
+  color: #ffffff;&#13;
+&#13;
+  display: flex;&#13;
+  align-items: center;&#13;
+  justify-content: center;&#13;
+&#13;
+  font-weight: 850;&#13;
+}&#13;
+&#13;
+&#13;
+.student-avatar {&#13;
+  width: 38px;&#13;
+  height: 38px;&#13;
+&#13;
+  font-size: 12px;&#13;
+}&#13;
+&#13;
+&#13;
+.student-mini-info {&#13;
+  min-width: 0;&#13;
+&#13;
+  flex: 1;&#13;
+}&#13;
+&#13;
+&#13;
+.student-mini-name {&#13;
+  font-size: 14px;&#13;
+&#13;
+  font-weight: 750;&#13;
+&#13;
+  color: #111827;&#13;
+&#13;
+  white-space: nowrap;&#13;
+  overflow: hidden;&#13;
+  text-overflow: ellipsis;&#13;
+}&#13;
+&#13;
+&#13;
+.student-mini-id {&#13;
+  margin-top: 3px;&#13;
+&#13;
+  font-size: 11px;&#13;
+&#13;
+  color: #64748b;&#13;
+&#13;
+  font-weight: 500;&#13;
+}&#13;
+&#13;
+&#13;
+.profile-arrow {&#13;
+  color: #94a3b8;&#13;
+&#13;
+  font-size: 18px;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   NAV&#13;
+   ========================================================= */&#13;
+&#13;
+.campus360-nav {&#13;
+  padding: 5px 10px;&#13;
+&#13;
+  overflow-y: auto;&#13;
+&#13;
+  flex: 1;&#13;
+}&#13;
+&#13;
+&#13;
+.nav-section-title {&#13;
+  padding: 18px 11px 8px;&#13;
+&#13;
+  font-size: 10px;&#13;
+&#13;
+  letter-spacing: 0.12em;&#13;
+&#13;
+  font-weight: 850;&#13;
+&#13;
+  color: #64748b;&#13;
+}&#13;
+&#13;
+&#13;
+.nav-item {&#13;
+  position: relative;&#13;
+&#13;
+  display: flex;&#13;
+  align-items: center;&#13;
+&#13;
+  gap: 11px;&#13;
+&#13;
+  min-height: 43px;&#13;
+&#13;
+  padding: 9px 11px;&#13;
+&#13;
+  margin: 2px 0;&#13;
+&#13;
+  border-radius: 10px;&#13;
+&#13;
+  color: #334155;&#13;
+&#13;
+  font-size: 13px;&#13;
+&#13;
+  font-weight: 650;&#13;
+&#13;
+  text-decoration: none !important;&#13;
+&#13;
+  transition:&#13;
+    all 0.2s ease;&#13;
+}&#13;
+&#13;
+&#13;
+.nav-item:hover {&#13;
+  color: #5b21b6;&#13;
+&#13;
+  background: #f4f0ff;&#13;
+&#13;
+  transform: translateX(2px);&#13;
+}&#13;
+&#13;
+&#13;
+.nav-item.active {&#13;
+  color: #5b21b6;&#13;
+&#13;
+  background: #e9ddff;&#13;
+&#13;
+  font-weight: 800;&#13;
+}&#13;
+&#13;
+&#13;
+.nav-item.active:before {&#13;
+  content: "";&#13;
+&#13;
+  position: absolute;&#13;
+&#13;
+  left: 0;&#13;
+&#13;
+  top: 8px;&#13;
+&#13;
+  bottom: 8px;&#13;
+&#13;
+  width: 3px;&#13;
+&#13;
+  border-radius: 3px;&#13;
+&#13;
+  background: #7c3aed;&#13;
+}&#13;
+&#13;
+&#13;
+.nav-icon {&#13;
+  width: 21px;&#13;
+&#13;
+  text-align: center;&#13;
+&#13;
+  font-size: 16px;&#13;
+&#13;
+  color: #64748b;&#13;
+}&#13;
+&#13;
+&#13;
+.nav-item.active .nav-icon {&#13;
+  color: #7c3aed;&#13;
+}&#13;
+&#13;
+&#13;
+.nav-count {&#13;
+  margin-left: auto;&#13;
+&#13;
+  min-width: 22px;&#13;
+  height: 22px;&#13;
+&#13;
+  padding: 0 6px;&#13;
+&#13;
+  border-radius: 11px;&#13;
+&#13;
+  background: #ddd6fe;&#13;
+&#13;
+  color: #5b21b6;&#13;
+&#13;
+  font-size: 11px;&#13;
+&#13;
+  font-weight: 850;&#13;
+&#13;
+  display: flex;&#13;
+  align-items: center;&#13;
+  justify-content: center;&#13;
+}&#13;
+&#13;
+&#13;
+.danger-count {&#13;
+  background: #fee2e2;&#13;
+&#13;
+  color: #991b1b;&#13;
+}&#13;
+&#13;
+&#13;
+.ai-nav-item {&#13;
+  background: #faf8ff;&#13;
+}&#13;
+&#13;
+&#13;
+.ai-mini-badge {&#13;
+  margin-left: auto;&#13;
+&#13;
+  padding: 3px 6px;&#13;
+&#13;
+  border-radius: 5px;&#13;
+&#13;
+  background: #e9ddff;&#13;
+&#13;
+  color: #6d28d9;&#13;
+&#13;
+  font-size: 8px;&#13;
+&#13;
+  font-weight: 900;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   SIDEBAR FOOTER&#13;
+   ========================================================= */&#13;
+&#13;
+.sidebar-footer {&#13;
+  padding: 14px;&#13;
+&#13;
+  border-top: 1px solid #edf0f5;&#13;
+}&#13;
+&#13;
+&#13;
+.journey-mini {&#13;
+  padding: 13px;&#13;
+&#13;
+  border-radius: 12px;&#13;
+&#13;
+  background: #faf9ff;&#13;
+&#13;
+  border: 1px solid #e8e5f2;&#13;
+}&#13;
+&#13;
+&#13;
+.journey-mini-label {&#13;
+  font-size: 10px;&#13;
+&#13;
+  font-weight: 850;&#13;
+&#13;
+  color: #64748b;&#13;
+&#13;
+  letter-spacing: 0.08em;&#13;
+}&#13;
+&#13;
+&#13;
+.journey-mini-progress {&#13;
+  height: 7px;&#13;
+&#13;
+  margin-top: 10px;&#13;
+&#13;
+  border-radius: 7px;&#13;
+&#13;
+  background: #e5e7eb;&#13;
+&#13;
+  overflow: hidden;&#13;
+}&#13;
+&#13;
+&#13;
+.journey-mini-fill {&#13;
+  height: 100%;&#13;
+&#13;
+  border-radius: 7px;&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      90deg,&#13;
+      #7c3aed,&#13;
+      #6366f1&#13;
+    );&#13;
+}&#13;
+&#13;
+&#13;
+.journey-mini-score {&#13;
+  margin-top: 7px;&#13;
+&#13;
+  font-size: 11px;&#13;
+&#13;
+  color: #64748b;&#13;
+&#13;
+  font-weight: 600;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   MAIN&#13;
+   ========================================================= */&#13;
+&#13;
+.campus360-main {&#13;
+  flex: 1;&#13;
+&#13;
+  min-width: 0;&#13;
+&#13;
+  width: calc(100vw - 250px);&#13;
+&#13;
+  background: #f4f6fa;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   TOPBAR&#13;
+   ========================================================= */&#13;
+&#13;
+.topbar {&#13;
+  height: 76px;&#13;
+&#13;
+  padding: 0 30px;&#13;
+&#13;
+  background: #ffffff;&#13;
+&#13;
+  border-bottom: 1px solid #dce2eb;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  justify-content: space-between;&#13;
+}&#13;
+&#13;
+&#13;
+.page-breadcrumb {&#13;
+  font-size: 13px;&#13;
+&#13;
+  font-weight: 650;&#13;
+&#13;
+  color: #475569;&#13;
+}&#13;
+&#13;
+&#13;
+.page-breadcrumb span {&#13;
+  padding: 0 8px;&#13;
+&#13;
+  color: #cbd5e1;&#13;
+}&#13;
+&#13;
+&#13;
+.topbar-right {&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  gap: 12px;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   SEARCH&#13;
+   ========================================================= */&#13;
+&#13;
+.tpo-search {&#13;
+  width: 320px;&#13;
+&#13;
+  height: 38px;&#13;
+&#13;
+  padding: 0 12px;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  gap: 8px;&#13;
+&#13;
+  background: #f8fafc;&#13;
+&#13;
+  border: 1px solid #dbe1ea;&#13;
+&#13;
+  border-radius: 9px;&#13;
+&#13;
+  transition: all 0.2s ease;&#13;
+}&#13;
+&#13;
+&#13;
+.tpo-search:focus-within {&#13;
+  background: #ffffff;&#13;
+&#13;
+  border-color: #a78bfa;&#13;
+&#13;
+  box-shadow:&#13;
+    0 0 0 3px&#13;
+    rgba(124, 58, 237, 0.08);&#13;
+}&#13;
+&#13;
+&#13;
+.tpo-search span {&#13;
+  font-size: 18px;&#13;
+&#13;
+  color: #64748b;&#13;
+}&#13;
+&#13;
+&#13;
+.tpo-search input {&#13;
+  width: 100%;&#13;
+&#13;
+  border: 0 !important;&#13;
+&#13;
+  outline: 0 !important;&#13;
+&#13;
+  background: transparent !important;&#13;
+&#13;
+  box-shadow: none !important;&#13;
+&#13;
+  font-size: 11px;&#13;
+&#13;
+  color: #334155;&#13;
+}&#13;
+&#13;
+&#13;
+.icon-button {&#13;
+  width: 38px;&#13;
+  height: 38px;&#13;
+&#13;
+  border: 1px solid #dbe1ea;&#13;
+&#13;
+  background: #ffffff;&#13;
+&#13;
+  border-radius: 9px;&#13;
+&#13;
+  color: #475569;&#13;
+&#13;
+  cursor: pointer;&#13;
+&#13;
+  font-size: 18px;&#13;
+&#13;
+  transition: all 0.2s ease;&#13;
+}&#13;
+&#13;
+&#13;
+.icon-button:hover {&#13;
+  background: #f3efff;&#13;
+&#13;
+  color: #6d28d9;&#13;
+&#13;
+  border-color: #c4b5fd;&#13;
+&#13;
+  transform: rotate(15deg);&#13;
+}&#13;
+&#13;
+&#13;
+.top-profile {&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  gap: 9px;&#13;
+&#13;
+  text-decoration: none !important;&#13;
+}&#13;
+&#13;
+&#13;
+.top-avatar {&#13;
+  width: 38px;&#13;
+  height: 38px;&#13;
+&#13;
+  font-size: 11px;&#13;
+}&#13;
+&#13;
+&#13;
+.top-profile-text {&#13;
+  display: flex;&#13;
+&#13;
+  flex-direction: column;&#13;
+}&#13;
+&#13;
+&#13;
+.top-profile-name {&#13;
+  font-size: 13px;&#13;
+&#13;
+  font-weight: 800;&#13;
+&#13;
+  color: #111827;&#13;
+}&#13;
+&#13;
+&#13;
+.top-profile-id {&#13;
+  font-size: 10px;&#13;
+&#13;
+  color: #64748b;&#13;
+&#13;
+  font-weight: 500;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   CONTENT&#13;
+   ========================================================= */&#13;
+&#13;
+.dashboard-content {&#13;
+  width: 100% !important;&#13;
+&#13;
+  max-width: none !important;&#13;
+&#13;
+  margin: 0 !important;&#13;
+&#13;
+  padding: 30px;&#13;
+&#13;
+  box-sizing: border-box;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   HEADER&#13;
+   ========================================================= */&#13;
+&#13;
+.dashboard-header {&#13;
+  display: flex;&#13;
+&#13;
+  justify-content: space-between;&#13;
+&#13;
+  align-items: flex-end;&#13;
+&#13;
+  gap: 20px;&#13;
+&#13;
+  margin-bottom: 25px;&#13;
+}&#13;
+&#13;
+&#13;
+.eyebrow,&#13;
+.card-eyebrow {&#13;
+  margin-bottom: 8px;&#13;
+&#13;
+  font-size: 10px;&#13;
+&#13;
+  font-weight: 850;&#13;
+&#13;
+  color: #6d28d9;&#13;
+&#13;
+  letter-spacing: 0.13em;&#13;
+}&#13;
+&#13;
+&#13;
+.dashboard-header h1 {&#13;
+  margin: 0;&#13;
+&#13;
+  font-size: 34px;&#13;
+&#13;
+  line-height: 1.18;&#13;
+&#13;
+  font-weight: 850;&#13;
+&#13;
+  letter-spacing: -0.025em;&#13;
+&#13;
+  color: #0f172a;&#13;
+}&#13;
+&#13;
+&#13;
+.dashboard-header p {&#13;
+  margin: 9px 0 0;&#13;
+&#13;
+  max-width: 760px;&#13;
+&#13;
+  font-size: 14px;&#13;
+&#13;
+  line-height: 1.6;&#13;
+&#13;
+  color: #475569;&#13;
+&#13;
+  font-weight: 500;&#13;
+}&#13;
+&#13;
+&#13;
+.student-context {&#13;
+  padding: 12px 16px;&#13;
+&#13;
+  border: 1px solid #dbe1ea;&#13;
+&#13;
+  border-radius: 11px;&#13;
+&#13;
+  background: #ffffff;&#13;
+&#13;
+  text-align: right;&#13;
+&#13;
+  box-shadow:&#13;
+    0 3px 10px&#13;
+    rgba(15, 23, 42, 0.03);&#13;
+}&#13;
+&#13;
+&#13;
+.context-label {&#13;
+  display: block;&#13;
+&#13;
+  font-size: 9px;&#13;
+&#13;
+  letter-spacing: 0.1em;&#13;
+&#13;
+  color: #64748b;&#13;
+&#13;
+  font-weight: 850;&#13;
+}&#13;
+&#13;
+&#13;
+.student-context strong {&#13;
+  display: block;&#13;
+&#13;
+  margin-top: 4px;&#13;
+&#13;
+  font-size: 12px;&#13;
+&#13;
+  color: #1e293b;&#13;
+&#13;
+  font-weight: 850;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   KPI GRID&#13;
+   ========================================================= */&#13;
+&#13;
+.kpi-grid {&#13;
+  display: grid;&#13;
+&#13;
+  grid-template-columns:&#13;
+    repeat(6, minmax(0, 1fr));&#13;
+&#13;
+  gap: 14px;&#13;
+&#13;
+  margin-bottom: 18px;&#13;
+}&#13;
+&#13;
+&#13;
+.kpi-card {&#13;
+  display: block;&#13;
+&#13;
+  min-height: 142px;&#13;
+&#13;
+  padding: 17px;&#13;
+&#13;
+  border-radius: 16px;&#13;
+&#13;
+  text-decoration: none !important;&#13;
+&#13;
+  border: 1px solid transparent;&#13;
+&#13;
+  transition:&#13;
+    transform 0.2s ease,&#13;
+    box-shadow 0.2s ease;&#13;
+}&#13;
+&#13;
+&#13;
+.kpi-card:hover {&#13;
+  transform: translateY(-4px);&#13;
+&#13;
+  box-shadow:&#13;
+    0 13px 28px&#13;
+    rgba(15, 23, 42, 0.12);&#13;
+}&#13;
+&#13;
+&#13;
+.kpi-top,&#13;
+.kpi-bottom {&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  justify-content: space-between;&#13;
+}&#13;
+&#13;
+&#13;
+.kpi-label {&#13;
+  font-size: 12px;&#13;
+&#13;
+  font-weight: 750;&#13;
+&#13;
+  color: #1e293b;&#13;
+}&#13;
+&#13;
+&#13;
+.kpi-icon {&#13;
+  width: 34px;&#13;
+  height: 34px;&#13;
+&#13;
+  border-radius: 9px;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+  justify-content: center;&#13;
+&#13;
+  background: #ffffff;&#13;
+&#13;
+  font-size: 15px;&#13;
+&#13;
+  font-weight: 800;&#13;
+&#13;
+  box-shadow:&#13;
+    0 4px 12px&#13;
+    rgba(15, 23, 42, 0.08);&#13;
+}&#13;
+&#13;
+&#13;
+.kpi-value {&#13;
+  margin: 13px 0 8px;&#13;
+&#13;
+  font-size: 31px;&#13;
+&#13;
+  line-height: 1;&#13;
+&#13;
+  font-weight: 900;&#13;
+&#13;
+  letter-spacing: -0.035em;&#13;
+&#13;
+  color: #0b1220;&#13;
+}&#13;
+&#13;
+&#13;
+.kpi-value span {&#13;
+  font-size: 17px;&#13;
+&#13;
+  font-weight: 750;&#13;
+&#13;
+  color: #475569;&#13;
+}&#13;
+&#13;
+&#13;
+.kpi-bottom {&#13;
+  font-size: 9px;&#13;
+&#13;
+  color: #475569;&#13;
+&#13;
+  font-weight: 600;&#13;
+}&#13;
+&#13;
+&#13;
+.kpi-link {&#13;
+  font-size: 10px;&#13;
+&#13;
+  font-weight: 850;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   KPI COLORS&#13;
+   ========================================================= */&#13;
+&#13;
+.kpi-blue {&#13;
+  background:&#13;
+    linear-gradient(135deg, #edf7ff, #d5ebff);&#13;
+&#13;
+  border-color: #93c5fd;&#13;
+}&#13;
+&#13;
+&#13;
+.kpi-blue .kpi-icon,&#13;
+.kpi-blue .kpi-link,&#13;
+.kpi-blue .kpi-value {&#13;
+  color: #1d4ed8;&#13;
+}&#13;
+&#13;
+&#13;
+.kpi-purple {&#13;
+  background:&#13;
+    linear-gradient(135deg, #f5f0ff, #e4d5ff);&#13;
+&#13;
+  border-color: #c4b5fd;&#13;
+}&#13;
+&#13;
+&#13;
+.kpi-purple .kpi-icon,&#13;
+.kpi-purple .kpi-link,&#13;
+.kpi-purple .kpi-value {&#13;
+  color: #6d28d9;&#13;
+}&#13;
+&#13;
+&#13;
+.kpi-red {&#13;
+  background:&#13;
+    linear-gradient(135deg, #fff1f2, #ffe0e3);&#13;
+&#13;
+  border-color: #fda4af;&#13;
+}&#13;
+&#13;
+&#13;
+.kpi-red .kpi-icon,&#13;
+.kpi-red .kpi-link,&#13;
+.kpi-red .kpi-value {&#13;
+  color: #be123c;&#13;
+}&#13;
+&#13;
+&#13;
+.kpi-green {&#13;
+  background:&#13;
+    linear-gradient(135deg, #effdf5, #d8f7e5);&#13;
+&#13;
+  border-color: #86efac;&#13;
+}&#13;
+&#13;
+&#13;
+.kpi-green .kpi-icon,&#13;
+.kpi-green .kpi-link,&#13;
+.kpi-green .kpi-value {&#13;
+  color: #15803d;&#13;
+}&#13;
+&#13;
+&#13;
+.kpi-orange {&#13;
+  background:&#13;
+    linear-gradient(135deg, #fff7ed, #ffe5c7);&#13;
+&#13;
+  border-color: #fdba74;&#13;
+}&#13;
+&#13;
+&#13;
+.kpi-orange .kpi-icon,&#13;
+.kpi-orange .kpi-link,&#13;
+.kpi-orange .kpi-value {&#13;
+  color: #c2410c;&#13;
+}&#13;
+&#13;
+&#13;
+.kpi-indigo {&#13;
+  background:&#13;
+    linear-gradient(135deg, #eef2ff, #dbe4ff);&#13;
+&#13;
+  border-color: #a5b4fc;&#13;
+}&#13;
+&#13;
+&#13;
+.kpi-indigo .kpi-icon,&#13;
+.kpi-indigo .kpi-link,&#13;
+.kpi-indigo .kpi-value {&#13;
+  color: #4338ca;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   DASHBOARD GRID&#13;
+   ========================================================= */&#13;
+&#13;
+.dashboard-grid {&#13;
+  display: grid;&#13;
+&#13;
+  grid-template-columns:&#13;
+    minmax(0, 1.35fr)&#13;
+    minmax(340px, 0.85fr);&#13;
+&#13;
+  gap: 18px;&#13;
+&#13;
+  margin-bottom: 18px;&#13;
+}&#13;
+&#13;
+&#13;
+.three-column-grid {&#13;
+  display: grid;&#13;
+&#13;
+  grid-template-columns:&#13;
+    repeat(3, minmax(0, 1fr));&#13;
+&#13;
+  gap: 18px;&#13;
+&#13;
+  margin-bottom: 18px;&#13;
+}&#13;
+&#13;
+&#13;
+.dashboard-card {&#13;
+  background: #ffffff;&#13;
+&#13;
+  border: 1px solid #dbe1ea;&#13;
+&#13;
+  border-radius: 17px;&#13;
+&#13;
+  padding: 22px;&#13;
+&#13;
+  box-shadow:&#13;
+    0 5px 18px&#13;
+    rgba(15, 23, 42, 0.05);&#13;
+&#13;
+  transition:&#13;
+    box-shadow 0.2s ease,&#13;
+    transform 0.2s ease;&#13;
+}&#13;
+&#13;
+&#13;
+.dashboard-card:hover {&#13;
+  box-shadow:&#13;
+    0 10px 26px&#13;
+    rgba(15, 23, 42, 0.075);&#13;
+}&#13;
+&#13;
+&#13;
+.compact-card {&#13;
+  min-height: 285px;&#13;
+}&#13;
+&#13;
+&#13;
+.card-header {&#13;
+  display: flex;&#13;
+&#13;
+  align-items: flex-start;&#13;
+&#13;
+  justify-content: space-between;&#13;
+&#13;
+  gap: 15px;&#13;
+&#13;
+  margin-bottom: 20px;&#13;
+}&#13;
+&#13;
+&#13;
+.card-header h2 {&#13;
+  margin: 0;&#13;
+&#13;
+  font-size: 20px;&#13;
+&#13;
+  font-weight: 850;&#13;
+&#13;
+  letter-spacing: -0.015em;&#13;
+&#13;
+  color: #0f172a;&#13;
+}&#13;
+&#13;
+&#13;
+.text-link {&#13;
+  font-size: 11px;&#13;
+&#13;
+  color: #6d28d9;&#13;
+&#13;
+  font-weight: 850;&#13;
+&#13;
+  text-decoration: none !important;&#13;
+}&#13;
+&#13;
+&#13;
+.card-description {&#13;
+  margin: 5px 0 0;&#13;
+&#13;
+  font-size: 11px;&#13;
+&#13;
+  color: #64748b;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   READINESS&#13;
+   ========================================================= */&#13;
+&#13;
+.readiness-content {&#13;
+  display: grid;&#13;
+&#13;
+  grid-template-columns: 190px 1fr;&#13;
+&#13;
+  gap: 28px;&#13;
+&#13;
+  align-items: center;&#13;
+}&#13;
+&#13;
+&#13;
+.readiness-score {&#13;
+  text-align: center;&#13;
+}&#13;
+&#13;
+&#13;
+.score-ring {&#13;
+  width: 155px;&#13;
+  height: 155px;&#13;
+&#13;
+  margin: 0 auto;&#13;
+&#13;
+  border-radius: 50%;&#13;
+&#13;
+  background:&#13;
+    conic-gradient(&#13;
+      #7c3aed&#13;
+      calc(var(--score, 0) * 1%),&#13;
+      #e5d8ff 0&#13;
+    );&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+  justify-content: center;&#13;
+&#13;
+  position: relative;&#13;
+}&#13;
+&#13;
+&#13;
+.score-ring:after {&#13;
+  content: "";&#13;
+&#13;
+  position: absolute;&#13;
+&#13;
+  inset: 11px;&#13;
+&#13;
+  border-radius: 50%;&#13;
+&#13;
+  background: #ffffff;&#13;
+}&#13;
+&#13;
+&#13;
+.score-inner {&#13;
+  position: relative;&#13;
+&#13;
+  z-index: 2;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: baseline;&#13;
+}&#13;
+&#13;
+&#13;
+.score-inner strong {&#13;
+  font-size: 39px;&#13;
+&#13;
+  font-weight: 900;&#13;
+&#13;
+  color: #0f172a;&#13;
+}&#13;
+&#13;
+&#13;
+.score-inner span {&#13;
+  margin-left: 3px;&#13;
+&#13;
+  font-size: 12px;&#13;
+&#13;
+  color: #64748b;&#13;
+}&#13;
+&#13;
+&#13;
+.score-caption {&#13;
+  margin-top: 9px;&#13;
+&#13;
+  font-size: 10px;&#13;
+&#13;
+  font-weight: 750;&#13;
+&#13;
+  color: #475569;&#13;
+}&#13;
+&#13;
+&#13;
+.readiness-metrics {&#13;
+  display: flex;&#13;
+&#13;
+  flex-direction: column;&#13;
+&#13;
+  gap: 19px;&#13;
+}&#13;
+&#13;
+&#13;
+.metric-row {&#13;
+  width: 100%;&#13;
+}&#13;
+&#13;
+&#13;
+.metric-info {&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  justify-content: space-between;&#13;
+&#13;
+  margin-bottom: 7px;&#13;
+}&#13;
+&#13;
+&#13;
+.metric-name {&#13;
+  font-size: 12px;&#13;
+&#13;
+  color: #475569;&#13;
+&#13;
+  font-weight: 650;&#13;
+}&#13;
+&#13;
+&#13;
+.metric-info strong {&#13;
+  font-size: 12px;&#13;
+&#13;
+  color: #111827;&#13;
+&#13;
+  font-weight: 850;&#13;
+}&#13;
+&#13;
+&#13;
+.metric-bar {&#13;
+  height: 8px;&#13;
+&#13;
+  border-radius: 8px;&#13;
+&#13;
+  background: #e6eaf0;&#13;
+&#13;
+  overflow: hidden;&#13;
+}&#13;
+&#13;
+&#13;
+.metric-fill {&#13;
+  height: 100%;&#13;
+&#13;
+  border-radius: 8px;&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      90deg,&#13;
+      #7c3aed,&#13;
+      #6366f1&#13;
+    );&#13;
+}&#13;
+&#13;
+&#13;
+.blue-fill {&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      90deg,&#13;
+      #3b82f6,&#13;
+      #60a5fa&#13;
+    );&#13;
+}&#13;
+&#13;
+&#13;
+.metric-fill.warning {&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      90deg,&#13;
+      #f59e0b,&#13;
+      #fbbf24&#13;
+    );&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   AI RISK&#13;
+   ========================================================= */&#13;
+&#13;
+.ai-badge {&#13;
+  padding: 6px 9px;&#13;
+&#13;
+  border-radius: 7px;&#13;
+&#13;
+  background: #e9ddff;&#13;
+&#13;
+  color: #6d28d9;&#13;
+&#13;
+  font-size: 10px;&#13;
+&#13;
+  font-weight: 850;&#13;
+}&#13;
+&#13;
+&#13;
+.risk-summary {&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  justify-content: space-between;&#13;
+&#13;
+  gap: 25px;&#13;
+}&#13;
+&#13;
+&#13;
+.risk-total {&#13;
+  font-size: 42px;&#13;
+&#13;
+  line-height: 1;&#13;
+&#13;
+  font-weight: 900;&#13;
+&#13;
+  color: #0f172a;&#13;
+}&#13;
+&#13;
+&#13;
+.risk-total-label {&#13;
+  margin-top: 7px;&#13;
+&#13;
+  font-size: 10px;&#13;
+&#13;
+  color: #64748b;&#13;
+}&#13;
+&#13;
+&#13;
+.risk-list {&#13;
+  flex: 1;&#13;
+}&#13;
+&#13;
+&#13;
+.risk-item {&#13;
+  display: grid;&#13;
+&#13;
+  grid-template-columns:&#13;
+    10px 1fr auto;&#13;
+&#13;
+  gap: 8px;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  padding: 7px 0;&#13;
+&#13;
+  font-size: 11px;&#13;
+&#13;
+  color: #475569;&#13;
+}&#13;
+&#13;
+&#13;
+.risk-item strong {&#13;
+  color: #111827;&#13;
+&#13;
+  font-weight: 850;&#13;
+}&#13;
+&#13;
+&#13;
+.risk-dot {&#13;
+  width: 8px;&#13;
+  height: 8px;&#13;
+&#13;
+  border-radius: 50%;&#13;
+}&#13;
+&#13;
+&#13;
+.risk-dot.high {&#13;
+  background: #ef4444;&#13;
+}&#13;
+&#13;
+&#13;
+.risk-dot.medium {&#13;
+  background: #f59e0b;&#13;
+}&#13;
+&#13;
+&#13;
+.risk-dot.low {&#13;
+  background: #10b981;&#13;
+}&#13;
+&#13;
+&#13;
+.risk-bar {&#13;
+  height: 10px;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  overflow: hidden;&#13;
+&#13;
+  border-radius: 10px;&#13;
+&#13;
+  margin-top: 20px;&#13;
+&#13;
+  background: #f1f5f9;&#13;
+}&#13;
+&#13;
+&#13;
+.risk-bar-high {&#13;
+  background: #ef4444;&#13;
+}&#13;
+&#13;
+&#13;
+.risk-bar-medium {&#13;
+  background: #f59e0b;&#13;
+}&#13;
+&#13;
+&#13;
+.risk-bar-low {&#13;
+  background: #10b981;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   LISTS&#13;
+   ========================================================= */&#13;
+&#13;
+.list-stack {&#13;
+  display: flex;&#13;
+&#13;
+  flex-direction: column;&#13;
+&#13;
+  gap: 8px;&#13;
+}&#13;
+&#13;
+&#13;
+.data-list-item {&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  gap: 10px;&#13;
+&#13;
+  padding: 10px;&#13;
+&#13;
+  border-radius: 10px;&#13;
+&#13;
+  background: #f8fafc;&#13;
+&#13;
+  border: 1px solid #edf1f6;&#13;
+&#13;
+  transition: all 0.2s ease;&#13;
+}&#13;
+&#13;
+&#13;
+.data-list-item:hover {&#13;
+  background: #faf8ff;&#13;
+&#13;
+  border-color: #ddd6fe;&#13;
+&#13;
+  transform: translateX(2px);&#13;
+}&#13;
+&#13;
+&#13;
+.data-list-icon {&#13;
+  width: 31px;&#13;
+  height: 31px;&#13;
+&#13;
+  border-radius: 8px;&#13;
+&#13;
+  background: #fee2e2;&#13;
+&#13;
+  color: #dc2626;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+  justify-content: center;&#13;
+&#13;
+  font-weight: 900;&#13;
+&#13;
+  font-size: 12px;&#13;
+}&#13;
+&#13;
+&#13;
+.intervention-icon {&#13;
+  background: #ede9fe;&#13;
+&#13;
+  color: #7c3aed;&#13;
+}&#13;
+&#13;
+&#13;
+.data-list-content {&#13;
+  min-width: 0;&#13;
+&#13;
+  flex: 1;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  flex-direction: column;&#13;
+}&#13;
+&#13;
+&#13;
+.data-list-content strong {&#13;
+  font-size: 11px;&#13;
+&#13;
+  color: #1e293b;&#13;
+&#13;
+  white-space: nowrap;&#13;
+&#13;
+  overflow: hidden;&#13;
+&#13;
+  text-overflow: ellipsis;&#13;
+}&#13;
+&#13;
+&#13;
+.data-list-content span {&#13;
+  margin-top: 3px;&#13;
+&#13;
+  font-size: 9px;&#13;
+&#13;
+  color: #64748b;&#13;
+}&#13;
+&#13;
+&#13;
+.data-list-value {&#13;
+  font-size: 11px;&#13;
+&#13;
+  color: #475569;&#13;
+&#13;
+  font-weight: 850;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   STATUS&#13;
+   ========================================================= */&#13;
+&#13;
+.status-pill {&#13;
+  min-width: 27px;&#13;
+&#13;
+  padding: 4px 7px;&#13;
+&#13;
+  border-radius: 12px;&#13;
+&#13;
+  text-align: center;&#13;
+&#13;
+  font-size: 9px;&#13;
+&#13;
+  font-weight: 850;&#13;
+&#13;
+  background: #f1f5f9;&#13;
+&#13;
+  color: #475569;&#13;
+}&#13;
+&#13;
+&#13;
+.status-recommended {&#13;
+  background: #fef3c7;&#13;
+&#13;
+  color: #92400e;&#13;
+}&#13;
+&#13;
+&#13;
+.status-progress {&#13;
+  background: #dbeafe;&#13;
+&#13;
+  color: #1d4ed8;&#13;
+}&#13;
+&#13;
+&#13;
+.status-completed {&#13;
+  background: #dcfce7;&#13;
+&#13;
+  color: #166534;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   TRAINING&#13;
+   ========================================================= */&#13;
+&#13;
+.training-summary {&#13;
+  padding: 17px;&#13;
+&#13;
+  border-radius: 13px;&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      135deg,&#13;
+      #f5f0ff,&#13;
+      #eee7ff&#13;
+    );&#13;
+&#13;
+  border: 1px solid #ddd6fe;&#13;
+}&#13;
+&#13;
+&#13;
+.training-big-number {&#13;
+  font-size: 37px;&#13;
+&#13;
+  line-height: 1;&#13;
+&#13;
+  font-weight: 900;&#13;
+&#13;
+  color: #5b21b6;&#13;
+}&#13;
+&#13;
+&#13;
+.training-summary span {&#13;
+  display: block;&#13;
+&#13;
+  margin-top: 6px;&#13;
+&#13;
+  font-size: 10px;&#13;
+&#13;
+  color: #64748b;&#13;
+}&#13;
+&#13;
+&#13;
+.training-stats {&#13;
+  display: grid;&#13;
+&#13;
+  grid-template-columns: 1fr 1fr;&#13;
+&#13;
+  gap: 10px;&#13;
+&#13;
+  margin-top: 12px;&#13;
+}&#13;
+&#13;
+&#13;
+.training-stats div {&#13;
+  padding: 11px;&#13;
+&#13;
+  border-radius: 10px;&#13;
+&#13;
+  border: 1px solid #e2e8f0;&#13;
+&#13;
+  background: #ffffff;&#13;
+}&#13;
+&#13;
+&#13;
+.training-stats strong {&#13;
+  display: block;&#13;
+&#13;
+  font-size: 19px;&#13;
+&#13;
+  color: #1e293b;&#13;
+}&#13;
+&#13;
+&#13;
+.training-stats span {&#13;
+  display: block;&#13;
+&#13;
+  margin-top: 3px;&#13;
+&#13;
+  font-size: 9px;&#13;
+&#13;
+  color: #64748b;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   DRIVES&#13;
+   ========================================================= */&#13;
+&#13;
+.drive-list {&#13;
+  display: flex;&#13;
+&#13;
+  flex-direction: column;&#13;
+&#13;
+  gap: 10px;&#13;
+}&#13;
+&#13;
+&#13;
+.drive-item {&#13;
+  display: flex;&#13;
+&#13;
+  gap: 11px;&#13;
+&#13;
+  align-items: center;&#13;
+}&#13;
+&#13;
+&#13;
+.drive-date {&#13;
+  width: 42px;&#13;
+  height: 45px;&#13;
+&#13;
+  flex: 0 0 42px;&#13;
+&#13;
+  border-radius: 9px;&#13;
+&#13;
+  background: #ede9fe;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  flex-direction: column;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  justify-content: center;&#13;
+}&#13;
+&#13;
+&#13;
+.drive-date strong {&#13;
+  font-size: 16px;&#13;
+&#13;
+  color: #5b21b6;&#13;
+&#13;
+  line-height: 1;&#13;
+}&#13;
+&#13;
+&#13;
+.drive-date span {&#13;
+  margin-top: 3px;&#13;
+&#13;
+  font-size: 7px;&#13;
+&#13;
+  text-transform: uppercase;&#13;
+&#13;
+  color: #7c3aed;&#13;
+&#13;
+  font-weight: 850;&#13;
+}&#13;
+&#13;
+&#13;
+.drive-content {&#13;
+  min-width: 0;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  flex-direction: column;&#13;
+}&#13;
+&#13;
+&#13;
+.drive-content strong {&#13;
+  font-size: 11px;&#13;
+&#13;
+  color: #1e293b;&#13;
+}&#13;
+&#13;
+&#13;
+.drive-content span {&#13;
+  margin-top: 3px;&#13;
+&#13;
+  font-size: 9px;&#13;
+&#13;
+  color: #64748b;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   ALERTS&#13;
+   ========================================================= */&#13;
+&#13;
+.alert-list {&#13;
+  display: flex;&#13;
+&#13;
+  flex-direction: column;&#13;
+&#13;
+  gap: 10px;&#13;
+}&#13;
+&#13;
+&#13;
+.alert-item {&#13;
+  display: flex;&#13;
+&#13;
+  gap: 10px;&#13;
+&#13;
+  padding: 9px;&#13;
+&#13;
+  border-radius: 10px;&#13;
+&#13;
+  background: #fff7ed;&#13;
+&#13;
+  border: 1px solid #fed7aa;&#13;
+}&#13;
+&#13;
+&#13;
+.alert-icon {&#13;
+  width: 29px;&#13;
+  height: 29px;&#13;
+&#13;
+  flex: 0 0 29px;&#13;
+&#13;
+  border-radius: 8px;&#13;
+&#13;
+  background: #ffedd5;&#13;
+&#13;
+  color: #c2410c;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+  justify-content: center;&#13;
+&#13;
+  font-size: 11px;&#13;
+&#13;
+  font-weight: 900;&#13;
+}&#13;
+&#13;
+&#13;
+.alert-item strong {&#13;
+  display: block;&#13;
+&#13;
+  font-size: 10px;&#13;
+&#13;
+  color: #1e293b;&#13;
+}&#13;
+&#13;
+&#13;
+.alert-item span {&#13;
+  display: block;&#13;
+&#13;
+  margin-top: 3px;&#13;
+&#13;
+  font-size: 9px;&#13;
+&#13;
+  line-height: 1.4;&#13;
+&#13;
+  color: #64748b;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   PIPELINE&#13;
+   ========================================================= */&#13;
+&#13;
+.pipeline-list {&#13;
+  display: flex;&#13;
+&#13;
+  flex-direction: column;&#13;
+}&#13;
+&#13;
+&#13;
+.pipeline-row {&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  justify-content: space-between;&#13;
+&#13;
+  padding: 11px 0;&#13;
+&#13;
+  border-bottom: 1px solid #eef1f5;&#13;
+}&#13;
+&#13;
+&#13;
+.pipeline-row:last-child {&#13;
+  border-bottom: 0;&#13;
+}&#13;
+&#13;
+&#13;
+.pipeline-row span {&#13;
+  font-size: 10px;&#13;
+&#13;
+  color: #64748b;&#13;
+}&#13;
+&#13;
+&#13;
+.pipeline-row strong {&#13;
+  font-size: 14px;&#13;
+&#13;
+  color: #1e293b;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   EMPTY STATE&#13;
+   ========================================================= */&#13;
+&#13;
+.empty-state {&#13;
+  padding: 20px 8px;&#13;
+&#13;
+  text-align: center;&#13;
+&#13;
+  font-size: 10px;&#13;
+&#13;
+  color: #94a3b8;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   QUICK ACTIONS&#13;
+   ========================================================= */&#13;
+&#13;
+.quick-actions-card {&#13;
+  margin-bottom: 18px;&#13;
+}&#13;
+&#13;
+&#13;
+.quick-actions {&#13;
+  display: grid;&#13;
+&#13;
+  grid-template-columns:&#13;
+    repeat(6, minmax(0, 1fr));&#13;
+&#13;
+  gap: 10px;&#13;
+}&#13;
+&#13;
+&#13;
+.quick-action {&#13;
+  min-height: 76px;&#13;
+&#13;
+  padding: 12px;&#13;
+&#13;
+  border-radius: 11px;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  flex-direction: column;&#13;
+&#13;
+  justify-content: center;&#13;
+&#13;
+  gap: 7px;&#13;
+&#13;
+  text-decoration: none !important;&#13;
+&#13;
+  font-size: 10px;&#13;
+&#13;
+  font-weight: 800;&#13;
+&#13;
+  transition:&#13;
+    transform 0.2s ease,&#13;
+    box-shadow 0.2s ease;&#13;
+}&#13;
+&#13;
+&#13;
+.quick-action:hover {&#13;
+  transform: translateY(-3px);&#13;
+&#13;
+  box-shadow:&#13;
+    0 9px 18px&#13;
+    rgba(15, 23, 42, 0.09);&#13;
+}&#13;
+&#13;
+&#13;
+.quick-action-icon {&#13;
+  font-size: 16px;&#13;
+}&#13;
+&#13;
+&#13;
+.quick-blue {&#13;
+  background: #eff6ff;&#13;
+&#13;
+  color: #1d4ed8;&#13;
+}&#13;
+&#13;
+&#13;
+.quick-green {&#13;
+  background: #ecfdf5;&#13;
+&#13;
+  color: #15803d;&#13;
+}&#13;
+&#13;
+&#13;
+.quick-orange {&#13;
+  background: #fff7ed;&#13;
+&#13;
+  color: #c2410c;&#13;
+}&#13;
+&#13;
+&#13;
+.quick-purple {&#13;
+  background: #f5f3ff;&#13;
+&#13;
+  color: #6d28d9;&#13;
+}&#13;
+&#13;
+&#13;
+.quick-red {&#13;
+  background: #fff1f2;&#13;
+&#13;
+  color: #be123c;&#13;
+}&#13;
+&#13;
+&#13;
+.quick-ai {&#13;
+  background: #ecfeff;&#13;
+&#13;
+  color: #0f766e;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   FOOTER&#13;
+   ========================================================= */&#13;
+&#13;
+.dashboard-footer {&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  justify-content: space-between;&#13;
+&#13;
+  padding: 4px 2px 10px;&#13;
+&#13;
+  color: #64748b;&#13;
+&#13;
+  font-size: 10px;&#13;
+&#13;
+  font-weight: 550;&#13;
+}&#13;
+&#13;
+&#13;
+.refresh-button {&#13;
+  border: 0;&#13;
+&#13;
+  background: transparent;&#13;
+&#13;
+  color: #6d28d9;&#13;
+&#13;
+  font-size: 11px;&#13;
+&#13;
+  font-weight: 850;&#13;
+&#13;
+  cursor: pointer;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   SERVICE PORTAL FULL WIDTH&#13;
+   ========================================================= */&#13;
+&#13;
+body:has(.campus360-app) {&#13;
+  overflow-x: hidden !important;&#13;
+}&#13;
+&#13;
+&#13;
+.container:has(.campus360-app),&#13;
+.container-fluid:has(.campus360-app) {&#13;
+  width: 100vw !important;&#13;
+&#13;
+  max-width: none !important;&#13;
+&#13;
+  margin-left: 0 !important;&#13;
+&#13;
+  margin-right: 0 !important;&#13;
+&#13;
+  padding-left: 0 !important;&#13;
+&#13;
+  padding-right: 0 !important;&#13;
+}&#13;
+&#13;
+&#13;
+.row:has(.campus360-app) {&#13;
+  width: 100vw !important;&#13;
+&#13;
+  max-width: none !important;&#13;
+&#13;
+  margin-left: 0 !important;&#13;
+&#13;
+  margin-right: 0 !important;&#13;
+}&#13;
+&#13;
+&#13;
+[class*="col-"]:has(.campus360-app) {&#13;
+  width: 100% !important;&#13;
+&#13;
+  max-width: none !important;&#13;
+&#13;
+  padding-left: 0 !important;&#13;
+&#13;
+  padding-right: 0 !important;&#13;
+&#13;
+  margin-left: 0 !important;&#13;
+&#13;
+  margin-right: 0 !important;&#13;
+}&#13;
+&#13;
+&#13;
+.well:has(.campus360-app) {&#13;
+  margin: 0 !important;&#13;
+&#13;
+  padding: 0 !important;&#13;
+&#13;
+  border: 0 !important;&#13;
+&#13;
+  box-shadow: none !important;&#13;
+&#13;
+  background: transparent !important;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   RESPONSIVE&#13;
+   ========================================================= */&#13;
+&#13;
+@media (max-width: 1250px) {&#13;
+&#13;
+  .kpi-grid {&#13;
+    grid-template-columns:&#13;
+      repeat(3, 1fr);&#13;
+  }&#13;
+&#13;
+  .quick-actions {&#13;
+    grid-template-columns:&#13;
+      repeat(3, 1fr);&#13;
+  }&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+@media (max-width: 1100px) {&#13;
+&#13;
+  .three-column-grid {&#13;
+    grid-template-columns:&#13;
+      repeat(2, 1fr);&#13;
+  }&#13;
+&#13;
+  .tpo-search {&#13;
+    width: 240px;&#13;
+  }&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+@media (max-width: 900px) {&#13;
+&#13;
+  .campus360-sidebar {&#13;
+    width: 220px;&#13;
+&#13;
+    min-width: 220px;&#13;
+  }&#13;
+&#13;
+  .campus360-main {&#13;
+    width: calc(100vw - 220px);&#13;
+  }&#13;
+&#13;
+  .dashboard-grid {&#13;
+    grid-template-columns: 1fr;&#13;
+  }&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+@media (max-width: 750px) {&#13;
+&#13;
+  .campus360-sidebar {&#13;
+    width: 70px;&#13;
+&#13;
+    min-width: 70px;&#13;
+  }&#13;
+&#13;
+  .campus360-main {&#13;
+    width: calc(100vw - 70px);&#13;
+  }&#13;
+&#13;
+  .brand-text,&#13;
+  .student-mini-info,&#13;
+  .profile-arrow,&#13;
+  .nav-section-title,&#13;
+  .nav-item span:not(.nav-icon),&#13;
+  .nav-count,&#13;
+  .ai-mini-badge,&#13;
+  .sidebar-footer {&#13;
+    display: none;&#13;
+  }&#13;
+&#13;
+  .sidebar-brand {&#13;
+    justify-content: center;&#13;
+&#13;
+    padding: 0;&#13;
+  }&#13;
+&#13;
+  .student-mini-profile {&#13;
+    justify-content: center;&#13;
+&#13;
+    padding: 8px;&#13;
+  }&#13;
+&#13;
+  .nav-item {&#13;
+    justify-content: center;&#13;
+  }&#13;
+&#13;
+  .kpi-grid {&#13;
+    grid-template-columns:&#13;
+      repeat(2, 1fr);&#13;
+  }&#13;
+&#13;
+  .three-column-grid {&#13;
+    grid-template-columns: 1fr;&#13;
+  }&#13;
+&#13;
+  .quick-actions {&#13;
+    grid-template-columns:&#13;
+      repeat(2, 1fr);&#13;
+  }&#13;
+&#13;
+  .readiness-content {&#13;
+    grid-template-columns: 1fr;&#13;
+  }&#13;
+&#13;
+  .tpo-search {&#13;
+    display: none;&#13;
+  }&#13;
+&#13;
+  .dashboard-content {&#13;
+    padding: 20px;&#13;
+  }&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+@media (max-width: 520px) {&#13;
+&#13;
+  .topbar {&#13;
+    padding: 0 15px;&#13;
+  }&#13;
+&#13;
+  .dashboard-header {&#13;
+    align-items: flex-start;&#13;
+&#13;
+    flex-direction: column;&#13;
+  }&#13;
+&#13;
+  .dashboard-header h1 {&#13;
+    font-size: 26px;&#13;
+  }&#13;
+&#13;
+  .kpi-grid {&#13;
+    grid-template-columns: 1fr;&#13;
+  }&#13;
+&#13;
+  .quick-actions {&#13;
+    grid-template-columns: 1fr;&#13;
+  }&#13;
+&#13;
+  .dashboard-footer {&#13;
+    flex-direction: column;&#13;
+&#13;
+    align-items: flex-start;&#13;
+&#13;
+    gap: 8px;&#13;
+  }&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   FINAL&#13;
+   ========================================================= */&#13;
+&#13;
+.campus360-app {&#13;
+  margin-top: 0 !important;&#13;
+&#13;
+  margin-bottom: 0 !important;&#13;
+}&#13;
+&#13;
+.campus360-app .dashboard-content {&#13;
+  max-width: none !important;&#13;
+&#13;
+  width: 100% !important;&#13;
+&#13;
+  margin-left: 0 !important;&#13;
+&#13;
+  margin-right: 0 !important;&#13;
+}
+.campus360-tpo-layout,
+.tpo-layout,
+.tpo-container,
+.campus360-skill-intel,
+.tpo-dashboard-center {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  z-index: 9999 !important;
+  overflow: hidden !important;
+  background: #f8fafc !important;
+}
+
+.campus360-tpo-layout,
+.tpo-layout,
+.tpo-container,
+.campus360-skill-intel,
+.tpo-dashboard-center {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  z-index: 9999 !important;
+  overflow: hidden !important;
+  background: #f8fafc !important;
+}
+</css>
+        <data_table>sp_instance</data_table>
+        <demo_data/>
+        <description>Campus360 TPO placement intelligence command center</description>
+        <docs/>
+        <field_list/>
+        <has_preview>false</has_preview>
+        <id>campus360_tpo_command_center</id>
+        <internal>false</internal>
+        <link><![CDATA[function link(scope, element, attrs, controller) {
+  
+}]]></link>
+        <name>Campus360 TPO Command Center</name>
+        <option_schema/>
+        <public>false</public>
+        <roles>x_snc_campus360.tpo,x_snc_campus360.campus_admin</roles>
+        <script><![CDATA[(function() {
+  try { data.chatbotWidget = $sp.getWidget('c4ae634574e703107f4410c9fee0cde5', {}); } catch(e) {}
+
+    /*
+     * ============================================================
+     * CAMPUS360 TPO DASHBOARD
+     * DYNAMIC SERVER SCRIPT
+     * ============================================================
+     */
+
+
+    /* ============================================================
+       DEFAULT DATA
+       ============================================================ */
+
+    data.tpo = {
+        name: "TPO"
+    };
+
+
+    data.kpis = {
+        students: 0,
+        companies: 0,
+        openOpportunities: 0,
+        applications: 0,
+        placed: 0,
+        highRisk: 0,
+        activeInterventions: 0
+    };
+
+
+    data.readiness = {
+        average: 0,
+
+        highReady: 0,
+        mediumReady: 0,
+        lowReady: 0,
+
+        highReadyPercent: 0,
+        mediumReadyPercent: 0,
+        lowReadyPercent: 0
+    };
+
+
+    data.risk = {
+        total: 0,
+        high: 0,
+        medium: 0,
+        low: 0,
+
+        highPercent: 0,
+        mediumPercent: 0,
+        lowPercent: 0
+    };
+
+
+    data.bottlenecks = [];
+
+    data.interventions = [];
+
+    data.drives = [];
+
+    data.alerts = [];
+
+
+    data.applicationStats = {
+        shortlisted: 0,
+        assessment: 0,
+        interview: 0,
+        offers: 0
+    };
+
+
+    data.training = {
+        active: 0,
+        enrollments: 0,
+        completed: 0
+    };
+
+
+    /* ============================================================
+       HELPERS
+       ============================================================ */
+
+    function tableExists(tableName) {
+
+        var gr =
+            new GlideRecord(tableName);
+
+        return gr.isValid();
+
+    }
+
+
+    function fieldExists(gr, fieldName) {
+
+        return gr &&
+               gr.isValidField(fieldName);
+
+    }
+
+
+    function addQueryIfValid(
+        gr,
+        fieldName,
+        operator,
+        value
+    ) {
+
+        if (!fieldExists(gr, fieldName)) {
+
+            return false;
+
+        }
+
+
+        if (
+            operator === undefined ||
+            operator === null
+        ) {
+
+            gr.addQuery(
+                fieldName,
+                value
+            );
+
+        } else {
+
+            gr.addQuery(
+                fieldName,
+                operator,
+                value
+            );
+
+        }
+
+
+        return true;
+
+    }
+
+
+    function getValueSafe(
+        gr,
+        fieldName
+    ) {
+
+        if (!fieldExists(gr, fieldName)) {
+
+            return "";
+
+        }
+
+
+        return gr.getValue(
+            fieldName
+        ) || "";
+
+    }
+
+
+    function getDisplaySafe(
+        gr,
+        fieldName
+    ) {
+
+        if (!fieldExists(gr, fieldName)) {
+
+            return "";
+
+        }
+
+
+        return gr.getDisplayValue(
+            fieldName
+        ) || "";
+
+    }
+
+
+    function countRecords(
+        tableName,
+        fieldName,
+        value
+    ) {
+
+        if (!tableExists(tableName)) {
+
+            return 0;
+
+        }
+
+
+        var gr =
+            new GlideRecord(tableName);
+
+
+        if (
+            fieldName &&
+            fieldName !== ""
+        ) {
+
+            if (!fieldExists(gr, fieldName)) {
+
+                return 0;
+
+            }
+
+
+            gr.addQuery(
+                fieldName,
+                value
+            );
+
+        }
+
+
+        gr.query();
+
+
+        return gr.getRowCount();
+
+    }
+
+
+    function countStatus(
+        tableName,
+        fieldName,
+        value
+    ) {
+
+        return countRecords(
+            tableName,
+            fieldName,
+            value
+        );
+
+    }
+
+
+    function clamp(
+        value,
+        min,
+        max
+    ) {
+
+        return Math.max(
+            min,
+            Math.min(
+                max,
+                value
+            )
+        );
+
+    }
+
+
+    function percent(
+        value,
+        total
+    ) {
+
+        if (!total) {
+
+            return 0;
+
+        }
+
+
+        return Math.round(
+            (value / total) * 100
+        );
+
+    }
+
+
+    /* ============================================================
+       TPO USER
+       ============================================================ */
+
+    var currentUser =
+        gs.getUser();
+
+
+    if (currentUser) {
+
+        data.tpo.name =
+            currentUser.getDisplayName()
+            || "TPO";
+
+    }
+
+
+    /* ============================================================
+       TABLE NAMES
+       ============================================================ */
+
+    var STUDENT =
+        "x_snc_campus360_student_master";
+
+    var COMPANY =
+        "x_snc_campus360_company_master";
+
+    var OPPORTUNITY =
+        "x_snc_campus360_placement_opportunity";
+
+    var APPLICATION =
+        "x_snc_campus360_student_application";
+
+    var ASSESSMENT =
+        "x_snc_campus360_student_assessment";
+
+    var TRAINING =
+        "x_snc_campus360_training_program";
+
+    var ENROLLMENT =
+        "x_snc_campus360_training_enrollment";
+
+    var INTERVIEW =
+        "x_snc_campus360_mock_interview";
+
+    var INTELLIGENCE =
+        "x_snc_campus360_placement_intelligence";
+
+    var INTERVENTION =
+        "x_snc_campus360_placement_intervention";
+
+    var OUTCOME =
+        "x_snc_campus360_placement_outcome";
+
+    var NOTIFICATION =
+        "x_snc_campus360_student_notification";
+
+
+    /* ============================================================
+       BASIC COUNTS
+       ============================================================ */
+
+    data.kpis.students =
+        countRecords(
+            STUDENT
+        );
+
+
+    data.kpis.companies =
+        countRecords(
+            COMPANY
+        );
+
+
+    data.kpis.applications =
+        countRecords(
+            APPLICATION
+        );
+
+
+    data.kpis.placed =
+        countStatus(
+            STUDENT,
+            "placement_status",
+            "Placed"
+        );
+
+
+    data.kpis.openOpportunities =
+        countStatus(
+            OPPORTUNITY,
+            "status",
+            "Open"
+        );
+
+
+    /* ============================================================
+       HIGH RISK
+       ============================================================ */
+
+    data.kpis.highRisk =
+        countStatus(
+            INTELLIGENCE,
+            "risk_level",
+            "High"
+        );
+
+
+    /* ============================================================
+       ACTIVE INTERVENTIONS
+       ============================================================ */
+
+    if (tableExists(INTERVENTION)) {
+
+        var activeInterventionGR =
+            new GlideRecord(
+                INTERVENTION
+            );
+
+
+        if (
+            fieldExists(
+                activeInterventionGR,
+                "status"
+            )
+        ) {
+
+            var qc =
+                activeInterventionGR.addQuery(
+                    "status",
+                    "Recommended"
+                );
+
+
+            qc.addOrCondition(
+                "status",
+                "In Progress"
+            );
+
+
+            activeInterventionGR.query();
+
+
+            data.kpis.activeInterventions =
+                activeInterventionGR.getRowCount();
+
+        }
+
+    }
+
+
+    /* ============================================================
+       PLACEMENT READINESS
+       ============================================================ */
+
+    if (tableExists(INTELLIGENCE)) {
+
+        var intelligenceGR =
+            new GlideRecord(
+                INTELLIGENCE
+            );
+
+
+        if (
+            fieldExists(
+                intelligenceGR,
+                "readiness_score"
+            )
+        ) {
+
+            intelligenceGR.query();
+
+
+            var totalScore = 0;
+
+            var intelligenceCount = 0;
+
+
+            while (
+                intelligenceGR.next()
+            ) {
+
+                var score =
+                    parseFloat(
+                        getValueSafe(
+                            intelligenceGR,
+                            "readiness_score"
+                        )
+                    );
+
+
+                if (isNaN(score)) {
+
+                    continue;
+
+                }
+
+
+                score =
+                    clamp(
+                        score,
+                        0,
+                        100
+                    );
+
+
+                totalScore += score;
+
+                intelligenceCount++;
+
+
+                /*
+                 * Dashboard categorization.
+                 *
+                 * 70+ = highly ready
+                 * 40-69 = moderate
+                 * below 40 = needs support
+                 *
+                 * These thresholds are dashboard presentation
+                 * thresholds and can be changed later.
+                 */
+
+                if (score >= 70) {
+
+                    data.readiness.highReady++;
+
+                } else if (score >= 40) {
+
+                    data.readiness.mediumReady++;
+
+                } else {
+
+                    data.readiness.lowReady++;
+
+                }
+
+            }
+
+
+            if (intelligenceCount > 0) {
+
+                data.readiness.average =
+                    Math.round(
+                        totalScore /
+                        intelligenceCount
+                    );
+
+            }
+
+
+            data.readiness.highReadyPercent =
+                percent(
+                    data.readiness.highReady,
+                    intelligenceCount
+                );
+
+
+            data.readiness.mediumReadyPercent =
+                percent(
+                    data.readiness.mediumReady,
+                    intelligenceCount
+                );
+
+
+            data.readiness.lowReadyPercent =
+                percent(
+                    data.readiness.lowReady,
+                    intelligenceCount
+                );
+
+        }
+
+    }
+
+
+    /* ============================================================
+       RISK DISTRIBUTION
+       ============================================================ */
+
+    if (tableExists(INTELLIGENCE)) {
+
+        data.risk.high =
+            countStatus(
+                INTELLIGENCE,
+                "risk_level",
+                "High"
+            );
+
+
+        data.risk.medium =
+            countStatus(
+                INTELLIGENCE,
+                "risk_level",
+                "Medium"
+            );
+
+
+        data.risk.low =
+            countStatus(
+                INTELLIGENCE,
+                "risk_level",
+                "Low"
+            );
+
+
+        data.risk.total =
+            data.risk.high +
+            data.risk.medium +
+            data.risk.low;
+
+
+        data.risk.highPercent =
+            percent(
+                data.risk.high,
+                data.risk.total
+            );
+
+
+        data.risk.mediumPercent =
+            percent(
+                data.risk.medium,
+                data.risk.total
+            );
+
+
+        data.risk.lowPercent =
+            percent(
+                data.risk.low,
+                data.risk.total
+            );
+
+    }
+
+
+    /* ============================================================
+       BOTTLENECKS
+       ============================================================ */
+
+    if (tableExists(INTELLIGENCE)) {
+
+        var bottleneckCounts = {};
+
+
+        var bottleneckGR =
+            new GlideRecord(
+                INTELLIGENCE
+            );
+
+
+        if (
+            fieldExists(
+                bottleneckGR,
+                "bottleneck_stage"
+            )
+        ) {
+
+            bottleneckGR.query();
+
+
+            while (
+                bottleneckGR.next()
+            ) {
+
+                var stage =
+                    getDisplaySafe(
+                        bottleneckGR,
+                        "bottleneck_stage"
+                    );
+
+
+                if (
+                    !stage ||
+                    stage === "None"
+                ) {
+
+                    continue;
+
+                }
+
+
+                if (
+                    !bottleneckCounts[stage]
+                ) {
+
+                    bottleneckCounts[stage] =
+                        0;
+
+                }
+
+
+                bottleneckCounts[stage]++;
+
+            }
+
+
+            for (
+                var stageName in bottleneckCounts
+            ) {
+
+                data.bottlenecks.push({
+
+                    name: stageName,
+
+                    count:
+                        bottleneckCounts[
+                            stageName
+                        ],
+
+                    percent:
+                        percent(
+                            bottleneckCounts[
+                                stageName
+                            ],
+                            data.risk.total ||
+                            data.kpis.students
+                        )
+
+                });
+
+            }
+
+
+            data.bottlenecks.sort(
+                function(a, b) {
+
+                    return b.count -
+                           a.count;
+
+                }
+            );
+
+
+            if (
+                data.bottlenecks.length > 5
+            ) {
+
+                data.bottlenecks =
+                    data.bottlenecks.slice(
+                        0,
+                        5
+                    );
+
+            }
+
+        }
+
+    }
+
+
+    /* ============================================================
+       INTERVENTIONS
+       ============================================================ */
+
+    if (tableExists(INTERVENTION)) {
+
+        var interventionCounts = {};
+
+
+        var interventionGR =
+            new GlideRecord(
+                INTERVENTION
+            );
+
+
+        if (
+            fieldExists(
+                interventionGR,
+                "intervention_type"
+            )
+        ) {
+
+            interventionGR.query();
+
+
+            while (
+                interventionGR.next()
+            ) {
+
+                var type =
+                    getDisplaySafe(
+                        interventionGR,
+                        "intervention_type"
+                    );
+
+
+                var status =
+                    getDisplaySafe(
+                        interventionGR,
+                        "status"
+                    );
+
+
+                if (!type) {
+
+                    type =
+                        "Intervention";
+
+                }
+
+
+                var key =
+                    type +
+                    "|" +
+                    status;
+
+
+                if (
+                    !interventionCounts[key]
+                ) {
+
+                    interventionCounts[key] = {
+
+                        type: type,
+
+                        status: status,
+
+                        count: 0
+
+                    };
+
+                }
+
+
+                interventionCounts[key].count++;
+
+            }
+
+
+            for (
+                var interventionKey
+                in interventionCounts
+            ) {
+
+                data.interventions.push(
+                    interventionCounts[
+                        interventionKey
+                    ]
+                );
+
+            }
+
+
+            data.interventions.sort(
+                function(a, b) {
+
+                    return b.count -
+                           a.count;
+
+                }
+            );
+
+
+            if (
+                data.interventions.length > 5
+            ) {
+
+                data.interventions =
+                    data.interventions.slice(
+                        0,
+                        5
+                    );
+
+            }
+
+        }
+
+    }
+
+
+    /* ============================================================
+       UPCOMING DRIVES
+       ============================================================ */
+
+    if (tableExists(OPPORTUNITY)) {
+
+        var driveGR =
+            new GlideRecord(
+                OPPORTUNITY
+            );
+
+
+        if (
+            fieldExists(
+                driveGR,
+                "drive_date"
+            )
+        ) {
+
+            driveGR.addQuery(
+                "drive_date",
+                ">=",
+                gs.nowDateTime()
+            );
+
+
+            if (
+                fieldExists(
+                    driveGR,
+                    "status"
+                )
+            ) {
+
+                driveGR.addQuery(
+                    "status",
+                    "Open"
+                );
+
+            }
+
+
+            driveGR.orderBy(
+                "drive_date"
+            );
+
+
+            driveGR.setLimit(5);
+
+            driveGR.query();
+
+
+            while (
+                driveGR.next()
+            ) {
+
+                var driveDate =
+                    driveGR.getDisplayValue(
+                        "drive_date"
+                    );
+
+
+                var day = "";
+
+                var month = "";
+
+
+                if (driveDate) {
+
+                    var parts =
+                        driveDate.split(
+                            " "
+                        );
+
+
+                    if (
+                        parts.length > 0
+                    ) {
+
+                        day =
+                            parts[0];
+
+                    }
+
+
+                    if (
+                        parts.length > 1
+                    ) {
+
+                        month =
+                            parts[1];
+
+                    }
+
+                }
+
+
+                data.drives.push({
+
+                    title:
+                        getDisplaySafe(
+                            driveGR,
+                            "opportunity_type"
+                        ) ||
+                        "Placement Drive",
+
+                    company:
+                        getDisplaySafe(
+                            driveGR,
+                            "company"
+                        ) ||
+                        "Company",
+
+                    day: day,
+
+                    month: month
+
+                });
+
+            }
+
+        }
+
+    }
+
+
+    /* ============================================================
+       RECENT ALERTS
+       ============================================================ */
+
+    if (tableExists(NOTIFICATION)) {
+
+        var notificationGR =
+            new GlideRecord(
+                NOTIFICATION
+            );
+
+
+        notificationGR.orderByDesc(
+            "sys_created_on"
+        );
+
+
+        notificationGR.setLimit(5);
+
+        notificationGR.query();
+
+
+        while (
+            notificationGR.next()
+        ) {
+
+            data.alerts.push({
+
+                title:
+                    getDisplaySafe(
+                        notificationGR,
+                        "notification_type"
+                    ) ||
+                    "Student Notification",
+
+                message:
+                    getValueSafe(
+                        notificationGR,
+                        "message"
+                    ) ||
+                    "New student notification"
+
+            });
+
+        }
+
+    }
+
+
+    /* ============================================================
+       APPLICATION PIPELINE
+       ============================================================ */
+
+    if (tableExists(APPLICATION)) {
+
+        data.applicationStats.shortlisted =
+            countStatus(
+                APPLICATION,
+                "shortlisted",
+                true
+            );
+
+
+        data.applicationStats.assessment =
+            countStatus(
+                APPLICATION,
+                "assessment_status",
+                "Completed"
+            );
+
+
+        data.applicationStats.interview =
+            countStatus(
+                APPLICATION,
+                "interview_status",
+                "Completed"
+            );
+
+
+        data.applicationStats.offers =
+            countStatus(
+                APPLICATION,
+                "offer_status",
+                "Offered"
+            );
+
+    }
+
+
+    /* ============================================================
+       TRAINING
+       ============================================================ */
+
+    data.training.active =
+        countStatus(
+            TRAINING,
+            "status",
+            "Ongoing"
+        );
+
+
+    data.training.enrollments =
+        countRecords(
+            ENROLLMENT
+        );
+
+
+    data.training.completed =
+        countStatus(
+            ENROLLMENT,
+            "completion_status",
+            "Completed"
+        );
+
+
+    /* ============================================================
+       FINAL NORMALIZATION
+       ============================================================ */
+
+    data.readiness.average =
+        clamp(
+            data.readiness.average,
+            0,
+            100
+        );
+
+
+    data.risk.highPercent =
+        clamp(
+            data.risk.highPercent,
+            0,
+            100
+        );
+
+
+    data.risk.mediumPercent =
+        clamp(
+            data.risk.mediumPercent,
+            0,
+            100
+        );
+
+
+    data.risk.lowPercent =
+        clamp(
+            data.risk.lowPercent,
+            0,
+            100
+        );
+
+})();
+
+try {
+  data.aiWidget = $sp.getWidget('c4ae634574e703107f4410c9fee0cde5', {});
+  data.chatbotWidget = data.aiWidget;
+} catch(e) {}
+]]></script>
+        <servicenow>false</servicenow>
+        <sys_class_name>sp_widget</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-22 11:50:01</sys_created_on>
+        <sys_id>2eed79a8f1af03107f44ff560373bbb8</sys_id>
+        <sys_mod_count>9</sys_mod_count>
+        <sys_name>Campus360 TPO Command Center</sys_name>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name>sp_widget_2eed79a8f1af03107f44ff560373bbb8</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-30 19:21:13</sys_updated_on>
+        <template><![CDATA[<div class="campus360-app">
+
+  <!-- =========================================================
+       SIDEBAR
+       ========================================================= -->
+
+  <aside class="campus360-sidebar">
+
+    <!-- BRAND -->
+    <div class="sidebar-brand">
+
+      <div class="brand-mark">
+        C
+      </div>
+
+      <div class="brand-text">
+
+        <div class="brand-name">
+          Campus360
+        </div>
+
+        <div class="brand-subtitle">
+          TPO Portal
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- TPO PROFILE -->
+    <a class="student-mini-profile"
+       href="?id=campus360_tpo_dashboard">
+
+      <div class="student-avatar">
+        TP
+      </div>
+
+      <div class="student-mini-info">
+
+        <div class="student-mini-name">
+          {{data.tpo.name}}
+        </div>
+
+        <div class="student-mini-id">
+          Training &amp; Placement Office
+        </div>
+
+      </div>
+
+      <span class="profile-arrow">
+        ›
+      </span>
+
+    </a>
+
+
+    <!-- =======================================================
+         NAVIGATION
+         ======================================================= -->
+
+    <nav class="campus360-nav">
+
+      <!-- OVERVIEW -->
+      <div class="nav-section-title">
+        OVERVIEW
+      </div>
+
+
+      <!-- DASHBOARD -->
+      <a class="nav-item active"
+         href="?id=campus360_tpo_dashboard">
+
+        <span class="nav-icon">
+          ⌂
+        </span>
+
+        <span>
+          Dashboard
+        </span>
+
+      </a>
+
+
+      <!-- =====================================================
+           STUDENTS
+           ===================================================== -->
+
+      <div class="nav-section-title">
+        STUDENTS
+      </div>
+
+
+      <a class="nav-item"
+         href="?id=campus360_tpo_students">
+
+        <span class="nav-icon">
+          ♙
+        </span>
+
+        <span>
+          Students
+        </span>
+
+        <span class="nav-count"
+              ng-if="data.kpis.students > 0">
+
+          {{data.kpis.students}}
+
+        </span>
+
+      </a>
+
+
+      <a class="nav-item"
+         href="?id=campus360_tpo_skill_intelligence">
+
+        <span class="nav-icon">
+          ✦
+        </span>
+
+        <span>
+          Skill Intelligence
+        </span>
+
+      </a>
+
+
+      <a class="nav-item"
+         href="?id=campus360_tpo_assessments">
+
+        <span class="nav-icon">
+          ▤
+        </span>
+
+        <span>
+          Assessments
+        </span>
+
+      </a>
+
+
+      <!-- =====================================================
+           PLACEMENTS
+           ===================================================== -->
+
+      <div class="nav-section-title">
+        PLACEMENTS
+      </div>
+
+
+      <a class="nav-item"
+         href="?id=campus360_tpo_companies">
+
+        <span class="nav-icon">
+          ▥
+        </span>
+
+        <span>
+          Companies
+        </span>
+
+        <span class="nav-count"
+              ng-if="data.kpis.companies > 0">
+
+          {{data.kpis.companies}}
+
+        </span>
+
+      </a>
+
+
+      <a class="nav-item"
+         href="?id=campus360_tpo_opportunities">
+
+        <span class="nav-icon">
+          ◈
+        </span>
+
+        <span>
+          Opportunities
+        </span>
+
+        <span class="nav-count"
+              ng-if="data.kpis.openOpportunities > 0">
+
+          {{data.kpis.openOpportunities}}
+
+        </span>
+
+      </a>
+
+
+      <a class="nav-item"
+         href="?id=campus360_tpo_applications">
+
+        <span class="nav-icon">
+          ▤
+        </span>
+
+        <span>
+          Applications
+        </span>
+
+        <span class="nav-count"
+              ng-if="data.kpis.applications > 0">
+
+          {{data.kpis.applications}}
+
+        </span>
+
+      </a>
+
+
+      <a class="nav-item"
+         href="?id=campus360_tpo_interviews">
+
+        <span class="nav-icon">
+          ◉
+        </span>
+
+        <span>
+          Interviews
+        </span>
+
+      </a>
+
+
+      <a class="nav-item"
+         href="?id=campus360_tpo_outcomes">
+
+        <span class="nav-icon">
+          ✓
+        </span>
+
+        <span>
+          Placement Outcomes
+        </span>
+
+        <span class="nav-count"
+              ng-if="data.kpis.placed > 0">
+
+          {{data.kpis.placed}}
+
+        </span>
+
+      </a>
+
+
+      <!-- =====================================================
+           TRAINING
+           ===================================================== -->
+
+      <div class="nav-section-title">
+        TRAINING
+      </div>
+
+
+      <a class="nav-item"
+         href="?id=campus360_tpo_training">
+
+        <span class="nav-icon">
+          ◆
+        </span>
+
+        <span>
+          Training Programs
+        </span>
+
+      </a>
+
+
+      <a class="nav-item"
+         href="?id=campus360_tpo_enrollments">
+
+        <span class="nav-icon">
+          ◇
+        </span>
+
+        <span>
+          Enrollments
+        </span>
+
+      </a>
+
+
+      <!-- =====================================================
+           INTELLIGENCE
+           ===================================================== -->
+
+      <div class="nav-section-title">
+        INTELLIGENCE
+      </div>
+
+
+      <a class="nav-item"
+         href="?id=campus360_tpo_placement_intelligence">
+
+        <span class="nav-icon">
+          ★
+        </span>
+
+        <span>
+          Placement Intelligence
+        </span>
+
+        <span class="nav-count danger-count"
+              ng-if="data.kpis.highRisk > 0">
+
+          {{data.kpis.highRisk}}
+
+        </span>
+
+      </a>
+
+
+      <a class="nav-item"
+         href="?id=campus360_tpo_interventions">
+
+        <span class="nav-icon">
+          ✦
+        </span>
+
+        <span>
+          Interventions
+        </span>
+
+        <span class="nav-count"
+              ng-if="data.kpis.activeInterventions > 0">
+
+          {{data.kpis.activeInterventions}}
+
+        </span>
+
+      </a>
+
+
+      <!-- =====================================================
+           AI
+           ===================================================== -->
+
+      <div class="nav-section-title">
+        AI &amp; AUTOMATION
+      </div>
+
+
+      <a class="nav-item ai-nav-item"
+         href="?id=campus360_tpo_ai">
+
+        <span class="nav-icon">
+          ✧
+        </span>
+
+        <span>
+          AI Assistant
+        </span>
+
+        <span class="ai-mini-badge">
+          AI
+        </span>
+
+      </a>
+
+    </nav>
+
+
+    <!-- =======================================================
+         SIDEBAR FOOTER
+         ======================================================= -->
+
+    <div class="sidebar-footer">
+
+      <div class="journey-mini">
+
+        <div class="journey-mini-label">
+          PLACEMENT READINESS
+        </div>
+
+        <div class="journey-mini-progress">
+
+          <div class="journey-mini-fill"
+               ng-style="{'width': data.readiness.average + '%'}">
+          </div>
+
+        </div>
+
+        <div class="journey-mini-score">
+          {{data.readiness.average}}% average readiness
+        </div>
+
+      </div>
+
+    </div>
+
+  </aside>
+
+
+  <!-- =========================================================
+       MAIN CONTENT
+       ========================================================= -->
+
+  <main class="campus360-main">
+
+
+    <!-- =======================================================
+         TOP BAR
+         ======================================================= -->
+
+    <header class="topbar">
+
+      <div class="topbar-left">
+
+        <div class="page-breadcrumb">
+
+          TPO Portal
+
+          <span>
+            /
+          </span>
+
+          Dashboard
+
+        </div>
+
+      </div>
+
+
+      <div class="topbar-right">
+
+        <!-- SEARCH -->
+        <div class="tpo-search">
+
+          <span>
+            ⌕
+          </span>
+
+          <input
+            type="text"
+            ng-model="c.search"
+            placeholder="Search students, companies, opportunities..."
+          />
+
+        </div>
+
+
+        <!-- REFRESH -->
+        <button class="icon-button"
+                ng-click="c.refreshDashboard()"
+                title="Refresh dashboard">
+
+          ↻
+
+        </button>
+
+
+        <!-- TPO -->
+        <a class="top-profile"
+           href="?id=campus360_tpo_dashboard">
+
+          <div class="top-avatar">
+            TP
+          </div>
+
+          <div class="top-profile-text">
+
+            <span class="top-profile-name">
+              {{data.tpo.name}}
+            </span>
+
+            <span class="top-profile-id">
+              TPO
+            </span>
+
+          </div>
+
+        </a>
+
+      </div>
+
+    </header>
+
+
+    <!-- =======================================================
+         DASHBOARD CONTENT
+         ======================================================= -->
+
+    <section class="dashboard-content">
+
+
+      <!-- =====================================================
+           WELCOME
+           ===================================================== -->
+
+      <div class="dashboard-header">
+
+        <div>
+
+          <div class="eyebrow">
+            TPO COMMAND CENTER
+          </div>
+
+          <h1>
+            Welcome back, TPO ]]>👋
+<![CDATA[          </h1>
+
+          <p>
+            Monitor placement readiness, recruitment activity,
+            student risk, and training outcomes from one place.
+          </p>
+
+        </div>
+
+
+        <div class="student-context">
+
+          <span class="context-label">
+            CAMPUS360
+          </span>
+
+          <strong>
+            Training &amp; Placement Office
+          </strong>
+
+        </div>
+
+      </div>
+
+
+      <!-- =====================================================
+           KPI CARDS
+           ===================================================== -->
+
+      <div class="kpi-grid">
+
+
+        <!-- STUDENTS -->
+        <a class="kpi-card kpi-blue"
+           href="?id=campus360_tpo_students">
+
+          <div class="kpi-top">
+
+            <span class="kpi-label">
+              Total Students
+            </span>
+
+            <span class="kpi-icon">
+              ♙
+            </span>
+
+          </div>
+
+          <div class="kpi-value">
+            {{data.kpis.students}}
+          </div>
+
+          <div class="kpi-bottom">
+
+            <span>
+              Student master
+            </span>
+
+            <span class="kpi-link">
+              View →
+            </span>
+
+          </div>
+
+        </a>
+
+
+        <!-- READINESS -->
+        <a class="kpi-card kpi-purple"
+           href="?id=campus360_tpo_placement_intelligence">
+
+          <div class="kpi-top">
+
+            <span class="kpi-label">
+              Avg Readiness
+            </span>
+
+            <span class="kpi-icon">
+              ↗
+            </span>
+
+          </div>
+
+          <div class="kpi-value">
+
+            {{data.readiness.average}}
+
+            <span>
+              %
+            </span>
+
+          </div>
+
+          <div class="kpi-bottom">
+
+            <span>
+              Placement intelligence
+            </span>
+
+            <span class="kpi-link">
+              View →
+            </span>
+
+          </div>
+
+        </a>
+
+
+        <!-- HIGH RISK -->
+        <a class="kpi-card kpi-red"
+           href="?id=campus360_tpo_placement_intelligence">
+
+          <div class="kpi-top">
+
+            <span class="kpi-label">
+              High Risk
+            </span>
+
+            <span class="kpi-icon">
+              !
+            </span>
+
+          </div>
+
+          <div class="kpi-value">
+            {{data.kpis.highRisk}}
+          </div>
+
+          <div class="kpi-bottom">
+
+            <span>
+              Students requiring attention
+            </span>
+
+            <span class="kpi-link">
+              Review →
+            </span>
+
+          </div>
+
+        </a>
+
+
+        <!-- PLACED -->
+        <a class="kpi-card kpi-green"
+           href="?id=campus360_tpo_outcomes">
+
+          <div class="kpi-top">
+
+            <span class="kpi-label">
+              Placed Students
+            </span>
+
+            <span class="kpi-icon">
+              ✓
+            </span>
+
+          </div>
+
+          <div class="kpi-value">
+            {{data.kpis.placed}}
+          </div>
+
+          <div class="kpi-bottom">
+
+            <span>
+              Placement status
+            </span>
+
+            <span class="kpi-link">
+              View →
+            </span>
+
+          </div>
+
+        </a>
+
+
+        <!-- OPPORTUNITIES -->
+        <a class="kpi-card kpi-orange"
+           href="?id=campus360_tpo_opportunities">
+
+          <div class="kpi-top">
+
+            <span class="kpi-label">
+              Open Opportunities
+            </span>
+
+            <span class="kpi-icon">
+              ◈
+            </span>
+
+          </div>
+
+          <div class="kpi-value">
+            {{data.kpis.openOpportunities}}
+          </div>
+
+          <div class="kpi-bottom">
+
+            <span>
+              Active recruitment
+            </span>
+
+            <span class="kpi-link">
+              View →
+            </span>
+
+          </div>
+
+        </a>
+
+
+        <!-- APPLICATIONS -->
+        <a class="kpi-card kpi-indigo"
+           href="?id=campus360_tpo_applications">
+
+          <div class="kpi-top">
+
+            <span class="kpi-label">
+              Applications
+            </span>
+
+            <span class="kpi-icon">
+              ▤
+            </span>
+
+          </div>
+
+          <div class="kpi-value">
+            {{data.kpis.applications}}
+          </div>
+
+          <div class="kpi-bottom">
+
+            <span>
+              Student applications
+            </span>
+
+            <span class="kpi-link">
+              View →
+            </span>
+
+          </div>
+
+        </a>
+
+      </div>
+
+
+      <!-- =====================================================
+           INTELLIGENCE ROW
+           ===================================================== -->
+
+      <div class="dashboard-grid">
+
+
+        <!-- READINESS -->
+        <section class="dashboard-card readiness-card">
+
+          <div class="card-header">
+
+            <div>
+
+              <div class="card-eyebrow">
+                PLACEMENT INTELLIGENCE
+              </div>
+
+              <h2>
+                Campus readiness
+              </h2>
+
+            </div>
+
+            <a class="text-link"
+               href="?id=campus360_tpo_placement_intelligence">
+
+              View details →
+
+            </a>
+
+          </div>
+
+
+          <div class="readiness-content">
+
+
+            <!-- SCORE -->
+            <div class="readiness-score">
+
+              <div class="score-ring"
+                   ng-style="{'--score': data.readiness.average}">
+
+                <div class="score-inner">
+
+                  <strong>
+                    {{data.readiness.average}}
+                  </strong>
+
+                  <span>
+                    / 100
+                  </span>
+
+                </div>
+
+              </div>
+
+
+              <div class="score-caption">
+                Average Placement Readiness
+              </div>
+
+            </div>
+
+
+            <!-- METRICS -->
+            <div class="readiness-metrics">
+
+
+              <div class="metric-row">
+
+                <div class="metric-info">
+
+                  <span class="metric-name">
+                    Highly Ready
+                  </span>
+
+                  <strong>
+                    {{data.readiness.highReady}}
+                  </strong>
+
+                </div>
+
+                <div class="metric-bar">
+
+                  <div class="metric-fill"
+                       ng-style="{
+                         'width':
+                         data.readiness.highReadyPercent + '%'
+                       }">
+                  </div>
+
+                </div>
+
+              </div>
+
+
+              <div class="metric-row">
+
+                <div class="metric-info">
+
+                  <span class="metric-name">
+                    Moderate Readiness
+                  </span>
+
+                  <strong>
+                    {{data.readiness.mediumReady}}
+                  </strong>
+
+                </div>
+
+                <div class="metric-bar">
+
+                  <div class="metric-fill blue-fill"
+                       ng-style="{
+                         'width':
+                         data.readiness.mediumReadyPercent + '%'
+                       }">
+                  </div>
+
+                </div>
+
+              </div>
+
+
+              <div class="metric-row">
+
+                <div class="metric-info">
+
+                  <span class="metric-name">
+                    Needs Support
+                  </span>
+
+                  <strong>
+                    {{data.readiness.lowReady}}
+                  </strong>
+
+                </div>
+
+                <div class="metric-bar">
+
+                  <div class="metric-fill warning"
+                       ng-style="{
+                         'width':
+                         data.readiness.lowReadyPercent + '%'
+                       }">
+                  </div>
+
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </section>
+
+
+        <!-- RISK -->
+        <section class="dashboard-card focus-card">
+
+          <div class="card-header">
+
+            <div>
+
+              <div class="card-eyebrow">
+                AI RISK DISTRIBUTION
+              </div>
+
+              <h2>
+                Student risk
+              </h2>
+
+            </div>
+
+            <div class="ai-badge">
+              AI
+            </div>
+
+          </div>
+
+
+          <div class="risk-summary">
+
+
+            <div class="risk-summary-main">
+
+              <div class="risk-total">
+                {{data.risk.total}}
+              </div>
+
+              <div class="risk-total-label">
+                Intelligence records
+              </div>
+
+            </div>
+
+
+            <div class="risk-list">
+
+
+              <div class="risk-item">
+
+                <span class="risk-dot high"></span>
+
+                <span>
+                  High Risk
+                </span>
+
+                <strong>
+                  {{data.risk.high}}
+                </strong>
+
+              </div>
+
+
+              <div class="risk-item">
+
+                <span class="risk-dot medium"></span>
+
+                <span>
+                  Medium Risk
+                </span>
+
+                <strong>
+                  {{data.risk.medium}}
+                </strong>
+
+              </div>
+
+
+              <div class="risk-item">
+
+                <span class="risk-dot low"></span>
+
+                <span>
+                  Low Risk
+                </span>
+
+                <strong>
+                  {{data.risk.low}}
+                </strong>
+
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <div class="risk-bar">
+
+            <div class="risk-bar-high"
+                 ng-style="{'width': data.risk.highPercent + '%'}">
+            </div>
+
+            <div class="risk-bar-medium"
+                 ng-style="{'width': data.risk.mediumPercent + '%'}">
+            </div>
+
+            <div class="risk-bar-low"
+                 ng-style="{'width': data.risk.lowPercent + '%'}">
+            </div>
+
+          </div>
+
+        </section>
+
+      </div>
+
+
+      <!-- =====================================================
+           OPERATIONS ROW
+           ===================================================== -->
+
+      <div class="three-column-grid">
+
+
+        <!-- BOTTLENECKS -->
+        <section class="dashboard-card compact-card">
+
+          <div class="card-header">
+
+            <div>
+
+              <div class="card-eyebrow">
+                PLACEMENT INTELLIGENCE
+              </div>
+
+              <h2>
+                Bottlenecks
+              </h2>
+
+            </div>
+
+          </div>
+
+
+          <div class="list-stack">
+
+            <div class="data-list-item"
+                 ng-repeat="item in data.bottlenecks">
+
+              <div class="data-list-icon">
+                !
+              </div>
+
+              <div class="data-list-content">
+
+                <strong>
+                  {{item.name}}
+                </strong>
+
+                <span>
+                  {{item.count}} students
+                </span>
+
+              </div>
+
+              <div class="data-list-value">
+                {{item.percent}}%
+              </div>
+
+            </div>
+
+
+            <div class="empty-state"
+                 ng-if="!data.bottlenecks.length">
+
+              No bottleneck data available.
+
+            </div>
+
+          </div>
+
+        </section>
+
+
+        <!-- INTERVENTIONS -->
+        <section class="dashboard-card compact-card">
+
+          <div class="card-header">
+
+            <div>
+
+              <div class="card-eyebrow">
+                STUDENT SUPPORT
+              </div>
+
+              <h2>
+                Interventions
+              </h2>
+
+            </div>
+
+            <a class="text-link"
+               href="?id=campus360_tpo_interventions">
+
+              View all →
+
+            </a>
+
+          </div>
+
+
+          <div class="list-stack">
+
+            <div class="data-list-item"
+                 ng-repeat="item in data.interventions">
+
+              <div class="data-list-icon intervention-icon">
+                ✦
+              </div>
+
+              <div class="data-list-content">
+
+                <strong>
+                  {{item.type}}
+                </strong>
+
+                <span>
+                  {{item.status}}
+                </span>
+
+              </div>
+
+              <div class="status-pill"
+                   ng-class="{
+                     'status-recommended':
+                       item.status == 'Recommended',
+
+                     'status-progress':
+                       item.status == 'In Progress',
+
+                     'status-completed':
+                       item.status == 'Completed'
+                   }">
+
+                {{item.count}}
+
+              </div>
+
+            </div>
+
+
+            <div class="empty-state"
+                 ng-if="!data.interventions.length">
+
+              No intervention data available.
+
+            </div>
+
+          </div>
+
+        </section>
+
+
+        <!-- TRAINING -->
+        <section class="dashboard-card compact-card">
+
+          <div class="card-header">
+
+            <div>
+
+              <div class="card-eyebrow">
+                TRAINING
+              </div>
+
+              <h2>
+                Training Activity
+              </h2>
+
+            </div>
+
+            <a class="text-link"
+               href="?id=campus360_tpo_training">
+
+              View all →
+
+            </a>
+
+          </div>
+
+
+          <div class="training-summary">
+
+            <div class="training-big-number">
+              {{data.training.active}}
+            </div>
+
+            <span>
+              Active programs
+            </span>
+
+          </div>
+
+
+          <div class="training-stats">
+
+            <div>
+
+              <strong>
+                {{data.training.enrollments}}
+              </strong>
+
+              <span>
+                Enrollments
+              </span>
+
+            </div>
+
+            <div>
+
+              <strong>
+                {{data.training.completed}}
+              </strong>
+
+              <span>
+                Completed
+              </span>
+
+            </div>
+
+          </div>
+
+        </section>
+
+      </div>
+
+
+      <!-- =====================================================
+           RECRUITMENT ROW
+           ===================================================== -->
+
+      <div class="three-column-grid">
+
+
+        <!-- UPCOMING DRIVES -->
+        <section class="dashboard-card compact-card">
+
+          <div class="card-header">
+
+            <div>
+
+              <div class="card-eyebrow">
+                RECRUITMENT
+              </div>
+
+              <h2>
+                Upcoming Drives
+              </h2>
+
+            </div>
+
+            <a class="text-link"
+               href="?id=campus360_tpo_opportunities">
+
+              View all →
+
+            </a>
+
+          </div>
+
+
+          <div class="drive-list">
+
+            <div class="drive-item"
+                 ng-repeat="drive in data.drives">
+
+              <div class="drive-date">
+
+                <strong>
+                  {{drive.day}}
+                </strong>
+
+                <span>
+                  {{drive.month}}
+                </span>
+
+              </div>
+
+              <div class="drive-content">
+
+                <strong>
+                  {{drive.title}}
+                </strong>
+
+                <span>
+                  {{drive.company}}
+                </span>
+
+              </div>
+
+            </div>
+
+
+            <div class="empty-state"
+                 ng-if="!data.drives.length">
+
+              No upcoming placement drives.
+
+            </div>
+
+          </div>
+
+        </section>
+
+
+        <!-- RECENT ALERTS -->
+        <section class="dashboard-card compact-card">
+
+          <div class="card-header">
+
+            <div>
+
+              <div class="card-eyebrow">
+                NOTIFICATIONS
+              </div>
+
+              <h2>
+                Recent Alerts
+              </h2>
+
+            </div>
+
+          </div>
+
+
+          <div class="alert-list">
+
+            <div class="alert-item"
+                 ng-repeat="alert in data.alerts">
+
+              <div class="alert-icon">
+                !
+              </div>
+
+              <div>
+
+                <strong>
+                  {{alert.title}}
+                </strong>
+
+                <span>
+                  {{alert.message}}
+                </span>
+
+              </div>
+
+            </div>
+
+
+            <div class="empty-state"
+                 ng-if="!data.alerts.length">
+
+              No recent alerts.
+
+            </div>
+
+          </div>
+
+        </section>
+
+
+        <!-- APPLICATION SNAPSHOT -->
+        <section class="dashboard-card compact-card">
+
+          <div class="card-header">
+
+            <div>
+
+              <div class="card-eyebrow">
+                RECRUITMENT PIPELINE
+              </div>
+
+              <h2>
+                Application Snapshot
+              </h2>
+
+            </div>
+
+          </div>
+
+
+          <div class="pipeline-list">
+
+            <div class="pipeline-row">
+
+              <span>
+                Total Applications
+              </span>
+
+              <strong>
+                {{data.kpis.applications}}
+              </strong>
+
+            </div>
+
+
+            <div class="pipeline-row">
+
+              <span>
+                Shortlisted
+              </span>
+
+              <strong>
+                {{data.applicationStats.shortlisted}}
+              </strong>
+
+            </div>
+
+
+            <div class="pipeline-row">
+
+              <span>
+                Assessment Stage
+              </span>
+
+              <strong>
+                {{data.applicationStats.assessment}}
+              </strong>
+
+            </div>
+
+
+            <div class="pipeline-row">
+
+              <span>
+                Interview Stage
+              </span>
+
+              <strong>
+                {{data.applicationStats.interview}}
+              </strong>
+
+            </div>
+
+
+            <div class="pipeline-row">
+
+              <span>
+                Offers
+              </span>
+
+              <strong>
+                {{data.applicationStats.offers}}
+              </strong>
+
+            </div>
+
+          </div>
+
+        </section>
+
+      </div>
+
+
+      <!-- =====================================================
+           QUICK ACTIONS
+           ===================================================== -->
+
+      <section class="dashboard-card quick-actions-card">
+
+        <div class="card-header">
+
+          <div>
+
+            <div class="card-eyebrow">
+              TPO OPERATIONS
+            </div>
+
+            <h2>
+              Quick Actions
+            </h2>
+
+            <p class="card-description">
+              Common Training &amp; Placement Office operations
+            </p>
+
+          </div>
+
+        </div>
+
+
+        <div class="quick-actions">
+
+
+          <a class="quick-action quick-blue"
+             href="?id=campus360_tpo_students">
+
+            <span class="quick-action-icon">
+              +
+            </span>
+
+            <span>
+              Add / Manage Student
+            </span>
+
+          </a>
+
+
+          <a class="quick-action quick-green"
+             href="?id=campus360_tpo_companies">
+
+            <span class="quick-action-icon">
+              +
+            </span>
+
+            <span>
+              Add / Manage Company
+            </span>
+
+          </a>
+
+
+          <a class="quick-action quick-orange"
+             href="?id=campus360_tpo_opportunities">
+
+            <span class="quick-action-icon">
+              +
+            </span>
+
+            <span>
+              Create Opportunity
+            </span>
+
+          </a>
+
+
+          <a class="quick-action quick-purple"
+             href="?id=campus360_tpo_training">
+
+            <span class="quick-action-icon">
+              +
+            </span>
+
+            <span>
+              Create Training
+            </span>
+
+          </a>
+
+
+          <a class="quick-action quick-red"
+             href="?id=campus360_tpo_interventions">
+
+            <span class="quick-action-icon">
+              +
+            </span>
+
+            <span>
+              Create Intervention
+            </span>
+
+          </a>
+
+
+          <a class="quick-action quick-ai"
+             href="?id=campus360_tpo_ai">
+
+            <span class="quick-action-icon">
+              ✦
+            </span>
+
+            <span>
+              Open AI Assistant
+            </span>
+
+          </a>
+
+        </div>
+
+      </section>
+
+
+      <!-- =====================================================
+           FOOTER
+           ===================================================== -->
+
+      <div class="dashboard-footer">
+
+        <span>
+          Campus360 · Intelligent Training &amp; Placement
+        </span>
+
+
+        <button class="refresh-button"
+                ng-click="c.refreshDashboard()">
+
+          ↻ Refresh Dashboard
+
+        </button>
+
+      </div>
+
+
+    </section>
+
+  </main>
+
+</div>
+<div style="position: fixed; bottom: 24px; right: 24px; z-index: 999999;">
+  
+</div>
+<div style="position: fixed; bottom: 24px; right: 24px; z-index: 999999;">
+  <sp-widget widget="data.aiWidget"></sp-widget>
+</div>
+]]></template>
+    </sp_widget>
+</record_update>

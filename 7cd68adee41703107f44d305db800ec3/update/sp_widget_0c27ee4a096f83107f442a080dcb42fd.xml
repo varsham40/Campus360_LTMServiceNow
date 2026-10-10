@@ -1,0 +1,849 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_widget">
+    <sp_widget action="INSERT_OR_UPDATE">
+        <category>custom</category>
+        <client_script><![CDATA[api.controller = function($scope, $location) {
+
+    var c = this;
+
+    // -----------------------------------------
+    // INITIAL VALUES
+    // -----------------------------------------
+
+    c.data.assessment_type = 'Technical';
+    c.data.saving = false;
+
+
+    // -----------------------------------------
+    // BACK TO DASHBOARD
+    // -----------------------------------------
+
+    c.goToDashboard = function() {
+
+        $location.search({
+            id: 'campus360_recruiter_dashboard_new'
+        });
+
+    };
+
+
+    // -----------------------------------------
+    // PUBLISH ASSESSMENT
+    // -----------------------------------------
+
+    c.publish = function() {
+
+        // Basic validation
+        if (!c.data.assessment_name) {
+
+            c.data.message =
+                'Please enter an assessment name.';
+
+            return;
+        }
+
+
+        if (!c.data.opportunity) {
+
+            c.data.message =
+                'Please select a placement opportunity.';
+
+            return;
+        }
+
+
+        c.data.saving = true;
+        c.data.message = '';
+
+
+        // Send data to Server Script
+        c.server.update().then(function(response) {
+
+            c.data.saving = false;
+
+
+            if (response.data.success) {
+
+                c.data.message =
+                    'Assessment published successfully.';
+
+
+                // Redirect to dashboard
+                setTimeout(function() {
+
+                    $location.search({
+                        id: 'campus360_recruiter_dashboard_new'
+                    });
+
+                    $scope.$apply();
+
+                }, 1000);
+
+
+            } else {
+
+                c.data.message =
+                    response.data.message ||
+                    'Unable to publish assessment.';
+
+            }
+
+        });
+
+    };
+
+
+    // -----------------------------------------
+    // CANCEL
+    // -----------------------------------------
+
+    c.cancel = function() {
+
+        c.goToDashboard();
+
+    };
+
+};]]></client_script>
+        <controller_as>c</controller_as>
+        <css>/* =========================================&#13;
+   CAMPUS360 - CREATE ASSESSMENT&#13;
+   ========================================= */&#13;
+&#13;
+.c360-assessment-page {&#13;
+  width: 100%;&#13;
+  min-height: 100vh;&#13;
+  background: #f5f7fb;&#13;
+  padding: 32px 20px 60px;&#13;
+  box-sizing: border-box;&#13;
+}&#13;
+&#13;
+.c360-assessment-container {&#13;
+  max-width: 900px;&#13;
+  margin: 0 auto;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   PAGE HEADER&#13;
+   ========================================= */&#13;
+&#13;
+.c360-page-header {&#13;
+  display: flex;&#13;
+  justify-content: space-between;&#13;
+  align-items: flex-start;&#13;
+  margin-bottom: 22px;&#13;
+  padding: 0 4px;&#13;
+}&#13;
+&#13;
+.c360-eyebrow {&#13;
+  color: #5b52e8;&#13;
+  font-size: 10px;&#13;
+  font-weight: 700;&#13;
+  letter-spacing: 1px;&#13;
+  margin-bottom: 6px;&#13;
+}&#13;
+&#13;
+.c360-page-header h1 {&#13;
+  margin: 0;&#13;
+  color: #10194f;&#13;
+  font-size: 24px;&#13;
+  font-weight: 600;&#13;
+  line-height: 1.3;&#13;
+}&#13;
+&#13;
+.c360-page-header p {&#13;
+  margin: 7px 0 0;&#13;
+  color: #7b7f9c;&#13;
+  font-size: 12px;&#13;
+}&#13;
+&#13;
+.c360-back {&#13;
+  color: #5148df;&#13;
+  font-size: 11px;&#13;
+  font-weight: 500;&#13;
+  text-decoration: none;&#13;
+  padding-top: 5px;&#13;
+}&#13;
+&#13;
+.c360-back:hover {&#13;
+  color: #3931b9;&#13;
+  text-decoration: none;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   FORM CARD&#13;
+   ========================================= */&#13;
+&#13;
+.c360-form-card {&#13;
+  background: #ffffff;&#13;
+  border: 1px solid #dedff0;&#13;
+  border-radius: 12px;&#13;
+  padding: 28px 30px 24px;&#13;
+  box-shadow: 0 4px 14px rgba(50, 55, 110, 0.04);&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   FORM ROW&#13;
+   ========================================= */&#13;
+&#13;
+.c360-form-row {&#13;
+  display: grid;&#13;
+  grid-template-columns: 1fr 1fr;&#13;
+  gap: 16px;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   FIELD&#13;
+   ========================================= */&#13;
+&#13;
+.c360-field {&#13;
+  margin-bottom: 18px;&#13;
+}&#13;
+&#13;
+.c360-field.full {&#13;
+  width: 100%;&#13;
+}&#13;
+&#13;
+.c360-field label {&#13;
+  display: block;&#13;
+  margin-bottom: 7px;&#13;
+  color: #111a4d;&#13;
+  font-size: 11px;&#13;
+  font-weight: 500;&#13;
+}&#13;
+&#13;
+.c360-field label span {&#13;
+  color: #e04b5b;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   INPUTS&#13;
+   ========================================= */&#13;
+&#13;
+.c360-field input,&#13;
+.c360-field select,&#13;
+.c360-field textarea {&#13;
+  width: 100%;&#13;
+  box-sizing: border-box;&#13;
+  border: 1px solid #cfd2df;&#13;
+  border-radius: 5px;&#13;
+  background: #ffffff;&#13;
+  color: #18204f;&#13;
+  font-size: 12px;&#13;
+  font-family: inherit;&#13;
+  outline: none;&#13;
+  transition: border-color 0.2s ease,&#13;
+              box-shadow 0.2s ease;&#13;
+}&#13;
+&#13;
+.c360-field input,&#13;
+.c360-field select {&#13;
+  height: 38px;&#13;
+  padding: 0 11px;&#13;
+}&#13;
+&#13;
+.c360-field textarea {&#13;
+  min-height: 110px;&#13;
+  padding: 10px 11px;&#13;
+  resize: vertical;&#13;
+  line-height: 1.5;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   PLACEHOLDER&#13;
+   ========================================= */&#13;
+&#13;
+.c360-field input::placeholder,&#13;
+.c360-field textarea::placeholder {&#13;
+  color: #9a9db5;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   FOCUS&#13;
+   ========================================= */&#13;
+&#13;
+.c360-field input:focus,&#13;
+.c360-field select:focus,&#13;
+.c360-field textarea:focus {&#13;
+  border-color: #655bea;&#13;
+  box-shadow: 0 0 0 2px rgba(101, 91, 234, 0.08);&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   SELECT&#13;
+   ========================================= */&#13;
+&#13;
+.c360-field select {&#13;
+  cursor: pointer;&#13;
+  appearance: auto;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   FORM ACTIONS&#13;
+   ========================================= */&#13;
+&#13;
+.c360-form-actions {&#13;
+  display: flex;&#13;
+  justify-content: flex-end;&#13;
+  align-items: center;&#13;
+  gap: 10px;&#13;
+  border-top: 1px solid #eeeeF5;&#13;
+  padding-top: 18px;&#13;
+  margin-top: 4px;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   CANCEL&#13;
+   ========================================= */&#13;
+&#13;
+.c360-cancel {&#13;
+  height: 36px;&#13;
+  padding: 0 18px;&#13;
+  border: 1px solid #d8d9e8;&#13;
+  border-radius: 6px;&#13;
+  background: #ffffff;&#13;
+  color: #5f6383;&#13;
+  font-size: 11px;&#13;
+  font-weight: 500;&#13;
+  cursor: pointer;&#13;
+}&#13;
+&#13;
+.c360-cancel:hover {&#13;
+  background: #f7f7fc;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   PUBLISH&#13;
+   ========================================= */&#13;
+&#13;
+.c360-publish {&#13;
+  height: 36px;&#13;
+  padding: 0 20px;&#13;
+  border: none;&#13;
+  border-radius: 6px;&#13;
+  background: #5b52e8;&#13;
+  color: #ffffff;&#13;
+  font-size: 11px;&#13;
+  font-weight: 600;&#13;
+  cursor: pointer;&#13;
+  transition: background 0.2s ease,&#13;
+              transform 0.1s ease;&#13;
+}&#13;
+&#13;
+.c360-publish:hover {&#13;
+  background: #493fd2;&#13;
+}&#13;
+&#13;
+.c360-publish:active {&#13;
+  transform: translateY(1px);&#13;
+}&#13;
+&#13;
+.c360-publish:disabled {&#13;
+  opacity: 0.65;&#13;
+  cursor: not-allowed;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   MESSAGE&#13;
+   ========================================= */&#13;
+&#13;
+.c360-message {&#13;
+  margin-top: 15px;&#13;
+  padding: 10px 12px;&#13;
+  border-radius: 6px;&#13;
+  background: #f0efff;&#13;
+  color: #5148df;&#13;
+  font-size: 11px;&#13;
+  text-align: center;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================&#13;
+   RESPONSIVE&#13;
+   ========================================= */&#13;
+&#13;
+@media (max-width: 700px) {&#13;
+&#13;
+  .c360-assessment-page {&#13;
+    padding: 20px 12px 40px;&#13;
+  }&#13;
+&#13;
+  .c360-page-header {&#13;
+    flex-direction: column;&#13;
+    gap: 10px;&#13;
+  }&#13;
+&#13;
+  .c360-form-card {&#13;
+    padding: 22px 18px;&#13;
+  }&#13;
+&#13;
+  .c360-form-row {&#13;
+    grid-template-columns: 1fr;&#13;
+    gap: 0;&#13;
+  }&#13;
+&#13;
+  .c360-form-actions {&#13;
+    flex-direction: column-reverse;&#13;
+    align-items: stretch;&#13;
+  }&#13;
+&#13;
+  .c360-cancel,&#13;
+  .c360-publish {&#13;
+    width: 100%;&#13;
+  }&#13;
+&#13;
+}</css>
+        <data_table>sp_instance</data_table>
+        <demo_data/>
+        <description/>
+        <docs/>
+        <field_list/>
+        <has_preview>false</has_preview>
+        <id>campus360_create_assessment</id>
+        <internal>false</internal>
+        <link><![CDATA[function link(scope, element, attrs, controller) {
+  
+}]]></link>
+        <name>Campus360 Create Assessment</name>
+        <option_schema/>
+        <public>false</public>
+        <roles/>
+        <script><![CDATA[(function() {
+
+    data.success = false;
+    data.message = '';
+
+
+    // -----------------------------------------
+    // LOAD PLACEMENT OPPORTUNITIES
+    // -----------------------------------------
+
+    data.opportunities = [];
+
+    var opportunities = new GlideRecord(
+        'x_snc_campus360_placement_opportunity'
+    );
+
+    opportunities.addQuery('status', 'Open');
+    opportunities.orderBy('opportunity_title');
+    opportunities.query();
+
+    while (opportunities.next()) {
+
+        var opportunity = {};
+
+        opportunity.sys_id =
+            opportunities.getUniqueValue();
+
+        opportunity.title =
+            opportunities.getValue('opportunity_title');
+
+        opportunity.opportunity_id =
+            opportunities.getValue('opportunity_id');
+
+        data.opportunities.push(opportunity);
+    }
+
+
+    // -----------------------------------------
+    // PUBLISH ASSESSMENT
+    // -----------------------------------------
+
+    if (input) {
+
+        var assessment = new GlideRecord(
+            'x_snc_campus360_student_assessment'
+        );
+
+        assessment.initialize();
+
+
+        // -----------------------------------------
+        // ASSESSMENT ID
+        // -----------------------------------------
+
+        var assessmentNumber =
+            'ASM' +
+            new GlideDateTime().getNumericValue();
+
+        assessment.setValue(
+            'assessment_id',
+            assessmentNumber
+        );
+
+
+        // -----------------------------------------
+        // ASSESSMENT NAME
+        // -----------------------------------------
+
+        assessment.setValue(
+            'assessment_name',
+            input.assessment_name
+        );
+
+
+        // -----------------------------------------
+        // ASSESSMENT TYPE
+        // -----------------------------------------
+
+        if (input.assessment_type) {
+
+            assessment.setValue(
+                'assessment_type',
+                input.assessment_type
+            );
+
+        }
+
+
+        // -----------------------------------------
+        // OPPORTUNITY
+        // -----------------------------------------
+
+        if (input.opportunity) {
+
+            assessment.setValue(
+                'opportunity',
+                input.opportunity
+            );
+
+        }
+
+
+        // -----------------------------------------
+        // DURATION
+        // -----------------------------------------
+
+        if (input.duration) {
+
+            assessment.setValue(
+                'duration',
+                input.duration
+            );
+
+        }
+
+
+        // -----------------------------------------
+        // MAXIMUM SCORE
+        // -----------------------------------------
+
+        if (input.maximum_score) {
+
+            assessment.setValue(
+                'maximum_score',
+                input.maximum_score
+            );
+
+        }
+
+
+        // -----------------------------------------
+        // ASSESSMENT DATE
+        // -----------------------------------------
+
+        if (input.assessment_date) {
+
+            assessment.setValue(
+                'assessment_date',
+                input.assessment_date
+            );
+
+        }
+
+
+        // -----------------------------------------
+        // INSTRUCTIONS
+        // -----------------------------------------
+
+        if (input.instructions) {
+
+            assessment.setValue(
+                'instructions',
+                input.instructions
+            );
+
+        }
+
+
+        // -----------------------------------------
+        // STATUS
+        // -----------------------------------------
+
+        assessment.setValue(
+            'status',
+            'Published'
+        );
+
+
+        // -----------------------------------------
+        // INSERT
+        // -----------------------------------------
+
+        var sysId = assessment.insert();
+
+
+        if (sysId) {
+
+            data.success = true;
+
+            data.assessment_sys_id =
+                sysId;
+
+            data.message =
+                'Assessment published successfully.';
+
+        } else {
+
+            data.success = false;
+
+            data.message =
+                'Failed to create assessment record.';
+
+        }
+
+    }
+
+})();]]></script>
+        <servicenow>false</servicenow>
+        <sys_class_name>sp_widget</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-27 06:10:43</sys_created_on>
+        <sys_id>0c27ee4a096f83107f442a080dcb42fd</sys_id>
+        <sys_mod_count>6</sys_mod_count>
+        <sys_name>Campus360 Create Assessment</sys_name>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name>sp_widget_0c27ee4a096f83107f442a080dcb42fd</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-27 07:59:50</sys_updated_on>
+        <template><![CDATA[<div class="c360-assessment-page">
+
+  <div class="c360-assessment-container">
+
+    <!-- HEADER -->
+    <div class="c360-page-header">
+
+      <div>
+        <div class="c360-eyebrow">
+          RECRUITMENT
+        </div>
+
+        <h1>Create Assessment</h1>
+
+        <p>
+          Create an assessment for students applying to a placement opportunity.
+        </p>
+      </div>
+
+      <button type="button"
+              class="c360-back"
+              ng-click="c.goToDashboard()">
+        ← Back
+      </button>
+
+    </div>
+
+
+    <!-- FORM CARD -->
+    <div class="c360-form-card">
+
+      <!-- ASSESSMENT NAME -->
+      <div class="c360-field full">
+
+        <label>
+          Assessment Name <span>*</span>
+        </label>
+
+        <input
+          type="text"
+          ng-model="c.data.assessment_name"
+          placeholder="e.g. Technical Assessment"
+        >
+
+      </div>
+
+
+      <!-- OPPORTUNITY + TYPE -->
+      <div class="c360-form-row">
+
+        <div class="c360-field">
+
+          <label>
+            Placement Opportunity <span>*</span>
+          </label>
+
+          <select ng-model="c.data.opportunity">
+
+            <option value="">
+              Select opportunity
+            </option>
+
+            <option
+              ng-repeat="opportunity in c.data.opportunities"
+              value="{{opportunity.sys_id}}">
+
+              {{opportunity.title}}
+
+            </option>
+
+          </select>
+
+        </div>
+
+
+        <div class="c360-field">
+
+          <label>
+            Assessment Type
+          </label>
+
+          <select ng-model="c.data.assessment_type">
+
+            <option value="Technical">
+              Technical
+            </option>
+
+            <option value="Aptitude">
+              Aptitude
+            </option>
+
+            <option value="Coding">
+              Coding
+            </option>
+
+            <option value="Communication">
+              Communication
+            </option>
+
+            <option value="Technical + Aptitude">
+              Technical + Aptitude
+            </option>
+
+          </select>
+
+        </div>
+
+      </div>
+
+
+      <!-- DURATION + MAXIMUM SCORE -->
+      <div class="c360-form-row">
+
+        <div class="c360-field">
+
+          <label>
+            Duration (minutes)
+          </label>
+
+          <input
+            type="number"
+            ng-model="c.data.duration"
+            placeholder="e.g. 60"
+          >
+
+        </div>
+
+
+        <div class="c360-field">
+
+          <label>
+            Maximum Score
+          </label>
+
+          <input
+            type="number"
+            ng-model="c.data.maximum_score"
+            placeholder="e.g. 100"
+          >
+
+        </div>
+
+      </div>
+
+
+      <!-- ASSESSMENT DATE -->
+      <div class="c360-field full">
+
+        <label>
+          Assessment Date
+        </label>
+
+        <input
+          type="date"
+          ng-model="c.data.assessment_date"
+        >
+
+      </div>
+
+
+      <!-- INSTRUCTIONS -->
+      <div class="c360-field full">
+
+        <label>
+          Instructions
+        </label>
+
+        <textarea
+          ng-model="c.data.instructions"
+          placeholder="Enter assessment instructions..."
+          rows="5">
+        </textarea>
+
+      </div>
+
+
+      <!-- ACTIONS -->
+      <div class="c360-form-actions">
+
+      <button type="button"
+              class="cancel-button"
+              ng-click="c.cancel()">
+        Cancel
+      </button>
+
+      <button type="button"
+              class="c360-publish"
+              ng-click="c.publish()"
+              ng-disabled="c.data.saving">
+
+        <span ng-if="!c.data.saving">
+          Publish Assessment →
+        </span>
+
+        <span ng-if="c.data.saving">
+          Publishing...
+        </span>
+
+      </button>
+
+    </div>
+
+
+      <!-- MESSAGE -->
+      <div
+        class="c360-message"
+        ng-if="c.data.message">
+
+        {{c.data.message}}
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>]]></template>
+    </sp_widget>
+</record_update>

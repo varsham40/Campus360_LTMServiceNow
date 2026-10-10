@@ -1,0 +1,6700 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_widget">
+    <sp_widget action="INSERT_OR_UPDATE">
+        <category>custom</category>
+        <client_script><![CDATA[api.controller = function($scope, $window, $http) {
+  var c = this;
+
+  c.sidebarCollapsed = false;
+  c.chatbotOpen = false;
+
+  c.toggleSidebar = function() {
+    c.sidebarCollapsed = !c.sidebarCollapsed;
+  };
+
+  c.toggleChatbot = function() {
+    c.chatbotOpen = !c.chatbotOpen;
+  };
+
+  c.goToPage = function(pageId) {
+    $window.location.href = '?id=' + pageId;
+  };
+
+  c.selectedAcadYear = '2023 - 2027';
+  c.filterBatch = 'ALL';
+  c.filterBranch = 'ALL';
+  c.filterStatus = 'ALL';
+  c.filterPackage = 'ALL';
+  c.filterCgpa = 'ALL';
+  c.searchQuery = '';
+
+  c.showNotifs = false;
+  c.notifTab = 'ALL';
+
+  c.activeModal = null;
+  c.unplacedTab = 'ALL';
+
+  c.showDrawer = false;
+  c.drawerType = null;
+  c.selectedStudent = null;
+  c.selectedCompany = null;
+
+  c.toggleNotifs = function() {
+    c.showNotifs = !c.showNotifs;
+  };
+
+  c.clearNotifs = function() {
+    c.showNotifs = false;
+  };
+
+  c.clearFilters = function() {
+    c.selectedAcadYear = '2023 - 2027';
+    c.filterBatch = 'ALL';
+    c.filterBranch = 'ALL';
+    c.filterStatus = 'ALL';
+    c.filterPackage = 'ALL';
+    c.filterCgpa = 'ALL';
+    c.onFilterChange();
+  };
+
+  var masterStudents = [
+    { name: 'Aarav Sharma', roll_number: '23CSE001', branch: 'CSE', cgpa: '8.4', batch: '2023-2027', status: 'Unplaced', applications: 3, interviews: 2, pkg: 0 },
+    { name: 'Bhavna Patel', roll_number: '23ECE012', branch: 'ECE', cgpa: '7.8', batch: '2023-2027', status: 'Unplaced', applications: 2, interviews: 1, pkg: 0 },
+    { name: 'Chirag Rao', roll_number: '23IT045', branch: 'IT', cgpa: '7.2', batch: '2023-2027', status: 'Unplaced', applications: 4, interviews: 3, pkg: 0 },
+    { name: 'Divya Reddy', roll_number: '23CSE089', branch: 'CSE', cgpa: '6.9', batch: '2023-2027', status: 'Unplaced', applications: 1, interviews: 0, pkg: 0 },
+    { name: 'Eshwar Kumar', roll_number: '23MECH004', branch: 'MECH', cgpa: '7.1', batch: '2023-2027', status: 'Unplaced', applications: 2, interviews: 1, pkg: 0 },
+    { name: 'Farhan Ali', roll_number: '23CSE102', branch: 'CSE', cgpa: '8.1', batch: '2023-2027', status: 'Unplaced', applications: 5, interviews: 2, pkg: 0 },
+    { name: 'Gauri Verma', roll_number: '23ECE056', branch: 'ECE', cgpa: '7.6', batch: '2023-2027', status: 'Unplaced', applications: 3, interviews: 1, pkg: 0 },
+    { name: 'Harish Nair', roll_number: '23IT023', branch: 'IT', cgpa: '6.8', batch: '2023-2027', status: 'Unplaced', applications: 2, interviews: 0, pkg: 0 },
+    { name: 'Isha Gupta', roll_number: '23CSE044', branch: 'CSE', cgpa: '8.6', batch: '2023-2027', status: 'Unplaced', applications: 4, interviews: 3, pkg: 0 },
+    { name: 'Jayesh Singh', roll_number: '23MECH018', branch: 'MECH', cgpa: '7.4', batch: '2023-2027', status: 'Unplaced', applications: 1, interviews: 0, pkg: 0 },
+    { name: 'Kavya Joshi', roll_number: '23ECE090', branch: 'ECE', cgpa: '7.9', batch: '2023-2027', status: 'Unplaced', applications: 3, interviews: 2, pkg: 0 },
+    { name: 'Karan Shah', roll_number: '23CSE015', branch: 'CSE', cgpa: '9.1', batch: '2023-2027', status: 'Placed', applications: 2, interviews: 2, pkg: 12.5 },
+    { name: 'Meera Das', roll_number: '23ECE004', branch: 'ECE', cgpa: '8.8', batch: '2023-2027', status: 'Placed', applications: 3, interviews: 2, pkg: 9.0 },
+    { name: 'Nikhil Roy', roll_number: '23IT009', branch: 'IT', cgpa: '8.5', batch: '2023-2027', status: 'Placed', applications: 2, interviews: 1, pkg: 10.0 },
+    { name: 'Ojaswini K', roll_number: '23CSE077', branch: 'CSE', cgpa: '7.7', batch: '2024-2028', status: 'In Progress', applications: 1, interviews: 1, pkg: 0 },
+    { name: 'Pooja Hegde', roll_number: '23ECE044', branch: 'ECE', cgpa: '8.2', batch: '2024-2028', status: 'Unplaced', applications: 2, interviews: 1, pkg: 0 },
+    { name: 'Rahul Varma', roll_number: '23IT088', branch: 'IT', cgpa: '7.0', batch: '2024-2028', status: 'Unplaced', applications: 1, interviews: 0, pkg: 0 },
+    { name: 'Siddharth M', roll_number: '23MECH050', branch: 'MECH', cgpa: '6.7', batch: '2024-2028', status: 'Unplaced', applications: 1, interviews: 0, pkg: 0 }
+  ];
+
+  c.onFilterChange = function() {
+    var filtered = masterStudents.filter(function(st) {
+      if (c.filterBatch !== 'ALL' && st.batch !== c.filterBatch) return false;
+      if (c.filterBranch !== 'ALL' && st.branch !== c.filterBranch) return false;
+      if (c.filterStatus !== 'ALL' && st.status !== c.filterStatus) return false;
+      
+      var cg = parseFloat(st.cgpa);
+      if (c.filterCgpa === '8.0+' && cg < 8.0) return false;
+      if (c.filterCgpa === '7.5-8.0' && (cg < 7.5 || cg >= 8.0)) return false;
+      if (c.filterCgpa === '7.0-7.5' && (cg < 7.0 || cg >= 7.5)) return false;
+      if (c.filterCgpa === '<7.0' && cg >= 7.0) return false;
+
+      if (c.filterPackage === '10+' && st.pkg < 10) return false;
+      if (c.filterPackage === '6-10' && (st.pkg < 6 || st.pkg > 10)) return false;
+      if (c.filterPackage === '<6' && st.pkg >= 6 && st.status === 'Placed') return false;
+
+      return true;
+    });
+
+    var totalReg = filtered.length;
+    var placedCount = filtered.filter(function(s) { return s.status === 'Placed'; }).length;
+    var unplacedList = filtered.filter(function(s) { return s.status === 'Unplaced'; });
+    var rate = totalReg > 0 ? ((placedCount / totalReg) * 100).toFixed(1) : 0;
+
+    var highlyReady = filtered.filter(function(s) { return parseFloat(s.cgpa) >= 8.0; }).length;
+    var readyCount = totalReg - highlyReady;
+    var highlyReadyPct = totalReg > 0 ? Math.round((highlyReady / totalReg) * 100) : 0;
+    var readyPct = 100 - highlyReadyPct;
+
+    var monthNames = ['Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar', 'Apr', 'May'];
+    var monthlyData = [];
+    var linePoints = [];
+    var pathD = '';
+
+    for (var i = 0; i < 12; i++) {
+      var baseVal = (i + 1) * (totalReg > 0 ? (totalReg / 18) : 1);
+      var offVal = Math.min(Math.round(baseVal * 0.8) + (i % 2), 15);
+      var plcVal = Math.min(Math.round(baseVal * 0.6), offVal);
+      var rateVal = offVal > 0 ? Math.round((plcVal / offVal) * 100) : 0;
+
+      var x1 = 55 + (i * 45);
+      var x2 = x1 + 15;
+      var labelX = x1 + 7;
+
+      var offersH = offVal * 8;
+      var offersY = 165 - offersH;
+      var placedH = plcVal * 8;
+      var placedY = 165 - placedH;
+
+      var cy = 165 - Math.round((rateVal / 100) * 120);
+
+      monthlyData.push({
+        month: monthNames[i],
+        x1: x1, x2: x2, labelX: labelX,
+        offersH: offersH, offersY: offersY,
+        placedH: placedH, placedY: placedY
+      });
+
+      linePoints.push({ cx: x1 + 10, cy: cy });
+
+      if (i === 0) {
+        pathD += 'M ' + (x1 + 10) + ' ' + cy;
+      } else {
+        pathD += ' L ' + (x1 + 10) + ' ' + cy;
+      }
+    }
+
+    c.stats = {
+      totalCompanies: Math.min(3 + Math.floor(totalReg / 5), 6),
+      activeDrives: Math.min(13, totalReg),
+      registeredStudents: totalReg,
+      offersMade: placedCount,
+      placementRate: rate,
+      unplacedCount: unplacedList.length,
+      highlyReady: highlyReady,
+      highlyReadyPct: highlyReadyPct,
+      readyCount: readyCount,
+      readyPct: readyPct,
+      monthlyData: monthlyData,
+      linePoints: linePoints,
+      linePath: pathD,
+      funnel: {
+        registered: totalReg,
+        participating: totalReg,
+        applications: Math.round(totalReg * 1.4),
+        interviews: Math.round(totalReg * 0.9)
+      },
+      topCompaniesList: [
+        { name: 'CMP001', offers: Math.max(1, Math.floor(placedCount / 3)) },
+        { name: 'CMP003', offers: Math.max(1, Math.floor(placedCount / 3)) },
+        { name: 'CMP002', offers: Math.max(1, Math.floor(placedCount / 3)) }
+      ],
+      recentDrivesList: [
+        { company: 'CMP001', role: 'APP DEVELOPER', date: '2026-09-30 00:00:00', cgpa: '8+ CGPA' },
+        { company: 'CMP001', role: 'Software Developer', date: '2026-10-15 08:15:04', cgpa: '7.5+ CGPA' }
+      ]
+    };
+
+    c.filteredUnplacedList = unplacedList;
+  };
+
+  c.onFilterChange();
+
+  c.openModal = function(modalName) { c.activeModal = modalName; };
+  c.closeModal = function() { c.activeModal = null; };
+
+  c.openDrawer = function(type, dataObj) {
+    c.drawerType = type;
+    if (type === 'student') c.selectedStudent = dataObj;
+    if (type === 'company') c.selectedCompany = dataObj;
+    c.showDrawer = true;
+  };
+
+  c.closeDrawer = function() {
+    c.showDrawer = false;
+    c.drawerType = null;
+  };
+
+  c.exportCSV = function() {
+    var csvContent = "data:text/csv;charset=utf-8,Student Name,Roll No,Branch,CGPA,Status\n";
+    c.filteredUnplacedList.forEach(function(s) {
+      csvContent += s.name + "," + s.roll_number + "," + s.branch + "," + s.cgpa + ",Unplaced\n";
+    });
+    var encodedUri = encodeURI(csvContent);
+    var link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "unplaced_students_directory.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  c.drivesDetailedList = [
+    { company: 'CMP001', role: 'APP DEVELOPER', date: '2026-09-30', stage: 'Online Assessment', cgpa: '8.0+', applicants: 18 },
+    { company: 'CMP001', role: 'Software Developer', date: '2026-10-15', stage: 'Technical Round 1', cgpa: '7.5+', applicants: 14 },
+    { company: 'CMP002', role: 'Data Analyst', date: '2026-10-20', stage: 'Resume Screening', cgpa: '7.0+', applicants: 12 },
+    { company: 'CMP003', role: 'System Engineer', date: '2026-11-02', stage: 'Final Interview', cgpa: '7.5+', applicants: 8 }
+  ];
+
+  c.companiesDetailedList = [
+    { name: 'CMP001', industry: 'Software / IT', offers: 1, package: '12.5 LPA' },
+    { name: 'CMP002', industry: 'Analytics', offers: 1, package: '9.0 LPA' },
+    { name: 'CMP003', industry: 'Core Tech', offers: 1, package: '10.0 LPA' }
+  ];
+};]]></client_script>
+        <controller_as>c</controller_as>
+        <css>/* =========================================================&#13;
+   CAMPUS360 PLACEMENT OUTCOMES&#13;
+   NAVBAR + PURPLE SIDEBAR + ALIGNED FILTERS&#13;
+   ========================================================= */&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   FONT&#13;
+   ========================================================= */&#13;
+&#13;
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap');&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   VARIABLES&#13;
+   ========================================================= */&#13;
+&#13;
+:root{&#13;
+&#13;
+  --navy:#100a27;&#13;
+  --navy-dark:#0d0820;&#13;
+  --navy-light:#1b143b;&#13;
+&#13;
+  --purple:#7c3aed;&#13;
+  --purple-dark:#6d28d9;&#13;
+  --purple-soft:#f3e8ff;&#13;
+&#13;
+  --blue:#2563eb;&#13;
+  --green:#10b981;&#13;
+  --orange:#f97316;&#13;
+  --pink:#ec4899;&#13;
+  --cyan:#0891b2;&#13;
+&#13;
+  --bg:#f5f7fb;&#13;
+  --white:#ffffff;&#13;
+&#13;
+  --text:#10182b;&#13;
+  --muted:#64748b;&#13;
+&#13;
+  --line:#e2e8f0;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   GLOBAL RESET&#13;
+   ========================================================= */&#13;
+&#13;
+html,&#13;
+body{&#13;
+&#13;
+  width:100% !important;&#13;
+  height:100% !important;&#13;
+&#13;
+  min-width:100% !important;&#13;
+  min-height:100% !important;&#13;
+&#13;
+  margin:0 !important;&#13;
+  padding:0 !important;&#13;
+&#13;
+  overflow:hidden !important;&#13;
+&#13;
+  background:&#13;
+    var(--bg) !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+*{&#13;
+  box-sizing:border-box;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   HIDE NATIVE SERVICENOW NAVBAR&#13;
+   ========================================================= */&#13;
+&#13;
+body:has(.campus360-tpo-layout) #sp-header,&#13;
+body:has(.campus360-tpo-layout) .sp-header,&#13;
+body:has(.campus360-tpo-layout) .sp-navbar,&#13;
+body:has(.campus360-tpo-layout) #sp-nav-bar,&#13;
+body:has(.campus360-tpo-layout) .sp-nav-bar,&#13;
+body:has(.campus360-tpo-layout) header#sp-header,&#13;
+body:has(.campus360-tpo-layout) header.sp-header,&#13;
+body:has(.campus360-tpo-layout) header.navbar,&#13;
+body:has(.campus360-tpo-layout) nav.navbar,&#13;
+body:has(.campus360-tpo-layout) .navbar.sp-navbar,&#13;
+body:has(.campus360-tpo-layout) .navbar.navbar-default,&#13;
+body:has(.campus360-tpo-layout) .navbar.navbar-inverse,&#13;
+body:has(.campus360-tpo-layout) #responsiveNav{&#13;
+&#13;
+  display:none !important;&#13;
+  visibility:hidden !important;&#13;
+&#13;
+  height:0 !important;&#13;
+  min-height:0 !important;&#13;
+  max-height:0 !important;&#13;
+&#13;
+  width:0 !important;&#13;
+&#13;
+  margin:0 !important;&#13;
+  padding:0 !important;&#13;
+&#13;
+  overflow:hidden !important;&#13;
+&#13;
+  opacity:0 !important;&#13;
+&#13;
+  pointer-events:none !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   SERVICE PORTAL OUTER SPACING&#13;
+   ========================================================= */&#13;
+&#13;
+body:has(.campus360-tpo-layout) #sp-page,&#13;
+body:has(.campus360-tpo-layout) #sp-main,&#13;
+body:has(.campus360-tpo-layout) .sp-page,&#13;
+body:has(.campus360-tpo-layout) .sp-main,&#13;
+body:has(.campus360-tpo-layout) .page-wrapper,&#13;
+body:has(.campus360-tpo-layout) .main-content{&#13;
+&#13;
+  width:100% !important;&#13;
+  max-width:none !important;&#13;
+&#13;
+  margin:0 !important;&#13;
+  padding:0 !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   ROOT APPLICATION&#13;
+   ========================================================= */&#13;
+&#13;
+.campus360-tpo-layout{&#13;
+&#13;
+  position:fixed !important;&#13;
+&#13;
+  inset:0 !important;&#13;
+&#13;
+  width:100vw !important;&#13;
+  height:100vh !important;&#13;
+&#13;
+  display:flex !important;&#13;
+&#13;
+  overflow:hidden !important;&#13;
+&#13;
+  background:&#13;
+    var(--bg) !important;&#13;
+&#13;
+  color:&#13;
+    var(--text) !important;&#13;
+&#13;
+  font-family:&#13;
+    'Plus Jakarta Sans',&#13;
+    -apple-system,&#13;
+    BlinkMacSystemFont,&#13;
+    'Segoe UI',&#13;
+    Roboto,&#13;
+    sans-serif !important;&#13;
+&#13;
+  z-index:2147483647 !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   SIDEBAR&#13;
+   DARK PURPLE LIKE THIRD IMAGE&#13;
+   ========================================================= */&#13;
+&#13;
+.tpo-sidebar{&#13;
+&#13;
+  width:270px !important;&#13;
+  min-width:270px !important;&#13;
+  max-width:270px !important;&#13;
+&#13;
+  height:100vh !important;&#13;
+&#13;
+  flex:0 0 270px !important;&#13;
+&#13;
+  display:flex !important;&#13;
+&#13;
+  flex-direction:column !important;&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      180deg,&#13;
+      #10092a 0%,&#13;
+      #120c2e 50%,&#13;
+      #0d0821 100%&#13;
+    ) !important;&#13;
+&#13;
+  border-right:&#13;
+    1px solid #292143 !important;&#13;
+&#13;
+  color:#ffffff !important;&#13;
+&#13;
+  overflow-x:hidden !important;&#13;
+  overflow-y:auto !important;&#13;
+&#13;
+  scrollbar-width:none !important;&#13;
+&#13;
+  z-index:2000 !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.tpo-sidebar::-webkit-scrollbar{&#13;
+&#13;
+  width:0 !important;&#13;
+  height:0 !important;&#13;
+&#13;
+  display:none !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   SIDEBAR BRAND&#13;
+   ========================================================= */&#13;
+&#13;
+.sidebar-brand{&#13;
+&#13;
+  min-height:90px !important;&#13;
+&#13;
+  height:90px !important;&#13;
+&#13;
+  padding:18px 19px !important;&#13;
+&#13;
+  display:flex !important;&#13;
+&#13;
+  align-items:center !important;&#13;
+&#13;
+  gap:12px !important;&#13;
+&#13;
+  border-bottom:&#13;
+    1px solid rgba(255,255,255,.08) !important;&#13;
+&#13;
+  flex-shrink:0 !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.brand-logo{&#13;
+&#13;
+  width:50px !important;&#13;
+  height:50px !important;&#13;
+&#13;
+  min-width:50px !important;&#13;
+&#13;
+  border-radius:14px !important;&#13;
+&#13;
+  display:flex !important;&#13;
+&#13;
+  align-items:center !important;&#13;
+  justify-content:center !important;&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      135deg,&#13;
+      #743be4,&#13;
+      #8b4af3&#13;
+    ) !important;&#13;
+&#13;
+  color:#ffffff !important;&#13;
+&#13;
+  font-size:24px !important;&#13;
+&#13;
+  font-weight:900 !important;&#13;
+&#13;
+  box-shadow:&#13;
+    0 8px 22px rgba(124,58,237,.25) !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.brand-title{&#13;
+&#13;
+  display:block !important;&#13;
+&#13;
+  color:#ffffff !important;&#13;
+&#13;
+  font-size:18px !important;&#13;
+&#13;
+  font-weight:900 !important;&#13;
+&#13;
+  letter-spacing:-.4px !important;&#13;
+&#13;
+  line-height:1.1 !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.brand-sub{&#13;
+&#13;
+  display:block !important;&#13;
+&#13;
+  margin-top:4px !important;&#13;
+&#13;
+  color:#c6b6ef !important;&#13;
+&#13;
+  font-size:10px !important;&#13;
+&#13;
+  font-weight:800 !important;&#13;
+&#13;
+  letter-spacing:.8px !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   SIDEBAR USER CARD&#13;
+   ========================================================= */&#13;
+&#13;
+.sidebar-user{&#13;
+&#13;
+  margin:16px 13px 10px !important;&#13;
+&#13;
+  padding:12px 13px !important;&#13;
+&#13;
+  min-height:73px !important;&#13;
+&#13;
+  display:flex !important;&#13;
+&#13;
+  align-items:center !important;&#13;
+&#13;
+  gap:11px !important;&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      145deg,&#13;
+      #1d1641,&#13;
+      #241a4e&#13;
+    ) !important;&#13;
+&#13;
+  border:&#13;
+    1px solid #392b63 !important;&#13;
+&#13;
+  border-radius:15px !important;&#13;
+&#13;
+  box-shadow:&#13;
+    0 5px 15px rgba(0,0,0,.18) !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.user-avatar{&#13;
+&#13;
+  width:44px !important;&#13;
+  height:44px !important;&#13;
+&#13;
+  min-width:44px !important;&#13;
+&#13;
+  border-radius:50% !important;&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      135deg,&#13;
+      #8c50ed,&#13;
+      #7337dd&#13;
+    ) !important;&#13;
+&#13;
+  color:#ffffff !important;&#13;
+&#13;
+  display:flex !important;&#13;
+&#13;
+  align-items:center !important;&#13;
+  justify-content:center !important;&#13;
+&#13;
+  font-size:13px !important;&#13;
+&#13;
+  font-weight:900 !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.user-info{&#13;
+&#13;
+  min-width:0 !important;&#13;
+&#13;
+  display:flex !important;&#13;
+&#13;
+  flex-direction:column !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.user-name{&#13;
+&#13;
+  color:#ffffff !important;&#13;
+&#13;
+  font-size:13px !important;&#13;
+&#13;
+  font-weight:900 !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.user-role{&#13;
+&#13;
+  margin-top:3px !important;&#13;
+&#13;
+  color:#c4b4ed !important;&#13;
+&#13;
+  font-size:9px !important;&#13;
+&#13;
+  font-weight:700 !important;&#13;
+&#13;
+  white-space:nowrap !important;&#13;
+&#13;
+  overflow:hidden !important;&#13;
+&#13;
+  text-overflow:ellipsis !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   SIDEBAR NAV&#13;
+   ========================================================= */&#13;
+&#13;
+.sidebar-nav{&#13;
+&#13;
+  flex:1 1 auto !important;&#13;
+&#13;
+  min-height:0 !important;&#13;
+&#13;
+  padding:&#13;
+    3px 11px 18px !important;&#13;
+&#13;
+  overflow-y:auto !important;&#13;
+  overflow-x:hidden !important;&#13;
+&#13;
+  scrollbar-width:none !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.sidebar-nav::-webkit-scrollbar{&#13;
+&#13;
+  width:0 !important;&#13;
+  height:0 !important;&#13;
+&#13;
+  display:none !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nav-section-title{&#13;
+&#13;
+  padding:&#13;
+    15px 14px 7px !important;&#13;
+&#13;
+  color:#8e87a4 !important;&#13;
+&#13;
+  font-size:9px !important;&#13;
+&#13;
+  font-weight:900 !important;&#13;
+&#13;
+  letter-spacing:1.3px !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nav-item{&#13;
+&#13;
+  width:100% !important;&#13;
+&#13;
+  min-height:42px !important;&#13;
+&#13;
+  padding:&#13;
+    0 13px !important;&#13;
+&#13;
+  margin-bottom:3px !important;&#13;
+&#13;
+  display:flex !important;&#13;
+&#13;
+  align-items:center !important;&#13;
+&#13;
+  gap:11px !important;&#13;
+&#13;
+  border-radius:10px !important;&#13;
+&#13;
+  color:#ded9ed !important;&#13;
+&#13;
+  background:transparent !important;&#13;
+&#13;
+  text-decoration:none !important;&#13;
+&#13;
+  font-size:12px !important;&#13;
+&#13;
+  font-weight:700 !important;&#13;
+&#13;
+  cursor:pointer !important;&#13;
+&#13;
+  transition:&#13;
+    background .15s ease,&#13;
+    color .15s ease,&#13;
+    transform .15s ease !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nav-item:hover{&#13;
+&#13;
+  background:&#13;
+    rgba(255,255,255,.07) !important;&#13;
+&#13;
+  color:#ffffff !important;&#13;
+&#13;
+  text-decoration:none !important;&#13;
+&#13;
+  transform:&#13;
+    translateX(1px) !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nav-item.active{&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      90deg,&#13;
+      #7b3aed 0%,&#13;
+      #8b44ef 100%&#13;
+    ) !important;&#13;
+&#13;
+  color:#ffffff !important;&#13;
+&#13;
+  box-shadow:&#13;
+    0 8px 20px&#13;
+    rgba(124,58,237,.25) !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nav-icon{&#13;
+&#13;
+  width:20px !important;&#13;
+&#13;
+  min-width:20px !important;&#13;
+&#13;
+  text-align:center !important;&#13;
+&#13;
+  font-size:15px !important;&#13;
+&#13;
+  color:#bdb5d0 !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nav-item.active .nav-icon,&#13;
+.nav-item:hover .nav-icon{&#13;
+&#13;
+  color:#ffffff !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nav-label{&#13;
+&#13;
+  flex:1 !important;&#13;
+&#13;
+  min-width:0 !important;&#13;
+&#13;
+  white-space:nowrap !important;&#13;
+&#13;
+  overflow:hidden !important;&#13;
+&#13;
+  text-overflow:ellipsis !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nav-badge{&#13;
+&#13;
+  min-width:23px !important;&#13;
+&#13;
+  height:23px !important;&#13;
+&#13;
+  padding:0 6px !important;&#13;
+&#13;
+  display:flex !important;&#13;
+&#13;
+  align-items:center !important;&#13;
+&#13;
+  justify-content:center !important;&#13;
+&#13;
+  border-radius:50% !important;&#13;
+&#13;
+  background:&#13;
+    #342758 !important;&#13;
+&#13;
+  color:#cdbef1 !important;&#13;
+&#13;
+  font-size:9px !important;&#13;
+&#13;
+  font-weight:900 !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   SIDEBAR FOOTER&#13;
+   ========================================================= */&#13;
+&#13;
+.sidebar-footer{&#13;
+&#13;
+  flex-shrink:0 !important;&#13;
+&#13;
+  padding:&#13;
+    15px !important;&#13;
+&#13;
+  border-top:&#13;
+    1px solid rgba(255,255,255,.06) !important;&#13;
+&#13;
+  color:#817b95 !important;&#13;
+&#13;
+  font-size:8px !important;&#13;
+&#13;
+  text-align:center !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   SIDEBAR COLLAPSED&#13;
+   ========================================================= */&#13;
+&#13;
+.campus360-tpo-layout.sidebar-collapsed&#13;
+.tpo-sidebar{&#13;
+&#13;
+  width:0 !important;&#13;
+  min-width:0 !important;&#13;
+  max-width:0 !important;&#13;
+&#13;
+  flex-basis:0 !important;&#13;
+&#13;
+  transform:&#13;
+    translateX(-100%) !important;&#13;
+&#13;
+  opacity:0 !important;&#13;
+&#13;
+  pointer-events:none !important;&#13;
+&#13;
+  overflow:hidden !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.campus360-tpo-layout.sidebar-collapsed&#13;
+.tpo-right-container{&#13;
+&#13;
+  width:100vw !important;&#13;
+&#13;
+  flex:1 1 100% !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   RIGHT SIDE&#13;
+   ========================================================= */&#13;
+&#13;
+.tpo-right-container{&#13;
+&#13;
+  min-width:0 !important;&#13;
+&#13;
+  min-height:0 !important;&#13;
+&#13;
+  height:100vh !important;&#13;
+&#13;
+  flex:1 1 auto !important;&#13;
+&#13;
+  display:flex !important;&#13;
+&#13;
+  flex-direction:column !important;&#13;
+&#13;
+  overflow:hidden !important;&#13;
+&#13;
+  background:&#13;
+    var(--bg) !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   CUSTOM TOP NAVBAR&#13;
+   MATCH FIRST IMAGE&#13;
+   ========================================================= */&#13;
+&#13;
+.tpo-top-navbar{&#13;
+&#13;
+  width:100% !important;&#13;
+&#13;
+  height:68px !important;&#13;
+&#13;
+  min-height:68px !important;&#13;
+  max-height:68px !important;&#13;
+&#13;
+  flex:0 0 68px !important;&#13;
+&#13;
+  padding:&#13;
+    0 20px !important;&#13;
+&#13;
+  display:flex !important;&#13;
+&#13;
+  align-items:center !important;&#13;
+&#13;
+  justify-content:space-between !important;&#13;
+&#13;
+  background:#ffffff !important;&#13;
+&#13;
+  border-bottom:&#13;
+    1px solid #e1e5ec !important;&#13;
+&#13;
+  box-shadow:&#13;
+    0 1px 3px rgba(15,23,42,.035) !important;&#13;
+&#13;
+  z-index:3000 !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   TOP LEFT&#13;
+   ========================================================= */&#13;
+&#13;
+.top-nav-left{&#13;
+&#13;
+  display:flex !important;&#13;
+&#13;
+  align-items:center !important;&#13;
+&#13;
+  gap:14px !important;&#13;
+&#13;
+  min-width:0 !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.btn-toggle-sidebar{&#13;
+&#13;
+  width:43px !important;&#13;
+&#13;
+  height:43px !important;&#13;
+&#13;
+  min-width:43px !important;&#13;
+&#13;
+  padding:0 !important;&#13;
+&#13;
+  margin:0 !important;&#13;
+&#13;
+  border:&#13;
+    1px solid #dce1e9 !important;&#13;
+&#13;
+  border-radius:11px !important;&#13;
+&#13;
+  background:#ffffff !important;&#13;
+&#13;
+  color:#4e5b70 !important;&#13;
+&#13;
+  display:flex !important;&#13;
+&#13;
+  align-items:center !important;&#13;
+&#13;
+  justify-content:center !important;&#13;
+&#13;
+  font-size:19px !important;&#13;
+&#13;
+  cursor:pointer !important;&#13;
+&#13;
+  outline:none !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.btn-toggle-sidebar:hover{&#13;
+&#13;
+  background:#f7f3ff !important;&#13;
+&#13;
+  border-color:#d1c0f1 !important;&#13;
+&#13;
+  color:#7138d7 !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   PAGE TITLE&#13;
+   ========================================================= */&#13;
+&#13;
+.top-nav-title-box{&#13;
+&#13;
+  min-width:0 !important;&#13;
+&#13;
+  padding:&#13;
+    4px 10px !important;&#13;
+&#13;
+  border-radius:5px !important;&#13;
+&#13;
+  display:flex !important;&#13;
+&#13;
+  flex-direction:column !important;&#13;
+&#13;
+  justify-content:center !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.top-nav-kicker{&#13;
+&#13;
+  color:#7137db !important;&#13;
+&#13;
+  font-size:8px !important;&#13;
+&#13;
+  font-weight:950 !important;&#13;
+&#13;
+  letter-spacing:1.65px !important;&#13;
+&#13;
+  line-height:1 !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.top-nav-page-title{&#13;
+&#13;
+  margin-top:5px !important;&#13;
+&#13;
+  color:#111829 !important;&#13;
+&#13;
+  font-size:17px !important;&#13;
+&#13;
+  font-weight:950 !important;&#13;
+&#13;
+  line-height:1.1 !important;&#13;
+&#13;
+  letter-spacing:-.25px !important;&#13;
+&#13;
+  white-space:nowrap !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   TOP CENTER SEARCH&#13;
+   LEAN STYLE&#13;
+   ========================================================= */&#13;
+&#13;
+.top-nav-center{&#13;
+&#13;
+  flex:1 1 auto !important;&#13;
+&#13;
+  min-width:260px !important;&#13;
+&#13;
+  max-width:405px !important;&#13;
+&#13;
+  margin:&#13;
+    0 20px !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.header-search-bar{&#13;
+&#13;
+  position:relative !important;&#13;
+&#13;
+  width:100% !important;&#13;
+&#13;
+  height:42px !important;&#13;
+&#13;
+  display:flex !important;&#13;
+&#13;
+  align-items:center !important;&#13;
+&#13;
+  background:#ffffff !important;&#13;
+&#13;
+  border:&#13;
+    1px solid #dfe4ec !important;&#13;
+&#13;
+  border-radius:11px !important;&#13;
+&#13;
+  transition:&#13;
+    border-color .15s ease,&#13;
+    box-shadow .15s ease !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.header-search-bar:focus-within{&#13;
+&#13;
+  border-color:#af95e8 !important;&#13;
+&#13;
+  box-shadow:&#13;
+    0 0 0 3px&#13;
+    rgba(124,58,237,.07) !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.header-search-icon{&#13;
+&#13;
+  position:absolute !important;&#13;
+&#13;
+  left:14px !important;&#13;
+&#13;
+  top:50% !important;&#13;
+&#13;
+  transform:&#13;
+    translateY(-50%) !important;&#13;
+&#13;
+  color:#713be0 !important;&#13;
+&#13;
+  font-size:14px !important;&#13;
+&#13;
+  pointer-events:none !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.header-search-input{&#13;
+&#13;
+  width:100% !important;&#13;
+&#13;
+  height:100% !important;&#13;
+&#13;
+  padding:&#13;
+    0 14px 0 38px !important;&#13;
+&#13;
+  margin:0 !important;&#13;
+&#13;
+  border:0 !important;&#13;
+&#13;
+  outline:0 !important;&#13;
+&#13;
+  background:transparent !important;&#13;
+&#13;
+  color:#273047 !important;&#13;
+&#13;
+  font-size:10px !important;&#13;
+&#13;
+  font-weight:600 !important;&#13;
+&#13;
+  border-radius:11px !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.header-search-input::placeholder{&#13;
+&#13;
+  color:#8c95a5 !important;&#13;
+&#13;
+  font-size:10px !important;&#13;
+&#13;
+  font-weight:600 !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   TOP RIGHT&#13;
+   ========================================================= */&#13;
+&#13;
+.top-nav-right{&#13;
+&#13;
+  display:flex !important;&#13;
+&#13;
+  align-items:center !important;&#13;
+&#13;
+  justify-content:flex-end !important;&#13;
+&#13;
+  gap:9px !important;&#13;
+&#13;
+  position:relative !important;&#13;
+&#13;
+  height:100% !important;&#13;
+&#13;
+  flex-shrink:0 !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   REFRESH + NOTIFICATION&#13;
+   ========================================================= */&#13;
+&#13;
+.btn-top-action{&#13;
+&#13;
+  width:42px !important;&#13;
+&#13;
+  height:42px !important;&#13;
+&#13;
+  min-width:42px !important;&#13;
+&#13;
+  padding:0 !important;&#13;
+&#13;
+  margin:0 !important;&#13;
+&#13;
+  display:flex !important;&#13;
+&#13;
+  align-items:center !important;&#13;
+&#13;
+  justify-content:center !important;&#13;
+&#13;
+  border:&#13;
+    1px solid #dfe3eb !important;&#13;
+&#13;
+  border-radius:50% !important;&#13;
+&#13;
+  background:#ffffff !important;&#13;
+&#13;
+  color:#59667a !important;&#13;
+&#13;
+  font-size:17px !important;&#13;
+&#13;
+  cursor:pointer !important;&#13;
+&#13;
+  outline:none !important;&#13;
+&#13;
+  transition:&#13;
+    background .15s ease,&#13;
+    border-color .15s ease,&#13;
+    color .15s ease,&#13;
+    transform .15s ease !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.btn-top-action:hover{&#13;
+&#13;
+  background:#f7f3ff !important;&#13;
+&#13;
+  border-color:#d2c3f1 !important;&#13;
+&#13;
+  color:#6d35d5 !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.btn-top-action:active{&#13;
+&#13;
+  transform:scale(.95) !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   NOTIFICATION&#13;
+   ========================================================= */&#13;
+&#13;
+.notif-bell-wrap{&#13;
+&#13;
+  position:relative !important;&#13;
+&#13;
+  display:flex !important;&#13;
+&#13;
+  align-items:center !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.notification-action{&#13;
+&#13;
+  position:relative !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.notification-red-dot{&#13;
+&#13;
+  position:absolute !important;&#13;
+&#13;
+  top:6px !important;&#13;
+&#13;
+  right:6px !important;&#13;
+&#13;
+  width:7px !important;&#13;
+&#13;
+  height:7px !important;&#13;
+&#13;
+  background:#ed4764 !important;&#13;
+&#13;
+  border:&#13;
+    1.5px solid #ffffff !important;&#13;
+&#13;
+  border-radius:50% !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   TOP USER DIVIDER&#13;
+   ========================================================= */&#13;
+&#13;
+.top-user-divider{&#13;
+&#13;
+  width:1px !important;&#13;
+&#13;
+  height:34px !important;&#13;
+&#13;
+  margin:&#13;
+    0 5px !important;&#13;
+&#13;
+  background:#e2e6ec !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   PROFILE&#13;
+   ========================================================= */&#13;
+&#13;
+.header-user-card{&#13;
+&#13;
+  height:100% !important;&#13;
+&#13;
+  display:flex !important;&#13;
+&#13;
+  align-items:center !important;&#13;
+&#13;
+  gap:8px !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.h-user-avatar{&#13;
+&#13;
+  width:40px !important;&#13;
+&#13;
+  height:40px !important;&#13;
+&#13;
+  min-width:40px !important;&#13;
+&#13;
+  border-radius:50% !important;&#13;
+&#13;
+  display:flex !important;&#13;
+&#13;
+  align-items:center !important;&#13;
+&#13;
+  justify-content:center !important;&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      135deg,&#13;
+      #7d42ee,&#13;
+      #6f35da&#13;
+    ) !important;&#13;
+&#13;
+  color:#ffffff !important;&#13;
+&#13;
+  font-size:11px !important;&#13;
+&#13;
+  font-weight:950 !important;&#13;
+&#13;
+  box-shadow:&#13;
+    0 4px 10px&#13;
+    rgba(124,58,237,.14) !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.h-user-meta{&#13;
+&#13;
+  min-width:0 !important;&#13;
+&#13;
+  display:flex !important;&#13;
+&#13;
+  flex-direction:column !important;&#13;
+&#13;
+  justify-content:center !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.h-user-name{&#13;
+&#13;
+  color:#1c2537 !important;&#13;
+&#13;
+  font-size:11px !important;&#13;
+&#13;
+  font-weight:950 !important;&#13;
+&#13;
+  line-height:1.1 !important;&#13;
+&#13;
+  white-space:nowrap !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.h-user-role{&#13;
+&#13;
+  margin-top:3px !important;&#13;
+&#13;
+  color:#9199a8 !important;&#13;
+&#13;
+  font-size:8px !important;&#13;
+&#13;
+  font-weight:700 !important;&#13;
+&#13;
+  line-height:1 !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.h-user-chevron{&#13;
+&#13;
+  color:#566174 !important;&#13;
+&#13;
+  font-size:12px !important;&#13;
+&#13;
+  margin-left:2px !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   NOTIFICATION POPOVER&#13;
+   ========================================================= */&#13;
+&#13;
+.notif-popover-panel{&#13;
+&#13;
+  position:absolute !important;&#13;
+&#13;
+  top:50px !important;&#13;
+&#13;
+  right:0 !important;&#13;
+&#13;
+  width:380px !important;&#13;
+&#13;
+  max-width:&#13;
+    calc(100vw - 24px) !important;&#13;
+&#13;
+  padding:15px !important;&#13;
+&#13;
+  background:#ffffff !important;&#13;
+&#13;
+  border:&#13;
+    1px solid #e1e5ec !important;&#13;
+&#13;
+  border-radius:14px !important;&#13;
+&#13;
+  box-shadow:&#13;
+    0 18px 45px rgba(15,23,42,.16) !important;&#13;
+&#13;
+  z-index:9000 !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.notif-header-row{&#13;
+&#13;
+  display:flex !important;&#13;
+&#13;
+  align-items:center !important;&#13;
+&#13;
+  justify-content:space-between !important;&#13;
+&#13;
+  gap:10px !important;&#13;
+&#13;
+  padding-bottom:11px !important;&#13;
+&#13;
+  border-bottom:&#13;
+    1px solid #f1f3f6 !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.notif-title-badge{&#13;
+&#13;
+  display:flex !important;&#13;
+&#13;
+  align-items:center !important;&#13;
+&#13;
+  gap:7px !important;&#13;
+&#13;
+  min-width:0 !important;&#13;
+&#13;
+  color:#182235 !important;&#13;
+&#13;
+  font-size:10px !important;&#13;
+&#13;
+  font-weight:900 !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.bg-danger-light{&#13;
+&#13;
+  padding:3px 7px !important;&#13;
+&#13;
+  background:#fff0f2 !important;&#13;
+&#13;
+  color:#d6475e !important;&#13;
+&#13;
+  border-radius:10px !important;&#13;
+&#13;
+  font-size:8px !important;&#13;
+&#13;
+  font-weight:900 !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.btn-link-clear{&#13;
+&#13;
+  background:none !important;&#13;
+&#13;
+  border:0 !important;&#13;
+&#13;
+  color:#718096 !important;&#13;
+&#13;
+  font-size:8px !important;&#13;
+&#13;
+  font-weight:800 !important;&#13;
+&#13;
+  cursor:pointer !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.notif-tabs-row{&#13;
+&#13;
+  display:flex !important;&#13;
+&#13;
+  gap:6px !important;&#13;
+&#13;
+  margin:&#13;
+    10px 0 !important;&#13;
+&#13;
+  padding-bottom:8px !important;&#13;
+&#13;
+  border-bottom:&#13;
+    1px solid #f1f3f6 !important;&#13;
+&#13;
+  overflow-x:auto !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.n-tab{&#13;
+&#13;
+  border:0 !important;&#13;
+&#13;
+  background:transparent !important;&#13;
+&#13;
+  color:#738095 !important;&#13;
+&#13;
+  border-radius:6px !important;&#13;
+&#13;
+  padding:5px 7px !important;&#13;
+&#13;
+  font-size:8px !important;&#13;
+&#13;
+  font-weight:800 !important;&#13;
+&#13;
+  white-space:nowrap !important;&#13;
+&#13;
+  cursor:pointer !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.n-tab.active{&#13;
+&#13;
+  background:#f4efff !important;&#13;
+&#13;
+  color:#7137d8 !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.notif-cards-scroll{&#13;
+&#13;
+  max-height:280px !important;&#13;
+&#13;
+  overflow-y:auto !important;&#13;
+&#13;
+  display:flex !important;&#13;
+&#13;
+  flex-direction:column !important;&#13;
+&#13;
+  gap:9px !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.n-alert-card{&#13;
+&#13;
+  padding:11px !important;&#13;
+&#13;
+  border-radius:9px !important;&#13;
+&#13;
+  background:#ffffff !important;&#13;
+&#13;
+  border:&#13;
+    1px solid #e5e8ee !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.risk-type{&#13;
+&#13;
+  background:#fff6f7 !important;&#13;
+&#13;
+  border-left:&#13;
+    3px solid #ef4444 !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.opp-type{&#13;
+&#13;
+  background:#f1f7ff !important;&#13;
+&#13;
+  border-left:&#13;
+    3px solid #2563eb !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.n-card-head{&#13;
+&#13;
+  margin-bottom:4px !important;&#13;
+&#13;
+  color:#263147 !important;&#13;
+&#13;
+  font-size:9px !important;&#13;
+&#13;
+  font-weight:900 !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.n-card-body{&#13;
+&#13;
+  margin-bottom:6px !important;&#13;
+&#13;
+  color:#707b8d !important;&#13;
+&#13;
+  font-size:8px !important;&#13;
+&#13;
+  line-height:1.45 !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.n-card-foot{&#13;
+&#13;
+  display:flex !important;&#13;
+&#13;
+  justify-content:space-between !important;&#13;
+&#13;
+  align-items:center !important;&#13;
+&#13;
+  color:#9aa3b1 !important;&#13;
+&#13;
+  font-size:8px !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.btn-xs-dismiss{&#13;
+&#13;
+  padding:3px 6px !important;&#13;
+&#13;
+  border:&#13;
+    1px solid #d8dde5 !important;&#13;
+&#13;
+  border-radius:5px !important;&#13;
+&#13;
+  background:#ffffff !important;&#13;
+&#13;
+  color:#677185 !important;&#13;
+&#13;
+  font-size:7px !important;&#13;
+&#13;
+  cursor:pointer !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   MAIN SCROLL AREA&#13;
+   ========================================================= */&#13;
+&#13;
+.tpo-main-body,&#13;
+.placement-scroll-area{&#13;
+&#13;
+  flex:1 1 auto !important;&#13;
+&#13;
+  min-height:0 !important;&#13;
+&#13;
+  height:auto !important;&#13;
+&#13;
+  max-height:none !important;&#13;
+&#13;
+  overflow-x:hidden !important;&#13;
+&#13;
+  overflow-y:auto !important;&#13;
+&#13;
+  -webkit-overflow-scrolling:touch !important;&#13;
+&#13;
+  scrollbar-width:thin !important;&#13;
+&#13;
+  scrollbar-color:&#13;
+    #aaa2bd&#13;
+    #edf0f5 !important;&#13;
+&#13;
+  padding:&#13;
+    22px 30px 42px !important;&#13;
+&#13;
+  background:&#13;
+    #f5f7fb !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   VISIBLE FAR-RIGHT SCROLLBAR&#13;
+   ========================================================= */&#13;
+&#13;
+.tpo-main-body::-webkit-scrollbar,&#13;
+.placement-scroll-area::-webkit-scrollbar{&#13;
+&#13;
+  width:10px !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.tpo-main-body::-webkit-scrollbar-track,&#13;
+.placement-scroll-area::-webkit-scrollbar-track{&#13;
+&#13;
+  background:#edf0f5 !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.tpo-main-body::-webkit-scrollbar-thumb,&#13;
+.placement-scroll-area::-webkit-scrollbar-thumb{&#13;
+&#13;
+  background:#aaa2bd !important;&#13;
+&#13;
+  border:&#13;
+    2px solid #edf0f5 !important;&#13;
+&#13;
+  border-radius:9px !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.tpo-main-body::-webkit-scrollbar-thumb:hover,&#13;
+.placement-scroll-area::-webkit-scrollbar-thumb:hover{&#13;
+&#13;
+  background:#8f82ad !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   FILTER BAR&#13;
+   PROPER ALIGNMENT LIKE SECOND IMAGE&#13;
+   ========================================================= */&#13;
+&#13;
+.tpo-filter-bar{&#13;
+&#13;
+  width:100% !important;&#13;
+&#13;
+  min-height:86px !important;&#13;
+&#13;
+  padding:&#13;
+    12px 15px !important;&#13;
+&#13;
+  margin-bottom:22px !important;&#13;
+&#13;
+  display:grid !important;&#13;
+&#13;
+  grid-template-columns:&#13;
+    repeat(6,minmax(0,1fr))&#13;
+    auto !important;&#13;
+&#13;
+  align-items:end !important;&#13;
+&#13;
+  gap:11px !important;&#13;
+&#13;
+  background:#ffffff !important;&#13;
+&#13;
+  border:&#13;
+    1px solid #e0e5ed !important;&#13;
+&#13;
+  border-radius:14px !important;&#13;
+&#13;
+  box-shadow:&#13;
+    0 3px 12px rgba(15,23,42,.025) !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.filter-group{&#13;
+&#13;
+  min-width:0 !important;&#13;
+&#13;
+  display:flex !important;&#13;
+&#13;
+  flex-direction:column !important;&#13;
+&#13;
+  gap:5px !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.filter-group label{&#13;
+&#13;
+  display:block !important;&#13;
+&#13;
+  margin:0 !important;&#13;
+&#13;
+  color:#687286 !important;&#13;
+&#13;
+  font-size:9px !important;&#13;
+&#13;
+  font-weight:900 !important;&#13;
+&#13;
+  line-height:1.1 !important;&#13;
+&#13;
+  text-transform:uppercase !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.filter-select{&#13;
+&#13;
+  width:100% !important;&#13;
+&#13;
+  height:38px !important;&#13;
+&#13;
+  min-height:38px !important;&#13;
+&#13;
+  padding:&#13;
+    0 32px 0 10px !important;&#13;
+&#13;
+  appearance:none !important;&#13;
+&#13;
+  -webkit-appearance:none !important;&#13;
+&#13;
+  -moz-appearance:none !important;&#13;
+&#13;
+  border:&#13;
+    1px solid #d6dde7 !important;&#13;
+&#13;
+  border-radius:8px !important;&#13;
+&#13;
+  background-color:#ffffff !important;&#13;
+&#13;
+  background-image:&#13;
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2364758b' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") !important;&#13;
+&#13;
+  background-repeat:no-repeat !important;&#13;
+&#13;
+  background-position:&#13;
+    right 9px center !important;&#13;
+&#13;
+  background-size:&#13;
+    14px 14px !important;&#13;
+&#13;
+  color:#334155 !important;&#13;
+&#13;
+  font-size:10px !important;&#13;
+&#13;
+  font-weight:700 !important;&#13;
+&#13;
+  outline:none !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.filter-select:focus{&#13;
+&#13;
+  border-color:#ac90e7 !important;&#13;
+&#13;
+  box-shadow:&#13;
+    0 0 0 3px rgba(124,58,237,.07) !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.filter-clear-wrap{&#13;
+&#13;
+  height:100% !important;&#13;
+&#13;
+  display:flex !important;&#13;
+&#13;
+  align-items:flex-end !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.btn-clear-filters{&#13;
+&#13;
+  height:38px !important;&#13;
+&#13;
+  min-width:110px !important;&#13;
+&#13;
+  padding:&#13;
+    0 13px !important;&#13;
+&#13;
+  display:inline-flex !important;&#13;
+&#13;
+  align-items:center !important;&#13;
+&#13;
+  justify-content:center !important;&#13;
+&#13;
+  gap:5px !important;&#13;
+&#13;
+  border:&#13;
+    1px solid #d6dce5 !important;&#13;
+&#13;
+  border-radius:8px !important;&#13;
+&#13;
+  background:#ffffff !important;&#13;
+&#13;
+  color:#5f6b7e !important;&#13;
+&#13;
+  font-size:9px !important;&#13;
+&#13;
+  font-weight:800 !important;&#13;
+&#13;
+  cursor:pointer !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.btn-clear-filters:hover{&#13;
+&#13;
+  color:#6e35d6 !important;&#13;
+&#13;
+  border-color:#cdbbed !important;&#13;
+&#13;
+  background:#f8f5ff !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   KPI GRID&#13;
+   ========================================================= */&#13;
+&#13;
+.kpi-grid{&#13;
+&#13;
+  display:grid !important;&#13;
+&#13;
+  grid-template-columns:&#13;
+    repeat(5,minmax(0,1fr)) !important;&#13;
+&#13;
+  gap:14px !important;&#13;
+&#13;
+  margin-bottom:22px !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.kpi-card{&#13;
+&#13;
+  position:relative !important;&#13;
+&#13;
+  overflow:hidden !important;&#13;
+&#13;
+  min-height:142px !important;&#13;
+&#13;
+  padding:18px 17px !important;&#13;
+&#13;
+  display:flex !important;&#13;
+&#13;
+  justify-content:space-between !important;&#13;
+&#13;
+  align-items:flex-start !important;&#13;
+&#13;
+  gap:10px !important;&#13;
+&#13;
+  background:#ffffff !important;&#13;
+&#13;
+  border:&#13;
+    1px solid var(--line) !important;&#13;
+&#13;
+  border-radius:16px !important;&#13;
+&#13;
+  cursor:pointer !important;&#13;
+&#13;
+  transition:.2s !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.kpi-card:hover{&#13;
+&#13;
+  transform:&#13;
+    translateY(-2px) !important;&#13;
+&#13;
+  box-shadow:&#13;
+    0 10px 24px rgba(15,23,42,.08) !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   KPI ACCENT STRIPS&#13;
+   ========================================================= */&#13;
+&#13;
+.kpi-card:before{&#13;
+&#13;
+  content:"";&#13;
+&#13;
+  position:absolute;&#13;
+&#13;
+  left:0;&#13;
+  right:0;&#13;
+  top:0;&#13;
+&#13;
+  height:3px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.kpi-card:nth-child(1){&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      145deg,&#13;
+      #ffffff,&#13;
+      #eff6ff&#13;
+    ) !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.kpi-card:nth-child(1):before{&#13;
+  background:#2563eb !important;&#13;
+}&#13;
+&#13;
+&#13;
+.kpi-card:nth-child(2){&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      145deg,&#13;
+      #ffffff,&#13;
+      #ecfdf5&#13;
+    ) !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.kpi-card:nth-child(2):before{&#13;
+  background:#10b981 !important;&#13;
+}&#13;
+&#13;
+&#13;
+.kpi-card:nth-child(3){&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      145deg,&#13;
+      #ffffff,&#13;
+      #fdf2f8&#13;
+    ) !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.kpi-card:nth-child(3):before{&#13;
+  background:#ec4899 !important;&#13;
+}&#13;
+&#13;
+&#13;
+.kpi-card:nth-child(4){&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      145deg,&#13;
+      #ffffff,&#13;
+      #fff7ed&#13;
+    ) !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.kpi-card:nth-child(4):before{&#13;
+  background:#f97316 !important;&#13;
+}&#13;
+&#13;
+&#13;
+.kpi-card:nth-child(5){&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      145deg,&#13;
+      #ffffff,&#13;
+      #ecfeff&#13;
+    ) !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.kpi-card:nth-child(5):before{&#13;
+  background:#0891b2 !important;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   KPI CONTENT&#13;
+   ========================================================= */&#13;
+&#13;
+.kpi-label{&#13;
+&#13;
+  color:#334155 !important;&#13;
+&#13;
+  font-size:11px !important;&#13;
+&#13;
+  font-weight:750 !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.kpi-value{&#13;
+&#13;
+  margin:&#13;
+    8px 0 5px !important;&#13;
+&#13;
+  color:#0f172a !important;&#13;
+&#13;
+  font-size:27px !important;&#13;
+&#13;
+  line-height:1 !important;&#13;
+&#13;
+  font-weight:900 !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.kpi-trend{&#13;
+&#13;
+  font-size:9px !important;&#13;
+&#13;
+  font-weight:800 !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.kpi-trend.positive{&#13;
+  color:#059669 !important;&#13;
+}&#13;
+&#13;
+&#13;
+.kpi-icon-box{&#13;
+&#13;
+  width:38px !important;&#13;
+  height:38px !important;&#13;
+&#13;
+  min-width:38px !important;&#13;
+&#13;
+  display:flex !important;&#13;
+&#13;
+  align-items:center !important;&#13;
+  justify-content:center !important;&#13;
+&#13;
+  border-radius:11px !important;&#13;
+&#13;
+  font-size:16px !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* KPI ICON COLORS */&#13;
+&#13;
+.kpi-card:nth-child(1)&#13;
+.kpi-icon-box{&#13;
+&#13;
+  background:#dbeafe !important;&#13;
+  color:#2563eb !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.kpi-card:nth-child(2)&#13;
+.kpi-icon-box{&#13;
+&#13;
+  background:#d1fae5 !important;&#13;
+  color:#059669 !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.kpi-card:nth-child(3)&#13;
+.kpi-icon-box{&#13;
+&#13;
+  background:#fce7f3 !important;&#13;
+  color:#db2777 !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.kpi-card:nth-child(4)&#13;
+.kpi-icon-box{&#13;
+&#13;
+  background:#ffedd5 !important;&#13;
+  color:#ea580c !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.kpi-card:nth-child(5)&#13;
+.kpi-icon-box{&#13;
+&#13;
+  background:#cffafe !important;&#13;
+  color:#0891b2 !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   DASH ROWS&#13;
+   ========================================================= */&#13;
+&#13;
+.dash-row,&#13;
+.row-3-col{&#13;
+&#13;
+  width:100% !important;&#13;
+&#13;
+  display:flex !important;&#13;
+&#13;
+  gap:18px !important;&#13;
+&#13;
+  margin-bottom:20px !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.flex-2{&#13;
+&#13;
+  flex:2 1 0 !important;&#13;
+&#13;
+  min-width:0 !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.flex-1{&#13;
+&#13;
+  flex:1 1 0 !important;&#13;
+&#13;
+  min-width:0 !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.dash-card{&#13;
+&#13;
+  min-width:0 !important;&#13;
+&#13;
+  padding:20px !important;&#13;
+&#13;
+  display:flex !important;&#13;
+&#13;
+  flex-direction:column !important;&#13;
+&#13;
+  background:#ffffff !important;&#13;
+&#13;
+  border:&#13;
+    1px solid #e4e7ef !important;&#13;
+&#13;
+  border-radius:16px !important;&#13;
+&#13;
+  box-shadow:&#13;
+    0 5px 18px rgba(15,23,42,.035) !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   CARD HEADER&#13;
+   ========================================================= */&#13;
+&#13;
+.card-header-bar{&#13;
+&#13;
+  display:flex !important;&#13;
+&#13;
+  align-items:center !important;&#13;
+&#13;
+  justify-content:space-between !important;&#13;
+&#13;
+  margin-bottom:14px !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.card-header-bar h3{&#13;
+&#13;
+  margin:0 !important;&#13;
+&#13;
+  color:#111827 !important;&#13;
+&#13;
+  font-size:16px !important;&#13;
+&#13;
+  font-weight:800 !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.card-select-sm{&#13;
+&#13;
+  padding:&#13;
+    4px 8px !important;&#13;
+&#13;
+  border:&#13;
+    1px solid #dbe1e8 !important;&#13;
+&#13;
+  border-radius:7px !important;&#13;
+&#13;
+  background:#ffffff !important;&#13;
+&#13;
+  color:#556176 !important;&#13;
+&#13;
+  font-size:9px !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   BLUE PLACEMENT OVERVIEW&#13;
+   ========================================================= */&#13;
+&#13;
+.chart-card{&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      145deg,&#13;
+      #ffffff,&#13;
+      #eff6ff&#13;
+    ) !important;&#13;
+&#13;
+  border-color:#dbeafe !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.chart-card&#13;
+.card-header-bar h3{&#13;
+&#13;
+  color:#1d4ed8 !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   GREEN DRIVE STATUS&#13;
+   ========================================================= */&#13;
+&#13;
+.drive-status-card{&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      145deg,&#13;
+      #ffffff,&#13;
+      #ecfdf5&#13;
+    ) !important;&#13;
+&#13;
+  border-color:#bbf7d0 !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.drive-status-card&#13;
+.card-header-bar h3{&#13;
+&#13;
+  color:#047857 !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   ORANGE RECRUITERS&#13;
+   ========================================================= */&#13;
+&#13;
+.recruiter-card{&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      145deg,&#13;
+      #ffffff,&#13;
+      #fff7ed&#13;
+    ) !important;&#13;
+&#13;
+  border-color:#fed7aa !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.recruiter-card&#13;
+.card-header-bar h3{&#13;
+&#13;
+  color:#c2410c !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   CHART LEGEND&#13;
+   ========================================================= */&#13;
+&#13;
+.chart-legend{&#13;
+&#13;
+  display:flex !important;&#13;
+&#13;
+  align-items:center !important;&#13;
+&#13;
+  gap:14px !important;&#13;
+&#13;
+  margin-bottom:10px !important;&#13;
+&#13;
+  color:#64748b !important;&#13;
+&#13;
+  font-size:10px !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.legend-item{&#13;
+&#13;
+  display:flex !important;&#13;
+&#13;
+  align-items:center !important;&#13;
+&#13;
+  gap:5px !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.dot{&#13;
+&#13;
+  width:8px !important;&#13;
+  height:8px !important;&#13;
+&#13;
+  display:inline-block !important;&#13;
+&#13;
+  border-radius:50% !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   SVG&#13;
+   ========================================================= */&#13;
+&#13;
+.svg-chart-wrapper{&#13;
+&#13;
+  width:100% !important;&#13;
+&#13;
+  overflow:hidden !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.placement-svg{&#13;
+&#13;
+  width:100% !important;&#13;
+&#13;
+  height:190px !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   DOUGHNUT&#13;
+   ========================================================= */&#13;
+&#13;
+.doughnut-wrapper{&#13;
+&#13;
+  flex:1 !important;&#13;
+&#13;
+  display:flex !important;&#13;
+&#13;
+  flex-direction:column !important;&#13;
+&#13;
+  align-items:center !important;&#13;
+&#13;
+  justify-content:center !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.doughnut-graphic{&#13;
+&#13;
+  position:relative !important;&#13;
+&#13;
+  width:120px !important;&#13;
+  height:120px !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.doughnut-svg{&#13;
+&#13;
+  width:100% !important;&#13;
+  height:100% !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.doughnut-center-text{&#13;
+&#13;
+  position:absolute !important;&#13;
+&#13;
+  top:50% !important;&#13;
+  left:50% !important;&#13;
+&#13;
+  transform:&#13;
+    translate(-50%,-50%) !important;&#13;
+&#13;
+  text-align:center !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.center-val{&#13;
+&#13;
+  color:#0f172a !important;&#13;
+&#13;
+  font-size:24px !important;&#13;
+&#13;
+  font-weight:900 !important;&#13;
+&#13;
+  line-height:1 !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.center-sub{&#13;
+&#13;
+  margin-top:3px !important;&#13;
+&#13;
+  color:#64748b !important;&#13;
+&#13;
+  font-size:8px !important;&#13;
+&#13;
+  font-weight:800 !important;&#13;
+&#13;
+  text-transform:uppercase !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.doughnut-footer-legend{&#13;
+&#13;
+  width:100% !important;&#13;
+&#13;
+  margin-top:14px !important;&#13;
+&#13;
+  padding-top:10px !important;&#13;
+&#13;
+  border-top:&#13;
+    1px dashed #bbf7d0 !important;&#13;
+&#13;
+  color:#475569 !important;&#13;
+&#13;
+  font-size:10px !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.blue-dot{&#13;
+&#13;
+  display:inline-block !important;&#13;
+&#13;
+  width:7px !important;&#13;
+  height:7px !important;&#13;
+&#13;
+  border-radius:50% !important;&#13;
+&#13;
+  background:#10b981 !important;&#13;
+&#13;
+  margin-right:5px !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   RECRUITERS&#13;
+   ========================================================= */&#13;
+&#13;
+.recruiter-table-head{&#13;
+&#13;
+  display:flex !important;&#13;
+&#13;
+  align-items:center !important;&#13;
+&#13;
+  justify-content:space-between !important;&#13;
+&#13;
+  padding-bottom:7px !important;&#13;
+&#13;
+  border-bottom:&#13;
+    1px solid #fed7aa !important;&#13;
+&#13;
+  color:#9a3412 !important;&#13;
+&#13;
+  font-size:9px !important;&#13;
+&#13;
+  font-weight:900 !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.recruiter-list{&#13;
+&#13;
+  display:flex !important;&#13;
+&#13;
+  flex-direction:column !important;&#13;
+&#13;
+  gap:8px !important;&#13;
+&#13;
+  margin-top:8px !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.recruiter-row{&#13;
+&#13;
+  display:flex !important;&#13;
+&#13;
+  align-items:center !important;&#13;
+&#13;
+  justify-content:space-between !important;&#13;
+&#13;
+  padding:8px 11px !important;&#13;
+&#13;
+  border-radius:8px !important;&#13;
+&#13;
+  background:#fff7ed !important;&#13;
+&#13;
+  cursor:pointer !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.recruiter-row:hover{&#13;
+&#13;
+  background:#ffedd5 !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.comp-logo-tag{&#13;
+&#13;
+  padding:2px 6px !important;&#13;
+&#13;
+  border-radius:4px !important;&#13;
+&#13;
+  background:#ffedd5 !important;&#13;
+&#13;
+  color:#c2410c !important;&#13;
+&#13;
+  font-size:8px !important;&#13;
+&#13;
+  font-weight:900 !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.comp-name{&#13;
+&#13;
+  margin-left:7px !important;&#13;
+&#13;
+  color:#1e293b !important;&#13;
+&#13;
+  font-size:10px !important;&#13;
+&#13;
+  font-weight:800 !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.comp-offers-cell{&#13;
+&#13;
+  color:#c2410c !important;&#13;
+&#13;
+  font-size:11px !important;&#13;
+&#13;
+  font-weight:900 !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.card-bottom-hint{&#13;
+&#13;
+  margin-top:auto !important;&#13;
+&#13;
+  padding-top:10px !important;&#13;
+&#13;
+  text-align:center !important;&#13;
+&#13;
+  color:#94a3b8 !important;&#13;
+&#13;
+  font-size:9px !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   RECENT DRIVES&#13;
+   ========================================================= */&#13;
+&#13;
+.custom-dash-table{&#13;
+&#13;
+  margin:0 !important;&#13;
+&#13;
+  font-size:10px !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.custom-dash-table th{&#13;
+&#13;
+  color:#64748b !important;&#13;
+&#13;
+  font-size:8px !important;&#13;
+&#13;
+  font-weight:900 !important;&#13;
+&#13;
+  border:0 !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.custom-dash-table td{&#13;
+&#13;
+  border-color:#e6f1f8 !important;&#13;
+&#13;
+  vertical-align:middle !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.dash-card-footer{&#13;
+&#13;
+  display:flex !important;&#13;
+&#13;
+  align-items:center !important;&#13;
+&#13;
+  justify-content:space-between !important;&#13;
+&#13;
+  margin-top:auto !important;&#13;
+&#13;
+  padding-top:10px !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.footer-count{&#13;
+&#13;
+  color:#94a3b8 !important;&#13;
+&#13;
+  font-size:8px !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   PAGINATION&#13;
+   ========================================================= */&#13;
+&#13;
+.pagination-mini{&#13;
+&#13;
+  display:flex !important;&#13;
+&#13;
+  align-items:center !important;&#13;
+&#13;
+  gap:4px !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.btn-p-arrow{&#13;
+&#13;
+  width:23px !important;&#13;
+  height:23px !important;&#13;
+&#13;
+  border:&#13;
+    1px solid #d7dde5 !important;&#13;
+&#13;
+  border-radius:5px !important;&#13;
+&#13;
+  background:#ffffff !important;&#13;
+&#13;
+  color:#7c8798 !important;&#13;
+&#13;
+  font-size:9px !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.p-line{&#13;
+&#13;
+  width:28px !important;&#13;
+  height:3px !important;&#13;
+&#13;
+  border-radius:3px !important;&#13;
+&#13;
+  background:#06b6d4 !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   STUDENT READINESS&#13;
+   ========================================================= */&#13;
+&#13;
+.readiness-legend-list{&#13;
+&#13;
+  width:100% !important;&#13;
+&#13;
+  margin-top:9px !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.r-legend-row{&#13;
+&#13;
+  display:flex !important;&#13;
+&#13;
+  align-items:center !important;&#13;
+&#13;
+  justify-content:space-between !important;&#13;
+&#13;
+  margin-bottom:5px !important;&#13;
+&#13;
+  color:#64748b !important;&#13;
+&#13;
+  font-size:9px !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.readiness-link-btn{&#13;
+&#13;
+  margin-top:10px !important;&#13;
+&#13;
+  text-align:center !important;&#13;
+&#13;
+  color:#db2777 !important;&#13;
+&#13;
+  font-size:9px !important;&#13;
+&#13;
+  font-weight:800 !important;&#13;
+&#13;
+  cursor:pointer !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   FUNNEL&#13;
+   ========================================================= */&#13;
+&#13;
+.funnel-list{&#13;
+&#13;
+  display:flex !important;&#13;
+&#13;
+  flex-direction:column !important;&#13;
+&#13;
+  gap:8px !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.funnel-head{&#13;
+&#13;
+  display:flex !important;&#13;
+&#13;
+  align-items:center !important;&#13;
+&#13;
+  justify-content:space-between !important;&#13;
+&#13;
+  margin-bottom:3px !important;&#13;
+&#13;
+  color:#475569 !important;&#13;
+&#13;
+  font-size:9px !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.funnel-bar-bg{&#13;
+&#13;
+  height:8px !important;&#13;
+&#13;
+  overflow:hidden !important;&#13;
+&#13;
+  border-radius:5px !important;&#13;
+&#13;
+  background:#f1f5f9 !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.funnel-bar-fill{&#13;
+&#13;
+  height:100% !important;&#13;
+&#13;
+  border-radius:5px !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   FUNNEL MULTI COLOR&#13;
+   ========================================================= */&#13;
+&#13;
+.funnel-item:nth-child(1)&#13;
+.funnel-bar-fill{&#13;
+&#13;
+  background:#2563eb !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.funnel-item:nth-child(2)&#13;
+.funnel-bar-fill{&#13;
+&#13;
+  background:#6366f1 !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.funnel-item:nth-child(3)&#13;
+.funnel-bar-fill{&#13;
+&#13;
+  background:#f97316 !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.funnel-item:nth-child(4)&#13;
+.funnel-bar-fill{&#13;
+&#13;
+  background:#06b6d4 !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.funnel-item:nth-child(5)&#13;
+.funnel-bar-fill{&#13;
+&#13;
+  background:#10b981 !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   UNPLACED BANNER&#13;
+   ========================================================= */&#13;
+&#13;
+.unplaced-action-banner{&#13;
+&#13;
+  margin-top:4px !important;&#13;
+&#13;
+  padding:&#13;
+    17px 20px !important;&#13;
+&#13;
+  display:flex !important;&#13;
+&#13;
+  align-items:center !important;&#13;
+&#13;
+  justify-content:space-between !important;&#13;
+&#13;
+  gap:18px !important;&#13;
+&#13;
+  border:&#13;
+    1px solid #fda4af !important;&#13;
+&#13;
+  border-radius:16px !important;&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      135deg,&#13;
+      #fff7f7,&#13;
+      #fff1f2&#13;
+    ) !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.banner-left{&#13;
+&#13;
+  display:flex !important;&#13;
+&#13;
+  align-items:center !important;&#13;
+&#13;
+  gap:14px !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.alert-icon-box{&#13;
+&#13;
+  width:44px !important;&#13;
+  height:44px !important;&#13;
+&#13;
+  min-width:44px !important;&#13;
+&#13;
+  border-radius:12px !important;&#13;
+&#13;
+  display:flex !important;&#13;
+&#13;
+  align-items:center !important;&#13;
+  justify-content:center !important;&#13;
+&#13;
+  background:#fee2e2 !important;&#13;
+&#13;
+  color:#dc2626 !important;&#13;
+&#13;
+  font-size:18px !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.banner-title{&#13;
+&#13;
+  color:#be123c !important;&#13;
+&#13;
+  font-size:14px !important;&#13;
+&#13;
+  font-weight:900 !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.badge-action-req{&#13;
+&#13;
+  margin-left:7px !important;&#13;
+&#13;
+  padding:3px 6px !important;&#13;
+&#13;
+  border-radius:4px !important;&#13;
+&#13;
+  background:#ef4444 !important;&#13;
+&#13;
+  color:#ffffff !important;&#13;
+&#13;
+  font-size:8px !important;&#13;
+&#13;
+  font-weight:900 !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.banner-sub{&#13;
+&#13;
+  margin-top:3px !important;&#13;
+&#13;
+  color:#9f1239 !important;&#13;
+&#13;
+  font-size:9px !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.banner-right{&#13;
+&#13;
+  display:flex !important;&#13;
+&#13;
+  align-items:center !important;&#13;
+&#13;
+  gap:9px !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.btn-dark-action{&#13;
+&#13;
+  padding:&#13;
+    9px 13px !important;&#13;
+&#13;
+  border:0 !important;&#13;
+&#13;
+  border-radius:9px !important;&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      135deg,&#13;
+      #1e293b,&#13;
+      #334155&#13;
+    ) !important;&#13;
+&#13;
+  color:#ffffff !important;&#13;
+&#13;
+  font-size:9px !important;&#13;
+&#13;
+  font-weight:800 !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.btn-outline-action{&#13;
+&#13;
+  padding:&#13;
+    9px 13px !important;&#13;
+&#13;
+  border:&#13;
+    1px solid #d3d9e1 !important;&#13;
+&#13;
+  border-radius:9px !important;&#13;
+&#13;
+  background:#ffffff !important;&#13;
+&#13;
+  color:#475569 !important;&#13;
+&#13;
+  font-size:9px !important;&#13;
+&#13;
+  font-weight:800 !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   MODALS&#13;
+   ========================================================= */&#13;
+&#13;
+.modal-backdrop-custom{&#13;
+&#13;
+  position:fixed !important;&#13;
+&#13;
+  inset:0 !important;&#13;
+&#13;
+  width:100vw !important;&#13;
+  height:100vh !important;&#13;
+&#13;
+  display:flex !important;&#13;
+&#13;
+  align-items:center !important;&#13;
+  justify-content:center !important;&#13;
+&#13;
+  padding:20px !important;&#13;
+&#13;
+  background:&#13;
+    rgba(15,23,42,.62) !important;&#13;
+&#13;
+  backdrop-filter:blur(4px) !important;&#13;
+&#13;
+  z-index:2147482000 !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.modal-dialog-custom{&#13;
+&#13;
+  width:90% !important;&#13;
+&#13;
+  max-height:85vh !important;&#13;
+&#13;
+  display:flex !important;&#13;
+&#13;
+  flex-direction:column !important;&#13;
+&#13;
+  overflow:hidden !important;&#13;
+&#13;
+  background:#ffffff !important;&#13;
+&#13;
+  border:&#13;
+    1px solid #e2e8f0 !important;&#13;
+&#13;
+  border-radius:18px !important;&#13;
+&#13;
+  box-shadow:&#13;
+    0 28px 70px rgba(15,23,42,.22) !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.modal-lg-custom{&#13;
+&#13;
+  max-width:940px !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.modal-md-custom{&#13;
+&#13;
+  max-width:660px !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.modal-header-custom{&#13;
+&#13;
+  padding:&#13;
+    17px 23px !important;&#13;
+&#13;
+  display:flex !important;&#13;
+&#13;
+  align-items:center !important;&#13;
+&#13;
+  justify-content:space-between !important;&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      90deg,&#13;
+      #f1edff,&#13;
+      #ffffff&#13;
+    ) !important;&#13;
+&#13;
+  border-bottom:&#13;
+    1px solid #e1e6ed !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.modal-title-custom{&#13;
+&#13;
+  color:#111827 !important;&#13;
+&#13;
+  font-size:15px !important;&#13;
+&#13;
+  font-weight:900 !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.btn-close-custom{&#13;
+&#13;
+  width:34px !important;&#13;
+&#13;
+  height:34px !important;&#13;
+&#13;
+  display:flex !important;&#13;
+&#13;
+  align-items:center !important;&#13;
+&#13;
+  justify-content:center !important;&#13;
+&#13;
+  padding:0 !important;&#13;
+&#13;
+  border:&#13;
+    1px solid #dce1e8 !important;&#13;
+&#13;
+  border-radius:8px !important;&#13;
+&#13;
+  background:#ffffff !important;&#13;
+&#13;
+  color:#667286 !important;&#13;
+&#13;
+  font-size:17px !important;&#13;
+&#13;
+  cursor:pointer !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.modal-body-custom{&#13;
+&#13;
+  flex:1 1 auto !important;&#13;
+&#13;
+  min-height:0 !important;&#13;
+&#13;
+  padding:20px !important;&#13;
+&#13;
+  overflow:auto !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.modal-footer-custom{&#13;
+&#13;
+  flex:0 0 auto !important;&#13;
+&#13;
+  padding:&#13;
+    13px 22px !important;&#13;
+&#13;
+  display:flex !important;&#13;
+&#13;
+  align-items:center !important;&#13;
+&#13;
+  justify-content:flex-end !important;&#13;
+&#13;
+  gap:10px !important;&#13;
+&#13;
+  border-top:&#13;
+    1px solid #e1e6ed !important;&#13;
+&#13;
+  background:#fafbfe !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.modal-filter-tabs{&#13;
+&#13;
+  display:flex !important;&#13;
+&#13;
+  gap:8px !important;&#13;
+&#13;
+  margin-bottom:14px !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.tab-btn{&#13;
+&#13;
+  padding:&#13;
+    7px 12px !important;&#13;
+&#13;
+  border:0 !important;&#13;
+&#13;
+  border-radius:7px !important;&#13;
+&#13;
+  background:#f1f5f9 !important;&#13;
+&#13;
+  color:#64748b !important;&#13;
+&#13;
+  font-size:9px !important;&#13;
+&#13;
+  font-weight:800 !important;&#13;
+&#13;
+  cursor:pointer !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.tab-btn.active{&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      135deg,&#13;
+      #7c3aed,&#13;
+      #8b46ef&#13;
+    ) !important;&#13;
+&#13;
+  color:#ffffff !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.modal-table-wrap{&#13;
+&#13;
+  max-height:420px !important;&#13;
+&#13;
+  overflow:auto !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   DRAWER&#13;
+   ========================================================= */&#13;
+&#13;
+.drawer-overlay{&#13;
+&#13;
+  position:fixed !important;&#13;
+&#13;
+  inset:0 !important;&#13;
+&#13;
+  background:&#13;
+    rgba(15,23,42,.38) !important;&#13;
+&#13;
+  z-index:2147482100 !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.drawer-panel.compact-drawer{&#13;
+&#13;
+  position:fixed !important;&#13;
+&#13;
+  top:0 !important;&#13;
+&#13;
+  right:0 !important;&#13;
+&#13;
+  bottom:0 !important;&#13;
+&#13;
+  width:420px !important;&#13;
+&#13;
+  background:#ffffff !important;&#13;
+&#13;
+  box-shadow:&#13;
+    -18px 0 45px rgba(15,23,42,.18) !important;&#13;
+&#13;
+  z-index:2147482200 !important;&#13;
+&#13;
+  display:flex !important;&#13;
+&#13;
+  flex-direction:column !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.drawer-header{&#13;
+&#13;
+  min-height:65px !important;&#13;
+&#13;
+  padding:&#13;
+    15px 20px !important;&#13;
+&#13;
+  display:flex !important;&#13;
+&#13;
+  align-items:center !important;&#13;
+&#13;
+  justify-content:space-between !important;&#13;
+&#13;
+  background:#ffffff !important;&#13;
+&#13;
+  border-bottom:&#13;
+    1px solid #e2e8f0 !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.drawer-header h4{&#13;
+&#13;
+  margin:0 !important;&#13;
+&#13;
+  color:#0f172a !important;&#13;
+&#13;
+  font-size:15px !important;&#13;
+&#13;
+  font-weight:900 !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.drawer-body{&#13;
+&#13;
+  flex:1 1 auto !important;&#13;
+&#13;
+  min-height:0 !important;&#13;
+&#13;
+  padding:20px !important;&#13;
+&#13;
+  overflow:auto !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.drawer-avatar-card{&#13;
+&#13;
+  display:flex !important;&#13;
+&#13;
+  align-items:center !important;&#13;
+&#13;
+  gap:12px !important;&#13;
+&#13;
+  margin-bottom:20px !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.d-avatar{&#13;
+&#13;
+  width:45px !important;&#13;
+  height:45px !important;&#13;
+&#13;
+  min-width:45px !important;&#13;
+&#13;
+  border-radius:50% !important;&#13;
+&#13;
+  display:flex !important;&#13;
+&#13;
+  align-items:center !important;&#13;
+  justify-content:center !important;&#13;
+&#13;
+  background:#7c3aed !important;&#13;
+&#13;
+  color:#ffffff !important;&#13;
+&#13;
+  font-size:18px !important;&#13;
+&#13;
+  font-weight:900 !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.d-info h5{&#13;
+&#13;
+  margin:0 0 3px !important;&#13;
+&#13;
+  color:#182134 !important;&#13;
+&#13;
+  font-size:15px !important;&#13;
+&#13;
+  font-weight:900 !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.drawer-stat-grid{&#13;
+&#13;
+  display:grid !important;&#13;
+&#13;
+  grid-template-columns:&#13;
+    repeat(3,1fr) !important;&#13;
+&#13;
+  gap:10px !important;&#13;
+&#13;
+  margin-bottom:20px !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.d-stat-box{&#13;
+&#13;
+  padding:11px !important;&#13;
+&#13;
+  text-align:center !important;&#13;
+&#13;
+  border:&#13;
+    1px solid #e2e8f0 !important;&#13;
+&#13;
+  border-radius:9px !important;&#13;
+&#13;
+  background:#f8fafc !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.d-stat-lbl{&#13;
+&#13;
+  color:#7b8494 !important;&#13;
+&#13;
+  font-size:8px !important;&#13;
+&#13;
+  font-weight:800 !important;&#13;
+&#13;
+  text-transform:uppercase !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.d-stat-val{&#13;
+&#13;
+  margin-top:3px !important;&#13;
+&#13;
+  color:#172033 !important;&#13;
+&#13;
+  font-size:16px !important;&#13;
+&#13;
+  font-weight:900 !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.drawer-section{&#13;
+&#13;
+  padding:15px !important;&#13;
+&#13;
+  border:&#13;
+    1px solid #e2e8f0 !important;&#13;
+&#13;
+  border-radius:10px !important;&#13;
+&#13;
+  background:#f8fafc !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.drawer-section h6{&#13;
+&#13;
+  margin:&#13;
+    0 0 7px !important;&#13;
+&#13;
+  color:#1f2937 !important;&#13;
+&#13;
+  font-size:12px !important;&#13;
+&#13;
+  font-weight:900 !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   AI ASSISTANT&#13;
+   ========================================================= */&#13;
+&#13;
+.ai-chatbot-floating-btn{&#13;
+&#13;
+  position:fixed !important;&#13;
+&#13;
+  right:24px !important;&#13;
+&#13;
+  bottom:24px !important;&#13;
+&#13;
+  width:54px !important;&#13;
+&#13;
+  height:54px !important;&#13;
+&#13;
+  border-radius:50% !important;&#13;
+&#13;
+  display:flex !important;&#13;
+&#13;
+  align-items:center !important;&#13;
+  justify-content:center !important;&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      135deg,&#13;
+      #2563eb,&#13;
+      #0891b2&#13;
+    ) !important;&#13;
+&#13;
+  color:#ffffff !important;&#13;
+&#13;
+  font-size:25px !important;&#13;
+&#13;
+  box-shadow:&#13;
+    0 10px 26px rgba(37,99,235,.32) !important;&#13;
+&#13;
+  cursor:pointer !important;&#13;
+&#13;
+  z-index:2147483000 !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.tpo-chatbot-embedded{&#13;
+&#13;
+  position:fixed !important;&#13;
+&#13;
+  right:24px !important;&#13;
+&#13;
+  bottom:90px !important;&#13;
+&#13;
+  width:380px !important;&#13;
+&#13;
+  z-index:2147483000 !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   COMMON UTILITIES&#13;
+   ========================================================= */&#13;
+&#13;
+.bg-blue{&#13;
+  background:#dbeafe !important;&#13;
+  color:#2563eb !important;&#13;
+}&#13;
+&#13;
+.bg-green{&#13;
+  background:#d1fae5 !important;&#13;
+  color:#059669 !important;&#13;
+}&#13;
+&#13;
+.bg-purple{&#13;
+  background:#ede9fe !important;&#13;
+  color:#7c3aed !important;&#13;
+}&#13;
+&#13;
+.bg-amber{&#13;
+  background:#fef3c7 !important;&#13;
+  color:#d97706 !important;&#13;
+}&#13;
+&#13;
+.bg-teal{&#13;
+  background:#ccfbf1 !important;&#13;
+  color:#0f766e !important;&#13;
+}&#13;
+&#13;
+.bg-emerald{&#13;
+  background:#d1fae5 !important;&#13;
+  color:#059669 !important;&#13;
+}&#13;
+&#13;
+.bg-slate-light{&#13;
+  background:#f1f5f9 !important;&#13;
+  color:#475569 !important;&#13;
+}&#13;
+&#13;
+.bg-slate{&#13;
+  background:#f1f5f9 !important;&#13;
+  color:#475569 !important;&#13;
+}&#13;
+&#13;
+.bg-indigo{&#13;
+  background:#e0e7ff !important;&#13;
+  color:#4f46e5 !important;&#13;
+}&#13;
+&#13;
+.text-muted{&#13;
+  color:#64748b !important;&#13;
+}&#13;
+&#13;
+.text-primary{&#13;
+  color:#2563eb !important;&#13;
+}&#13;
+&#13;
+.text-warning{&#13;
+  color:#d97706 !important;&#13;
+}&#13;
+&#13;
+.text-success{&#13;
+  color:#059669 !important;&#13;
+}&#13;
+&#13;
+.text-info{&#13;
+  color:#0891b2 !important;&#13;
+}&#13;
+&#13;
+.text-right{&#13;
+  text-align:right !important;&#13;
+}&#13;
+&#13;
+.cursor-pointer{&#13;
+  cursor:pointer !important;&#13;
+}&#13;
+&#13;
+.pull-right{&#13;
+  float:right !important;&#13;
+}&#13;
+&#13;
+.list-unstyled{&#13;
+  padding-left:0 !important;&#13;
+  list-style:none !important;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   RESPONSIVE&#13;
+   ========================================================= */&#13;
+&#13;
+@media (max-width:1400px){&#13;
+&#13;
+  .tpo-sidebar{&#13;
+&#13;
+    width:250px !important;&#13;
+&#13;
+    min-width:250px !important;&#13;
+&#13;
+    max-width:250px !important;&#13;
+&#13;
+    flex-basis:250px !important;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .top-nav-center{&#13;
+&#13;
+    max-width:340px !important;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .tpo-filter-bar{&#13;
+&#13;
+    grid-template-columns:&#13;
+      repeat(3,minmax(0,1fr))&#13;
+      auto !important;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .kpi-grid{&#13;
+&#13;
+    grid-template-columns:&#13;
+      repeat(3,minmax(0,1fr)) !important;&#13;
+&#13;
+  }&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+@media (max-width:1050px){&#13;
+&#13;
+  .top-nav-center{&#13;
+&#13;
+    max-width:280px !important;&#13;
+&#13;
+    margin:&#13;
+      0 12px !important;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .tpo-filter-bar{&#13;
+&#13;
+    grid-template-columns:&#13;
+      repeat(2,minmax(0,1fr)) !important;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .filter-clear-wrap{&#13;
+&#13;
+    align-items:stretch !important;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .btn-clear-filters{&#13;
+&#13;
+    width:100% !important;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .dash-row,&#13;
+  .row-3-col{&#13;
+&#13;
+    flex-direction:column !important;&#13;
+&#13;
+  }&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+@media (max-width:820px){&#13;
+&#13;
+  .tpo-sidebar{&#13;
+&#13;
+    width:220px !important;&#13;
+&#13;
+    min-width:220px !important;&#13;
+&#13;
+    max-width:220px !important;&#13;
+&#13;
+    flex-basis:220px !important;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .top-nav-center{&#13;
+&#13;
+    display:none !important;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .top-nav-right{&#13;
+&#13;
+    margin-left:auto !important;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .tpo-main-body,&#13;
+  .placement-scroll-area{&#13;
+&#13;
+    padding:&#13;
+      18px 18px 35px !important;&#13;
+&#13;
+  }&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+@media (max-width:650px){&#13;
+&#13;
+  .tpo-sidebar{&#13;
+&#13;
+    width:72px !important;&#13;
+&#13;
+    min-width:72px !important;&#13;
+&#13;
+    max-width:72px !important;&#13;
+&#13;
+    flex-basis:72px !important;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .sidebar-user,&#13;
+  .brand-text,&#13;
+  .nav-section-title,&#13;
+  .nav-label,&#13;
+  .nav-badge,&#13;
+  .sidebar-footer{&#13;
+&#13;
+    display:none !important;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .sidebar-brand{&#13;
+&#13;
+    justify-content:center !important;&#13;
+&#13;
+    padding:&#13;
+      10px !important;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .nav-item{&#13;
+&#13;
+    justify-content:center !important;&#13;
+&#13;
+    padding:&#13;
+      10px !important;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .top-nav-page-title{&#13;
+&#13;
+    font-size:14px !important;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .tpo-filter-bar{&#13;
+&#13;
+    grid-template-columns:1fr !important;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .kpi-grid{&#13;
+&#13;
+    grid-template-columns:1fr !important;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .banner-right{&#13;
+&#13;
+    flex-wrap:wrap !important;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .unplaced-action-banner{&#13;
+&#13;
+    flex-direction:column !important;&#13;
+&#13;
+    align-items:flex-start !important;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .drawer-panel.compact-drawer{&#13;
+&#13;
+    width:100vw !important;&#13;
+&#13;
+  }&#13;
+&#13;
+}</css>
+        <data_table>sp_instance</data_table>
+        <demo_data/>
+        <description>Campus360 TPO Placement Outcomes Tracking &amp; Analytics Center</description>
+        <docs/>
+        <field_list/>
+        <has_preview>false</has_preview>
+        <id>campus360_tpo_placement_outcomes_widget</id>
+        <internal>false</internal>
+        <link><![CDATA[function link(scope, element, attrs, controller) {  }]]></link>
+        <name>Campus360 TPO Placement Outcomes</name>
+        <option_schema/>
+        <public>false</public>
+        <roles/>
+        <script><![CDATA[(function() {
+  data.stats = {
+    totalCompanies: 3,
+    activeDrives: 13,
+    registeredStudents: 18,
+    offersMade: 3,
+    placementRate: 22.2
+  };
+
+  // Embed AI Assistant Chatbot Widget
+  try {
+    data.chatbotWidget = $sp.getWidget('c4ae634574e703107f4410c9fee0cde5', {});
+  } catch(e) {}
+})();
+
+try {
+  data.aiWidget = $sp.getWidget('c4ae634574e703107f4410c9fee0cde5', {});
+  data.chatbotWidget = data.aiWidget;
+} catch(e) {}
+]]></script>
+        <servicenow>false</servicenow>
+        <sys_class_name>sp_widget</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-30 14:02:08</sys_created_on>
+        <sys_id>40ff6b0fe82743107f4400e4b3ee5f7b</sys_id>
+        <sys_mod_count>17</sys_mod_count>
+        <sys_name>Campus360 TPO Placement Outcomes</sys_name>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name>sp_widget_40ff6b0fe82743107f4400e4b3ee5f7b</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-10-01 10:53:18</sys_updated_on>
+        <template><![CDATA[<div class="campus360-tpo-layout" ng-class="{'sidebar-collapsed': c.sidebarCollapsed}">
+
+  <!-- =========================================================
+       LEFT SIDEBAR
+       ========================================================= -->
+
+  <aside class="tpo-sidebar">
+
+    <!-- BRAND -->
+    <div class="sidebar-brand">
+
+      <div class="brand-logo">
+        C
+      </div>
+
+      <div class="brand-text">
+
+        <span class="brand-title">
+          Campus360
+        </span>
+
+        <span class="brand-sub">
+          TPO PORTAL
+        </span>
+
+      </div>
+
+    </div>
+
+
+    <!-- TPO USER -->
+    <div class="sidebar-user">
+
+      <div class="user-avatar">
+        MA
+      </div>
+
+      <div class="user-info">
+
+        <div class="user-name">
+          MD Ali
+        </div>
+
+        <div class="user-role">
+          TPO Lead &bull; Training &amp; Placement
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- SIDEBAR NAVIGATION -->
+    <nav class="sidebar-nav">
+
+      <!-- OVERVIEW -->
+      <div class="nav-section-title">
+        OVERVIEW
+      </div>
+
+      <a href="javascript:void(0)"
+         ng-click="c.goToPage('campus360_tpo_home')"
+         class="nav-item">
+
+        <i class="fa fa-th-large nav-icon"></i>
+
+        <span class="nav-label">
+          Dashboard
+        </span>
+
+      </a>
+
+
+      <!-- STUDENTS -->
+      <div class="nav-section-title">
+        STUDENTS
+      </div>
+
+      <a href="javascript:void(0)"
+         ng-click="c.goToPage('campus360_tpo_student_management')"
+         class="nav-item">
+
+        <i class="fa fa-users nav-icon"></i>
+
+        <span class="nav-label">
+          Students
+        </span>
+
+        <span class="nav-badge">
+          20
+        </span>
+
+      </a>
+
+
+      <a href="javascript:void(0)"
+         ng-click="c.goToPage('campus360_tpo_skill_intelligence_new')"
+         class="nav-item">
+
+        <i class="fa fa-line-chart nav-icon"></i>
+
+        <span class="nav-label">
+          Skill Intelligence
+        </span>
+
+      </a>
+
+
+      <a href="javascript:void(0)"
+         ng-click="c.goToPage('student_assessments_new')"
+         class="nav-item">
+
+        <i class="fa fa-check-square-o nav-icon"></i>
+
+        <span class="nav-label">
+          Assessments
+        </span>
+
+      </a>
+
+
+      <!-- PLACEMENTS -->
+      <div class="nav-section-title">
+        PLACEMENTS
+      </div>
+
+
+      <a href="javascript:void(0)"
+         ng-click="c.goToPage('campus360_tpo_companies_new')"
+         class="nav-item">
+
+        <i class="fa fa-building-o nav-icon"></i>
+
+        <span class="nav-label">
+          Companies
+        </span>
+
+        <span class="nav-badge">
+          6
+        </span>
+
+      </a>
+
+
+      <a href="javascript:void(0)"
+         ng-click="c.goToPage('campus360_tpo_opportunities_new')"
+         class="nav-item">
+
+        <i class="fa fa-briefcase nav-icon"></i>
+
+        <span class="nav-label">
+          Opportunities
+        </span>
+
+        <span class="nav-badge">
+          13
+        </span>
+
+      </a>
+
+
+      <a href="javascript:void(0)"
+         ng-click="c.goToPage('campus360_tpo_application_new')"
+         class="nav-item">
+
+        <i class="fa fa-paper-plane-o nav-icon"></i>
+
+        <span class="nav-label">
+          Applications
+        </span>
+
+      </a>
+
+
+      <a href="javascript:void(0)"
+         ng-click="c.goToPage('campus360_tpo_interviews_new')"
+         class="nav-item">
+
+        <i class="fa fa-calendar nav-icon"></i>
+
+        <span class="nav-label">
+          Interviews
+        </span>
+
+      </a>
+
+
+      <!-- ACTIVE PAGE -->
+      <a href="javascript:void(0)"
+         class="nav-item active">
+
+        <i class="fa fa-bar-chart nav-icon"></i>
+
+        <span class="nav-label">
+          Placement Outcomes
+        </span>
+
+      </a>
+
+
+      <!-- TRAINING -->
+      <div class="nav-section-title">
+        TRAINING
+      </div>
+
+
+      <a href="javascript:void(0)"
+         ng-click="c.goToPage('campus360_tpo_training_programs')"
+         class="nav-item">
+
+        <i class="fa fa-graduation-cap nav-icon"></i>
+
+        <span class="nav-label">
+          Training Programs
+        </span>
+
+      </a>
+
+
+    </nav>
+
+
+    <div class="sidebar-footer">
+      Campus360 Institutional v2.4
+    </div>
+
+  </aside>
+
+
+  <!-- =========================================================
+       RIGHT CONTENT AREA
+       ========================================================= -->
+
+  <div class="tpo-right-container">
+
+
+    <!-- =======================================================
+         CUSTOM CAMPUS360 TOP NAVBAR
+         ======================================================= -->
+
+    <header class="tpo-top-navbar">
+
+
+      <!-- LEFT SIDE -->
+      <div class="top-nav-left">
+
+
+        <!-- HAMBURGER -->
+        <button
+          type="button"
+          class="btn-toggle-sidebar"
+          ng-click="c.toggleSidebar()"
+          title="Toggle Sidebar"
+          aria-label="Toggle Sidebar">
+
+          <i class="fa fa-bars"></i>
+
+        </button>
+
+
+        <!-- CAMPUS360 PAGE IDENTITY -->
+        <div class="top-nav-title-box">
+
+          <div class="top-nav-kicker">
+            CAMPUS360
+          </div>
+
+          <div class="top-nav-page-title">
+            Placement Outcomes
+          </div>
+
+        </div>
+
+
+      </div>
+
+
+      <!-- SEARCH -->
+      <div class="top-nav-center">
+
+        <div class="header-search-bar">
+
+          <i class="fa fa-search header-search-icon"></i>
+
+          <input
+            type="text"
+            placeholder="Search student name, USN, skill, branch..."
+            ng-model="c.searchQuery"
+            class="header-search-input"
+            aria-label="Search Placement Outcomes" />
+
+        </div>
+
+      </div>
+
+
+      <!-- RIGHT SIDE -->
+      <div class="top-nav-right">
+
+
+        <!-- REFRESH -->
+        <button
+          type="button"
+          class="btn-top-action"
+          ng-click="c.refreshData()"
+          title="Refresh Data"
+          aria-label="Refresh Data">
+
+          <i class="fa fa-refresh"></i>
+
+        </button>
+
+
+        <!-- NOTIFICATION -->
+        <div class="notif-bell-wrap">
+
+
+          <button
+            type="button"
+            class="btn-top-action notification-action"
+            ng-click="c.toggleNotifs()"
+            title="Notifications"
+            aria-label="Notifications">
+
+            <i class="fa fa-bell-o"></i>
+
+            <span class="notification-red-dot">
+            </span>
+
+          </button>
+
+
+          <!-- NOTIFICATION POPOVER -->
+          <div
+            class="notif-popover-panel"
+            ng-if="c.showNotifs">
+
+
+            <div class="notif-header-row">
+
+
+              <div class="notif-title-badge">
+
+                <i class="fa fa-bell text-primary"></i>
+
+                <span>
+                  TPO Placement &amp; Risk Alerts
+                </span>
+
+                <span class="badge bg-danger-light">
+                  11 Active
+                </span>
+
+              </div>
+
+
+              <button
+                class="btn-link-clear"
+                ng-click="c.clearNotifs()">
+
+                Clear All
+
+              </button>
+
+
+            </div>
+
+
+            <div class="notif-tabs-row">
+
+
+              <button
+                class="n-tab"
+                ng-class="{'active': c.notifTab === 'ALL'}"
+                ng-click="c.notifTab = 'ALL'">
+
+                All (11)
+
+              </button>
+
+
+              <button
+                class="n-tab"
+                ng-class="{'active': c.notifTab === 'RISK'}"
+                ng-click="c.notifTab = 'RISK'">
+
+                At-Risk
+
+              </button>
+
+
+              <button
+                class="n-tab"
+                ng-class="{'active': c.notifTab === 'OPP'}"
+                ng-click="c.notifTab = 'OPP'">
+
+                New Opportunities
+
+              </button>
+
+
+              <button
+                class="n-tab"
+                ng-class="{'active': c.notifTab === 'INT'}"
+                ng-click="c.notifTab = 'INT'">
+
+                Scheduled Interviews
+
+              </button>
+
+
+            </div>
+
+
+            <div class="notif-cards-scroll">
+
+
+              <div class="n-alert-card risk-type">
+
+
+                <div class="n-card-head">
+
+                  <i class="fa fa-exclamation-circle"></i>
+
+                  <strong>
+                    At-Risk Students Alert
+                  </strong>
+
+                </div>
+
+
+                <div class="n-card-body">
+
+                  2 students flagged as High Placement Risk due to low skill readiness (&lt;60%).
+
+                </div>
+
+
+                <div class="n-card-foot">
+
+                  <span>
+                    2 High-Risk Students
+                  </span>
+
+                  <button class="btn-xs-dismiss">
+                    &times; Dismiss
+                  </button>
+
+                </div>
+
+
+              </div>
+
+
+              <div class="n-alert-card opp-type">
+
+
+                <div class="n-card-head">
+
+                  <i class="fa fa-briefcase"></i>
+
+                  <strong>
+                    New Opportunity: Placement Drive
+                  </strong>
+
+                </div>
+
+
+                <div class="n-card-body">
+
+                  CMP001 published a new drive for Software Developer.
+                  Application Deadline: Open.
+
+                </div>
+
+
+                <div class="n-card-foot">
+
+                  <span>
+                    CMP001 &bull; 2026-09-28
+                  </span>
+
+                  <button class="btn-xs-dismiss">
+                    &times; Dismiss
+                  </button>
+
+                </div>
+
+
+              </div>
+
+
+            </div>
+
+
+          </div>
+
+
+        </div>
+
+
+        <!-- PROFILE DIVIDER -->
+        <div class="top-user-divider"></div>
+
+
+        <!-- PROFILE -->
+        <div class="header-user-card">
+
+
+          <div class="h-user-avatar">
+            MA
+          </div>
+
+
+          <div class="h-user-meta">
+
+            <div class="h-user-name">
+              MD Ali
+            </div>
+
+            <div class="h-user-role">
+              TPO
+            </div>
+
+          </div>
+
+
+          <span class="h-user-chevron">
+            <i class="fa fa-angle-down"></i>
+          </span>
+
+
+        </div>
+
+
+      </div>
+
+
+    </header>
+
+
+    <!-- =========================================================
+         MAIN PAGE SCROLL AREA
+         ========================================================= -->
+
+    <main class="tpo-main-body placement-scroll-area">
+
+
+      <!-- =======================================================
+           TOP FILTER BAR
+           ======================================================= -->
+
+      <div class="tpo-filter-bar">
+
+
+        <!-- ACADEMIC YEAR -->
+        <div class="filter-group">
+
+          <label>
+            Academic Year
+          </label>
+
+          <select
+            ng-model="c.selectedAcadYear"
+            ng-change="c.onFilterChange()"
+            class="filter-select">
+
+            <option value="2023 - 2027">
+              2023 - 2027
+            </option>
+
+            <option value="2024 - 2028">
+              2024 - 2028
+            </option>
+
+            <option value="2022 - 2026">
+              2022 - 2026
+            </option>
+
+          </select>
+
+        </div>
+
+
+        <!-- BATCH -->
+        <div class="filter-group">
+
+          <label>
+            Batch
+          </label>
+
+          <select
+            ng-model="c.filterBatch"
+            ng-change="c.onFilterChange()"
+            class="filter-select">
+
+            <option value="ALL">
+              All Batches
+            </option>
+
+            <option value="2023-2027">
+              Batch 2023-2027
+            </option>
+
+            <option value="2024-2028">
+              Batch 2024-2028
+            </option>
+
+          </select>
+
+        </div>
+
+
+        <!-- BRANCH -->
+        <div class="filter-group">
+
+          <label>
+            Branch / Dept
+          </label>
+
+          <select
+            ng-model="c.filterBranch"
+            ng-change="c.onFilterChange()"
+            class="filter-select">
+
+            <option value="ALL">
+              All Branches
+            </option>
+
+            <option value="CSE">
+              Computer Science (CSE)
+            </option>
+
+            <option value="ECE">
+              Electronics (ECE)
+            </option>
+
+            <option value="IT">
+              Information Tech (IT)
+            </option>
+
+            <option value="MECH">
+              Mechanical (MECH)
+            </option>
+
+          </select>
+
+        </div>
+
+
+        <!-- PLACEMENT STATUS -->
+        <div class="filter-group">
+
+          <label>
+            Placement Status
+          </label>
+
+          <select
+            ng-model="c.filterStatus"
+            ng-change="c.onFilterChange()"
+            class="filter-select">
+
+            <option value="ALL">
+              All Statuses
+            </option>
+
+            <option value="Placed">
+              Placed
+            </option>
+
+            <option value="Unplaced">
+              Unplaced
+            </option>
+
+            <option value="In Progress">
+              In Progress
+            </option>
+
+          </select>
+
+        </div>
+
+
+        <!-- PACKAGE RANGE -->
+        <div class="filter-group">
+
+          <label>
+            Package Range
+          </label>
+
+          <select
+            ng-model="c.filterPackage"
+            ng-change="c.onFilterChange()"
+            class="filter-select">
+
+            <option value="ALL">
+              All Ranges
+            </option>
+
+            <option value="10+">
+              &gt; 10 LPA
+            </option>
+
+            <option value="6-10">
+              6 - 10 LPA
+            </option>
+
+            <option value="<6">
+              &lt; 6 LPA
+            </option>
+
+          </select>
+
+        </div>
+
+
+        <!-- CGPA -->
+        <div class="filter-group">
+
+          <label>
+            CGPA Threshold
+          </label>
+
+          <select
+            ng-model="c.filterCgpa"
+            ng-change="c.onFilterChange()"
+            class="filter-select">
+
+            <option value="ALL">
+              All CGPA
+            </option>
+
+            <option value="8.0+">
+              8.0+ CGPA
+            </option>
+
+            <option value="7.5-8.0">
+              7.5 - 8.0 CGPA
+            </option>
+
+            <option value="7.0-7.5">
+              7.0 - 7.5 CGPA
+            </option>
+
+            <option value="<7.0">
+              &lt; 7.0 CGPA
+            </option>
+
+          </select>
+
+        </div>
+
+
+        <!-- CLEAR FILTERS -->
+        <div class="filter-clear-wrap">
+
+          <button
+            class="btn-clear-filters"
+            ng-click="c.clearFilters()">
+
+            <i class="fa fa-times"></i>
+
+            Clear Filters
+
+          </button>
+
+        </div>
+
+
+      </div>
+
+
+      <!-- =======================================================
+           KPI CARDS
+           ======================================================= -->
+
+      <div class="kpi-grid">
+
+
+        <div class="kpi-card"
+             ng-click="c.openModal('companies')">
+
+          <div class="kpi-content">
+
+            <div class="kpi-label">
+              Total Companies
+            </div>
+
+            <div class="kpi-value">
+              {{c.stats.totalCompanies}}
+            </div>
+
+            <div class="kpi-trend positive">
+
+              <i class="fa fa-arrow-up"></i>
+
+              18% vs last year
+
+            </div>
+
+          </div>
+
+
+          <div class="kpi-icon-box bg-blue">
+
+            <i class="fa fa-building-o"></i>
+
+          </div>
+
+        </div>
+
+
+        <div class="kpi-card"
+             ng-click="c.openModal('drives')">
+
+          <div class="kpi-content">
+
+            <div class="kpi-label">
+              Active Drives
+            </div>
+
+            <div class="kpi-value">
+              {{c.stats.activeDrives}}
+            </div>
+
+            <div class="kpi-trend positive">
+
+              <i class="fa fa-arrow-up"></i>
+
+              15% vs last year
+
+            </div>
+
+          </div>
+
+
+          <div class="kpi-icon-box bg-green">
+
+            <i class="fa fa-calendar-check-o"></i>
+
+          </div>
+
+        </div>
+
+
+        <div class="kpi-card"
+             ng-click="c.openModal('unplaced')">
+
+          <div class="kpi-content">
+
+            <div class="kpi-label">
+              Students Registered
+            </div>
+
+            <div class="kpi-value">
+              {{c.stats.registeredStudents}}
+            </div>
+
+            <div class="kpi-trend positive">
+
+              <i class="fa fa-arrow-up"></i>
+
+              12% vs last year
+
+            </div>
+
+          </div>
+
+
+          <div class="kpi-icon-box bg-purple">
+
+            <i class="fa fa-user-o"></i>
+
+          </div>
+
+        </div>
+
+
+        <div class="kpi-card"
+             ng-click="c.openModal('companies')">
+
+          <div class="kpi-content">
+
+            <div class="kpi-label">
+              Offers Made
+            </div>
+
+            <div class="kpi-value">
+              {{c.stats.offersMade}}
+            </div>
+
+            <div class="kpi-trend positive">
+
+              <i class="fa fa-arrow-up"></i>
+
+              20% vs last year
+
+            </div>
+
+          </div>
+
+
+          <div class="kpi-icon-box bg-amber">
+
+            <i class="fa fa-trophy"></i>
+
+          </div>
+
+        </div>
+
+
+        <div class="kpi-card"
+             ng-click="c.openModal('readiness')">
+
+          <div class="kpi-content">
+
+            <div class="kpi-label">
+              Placement Rate
+            </div>
+
+            <div class="kpi-value">
+              {{c.stats.placementRate}}%
+            </div>
+
+            <div class="kpi-trend positive">
+
+              <i class="fa fa-arrow-up"></i>
+
+              8% vs last year
+
+            </div>
+
+          </div>
+
+
+          <div class="kpi-icon-box bg-teal">
+
+            <i class="fa fa-pie-chart"></i>
+
+          </div>
+
+        </div>
+
+
+      </div>
+
+
+      <!-- =======================================================
+           PLACEMENT OVERVIEW / DRIVE STATUS / TOP RECRUITERS
+           ======================================================= -->
+
+      <div class="dash-row row-3-col">
+
+
+        <!-- PLACEMENT OVERVIEW -->
+        <div class="dash-card chart-card flex-2">
+
+
+          <div class="card-header-bar">
+
+            <h3>
+              Placement Overview
+            </h3>
+
+
+            <select
+              class="card-select-sm"
+              ng-model="c.selectedAcadYear"
+              ng-change="c.onFilterChange()">
+
+              <option value="2023 - 2027">
+                Batch 2023 – 2027
+              </option>
+
+              <option value="2024 - 2028">
+                Batch 2024 – 2028
+              </option>
+
+            </select>
+
+          </div>
+
+
+          <div class="chart-legend">
+
+            <span class="legend-item">
+              <span class="dot bg-blue"></span>
+              Offers Made
+            </span>
+
+            <span class="legend-item">
+              <span class="dot bg-emerald"></span>
+              Students Placed
+            </span>
+
+            <span class="legend-item">
+              <span class="dot bg-indigo-line"></span>
+              Placement Rate (%)
+            </span>
+
+          </div>
+
+
+          <div class="svg-chart-wrapper">
+
+            <svg
+              viewBox="0 0 600 200"
+              class="placement-svg">
+
+              <line
+                x1="40"
+                y1="30"
+                x2="580"
+                y2="30"
+                stroke="#E2E8F0"
+                stroke-dasharray="4">
+              </line>
+
+              <line
+                x1="40"
+                y1="75"
+                x2="580"
+                y2="75"
+                stroke="#E2E8F0"
+                stroke-dasharray="4">
+              </line>
+
+              <line
+                x1="40"
+                y1="120"
+                x2="580"
+                y2="120"
+                stroke="#E2E8F0"
+                stroke-dasharray="4">
+              </line>
+
+              <line
+                x1="40"
+                y1="165"
+                x2="580"
+                y2="165"
+                stroke="#CBD5E1">
+              </line>
+
+
+              <g ng-repeat="m in c.stats.monthlyData">
+
+                <rect
+                  ng-attr-x="{{m.x1}}"
+                  ng-attr-y="{{m.offersY}}"
+                  width="12"
+                  ng-attr-height="{{m.offersH}}"
+                  fill="#3B82F6"
+                  rx="2">
+                </rect>
+
+                <rect
+                  ng-attr-x="{{m.x2}}"
+                  ng-attr-y="{{m.placedY}}"
+                  width="12"
+                  ng-attr-height="{{m.placedH}}"
+                  fill="#10B981"
+                  rx="2">
+                </rect>
+
+                <text
+                  ng-attr-x="{{m.labelX}}"
+                  y="182"
+                  font-size="11"
+                  fill="#64748B">
+
+                  {{m.month}}
+
+                </text>
+
+              </g>
+
+
+              <path
+                ng-attr-d="{{c.stats.linePath}}"
+                fill="none"
+                stroke="#8B5CF6"
+                stroke-width="3.5">
+              </path>
+
+
+              <circle
+                ng-repeat="p in c.stats.linePoints"
+                ng-attr-cx="{{p.cx}}"
+                ng-attr-cy="{{p.cy}}"
+                r="4"
+                fill="#A855F7"
+                stroke="#FFF"
+                stroke-width="2">
+              </circle>
+
+            </svg>
+
+          </div>
+
+
+        </div>
+
+
+        <!-- DRIVE STATUS -->
+        <div
+          class="dash-card drive-status-card flex-1 cursor-pointer"
+          ng-click="c.openModal('drives')">
+
+
+          <div class="card-header-bar">
+
+            <h3>
+              Drive Status
+            </h3>
+
+
+            <select class="card-select-sm">
+
+              <option>
+                {{c.selectedAcadYear}}
+              </option>
+
+            </select>
+
+          </div>
+
+
+          <div class="doughnut-wrapper">
+
+
+            <div class="doughnut-graphic">
+
+              <svg
+                viewBox="0 0 120 120"
+                class="doughnut-svg">
+
+                <circle
+                  cx="60"
+                  cy="60"
+                  r="48"
+                  fill="none"
+                  stroke="#10B981"
+                  stroke-width="16">
+                </circle>
+
+              </svg>
+
+
+              <div class="doughnut-center-text">
+
+                <div class="center-val">
+                  {{c.stats.activeDrives}}
+                </div>
+
+                <div class="center-sub">
+                  Total Drives
+                </div>
+
+              </div>
+
+            </div>
+
+
+            <div class="doughnut-footer-legend">
+
+              <span class="blue-dot"></span>
+
+              <span>
+                Upcoming / Open Drives
+              </span>
+
+              <strong class="pull-right">
+
+                {{c.stats.activeDrives}}
+
+                <small class="text-muted">
+                  (100%)
+                </small>
+
+              </strong>
+
+            </div>
+
+
+          </div>
+
+        </div>
+
+
+        <!-- TOP RECRUITERS -->
+        <div class="dash-card recruiter-card flex-1">
+
+
+          <div class="card-header-bar">
+
+            <h3>
+              Top Recruiters
+            </h3>
+
+            <button
+              class="btn-link-sm"
+              ng-click="c.openModal('companies')">
+
+              View all &rarr;
+
+            </button>
+
+          </div>
+
+
+          <div class="recruiter-table-head">
+
+            <span>
+              COMPANY
+            </span>
+
+            <span class="text-right">
+              OFFERS
+            </span>
+
+          </div>
+
+
+          <div class="recruiter-list">
+
+
+            <div
+              class="recruiter-row"
+              ng-repeat="comp in c.stats.topCompaniesList"
+              ng-click="c.openDrawer('company', comp)">
+
+
+              <div class="comp-badge-cell">
+
+                <span class="comp-logo-tag">
+                  CMP
+                </span>
+
+                <span class="comp-name">
+                  {{comp.name}}
+                </span>
+
+              </div>
+
+
+              <div class="comp-offers-cell">
+                {{comp.offers}}
+              </div>
+
+
+            </div>
+
+
+          </div>
+
+
+          <div class="card-bottom-hint">
+            Showing top active recruiting partners
+          </div>
+
+
+        </div>
+
+
+      </div>
+
+
+      <!-- =======================================================
+           RECENT DRIVES / READINESS / FUNNEL
+           ======================================================= -->
+
+      <div class="dash-row row-3-col">
+
+
+        <!-- RECENT DRIVES -->
+        <div class="dash-card flex-2">
+
+
+          <div class="card-header-bar">
+
+            <h3>
+              Recent Drives
+            </h3>
+
+            <button
+              class="btn-link-sm"
+              ng-click="c.openModal('drives')">
+
+              View all &rarr;
+
+            </button>
+
+          </div>
+
+
+          <div class="table-responsive">
+
+            <table class="table custom-dash-table">
+
+              <thead>
+
+                <tr>
+
+                  <th>
+                    COMPANY
+                  </th>
+
+                  <th>
+                    ROLE
+                  </th>
+
+                  <th>
+                    DRIVE DATE
+                  </th>
+
+                  <th>
+                    ELIGIBLE
+                  </th>
+
+                </tr>
+
+              </thead>
+
+
+              <tbody>
+
+                <tr
+                  ng-repeat="drv in c.stats.recentDrivesList"
+                  class="cursor-pointer"
+                  ng-click="c.openModal('drives')">
+
+
+                  <td>
+
+                    <span class="comp-logo-tag">
+                      CMP
+                    </span>
+
+                    <strong style="margin-left:6px;">
+                      {{drv.company}}
+                    </strong>
+
+                  </td>
+
+
+                  <td>
+                    {{drv.role}}
+                  </td>
+
+
+                  <td class="text-muted">
+                    {{drv.date}}
+                  </td>
+
+
+                  <td>
+
+                    <span class="badge bg-slate-light">
+                      {{drv.cgpa}}
+                    </span>
+
+                  </td>
+
+
+                </tr>
+
+              </tbody>
+
+            </table>
+
+          </div>
+
+
+          <div class="dash-card-footer">
+
+
+            <div class="pagination-mini">
+
+              <button class="btn-p-arrow disabled">
+                &lt;
+              </button>
+
+              <span class="p-line"></span>
+
+              <button class="btn-p-arrow disabled">
+                &gt;
+              </button>
+
+            </div>
+
+
+            <div class="footer-count">
+
+              Showing
+              {{c.stats.recentDrivesList.length}}
+              of
+              {{c.stats.activeDrives}}
+              drives
+
+            </div>
+
+
+          </div>
+
+
+        </div>
+
+
+        <!-- STUDENT READINESS -->
+        <div
+          class="dash-card flex-1 cursor-pointer"
+          ng-click="c.openModal('readiness')">
+
+
+          <div class="card-header-bar">
+
+            <h3>
+              Student Readiness
+            </h3>
+
+
+            <select class="card-select-sm">
+
+              <option>
+                {{c.selectedAcadYear}}
+              </option>
+
+            </select>
+
+          </div>
+
+
+          <div class="doughnut-wrapper">
+
+
+            <div class="doughnut-graphic">
+
+
+              <svg
+                viewBox="0 0 120 120"
+                class="doughnut-svg">
+
+
+                <circle
+                  cx="60"
+                  cy="60"
+                  r="44"
+                  fill="none"
+                  stroke="#8B5CF6"
+                  stroke-dasharray="170 276"
+                  stroke-dashoffset="0"
+                  stroke-width="14"
+                  transform="rotate(-90 60 60)">
+                </circle>
+
+
+                <circle
+                  cx="60"
+                  cy="60"
+                  r="44"
+                  fill="none"
+                  stroke="#10B981"
+                  stroke-dasharray="106 276"
+                  stroke-dashoffset="-170"
+                  stroke-width="14"
+                  transform="rotate(-90 60 60)">
+                </circle>
+
+
+              </svg>
+
+
+              <div class="doughnut-center-text">
+
+                <div class="center-val">
+                  {{c.stats.registeredStudents}}
+                </div>
+
+                <div class="center-sub">
+                  Students
+                </div>
+
+              </div>
+
+
+            </div>
+
+
+            <div class="readiness-legend-list">
+
+
+              <div class="r-legend-row">
+
+                <span>
+
+                  <span class="dot bg-emerald"></span>
+
+                  Highly Ready
+
+                </span>
+
+
+                <strong>
+
+                  {{c.stats.highlyReady}}
+
+                  <small class="text-muted">
+                    ({{c.stats.highlyReadyPct}}%)
+                  </small>
+
+                </strong>
+
+              </div>
+
+
+              <div class="r-legend-row">
+
+                <span>
+
+                  <span class="dot bg-blue"></span>
+
+                  Ready
+
+                </span>
+
+
+                <strong>
+
+                  {{c.stats.readyCount}}
+
+                  <small class="text-muted">
+                    ({{c.stats.readyPct}}%)
+                  </small>
+
+                </strong>
+
+              </div>
+
+
+            </div>
+
+
+            <div class="readiness-link-btn">
+              View readiness dashboard &rarr;
+            </div>
+
+
+          </div>
+
+
+        </div>
+
+
+        <!-- PLACEMENT FUNNEL -->
+        <div class="dash-card flex-1">
+
+
+          <div class="card-header-bar">
+
+            <h3>
+              Placement Funnel
+            </h3>
+
+
+            <select class="card-select-sm">
+
+              <option>
+                {{c.selectedAcadYear}}
+              </option>
+
+            </select>
+
+          </div>
+
+
+          <div class="funnel-list">
+
+
+            <div class="funnel-item">
+
+              <div class="funnel-head">
+
+                <span>
+                  Registered Students
+                </span>
+
+                <strong>
+                  {{c.stats.funnel.registered}}
+                </strong>
+
+              </div>
+
+
+              <div class="funnel-bar-bg">
+
+                <div
+                  class="funnel-bar-fill bg-blue"
+                  style="width:100%;">
+                </div>
+
+              </div>
+
+            </div>
+
+
+            <div class="funnel-item">
+
+              <div class="funnel-head">
+
+                <span>
+                  Participating Students
+                </span>
+
+                <strong>
+                  {{c.stats.funnel.participating}}
+                </strong>
+
+              </div>
+
+
+              <div class="funnel-bar-bg">
+
+                <div
+                  class="funnel-bar-fill bg-blue"
+                  style="width:100%;">
+                </div>
+
+              </div>
+
+            </div>
+
+
+            <div class="funnel-item">
+
+              <div class="funnel-head">
+
+                <span>
+                  Applications Sent
+                </span>
+
+                <strong>
+                  {{c.stats.funnel.applications}}
+                </strong>
+
+              </div>
+
+
+              <div class="funnel-bar-bg">
+
+                <div
+                  class="funnel-bar-fill bg-blue"
+                  style="width:80%;">
+                </div>
+
+              </div>
+
+            </div>
+
+
+            <div class="funnel-item">
+
+              <div class="funnel-head">
+
+                <span>
+                  Interviews Conducted
+                </span>
+
+                <strong>
+                  {{c.stats.funnel.interviews}}
+                </strong>
+
+              </div>
+
+
+              <div class="funnel-bar-bg">
+
+                <div
+                  class="funnel-bar-fill bg-blue"
+                  style="width:60%;">
+                </div>
+
+              </div>
+
+            </div>
+
+
+            <div class="funnel-item">
+
+              <div class="funnel-head">
+
+                <span>
+                  Verified Offers
+                </span>
+
+                <strong>
+                  {{c.stats.offersMade}}
+                </strong>
+
+              </div>
+
+
+              <div class="funnel-bar-bg">
+
+                <div
+                  class="funnel-bar-fill bg-emerald"
+                  style="width:25%;">
+                </div>
+
+              </div>
+
+            </div>
+
+
+          </div>
+
+
+          <div class="card-bottom-hint">
+            Conversions calculated across hiring cycles
+          </div>
+
+
+        </div>
+
+
+      </div>
+
+
+      <!-- =======================================================
+           UNPLACED STUDENTS ACTION BANNER
+           ======================================================= -->
+
+      <div class="unplaced-action-banner">
+
+
+        <div class="banner-left">
+
+
+          <div class="alert-icon-box">
+
+            <i class="fa fa-exclamation-triangle"></i>
+
+          </div>
+
+
+          <div class="banner-text">
+
+
+            <div class="banner-title">
+
+              Unplaced Students Tracking &amp;
+              Attention Directory
+
+              <span class="badge-action-req">
+                Action Required
+              </span>
+
+            </div>
+
+
+            <div class="banner-sub">
+
+              {{c.stats.unplacedCount}}
+
+              active students currently require interview
+              assistance and placement support.
+
+            </div>
+
+
+          </div>
+
+
+        </div>
+
+
+        <div class="banner-right">
+
+
+          <button
+            class="btn btn-dark-action"
+            ng-click="c.openModal('unplaced')">
+
+            <i class="fa fa-users"></i>
+
+            Inspect Unplaced Directory
+            ({{c.stats.unplacedCount}})
+
+          </button>
+
+
+          <button
+            class="btn btn-outline-action"
+            ng-click="c.exportCSV()">
+
+            <i class="fa fa-download"></i>
+
+            Export CSV
+
+          </button>
+
+
+        </div>
+
+
+      </div>
+
+
+    </main>
+
+
+  </div>
+
+
+  <!-- =========================================================
+       FLOATING AI ASSISTANT
+       ========================================================= -->
+
+  <div
+    class="ai-chatbot-floating-btn"
+    ng-click="c.toggleChatbot()"
+    title="Campus360 AI Assistant">
+
+    <span>
+      ✦
+    </span>
+
+  </div>
+
+
+  <div
+    class="tpo-chatbot-embedded"
+    ng-if="c.chatbotOpen">
+  </div>
+
+
+  <!-- =========================================================
+       UNPLACED STUDENTS MODAL
+       ========================================================= -->
+
+  <div
+    class="modal-backdrop-custom"
+    ng-if="c.activeModal === 'unplaced'">
+
+    <div class="modal-dialog-custom modal-lg-custom">
+
+
+      <div class="modal-header-custom">
+
+        <div class="modal-title-custom">
+
+          <i class="fa fa-user-times text-warning"></i>
+
+          Unplaced Students Attention &amp;
+          Tracking Directory
+
+          <span class="badge bg-danger">
+
+            {{c.filteredUnplacedList.length}}
+
+            Active Unplaced
+
+          </span>
+
+        </div>
+
+
+        <button
+          class="btn-close-custom"
+          ng-click="c.closeModal()">
+
+          &times;
+
+        </button>
+
+      </div>
+
+
+      <div class="modal-body-custom">
+
+
+        <div class="modal-filter-tabs">
+
+
+          <button
+            class="tab-btn"
+            ng-class="{'active': c.unplacedTab === 'ALL'}"
+            ng-click="c.unplacedTab = 'ALL'">
+
+            All Unplaced
+            ({{c.stats.unplacedCount}})
+
+          </button>
+
+
+          <button
+            class="tab-btn"
+            ng-class="{'active': c.unplacedTab === 'INTERVENTIONS'}"
+            ng-click="c.unplacedTab = 'INTERVENTIONS'">
+
+            Requires Assistance (6)
+
+          </button>
+
+
+          <button
+            class="tab-btn"
+            ng-class="{'active': c.unplacedTab === 'LOW_CGPA'}"
+            ng-click="c.unplacedTab = 'LOW_CGPA'">
+
+            CGPA &lt; 7.5 (4)
+
+          </button>
+
+
+        </div>
+
+
+        <div class="table-responsive modal-table-wrap">
+
+
+          <table class="table table-hover table-striped modal-table">
+
+
+            <thead>
+
+              <tr>
+
+                <th>
+                  STUDENT NAME
+                </th>
+
+                <th>
+                  ROLL NO
+                </th>
+
+                <th>
+                  BRANCH
+                </th>
+
+                <th>
+                  CGPA
+                </th>
+
+                <th>
+                  APPLICATIONS
+                </th>
+
+                <th>
+                  INTERVIEWS
+                </th>
+
+                <th>
+                  STATUS
+                </th>
+
+                <th class="text-right">
+                  ACTION
+                </th>
+
+              </tr>
+
+            </thead>
+
+
+            <tbody>
+
+
+              <tr ng-repeat="st in c.filteredUnplacedList">
+
+
+                <td>
+
+                  <strong
+                    class="text-primary cursor-pointer"
+                    ng-click="c.openDrawer('student', st)">
+
+                    {{st.name}}
+
+                  </strong>
+
+                </td>
+
+
+                <td>
+                  {{st.roll_number}}
+                </td>
+
+
+                <td>
+
+                  <span class="badge bg-slate">
+                    {{st.branch}}
+                  </span>
+
+                </td>
+
+
+                <td>
+
+                  <strong>
+                    {{st.cgpa}}
+                  </strong>
+
+                </td>
+
+
+                <td>
+                  {{st.applications}}
+                </td>
+
+
+                <td>
+                  {{st.interviews}}
+                </td>
+
+
+                <td>
+
+                  <span class="badge bg-amber-light">
+                    Unplaced
+                  </span>
+
+                </td>
+
+
+                <td class="text-right">
+
+                  <button
+                    class="btn btn-xs btn-default"
+                    ng-click="c.openDrawer('student', st)">
+
+                    <i class="fa fa-eye"></i>
+
+                    View Profile
+
+                  </button>
+
+                </td>
+
+
+              </tr>
+
+
+            </tbody>
+
+
+          </table>
+
+
+        </div>
+
+
+      </div>
+
+
+      <div class="modal-footer-custom">
+
+
+        <button
+          class="btn btn-default"
+          ng-click="c.closeModal()">
+
+          Close
+
+        </button>
+
+
+        <button
+          class="btn btn-success"
+          ng-click="c.exportCSV()">
+
+          <i class="fa fa-file-excel-o"></i>
+
+          Export CSV
+
+        </button>
+
+
+      </div>
+
+
+    </div>
+
+  </div>
+
+
+  <!-- =========================================================
+       RECRUITMENT DRIVES MODAL
+       ========================================================= -->
+
+  <div
+    class="modal-backdrop-custom"
+    ng-if="c.activeModal === 'drives'">
+
+    <div class="modal-dialog-custom modal-lg-custom">
+
+
+      <div class="modal-header-custom">
+
+
+        <div class="modal-title-custom">
+
+          <i class="fa fa-calendar-check-o text-primary"></i>
+
+          Recruitment Drive &amp;
+          Schedule Overview
+
+        </div>
+
+
+        <button
+          class="btn-close-custom"
+          ng-click="c.closeModal()">
+
+          &times;
+
+        </button>
+
+
+      </div>
+
+
+      <div class="modal-body-custom">
+
+
+        <div class="table-responsive modal-table-wrap">
+
+
+          <table class="table table-hover table-striped modal-table">
+
+
+            <thead>
+
+              <tr>
+
+                <th>
+                  COMPANY
+                </th>
+
+                <th>
+                  ROLE
+                </th>
+
+                <th>
+                  DRIVE DATE
+                </th>
+
+                <th>
+                  STAGE
+                </th>
+
+                <th>
+                  MIN CGPA
+                </th>
+
+                <th>
+                  APPLICANTS
+                </th>
+
+                <th class="text-right">
+                  ACTION
+                </th>
+
+              </tr>
+
+            </thead>
+
+
+            <tbody>
+
+
+              <tr ng-repeat="drv in c.drivesDetailedList">
+
+
+                <td>
+                  <strong>
+                    {{drv.company}}
+                  </strong>
+                </td>
+
+
+                <td>
+                  {{drv.role}}
+                </td>
+
+
+                <td>
+                  {{drv.date}}
+                </td>
+
+
+                <td>
+
+                  <span class="badge bg-info">
+                    {{drv.stage}}
+                  </span>
+
+                </td>
+
+
+                <td>
+                  {{drv.cgpa}}
+                </td>
+
+
+                <td>
+                  {{drv.applicants}} students
+                </td>
+
+
+                <td class="text-right">
+
+                  <button
+                    class="btn btn-xs btn-primary"
+                    ng-click="c.openDrawer('company', drv)">
+
+                    View Details
+
+                  </button>
+
+                </td>
+
+
+              </tr>
+
+
+            </tbody>
+
+
+          </table>
+
+
+        </div>
+
+
+      </div>
+
+
+      <div class="modal-footer-custom">
+
+        <button
+          class="btn btn-default"
+          ng-click="c.closeModal()">
+
+          Close
+
+        </button>
+
+      </div>
+
+
+    </div>
+
+  </div>
+
+
+  <!-- =========================================================
+       COMPANIES MODAL
+       ========================================================= -->
+
+  <div
+    class="modal-backdrop-custom"
+    ng-if="c.activeModal === 'companies'">
+
+    <div class="modal-dialog-custom modal-md-custom">
+
+
+      <div class="modal-header-custom">
+
+
+        <div class="modal-title-custom">
+
+          <i class="fa fa-building text-info"></i>
+
+          Recruiting Partners &amp;
+          Offers Breakdown
+
+        </div>
+
+
+        <button
+          class="btn-close-custom"
+          ng-click="c.closeModal()">
+
+          &times;
+
+        </button>
+
+      </div>
+
+
+      <div class="modal-body-custom">
+
+
+        <div class="table-responsive modal-table-wrap">
+
+
+          <table class="table table-striped modal-table">
+
+
+            <thead>
+
+              <tr>
+
+                <th>
+                  COMPANY NAME
+                </th>
+
+                <th>
+                  INDUSTRY
+                </th>
+
+                <th>
+                  OFFERS MADE
+                </th>
+
+                <th>
+                  AVG PACKAGE
+                </th>
+
+              </tr>
+
+            </thead>
+
+
+            <tbody>
+
+
+              <tr
+                ng-repeat="citem in c.companiesDetailedList"
+                class="cursor-pointer"
+                ng-click="c.openDrawer('company', citem)">
+
+
+                <td>
+                  <strong>
+                    {{citem.name}}
+                  </strong>
+                </td>
+
+
+                <td>
+                  {{citem.industry}}
+                </td>
+
+
+                <td>
+
+                  <span class="badge bg-success">
+                    {{citem.offers}}
+                  </span>
+
+                </td>
+
+
+                <td>
+                  {{citem.package}}
+                </td>
+
+
+              </tr>
+
+
+            </tbody>
+
+
+          </table>
+
+
+        </div>
+
+
+      </div>
+
+
+      <div class="modal-footer-custom">
+
+        <button
+          class="btn btn-default"
+          ng-click="c.closeModal()">
+
+          Close
+
+        </button>
+
+      </div>
+
+
+    </div>
+
+  </div>
+
+
+  <!-- =========================================================
+       SIDE DRAWER
+       ========================================================= -->
+
+  <div
+    class="drawer-overlay"
+    ng-if="c.showDrawer"
+    ng-click="c.closeDrawer()">
+  </div>
+
+
+  <div
+    class="drawer-panel compact-drawer"
+    ng-if="c.showDrawer">
+
+
+    <div class="drawer-header">
+
+      <h4>
+
+        {{
+          c.drawerType === 'student'
+          ? 'Student Profile'
+          : 'Company Profile'
+        }}
+
+      </h4>
+
+
+      <button
+        class="btn-close-custom"
+        ng-click="c.closeDrawer()">
+
+        &times;
+
+      </button>
+
+    </div>
+
+
+    <!-- STUDENT DRAWER -->
+    <div
+      class="drawer-body"
+      ng-if="c.drawerType === 'student'">
+
+
+      <div class="drawer-avatar-card">
+
+
+        <div class="d-avatar">
+
+          {{c.selectedStudent.name.charAt(0)}}
+
+        </div>
+
+
+        <div class="d-info">
+
+          <h5>
+            {{c.selectedStudent.name}}
+          </h5>
+
+          <span class="text-muted">
+
+            {{c.selectedStudent.roll_number}}
+
+            |
+
+            {{c.selectedStudent.branch}}
+
+          </span>
+
+        </div>
+
+
+      </div>
+
+
+      <div class="drawer-stat-grid">
+
+
+        <div class="d-stat-box">
+
+          <div class="d-stat-lbl">
+            CGPA
+          </div>
+
+          <div class="d-stat-val">
+            {{c.selectedStudent.cgpa}}
+          </div>
+
+        </div>
+
+
+        <div class="d-stat-box">
+
+          <div class="d-stat-lbl">
+            Applications
+          </div>
+
+          <div class="d-stat-val">
+            {{c.selectedStudent.applications}}
+          </div>
+
+        </div>
+
+
+        <div class="d-stat-box">
+
+          <div class="d-stat-lbl">
+            Interviews
+          </div>
+
+          <div class="d-stat-val">
+            {{c.selectedStudent.interviews}}
+          </div>
+
+        </div>
+
+
+      </div>
+
+
+      <div class="drawer-section">
+
+
+        <h6>
+
+          Placement Details &amp;
+          Academic Status
+
+        </h6>
+
+
+        <p class="text-muted small">
+
+          Student profile verified by Training &amp;
+          Placement Officer. Active in placement drives
+          for 2023-2027 cycle.
+
+        </p>
+
+
+        <button
+          class="btn btn-block btn-default"
+          ng-click="c.closeDrawer()">
+
+          Close Profile
+
+        </button>
+
+
+      </div>
+
+
+    </div>
+
+
+    <!-- COMPANY DRAWER -->
+    <div
+      class="drawer-body"
+      ng-if="c.drawerType === 'company'">
+
+
+      <div class="drawer-avatar-card">
+
+
+        <div class="d-avatar bg-indigo">
+          C
+        </div>
+
+
+        <div class="d-info">
+
+          <h5>
+
+            {{
+              c.selectedCompany.name ||
+              c.selectedCompany.company
+            }}
+
+          </h5>
+
+          <span class="text-muted">
+            Hiring Partner
+          </span>
+
+        </div>
+
+
+      </div>
+
+
+      <div class="drawer-stat-grid">
+
+
+        <div class="d-stat-box">
+
+          <div class="d-stat-lbl">
+            Active Drives
+          </div>
+
+          <div class="d-stat-val">
+            2
+          </div>
+
+        </div>
+
+
+        <div class="d-stat-box">
+
+          <div class="d-stat-lbl">
+            Offers Made
+          </div>
+
+          <div class="d-stat-val">
+            {{c.selectedCompany.offers || 1}}
+          </div>
+
+        </div>
+
+
+      </div>
+
+
+      <div class="drawer-section">
+
+
+        <h6>
+          Scheduled Rounds
+        </h6>
+
+
+        <ul class="list-unstyled small">
+
+          <li>
+
+            <i class="fa fa-check-circle text-success"></i>
+
+            Online Test (Completed)
+
+          </li>
+
+
+          <li>
+
+            <i class="fa fa-clock-o text-warning"></i>
+
+            Technical Interview Round 1 (Oct 15)
+
+          </li>
+
+        </ul>
+
+
+        <button
+          class="btn btn-block btn-default"
+          ng-click="c.closeDrawer()">
+
+          Close Details
+
+        </button>
+
+
+      </div>
+
+
+    </div>
+
+
+  </div>
+
+
+  <!-- =========================================================
+       CAMPUS360 AI
+       ========================================================= -->
+
+  <div
+    style="
+      position:fixed;
+      bottom:24px;
+      right:24px;
+      z-index:999999;
+    ">
+
+    <sp-widget widget="data.aiWidget"></sp-widget>
+
+  </div>
+
+
+</div>]]></template>
+    </sp_widget>
+</record_update>

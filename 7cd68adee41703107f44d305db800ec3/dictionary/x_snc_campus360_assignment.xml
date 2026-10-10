@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?><database>
+    <element attributes="enforce_dot_walk_cross_scope_access=true" db_object_id="3de8bfb4c42743107f44164a4d246326" label="Assignment" max_length="40" name="x_snc_campus360_assignment" type="collection">
+        <element label="Due Date" max_length="255" name="due_date" type="glide_date"/>
+        <element label="Description" max_length="1000" name="description" type="string"/>
+        <element display="true" label="Assignment Name" max_length="40" name="assignment_name" type="string"/>
+        <element default="100" label="Maximum Score" max_length="255" name="maximum_score" type="integer"/>
+        <element label="Training Program" max_length="32" name="training_program" reference="x_snc_campus360_training_program" type="reference"/>
+        <element choice="1" label="Status" max_length="255" name="status" type="choice">
+            <choice>
+                <element inactive_on_update="false" label="Draft" sequence="0" value="Draft"/>
+                <element inactive_on_update="false" label="Published" sequence="1" value="Published"/>
+                <element inactive_on_update="false" label="Closed" sequence="2" value="Closed"/>
+            </choice>
+        </element>
+        <element choice="1" label="Assignment Type" max_length="255" name="assignment_type" type="choice">
+            <choice/>
+        </element>
+        <element label="Batch" max_length="40" name="batch" type="string"/>
+        <element label="Assigned Date" max_length="255" name="assigned_date" type="glide_date"/>
+        <element label="Assignment ID" max_length="40" name="assignment_id" type="string"/>
+        <element label="Trainer" max_length="32" name="trainer" reference="x_snc_campus360_trainer_master" type="reference"/>
+        <index name="index">
+            <element name="training_program"/>
+        </index>
+        <index name="index2">
+            <element name="trainer"/>
+        </index>
+    </element>
+</database>

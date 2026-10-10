@@ -1,0 +1,2763 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_widget">
+    <sp_widget action="INSERT_OR_UPDATE">
+        <category>custom</category>
+        <client_script><![CDATA[api.controller = function($scope, $window) {
+
+    var c = this;
+
+
+    /*
+     * =====================================================
+     * SEARCH
+     * =====================================================
+     */
+
+    c.search = "";
+
+
+    /*
+     * =====================================================
+     * ROLE FILTER
+     * =====================================================
+     */
+
+    c.rolePeriod = "season";
+
+
+    /*
+     * =====================================================
+     * REFRESH DASHBOARD
+     * =====================================================
+     */
+
+    c.refreshDashboard = function() {
+
+        c.data = {};
+
+        c.server.update();
+
+    };
+
+
+    /*
+     * =====================================================
+     * VIEW CANDIDATE
+     * =====================================================
+     */
+
+    c.viewCandidate = function(candidate) {
+
+        if (!candidate || !candidate.sys_id) {
+            return;
+        }
+
+        /*
+         * Change this page ID later when
+         * Candidate Details page is created.
+         */
+
+        $window.location.href =
+            "?id=campus360_recruiter_candidate_details" +
+            "&sys_id=" +
+            candidate.sys_id;
+
+    };
+
+
+    /*
+     * =====================================================
+     * SEARCH CANDIDATES
+     * =====================================================
+     */
+
+    c.searchCandidates = function(candidate) {
+
+        if (!c.search) {
+            return true;
+        }
+
+        var searchText =
+            c.search.toLowerCase();
+
+        var name =
+            (candidate.name || "")
+            .toLowerCase();
+
+        var role =
+            (candidate.role || "")
+            .toLowerCase();
+
+        var status =
+            (candidate.status || "")
+            .toLowerCase();
+
+        return (
+            name.indexOf(searchText) >= 0 ||
+            role.indexOf(searchText) >= 0 ||
+            status.indexOf(searchText) >= 0
+        );
+
+    };
+
+
+    /*
+     * =====================================================
+     * INITIALIZE
+     * =====================================================
+     */
+
+    $scope.$watch(
+        function() {
+            return c.data;
+        },
+        function(newData) {
+
+            if (!newData) {
+                return;
+            }
+
+            /*
+             * Data is already prepared
+             * by Server Script.
+             */
+
+        },
+        true
+    );
+
+};]]></client_script>
+        <controller_as>c</controller_as>
+        <css>/* =========================================================&#13;
+CAMPUS360 RECRUITER DASHBOARD&#13;
+========================================================= */&#13;
+&#13;
+.campus360-recruiter {&#13;
+min-height: 100vh;&#13;
+background: #f5f7fb;&#13;
+color: #172033;&#13;
+font-family: "Inter", "Segoe UI", Arial, sans-serif;&#13;
+display: flex;&#13;
+}&#13;
+&#13;
+/* =========================================================&#13;
+SIDEBAR&#13;
+========================================================= */&#13;
+&#13;
+.recruiter-sidebar {&#13;
+width: 250px;&#13;
+min-height: 100vh;&#13;
+background: #101b3d;&#13;
+color: #ffffff;&#13;
+padding: 22px 16px;&#13;
+display: flex;&#13;
+flex-direction: column;&#13;
+box-sizing: border-box;&#13;
+}&#13;
+&#13;
+.sidebar-brand {&#13;
+display: flex;&#13;
+align-items: center;&#13;
+gap: 12px;&#13;
+padding: 4px 8px 24px;&#13;
+}&#13;
+&#13;
+.brand-mark {&#13;
+width: 40px;&#13;
+height: 40px;&#13;
+border-radius: 11px;&#13;
+background: #ffffff;&#13;
+color: #3155d9;&#13;
+display: flex;&#13;
+align-items: center;&#13;
+justify-content: center;&#13;
+font-size: 22px;&#13;
+font-weight: 800;&#13;
+}&#13;
+&#13;
+.brand-name {&#13;
+font-size: 18px;&#13;
+font-weight: 800;&#13;
+}&#13;
+&#13;
+.brand-subtitle {&#13;
+font-size: 11px;&#13;
+color: #aeb9d8;&#13;
+margin-top: 2px;&#13;
+}&#13;
+&#13;
+/* COMPANY PROFILE */&#13;
+&#13;
+.company-profile {&#13;
+background: rgba(255,255,255,0.08);&#13;
+border-radius: 12px;&#13;
+padding: 12px;&#13;
+display: flex;&#13;
+align-items: center;&#13;
+gap: 10px;&#13;
+margin-bottom: 22px;&#13;
+}&#13;
+&#13;
+.company-avatar,&#13;
+.top-avatar,&#13;
+.candidate-avatar {&#13;
+display: flex;&#13;
+align-items: center;&#13;
+justify-content: center;&#13;
+border-radius: 50%;&#13;
+font-weight: 700;&#13;
+}&#13;
+&#13;
+.company-avatar {&#13;
+width: 38px;&#13;
+height: 38px;&#13;
+background: #536dfe;&#13;
+color: white;&#13;
+font-size: 13px;&#13;
+}&#13;
+&#13;
+.company-name {&#13;
+font-size: 13px;&#13;
+font-weight: 700;&#13;
+}&#13;
+&#13;
+.recruiter-name {&#13;
+font-size: 11px;&#13;
+color: #aeb9d8;&#13;
+margin-top: 3px;&#13;
+}&#13;
+&#13;
+/* NAVIGATION */&#13;
+&#13;
+.recruiter-nav {&#13;
+flex: 1;&#13;
+}&#13;
+&#13;
+.nav-section-title {&#13;
+font-size: 10px;&#13;
+font-weight: 700;&#13;
+color: #7e8db7;&#13;
+letter-spacing: 1px;&#13;
+padding: 13px 10px 7px;&#13;
+}&#13;
+&#13;
+.nav-item {&#13;
+display: flex;&#13;
+align-items: center;&#13;
+gap: 10px;&#13;
+color: #c6cee4;&#13;
+text-decoration: none;&#13;
+padding: 10px 11px;&#13;
+border-radius: 8px;&#13;
+margin-bottom: 3px;&#13;
+font-size: 13px;&#13;
+transition: all 0.2s ease;&#13;
+}&#13;
+&#13;
+.nav-item {&#13;
+background: rgba(255,255,255,0.08);&#13;
+color: #ffffff;&#13;
+text-decoration: none;&#13;
+}&#13;
+&#13;
+.nav-item.active {&#13;
+background: #536dfe;&#13;
+color: #ffffff;&#13;
+}&#13;
+&#13;
+.nav-icon {&#13;
+width: 20px;&#13;
+text-align: center;&#13;
+font-size: 15px;&#13;
+}&#13;
+&#13;
+.nav-count {&#13;
+margin-left: auto;&#13;
+background: #ef5350;&#13;
+color: white;&#13;
+border-radius: 20px;&#13;
+padding: 2px 7px;&#13;
+font-size: 10px;&#13;
+}&#13;
+&#13;
+/* SIDEBAR FOOTER */&#13;
+&#13;
+.sidebar-footer {&#13;
+border-top: 1px solid rgba(255,255,255,0.1);&#13;
+padding: 16px 8px 2px;&#13;
+}&#13;
+&#13;
+.footer-title {&#13;
+font-size: 12px;&#13;
+font-weight: 700;&#13;
+}&#13;
+&#13;
+.footer-subtitle {&#13;
+color: #8290b8;&#13;
+font-size: 10px;&#13;
+margin-top: 4px;&#13;
+}&#13;
+&#13;
+/* =========================================================&#13;
+MAIN&#13;
+========================================================= */&#13;
+&#13;
+.recruiter-main {&#13;
+flex: 1;&#13;
+min-width: 0;&#13;
+}&#13;
+&#13;
+/* =========================================================&#13;
+TOPBAR&#13;
+========================================================= */&#13;
+&#13;
+.recruiter-topbar {&#13;
+height: 68px;&#13;
+background: #ffffff;&#13;
+border-bottom: 1px solid #e8ebf2;&#13;
+display: flex;&#13;
+align-items: center;&#13;
+justify-content: space-between;&#13;
+padding: 0 30px;&#13;
+box-sizing: border-box;&#13;
+}&#13;
+&#13;
+.topbar-search {&#13;
+width: 390px;&#13;
+height: 38px;&#13;
+background: #f5f7fb;&#13;
+border: 1px solid #e7eaf1;&#13;
+border-radius: 8px;&#13;
+display: flex;&#13;
+align-items: center;&#13;
+padding: 0 12px;&#13;
+}&#13;
+&#13;
+.search-icon {&#13;
+color: #8993a8;&#13;
+margin-right: 8px;&#13;
+font-size: 19px;&#13;
+}&#13;
+&#13;
+.topbar-search input {&#13;
+border: none;&#13;
+outline: none;&#13;
+background: transparent;&#13;
+width: 100%;&#13;
+font-size: 12px;&#13;
+color: #27324a;&#13;
+}&#13;
+&#13;
+.topbar-actions {&#13;
+display: flex;&#13;
+align-items: center;&#13;
+gap: 9px;&#13;
+}&#13;
+&#13;
+.top-icon {&#13;
+width: 35px;&#13;
+height: 35px;&#13;
+border: 1px solid #e4e8f0;&#13;
+background: white;&#13;
+border-radius: 8px;&#13;
+color: #65708a;&#13;
+cursor: pointer;&#13;
+}&#13;
+&#13;
+.top-icon {&#13;
+background: #f5f7fb;&#13;
+}&#13;
+&#13;
+.top-profile {&#13;
+display: flex;&#13;
+align-items: center;&#13;
+gap: 9px;&#13;
+margin-left: 8px;&#13;
+padding-left: 14px;&#13;
+border-left: 1px solid #e5e8ef;&#13;
+}&#13;
+&#13;
+.top-avatar {&#13;
+width: 34px;&#13;
+height: 34px;&#13;
+background: #e9edff;&#13;
+color: #3e57c9;&#13;
+font-size: 12px;&#13;
+}&#13;
+&#13;
+.top-profile-info {&#13;
+display: flex;&#13;
+flex-direction: column;&#13;
+}&#13;
+&#13;
+.top-profile-info strong {&#13;
+font-size: 12px;&#13;
+}&#13;
+&#13;
+.top-profile-info span {&#13;
+color: #8a94a8;&#13;
+font-size: 10px;&#13;
+margin-top: 2px;&#13;
+}&#13;
+&#13;
+/* =========================================================&#13;
+DASHBOARD CONTENT&#13;
+========================================================= */&#13;
+&#13;
+.recruiter-dashboard {&#13;
+padding: 28px 30px;&#13;
+max-width: 1600px;&#13;
+margin: auto;&#13;
+}&#13;
+&#13;
+.dashboard-header {&#13;
+display: flex;&#13;
+align-items: flex-start;&#13;
+justify-content: space-between;&#13;
+margin-bottom: 25px;&#13;
+}&#13;
+&#13;
+.eyebrow,&#13;
+.card-eyebrow {&#13;
+font-size: 9px;&#13;
+font-weight: 800;&#13;
+letter-spacing: 1.1px;&#13;
+color: #6273d7;&#13;
+}&#13;
+&#13;
+.dashboard-header h1 {&#13;
+margin: 5px 0 7px;&#13;
+font-size: 27px;&#13;
+font-weight: 750;&#13;
+color: #15203b;&#13;
+}&#13;
+&#13;
+.dashboard-header p {&#13;
+margin: 0;&#13;
+color: #78839a;&#13;
+font-size: 12px;&#13;
+max-width: 680px;&#13;
+}&#13;
+&#13;
+.company-context {&#13;
+background: #ffffff;&#13;
+border: 1px solid #e7eaf1;&#13;
+border-radius: 10px;&#13;
+padding: 11px 17px;&#13;
+text-align: right;&#13;
+}&#13;
+&#13;
+.company-context span {&#13;
+display: block;&#13;
+font-size: 8px;&#13;
+color: #8993a8;&#13;
+letter-spacing: 1px;&#13;
+}&#13;
+&#13;
+.company-context strong {&#13;
+display: block;&#13;
+margin-top: 3px;&#13;
+font-size: 13px;&#13;
+}&#13;
+&#13;
+/* =========================================================&#13;
+KPI CARDS&#13;
+========================================================= */&#13;
+&#13;
+.kpi-grid {&#13;
+display: grid;&#13;
+grid-template-columns: repeat(5, 1fr);&#13;
+gap: 14px;&#13;
+margin-bottom: 18px;&#13;
+}&#13;
+&#13;
+.kpi-card {&#13;
+background: #ffffff;&#13;
+border: 1px solid #e7eaf1;&#13;
+border-radius: 12px;&#13;
+padding: 17px;&#13;
+min-height: 122px;&#13;
+box-sizing: border-box;&#13;
+text-decoration: none;&#13;
+color: inherit;&#13;
+transition: transform 0.2s ease, box-shadow 0.2s ease;&#13;
+}&#13;
+&#13;
+.kpi-card {&#13;
+transform: translateY(-2px);&#13;
+box-shadow: 0 8px 22px rgba(30, 48, 90, 0.08);&#13;
+text-decoration: none;&#13;
+}&#13;
+&#13;
+.kpi-top {&#13;
+display: flex;&#13;
+justify-content: space-between;&#13;
+align-items: center;&#13;
+}&#13;
+&#13;
+.kpi-label {&#13;
+font-size: 11px;&#13;
+color: #78839a;&#13;
+font-weight: 600;&#13;
+}&#13;
+&#13;
+.kpi-icon {&#13;
+width: 30px;&#13;
+height: 30px;&#13;
+border-radius: 8px;&#13;
+display: flex;&#13;
+justify-content: center;&#13;
+align-items: center;&#13;
+font-size: 14px;&#13;
+}&#13;
+&#13;
+.kpi-blue .kpi-icon {&#13;
+background: #eaf0ff;&#13;
+color: #4967dc;&#13;
+}&#13;
+&#13;
+.kpi-green .kpi-icon {&#13;
+background: #e8f8ef;&#13;
+color: #2d9a5b;&#13;
+}&#13;
+&#13;
+.kpi-purple .kpi-icon {&#13;
+background: #f0eaff;&#13;
+color: #7655d8;&#13;
+}&#13;
+&#13;
+.kpi-orange .kpi-icon {&#13;
+background: #fff2e4;&#13;
+color: #e28a32;&#13;
+}&#13;
+&#13;
+.kpi-value {&#13;
+font-size: 28px;&#13;
+font-weight: 800;&#13;
+margin-top: 12px;&#13;
+color: #17213b;&#13;
+}&#13;
+&#13;
+.kpi-bottom {&#13;
+display: flex;&#13;
+justify-content: space-between;&#13;
+margin-top: 5px;&#13;
+color: #929bad;&#13;
+font-size: 9px;&#13;
+}&#13;
+&#13;
+.kpi-link {&#13;
+color: #5268d6;&#13;
+font-weight: 700;&#13;
+}&#13;
+&#13;
+/* =========================================================&#13;
+CARDS&#13;
+========================================================= */&#13;
+&#13;
+.dashboard-grid {&#13;
+display: grid;&#13;
+grid-template-columns: 1.45fr 1fr;&#13;
+gap: 18px;&#13;
+margin-bottom: 18px;&#13;
+}&#13;
+&#13;
+.lower-grid {&#13;
+display: grid;&#13;
+grid-template-columns: 1.45fr 1fr;&#13;
+gap: 18px;&#13;
+margin-bottom: 18px;&#13;
+}&#13;
+&#13;
+.bottom-grid {&#13;
+display: grid;&#13;
+grid-template-columns: 1.45fr 1fr;&#13;
+gap: 18px;&#13;
+}&#13;
+&#13;
+.dashboard-card {&#13;
+background: #ffffff;&#13;
+border: 1px solid #e7eaf1;&#13;
+border-radius: 12px;&#13;
+padding: 20px;&#13;
+box-sizing: border-box;&#13;
+}&#13;
+&#13;
+.card-header {&#13;
+display: flex;&#13;
+justify-content: space-between;&#13;
+align-items: flex-start;&#13;
+margin-bottom: 18px;&#13;
+}&#13;
+&#13;
+.card-header h2 {&#13;
+margin: 4px 0 0;&#13;
+font-size: 15px;&#13;
+color: #1a2540;&#13;
+}&#13;
+&#13;
+.card-header select {&#13;
+border: 1px solid #e3e7ef;&#13;
+background: white;&#13;
+border-radius: 6px;&#13;
+padding: 6px 9px;&#13;
+font-size: 10px;&#13;
+color: #69748a;&#13;
+}&#13;
+&#13;
+.card-header a {&#13;
+font-size: 10px;&#13;
+color: #5268d6;&#13;
+text-decoration: none;&#13;
+font-weight: 700;&#13;
+}&#13;
+&#13;
+/* =========================================================&#13;
+APPLICATION ROLE CHART&#13;
+========================================================= */&#13;
+&#13;
+.role-chart {&#13;
+height: 205px;&#13;
+display: flex;&#13;
+align-items: flex-end;&#13;
+justify-content: space-around;&#13;
+gap: 18px;&#13;
+padding: 10px 10px 0;&#13;
+border-bottom: 1px solid #edf0f5;&#13;
+}&#13;
+&#13;
+.role-bar {&#13;
+flex: 1;&#13;
+max-width: 90px;&#13;
+height: 100%;&#13;
+display: flex;&#13;
+flex-direction: column;&#13;
+align-items: center;&#13;
+justify-content: flex-end;&#13;
+}&#13;
+&#13;
+.bar-value {&#13;
+font-size: 10px;&#13;
+font-weight: 700;&#13;
+color: #4f5e7e;&#13;
+margin-bottom: 5px;&#13;
+}&#13;
+&#13;
+.bar {&#13;
+width: 42px;&#13;
+max-height: 145px;&#13;
+min-height: 4px;&#13;
+background: #6378e8;&#13;
+border-radius: 6px 6px 0 0;&#13;
+}&#13;
+&#13;
+.bar-label {&#13;
+margin-top: 8px;&#13;
+color: #7e8799;&#13;
+font-size: 9px;&#13;
+text-align: center;&#13;
+max-width: 75px;&#13;
+overflow: hidden;&#13;
+text-overflow: ellipsis;&#13;
+white-space: nowrap;&#13;
+}&#13;
+&#13;
+/* =========================================================&#13;
+STATUS&#13;
+========================================================= */&#13;
+&#13;
+.status-content {&#13;
+display: flex;&#13;
+align-items: center;&#13;
+gap: 35px;&#13;
+min-height: 205px;&#13;
+}&#13;
+&#13;
+.status-circle {&#13;
+width: 135px;&#13;
+height: 135px;&#13;
+border-radius: 50%;&#13;
+border: 14px solid #e9edff;&#13;
+display: flex;&#13;
+flex-direction: column;&#13;
+align-items: center;&#13;
+justify-content: center;&#13;
+flex-shrink: 0;&#13;
+}&#13;
+&#13;
+.status-total {&#13;
+font-size: 25px;&#13;
+font-weight: 800;&#13;
+}&#13;
+&#13;
+.status-label {&#13;
+font-size: 9px;&#13;
+color: #8a94a7;&#13;
+margin-top: 2px;&#13;
+}&#13;
+&#13;
+.status-list {&#13;
+flex: 1;&#13;
+}&#13;
+&#13;
+.status-row {&#13;
+display: flex;&#13;
+align-items: center;&#13;
+gap: 7px;&#13;
+font-size: 10px;&#13;
+margin-bottom: 13px;&#13;
+color: #5e687c;&#13;
+}&#13;
+&#13;
+.status-row strong {&#13;
+margin-left: auto;&#13;
+color: #1e2942;&#13;
+}&#13;
+&#13;
+.status-row small {&#13;
+color: #9aa2b2;&#13;
+}&#13;
+&#13;
+.status-dot {&#13;
+width: 8px;&#13;
+height: 8px;&#13;
+border-radius: 50%;&#13;
+}&#13;
+&#13;
+.status-pending {&#13;
+background: #f4b740;&#13;
+}&#13;
+&#13;
+.status-shortlisted {&#13;
+background: #5471e2;&#13;
+}&#13;
+&#13;
+.status-rejected {&#13;
+background: #e95c63;&#13;
+}&#13;
+&#13;
+.status-selected {&#13;
+background: #42a66b;&#13;
+}&#13;
+&#13;
+.status-other {&#13;
+background: #9aa2b2;&#13;
+}&#13;
+&#13;
+/* =========================================================&#13;
+CANDIDATE TABLE&#13;
+========================================================= */&#13;
+&#13;
+.candidate-table {&#13;
+width: 100%;&#13;
+}&#13;
+&#13;
+.table-header,&#13;
+.candidate-row {&#13;
+display: grid;&#13;
+grid-template-columns: 1.4fr 1.1fr 1.1fr .8fr 1fr .55fr;&#13;
+gap: 12px;&#13;
+align-items: center;&#13;
+}&#13;
+&#13;
+.table-header {&#13;
+padding: 9px 0;&#13;
+border-bottom: 1px solid #edf0f4;&#13;
+color: #9aa2b3;&#13;
+font-size: 9px;&#13;
+font-weight: 700;&#13;
+}&#13;
+&#13;
+.candidate-row {&#13;
+padding: 12px 0;&#13;
+border-bottom: 1px solid #f0f2f6;&#13;
+font-size: 10px;&#13;
+color: #606b81;&#13;
+}&#13;
+&#13;
+.candidate-name {&#13;
+display: flex;&#13;
+align-items: center;&#13;
+gap: 8px;&#13;
+color: #26314a;&#13;
+font-weight: 650;&#13;
+}&#13;
+&#13;
+.candidate-avatar {&#13;
+width: 29px;&#13;
+height: 29px;&#13;
+background: #edf0ff;&#13;
+color: #4d62ca;&#13;
+font-size: 9px;&#13;
+}&#13;
+&#13;
+.skill-match {&#13;
+display: flex;&#13;
+align-items: center;&#13;
+gap: 7px;&#13;
+}&#13;
+&#13;
+.skill-bar {&#13;
+width: 45px;&#13;
+height: 5px;&#13;
+background: #e9ecf2;&#13;
+border-radius: 10px;&#13;
+overflow: hidden;&#13;
+}&#13;
+&#13;
+.skill-fill {&#13;
+height: 100%;&#13;
+background: #536ddd;&#13;
+border-radius: 10px;&#13;
+}&#13;
+&#13;
+.skill-match span {&#13;
+font-size: 9px;&#13;
+font-weight: 700;&#13;
+}&#13;
+&#13;
+.status-badge {&#13;
+display: inline-block;&#13;
+border-radius: 20px;&#13;
+padding: 4px 7px;&#13;
+font-size: 8px;&#13;
+font-weight: 700;&#13;
+}&#13;
+&#13;
+.badge-pending {&#13;
+background: #fff4d9;&#13;
+color: #b27a10;&#13;
+}&#13;
+&#13;
+.badge-shortlisted {&#13;
+background: #e9edff;&#13;
+color: #4c62c9;&#13;
+}&#13;
+&#13;
+.badge-rejected {&#13;
+background: #ffe9ea;&#13;
+color: #c34e56;&#13;
+}&#13;
+&#13;
+.badge-selected {&#13;
+background: #e6f7ed;&#13;
+color: #278051;&#13;
+}&#13;
+&#13;
+.badge-other {&#13;
+background: #eef0f4;&#13;
+color: #697286;&#13;
+}&#13;
+&#13;
+.view-button {&#13;
+border: none;&#13;
+background: #eef1ff;&#13;
+color: #5066cf;&#13;
+padding: 5px 8px;&#13;
+border-radius: 5px;&#13;
+font-size: 9px;&#13;
+cursor: pointer;&#13;
+}&#13;
+&#13;
+.view-button {&#13;
+background: #dfe5ff;&#13;
+}&#13;
+&#13;
+/* =========================================================&#13;
+INTERVIEWS&#13;
+========================================================= */&#13;
+&#13;
+.interview-list {&#13;
+display: flex;&#13;
+flex-direction: column;&#13;
+}&#13;
+&#13;
+.interview-item {&#13;
+display: flex;&#13;
+align-items: center;&#13;
+gap: 11px;&#13;
+padding: 11px 0;&#13;
+border-bottom: 1px solid #eff1f5;&#13;
+}&#13;
+&#13;
+.interview-date {&#13;
+width: 42px;&#13;
+height: 42px;&#13;
+border-radius: 8px;&#13;
+background: #eef1ff;&#13;
+color: #4f63c9;&#13;
+display: flex;&#13;
+flex-direction: column;&#13;
+align-items: center;&#13;
+justify-content: center;&#13;
+}&#13;
+&#13;
+.interview-date strong {&#13;
+font-size: 15px;&#13;
+}&#13;
+&#13;
+.interview-date span {&#13;
+font-size: 8px;&#13;
+text-transform: uppercase;&#13;
+}&#13;
+&#13;
+.interview-details {&#13;
+display: flex;&#13;
+flex-direction: column;&#13;
+flex: 1;&#13;
+}&#13;
+&#13;
+.interview-details strong {&#13;
+font-size: 10px;&#13;
+color: #29344e;&#13;
+}&#13;
+&#13;
+.interview-details span {&#13;
+font-size: 9px;&#13;
+color: #7c879b;&#13;
+margin-top: 2px;&#13;
+}&#13;
+&#13;
+.interview-details small {&#13;
+font-size: 8px;&#13;
+color: #9ba3b2;&#13;
+margin-top: 3px;&#13;
+}&#13;
+&#13;
+.interview-status {&#13;
+font-size: 8px;&#13;
+color: #4f63c9;&#13;
+background: #eef1ff;&#13;
+padding: 4px 6px;&#13;
+border-radius: 10px;&#13;
+}&#13;
+&#13;
+/* =========================================================&#13;
+QUICK ACTIONS&#13;
+========================================================= */&#13;
+&#13;
+.quick-actions {&#13;
+display: grid;&#13;
+grid-template-columns: 1fr 1fr;&#13;
+gap: 10px;&#13;
+}&#13;
+&#13;
+.quick-action {&#13;
+border: 1px solid #e9ecf2;&#13;
+border-radius: 9px;&#13;
+padding: 13px;&#13;
+text-decoration: none;&#13;
+color: inherit;&#13;
+display: flex;&#13;
+flex-direction: column;&#13;
+transition: 0.2s;&#13;
+}&#13;
+&#13;
+.quick-action {&#13;
+border-color: #bfc9f5;&#13;
+background: #fafbff;&#13;
+text-decoration: none;&#13;
+}&#13;
+&#13;
+.quick-action &gt; span {&#13;
+width: 28px;&#13;
+height: 28px;&#13;
+display: flex;&#13;
+align-items: center;&#13;
+justify-content: center;&#13;
+background: #eef1ff;&#13;
+color: #5066d0;&#13;
+border-radius: 7px;&#13;
+margin-bottom: 8px;&#13;
+}&#13;
+&#13;
+.quick-action strong {&#13;
+font-size: 10px;&#13;
+color: #29344e;&#13;
+}&#13;
+&#13;
+.quick-action small {&#13;
+color: #8a94a7;&#13;
+font-size: 8px;&#13;
+margin-top: 4px;&#13;
+}&#13;
+&#13;
+/* =========================================================&#13;
+ACTIVITY&#13;
+========================================================= */&#13;
+&#13;
+.activity-list {&#13;
+display: flex;&#13;
+flex-direction: column;&#13;
+}&#13;
+&#13;
+.activity-item {&#13;
+display: flex;&#13;
+gap: 10px;&#13;
+align-items: center;&#13;
+padding: 10px 0;&#13;
+border-bottom: 1px solid #eff1f5;&#13;
+}&#13;
+&#13;
+.activity-icon {&#13;
+width: 30px;&#13;
+height: 30px;&#13;
+border-radius: 7px;&#13;
+background: #eef1ff;&#13;
+color: #5268d3;&#13;
+display: flex;&#13;
+align-items: center;&#13;
+justify-content: center;&#13;
+font-size: 12px;&#13;
+}&#13;
+&#13;
+.activity-item &gt; div {&#13;
+display: flex;&#13;
+flex-direction: column;&#13;
+}&#13;
+&#13;
+.activity-item strong {&#13;
+font-size: 9px;&#13;
+color: #313b52;&#13;
+}&#13;
+&#13;
+.activity-item span {&#13;
+font-size: 8px;&#13;
+color: #929bad;&#13;
+margin-top: 3px;&#13;
+}&#13;
+&#13;
+/* =========================================================&#13;
+FOOTER&#13;
+========================================================= */&#13;
+&#13;
+.dashboard-footer {&#13;
+display: flex;&#13;
+justify-content: space-between;&#13;
+align-items: center;&#13;
+padding: 18px 2px 5px;&#13;
+color: #929bad;&#13;
+font-size: 9px;&#13;
+}&#13;
+&#13;
+.dashboard-footer button {&#13;
+border: none;&#13;
+background: transparent;&#13;
+color: #5368d1;&#13;
+font-size: 9px;&#13;
+cursor: pointer;&#13;
+}&#13;
+&#13;
+/* =========================================================&#13;
+RESPONSIVE&#13;
+========================================================= */&#13;
+&#13;
+@media (max-width: 1200px) {&#13;
+&#13;
+.kpi-grid {&#13;
+    grid-template-columns: repeat(3, 1fr);&#13;
+}&#13;
+&#13;
+.dashboard-grid,&#13;
+.lower-grid,&#13;
+.bottom-grid {&#13;
+    grid-template-columns: 1fr;&#13;
+}&#13;
+&#13;
+}&#13;
+&#13;
+@media (max-width: 850px) {&#13;
+&#13;
+.recruiter-sidebar {&#13;
+    width: 70px;&#13;
+    padding: 15px 8px;&#13;
+}&#13;
+&#13;
+.brand-name,&#13;
+.brand-subtitle,&#13;
+.company-profile &gt; div:last-child,&#13;
+.nav-section-title,&#13;
+.nav-item span:not(.nav-icon),&#13;
+.sidebar-footer {&#13;
+    display: none;&#13;
+}&#13;
+&#13;
+.sidebar-brand {&#13;
+    justify-content: center;&#13;
+}&#13;
+&#13;
+.company-profile {&#13;
+    justify-content: center;&#13;
+}&#13;
+&#13;
+.nav-item {&#13;
+    justify-content: center;&#13;
+}&#13;
+&#13;
+.nav-count {&#13;
+    display: none;&#13;
+}&#13;
+&#13;
+.recruiter-topbar {&#13;
+    padding: 0 15px;&#13;
+}&#13;
+&#13;
+.topbar-search {&#13;
+    width: 230px;&#13;
+}&#13;
+&#13;
+.recruiter-dashboard {&#13;
+    padding: 20px 15px;&#13;
+}&#13;
+&#13;
+.dashboard-header {&#13;
+    flex-direction: column;&#13;
+    gap: 15px;&#13;
+}&#13;
+&#13;
+.kpi-grid {&#13;
+    grid-template-columns: repeat(2, 1fr);&#13;
+}&#13;
+&#13;
+}&#13;
+&#13;
+@media (max-width: 600px) {&#13;
+&#13;
+.kpi-grid {&#13;
+    grid-template-columns: 1fr;&#13;
+}&#13;
+&#13;
+.topbar-search {&#13;
+    width: 160px;&#13;
+}&#13;
+&#13;
+.top-profile-info {&#13;
+    display: none;&#13;
+}&#13;
+&#13;
+.table-header {&#13;
+    display: none;&#13;
+}&#13;
+&#13;
+.candidate-row {&#13;
+    grid-template-columns: 1fr;&#13;
+    gap: 6px;&#13;
+    padding: 15px 0;&#13;
+}&#13;
+&#13;
+.status-content {&#13;
+    flex-direction: column;&#13;
+    justify-content: center;&#13;
+}&#13;
+&#13;
+.quick-actions {&#13;
+    grid-template-columns: 1fr;&#13;
+}&#13;
+&#13;
+}</css>
+        <data_table>sp_instance</data_table>
+        <demo_data/>
+        <description/>
+        <docs/>
+        <field_list/>
+        <has_preview>false</has_preview>
+        <id>campus360_recruiter_dashboard</id>
+        <internal>false</internal>
+        <link><![CDATA[function link(scope, element, attrs, controller) {
+  
+}]]></link>
+        <name>Campus360 Recruiter Dashboard</name>
+        <option_schema/>
+        <public>false</public>
+        <roles/>
+        <script><![CDATA[(function() {
+
+    data.kpis = {
+        applications: 0,
+        shortlisted: 0,
+        interviews: 0,
+        offers: 0,
+        inProgress: 0
+    };
+
+    data.recruiter = {
+        name: gs.getUserDisplayName() || "Recruiter",
+        company: "Campus Recruiter",
+        initials: "CR"
+    };
+
+    data.applicationsByRole = [];
+    data.applicationStatus = [];
+    data.topCandidates = [];
+    data.upcomingInterviews = [];
+    data.recentActivity = [];
+
+
+    /*
+     * =====================================================
+     * 1. IDENTIFY RECRUITER / COMPANY
+     * =====================================================
+     */
+
+    var currentEmail = gs.getUser().getEmail();
+
+	var companySysId = "";
+
+	var companyGR = new GlideRecord(
+		"x_snc_campus360_company_master"
+	);
+
+	companyGR.addQuery("recruiter_email", currentEmail);
+	companyGR.setLimit(1);
+	companyGR.query();
+
+	if (companyGR.next()) {
+
+		companySysId =
+			companyGR.getUniqueValue();
+
+        data.recruiter.company =
+            companyGR.getValue("company_name") ||
+            "Campus Recruiter";
+
+        data.recruiter.name =
+            companyGR.getValue("recruiter_name") ||
+            gs.getUserDisplayName();
+
+    }
+
+
+    /*
+     * INITIALS
+     */
+
+    var nameParts = data.recruiter.name.split(" ");
+
+    if (nameParts.length >= 2) {
+
+        data.recruiter.initials =
+            nameParts[0].substring(0, 1) +
+            nameParts[nameParts.length - 1].substring(0, 1);
+
+    } else {
+
+        data.recruiter.initials =
+            data.recruiter.name.substring(0, 2);
+
+    }
+
+
+    /*
+     * =====================================================
+     * 2. TOTAL APPLICATIONS
+     * =====================================================
+     */
+
+    var appGR = new GlideRecord(
+		"x_snc_campus360_student_application"
+	);
+
+	appGR.addQuery(
+		"opportunity.company",
+		companySysId
+	);
+
+	appGR.query();
+
+    while (appGR.next()) {
+
+        data.kpis.applications++;
+
+        var appStatus =
+            (appGR.getValue("application_status") || "")
+            .toLowerCase();
+
+        if (
+            appStatus.indexOf("short") >= 0 ||
+            appGR.getValue("shortlisted") == "true"
+        ) {
+
+            data.kpis.shortlisted++;
+
+        }
+
+
+        if (
+            appStatus.indexOf("pending") >= 0 ||
+            appStatus.indexOf("progress") >= 0 ||
+            appStatus.indexOf("review") >= 0
+        ) {
+
+            data.kpis.inProgress++;
+
+        }
+
+    }
+
+
+    /*
+     * =====================================================
+     * 3. INTERVIEWS
+     * =====================================================
+     */
+
+    var interviewGR = new GlideRecord(
+        "x_snc_campus360_recruiter_interview"
+    );
+
+    interviewGR.addQuery(
+        "interview_date",
+        ">=",
+        gs.beginningOfToday()
+    );
+
+    interviewGR.query();
+
+    while (interviewGR.next()) {
+
+        data.kpis.interviews++;
+
+    }
+
+
+    /*
+	* =====================================================
+	* 4. OFFERS / PLACEMENT OUTCOMES
+	* =====================================================
+	*/
+
+	var outcomeGR = new GlideRecord(
+		"x_snc_campus360_placement_outcome"
+	);
+
+	outcomeGR.query();
+
+	while (outcomeGR.next()) {
+
+		var outcomeStatus =
+			(
+				outcomeGR.getValue("outcome_type") ||
+				""
+			).toLowerCase();
+
+		if (
+			outcomeStatus.indexOf("offer") >= 0 ||
+			outcomeStatus.indexOf("selected") >= 0 ||
+			outcomeStatus.indexOf("placed") >= 0
+		) {
+
+			data.kpis.offers++;
+
+		}
+
+	}
+
+
+    /*
+     * =====================================================
+     * 5. APPLICATION STATUS
+     * =====================================================
+     */
+
+    var statusMap = {};
+
+    var statusGR = new GlideRecord(
+		"x_snc_campus360_student_application"
+	);
+
+	statusGR.addQuery(
+		"opportunity.company",
+		companySysId
+	);
+
+	statusGR.query();
+
+    while (statusGR.next()) {
+
+        var status =
+            statusGR.getValue("application_status") ||
+            "Other";
+
+        if (!statusMap[status]) {
+            statusMap[status] = 0;
+        }
+
+        statusMap[status]++;
+
+    }
+
+
+    var totalApplications = data.kpis.applications;
+
+    for (var statusName in statusMap) {
+
+        var statusClass = "other";
+
+        var lowerStatus =
+            statusName.toLowerCase();
+
+        if (lowerStatus.indexOf("pending") >= 0) {
+            statusClass = "pending";
+        } else if (lowerStatus.indexOf("short") >= 0) {
+            statusClass = "shortlisted";
+        } else if (lowerStatus.indexOf("reject") >= 0) {
+            statusClass = "rejected";
+        } else if (
+            lowerStatus.indexOf("select") >= 0 ||
+            lowerStatus.indexOf("offer") >= 0
+        ) {
+            statusClass = "selected";
+        }
+
+        data.applicationStatus.push({
+            label: statusName,
+            count: statusMap[statusName],
+            percent: totalApplications ?
+                Math.round(
+                    (statusMap[statusName] /
+                    totalApplications) * 100
+                ) : 0,
+            class: statusClass
+        });
+
+    }
+
+
+    /*
+     * =====================================================
+     * 6. APPLICATIONS BY ROLE
+     * =====================================================
+     */
+
+    var roleMap = {};
+
+	var roleGR = new GlideRecord(
+		"x_snc_campus360_student_application"
+	);
+
+	roleGR.addQuery(
+		"opportunity.company",
+		companySysId
+	);
+
+	roleGR.query();
+
+    while (roleGR.next()) {
+
+        var opportunity =
+            roleGR.getValue("opportunity");
+
+        if (!opportunity) {
+            continue;
+        }
+
+        var opportunityGR = new GlideRecord(
+            "x_snc_campus360_placement_opportunity"
+        );
+
+        if (opportunityGR.get(opportunity)) {
+
+            var role =
+                opportunityGR.getValue("opportunity_title") ||
+                "Other";
+
+            if (!roleMap[role]) {
+                roleMap[role] = 0;
+            }
+
+            roleMap[role]++;
+
+        }
+
+    }
+
+
+    var maxRoleCount = 1;
+
+    for (var roleName in roleMap) {
+
+        if (roleMap[roleName] > maxRoleCount) {
+            maxRoleCount = roleMap[roleName];
+        }
+
+    }
+
+
+    for (var roleKey in roleMap) {
+
+        data.applicationsByRole.push({
+
+            role: roleKey,
+
+            count: roleMap[roleKey],
+
+            height:
+                Math.max(
+                    10,
+                    Math.round(
+                        (roleMap[roleKey] /
+                        maxRoleCount) * 145
+                    )
+                )
+
+        });
+
+    }
+
+
+    /*
+     * =====================================================
+     * 7. TOP CANDIDATES
+     * =====================================================
+     */
+
+    var candidateGR = new GlideRecord(
+		"x_snc_campus360_student_application"
+	);
+
+	candidateGR.addQuery(
+		"opportunity.company",
+		companySysId
+	);
+
+	candidateGR.orderByDesc("ai_match_score");
+	candidateGR.setLimit(8);
+	candidateGR.query();
+
+    while (candidateGR.next()) {
+
+        var studentID =
+            candidateGR.getValue("student");
+
+        var studentName = "Student";
+
+        var studentGR = new GlideRecord(
+            "x_snc_campus360_student_master"
+        );
+
+        if (
+            studentID &&
+            studentGR.get(studentID)
+        ) {
+
+            studentName =
+                studentGR.getValue("student_name") ||
+                "Student";
+
+        }
+
+
+        var candidateRole = "Candidate";
+
+        var oppID =
+            candidateGR.getValue("opportunity");
+
+        if (oppID) {
+
+            var oppGR = new GlideRecord(
+                "x_snc_campus360_placement_opportunity"
+            );
+
+            if (oppGR.get(oppID)) {
+
+                candidateRole =
+                    oppGR.getValue("opportunity_title") ||
+                    "Candidate";
+
+            }
+
+        }
+
+
+        var matchScore =
+            parseInt(
+                candidateGR.getValue("ai_match_score"),
+                10
+            ) || 0;
+
+
+        var candidateStatus =
+            candidateGR.getValue(
+                "application_status"
+            ) || "Pending";
+
+
+        var statusClass = "other";
+
+        var lowerCandidateStatus =
+            candidateStatus.toLowerCase();
+
+        if (
+            lowerCandidateStatus.indexOf("short") >= 0
+        ) {
+            statusClass = "shortlisted";
+        } else if (
+            lowerCandidateStatus.indexOf("reject") >= 0
+        ) {
+            statusClass = "rejected";
+        } else if (
+            lowerCandidateStatus.indexOf("select") >= 0 ||
+            lowerCandidateStatus.indexOf("offer") >= 0
+        ) {
+            statusClass = "selected";
+        } else if (
+            lowerCandidateStatus.indexOf("pending") >= 0
+        ) {
+            statusClass = "pending";
+        }
+
+
+        var candidateParts =
+            studentName.split(" ");
+
+        var initials = "";
+
+        if (candidateParts.length >= 2) {
+
+            initials =
+                candidateParts[0].substring(0, 1) +
+                candidateParts[
+                    candidateParts.length - 1
+                ].substring(0, 1);
+
+        } else {
+
+            initials =
+                studentName.substring(0, 2);
+
+        }
+
+
+        data.topCandidates.push({
+
+            sys_id:
+                candidateGR.getUniqueValue(),
+
+            name:
+                studentName,
+
+            initials:
+                initials.toUpperCase(),
+
+            role:
+                candidateRole,
+
+            match:
+                matchScore,
+
+            status:
+                candidateStatus,
+
+            statusClass:
+                statusClass,
+
+            stage:
+                candidateStatus
+
+        });
+
+    }
+
+
+    /*
+     * =====================================================
+     * 8. UPCOMING INTERVIEWS
+     * =====================================================
+     */
+
+    var upcomingGR = new GlideRecord(
+		"x_snc_campus360_recruiter_interview"
+	);
+
+	upcomingGR.addQuery(
+		"opportunity.company",
+		companySysId
+	);
+
+	upcomingGR.addQuery(
+		"interview_date",
+		">=",
+		gs.beginningOfToday()
+	);
+
+	upcomingGR.orderBy("interview_date");
+	upcomingGR.setLimit(6);
+	upcomingGR.query();
+
+    while (upcomingGR.next()) {
+
+        var interviewStudent =
+            upcomingGR.getValue("student");
+
+        var interviewStudentName =
+            "Student";
+
+        var isGR = new GlideRecord(
+            "x_snc_campus360_student_master"
+        );
+
+        if (
+            interviewStudent &&
+            isGR.get(interviewStudent)
+        ) {
+
+            interviewStudentName =
+                isGR.getValue("student_name") ||
+                "Student";
+
+        }
+
+
+        var interviewDate =
+            upcomingGR.getValue(
+                "interview_date"
+            );
+
+        var gd =
+            new GlideDateTime(interviewDate);
+
+
+        var day =
+            gd.getDayOfMonthLocalTime();
+
+        var month =
+            gd.getMonthLocalTime();
+
+
+        var monthNames = [
+            "Jan", "Feb", "Mar", "Apr",
+            "May", "Jun", "Jul", "Aug",
+            "Sep", "Oct", "Nov", "Dec"
+        ];
+
+
+        data.upcomingInterviews.push({
+
+            student:
+                interviewStudentName,
+
+            role:
+                upcomingGR.getValue(
+                    "interview_type"
+                ) || "Interview",
+
+            day:
+                day,
+
+            month:
+                monthNames[month - 1],
+
+            time:
+                upcomingGR.getDisplayValue(
+                    "start_time"
+                ),
+
+            status:
+                upcomingGR.getValue(
+                    "interview_status"
+                ) || "Scheduled"
+
+        });
+
+    }
+
+
+    /*
+     * =====================================================
+     * 9. RECENT ACTIVITY
+     * =====================================================
+     */
+
+    var recentAppGR = new GlideRecord(
+        "x_snc_campus360_student_application"
+    );
+
+    recentAppGR.orderByDesc("sys_updated_on");
+    recentAppGR.setLimit(5);
+    recentAppGR.query();
+
+    while (recentAppGR.next()) {
+
+        var activityStatus =
+            recentAppGR.getValue(
+                "application_status"
+            ) || "Application Updated";
+
+
+        data.recentActivity.push({
+
+            title:
+                "Application " +
+                activityStatus,
+
+            time:
+                recentAppGR.getDisplayValue(
+                    "sys_updated_on"
+                ),
+
+            type:
+                "application",
+
+            icon:
+                "•"
+
+        });
+
+    }
+
+
+    /*
+     * =====================================================
+     * 10. FALLBACK ACTIVITY
+     * =====================================================
+     */
+
+    if (data.recentActivity.length === 0) {
+
+        data.recentActivity.push({
+
+            title:
+                "No recent recruitment activity",
+
+            time:
+                "Waiting for activity",
+
+            type:
+                "application",
+
+            icon:
+                "•"
+
+        });
+
+    }
+
+
+})();]]></script>
+        <servicenow>false</servicenow>
+        <sys_class_name>sp_widget</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-23 05:14:24</sys_created_on>
+        <sys_id>42e37d78c46303107f44164a4d246321</sys_id>
+        <sys_mod_count>25</sys_mod_count>
+        <sys_name>Campus360 Recruiter Dashboard</sys_name>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name>sp_widget_42e37d78c46303107f44164a4d246321</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-26 13:44:08</sys_updated_on>
+        <template><![CDATA[<div class="campus360-recruiter">
+
+  <!-- SIDEBAR -->
+
+  <aside class="recruiter-sidebar">
+
+<div class="sidebar-brand">
+  <div class="brand-mark">C</div>
+
+  <div>
+    <div class="brand-name">Campus360</div>
+    <div class="brand-subtitle">Recruiter Portal</div>
+  </div>
+</div>
+
+<!-- COMPANY -->
+<div class="company-profile">
+
+  <div class="company-avatar">
+    {{data.recruiter.initials}}
+  </div>
+
+  <div>
+    <div class="company-name">
+      {{data.recruiter.company}}
+    </div>
+
+    <div class="recruiter-name">
+      {{data.recruiter.name}}
+    </div>
+  </div>
+
+</div>
+
+<!-- NAVIGATION -->
+<nav class="recruiter-nav">
+
+  <div class="nav-section-title">
+    OVERVIEW
+  </div>
+
+  <a class="nav-item active"
+     ng-href="?id=campus360_recruiter_dashboard">
+
+    <span class="nav-icon">⌂</span>
+    <span>Dashboard</span>
+
+  </a>
+
+
+  <div class="nav-section-title">
+    RECRUITMENT
+  </div>
+
+  <a class="nav-item"
+     ng-href="?id=campus360_recruiter_jobs">
+
+    <span class="nav-icon">▣</span>
+    <span>Job Opportunities</span>
+
+  </a>
+
+  <a class="nav-item"
+     ng-href="?id=campus360_recruiter_candidates">
+
+    <span class="nav-icon">♙</span>
+    <span>Candidates</span>
+
+  </a>
+
+  <a class="nav-item"
+     ng-href="?id=campus360_recruiter_interviews">
+
+    <span class="nav-icon">◉</span>
+    <span>Interviews</span>
+
+    <span class="nav-count"
+          ng-if="data.counts.interviews > 0">
+      {{data.counts.interviews}}
+    </span>
+
+  </a>
+
+  <a class="nav-item"
+     ng-href="?id=campus360_placement_outcome">
+
+    <span class="nav-icon">✓</span>
+    <span>Offers</span>
+
+  </a>
+
+
+  <div class="nav-section-title">
+    TALENT
+  </div>
+
+  <a class="nav-item"
+     ng-href="?id=recruiter_talent_pool">
+
+    <span class="nav-icon">♟</span>
+    <span>Talent Pool</span>
+
+  </a>
+
+  <a class="nav-item"
+     ng-href="?id=campus360_recruiter_analytics">
+
+    <span class="nav-icon">▥</span>
+    <span>Analytics</span>
+
+  </a>
+
+
+  <div class="nav-section-title">
+    COMPANY
+  </div>
+
+  <a class="nav-item"
+     ng-href="?id=campus360_recruiter_communications">
+
+    <span class="nav-icon">✉</span>
+    <span>Communications</span>
+
+  </a>
+
+  <a class="nav-item"
+     ng-href="?id=campus360_recruiter_company">
+
+    <span class="nav-icon">▤</span>
+    <span>Company Profile</span>
+
+  </a>
+
+</nav>
+
+
+<!-- SIDEBAR FOOTER -->
+<div class="sidebar-footer">
+
+  <div class="footer-title">
+    Campus360
+  </div>
+
+  <div class="footer-subtitle">
+    Intelligent Talent & Placement
+  </div>
+
+</div>
+
+  </aside>
+
+  <!-- MAIN CONTENT -->
+
+  <main class="recruiter-main">
+
+<!-- TOP BAR -->
+<header class="recruiter-topbar">
+
+  <div class="topbar-search">
+
+    <span class="search-icon">⌕</span>
+
+    <input type="text"
+           ng-model="c.search"
+           placeholder="Search candidates, jobs, or applications...">
+
+  </div>
+
+
+  <div class="topbar-actions">
+
+    <button class="top-icon"
+            ng-click="c.refreshDashboard()"
+            title="Refresh">
+      ↻
+    </button>
+
+    <button class="top-icon">
+      ✉
+    </button>
+
+    <button class="top-icon">
+      ♧
+    </button>
+
+
+    <div class="top-profile">
+
+      <div class="top-avatar">
+        {{data.recruiter.initials}}
+      </div>
+
+      <div class="top-profile-info">
+
+        <strong>
+          {{data.recruiter.name}}
+        </strong>
+
+        <span>
+          {{data.recruiter.company}}
+        </span>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</header>
+
+
+<!-- DASHBOARD -->
+<section class="recruiter-dashboard">
+
+
+  <!-- WELCOME -->
+  <div class="dashboard-header">
+
+    <div>
+
+      <div class="eyebrow">
+        RECRUITER DASHBOARD
+      </div>
+
+      <h1>
+        Welcome, {{data.recruiter.name}} ]]>👋
+<![CDATA[      </h1>
+
+      <p>
+        Manage campus hiring, discover candidates,
+        schedule interviews and track recruitment progress.
+      </p>
+
+    </div>
+
+
+    <div class="company-context">
+
+      <span>
+        COMPANY
+      </span>
+
+      <strong>
+        {{data.recruiter.company}}
+      </strong>
+
+    </div>
+
+  </div>
+
+
+  <!-- KPI CARDS -->
+  <div class="kpi-grid">
+
+
+    <!-- APPLICATIONS -->
+    <a class="kpi-card kpi-blue"
+       ng-href="?id=campus360_recruiter_candidates">
+
+      <div class="kpi-top">
+
+        <span class="kpi-label">
+          Total Applications
+        </span>
+
+        <span class="kpi-icon">
+          ♙
+        </span>
+
+      </div>
+
+      <div class="kpi-value">
+        {{data.kpis.applications}}
+      </div>
+
+      <div class="kpi-bottom">
+        <span>
+          Applications received
+        </span>
+
+        <span class="kpi-link">
+          View →
+        </span>
+      </div>
+
+    </a>
+
+
+    <!-- SHORTLISTED -->
+    <a class="kpi-card kpi-green"
+       ng-href="?id=campus360_recruiter_candidates">
+
+      <div class="kpi-top">
+
+        <span class="kpi-label">
+          Shortlisted
+        </span>
+
+        <span class="kpi-icon">
+          ✓
+        </span>
+
+      </div>
+
+      <div class="kpi-value">
+        {{data.kpis.shortlisted}}
+      </div>
+
+      <div class="kpi-bottom">
+
+        <span>
+          Candidates shortlisted
+        </span>
+
+        <span class="kpi-link">
+          View →
+        </span>
+
+      </div>
+
+    </a>
+
+
+    <!-- INTERVIEWS -->
+    <a class="kpi-card kpi-purple"
+       ng-href="?id=campus360_recruiter_interviews">
+
+      <div class="kpi-top">
+
+        <span class="kpi-label">
+          Interviews Scheduled
+        </span>
+
+        <span class="kpi-icon">
+          ◉
+        </span>
+
+      </div>
+
+      <div class="kpi-value">
+        {{data.kpis.interviews}}
+      </div>
+
+      <div class="kpi-bottom">
+
+        <span>
+          Upcoming interviews
+        </span>
+
+        <span class="kpi-link">
+          View →
+        </span>
+
+      </div>
+
+    </a>
+
+
+    <!-- OFFERS -->
+    <a class="kpi-card kpi-green"
+       ng-href="?id=campus360_placement_outcome">
+
+      <div class="kpi-top">
+
+        <span class="kpi-label">
+          Offers Made
+        </span>
+
+        <span class="kpi-icon">
+          ★
+        </span>
+
+      </div>
+
+      <div class="kpi-value">
+        {{data.kpis.offers}}
+      </div>
+
+      <div class="kpi-bottom">
+
+        <span>
+          Placement outcomes
+        </span>
+
+        <span class="kpi-link">
+          View →
+        </span>
+
+      </div>
+
+    </a>
+
+
+    <!-- IN PROGRESS -->
+    <div class="kpi-card kpi-orange">
+
+      <div class="kpi-top">
+
+        <span class="kpi-label">
+          In Progress
+        </span>
+
+        <span class="kpi-icon">
+          ◷
+        </span>
+
+      </div>
+
+      <div class="kpi-value">
+        {{data.kpis.inProgress}}
+      </div>
+
+      <div class="kpi-bottom">
+
+        <span>
+          Active applications
+        </span>
+
+      </div>
+
+    </div>
+
+
+  </div>
+
+
+  <!-- MAIN GRID -->
+  <div class="dashboard-grid">
+
+
+    <!-- APPLICATIONS BY ROLE -->
+    <section class="dashboard-card applications-role-card">
+
+      <div class="card-header">
+
+        <div>
+
+          <div class="card-eyebrow">
+            RECRUITMENT
+          </div>
+
+          <h2>
+            Applications by Role
+          </h2>
+
+        </div>
+
+        <select ng-model="c.rolePeriod">
+          <option value="season">
+            This Placement Season
+          </option>
+
+          <option value="month">
+            This Month
+          </option>
+
+        </select>
+
+      </div>
+
+
+      <div class="role-chart">
+
+        <div class="role-bar"
+             ng-repeat="role in data.applicationsByRole">
+
+          <div class="bar-value">
+            {{role.count}}
+          </div>
+
+          <div class="bar"
+               ng-style="{'height': role.height + 'px'}">
+          </div>
+
+          <div class="bar-label">
+            {{role.role}}
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- APPLICATION STATUS -->
+    <section class="dashboard-card status-card">
+
+      <div class="card-header">
+
+        <div>
+
+          <div class="card-eyebrow">
+            APPLICATION PIPELINE
+          </div>
+
+          <h2>
+            Application Status
+          </h2>
+
+        </div>
+
+      </div>
+
+
+      <div class="status-content">
+
+        <div class="status-circle">
+
+          <div class="status-total">
+            {{data.kpis.applications}}
+          </div>
+
+          <div class="status-label">
+            Applications
+          </div>
+
+        </div>
+
+
+        <div class="status-list">
+
+          <div class="status-row"
+               ng-repeat="status in data.applicationStatus">
+
+            <span class="status-dot"
+                  ng-class="'status-' + status.class">
+            </span>
+
+            <span>
+              {{status.label}}
+            </span>
+
+            <strong>
+              {{status.count}}
+            </strong>
+
+            <small>
+              ({{status.percent}}%)
+            </small>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+  </div>
+
+
+  <!-- LOWER GRID -->
+  <div class="lower-grid">
+
+
+    <!-- TOP CANDIDATES -->
+    <section class="dashboard-card candidates-card">
+
+      <div class="card-header">
+
+        <div>
+
+          <div class="card-eyebrow">
+            TALENT INTELLIGENCE
+          </div>
+
+          <h2>
+            Top Candidates
+          </h2>
+
+        </div>
+
+        <a ng-href="?id=campus360_recruiter_candidates">
+          View All
+        </a>
+
+      </div>
+
+
+      <div class="candidate-table">
+
+        <div class="table-header">
+
+          <span>Name</span>
+          <span>Role Applied</span>
+          <span>Skills Match</span>
+          <span>Status</span>
+          <span>Current Stage</span>
+          <span>Action</span>
+
+        </div>
+
+
+        <div class="candidate-row"
+             ng-repeat="candidate in data.topCandidates | filter:c.searchCandidates">
+
+          <div class="candidate-name">
+
+            <div class="candidate-avatar">
+              {{candidate.initials}}
+            </div>
+
+            <span>
+              {{candidate.name}}
+            </span>
+
+          </div>
+
+
+          <div>
+            {{candidate.role}}
+          </div>
+
+
+          <div class="skill-match">
+
+            <div class="skill-bar">
+
+              <div class="skill-fill"
+                   ng-style="{'width': candidate.match + '%'}">
+              </div>
+
+            </div>
+
+            <span>
+              {{candidate.match}}%
+            </span>
+
+          </div>
+
+
+          <div>
+
+            <span class="status-badge"
+                  ng-class="'badge-' + candidate.statusClass">
+
+              {{candidate.status}}
+
+            </span>
+
+          </div>
+
+
+          <div>
+            {{candidate.stage}}
+          </div>
+
+
+          <div>
+
+            <button class="view-button"
+                    ng-click="c.viewCandidate(candidate)">
+
+              View
+
+            </button>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- UPCOMING INTERVIEWS -->
+    <section class="dashboard-card interviews-card">
+
+      <div class="card-header">
+
+        <div>
+
+          <div class="card-eyebrow">
+            SCHEDULE
+          </div>
+
+          <h2>
+            Upcoming Interviews
+          </h2>
+
+        </div>
+
+        <a ng-href="?id=campus360_recruiter_interviews">
+          View All
+        </a>
+
+      </div>
+
+
+      <div class="interview-list">
+
+        <div class="interview-item"
+             ng-repeat="interview in data.upcomingInterviews">
+
+          <div class="interview-date">
+
+            <strong>
+              {{interview.day}}
+            </strong>
+
+            <span>
+              {{interview.month}}
+            </span>
+
+          </div>
+
+
+          <div class="interview-details">
+
+            <strong>
+              {{interview.student}}
+            </strong>
+
+            <span>
+              {{interview.role}}
+            </span>
+
+            <small>
+              {{interview.time}}
+            </small>
+
+          </div>
+
+
+          <span class="interview-status">
+            {{interview.status}}
+          </span>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+  </div>
+
+
+  <!-- BOTTOM GRID -->
+  <div class="bottom-grid">
+
+
+    <!-- QUICK ACTIONS -->
+    <!-- QUICK ACTIONS -->
+    <section class="dashboard-card quick-actions-card">
+
+      <div class="card-header">
+
+        <div>
+
+          <div class="card-eyebrow">
+            QUICK ACTIONS
+          </div>
+
+          <h2>
+            Recruitment Actions
+          </h2>
+
+        </div>
+
+      </div>
+
+
+      <div class="quick-actions">
+
+        <a class="quick-action"
+           ng-href="?id=recruiter_talent_pool">
+
+          <span>♙</span>
+
+          <strong>
+            Search Talent Pool
+          </strong>
+
+          <small>
+            Find candidates based on skills
+          </small>
+
+        </a>
+
+
+        <a class="quick-action"
+           ng-href="?id=campus360_recruiter_jobs">
+
+          <span>＋</span>
+
+          <strong>
+            Manage Job Postings
+          </strong>
+
+          <small>
+            Create and manage opportunities
+          </small>
+
+        </a>
+
+
+        <a class="quick-action"
+           ng-href="?id=campus360_recruiter_interviews">
+
+          <span>◉</span>
+
+          <strong>
+            Schedule Interviews
+          </strong>
+
+          <small>
+            Plan candidate interviews
+          </small>
+
+        </a>
+
+
+        <a class="quick-action"
+           ng-href="?id=campus360_recruiter_analytics">
+
+          <span>▥</span>
+
+          <strong>
+            View Analytics
+          </strong>
+
+          <small>
+            Recruitment insights
+          </small>
+
+        </a>
+
+      </div>
+
+    </section>
+
+
+    <!-- RECENT ACTIVITY -->
+    <section class="dashboard-card activity-card">
+
+      <div class="card-header">
+
+        <div>
+
+          <div class="card-eyebrow">
+            ACTIVITY
+          </div>
+
+          <h2>
+            Recent Activity
+          </h2>
+
+        </div>
+
+        <a>
+          View All
+        </a>
+
+      </div>
+
+
+      <div class="activity-list">
+
+        <div class="activity-item"
+             ng-repeat="activity in data.recentActivity">
+
+          <div class="activity-icon"
+               ng-class="'activity-' + activity.type">
+
+            {{activity.icon}}
+
+          </div>
+
+          <div>
+
+            <strong>
+              {{activity.title}}
+            </strong>
+
+            <span>
+              {{activity.time}}
+            </span>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+  </div>
+
+
+  <!-- FOOTER -->
+  <div class="dashboard-footer">
+
+    <span>
+      Campus360 · Intelligent Training & Placement
+    </span>
+
+    <button ng-click="c.refreshDashboard()">
+      ↻ Refresh Dashboard
+    </button>
+
+  </div>
+
+
+</section>
+
+  </main>
+
+</div>]]></template>
+    </sp_widget>
+</record_update>

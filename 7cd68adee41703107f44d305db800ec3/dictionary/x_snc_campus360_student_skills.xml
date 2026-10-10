@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?><database>
+    <element attributes="enforce_dot_walk_cross_scope_access=true" db_object_id="72b9ce16e45703107f44d305db800eb4" label="Student Skills" max_length="40" name="x_snc_campus360_student_skills" type="collection">
+        <element label="Skill Name" max_length="50" name="skill_name" type="string"/>
+        <element label="Assessment Score" max_length="40" name="assessment_score" type="integer"/>
+        <element choice="3" label="Skill Category" max_length="30" name="skill_category" type="choice">
+            <choice>
+                <element inactive_on_update="false" label="Data Science" sequence="4" value="data_science"/>
+                <element inactive_on_update="false" label="Cybersecurity" sequence="8" value="cybersecurity"/>
+                <element inactive_on_update="false" label="Cloud" sequence="3" value="cloud"/>
+                <element inactive_on_update="false" label="Programming" sequence="0" value="programming"/>
+                <element inactive_on_update="false" label="Networking" sequence="7" value="networking"/>
+                <element inactive_on_update="false" label="Database" sequence="2" value="database"/>
+                <element inactive_on_update="false" label="Other" sequence="10" value="other"/>
+                <element inactive_on_update="false" label="DevOps" sequence="6" value="devops"/>
+                <element inactive_on_update="false" label="Web Development" sequence="1" value="web_development"/>
+                <element inactive_on_update="false" label="Soft Skills" sequence="9" value="soft_skills"/>
+                <element inactive_on_update="false" label="AI / ML" sequence="5" value="ai_ml"/>
+            </choice>
+        </element>
+        <element choice="3" label="Skill Level" max_length="20" name="skill_level" type="choice">
+            <choice>
+                <element inactive_on_update="false" label="Expert" sequence="3" value="expert"/>
+                <element inactive_on_update="false" label="Advanced" sequence="2" value="advanced"/>
+                <element inactive_on_update="false" label="Beginner" sequence="0" value="beginner"/>
+                <element inactive_on_update="false" label="Intermediate" sequence="1" value="intermediate"/>
+            </choice>
+        </element>
+        <element display="true" label="Skill Record ID" max_length="20" name="skill_record_id" type="string"/>
+        <element label="Certification" max_length="40" name="certification" type="boolean"/>
+        <element label="Student" max_length="32" name="student" reference="x_snc_campus360_student_master" type="reference"/>
+        <element label="Last Assessed" max_length="40" name="last_assessed" type="glide_date"/>
+        <index name="index">
+            <element name="student"/>
+        </index>
+    </element>
+</database>

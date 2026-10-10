@@ -1,0 +1,8160 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_widget">
+    <sp_widget action="INSERT_OR_UPDATE">
+        <category>custom</category>
+        <client_script><![CDATA[api.controller = function($window) {
+
+    var c = this;
+
+
+    /* =========================================================
+       CAMPUS360 SIDEBAR / UI
+       ========================================================= */
+
+    c.sidebarOpen = true;
+
+    c.pageRefreshing = false;
+
+
+    /*
+     * ============================================================
+     * TOGGLE SIDEBAR
+     * ============================================================
+     */
+
+    c.toggleSidebar = function() {
+
+        c.sidebarOpen =
+            !c.sidebarOpen;
+
+    };
+
+
+    /*
+     * ============================================================
+     * STUDENT INITIALS
+     * ============================================================
+     */
+
+    c.getStudentInitials = function() {
+
+        var name =
+            c.data &&
+            c.data.student &&
+            c.data.student.name
+                ? String(
+                    c.data.student.name
+                  )
+                : 'Test Student Campus360';
+
+
+        var parts =
+            name
+                .trim()
+                .split(/\s+/);
+
+
+        if (!parts.length) {
+
+            return 'TC';
+
+        }
+
+
+        if (parts.length === 1) {
+
+            return parts[0]
+                .substring(0, 2)
+                .toUpperCase();
+
+        }
+
+
+        return (
+            parts[0].charAt(0) +
+            parts[
+                parts.length - 1
+            ].charAt(0)
+        ).toUpperCase();
+
+    };
+
+
+    /*
+     * ============================================================
+     * CAMPUS360 PAGE NAVIGATION
+     * ============================================================
+     */
+
+    c.navigate = function(pageId) {
+
+        if (!pageId) {
+
+            return;
+
+        }
+
+
+        var studentId =
+            c.data &&
+            c.data.student &&
+            c.data.student.studentId
+                ? c.data.student.studentId
+                : '';
+
+
+        var url =
+            '?id=' +
+            encodeURIComponent(
+                pageId
+            );
+
+
+        if (studentId) {
+
+            url +=
+                '&student=' +
+                encodeURIComponent(
+                    studentId
+                );
+
+        }
+
+
+        $window.location.href =
+            url;
+
+    };
+
+
+    /*
+     * ============================================================
+     * REFRESH PAGE
+     * ============================================================
+     */
+
+    c.refreshPage = function() {
+
+        if (c.pageRefreshing) {
+
+            return;
+
+        }
+
+
+        c.pageRefreshing = true;
+
+
+        c.server.get({
+
+            action: 'load',
+
+            selectedDate:
+                c.formatDateForServer(
+                    c.selectedDate
+                )
+
+        }).then(function(response) {
+
+            c.data =
+                response.data;
+
+
+            c.selectedType =
+                '';
+
+
+            c.selectedSlot =
+                null;
+
+
+            c.pageRefreshing =
+                false;
+
+
+        }, function() {
+
+            c.pageRefreshing =
+                false;
+
+        });
+
+    };
+
+
+    /* =========================================================
+       BOOKING STATE
+       ========================================================= */
+
+    c.step = 1;
+
+    c.selectedDate = null;
+
+    c.selectedType = '';
+
+    c.selectedSlot = null;
+
+    c.submitting = false;
+
+    c.pollTimer = null;
+
+
+    /*
+     * ============================================================
+     * DATE HELPERS
+     * ============================================================
+     */
+
+    c.formatDateForServer = function(d) {
+
+        if (!d) {
+
+            return '';
+
+        }
+
+
+        if (
+            Object.prototype.toString.call(d) !==
+            '[object Date]'
+        ) {
+
+            return String(d);
+
+        }
+
+
+        if (
+            isNaN(
+                d.getTime()
+            )
+        ) {
+
+            return '';
+
+        }
+
+
+        var year =
+            d.getFullYear();
+
+
+        var month =
+            d.getMonth() + 1;
+
+
+        var day =
+            d.getDate();
+
+
+        if (month < 10) {
+
+            month =
+                '0' + month;
+
+        }
+
+
+        if (day < 10) {
+
+            day =
+                '0' + day;
+
+        }
+
+
+        return (
+            year +
+            '-' +
+            month +
+            '-' +
+            day
+        );
+
+    };
+
+
+    /*
+     * ============================================================
+     * TODAY
+     * ============================================================
+     */
+
+    c.makeTodayDate = function() {
+
+        var now =
+            new Date();
+
+
+        return new Date(
+
+            now.getFullYear(),
+
+            now.getMonth(),
+
+            now.getDate()
+
+        );
+
+    };
+
+
+    /*
+     * ============================================================
+     * INITIALIZATION
+     * ============================================================
+     */
+
+    c.selectedDate =
+        c.makeTodayDate();
+
+
+    c.minDate =
+        c.formatDateForServer(
+            c.selectedDate
+        );
+
+
+    /*
+     * ============================================================
+     * DATE CHANGE
+     * ============================================================
+     */
+
+    c.onDateChanged = function() {
+
+        c.data.error = '';
+
+        c.data.success = '';
+
+        c.selectedType = '';
+
+        c.selectedSlot = null;
+
+        c.data.slots = [];
+
+
+        var dateString =
+            c.formatDateForServer(
+                c.selectedDate
+            );
+
+
+        if (!dateString) {
+
+            c.data.error =
+                'Please select a valid interview date.';
+
+            return;
+
+        }
+
+
+        c.server.get({
+
+            action: 'load',
+
+            selectedDate:
+                dateString
+
+        }).then(function(response) {
+
+            c.data =
+                response.data;
+
+
+            c.selectedType =
+                '';
+
+
+            c.selectedSlot =
+                null;
+
+        });
+
+    };
+
+
+    /*
+     * ============================================================
+     * SELECT INTERVIEW TYPE
+     * ============================================================
+     */
+
+    c.selectType = function(type) {
+
+        if (
+            !type ||
+            type.count === 0
+        ) {
+
+            return;
+
+        }
+
+
+        c.selectedType =
+            type.value;
+
+
+        c.selectedSlot =
+            null;
+
+
+        c.data.error = '';
+
+        c.data.success = '';
+
+    };
+
+
+    /*
+     * ============================================================
+     * FILTER SLOTS
+     * ============================================================
+     */
+
+    c.getFilteredSlots = function() {
+
+        if (
+            !c.data ||
+            !c.data.slots
+        ) {
+
+            return [];
+
+        }
+
+
+        if (!c.selectedType) {
+
+            return [];
+
+        }
+
+
+        var result = [];
+
+
+        for (
+            var i = 0;
+            i < c.data.slots.length;
+            i++
+        ) {
+
+            var slot =
+                c.data.slots[i];
+
+
+            if (
+                String(
+                    slot.interviewType
+                ) ===
+                String(
+                    c.selectedType
+                )
+            ) {
+
+                result.push(
+                    slot
+                );
+
+            }
+
+        }
+
+
+        return result;
+
+    };
+
+
+    /*
+     * ============================================================
+     * ANGULAR PROPERTY
+     * ============================================================
+     */
+
+    Object.defineProperty(
+        c,
+        'filteredSlots',
+        {
+
+            get: function() {
+
+                return c.getFilteredSlots();
+
+            }
+
+        }
+    );
+
+
+    /*
+     * ============================================================
+     * SELECT SLOT
+     * ============================================================
+     */
+
+    c.selectSlot = function(slot) {
+
+        if (!slot) {
+
+            return;
+
+        }
+
+
+        c.selectedSlot =
+            slot;
+
+
+        c.data.error = '';
+
+        c.data.success = '';
+
+    };
+
+
+    /*
+     * ============================================================
+     * SUBMIT REQUEST
+     * ============================================================
+     */
+
+    c.submitRequest = function() {
+
+        c.data.error = '';
+
+        c.data.success = '';
+
+
+        if (!c.selectedDate) {
+
+            c.data.error =
+                'Please select an interview date.';
+
+            return;
+
+        }
+
+
+        if (!c.selectedType) {
+
+            c.data.error =
+                'Please select an interview type.';
+
+            return;
+
+        }
+
+
+        if (!c.selectedSlot) {
+
+            c.data.error =
+                'Please select an available time slot.';
+
+            return;
+
+        }
+
+
+        var dateString =
+            c.formatDateForServer(
+                c.selectedDate
+            );
+
+
+        if (!dateString) {
+
+            c.data.error =
+                'The selected date is invalid.';
+
+            return;
+
+        }
+
+
+        if (
+            !c.selectedSlot.availabilityIds ||
+            c.selectedSlot.availabilityIds.length === 0
+        ) {
+
+            c.data.error =
+                'The selected availability record could not be identified. Please refresh the date and select the slot again.';
+
+            return;
+
+        }
+
+
+        var selectedAvailabilityId =
+            String(
+                c.selectedSlot
+                    .availabilityIds[0]
+            );
+
+
+        c.submitting =
+            true;
+
+
+        c.server.get({
+
+            action: 'submit',
+
+            selectedDate:
+                dateString,
+
+            selectedAvailabilityId:
+                selectedAvailabilityId,
+
+            notes:
+                'Mock interview request for ' +
+                String(
+                    c.selectedSlot
+                        .interviewTypeLabel ||
+                    ''
+                ) +
+                (
+                    c.selectedSlot
+                        .skillAreaLabel
+                        ? ' - ' +
+                          c.selectedSlot
+                              .skillAreaLabel
+                        : ''
+                )
+
+        }).then(function(response) {
+
+            c.submitting =
+                false;
+
+
+            c.data =
+                response.data;
+
+
+            if (c.data.error) {
+
+                c.step =
+                    1;
+
+                return;
+
+            }
+
+
+            if (
+                c.data.currentRequest
+            ) {
+
+                c.step =
+                    2;
+
+
+                c.startPolling();
+
+            }
+
+
+        }, function() {
+
+            c.submitting =
+                false;
+
+
+            c.data.error =
+                'Unable to send the mock interview request. Please try again.';
+
+        });
+
+    };
+
+
+    /*
+     * ============================================================
+     * POLLING
+     * ============================================================
+     */
+
+    c.startPolling = function() {
+
+        if (c.pollTimer) {
+
+            clearTimeout(
+                c.pollTimer
+            );
+
+        }
+
+
+        c.pollTimer =
+            setTimeout(
+
+                function() {
+
+                    c.refreshRequest(
+                        true
+                    );
+
+                },
+
+                15000
+
+            );
+
+    };
+
+
+    /*
+     * ============================================================
+     * REFRESH REQUEST
+     * ============================================================
+     */
+
+    c.refreshRequest = function(
+        silent
+    ) {
+
+        if (
+            !c.data.currentRequest ||
+            !c.data.currentRequest.requestId
+        ) {
+
+            return;
+
+        }
+
+
+        c.server.get({
+
+            action: 'poll',
+
+            requestId:
+                c.data.currentRequest
+                    .requestId
+
+        }).then(function(response) {
+
+            c.data =
+                response.data;
+
+
+            /*
+             * TRAINER ACCEPTED
+             */
+
+            if (
+                c.data.currentRequest &&
+                String(
+                    c.data.currentRequest.status
+                ).toLowerCase() ===
+                'accepted'
+            ) {
+
+                c.step =
+                    3;
+
+
+                if (c.pollTimer) {
+
+                    clearTimeout(
+                        c.pollTimer
+                    );
+
+                }
+
+
+                return;
+
+            }
+
+
+            /*
+             * STILL WAITING
+             */
+
+            if (
+                c.data.currentRequest
+            ) {
+
+                c.step =
+                    2;
+
+
+                c.startPolling();
+
+            }
+
+
+        }, function() {
+
+            if (!silent) {
+
+                c.data.error =
+                    'Unable to refresh request status.';
+
+            }
+
+        });
+
+    };
+
+
+    /*
+     * ============================================================
+     * OPEN BOOKED SLOT DETAILS
+     * ============================================================
+     */
+
+    c.openBookedSlot = function(slot) {
+
+        if (!slot) {
+            return;
+        }
+
+
+        if (c.pollTimer) {
+
+            clearTimeout(
+                c.pollTimer
+            );
+
+            c.pollTimer =
+                null;
+
+        }
+
+
+        c.data.error = '';
+
+        c.data.success = '';
+
+        c.data.currentRequest =
+            slot;
+
+        c.step =
+            3;
+
+    };
+
+
+    /*
+     * ============================================================
+     * BOOK ANOTHER
+     * ============================================================
+     */
+
+    c.backToBooking = function() {
+
+        if (c.pollTimer) {
+
+            clearTimeout(
+                c.pollTimer
+            );
+
+        }
+
+
+        c.step =
+            1;
+
+
+        c.selectedType =
+            '';
+
+
+        c.selectedSlot =
+            null;
+
+
+        c.data.error =
+            '';
+
+
+        c.data.success =
+            '';
+
+
+        c.onDateChanged();
+
+    };
+
+
+    /*
+     * ============================================================
+     * CLEANUP
+     * ============================================================
+     */
+
+    c.$onDestroy = function() {
+
+        if (c.pollTimer) {
+
+            clearTimeout(
+                c.pollTimer
+            );
+
+        }
+
+    };
+
+
+    /*
+     * ============================================================
+     * FIRST SERVER LOAD
+     * ============================================================
+     */
+
+    c.server.get({
+
+        action: 'load',
+
+        selectedDate:
+            c.formatDateForServer(
+                c.selectedDate
+            )
+
+    }).then(function(response) {
+
+        c.data =
+            response.data;
+
+
+        c.selectedType =
+            '';
+
+
+        c.selectedSlot =
+            null;
+
+    });
+
+};]]></client_script>
+        <controller_as>c</controller_as>
+        <css>/* =========================================================&#13;
+   CAMPUS360 MOCK INTERVIEW SLOT BOOKING&#13;
+   FINAL STUDENT PORTAL STYLE&#13;
+   ========================================================= */&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   SERVICENOW HEADER RESET&#13;
+   ========================================================= */&#13;
+&#13;
+body:has(.campus360-booking) #sp-header,&#13;
+body:has(.campus360-booking) .sp-header,&#13;
+body:has(.campus360-booking) .sp-navbar,&#13;
+body:has(.campus360-booking) .navbar.sp-navbar,&#13;
+body:has(.campus360-booking) #sp-nav-bar,&#13;
+body:has(.campus360-booking) .sp-nav-bar,&#13;
+body:has(.campus360-booking) header#sp-header,&#13;
+body:has(.campus360-booking) header.sp-header {&#13;
+&#13;
+    display: none !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+body:has(.campus360-booking) #sp-page,&#13;
+body:has(.campus360-booking) #sp-main {&#13;
+&#13;
+    margin-top: 0 !important;&#13;
+&#13;
+    padding-top: 0 !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* ServiceNow widget wrappers */&#13;
+&#13;
+.well:has(.campus360-booking),&#13;
+.panel:has(.campus360-booking) {&#13;
+&#13;
+    width: 100% !important;&#13;
+&#13;
+    max-width: none !important;&#13;
+&#13;
+    margin: 0 !important;&#13;
+&#13;
+    padding: 0 !important;&#13;
+&#13;
+    border: 0 !important;&#13;
+&#13;
+    background: transparent !important;&#13;
+&#13;
+    box-shadow: none !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.panel:has(.campus360-booking) .panel-body {&#13;
+&#13;
+    width: 100% !important;&#13;
+&#13;
+    margin: 0 !important;&#13;
+&#13;
+    padding: 0 !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.row:has(.campus360-booking) {&#13;
+&#13;
+    margin-left: 0 !important;&#13;
+&#13;
+    margin-right: 0 !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   ROOT&#13;
+   ========================================================= */&#13;
+&#13;
+.campus360-booking {&#13;
+&#13;
+    position: fixed !important;&#13;
+&#13;
+    inset: 0 !important;&#13;
+&#13;
+    width: 100vw !important;&#13;
+&#13;
+    height: 100vh !important;&#13;
+&#13;
+    min-height: 100vh !important;&#13;
+&#13;
+    max-width: 100vw !important;&#13;
+&#13;
+    max-height: 100vh !important;&#13;
+&#13;
+    margin: 0 !important;&#13;
+&#13;
+    padding: 0 !important;&#13;
+&#13;
+    display: block !important;&#13;
+&#13;
+    overflow: hidden !important;&#13;
+&#13;
+    background:&#13;
+        linear-gradient(&#13;
+            135deg,&#13;
+            #f1f6fc 0%,&#13;
+            #f7f4ff 50%,&#13;
+            #f0f8f6 100%&#13;
+        );&#13;
+&#13;
+    color: #142840;&#13;
+&#13;
+    font-family:&#13;
+        "Inter",&#13;
+        "Segoe UI",&#13;
+        Arial,&#13;
+        sans-serif;&#13;
+&#13;
+    z-index: 999999 !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.campus360-booking,&#13;
+.campus360-booking *,&#13;
+.campus360-booking *::before,&#13;
+.campus360-booking *::after {&#13;
+&#13;
+    box-sizing: border-box;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   LEFT SIDEBAR&#13;
+   DARK PURPLE&#13;
+   ========================================================= */&#13;
+&#13;
+.c360-left-sidebar {&#13;
+&#13;
+    position: absolute !important;&#13;
+&#13;
+    left: 0;&#13;
+&#13;
+    top: 0;&#13;
+&#13;
+    bottom: 0;&#13;
+&#13;
+    width: 285px !important;&#13;
+&#13;
+    min-width: 285px !important;&#13;
+&#13;
+    max-width: 285px !important;&#13;
+&#13;
+    height: 100vh !important;&#13;
+&#13;
+    min-height: 100vh !important;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    flex-direction: column;&#13;
+&#13;
+    overflow: hidden;&#13;
+&#13;
+    background:&#13;
+        linear-gradient(&#13;
+            180deg,&#13;
+            #130d2f 0%,&#13;
+            #160d38 48%,&#13;
+            #100a29 100%&#13;
+        ) !important;&#13;
+&#13;
+    border-right:&#13;
+        1px solid #2d2157 !important;&#13;
+&#13;
+    box-shadow:&#13;
+        4px 0 18px&#13;
+        rgba(25,10,60,.20);&#13;
+&#13;
+    z-index: 100;&#13;
+&#13;
+    transition:&#13;
+        transform .25s ease;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.campus360-booking.sidebar-closed&#13;
+.c360-left-sidebar {&#13;
+&#13;
+    transform:&#13;
+        translateX(-105%);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   SIDEBAR BRAND&#13;
+   ========================================================= */&#13;
+&#13;
+.c360-sidebar-brand {&#13;
+&#13;
+    height: 88px;&#13;
+&#13;
+    min-height: 88px;&#13;
+&#13;
+    flex: 0 0 88px;&#13;
+&#13;
+    padding:&#13;
+        0&#13;
+        20px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 12px;&#13;
+&#13;
+    border-bottom:&#13;
+        1px&#13;
+        solid&#13;
+        #2d2157;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-brand-logo {&#13;
+&#13;
+    width: 48px;&#13;
+&#13;
+    height: 48px;&#13;
+&#13;
+    min-width: 48px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    justify-content: center;&#13;
+&#13;
+    border-radius: 13px;&#13;
+&#13;
+    background:&#13;
+        linear-gradient(&#13;
+            135deg,&#13;
+            #7c3aed,&#13;
+            #9333ea&#13;
+        );&#13;
+&#13;
+    color: #ffffff;&#13;
+&#13;
+    font-size: 23px;&#13;
+&#13;
+    font-weight: 900;&#13;
+&#13;
+    box-shadow:&#13;
+        0&#13;
+        7px&#13;
+        18px&#13;
+        rgba(124,58,237,.34);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-brand-name {&#13;
+&#13;
+    min-width: 0;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-brand-name strong {&#13;
+&#13;
+    display: block;&#13;
+&#13;
+    color: #ffffff;&#13;
+&#13;
+    font-size: 20px;&#13;
+&#13;
+    line-height: 1;&#13;
+&#13;
+    font-weight: 900;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-brand-name span {&#13;
+&#13;
+    display: block;&#13;
+&#13;
+    margin-top: 5px;&#13;
+&#13;
+    color: #c4b5fd;&#13;
+&#13;
+    font-size: 10px;&#13;
+&#13;
+    font-weight: 850;&#13;
+&#13;
+    letter-spacing: .45px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   STUDENT CARD&#13;
+   ========================================================= */&#13;
+&#13;
+.c360-sidebar-student {&#13;
+&#13;
+    margin:&#13;
+        18px&#13;
+        13px&#13;
+        10px;&#13;
+&#13;
+    padding: 12px;&#13;
+&#13;
+    min-height: 67px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 10px;&#13;
+&#13;
+    border:&#13;
+        1px&#13;
+        solid&#13;
+        #3a2d68;&#13;
+&#13;
+    border-radius: 14px;&#13;
+&#13;
+    background: #1d1440;&#13;
+&#13;
+    color: inherit !important;&#13;
+&#13;
+    text-decoration: none !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-sidebar-student:hover {&#13;
+&#13;
+    border-color: #6246a8;&#13;
+&#13;
+    background: #24174d;&#13;
+&#13;
+    box-shadow:&#13;
+        0&#13;
+        6px&#13;
+        16px&#13;
+        rgba(124,58,237,.14);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-sidebar-avatar {&#13;
+&#13;
+    width: 43px;&#13;
+&#13;
+    height: 43px;&#13;
+&#13;
+    min-width: 43px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    justify-content: center;&#13;
+&#13;
+    border-radius: 50%;&#13;
+&#13;
+    background:&#13;
+        linear-gradient(&#13;
+            135deg,&#13;
+            #7659f4,&#13;
+            #6654eb&#13;
+        );&#13;
+&#13;
+    color: #ffffff;&#13;
+&#13;
+    font-size: 11px;&#13;
+&#13;
+    font-weight: 900;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-sidebar-student-info {&#13;
+&#13;
+    min-width: 0;&#13;
+&#13;
+    flex: 1;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-sidebar-student-info strong {&#13;
+&#13;
+    display: block;&#13;
+&#13;
+    max-width: 190px;&#13;
+&#13;
+    overflow: hidden;&#13;
+&#13;
+    white-space: nowrap;&#13;
+&#13;
+    text-overflow: ellipsis;&#13;
+&#13;
+    color: #ffffff;&#13;
+&#13;
+    font-size: 13px;&#13;
+&#13;
+    font-weight: 900;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-sidebar-student-info span {&#13;
+&#13;
+    display: block;&#13;
+&#13;
+    margin-top: 3px;&#13;
+&#13;
+    color: #aaa0c7;&#13;
+&#13;
+    font-size: 10px;&#13;
+&#13;
+    font-weight: 600;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-student-arrow {&#13;
+&#13;
+    color: #a99fc7;&#13;
+&#13;
+    font-size: 21px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   NAV&#13;
+   ========================================================= */&#13;
+&#13;
+.c360-sidebar-nav {&#13;
+&#13;
+    flex:&#13;
+        1&#13;
+        1&#13;
+        auto;&#13;
+&#13;
+    min-height: 0;&#13;
+&#13;
+    padding:&#13;
+        2px&#13;
+        8px&#13;
+        12px;&#13;
+&#13;
+    overflow-y: auto;&#13;
+&#13;
+    overflow-x: hidden;&#13;
+&#13;
+    scrollbar-width: none;&#13;
+&#13;
+    -ms-overflow-style: none;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-sidebar-nav::-webkit-scrollbar {&#13;
+&#13;
+    width: 0 !important;&#13;
+&#13;
+    height: 0 !important;&#13;
+&#13;
+    display: none !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-nav-group {&#13;
+&#13;
+    margin-bottom: 4px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-nav-heading {&#13;
+&#13;
+    padding:&#13;
+        17px&#13;
+        9px&#13;
+        8px;&#13;
+&#13;
+    color: #8f84ae;&#13;
+&#13;
+    font-size: 10px;&#13;
+&#13;
+    font-weight: 900;&#13;
+&#13;
+    letter-spacing: .11em;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-nav-link {&#13;
+&#13;
+    position: relative;&#13;
+&#13;
+    width: 100%;&#13;
+&#13;
+    min-height: 46px;&#13;
+&#13;
+    margin:&#13;
+        3px&#13;
+        0;&#13;
+&#13;
+    padding:&#13;
+        9px&#13;
+        12px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 12px;&#13;
+&#13;
+    border: 0;&#13;
+&#13;
+    border-radius: 11px;&#13;
+&#13;
+    background: transparent;&#13;
+&#13;
+    color: #d8d0eb !important;&#13;
+&#13;
+    font-family: inherit;&#13;
+&#13;
+    font-size: 14px;&#13;
+&#13;
+    font-weight: 750;&#13;
+&#13;
+    text-decoration: none !important;&#13;
+&#13;
+    cursor: pointer;&#13;
+&#13;
+    transition:&#13;
+        background .18s ease,&#13;
+        color .18s ease,&#13;
+        transform .18s ease;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-nav-link:hover {&#13;
+&#13;
+    color: #ffffff !important;&#13;
+&#13;
+    background:&#13;
+        rgba(124,58,237,.18);&#13;
+&#13;
+    transform:&#13;
+        translateX(2px);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-nav-link.active {&#13;
+&#13;
+    color: #ffffff !important;&#13;
+&#13;
+    background:&#13;
+        linear-gradient(&#13;
+            90deg,&#13;
+            #7c3aed 0%,&#13;
+            #8b3ff2 100%&#13;
+        );&#13;
+&#13;
+    font-weight: 900;&#13;
+&#13;
+    box-shadow:&#13;
+        0&#13;
+        5px&#13;
+        14px&#13;
+        rgba(124,58,237,.24);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-nav-link.active::before {&#13;
+&#13;
+    content: "";&#13;
+&#13;
+    position: absolute;&#13;
+&#13;
+    left: 0;&#13;
+&#13;
+    top: 8px;&#13;
+&#13;
+    bottom: 8px;&#13;
+&#13;
+    width: 4px;&#13;
+&#13;
+    border-radius:&#13;
+        0&#13;
+        4px&#13;
+        4px&#13;
+        0;&#13;
+&#13;
+    background: #ffffff;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-nav-icon {&#13;
+&#13;
+    width: 24px;&#13;
+&#13;
+    min-width: 24px;&#13;
+&#13;
+    height: 24px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    justify-content: center;&#13;
+&#13;
+    color: #a99fc7;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-nav-icon .fa {&#13;
+&#13;
+    font-size: 16px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-nav-link:hover&#13;
+.c360-nav-icon,&#13;
+.c360-nav-link.active&#13;
+.c360-nav-icon {&#13;
+&#13;
+    color: #ffffff;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-nav-link &gt; span:last-child {&#13;
+&#13;
+    min-width: 0;&#13;
+&#13;
+    flex: 1;&#13;
+&#13;
+    white-space: nowrap;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   SIDEBAR FOOTER&#13;
+   ========================================================= */&#13;
+&#13;
+.c360-sidebar-footer {&#13;
+&#13;
+    flex:&#13;
+        0&#13;
+        0&#13;
+        auto;&#13;
+&#13;
+    margin:&#13;
+        0&#13;
+        12px&#13;
+        12px;&#13;
+&#13;
+    padding:&#13;
+        12px;&#13;
+&#13;
+    border:&#13;
+        1px&#13;
+        solid&#13;
+        #3a2d68;&#13;
+&#13;
+    border-radius: 12px;&#13;
+&#13;
+    background: #1a1138;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-footer-title {&#13;
+&#13;
+    color: #9d91b8;&#13;
+&#13;
+    font-size: 9px;&#13;
+&#13;
+    font-weight: 900;&#13;
+&#13;
+    letter-spacing: 1px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-readiness-track {&#13;
+&#13;
+    width: 100%;&#13;
+&#13;
+    height: 7px;&#13;
+&#13;
+    margin-top: 9px;&#13;
+&#13;
+    overflow: hidden;&#13;
+&#13;
+    border-radius: 10px;&#13;
+&#13;
+    background: #302454;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-readiness-fill {&#13;
+&#13;
+    height: 100%;&#13;
+&#13;
+    border-radius: inherit;&#13;
+&#13;
+    background:&#13;
+        linear-gradient(&#13;
+            90deg,&#13;
+            #7c3aed,&#13;
+            #a855f7&#13;
+        );&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-readiness-text {&#13;
+&#13;
+    margin-top: 6px;&#13;
+&#13;
+    color: #9d91b8;&#13;
+&#13;
+    font-size: 10px;&#13;
+&#13;
+    font-weight: 700;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   MAIN PAGE&#13;
+   ========================================================= */&#13;
+&#13;
+.c360-right-page {&#13;
+&#13;
+    position: absolute !important;&#13;
+&#13;
+    top: 0;&#13;
+&#13;
+    right: 0;&#13;
+&#13;
+    bottom: 0;&#13;
+&#13;
+    left: 285px;&#13;
+&#13;
+    width: auto !important;&#13;
+&#13;
+    height: 100vh !important;&#13;
+&#13;
+    min-width: 0 !important;&#13;
+&#13;
+    min-height: 100vh !important;&#13;
+&#13;
+    overflow-x: hidden !important;&#13;
+&#13;
+    overflow-y: auto !important;&#13;
+&#13;
+    background:&#13;
+        linear-gradient(&#13;
+            135deg,&#13;
+            #f1f6fc 0%,&#13;
+            #f7f4ff 50%,&#13;
+            #f0f8f6 100%&#13;
+        );&#13;
+&#13;
+    transition:&#13;
+        left .25s ease;&#13;
+&#13;
+    scrollbar-width: none;&#13;
+&#13;
+    -ms-overflow-style: none;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-right-page::-webkit-scrollbar {&#13;
+&#13;
+    width: 0 !important;&#13;
+&#13;
+    height: 0 !important;&#13;
+&#13;
+    display: none !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.campus360-booking.sidebar-closed&#13;
+.c360-right-page {&#13;
+&#13;
+    left: 0;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   TOP BAR&#13;
+   WHITE&#13;
+   ========================================================= */&#13;
+&#13;
+.c360-topbar {&#13;
+&#13;
+    position: sticky;&#13;
+&#13;
+    top: 0;&#13;
+&#13;
+    z-index: 2000;&#13;
+&#13;
+    width: 100%;&#13;
+&#13;
+    height: 78px;&#13;
+&#13;
+    min-height: 78px;&#13;
+&#13;
+    padding:&#13;
+        0&#13;
+        24px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    justify-content: space-between;&#13;
+&#13;
+    background: #ffffff !important;&#13;
+&#13;
+    border-bottom:&#13;
+        1px&#13;
+        solid&#13;
+        #dfe5ee;&#13;
+&#13;
+    box-shadow:&#13;
+        0&#13;
+        2px&#13;
+        10px&#13;
+        rgba(20,39,60,.035);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   TOP LEFT&#13;
+   ========================================================= */&#13;
+&#13;
+.c360-topbar-left {&#13;
+&#13;
+    min-width: 0;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 13px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   HAMBURGER&#13;
+   ========================================================= */&#13;
+&#13;
+.c360-menu-button {&#13;
+&#13;
+    width: 42px;&#13;
+&#13;
+    height: 42px;&#13;
+&#13;
+    min-width: 42px;&#13;
+&#13;
+    padding: 0;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    flex-direction: column;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    justify-content: center;&#13;
+&#13;
+    gap: 4px;&#13;
+&#13;
+    border:&#13;
+        1px&#13;
+        solid&#13;
+        #dce2ea;&#13;
+&#13;
+    border-radius: 10px;&#13;
+&#13;
+    background: #ffffff;&#13;
+&#13;
+    cursor: pointer;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-menu-button:hover {&#13;
+&#13;
+    background: #f5f2ff;&#13;
+&#13;
+    border-color: #bdb3f5;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-menu-button span {&#13;
+&#13;
+    display: block;&#13;
+&#13;
+    width: 19px;&#13;
+&#13;
+    height: 2px;&#13;
+&#13;
+    border-radius: 3px;&#13;
+&#13;
+    background: #5146e5;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   PAGE HEADING&#13;
+   ========================================================= */&#13;
+&#13;
+.c360-page-heading {&#13;
+&#13;
+    min-width: 220px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    flex-direction: column;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-page-heading span {&#13;
+&#13;
+    color: #5146e5;&#13;
+&#13;
+    font-size: 9px;&#13;
+&#13;
+    font-weight: 950;&#13;
+&#13;
+    letter-spacing: 1.6px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-page-heading strong {&#13;
+&#13;
+    margin-top: 5px;&#13;
+&#13;
+    color: #172a33;&#13;
+&#13;
+    font-size: 17px;&#13;
+&#13;
+    line-height: 1.1;&#13;
+&#13;
+    font-weight: 900;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   TOP RIGHT&#13;
+   ========================================================= */&#13;
+&#13;
+.c360-topbar-right {&#13;
+&#13;
+    margin-left: auto;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 9px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   TOP ICONS&#13;
+   ========================================================= */&#13;
+&#13;
+.c360-top-icon {&#13;
+&#13;
+    position: relative;&#13;
+&#13;
+    width: 41px;&#13;
+&#13;
+    height: 41px;&#13;
+&#13;
+    min-width: 41px;&#13;
+&#13;
+    padding: 0;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    justify-content: center;&#13;
+&#13;
+    border:&#13;
+        1px&#13;
+        solid&#13;
+        #dce2ea;&#13;
+&#13;
+    border-radius: 10px;&#13;
+&#13;
+    background: #ffffff;&#13;
+&#13;
+    color: #5c667a;&#13;
+&#13;
+    cursor: pointer;&#13;
+&#13;
+    transition:&#13;
+        background .18s ease,&#13;
+        color .18s ease,&#13;
+        border-color .18s ease;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-top-icon:hover {&#13;
+&#13;
+    color: #5146e5;&#13;
+&#13;
+    background: #f6f3ff;&#13;
+&#13;
+    border-color: #c7bdf5;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-top-icon svg {&#13;
+&#13;
+    width: 18px;&#13;
+&#13;
+    height: 18px;&#13;
+&#13;
+    fill: none;&#13;
+&#13;
+    stroke: currentColor;&#13;
+&#13;
+    stroke-width: 1.8;&#13;
+&#13;
+    stroke-linecap: round;&#13;
+&#13;
+    stroke-linejoin: round;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   NOTIFICATION&#13;
+   ========================================================= */&#13;
+&#13;
+.c360-notification-button {&#13;
+&#13;
+    color: #5146e5;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-notification-dot {&#13;
+&#13;
+    position: absolute;&#13;
+&#13;
+    top: 6px;&#13;
+&#13;
+    right: 6px;&#13;
+&#13;
+    width: 7px;&#13;
+&#13;
+    height: 7px;&#13;
+&#13;
+    border-radius: 50%;&#13;
+&#13;
+    background: #ff4058;&#13;
+&#13;
+    border:&#13;
+        1.5px&#13;
+        solid&#13;
+        #ffffff;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   TOP PROFILE&#13;
+   ========================================================= */&#13;
+&#13;
+.c360-top-student {&#13;
+&#13;
+    min-height: 45px;&#13;
+&#13;
+    padding-left: 11px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 9px;&#13;
+&#13;
+    border-left:&#13;
+        1px&#13;
+        solid&#13;
+        #e2e6ee;&#13;
+&#13;
+    color: inherit !important;&#13;
+&#13;
+    text-decoration: none !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-top-avatar {&#13;
+&#13;
+    width: 39px;&#13;
+&#13;
+    height: 39px;&#13;
+&#13;
+    min-width: 39px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    justify-content: center;&#13;
+&#13;
+    border-radius: 50%;&#13;
+&#13;
+    background:&#13;
+        linear-gradient(&#13;
+            135deg,&#13;
+            #7659f4,&#13;
+            #6654eb&#13;
+        );&#13;
+&#13;
+    color: #ffffff;&#13;
+&#13;
+    font-size: 11px;&#13;
+&#13;
+    font-weight: 900;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-top-student-info {&#13;
+&#13;
+    min-width: 0;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    flex-direction: column;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-top-student-info strong {&#13;
+&#13;
+    display: block;&#13;
+&#13;
+    max-width: 210px;&#13;
+&#13;
+    overflow: hidden;&#13;
+&#13;
+    white-space: nowrap;&#13;
+&#13;
+    text-overflow: ellipsis;&#13;
+&#13;
+    color: #101828;&#13;
+&#13;
+    font-size: 12px;&#13;
+&#13;
+    line-height: 1.25;&#13;
+&#13;
+    font-weight: 900;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-top-student-info span {&#13;
+&#13;
+    display: block;&#13;
+&#13;
+    margin-top: 2px;&#13;
+&#13;
+    color: #667085;&#13;
+&#13;
+    font-size: 9px;&#13;
+&#13;
+    font-weight: 600;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.c360-top-chevron {&#13;
+&#13;
+    color: #667085;&#13;
+&#13;
+    font-size: 13px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   CONTENT&#13;
+   ========================================================= */&#13;
+&#13;
+.c360-page-content {&#13;
+&#13;
+    width: 100%;&#13;
+&#13;
+    min-width: 0;&#13;
+&#13;
+    padding:&#13;
+        24px&#13;
+        14px&#13;
+        45px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   MOCK INTERVIEW SLOT BOOKING HERO&#13;
+   SAME DARK PURPLE AS SIDEBAR&#13;
+   ========================================================= */&#13;
+&#13;
+.mi-hero {&#13;
+&#13;
+    position: relative;&#13;
+&#13;
+    z-index: 1;&#13;
+&#13;
+    width: 100%;&#13;
+&#13;
+    min-height: 170px;&#13;
+&#13;
+    margin:&#13;
+        0&#13;
+        0&#13;
+        20px;&#13;
+&#13;
+    padding:&#13;
+        28px&#13;
+        38px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    overflow: hidden;&#13;
+&#13;
+    border-radius: 18px;&#13;
+&#13;
+    background:&#13;
+        linear-gradient(&#13;
+            180deg,&#13;
+            #130d2f 0%,&#13;
+            #160d38 48%,&#13;
+            #100a29 100%&#13;
+        ) !important;&#13;
+&#13;
+    border:&#13;
+        1px&#13;
+        solid&#13;
+        #2d2157 !important;&#13;
+&#13;
+    color: #ffffff !important;&#13;
+&#13;
+    box-shadow:&#13;
+        0&#13;
+        12px&#13;
+        28px&#13;
+        rgba(19,13,47,.22);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mi-hero::after {&#13;
+&#13;
+    content: "";&#13;
+&#13;
+    position: absolute;&#13;
+&#13;
+    width: 220px;&#13;
+&#13;
+    height: 220px;&#13;
+&#13;
+    right: -70px;&#13;
+&#13;
+    top: -105px;&#13;
+&#13;
+    border-radius: 50%;&#13;
+&#13;
+    background:&#13;
+        rgba(124,58,237,.10);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mi-hero-icon {&#13;
+&#13;
+    position: relative;&#13;
+&#13;
+    z-index: 1;&#13;
+&#13;
+    width: 52px;&#13;
+&#13;
+    height: 52px;&#13;
+&#13;
+    min-width: 52px;&#13;
+&#13;
+    margin-right: 18px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    justify-content: center;&#13;
+&#13;
+    border-radius: 13px;&#13;
+&#13;
+    background:&#13;
+        rgba(124,58,237,.18);&#13;
+&#13;
+    color: #c4b5fd !important;&#13;
+&#13;
+    font-size: 23px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mi-hero-content {&#13;
+&#13;
+    position: relative;&#13;
+&#13;
+    z-index: 1;&#13;
+&#13;
+    min-width: 0;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mi-hero-eyebrow {&#13;
+&#13;
+    margin-bottom: 7px;&#13;
+&#13;
+    color: #c4b5fd !important;&#13;
+&#13;
+    font-size: 10px;&#13;
+&#13;
+    font-weight: 900;&#13;
+&#13;
+    letter-spacing: 1.6px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mi-hero-content h1 {&#13;
+&#13;
+    margin: 0;&#13;
+&#13;
+    color: #ffffff !important;&#13;
+&#13;
+    font-size: 34px;&#13;
+&#13;
+    line-height: 1.12;&#13;
+&#13;
+    font-weight: 900;&#13;
+&#13;
+    letter-spacing: -.5px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mi-hero-content p {&#13;
+&#13;
+    max-width: 900px;&#13;
+&#13;
+    margin:&#13;
+        9px&#13;
+        0&#13;
+        0;&#13;
+&#13;
+    color: #d8d0eb !important;&#13;
+&#13;
+    font-size: 13px;&#13;
+&#13;
+    line-height: 1.6;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   ALERTS&#13;
+   ========================================================= */&#13;
+&#13;
+.mi-alert {&#13;
+&#13;
+    width: 100%;&#13;
+&#13;
+    margin-bottom: 15px;&#13;
+&#13;
+    padding:&#13;
+        12px&#13;
+        15px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 8px;&#13;
+&#13;
+    border-radius: 9px;&#13;
+&#13;
+    font-size: 12px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mi-alert-error {&#13;
+&#13;
+    background: #fff1f4;&#13;
+&#13;
+    border:&#13;
+        1px&#13;
+        solid&#13;
+        #f4c2d0;&#13;
+&#13;
+    color: #b4234b;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mi-alert-success {&#13;
+&#13;
+    background: #edf9f1;&#13;
+&#13;
+    border:&#13;
+        1px&#13;
+        solid&#13;
+        #b9e3c6;&#13;
+&#13;
+    color: #23723c;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   MAIN LAYOUT&#13;
+   ========================================================= */&#13;
+&#13;
+.mi-layout {&#13;
+&#13;
+    width: 100%;&#13;
+&#13;
+    min-width: 0;&#13;
+&#13;
+    display: grid;&#13;
+&#13;
+    grid-template-columns:&#13;
+        minmax(0,1fr)&#13;
+        305px;&#13;
+&#13;
+    gap: 18px;&#13;
+&#13;
+    align-items: start;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   MAIN CARD&#13;
+   ========================================================= */&#13;
+&#13;
+.mi-main-card {&#13;
+&#13;
+    min-width: 0;&#13;
+&#13;
+    width: 100%;&#13;
+&#13;
+    padding: 26px;&#13;
+&#13;
+    border:&#13;
+        1px&#13;
+        solid&#13;
+        #dce5ee;&#13;
+&#13;
+    border-radius: 16px;&#13;
+&#13;
+    background: #ffffff;&#13;
+&#13;
+    box-shadow:&#13;
+        0&#13;
+        7px&#13;
+        24px&#13;
+        rgba(28,89,131,.055);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   BOOKING HEADER&#13;
+   ========================================================= */&#13;
+&#13;
+.mi-section-top {&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    justify-content: space-between;&#13;
+&#13;
+    gap: 15px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mi-eyebrow {&#13;
+&#13;
+    margin-bottom: 6px;&#13;
+&#13;
+    color: #5146e5;&#13;
+&#13;
+    font-size: 10px;&#13;
+&#13;
+    font-weight: 900;&#13;
+&#13;
+    letter-spacing: 1.7px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mi-section-top h2 {&#13;
+&#13;
+    margin: 0;&#13;
+&#13;
+    color: #112e4c;&#13;
+&#13;
+    font-size: 22px;&#13;
+&#13;
+    line-height: 1.2;&#13;
+&#13;
+    font-weight: 850;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mi-step-badge {&#13;
+&#13;
+    flex-shrink: 0;&#13;
+&#13;
+    padding:&#13;
+        8px&#13;
+        13px;&#13;
+&#13;
+    border-radius: 18px;&#13;
+&#13;
+    background: #efebff;&#13;
+&#13;
+    color: #5146e5;&#13;
+&#13;
+    font-size: 10px;&#13;
+&#13;
+    font-weight: 850;&#13;
+&#13;
+    white-space: nowrap;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mi-divider {&#13;
+&#13;
+    height: 1px;&#13;
+&#13;
+    margin:&#13;
+        18px&#13;
+        0&#13;
+        23px;&#13;
+&#13;
+    background: #e2e8ef;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   FORM&#13;
+   ========================================================= */&#13;
+&#13;
+.mi-field-group {&#13;
+&#13;
+    margin-bottom: 25px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mi-field-group &gt; label {&#13;
+&#13;
+    display: block;&#13;
+&#13;
+    margin-bottom: 8px;&#13;
+&#13;
+    color: #1d3957;&#13;
+&#13;
+    font-size: 13px;&#13;
+&#13;
+    font-weight: 850;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mi-help {&#13;
+&#13;
+    margin-top: 7px;&#13;
+&#13;
+    color: #8290a1;&#13;
+&#13;
+    font-size: 10px;&#13;
+&#13;
+    line-height: 1.5;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mi-help-top {&#13;
+&#13;
+    margin-top: -1px;&#13;
+&#13;
+    margin-bottom: 12px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mi-date-input {&#13;
+&#13;
+    width: 100%;&#13;
+&#13;
+    height: 48px;&#13;
+&#13;
+    padding:&#13;
+        0&#13;
+        13px;&#13;
+&#13;
+    border:&#13;
+        1px&#13;
+        solid&#13;
+        #ccd8e6;&#13;
+&#13;
+    border-radius: 10px;&#13;
+&#13;
+    background: #ffffff;&#13;
+&#13;
+    color: #263e59;&#13;
+&#13;
+    font-size: 13px;&#13;
+&#13;
+    outline: none;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mi-date-input:focus {&#13;
+&#13;
+    border-color: #6254ed;&#13;
+&#13;
+    box-shadow:&#13;
+        0&#13;
+        0&#13;
+        0&#13;
+        3px&#13;
+        rgba(98,84,237,.09);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   TYPE CARDS&#13;
+   ========================================================= */&#13;
+&#13;
+.mi-type-grid {&#13;
+&#13;
+    display: grid;&#13;
+&#13;
+    grid-template-columns:&#13;
+        repeat(4,minmax(0,1fr));&#13;
+&#13;
+    gap: 10px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mi-type-card {&#13;
+&#13;
+    min-width: 0;&#13;
+&#13;
+    min-height: 76px;&#13;
+&#13;
+    padding: 13px;&#13;
+&#13;
+    border:&#13;
+        1px&#13;
+        solid&#13;
+        #dce4ed;&#13;
+&#13;
+    border-radius: 11px;&#13;
+&#13;
+    background: #ffffff;&#13;
+&#13;
+    color: #3f5570;&#13;
+&#13;
+    text-align: left;&#13;
+&#13;
+    cursor: pointer;&#13;
+&#13;
+    transition:&#13;
+        border-color .16s ease,&#13;
+        box-shadow .16s ease,&#13;
+        transform .16s ease;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mi-type-card:hover {&#13;
+&#13;
+    border-color: #aaa0e9;&#13;
+&#13;
+    box-shadow:&#13;
+        0&#13;
+        5px&#13;
+        14px&#13;
+        rgba(98,84,237,.09);&#13;
+&#13;
+    transform:&#13;
+        translateY(-1px);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mi-type-card.selected {&#13;
+&#13;
+    border:&#13;
+        2px&#13;
+        solid&#13;
+        #6254ed;&#13;
+&#13;
+    background:&#13;
+        linear-gradient(&#13;
+            135deg,&#13;
+            #f5f2ff,&#13;
+            #fbfaff&#13;
+        );&#13;
+&#13;
+    color: #5146e5;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mi-type-card:disabled {&#13;
+&#13;
+    opacity: .48;&#13;
+&#13;
+    cursor: not-allowed;&#13;
+&#13;
+    transform: none;&#13;
+&#13;
+    background: #f7f9fb;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mi-type-name {&#13;
+&#13;
+    font-size: 12px;&#13;
+&#13;
+    font-weight: 850;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mi-type-card.selected&#13;
+.mi-type-name {&#13;
+&#13;
+    color: #5146e5;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mi-type-count {&#13;
+&#13;
+    margin-top: 7px;&#13;
+&#13;
+    color: #6254ed;&#13;
+&#13;
+    font-size: 9px;&#13;
+&#13;
+    font-weight: 750;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mi-type-count.muted {&#13;
+&#13;
+    color: #9ba7b5;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   TIME CARDS&#13;
+   ========================================================= */&#13;
+&#13;
+.mi-time-grid {&#13;
+&#13;
+    display: grid;&#13;
+&#13;
+    grid-template-columns:&#13;
+        repeat(2,minmax(0,1fr));&#13;
+&#13;
+    gap: 11px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mi-time-card {&#13;
+&#13;
+    min-width: 0;&#13;
+&#13;
+    min-height: 93px;&#13;
+&#13;
+    padding: 15px;&#13;
+&#13;
+    border:&#13;
+        1px&#13;
+        solid&#13;
+        #dce4ed;&#13;
+&#13;
+    border-radius: 11px;&#13;
+&#13;
+    background: #ffffff;&#13;
+&#13;
+    text-align: left;&#13;
+&#13;
+    cursor: pointer;&#13;
+&#13;
+    transition:&#13;
+        border-color .16s ease,&#13;
+        box-shadow .16s ease,&#13;
+        transform .16s ease;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mi-time-card:hover {&#13;
+&#13;
+    border-color: #159eae;&#13;
+&#13;
+    box-shadow:&#13;
+        0&#13;
+        5px&#13;
+        15px&#13;
+        rgba(11,154,154,.08);&#13;
+&#13;
+    transform:&#13;
+        translateY(-1px);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mi-time-card.selected {&#13;
+&#13;
+    border:&#13;
+        2px&#13;
+        solid&#13;
+        #0b9a9a;&#13;
+&#13;
+    background:&#13;
+        linear-gradient(&#13;
+            135deg,&#13;
+            #effcfc,&#13;
+            #f8ffff&#13;
+        );&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mi-time-title {&#13;
+&#13;
+    margin-bottom: 7px;&#13;
+&#13;
+    color: #087f93;&#13;
+&#13;
+    font-size: 15px;&#13;
+&#13;
+    font-weight: 900;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mi-time-skill {&#13;
+&#13;
+    margin-bottom: 9px;&#13;
+&#13;
+    color: #61758c;&#13;
+&#13;
+    font-size: 10px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mi-trainer-count {&#13;
+&#13;
+    color: #8291a1;&#13;
+&#13;
+    font-size: 9px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mi-trainer-count i {&#13;
+&#13;
+    margin-right: 4px;&#13;
+&#13;
+    color: #0b9a9a;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   EMPTY&#13;
+   ========================================================= */&#13;
+&#13;
+.mi-empty,&#13;
+.mi-no-bookings {&#13;
+&#13;
+    padding: 17px;&#13;
+&#13;
+    border:&#13;
+        1px&#13;
+        solid&#13;
+        #e2e8ef;&#13;
+&#13;
+    border-radius: 10px;&#13;
+&#13;
+    background: #f7f9fc;&#13;
+&#13;
+    color: #8290a2;&#13;
+&#13;
+    text-align: center;&#13;
+&#13;
+    font-size: 10px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   PRIMARY BUTTON&#13;
+   ========================================================= */&#13;
+&#13;
+.mi-submit-area {&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    justify-content: flex-end;&#13;
+&#13;
+    margin-top: 5px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mi-primary-btn {&#13;
+&#13;
+    min-width: 245px;&#13;
+&#13;
+    min-height: 45px;&#13;
+&#13;
+    padding:&#13;
+        11px&#13;
+        18px;&#13;
+&#13;
+    border:&#13;
+        1px&#13;
+        solid&#13;
+        #6254ed;&#13;
+&#13;
+    border-radius: 9px;&#13;
+&#13;
+    background:&#13;
+        linear-gradient(&#13;
+            135deg,&#13;
+            #6254ed,&#13;
+            #765ff0&#13;
+        );&#13;
+&#13;
+    color: #ffffff;&#13;
+&#13;
+    font-size: 12px;&#13;
+&#13;
+    font-weight: 850;&#13;
+&#13;
+    box-shadow:&#13;
+        0&#13;
+        7px&#13;
+        16px&#13;
+        rgba(98,84,237,.20);&#13;
+&#13;
+    cursor: pointer;&#13;
+&#13;
+    transition:&#13;
+        transform .16s ease,&#13;
+        box-shadow .16s ease,&#13;
+        filter .16s ease;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mi-primary-btn:hover:not(:disabled) {&#13;
+&#13;
+    filter: brightness(.97);&#13;
+&#13;
+    transform:&#13;
+        translateY(-1px);&#13;
+&#13;
+    box-shadow:&#13;
+        0&#13;
+        9px&#13;
+        18px&#13;
+        rgba(98,84,237,.24);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mi-primary-btn:disabled {&#13;
+&#13;
+    opacity: .52;&#13;
+&#13;
+    cursor: not-allowed;&#13;
+&#13;
+    transform: none;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mi-button-arrow {&#13;
+&#13;
+    margin-left: 5px;&#13;
+&#13;
+    font-size: 14px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   SECONDARY BUTTON&#13;
+   ========================================================= */&#13;
+&#13;
+.mi-secondary-btn {&#13;
+&#13;
+    min-height: 40px;&#13;
+&#13;
+    margin-top: 16px;&#13;
+&#13;
+    padding:&#13;
+        10px&#13;
+        16px;&#13;
+&#13;
+    border:&#13;
+        1px&#13;
+        solid&#13;
+        #c8bcf5;&#13;
+&#13;
+    border-radius: 9px;&#13;
+&#13;
+    background: #f5f2ff;&#13;
+&#13;
+    color: #5146e5;&#13;
+&#13;
+    font-size: 11px;&#13;
+&#13;
+    font-weight: 850;&#13;
+&#13;
+    cursor: pointer;&#13;
+&#13;
+    transition:&#13;
+        background .16s ease,&#13;
+        border-color .16s ease,&#13;
+        transform .16s ease;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mi-secondary-btn:hover {&#13;
+&#13;
+    background: #ece8ff;&#13;
+&#13;
+    border-color: #b8aaf0;&#13;
+&#13;
+    transform:&#13;
+        translateY(-1px);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   STATUS BOX&#13;
+   ========================================================= */&#13;
+&#13;
+.mi-status-box {&#13;
+&#13;
+    padding:&#13;
+        22px&#13;
+        15px&#13;
+        27px;&#13;
+&#13;
+    text-align: center;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mi-status-icon {&#13;
+&#13;
+    width: 58px;&#13;
+&#13;
+    height: 58px;&#13;
+&#13;
+    margin:&#13;
+        0&#13;
+        auto&#13;
+        13px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    justify-content: center;&#13;
+&#13;
+    border-radius: 50%;&#13;
+&#13;
+    background: #fff5df;&#13;
+&#13;
+    color: #d38a00;&#13;
+&#13;
+    font-size: 23px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mi-status-icon.confirmed {&#13;
+&#13;
+    background: #e7f9ed;&#13;
+&#13;
+    color: #159447;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mi-status-box h3 {&#13;
+&#13;
+    margin:&#13;
+        0&#13;
+        0&#13;
+        7px;&#13;
+&#13;
+    color: #163451;&#13;
+&#13;
+    font-size: 20px;&#13;
+&#13;
+    font-weight: 850;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mi-status-box p {&#13;
+&#13;
+    margin: 0;&#13;
+&#13;
+    color: #718196;&#13;
+&#13;
+    font-size: 11px;&#13;
+&#13;
+    line-height: 1.6;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   DETAILS&#13;
+   ========================================================= */&#13;
+&#13;
+.mi-detail-card {&#13;
+&#13;
+    overflow: hidden;&#13;
+&#13;
+    border:&#13;
+        1px&#13;
+        solid&#13;
+        #e0e7ef;&#13;
+&#13;
+    border-radius: 11px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mi-detail-row {&#13;
+&#13;
+    min-height: 49px;&#13;
+&#13;
+    padding:&#13;
+        0&#13;
+        15px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    justify-content: space-between;&#13;
+&#13;
+    gap: 15px;&#13;
+&#13;
+    border-bottom:&#13;
+        1px&#13;
+        solid&#13;
+        #edf1f5;&#13;
+&#13;
+    font-size: 11px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mi-detail-row:last-child {&#13;
+&#13;
+    border-bottom: 0;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mi-detail-row &gt; span:first-child {&#13;
+&#13;
+    color: #8290a0;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mi-detail-row strong {&#13;
+&#13;
+    color: #2c4662;&#13;
+&#13;
+    text-align: right;&#13;
+&#13;
+    font-weight: 850;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   STATUS PILLS&#13;
+   ========================================================= */&#13;
+&#13;
+.mi-status-pill {&#13;
+&#13;
+    display: inline-flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    padding:&#13;
+        5px&#13;
+        9px;&#13;
+&#13;
+    border-radius: 20px;&#13;
+&#13;
+    font-size: 9px;&#13;
+&#13;
+    font-weight: 850;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mi-status-pill.requested {&#13;
+&#13;
+    background: #fff3d9;&#13;
+&#13;
+    color: #a76d00;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mi-status-pill.accepted {&#13;
+&#13;
+    background: #dcfce7;&#13;
+&#13;
+    color: #15803d;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   WAITING MESSAGE&#13;
+   ========================================================= */&#13;
+&#13;
+.mi-waiting-message {&#13;
+&#13;
+    margin-top: 17px;&#13;
+&#13;
+    padding: 13px;&#13;
+&#13;
+    border:&#13;
+        1px&#13;
+        solid&#13;
+        #cdeef1;&#13;
+&#13;
+    border-radius: 9px;&#13;
+&#13;
+    background: #effbfc;&#13;
+&#13;
+    color: #4b7580;&#13;
+&#13;
+    text-align: center;&#13;
+&#13;
+    font-size: 10px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   RIGHT INFO CARD&#13;
+   ========================================================= */&#13;
+&#13;
+.mi-sidebar {&#13;
+&#13;
+    width: 100%;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    flex-direction: column;&#13;
+&#13;
+    gap: 13px;&#13;
+&#13;
+    position: sticky;&#13;
+&#13;
+    top: 95px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mi-side-card {&#13;
+&#13;
+    width: 100%;&#13;
+&#13;
+    padding: 18px;&#13;
+&#13;
+    border:&#13;
+        1px&#13;
+        solid&#13;
+        #dce5ee;&#13;
+&#13;
+    border-radius: 15px;&#13;
+&#13;
+    background: #ffffff;&#13;
+&#13;
+    box-shadow:&#13;
+        0&#13;
+        7px&#13;
+        24px&#13;
+        rgba(28,89,131,.055);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   SIDE TITLE&#13;
+   ========================================================= */&#13;
+&#13;
+.mi-side-title {&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 7px;&#13;
+&#13;
+    margin-bottom: 16px;&#13;
+&#13;
+    color: #213b58;&#13;
+&#13;
+    font-size: 13px;&#13;
+&#13;
+    font-weight: 850;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mi-side-title-icon {&#13;
+&#13;
+    width: 25px;&#13;
+&#13;
+    height: 25px;&#13;
+&#13;
+    display: inline-flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    justify-content: center;&#13;
+&#13;
+    border-radius: 7px;&#13;
+&#13;
+    background: #e9f9ef;&#13;
+&#13;
+    color: #159447;&#13;
+&#13;
+    font-size: 11px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mi-side-title-icon.purple {&#13;
+&#13;
+    background: #eee7ff;&#13;
+&#13;
+    color: #6254ed;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mi-side-label {&#13;
+&#13;
+    margin-bottom: 10px;&#13;
+&#13;
+    color: #5146e5;&#13;
+&#13;
+    font-size: 9px;&#13;
+&#13;
+    font-weight: 900;&#13;
+&#13;
+    letter-spacing: 1.7px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   BOOKING PROGRESS&#13;
+   ========================================================= */&#13;
+&#13;
+.mi-progress {&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    flex-direction: column;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mi-progress-item {&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 10px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mi-progress-number {&#13;
+&#13;
+    width: 29px;&#13;
+&#13;
+    height: 29px;&#13;
+&#13;
+    min-width: 29px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    justify-content: center;&#13;
+&#13;
+    border-radius: 50%;&#13;
+&#13;
+    background: #edf1f5;&#13;
+&#13;
+    color: #8493a3;&#13;
+&#13;
+    font-size: 10px;&#13;
+&#13;
+    font-weight: 900;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mi-progress-item.active&#13;
+.mi-progress-number {&#13;
+&#13;
+    color: #ffffff;&#13;
+&#13;
+    background:&#13;
+        linear-gradient(&#13;
+            135deg,&#13;
+            #6254ed,&#13;
+            #765ff0&#13;
+        );&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mi-progress-item.done&#13;
+.mi-progress-number {&#13;
+&#13;
+    background: #dcfce7;&#13;
+&#13;
+    color: #15803d;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mi-progress-item &gt; div:last-child {&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    flex-direction: column;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mi-progress-item strong {&#13;
+&#13;
+    color: #203b58;&#13;
+&#13;
+    font-size: 10px;&#13;
+&#13;
+    font-weight: 900;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mi-progress-item small {&#13;
+&#13;
+    margin-top: 3px;&#13;
+&#13;
+    color: #8b99a8;&#13;
+&#13;
+    font-size: 8px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mi-progress-line {&#13;
+&#13;
+    width: 1px;&#13;
+&#13;
+    height: 19px;&#13;
+&#13;
+    margin-left: 14px;&#13;
+&#13;
+    background: #dfe5ec;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mi-progress-line.active {&#13;
+&#13;
+    background: #6254ed;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   STUDENT SIDE CARD&#13;
+   ========================================================= */&#13;
+&#13;
+.mi-student-profile {&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 10px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mi-student-avatar {&#13;
+&#13;
+    width: 40px;&#13;
+&#13;
+    height: 40px;&#13;
+&#13;
+    min-width: 40px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    justify-content: center;&#13;
+&#13;
+    border-radius: 11px;&#13;
+&#13;
+    background:&#13;
+        linear-gradient(&#13;
+            135deg,&#13;
+            #6254ed,&#13;
+            #7965f2&#13;
+        );&#13;
+&#13;
+    color: #ffffff;&#13;
+&#13;
+    font-size: 11px;&#13;
+&#13;
+    font-weight: 850;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mi-student-name {&#13;
+&#13;
+    color: #233c58;&#13;
+&#13;
+    font-size: 11px;&#13;
+&#13;
+    font-weight: 900;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mi-student-id {&#13;
+&#13;
+    margin-top: 4px;&#13;
+&#13;
+    color: #8795a6;&#13;
+&#13;
+    font-size: 9px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   BOOKED SLOTS&#13;
+   ========================================================= */&#13;
+&#13;
+.mi-booked-section {&#13;
+&#13;
+    width: 100%;&#13;
+&#13;
+    margin-top: 20px;&#13;
+&#13;
+    padding: 21px;&#13;
+&#13;
+    border:&#13;
+        1px&#13;
+        solid&#13;
+        #dce5ee;&#13;
+&#13;
+    border-radius: 16px;&#13;
+&#13;
+    background: #ffffff;&#13;
+&#13;
+    box-shadow:&#13;
+        0&#13;
+        7px&#13;
+        24px&#13;
+        rgba(28,89,131,.055);&#13;
+&#13;
+    overflow: hidden;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mi-booked-section-header {&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: flex-end;&#13;
+&#13;
+    justify-content: space-between;&#13;
+&#13;
+    gap: 18px;&#13;
+&#13;
+    margin-bottom: 15px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mi-booked-heading-group {&#13;
+&#13;
+    min-width: 0;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mi-booked-title-row {&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 9px;&#13;
+&#13;
+    margin-top: 4px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.booked-section-title {&#13;
+&#13;
+    margin-bottom: 0;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mi-booked-section-subtitle {&#13;
+&#13;
+    margin:&#13;
+        6px&#13;
+        0&#13;
+        0;&#13;
+&#13;
+    color: #7d899b;&#13;
+&#13;
+    font-size: 10px;&#13;
+&#13;
+    line-height: 1.5;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mi-booked-horizontal {&#13;
+&#13;
+    width: 100%;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    flex-wrap: nowrap;&#13;
+&#13;
+    gap: 14px;&#13;
+&#13;
+    overflow-x: auto;&#13;
+&#13;
+    overflow-y: hidden;&#13;
+&#13;
+    padding:&#13;
+        3px&#13;
+        3px&#13;
+        11px;&#13;
+&#13;
+    scrollbar-width: none;&#13;
+&#13;
+    -ms-overflow-style: none;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mi-booked-horizontal::-webkit-scrollbar {&#13;
+&#13;
+    width: 0 !important;&#13;
+&#13;
+    height: 0 !important;&#13;
+&#13;
+    display: none !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mi-booked-item {&#13;
+&#13;
+    width: 285px;&#13;
+&#13;
+    min-width: 285px;&#13;
+&#13;
+    max-width: 285px;&#13;
+&#13;
+    min-height: 185px;&#13;
+&#13;
+    flex:&#13;
+        0&#13;
+        0&#13;
+        285px;&#13;
+&#13;
+    padding: 15px;&#13;
+&#13;
+    border:&#13;
+        1px&#13;
+        solid&#13;
+        #dce4ed;&#13;
+&#13;
+    border-top:&#13;
+        3px&#13;
+        solid&#13;
+        #6254ed;&#13;
+&#13;
+    border-radius: 13px;&#13;
+&#13;
+    background:&#13;
+        linear-gradient(&#13;
+            145deg,&#13;
+            #ffffff,&#13;
+            #faf9ff&#13;
+        );&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mi-booked-top {&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    justify-content: space-between;&#13;
+&#13;
+    gap: 10px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mi-booked-date {&#13;
+&#13;
+    color: #6254ed;&#13;
+&#13;
+    font-size: 10px;&#13;
+&#13;
+    font-weight: 850;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mi-booked-time {&#13;
+&#13;
+    margin-top: 8px;&#13;
+&#13;
+    color: #243e5a;&#13;
+&#13;
+    font-size: 17px;&#13;
+&#13;
+    font-weight: 900;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mi-booked-type {&#13;
+&#13;
+    min-height: 30px;&#13;
+&#13;
+    margin-top: 7px;&#13;
+&#13;
+    color: #63768b;&#13;
+&#13;
+    font-size: 10px;&#13;
+&#13;
+    line-height: 1.45;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mi-booked-trainer {&#13;
+&#13;
+    margin-top: 9px;&#13;
+&#13;
+    color: #7d8a9c;&#13;
+&#13;
+    font-size: 9px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mi-booked-trainer i {&#13;
+&#13;
+    margin-right: 5px;&#13;
+&#13;
+    color: #6254ed;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   SPINNER&#13;
+   ========================================================= */&#13;
+&#13;
+.spinning {&#13;
+&#13;
+    display: inline-block;&#13;
+&#13;
+    animation:&#13;
+        c360-booking-spin&#13;
+        1s&#13;
+        linear&#13;
+        infinite;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+@keyframes c360-booking-spin {&#13;
+&#13;
+    from {&#13;
+        transform: rotate(0deg);&#13;
+    }&#13;
+&#13;
+    to {&#13;
+        transform: rotate(360deg);&#13;
+    }&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   MOBILE SIDEBAR&#13;
+   ========================================================= */&#13;
+&#13;
+.c360-sidebar-overlay {&#13;
+&#13;
+    display: none;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+@media (max-width: 900px) {&#13;
+&#13;
+    .c360-left-sidebar {&#13;
+&#13;
+        position: fixed !important;&#13;
+&#13;
+        left: 0;&#13;
+&#13;
+        top: 0;&#13;
+&#13;
+        bottom: 0;&#13;
+&#13;
+        width: 285px !important;&#13;
+&#13;
+        min-width: 285px !important;&#13;
+&#13;
+        max-width: 285px !important;&#13;
+&#13;
+        transform:&#13;
+            translateX(-105%);&#13;
+&#13;
+        z-index: 10000;&#13;
+&#13;
+        box-shadow:&#13;
+            8px&#13;
+            0&#13;
+            28px&#13;
+            rgba(25,43,60,.30);&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .campus360-booking.sidebar-open&#13;
+    .c360-left-sidebar {&#13;
+&#13;
+        transform:&#13;
+            translateX(0);&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .campus360-booking.sidebar-closed&#13;
+    .c360-left-sidebar {&#13;
+&#13;
+        transform:&#13;
+            translateX(-105%);&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .c360-sidebar-overlay {&#13;
+&#13;
+        position: fixed;&#13;
+&#13;
+        inset: 0;&#13;
+&#13;
+        z-index: 9990;&#13;
+&#13;
+        display: block;&#13;
+&#13;
+        background:&#13;
+            rgba(15,28,45,.38);&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .campus360-booking.sidebar-closed&#13;
+    .c360-sidebar-overlay {&#13;
+&#13;
+        display: none;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .c360-right-page {&#13;
+&#13;
+        left: 0 !important;&#13;
+&#13;
+        width: 100vw !important;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .mi-layout {&#13;
+&#13;
+        grid-template-columns: 1fr;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .mi-sidebar {&#13;
+&#13;
+        position: static;&#13;
+&#13;
+        display: grid;&#13;
+&#13;
+        grid-template-columns:&#13;
+            repeat(&#13;
+                2,&#13;
+                minmax(0,1fr)&#13;
+            );&#13;
+&#13;
+    }&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   TABLET&#13;
+   ========================================================= */&#13;
+&#13;
+@media (max-width: 1100px) {&#13;
+&#13;
+    .mi-layout {&#13;
+&#13;
+        grid-template-columns:&#13;
+            minmax(0,1fr)&#13;
+            275px;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .mi-type-grid {&#13;
+&#13;
+        grid-template-columns:&#13;
+            repeat(&#13;
+                2,&#13;
+                minmax(0,1fr)&#13;
+            );&#13;
+&#13;
+    }&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   MOBILE&#13;
+   ========================================================= */&#13;
+&#13;
+@media (max-width: 650px) {&#13;
+&#13;
+    .c360-topbar {&#13;
+&#13;
+        height: 68px;&#13;
+&#13;
+        min-height: 68px;&#13;
+&#13;
+        padding:&#13;
+            0&#13;
+            11px;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .c360-page-heading {&#13;
+&#13;
+        display: none;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .c360-topbar-right {&#13;
+&#13;
+        gap: 5px;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .c360-top-student-info,&#13;
+    .c360-top-chevron {&#13;
+&#13;
+        display: none;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .c360-top-student {&#13;
+&#13;
+        padding-left: 4px;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .c360-top-icon {&#13;
+&#13;
+        width: 37px;&#13;
+&#13;
+        height: 37px;&#13;
+&#13;
+        min-width: 37px;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .c360-top-avatar {&#13;
+&#13;
+        width: 37px;&#13;
+&#13;
+        height: 37px;&#13;
+&#13;
+        min-width: 37px;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .c360-page-content {&#13;
+&#13;
+        padding:&#13;
+            16px&#13;
+            10px&#13;
+            45px;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .mi-hero {&#13;
+&#13;
+        min-height: 160px;&#13;
+&#13;
+        padding:&#13;
+            25px&#13;
+            20px;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .mi-hero-icon {&#13;
+&#13;
+        display: none;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .mi-hero-content h1 {&#13;
+&#13;
+        font-size: 27px;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .mi-hero-content p {&#13;
+&#13;
+        font-size: 12px;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .mi-main-card {&#13;
+&#13;
+        padding: 18px;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .mi-sidebar {&#13;
+&#13;
+        display: block;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .mi-type-grid {&#13;
+&#13;
+        grid-template-columns: 1fr;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .mi-time-grid {&#13;
+&#13;
+        grid-template-columns: 1fr;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .mi-section-top {&#13;
+&#13;
+        align-items: flex-start;&#13;
+&#13;
+        flex-direction: column;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .mi-submit-area {&#13;
+&#13;
+        justify-content: stretch;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .mi-primary-btn {&#13;
+&#13;
+        width: 100%;&#13;
+&#13;
+        min-width: 0;&#13;
+&#13;
+    }&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   SMALL MOBILE&#13;
+   ========================================================= */&#13;
+&#13;
+@media (max-width: 480px) {&#13;
+&#13;
+    .c360-notification-button {&#13;
+&#13;
+        display: none;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .c360-menu-button {&#13;
+&#13;
+        width: 38px;&#13;
+&#13;
+        height: 38px;&#13;
+&#13;
+        min-width: 38px;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .c360-menu-button span {&#13;
+&#13;
+        width: 17px;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .mi-hero {&#13;
+&#13;
+        padding:&#13;
+            24px&#13;
+            18px;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .mi-hero-content h1 {&#13;
+&#13;
+        font-size: 24px;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .mi-booked-section {&#13;
+&#13;
+        padding: 16px;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .mi-booked-item {&#13;
+&#13;
+        width: 265px;&#13;
+&#13;
+        min-width: 265px;&#13;
+&#13;
+        flex-basis: 265px;&#13;
+&#13;
+    }&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   FINAL HERO OVERRIDE&#13;
+   EXACT SAME DARK PURPLE AS LEFT SIDEBAR&#13;
+   ========================================================= */&#13;
+&#13;
+.campus360-booking .mi-hero {&#13;
+&#13;
+    background:&#13;
+        linear-gradient(&#13;
+            180deg,&#13;
+            #130d2f 0%,&#13;
+            #160d38 48%,&#13;
+            #100a29 100%&#13;
+        ) !important;&#13;
+&#13;
+    border:&#13;
+        1px&#13;
+        solid&#13;
+        #2d2157 !important;&#13;
+&#13;
+    color:&#13;
+        #ffffff !important;&#13;
+&#13;
+    box-shadow:&#13;
+        0&#13;
+        12px&#13;
+        28px&#13;
+        rgba(19,13,47,.22) !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.campus360-booking .mi-hero::after {&#13;
+&#13;
+    background:&#13;
+        rgba(124,58,237,.10) !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.campus360-booking .mi-hero-icon {&#13;
+&#13;
+    background:&#13;
+        rgba(124,58,237,.18) !important;&#13;
+&#13;
+    color:&#13;
+        #c4b5fd !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.campus360-booking .mi-hero-eyebrow {&#13;
+&#13;
+    color:&#13;
+        #c4b5fd !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.campus360-booking .mi-hero-content h1 {&#13;
+&#13;
+    color:&#13;
+        #ffffff !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.campus360-booking .mi-hero-content p {&#13;
+&#13;
+    color:&#13;
+        #d8d0eb !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   FINAL WHITE TOP NAVBAR&#13;
+   ========================================================= */&#13;
+&#13;
+.campus360-booking .c360-topbar {&#13;
+&#13;
+    background:&#13;
+        #ffffff !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   FINAL DARK PURPLE SIDEBAR&#13;
+   ========================================================= */&#13;
+&#13;
+.campus360-booking .c360-left-sidebar {&#13;
+&#13;
+    background:&#13;
+        linear-gradient(&#13;
+            180deg,&#13;
+            #130d2f 0%,&#13;
+            #160d38 48%,&#13;
+            #100a29 100%&#13;
+        ) !important;&#13;
+&#13;
+    border-right:&#13;
+        1px&#13;
+        solid&#13;
+        #2d2157 !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   FINAL FULL VIEW&#13;
+   ========================================================= */&#13;
+&#13;
+.campus360-booking {&#13;
+&#13;
+    margin-top: 0 !important;&#13;
+&#13;
+    margin-bottom: 0 !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.campus360-booking .c360-right-page {&#13;
+&#13;
+    margin-left: 0 !important;&#13;
+&#13;
+    margin-right: 0 !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.campus360-booking .c360-page-content {&#13;
+&#13;
+    width: 100% !important;&#13;
+&#13;
+    max-width: none !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+body:has(.campus360-booking) &gt; header,&#13;
+body:has(.campus360-booking) &gt; nav {&#13;
+&#13;
+    display: none !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   FINAL SCROLLBAR HIDE&#13;
+   SCROLLING STILL WORKS&#13;
+   ========================================================= */&#13;
+&#13;
+.campus360-booking .c360-right-page,&#13;
+.campus360-booking .c360-sidebar-nav,&#13;
+.campus360-booking .mi-booked-horizontal {&#13;
+&#13;
+    scrollbar-width: none !important;&#13;
+&#13;
+    -ms-overflow-style: none !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.campus360-booking .c360-right-page::-webkit-scrollbar,&#13;
+.campus360-booking .c360-sidebar-nav::-webkit-scrollbar,&#13;
+.campus360-booking .mi-booked-horizontal::-webkit-scrollbar {&#13;
+&#13;
+    width: 0 !important;&#13;
+&#13;
+    height: 0 !important;&#13;
+&#13;
+    display: none !important;&#13;
+&#13;
+}&#13;
+/* =========================================================&#13;
+   FINAL MOCK INTERVIEW HERO&#13;
+   DARK PURPLE - #351A61&#13;
+   ========================================================= */&#13;
+&#13;
+.campus360-booking .mi-hero {&#13;
+&#13;
+    position: relative !important;&#13;
+&#13;
+    z-index: 1 !important;&#13;
+&#13;
+    background:&#13;
+        linear-gradient(&#13;
+            135deg,&#13;
+            #241044 0%,&#13;
+            #351A61 52%,&#13;
+            #45206D 100%&#13;
+        ) !important;&#13;
+&#13;
+    border:&#13;
+        1px solid #5A357D !important;&#13;
+&#13;
+    color:&#13;
+        #ffffff !important;&#13;
+&#13;
+    box-shadow:&#13;
+        0&#13;
+        12px&#13;
+        30px&#13;
+        rgba(53,26,97,.22) !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* Decorative circle */&#13;
+&#13;
+.campus360-booking .mi-hero::after {&#13;
+&#13;
+    background:&#13;
+        rgba(196,181,253,.10) !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* Hero icon */&#13;
+&#13;
+.campus360-booking .mi-hero-icon {&#13;
+&#13;
+    background:&#13;
+        rgba(124,58,237,.18) !important;&#13;
+&#13;
+    color:&#13;
+        #C4B5FD !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* Eyebrow */&#13;
+&#13;
+.campus360-booking .mi-hero-eyebrow {&#13;
+&#13;
+    color:&#13;
+        #DCCBFF !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* Hero title */&#13;
+&#13;
+.campus360-booking .mi-hero-content h1 {&#13;
+&#13;
+    color:&#13;
+        #FFFFFF !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* Hero description */&#13;
+&#13;
+.campus360-booking .mi-hero-content p {&#13;
+&#13;
+    color:&#13;
+        #E5DCF0 !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   KEEP TOP NAVBAR WHITE&#13;
+   ========================================================= */&#13;
+&#13;
+.campus360-booking .c360-topbar {&#13;
+&#13;
+    background:&#13;
+        #FFFFFF !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   KEEP LEFT SIDEBAR DARK PURPLE&#13;
+   ========================================================= */&#13;
+&#13;
+.campus360-booking .c360-left-sidebar {&#13;
+&#13;
+    background:&#13;
+        linear-gradient(&#13;
+            180deg,&#13;
+            #130D2F 0%,&#13;
+            #160D38 48%,&#13;
+            #100A29 100%&#13;
+        ) !important;&#13;
+&#13;
+    border-right:&#13;
+        1px solid #2D2157 !important;&#13;
+&#13;
+}</css>
+        <data_table>sp_instance</data_table>
+        <demo_data/>
+        <description/>
+        <docs/>
+        <field_list/>
+        <has_preview>false</has_preview>
+        <id>mock_interview_slot_booking</id>
+        <internal>false</internal>
+        <link><![CDATA[function link(scope, element, attrs, controller) {
+  
+}]]></link>
+        <name>Mock Interview Slot Booking</name>
+        <option_schema/>
+        <public>false</public>
+        <roles/>
+        <script><![CDATA[(function() {
+
+    var AVAIL_TABLE = 'x_snc_campus360_trainer_interview_availability';
+    var REQUEST_TABLE = 'x_snc_campus360_mock_interview_slot_request';
+    var TRAINER_REQUEST_TABLE = 'x_snc_campus360_mock_interview_request_trainer';
+    var MOCK_TABLE = 'x_snc_campus360_mock_interview';
+    var STUDENT_TABLE = 'x_snc_campus360_student_master';
+    var NOTIFICATION_TABLE = 'x_snc_campus360_student_notification';
+
+    data.error = '';
+    data.success = '';
+    data.interviewTypes = [];
+    data.slots = [];
+    data.bookedSlots = [];
+    data.student = {
+        sys_id: '',
+        studentId: '',
+        name: ''
+    };
+    data.currentRequest = null;
+
+
+    /* ============================================================
+       CHOICE HELPERS
+       ============================================================ */
+
+    function getChoiceValueByLabel(tableName, fieldName, label) {
+
+        var choice = new GlideRecord('sys_choice');
+
+        choice.addQuery('name', tableName);
+        choice.addQuery('element', fieldName);
+        choice.addQuery('label', label);
+        choice.addQuery('inactive', false);
+        choice.setLimit(1);
+        choice.query();
+
+        if (choice.next()) {
+            return String(choice.getValue('value'));
+        }
+
+        var temp = new GlideRecord(tableName);
+
+        if (!temp.isValid() || !temp.isValidField(fieldName)) {
+            return '';
+        }
+
+        try {
+
+            temp.initialize();
+
+            var el = temp.getElement(fieldName);
+
+            if (el && el.getChoices) {
+
+                var vals = el.getChoices();
+
+                for (var i = 0; i < vals.length; i++) {
+
+                    var val = String(vals[i]);
+
+                    temp.setValue(fieldName, val);
+
+                    var display = '';
+
+                    try {
+                        display = String(el.getChoiceValue());
+                    } catch (ignore1) {
+                        display = String(
+                            temp.getDisplayValue(fieldName)
+                        );
+                    }
+
+                    if (
+                        display.toLowerCase() ===
+                        String(label).toLowerCase()
+                    ) {
+                        return val;
+                    }
+                }
+            }
+
+        } catch (ignore2) {}
+
+        return '';
+    }
+
+
+    function setChoiceByLabel(gr, fieldName, label) {
+
+        if (!gr || !gr.isValidField(fieldName)) {
+            return false;
+        }
+
+        var value = getChoiceValueByLabel(
+            gr.getTableName(),
+            fieldName,
+            label
+        );
+
+        if (!value) {
+            return false;
+        }
+
+        gr.setValue(fieldName, value);
+
+        return String(
+            gr.getValue(fieldName)
+        ) === value;
+    }
+
+
+    function getChoiceList(tableName, fieldName) {
+
+        var result = [];
+
+        var choice = new GlideRecord('sys_choice');
+
+        choice.addQuery('name', tableName);
+        choice.addQuery('element', fieldName);
+        choice.addQuery('inactive', false);
+        choice.orderBy('sequence');
+        choice.query();
+
+        while (choice.next()) {
+
+            result.push({
+                value: String(
+                    choice.getValue('value')
+                ),
+                label: String(
+                    choice.getValue('label')
+                )
+            });
+
+        }
+
+        return result;
+    }
+
+
+    /* ============================================================
+       TIME FORMATTER
+       ============================================================ */
+
+    function formatTime12(value) {
+
+        var raw =
+            String(value || '').trim();
+
+        if (!raw) {
+            return '';
+        }
+
+        if (raw.indexOf('T') >= 0) {
+
+            raw =
+                raw.substring(
+                    raw.lastIndexOf('T') + 1
+                );
+
+        } else if (raw.indexOf(' ') >= 0) {
+
+            var spaceParts =
+                raw.split(/\s+/);
+
+            raw =
+                spaceParts[
+                    spaceParts.length - 1
+                ];
+
+        }
+
+        var timeMatch =
+            raw.match(
+                /(\d{1,2}):(\d{2})(?::(\d{2}))?/
+            );
+
+        if (!timeMatch) {
+            return raw;
+        }
+
+        var hour =
+            parseInt(
+                timeMatch[1],
+                10
+            );
+
+        var minute =
+            parseInt(
+                timeMatch[2],
+                10
+            );
+
+        if (
+            isNaN(hour) ||
+            isNaN(minute)
+        ) {
+            return raw;
+        }
+
+        hour =
+            hour % 24;
+
+        var ampm =
+            hour >= 12
+                ? 'PM'
+                : 'AM';
+
+        var hour12 =
+            hour % 12;
+
+        if (hour12 === 0) {
+            hour12 = 12;
+        }
+
+        var minuteText =
+            minute < 10
+                ? '0' + minute
+                : String(minute);
+
+        return (
+            hour12 +
+            ':' +
+            minuteText +
+            ' ' +
+            ampm
+        );
+    }
+
+
+    function formatTimeRange(
+        startTime,
+        endTime
+    ) {
+
+        return (
+            formatTime12(startTime) +
+            ' - ' +
+            formatTime12(endTime)
+        );
+    }
+
+
+    /* ============================================================
+       DATE FORMATTER
+       ============================================================ */
+
+    function formatDateDisplay(
+        dateValue
+    ) {
+
+        var raw =
+            String(dateValue || '');
+
+        if (!raw) {
+            return '';
+        }
+
+        var p =
+            raw.split('-');
+
+        if (p.length !== 3) {
+            return raw;
+        }
+
+        var months = [
+            'Jan',
+            'Feb',
+            'Mar',
+            'Apr',
+            'May',
+            'Jun',
+            'Jul',
+            'Aug',
+            'Sep',
+            'Oct',
+            'Nov',
+            'Dec'
+        ];
+
+        var year =
+            p[0];
+
+        var month =
+            parseInt(
+                p[1],
+                10
+            );
+
+        var day =
+            parseInt(
+                p[2],
+                10
+            );
+
+        if (
+            isNaN(month) ||
+            isNaN(day)
+        ) {
+            return raw;
+        }
+
+        return (
+            (day < 10
+                ? '0' + day
+                : day) +
+            ' ' +
+            months[month - 1] +
+            ' ' +
+            year
+        );
+    }
+
+
+    function validDateString(
+        value
+    ) {
+
+        var raw =
+            String(value || '');
+
+        if (
+            !/^\d{4}-\d{2}-\d{2}$/.test(
+                raw
+            )
+        ) {
+            return false;
+        }
+
+        var p =
+            raw.split('-');
+
+        var year =
+            parseInt(
+                p[0],
+                10
+            );
+
+        var month =
+            parseInt(
+                p[1],
+                10
+            );
+
+        var day =
+            parseInt(
+                p[2],
+                10
+            );
+
+        if (
+            month < 1 ||
+            month > 12
+        ) {
+            return false;
+        }
+
+        if (
+            day < 1 ||
+            day > 31
+        ) {
+            return false;
+        }
+
+        return true;
+    }
+
+
+    /* ============================================================
+       STUDENT
+       ============================================================ */
+
+    function resolveStudent() {
+
+        var userId =
+            gs.getUserID();
+
+        var user =
+            new GlideRecord('sys_user');
+
+        if (
+            userId &&
+            user.get(userId)
+        ) {
+
+            var email =
+                String(
+                    user.getValue('email') ||
+                    ''
+                );
+
+            if (email) {
+
+                var studentByEmail =
+                    new GlideRecord(
+                        STUDENT_TABLE
+                    );
+
+                studentByEmail.addQuery(
+                    'email',
+                    email
+                );
+
+                studentByEmail.setLimit(1);
+                studentByEmail.query();
+
+                if (
+                    studentByEmail.next()
+                ) {
+                    return studentByEmail;
+                }
+            }
+
+
+            var studentByUser =
+                new GlideRecord(
+                    STUDENT_TABLE
+                );
+
+            if (
+                studentByUser.isValidField(
+                    'user'
+                )
+            ) {
+
+                studentByUser.addQuery(
+                    'user',
+                    userId
+                );
+
+                studentByUser.setLimit(1);
+                studentByUser.query();
+
+                if (
+                    studentByUser.next()
+                ) {
+                    return studentByUser;
+                }
+            }
+        }
+
+
+        /*
+         * Test/development fallback.
+         */
+        var fallback =
+            new GlideRecord(
+                STUDENT_TABLE
+            );
+
+        if (
+            fallback.isValidField(
+                'student_id'
+            )
+        ) {
+
+            fallback.addQuery(
+                'student_id',
+                'STU_TEST_001'
+            );
+
+            fallback.setLimit(1);
+            fallback.query();
+
+            if (fallback.next()) {
+                return fallback;
+            }
+        }
+
+        return null;
+    }
+
+
+    function populateStudentData() {
+
+        var student =
+            resolveStudent();
+
+        if (!student) {
+
+            data.error =
+                'Student record could not be found.';
+
+            return null;
+        }
+
+        data.student.sys_id =
+            String(
+                student.getUniqueValue()
+            );
+
+        if (
+            student.isValidField(
+                'student_id'
+            )
+        ) {
+
+            data.student.studentId =
+                String(
+                    student.getValue(
+                        'student_id'
+                    ) || ''
+                );
+        }
+
+        if (
+            student.isValidField(
+                'student_name'
+            )
+        ) {
+
+            data.student.name =
+                String(
+                    student.getValue(
+                        'student_name'
+                    ) || ''
+                );
+
+        } else if (
+            student.isValidField(
+                'name'
+            )
+        ) {
+
+            data.student.name =
+                String(
+                    student.getValue(
+                        'name'
+                    ) || ''
+                );
+
+        } else {
+
+            data.student.name =
+                String(
+                    student.getDisplayValue() ||
+                    ''
+                );
+        }
+
+        return student;
+    }
+
+
+    /* ============================================================
+       INTERVIEW TYPES
+       ============================================================ */
+
+    function loadInterviewTypes(
+        selectedDate
+    ) {
+
+        var choices =
+            getChoiceList(
+                AVAIL_TABLE,
+                'interview_type'
+            );
+
+        data.interviewTypes =
+            [];
+
+        var availableValue =
+            getChoiceValueByLabel(
+                AVAIL_TABLE,
+                'status',
+                'Available'
+            );
+
+        for (
+            var i = 0;
+            i < choices.length;
+            i++
+        ) {
+
+            var choice =
+                choices[i];
+
+            var count = 0;
+
+            if (
+                selectedDate &&
+                availableValue
+            ) {
+
+                var gr =
+                    new GlideRecord(
+                        AVAIL_TABLE
+                    );
+
+                gr.addQuery(
+                    'available_date',
+                    selectedDate
+                );
+
+                gr.addQuery(
+                    'interview_type',
+                    choice.value
+                );
+
+                gr.addQuery(
+                    'active',
+                    true
+                );
+
+                gr.addQuery(
+                    'status',
+                    availableValue
+                );
+
+                gr.query();
+
+                while (gr.next()) {
+                    count++;
+                }
+            }
+
+            data.interviewTypes.push({
+                value: choice.value,
+                label: choice.label,
+                count: count
+            });
+
+        }
+    }
+
+
+    /* ============================================================
+       LOAD AVAILABLE SLOTS
+       ============================================================ */
+
+    function loadSlots(
+        selectedDate
+    ) {
+
+        data.slots = [];
+
+        if (!selectedDate) {
+            return;
+        }
+
+        if (
+            !validDateString(
+                selectedDate
+            )
+        ) {
+
+            data.error =
+                'Invalid interview date.';
+
+            return;
+        }
+
+        var availableValue =
+            getChoiceValueByLabel(
+                AVAIL_TABLE,
+                'status',
+                'Available'
+            );
+
+        if (!availableValue) {
+
+            data.error =
+                'The Available status choice could not be resolved from Trainer Interview Availability.';
+
+            return;
+        }
+
+        var gr =
+            new GlideRecord(
+                AVAIL_TABLE
+            );
+
+        gr.addQuery(
+            'available_date',
+            selectedDate
+        );
+
+        gr.addQuery(
+            'active',
+            true
+        );
+
+        gr.addQuery(
+            'status',
+            availableValue
+        );
+
+        gr.orderBy(
+            'start_time'
+        );
+
+        gr.query();
+
+        var groups = {};
+
+        while (gr.next()) {
+
+            var dateValue =
+                String(
+                    gr.getValue(
+                        'available_date'
+                    ) || ''
+                );
+
+            var startValue =
+                String(
+                    gr.getValue(
+                        'start_time'
+                    ) || ''
+                );
+
+            var endValue =
+                String(
+                    gr.getValue(
+                        'end_time'
+                    ) || ''
+                );
+
+            var typeValue =
+                String(
+                    gr.getValue(
+                        'interview_type'
+                    ) || ''
+                );
+
+            var typeLabel =
+                String(
+                    gr.getDisplayValue(
+                        'interview_type'
+                    ) || ''
+                );
+
+            var skillValue = '';
+
+            if (
+                gr.isValidField(
+                    'skill_area'
+                )
+            ) {
+
+                skillValue =
+                    String(
+                        gr.getValue(
+                            'skill_area'
+                        ) || ''
+                    );
+            }
+
+            var skillLabel = '';
+
+            if (
+                gr.isValidField(
+                    'skill_area'
+                )
+            ) {
+
+                skillLabel =
+                    String(
+                        gr.getDisplayValue(
+                            'skill_area'
+                        ) || ''
+                    );
+            }
+
+            var key =
+                dateValue +
+                '|' +
+                startValue +
+                '|' +
+                endValue +
+                '|' +
+                typeValue +
+                '|' +
+                skillValue;
+
+            if (!groups[key]) {
+
+                groups[key] = {
+
+                    key: key,
+
+                    date: dateValue,
+
+                    startTime: startValue,
+
+                    endTime: endValue,
+
+                    displayTime:
+                        formatTimeRange(
+                            startValue,
+                            endValue
+                        ),
+
+                    interviewType:
+                        typeValue,
+
+                    interviewTypeLabel:
+                        typeLabel,
+
+                    skillArea:
+                        skillValue,
+
+                    skillAreaLabel:
+                        skillLabel,
+
+                    trainerCount: 0,
+
+                    availabilityIds: []
+
+                };
+            }
+
+            groups[key].trainerCount++;
+
+            groups[key]
+                .availabilityIds
+                .push(
+                    String(
+                        gr.getUniqueValue()
+                    )
+                );
+        }
+
+
+        for (
+            var groupKey in groups
+        ) {
+
+            if (
+                groups.hasOwnProperty(
+                    groupKey
+                )
+            ) {
+
+                data.slots.push(
+                    groups[groupKey]
+                );
+            }
+        }
+    }
+
+
+    /* ============================================================
+       REQUEST DETAILS
+       ============================================================ */
+
+    function getTimingAvailability(
+        requestGr
+    ) {
+
+        var availabilityId =
+            '';
+
+        if (
+            requestGr.isValidField(
+                'requested_timing'
+            ) &&
+            requestGr.getValue(
+                'requested_timing'
+            )
+        ) {
+
+            availabilityId =
+                String(
+                    requestGr.getValue(
+                        'requested_timing'
+                    )
+                );
+        }
+
+
+        if (
+            !availabilityId &&
+            requestGr.isValidField(
+                'selected_availability'
+            ) &&
+            requestGr.getValue(
+                'selected_availability'
+            )
+        ) {
+
+            availabilityId =
+                String(
+                    requestGr.getValue(
+                        'selected_availability'
+                    )
+                );
+        }
+
+
+        if (
+            !availabilityId &&
+            requestGr.isValidField(
+                'selected_slot'
+            ) &&
+            requestGr.getValue(
+                'selected_slot'
+            )
+        ) {
+
+            availabilityId =
+                String(
+                    requestGr.getValue(
+                        'selected_slot'
+                    )
+                );
+        }
+
+
+        if (!availabilityId) {
+            return null;
+        }
+
+
+        var availability =
+            new GlideRecord(
+                AVAIL_TABLE
+            );
+
+        if (
+            !availability.get(
+                availabilityId
+            )
+        ) {
+
+            return null;
+        }
+
+        return availability;
+    }
+
+
+    function buildRequestData(
+        requestGr
+    ) {
+
+        var result = {
+
+            requestId:
+                String(
+                    requestGr.getUniqueValue()
+                ),
+
+            requestNumber:
+                String(
+                    requestGr.getDisplayValue()
+                ),
+
+            status:
+                String(
+                    requestGr.getDisplayValue(
+                        'status'
+                    ) || ''
+                ),
+
+            statusValue:
+                String(
+                    requestGr.getValue(
+                        'status'
+                    ) || ''
+                ),
+
+            trainerCount: 0,
+
+            trainer: '',
+
+            date: '',
+
+            dateDisplay: '',
+
+            startTime: '',
+
+            endTime: '',
+
+            displayTime: '',
+
+            interviewType: '',
+
+            skillArea: '',
+
+            mockInterviewNumber: '',
+
+            qrUrl: ''
+
+        };
+
+
+        var availability =
+            getTimingAvailability(
+                requestGr
+            );
+
+
+        if (availability) {
+
+            result.date =
+                String(
+                    availability.getValue(
+                        'available_date'
+                    ) || ''
+                );
+
+            result.dateDisplay =
+                formatDateDisplay(
+                    result.date
+                );
+
+            result.startTime =
+                String(
+                    availability.getValue(
+                        'start_time'
+                    ) || ''
+                );
+
+            result.endTime =
+                String(
+                    availability.getValue(
+                        'end_time'
+                    ) || ''
+                );
+
+            result.displayTime =
+                formatTimeRange(
+                    result.startTime,
+                    result.endTime
+                );
+
+            result.interviewType =
+                String(
+                    availability.getDisplayValue(
+                        'interview_type'
+                    ) || ''
+                );
+
+            if (
+                availability.isValidField(
+                    'skill_area'
+                )
+            ) {
+
+                result.skillArea =
+                    String(
+                        availability.getDisplayValue(
+                            'skill_area'
+                        ) || ''
+                    );
+            }
+        }
+
+
+        /*
+         * Find trainer response.
+         */
+        var child =
+            new GlideRecord(
+                TRAINER_REQUEST_TABLE
+            );
+
+        if (
+            child.isValidField(
+                'request'
+            )
+        ) {
+
+            child.addQuery(
+                'request',
+                requestGr.getUniqueValue()
+            );
+
+            child.query();
+
+            while (child.next()) {
+
+                result.trainerCount++;
+
+                var responseLabel =
+                    String(
+                        child.getDisplayValue(
+                            'response'
+                        ) || ''
+                    );
+
+                if (
+                    responseLabel ===
+                    'Accepted'
+                ) {
+
+                    if (
+                        child.isValidField(
+                            'trainer'
+                        )
+                    ) {
+
+                        result.trainer =
+                            String(
+                                child.getDisplayValue(
+                                    'trainer'
+                                ) || ''
+                            );
+                    }
+                }
+            }
+        }
+
+
+        if (
+            !result.trainer &&
+            requestGr.isValidField(
+                'accepted_trainer'
+            )
+        ) {
+
+            result.trainer =
+                String(
+                    requestGr.getDisplayValue(
+                        'accepted_trainer'
+                    ) || ''
+                );
+        }
+
+
+        /*
+         * Mock Interview.
+         *
+         * For accepted/booked interviews,
+         * Mock Interview is the preferred source
+         * for the actual scheduled date/time.
+         */
+        if (
+            requestGr.isValidField(
+                'mock_interview'
+            ) &&
+            requestGr.getValue(
+                'mock_interview'
+            )
+        ) {
+
+            var mock =
+                new GlideRecord(
+                    MOCK_TABLE
+                );
+
+            if (
+                mock.get(
+                    requestGr.getValue(
+                        'mock_interview'
+                    )
+                )
+            ) {
+
+                result.mockInterviewNumber =
+                    String(
+                        mock.getDisplayValue() ||
+                        ''
+                    );
+
+
+                if (
+                    mock.isValidField(
+                        'interview_date'
+                    )
+                ) {
+
+                    var mockDate =
+                        String(
+                            mock.getValue(
+                                'interview_date'
+                            ) || ''
+                        );
+
+                    if (mockDate) {
+
+                        result.date =
+                            mockDate;
+
+                        result.dateDisplay =
+                            formatDateDisplay(
+                                mockDate
+                            );
+                    }
+                }
+
+
+                if (
+                    mock.isValidField(
+                        'start_time'
+                    )
+                ) {
+
+                    result.startTime =
+                        String(
+                            mock.getValue(
+                                'start_time'
+                            ) || ''
+                        );
+                }
+
+
+                if (
+                    mock.isValidField(
+                        'end_time'
+                    )
+                ) {
+
+                    result.endTime =
+                        String(
+                            mock.getValue(
+                                'end_time'
+                            ) || ''
+                        );
+                }
+
+
+                if (
+                    result.startTime ||
+                    result.endTime
+                ) {
+
+                    result.displayTime =
+                        formatTimeRange(
+                            result.startTime,
+                            result.endTime
+                        );
+                }
+
+
+                if (
+                    mock.isValidField(
+                        'interview_type'
+                    )
+                ) {
+
+                    result.interviewType =
+                        String(
+                            mock.getDisplayValue(
+                                'interview_type'
+                            ) ||
+                            mock.getValue(
+                                'interview_type'
+                            ) ||
+                            result.interviewType ||
+                            ''
+                        );
+                }
+
+
+                if (
+                    mock.isValidField(
+                        'trainer_reference'
+                    )
+                ) {
+
+                    result.trainer =
+                        String(
+                            mock.getDisplayValue(
+                                'trainer_reference'
+                            ) ||
+                            result.trainer ||
+                            ''
+                        );
+
+                } else if (
+                    mock.isValidField(
+                        'trainer'
+                    )
+                ) {
+
+                    result.trainer =
+                        String(
+                            mock.getDisplayValue(
+                                'trainer'
+                            ) ||
+                            result.trainer ||
+                            ''
+                        );
+                }
+
+
+                if (
+                    mock.isValidField(
+                        'qr_url'
+                    )
+                ) {
+
+                    result.qrUrl =
+                        String(
+                            mock.getValue(
+                                'qr_url'
+                            ) || ''
+                        );
+
+                } else if (
+                    mock.isValidField(
+                        'qr_code'
+                    )
+                ) {
+
+                    result.qrUrl =
+                        String(
+                            mock.getValue(
+                                'qr_code'
+                            ) || ''
+                        );
+                }
+            }
+        }
+
+
+        return result;
+    }
+
+
+    /* ============================================================
+       LATEST REQUEST
+       ============================================================ */
+
+    function loadLatestRequest(
+        studentSysId
+    ) {
+
+        var result = null;
+
+        var gr =
+            new GlideRecord(
+                REQUEST_TABLE
+            );
+
+        gr.addQuery(
+            'student',
+            studentSysId
+        );
+
+        gr.orderByDesc(
+            'sys_created_on'
+        );
+
+        gr.setLimit(1);
+        gr.query();
+
+        if (gr.next()) {
+
+            result =
+                buildRequestData(
+                    gr
+                );
+        }
+
+        data.currentRequest =
+            result;
+
+        return result;
+    }
+
+
+    /* ============================================================
+       BOOKED SLOTS
+       ============================================================ */
+
+    function loadBookedSlots(
+        studentSysId
+    ) {
+
+        data.bookedSlots =
+            [];
+
+        var acceptedValue =
+            getChoiceValueByLabel(
+                REQUEST_TABLE,
+                'status',
+                'Accepted'
+            );
+
+        var completedValue =
+            getChoiceValueByLabel(
+                REQUEST_TABLE,
+                'status',
+                'Completed'
+            );
+
+        var statusValues =
+            [];
+
+        if (acceptedValue) {
+            statusValues.push(
+                acceptedValue
+            );
+        }
+
+        if (completedValue) {
+            statusValues.push(
+                completedValue
+            );
+        }
+
+        if (
+            statusValues.length === 0
+        ) {
+            return;
+        }
+
+
+        var gr =
+            new GlideRecord(
+                REQUEST_TABLE
+            );
+
+        gr.addQuery(
+            'student',
+            studentSysId
+        );
+
+        gr.addQuery(
+            'status',
+            'IN',
+            statusValues.join(',')
+        );
+
+        gr.orderByDesc(
+            'sys_created_on'
+        );
+
+        gr.query();
+
+
+        while (gr.next()) {
+
+            var item =
+                buildRequestData(
+                    gr
+                );
+
+            item.requestId =
+                String(
+                    gr.getUniqueValue()
+                );
+
+            data.bookedSlots.push(
+                item
+            );
+        }
+    }
+
+
+    /* ============================================================
+       SUBMIT REQUEST
+       ============================================================ */
+
+    function submitRequest(
+        studentSysId
+    ) {
+
+        var selectedDate =
+            String(
+                input.selectedDate ||
+                ''
+            );
+
+        var selectedAvailabilityId =
+            String(
+                input.selectedAvailabilityId ||
+                ''
+            );
+
+
+        if (
+            !validDateString(
+                selectedDate
+            )
+        ) {
+
+            data.error =
+                'Please select a valid interview date.';
+
+            return;
+        }
+
+
+        if (!selectedAvailabilityId) {
+
+            data.error =
+                'Please select an available time slot.';
+
+            return;
+        }
+
+
+        var selected =
+            new GlideRecord(
+                AVAIL_TABLE
+            );
+
+        if (
+            !selected.get(
+                selectedAvailabilityId
+            )
+        ) {
+
+            data.error =
+                'The selected availability record no longer exists. Please refresh the date and select an available slot again.';
+
+            return;
+        }
+
+
+        var availableValue =
+            getChoiceValueByLabel(
+                AVAIL_TABLE,
+                'status',
+                'Available'
+            );
+
+        if (!availableValue) {
+
+            data.error =
+                'Available status could not be resolved.';
+
+            return;
+        }
+
+
+        var dbDate =
+            String(
+                selected.getValue(
+                    'available_date'
+                ) || ''
+            );
+
+        if (
+            dbDate !== selectedDate
+        ) {
+
+            data.error =
+                'The selected date does not match the availability record. Please refresh and select the slot again.';
+
+            return;
+        }
+
+
+        if (
+            String(
+                selected.getValue(
+                    'active'
+                )
+            ) !== '1' &&
+            String(
+                selected.getValue(
+                    'active'
+                )
+            ) !== 'true'
+        ) {
+
+            data.error =
+                'This availability is no longer active. Please refresh the date and select an available slot again.';
+
+            return;
+        }
+
+
+        if (
+            String(
+                selected.getValue(
+                    'status'
+                )
+            ) !==
+            String(
+                availableValue
+            )
+        ) {
+
+            data.error =
+                'This availability is no longer available. Please refresh the date and select another available slot.';
+
+            return;
+        }
+
+
+        var startTime =
+            String(
+                selected.getValue(
+                    'start_time'
+                ) || ''
+            );
+
+        var endTime =
+            String(
+                selected.getValue(
+                    'end_time'
+                ) || ''
+            );
+
+        var interviewType =
+            String(
+                selected.getValue(
+                    'interview_type'
+                ) || ''
+            );
+
+        var skillArea = '';
+
+        if (
+            selected.isValidField(
+                'skill_area'
+            )
+        ) {
+
+            skillArea =
+                String(
+                    selected.getValue(
+                        'skill_area'
+                    ) || ''
+                );
+        }
+
+
+        /*
+         * Find every trainer with this exact slot.
+         */
+        var matchingAvailabilities =
+            new GlideRecord(
+                AVAIL_TABLE
+            );
+
+        matchingAvailabilities.addQuery(
+            'available_date',
+            selectedDate
+        );
+
+        matchingAvailabilities.addQuery(
+            'start_time',
+            startTime
+        );
+
+        matchingAvailabilities.addQuery(
+            'end_time',
+            endTime
+        );
+
+        matchingAvailabilities.addQuery(
+            'interview_type',
+            interviewType
+        );
+
+
+        if (
+            selected.isValidField(
+                'skill_area'
+            ) &&
+            skillArea
+        ) {
+
+            matchingAvailabilities.addQuery(
+                'skill_area',
+                skillArea
+            );
+        }
+
+
+        matchingAvailabilities.addQuery(
+            'active',
+            true
+        );
+
+        matchingAvailabilities.addQuery(
+            'status',
+            availableValue
+        );
+
+        matchingAvailabilities.query();
+
+
+        var availabilityIds =
+            [];
+
+        var trainerIds =
+            [];
+
+
+        while (
+            matchingAvailabilities.next()
+        ) {
+
+            availabilityIds.push(
+                String(
+                    matchingAvailabilities
+                        .getUniqueValue()
+                )
+            );
+
+
+            if (
+                matchingAvailabilities
+                    .isValidField('trainer') &&
+                matchingAvailabilities
+                    .getValue('trainer')
+            ) {
+
+                trainerIds.push(
+                    String(
+                        matchingAvailabilities
+                            .getValue('trainer')
+                    )
+                );
+            }
+        }
+
+
+        if (
+            availabilityIds.length === 0
+        ) {
+
+            data.error =
+                'This availability is no longer available. Please refresh the date and select another available slot.';
+
+            return;
+        }
+
+
+        /*
+         * Duplicate request check.
+         */
+        var requestedValue =
+            getChoiceValueByLabel(
+                REQUEST_TABLE,
+                'status',
+                'Requested'
+            );
+
+        var acceptedValue =
+            getChoiceValueByLabel(
+                REQUEST_TABLE,
+                'status',
+                'Accepted'
+            );
+
+
+        var existing =
+            new GlideRecord(
+                REQUEST_TABLE
+            );
+
+        existing.addQuery(
+            'student',
+            studentSysId
+        );
+
+        var statusQuery =
+            [];
+
+
+        if (requestedValue) {
+            statusQuery.push(
+                requestedValue
+            );
+        }
+
+        if (acceptedValue) {
+            statusQuery.push(
+                acceptedValue
+            );
+        }
+
+
+        if (
+            statusQuery.length > 0
+        ) {
+
+            existing.addQuery(
+                'status',
+                'IN',
+                statusQuery.join(',')
+            );
+        }
+
+
+        existing.query();
+
+
+        while (existing.next()) {
+
+            var existingAvailability =
+                getTimingAvailability(
+                    existing
+                );
+
+
+            if (existingAvailability) {
+
+                var existingDate =
+                    String(
+                        existingAvailability
+                            .getValue(
+                                'available_date'
+                            ) || ''
+                    );
+
+                var existingStart =
+                    String(
+                        existingAvailability
+                            .getValue(
+                                'start_time'
+                            ) || ''
+                    );
+
+                var existingEnd =
+                    String(
+                        existingAvailability
+                            .getValue(
+                                'end_time'
+                            ) || ''
+                    );
+
+                var existingType =
+                    String(
+                        existingAvailability
+                            .getValue(
+                                'interview_type'
+                            ) || ''
+                    );
+
+
+                if (
+                    existingDate === selectedDate &&
+                    existingStart === startTime &&
+                    existingEnd === endTime &&
+                    existingType === interviewType
+                ) {
+
+                    data.error =
+                        'You already have a request for this exact interview slot.';
+
+                    return;
+                }
+            }
+        }
+
+
+        /*
+         * Create parent request.
+         */
+        var request =
+            new GlideRecord(
+                REQUEST_TABLE
+            );
+
+        request.initialize();
+
+
+        request.setValue(
+            'student',
+            studentSysId
+        );
+
+
+        if (
+            request.isValidField(
+                'requested_timing'
+            )
+        ) {
+
+            request.setValue(
+                'requested_timing',
+                selectedAvailabilityId
+            );
+        }
+
+
+        if (
+            request.isValidField(
+                'selected_availability'
+            )
+        ) {
+
+            request.setValue(
+                'selected_availability',
+                selectedAvailabilityId
+            );
+        }
+
+
+        if (
+            request.isValidField(
+                'requested_date'
+            )
+        ) {
+
+            request.setValue(
+                'requested_date',
+                selectedDate
+            );
+        }
+
+
+        if (
+            request.isValidField(
+                'selected_date'
+            )
+        ) {
+
+            request.setValue(
+                'selected_date',
+                selectedDate
+            );
+        }
+
+
+        setChoiceByLabel(
+            request,
+            'status',
+            'Requested'
+        );
+
+
+        if (
+            request.isValidField(
+                'requested_on'
+            )
+        ) {
+
+            request.setValue(
+                'requested_on',
+                new GlideDateTime().getValue()
+            );
+        }
+
+
+        if (
+            request.isValidField(
+                'notes'
+            ) &&
+            input.notes
+        ) {
+
+            request.setValue(
+                'notes',
+                String(
+                    input.notes
+                )
+            );
+        }
+
+
+        var requestSysId =
+            request.insert();
+
+
+        if (!requestSysId) {
+
+            data.error =
+                'The mock interview request could not be created.';
+
+            return;
+        }
+
+
+        /*
+         * Create trainer request rows.
+         */
+        var childCount =
+            0;
+
+
+        for (
+            var i = 0;
+            i < trainerIds.length;
+            i++
+        ) {
+
+            var trainerId =
+                trainerIds[i];
+
+
+            var child =
+                new GlideRecord(
+                    TRAINER_REQUEST_TABLE
+                );
+
+            child.initialize();
+
+
+            if (
+                child.isValidField(
+                    'request'
+                )
+            ) {
+
+                child.setValue(
+                    'request',
+                    requestSysId
+                );
+            }
+
+
+            if (
+                child.isValidField(
+                    'trainer'
+                )
+            ) {
+
+                child.setValue(
+                    'trainer',
+                    trainerId
+                );
+            }
+
+
+            setChoiceByLabel(
+                child,
+                'response',
+                'Pending'
+            );
+
+
+            if (
+                child.isValidField(
+                    'notification_sent'
+                )
+            ) {
+
+                child.setValue(
+                    'notification_sent',
+                    false
+                );
+            }
+
+
+            child.insert();
+
+            childCount++;
+        }
+
+
+        /*
+         * Return request.
+         */
+        var freshRequest =
+            new GlideRecord(
+                REQUEST_TABLE
+            );
+
+
+        if (
+            freshRequest.get(
+                requestSysId
+            )
+        ) {
+
+            data.currentRequest =
+                buildRequestData(
+                    freshRequest
+                );
+
+            data.currentRequest.trainerCount =
+                childCount;
+        }
+
+
+        data.success =
+            'Your mock interview request has been sent to ' +
+            childCount +
+            ' available trainer(s).';
+
+
+        data.slots = [];
+
+        loadInterviewTypes(
+            selectedDate
+        );
+
+        loadSlots(
+            selectedDate
+        );
+
+        loadBookedSlots(
+            studentSysId
+        );
+    }
+
+
+    /* ============================================================
+       POLL REQUEST
+       ============================================================ */
+
+    function pollRequest(
+        studentSysId
+    ) {
+
+        var requestId =
+            String(
+                input.requestId ||
+                ''
+            );
+
+
+        if (!requestId) {
+
+            loadLatestRequest(
+                studentSysId
+            );
+
+            return;
+        }
+
+
+        var request =
+            new GlideRecord(
+                REQUEST_TABLE
+            );
+
+
+        request.addQuery(
+            'sys_id',
+            requestId
+        );
+
+        request.addQuery(
+            'student',
+            studentSysId
+        );
+
+        request.setLimit(1);
+        request.query();
+
+
+        if (
+            request.next()
+        ) {
+
+            data.currentRequest =
+                buildRequestData(
+                    request
+                );
+
+        } else {
+
+            data.error =
+                'The mock interview request could not be found.';
+        }
+
+
+        loadBookedSlots(
+            studentSysId
+        );
+    }
+
+
+    /* ============================================================
+       INITIAL LOAD
+       ============================================================ */
+
+    var student =
+        populateStudentData();
+
+
+    if (!student) {
+        return;
+    }
+
+
+    var selectedDate =
+        String(
+            input &&
+            input.selectedDate
+                ? input.selectedDate
+                : ''
+        );
+
+
+    if (
+        input &&
+        input.action === 'load'
+    ) {
+
+        loadInterviewTypes(
+            selectedDate
+        );
+
+        loadSlots(
+            selectedDate
+        );
+
+        loadBookedSlots(
+            student.getUniqueValue()
+        );
+
+
+    } else if (
+        input &&
+        input.action === 'submit'
+    ) {
+
+        submitRequest(
+            student.getUniqueValue()
+        );
+
+
+    } else if (
+        input &&
+        input.action === 'poll'
+    ) {
+
+        pollRequest(
+            student.getUniqueValue()
+        );
+
+
+    } else {
+
+        loadInterviewTypes('');
+
+        loadSlots('');
+
+        loadBookedSlots(
+            student.getUniqueValue()
+        );
+    }
+
+})();
+
+data.aiWidget = $sp.getWidget('campus360_ai_assistant');
+]]></script>
+        <servicenow>false</servicenow>
+        <sys_class_name>sp_widget</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-23 09:21:46</sys_created_on>
+        <sys_id>a9bb2e7cc42b03107f44164a4d24633e</sys_id>
+        <sys_mod_count>43</sys_mod_count>
+        <sys_name>Mock Interview Slot Booking</sys_name>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name>sp_widget_a9bb2e7cc42b03107f44164a4d24633e</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-10-03 05:53:41</sys_updated_on>
+        <template><![CDATA[<div
+    class="campus360-booking"
+    ng-class="{
+        'sidebar-open': c.sidebarOpen,
+        'sidebar-closed': !c.sidebarOpen
+    }">
+
+
+    <!-- =========================================================
+         LEFT CAMPUS360 SIDEBAR
+         ========================================================= -->
+
+    <aside class="c360-left-sidebar">
+
+
+        <!-- BRAND -->
+
+        <div class="c360-sidebar-brand">
+
+            <div class="c360-brand-logo">
+                C
+            </div>
+
+            <div class="c360-brand-name">
+
+                <strong>
+                    Campus360
+                </strong>
+
+                <span>
+                    STUDENT PORTAL
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <!-- STUDENT -->
+
+        <a
+            class="c360-sidebar-student"
+            ng-href="?id=campus360_profile&student={{c.data.student.id}}"
+        >
+
+            <div class="c360-sidebar-avatar">
+                {{c.getStudentInitials()}}
+            </div>
+
+
+            <div class="c360-sidebar-student-info">
+
+                <strong>
+
+                    {{
+                        c.data.student.name ||
+                        'Test Student Campus360'
+                    }}
+
+                </strong>
+
+                <span>
+
+                    {{
+                        c.data.student.studentId ||
+                        'STU_TEST_001'
+                    }}
+
+                </span>
+
+            </div>
+
+
+            <span class="c360-student-arrow">
+                ›
+            </span>
+
+        </a>
+
+
+        <!-- =====================================================
+             NAVIGATION
+             ===================================================== -->
+
+        <nav class="c360-sidebar-nav">
+
+
+            <!-- OVERVIEW -->
+
+            <div class="c360-nav-group">
+
+                <div class="c360-nav-heading">
+                    OVERVIEW
+                </div>
+
+
+                <a
+                    class="c360-nav-link"
+                    ng-href="?id=campus360_student_dashboard&student={{c.data.student.id}}"
+                >
+
+                    <span class="c360-nav-icon">
+                        <i class="fa fa-home"></i>
+                    </span>
+
+                    <span>
+                        Dashboard
+                    </span>
+
+                </a>
+
+            </div>
+
+
+            <!-- PLACEMENT JOURNEY -->
+
+            <div class="c360-nav-group">
+
+                <div class="c360-nav-heading">
+                    PLACEMENT JOURNEY
+                </div>
+
+
+                <!-- OPPORTUNITIES -->
+
+                <a
+                    class="c360-nav-link"
+                    ng-href="?id=campus360_opportunities&student={{c.data.student.id}}"
+                >
+
+                    <span class="c360-nav-icon">
+                        <i class="fa fa-diamond"></i>
+                    </span>
+
+                    <span>
+                        Opportunities
+                    </span>
+
+                </a>
+
+
+                <!-- APPLICATIONS -->
+
+                <a
+                    class="c360-nav-link"
+                    ng-href="?id=campus360_applications&student={{c.data.student.id}}"
+                >
+
+                    <span class="c360-nav-icon">
+                        <i class="fa fa-list-alt"></i>
+                    </span>
+
+                    <span>
+                        Applications
+                    </span>
+
+                </a>
+
+
+                <!-- INTERVIEWS -->
+
+                <a
+                    class="c360-nav-link"
+                    ng-href="?id=campus360_interviews&student={{c.data.student.id}}"
+                >
+
+                    <span class="c360-nav-icon">
+                        <i class="fa fa-clock-o"></i>
+                    </span>
+
+                    <span>
+                        Interviews
+                    </span>
+
+                </a>
+
+
+                <!-- TRAINING -->
+
+                <a
+                    class="c360-nav-link"
+                    ng-href="?id=campus360_training&student={{c.data.student.id}}"
+                >
+
+                    <span class="c360-nav-icon">
+                        <i class="fa fa-graduation-cap"></i>
+                    </span>
+
+                    <span>
+                        Training
+                    </span>
+
+                </a>
+
+
+                <!-- MOCK SLOTS -->
+
+                <a
+                    class="c360-nav-link active"
+                    ng-href="?id=mock_interview_booking&student={{c.data.student.id}}"
+                >
+
+                    <span class="c360-nav-icon">
+                        <i class="fa fa-calendar-check-o"></i>
+                    </span>
+
+                    <span>
+                        Mock Slots
+                    </span>
+
+                </a>
+
+            </div>
+
+
+            <!-- INTELLIGENCE -->
+
+            <div class="c360-nav-group">
+
+                <div class="c360-nav-heading">
+                    INTELLIGENCE
+                </div>
+
+
+                <a
+                    class="c360-nav-link"
+                    ng-href="?id=campus360_Progress&student={{c.data.student.id}}"
+                >
+
+                    <span class="c360-nav-icon">
+                        <i class="fa fa-bar-chart"></i>
+                    </span>
+
+                    <span>
+                        Assessments
+                    </span>
+
+                </a>
+
+
+                <a
+                    class="c360-nav-link"
+                    ng-href="?id=placement_readiness&student={{c.data.student.id}}"
+                >
+
+                    <span class="c360-nav-icon">
+                        <i class="fa fa-star-o"></i>
+                    </span>
+
+                    <span>
+                        Placement Readiness
+                    </span>
+
+                </a>
+
+            </div>
+
+
+            <!-- ACCOUNT -->
+
+            <div class="c360-nav-group">
+
+                <div class="c360-nav-heading">
+                    ACCOUNT
+                </div>
+
+
+                <a
+                    class="c360-nav-link"
+                    ng-href="?id=campus360_profile&student={{c.data.student.id}}"
+                >
+
+                    <span class="c360-nav-icon">
+                        <i class="fa fa-user-o"></i>
+                    </span>
+
+                    <span>
+                        My Profile
+                    </span>
+
+                </a>
+
+            </div>
+
+
+        </nav>
+
+
+        <!-- =====================================================
+             SIDEBAR FOOTER
+             ===================================================== -->
+
+        <div class="c360-sidebar-footer">
+
+            <div class="c360-footer-title">
+                PLACEMENT JOURNEY
+            </div>
+
+
+            <div class="c360-readiness-track">
+
+                <div
+                    class="c360-readiness-fill"
+                    ng-style="{
+                        width:
+                        (
+                            c.data.readinessScore !== undefined &&
+                            c.data.readinessScore !== null
+                            ? c.data.readinessScore
+                            : 0
+                        ) + '%'
+                    }">
+                </div>
+
+            </div>
+
+
+            <div class="c360-readiness-text">
+
+                {{
+                    c.data.readinessScore !== undefined &&
+                    c.data.readinessScore !== null
+                    ? c.data.readinessScore
+                    : 0
+                }}% readiness
+
+            </div>
+
+        </div>
+
+    </aside>
+
+
+    <!-- =========================================================
+         MOBILE OVERLAY
+         ========================================================= -->
+
+    <div
+        class="c360-sidebar-overlay"
+        ng-if="c.sidebarOpen"
+        ng-click="c.closeSidebar()">
+    </div>
+
+
+    <!-- =========================================================
+         RIGHT PAGE
+         ========================================================= -->
+
+    <main class="c360-right-page">
+
+
+        <!-- =====================================================
+             TOP BAR
+             ===================================================== -->
+
+        <header class="c360-topbar">
+
+
+            <!-- LEFT -->
+
+            <div class="c360-topbar-left">
+
+
+                <!-- HAMBURGER -->
+
+                <button
+                    type="button"
+                    class="c360-menu-button"
+                    ng-click="c.toggleSidebar()"
+                    aria-label="Toggle Campus360 sidebar"
+                    ng-attr-aria-expanded="{{c.sidebarOpen}}"
+                >
+
+                    <span></span>
+                    <span></span>
+                    <span></span>
+
+                </button>
+
+
+                <!-- PAGE TITLE -->
+
+                <div class="c360-page-heading">
+
+                    <span>
+                        CAMPUS360
+                    </span>
+
+                    <strong>
+                        Mock Interview Slot Booking
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <!-- RIGHT -->
+
+            <div class="c360-topbar-right">
+
+
+                <!-- REFRESH -->
+
+                <button
+                    type="button"
+                    class="c360-top-icon"
+                    ng-click="c.refreshPage()"
+                    title="Refresh"
+                    aria-label="Refresh"
+                >
+
+                    <svg viewBox="0 0 24 24">
+
+                        <path d="M20 11a8 8 0 0 0-14.8-4L4 9"></path>
+
+                        <path d="M4 5v4h4"></path>
+
+                        <path d="M4 13a8 8 0 0 0 14.8 4L20 15"></path>
+
+                        <path d="M20 19v-4h-4"></path>
+
+                    </svg>
+
+                </button>
+
+
+                <!-- NOTIFICATION -->
+
+                <button
+                    type="button"
+                    class="c360-top-icon c360-notification-button"
+                    title="Notifications"
+                    aria-label="Notifications"
+                >
+
+                    <svg viewBox="0 0 24 24">
+
+                        <path
+                            d="M18 10a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9">
+                        </path>
+
+                        <path d="M10 21h4"></path>
+
+                    </svg>
+
+
+                    <span class="c360-notification-dot"></span>
+
+                </button>
+
+
+                <!-- PROFILE -->
+
+                <a
+                    class="c360-top-student"
+                    ng-href="?id=campus360_profile&student={{c.data.student.id}}"
+                >
+
+                    <div class="c360-top-avatar">
+                        {{c.getStudentInitials()}}
+                    </div>
+
+
+                    <div class="c360-top-student-info">
+
+                        <strong>
+
+                            {{
+                                c.data.student.name ||
+                                'Test Student Campus360'
+                            }}
+
+                        </strong>
+
+                        <span>
+
+                            {{
+                                c.data.student.studentId ||
+                                'STU_TEST_001'
+                            }}
+
+                        </span>
+
+                    </div>
+
+
+                    <span class="c360-top-chevron">
+                        ˅
+                    </span>
+
+                </a>
+
+
+            </div>
+
+        </header>
+
+
+        <!-- =====================================================
+             PAGE CONTENT
+             ===================================================== -->
+
+        <div class="c360-page-content">
+
+
+            <!-- HERO -->
+
+            <section class="mi-hero">
+
+
+                <div class="mi-hero-icon">
+
+                    <i class="fa fa-calendar"></i>
+
+                </div>
+
+
+                <div class="mi-hero-content">
+
+
+                    <div class="mi-hero-eyebrow">
+                        PLACEMENT JOURNEY
+                    </div>
+
+
+                    <h1>
+                        Mock Interview Slot Booking
+                    </h1>
+
+
+                    <p>
+
+                        Choose an interview date, interview type and available time.
+                        Your request will be sent to all trainers available for that exact slot.
+
+                    </p>
+
+
+                </div>
+
+
+            </section>
+
+
+            <!-- ERROR -->
+
+            <div
+                class="mi-alert mi-alert-error"
+                ng-if="c.data.error"
+            >
+
+                <i class="fa fa-exclamation-circle"></i>
+
+                <span>
+                    {{c.data.error}}
+                </span>
+
+            </div>
+
+
+            <!-- SUCCESS -->
+
+            <div
+                class="mi-alert mi-alert-success"
+                ng-if="c.data.success"
+            >
+
+                <i class="fa fa-check-circle"></i>
+
+                <span>
+                    {{c.data.success}}
+                </span>
+
+            </div>
+
+
+            <!-- =================================================
+                 BOOKING LAYOUT
+                 ================================================= -->
+
+            <div class="mi-layout">
+
+
+                <!-- MAIN -->
+
+                <div class="mi-main-card">
+
+
+                    <div class="mi-section-top">
+
+
+                        <div>
+
+                            <div class="mi-eyebrow">
+
+                                {{
+                                    c.step === 1
+                                    ? 'BOOKING'
+                                    : c.step === 2
+                                    ? 'REQUEST SENT'
+                                    : 'CONFIRMED'
+                                }}
+
+                            </div>
+
+
+                            <h2>
+
+                                {{
+                                    c.step === 1
+                                    ? 'Request a Mock Interview'
+                                    : c.step === 2
+                                    ? 'Waiting for Trainer Acceptance'
+                                    : 'Mock Interview Confirmed'
+                                }}
+
+                            </h2>
+
+                        </div>
+
+
+                        <div class="mi-step-badge">
+                            Step {{c.step}} of 3
+                        </div>
+
+
+                    </div>
+
+
+                    <div class="mi-divider"></div>
+
+
+                    <!-- =================================================
+                         STEP 1
+                         ================================================= -->
+
+                    <div ng-if="c.step === 1">
+
+
+                        <div class="mi-field-group">
+
+                            <label>
+                                Interview Date
+                            </label>
+
+                            <input
+                                type="date"
+                                class="mi-date-input"
+                                ng-model="c.selectedDate"
+                                ng-change="c.onDateChanged()"
+                                min="{{c.minDate}}"
+                            />
+
+                            <div class="mi-help">
+                                Select the date on which you want the mock interview.
+                            </div>
+
+                        </div>
+
+
+                        <div class="mi-field-group">
+
+                            <label>
+                                Select Interview Type
+                            </label>
+
+
+                            <div class="mi-help mi-help-top">
+
+                                Interview types are loaded from the actual Trainer
+                                Interview Availability choices.
+
+                            </div>
+
+
+                            <div class="mi-type-grid">
+
+
+                                <button
+                                    type="button"
+                                    class="mi-type-card"
+                                    ng-repeat="
+                                        type in c.data.interviewTypes
+                                        track by type.value
+                                    "
+                                    ng-class="{
+                                        'selected':
+                                        c.selectedType === type.value
+                                    }"
+                                    ng-disabled="type.count === 0"
+                                    ng-click="c.selectType(type)"
+                                >
+
+                                    <div class="mi-type-name">
+                                        {{type.label}}
+                                    </div>
+
+
+                                    <div
+                                        class="mi-type-count"
+                                        ng-if="type.count > 0"
+                                    >
+
+                                        {{type.count}}
+
+                                        available
+
+                                        {{
+                                            type.count === 1
+                                            ? 'slot'
+                                            : 'slots'
+                                        }}
+
+                                    </div>
+
+
+                                    <div
+                                        class="mi-type-count muted"
+                                        ng-if="type.count === 0"
+                                    >
+
+                                        No slots on this date
+
+                                    </div>
+
+                                </button>
+
+
+                            </div>
+
+
+                        </div>
+
+
+                        <div class="mi-field-group">
+
+                            <label>
+                                Select Available Time
+                            </label>
+
+
+                            <div class="mi-help mi-help-top">
+
+                                Select an available time for the selected interview type.
+
+                            </div>
+
+
+                            <div class="mi-time-grid">
+
+
+                                <button
+                                    type="button"
+                                    class="mi-time-card"
+                                    ng-repeat="
+                                        slot in c.filteredSlots
+                                        track by slot.key
+                                    "
+                                    ng-class="{
+                                        'selected':
+                                        c.selectedSlot &&
+                                        c.selectedSlot.key === slot.key
+                                    }"
+                                    ng-click="c.selectSlot(slot)"
+                                >
+
+                                    <div class="mi-time-title">
+                                        {{slot.displayTime}}
+                                    </div>
+
+
+                                    <div class="mi-time-skill">
+                                        {{slot.skillArea || 'General'}}
+                                    </div>
+
+
+                                    <div class="mi-trainer-count">
+
+                                        <i class="fa fa-user"></i>
+
+                                        {{slot.trainerCount}}
+
+                                        {{
+                                            slot.trainerCount === 1
+                                            ? 'trainer'
+                                            : 'trainers'
+                                        }}
+
+                                        available
+
+                                    </div>
+
+                                </button>
+
+
+                            </div>
+
+
+                            <div
+                                class="mi-empty"
+                                ng-if="
+                                    c.selectedType &&
+                                    c.filteredSlots.length === 0
+                                "
+                            >
+
+                                No available time slots for this interview type
+                                on the selected date.
+
+                            </div>
+
+
+                        </div>
+
+
+                        <div class="mi-submit-area">
+
+                            <button
+                                type="button"
+                                class="mi-primary-btn"
+                                ng-click="c.submitRequest()"
+                                ng-disabled="
+                                    c.submitting ||
+                                    !c.selectedSlot
+                                "
+                            >
+
+                                <span ng-if="!c.submitting">
+
+                                    Request Mock Interview
+
+                                    <span class="mi-button-arrow">
+                                        →
+                                    </span>
+
+                                </span>
+
+
+                                <span ng-if="c.submitting">
+                                    Sending Request...
+                                </span>
+
+                            </button>
+
+                        </div>
+
+
+                    </div>
+
+
+                    <!-- =================================================
+                         STEP 2
+                         ================================================= -->
+
+                    <div ng-if="c.step === 2">
+
+
+                        <div class="mi-status-box">
+
+
+                            <div class="mi-status-icon waiting">
+
+                                <i class="fa fa-clock-o"></i>
+
+                            </div>
+
+
+                            <h3>
+                                Request Sent Successfully
+                            </h3>
+
+
+                            <p>
+
+                                Your request has been sent to
+
+                                <strong>
+                                    {{c.data.currentRequest.trainerCount}}
+                                </strong>
+
+                                trainer(s) available for this exact slot.
+
+                            </p>
+
+
+                        </div>
+
+
+                        <div class="mi-detail-card">
+
+
+                            <div class="mi-detail-row">
+
+                                <span>Date</span>
+
+                                <strong>
+                                    {{c.data.currentRequest.dateDisplay}}
+                                </strong>
+
+                            </div>
+
+
+                            <div class="mi-detail-row">
+
+                                <span>Interview Type</span>
+
+                                <strong>
+                                    {{c.data.currentRequest.interviewType}}
+                                </strong>
+
+                            </div>
+
+
+                            <div class="mi-detail-row">
+
+                                <span>Skill Area</span>
+
+                                <strong>
+                                    {{c.data.currentRequest.skillArea}}
+                                </strong>
+
+                            </div>
+
+
+                            <div class="mi-detail-row">
+
+                                <span>Time</span>
+
+                                <strong>
+                                    {{c.data.currentRequest.displayTime}}
+                                </strong>
+
+                            </div>
+
+
+                            <div class="mi-detail-row">
+
+                                <span>Status</span>
+
+                                <span class="mi-status-pill requested">
+                                    {{c.data.currentRequest.status}}
+                                </span>
+
+                            </div>
+
+
+                        </div>
+
+
+                        <div class="mi-waiting-message">
+
+                            <i class="fa fa-refresh spinning"></i>
+
+                            Waiting for a trainer to accept your request...
+
+                        </div>
+
+
+                        <button
+                            type="button"
+                            class="mi-secondary-btn"
+                            ng-click="c.refreshRequest(false)"
+                        >
+
+                            Refresh Status
+
+                        </button>
+
+
+                    </div>
+
+
+                    <!-- =================================================
+                         STEP 3
+                         ================================================= -->
+
+                    <div ng-if="c.step === 3">
+
+
+                        <div class="mi-status-box confirmed">
+
+
+                            <div class="mi-status-icon confirmed">
+
+                                <i class="fa fa-check"></i>
+
+                            </div>
+
+
+                            <h3>
+                                Mock Interview Confirmed
+                            </h3>
+
+
+                            <p>
+                                Your trainer has accepted the request.
+                            </p>
+
+
+                        </div>
+
+
+                        <div class="mi-detail-card">
+
+
+                            <div class="mi-detail-row">
+
+                                <span>Date</span>
+
+                                <strong>
+                                    {{c.data.currentRequest.dateDisplay}}
+                                </strong>
+
+                            </div>
+
+
+                            <div class="mi-detail-row">
+
+                                <span>Time</span>
+
+                                <strong>
+                                    {{c.data.currentRequest.displayTime}}
+                                </strong>
+
+                            </div>
+
+
+                            <div class="mi-detail-row">
+
+                                <span>Interview Type</span>
+
+                                <strong>
+                                    {{c.data.currentRequest.interviewType}}
+                                </strong>
+
+                            </div>
+
+
+                            <div class="mi-detail-row">
+
+                                <span>Skill Area</span>
+
+                                <strong>
+                                    {{c.data.currentRequest.skillArea}}
+                                </strong>
+
+                            </div>
+
+
+                            <div class="mi-detail-row">
+
+                                <span>Trainer</span>
+
+                                <strong>
+                                    {{c.data.currentRequest.trainer}}
+                                </strong>
+
+                            </div>
+
+
+                        </div>
+
+
+                        <button
+                            type="button"
+                            class="mi-secondary-btn"
+                            ng-click="c.backToBooking()"
+                        >
+
+                            Book Another Mock Interview
+
+                        </button>
+
+
+                    </div>
+
+
+                </div>
+
+
+                <!-- =================================================
+                     RIGHT INFORMATION
+                     ================================================= -->
+
+                <div class="mi-sidebar">
+
+
+                    <div class="mi-side-card">
+
+
+                        <div class="mi-side-title">
+
+                            <span class="mi-side-title-icon">
+                                ✓
+                            </span>
+
+                            Booking Status
+
+                        </div>
+
+
+                        <div class="mi-progress">
+
+
+                            <div
+                                class="mi-progress-item"
+                                ng-class="{
+                                    'active': c.step >= 1,
+                                    'done': c.step > 1
+                                }"
+                            >
+
+                                <div class="mi-progress-number">
+                                    1
+                                </div>
+
+                                <div>
+
+                                    <strong>
+                                        Select Slot
+                                    </strong>
+
+                                    <small>
+                                        Date, type and time
+                                    </small>
+
+                                </div>
+
+                            </div>
+
+
+                            <div
+                                class="mi-progress-line"
+                                ng-class="{
+                                    'active': c.step > 1
+                                }">
+                            </div>
+
+
+                            <div
+                                class="mi-progress-item"
+                                ng-class="{
+                                    'active': c.step >= 2,
+                                    'done': c.step > 2
+                                }"
+                            >
+
+                                <div class="mi-progress-number">
+                                    2
+                                </div>
+
+                                <div>
+
+                                    <strong>
+                                        Request Sent
+                                    </strong>
+
+                                    <small>
+                                        Waiting for trainer
+                                    </small>
+
+                                </div>
+
+                            </div>
+
+
+                            <div
+                                class="mi-progress-line"
+                                ng-class="{
+                                    'active': c.step > 2
+                                }">
+                            </div>
+
+
+                            <div
+                                class="mi-progress-item"
+                                ng-class="{
+                                    'active': c.step >= 3
+                                }"
+                            >
+
+                                <div class="mi-progress-number">
+                                    3
+                                </div>
+
+                                <div>
+
+                                    <strong>
+                                        Confirmed
+                                    </strong>
+
+                                    <small>
+                                        Interview scheduled
+                                    </small>
+
+                                </div>
+
+                            </div>
+
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="mi-side-card">
+
+
+                        <div class="mi-side-label">
+                            STUDENT
+                        </div>
+
+
+                        <div class="mi-student-profile">
+
+
+                            <div class="mi-student-avatar">
+                                {{c.getStudentInitials()}}
+                            </div>
+
+
+                            <div>
+
+                                <div class="mi-student-name">
+                                    {{c.data.student.name}}
+                                </div>
+
+                                <div class="mi-student-id">
+                                    {{c.data.student.studentId}}
+                                </div>
+
+                            </div>
+
+
+                        </div>
+
+
+                    </div>
+
+
+                </div>
+
+
+            </div>
+
+
+            <!-- =================================================
+                 BOOKED SLOTS
+                 ================================================= -->
+
+            <section class="mi-booked-section">
+
+
+                <div class="mi-booked-section-header">
+
+
+                    <div class="mi-booked-heading-group">
+
+
+                        <div class="mi-side-label">
+                            MY INTERVIEWS
+                        </div>
+
+
+                        <div class="mi-booked-title-row">
+
+                            <div class="mi-side-title booked-section-title">
+
+                                <span class="mi-side-title-icon purple">
+                                    ◷
+                                </span>
+
+                                My Booked Slots
+
+                            </div>
+
+                        </div>
+
+
+                        <p class="mi-booked-section-subtitle">
+
+                            Your accepted mock interviews are shown here.
+
+                        </p>
+
+
+                    </div>
+
+
+                </div>
+
+
+                <div
+                    class="mi-booked-horizontal"
+                    ng-if="
+                        c.data.bookedSlots &&
+                        c.data.bookedSlots.length
+                    "
+                >
+
+
+                    <div
+                        class="mi-booked-item"
+                        ng-repeat="
+                            slot in c.data.bookedSlots
+                            track by slot.requestId
+                        "
+                    >
+
+                        <div class="mi-booked-top">
+
+                            <div class="mi-booked-date">
+                                {{slot.dateDisplay}}
+                            </div>
+
+                            <span class="mi-status-pill accepted">
+                                {{slot.status}}
+                            </span>
+
+                        </div>
+
+
+                        <div class="mi-booked-time">
+                            {{slot.displayTime}}
+                        </div>
+
+
+                        <div class="mi-booked-type">
+
+                            {{slot.interviewType}}
+
+                            <span ng-if="slot.skillArea">
+                                • {{slot.skillArea}}
+                            </span>
+
+                        </div>
+
+
+                        <div class="mi-booked-trainer">
+
+                            <i class="fa fa-user"></i>
+
+                            Trainer:
+                            {{slot.trainer || 'Assigned'}}
+
+                        </div>
+
+                    </div>
+
+
+                </div>
+
+
+                <div
+                    class="mi-no-bookings"
+                    ng-if="
+                        !c.data.bookedSlots ||
+                        c.data.bookedSlots.length === 0
+                    "
+                >
+
+                    No accepted interview slots yet.
+
+                </div>
+
+
+            </section>
+
+
+        </div>
+
+    </main>
+
+
+  <!-- Campus360 AI Assistant Floating Widget -->
+  <sp-widget widget="data.aiWidget"></sp-widget>
+</div>]]></template>
+    </sp_widget>
+</record_update>

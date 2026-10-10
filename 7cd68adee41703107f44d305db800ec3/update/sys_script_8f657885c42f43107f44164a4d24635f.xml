@@ -1,0 +1,499 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update sys_domain="global" table="sys_script">
+    <sys_script action="INSERT_OR_UPDATE">
+        <abort_action>false</abort_action>
+        <access>package_private</access>
+        <action_delete>false</action_delete>
+        <action_insert>false</action_insert>
+        <action_query>false</action_query>
+        <action_update>true</action_update>
+        <active>true</active>
+        <add_message>false</add_message>
+        <advanced>true</advanced>
+        <change_fields>false</change_fields>
+        <client_callable>false</client_callable>
+        <collection>x_snc_campus360_mock_interview_request_trainer</collection>
+        <condition/>
+        <description/>
+        <execute_function>false</execute_function>
+        <filter_condition table="x_snc_campus360_mock_interview_request_trainer">responseCHANGESTOAccepted^EQ<item display_value="Accepted" endquery="false" field="response" goto="false" newquery="false" operator="CHANGESTO" or="false" value="Accepted"/>
+            <item endquery="true" field="" goto="false" newquery="false" operator="=" or="false" value=""/>
+        </filter_condition>
+        <is_rest>false</is_rest>
+        <message/>
+        <name>Trainer Acceptance - Validate First Winn</name>
+        <order>100</order>
+        <priority>100</priority>
+        <rest_method/>
+        <rest_method_text/>
+        <rest_service/>
+        <rest_service_text/>
+        <rest_variables/>
+        <role_conditions/>
+        <script><![CDATA[(function executeRule(current, previous /*null when async*/) {
+
+    /*
+     * Only run when Response changes TO Accepted.
+     */
+
+    var acceptedValue =
+        getChoiceValueByLabel(
+            current.getTableName(),
+            'response',
+            'Accepted'
+        );
+
+    var pendingValue =
+        getChoiceValueByLabel(
+            current.getTableName(),
+            'response',
+            'Pending'
+        );
+
+    if (!acceptedValue) {
+        return;
+    }
+
+    if (
+        !current.response.changesTo(
+            acceptedValue
+        )
+    ) {
+        return;
+    }
+
+
+    /*
+     * ============================================================
+     * PARENT REQUEST
+     * ============================================================
+     */
+
+    var requestId =
+        String(
+            current.getValue('request') || ''
+        );
+
+    if (!requestId) {
+        return;
+    }
+
+    var request =
+        new GlideRecord(
+            'x_snc_campus360_mock_interview_slot_request'
+        );
+
+    if (!request.get(requestId)) {
+        return;
+    }
+
+
+    /*
+     * ============================================================
+     * FIRST-TRAINER-WINS
+     * ============================================================
+     */
+
+    var parentAcceptedValue =
+        getChoiceValueByLabel(
+            request.getTableName(),
+            'status',
+            'Accepted'
+        );
+
+    if (
+        parentAcceptedValue &&
+        String(
+            request.getValue('status')
+        ) === String(parentAcceptedValue)
+    ) {
+
+        /*
+         * Another trainer has already accepted.
+         *
+         * Do not allow a second trainer to become accepted.
+         */
+
+        var alreadyAcceptedTrainer = '';
+
+        if (
+            request.isValidField('accepted_trainer')
+        ) {
+
+            alreadyAcceptedTrainer =
+                String(
+                    request.getValue(
+                        'accepted_trainer'
+                    ) || ''
+                );
+        }
+
+        var currentTrainer = '';
+
+        if (
+            current.isValidField('trainer')
+        ) {
+
+            currentTrainer =
+                String(
+                    current.getValue('trainer') || ''
+                );
+        }
+
+        if (
+            alreadyAcceptedTrainer &&
+            currentTrainer &&
+            alreadyAcceptedTrainer !== currentTrainer
+        ) {
+
+            if (pendingValue) {
+
+                current.setValue(
+                    'response',
+                    pendingValue
+                );
+            }
+
+            return;
+        }
+    }
+
+
+    /*
+     * ============================================================
+     * GET THE SELECTED AVAILABILITY
+     * ============================================================
+     */
+
+    var availabilityId = '';
+
+    if (
+        request.isValidField('requested_timing') &&
+        request.getValue('requested_timing')
+    ) {
+
+        availabilityId =
+            String(
+                request.getValue(
+                    'requested_timing'
+                )
+            );
+    }
+
+    if (
+        !availabilityId &&
+        request.isValidField('selected_availability') &&
+        request.getValue('selected_availability')
+    ) {
+
+        availabilityId =
+            String(
+                request.getValue(
+                    'selected_availability'
+                )
+            );
+    }
+
+    if (!availabilityId) {
+        return;
+    }
+
+
+    var availability =
+        new GlideRecord(
+            'x_snc_campus360_trainer_interview_availability'
+        );
+
+    if (!availability.get(availabilityId)) {
+
+        if (pendingValue) {
+            current.setValue(
+                'response',
+                pendingValue
+            );
+        }
+
+        return;
+    }
+
+
+    /*
+     * ============================================================
+     * CHECK ACTIVE + AVAILABLE
+     * ============================================================
+     */
+
+    var availableValue =
+        getChoiceValueByLabel(
+            availability.getTableName(),
+            'status',
+            'Available'
+        );
+
+    if (!availableValue) {
+
+        if (pendingValue) {
+            current.setValue(
+                'response',
+                pendingValue
+            );
+        }
+
+        return;
+    }
+
+    var activeValue =
+        String(
+            availability.getValue('active')
+        );
+
+    var isActive =
+        activeValue === '1' ||
+        activeValue === 'true';
+
+    var isAvailable =
+        String(
+            availability.getValue('status')
+        ) === String(availableValue);
+
+
+    /*
+     * If the selected row is no longer available,
+     * acceptance is rejected.
+     */
+    if (!isActive || !isAvailable) {
+
+        if (pendingValue) {
+
+            current.setValue(
+                'response',
+                pendingValue
+            );
+        }
+
+        return;
+    }
+
+
+    /*
+     * ============================================================
+     * CHECK THE ENTIRE EXACT SLOT
+     *
+     * If another request already booked one of the trainers
+     * for this exact date/time/type/skill, do not allow another
+     * trainer acceptance.
+     * ============================================================
+     */
+
+    var dateValue =
+        String(
+            availability.getValue(
+                'available_date'
+            ) || ''
+        );
+
+    var startValue =
+        String(
+            availability.getValue(
+                'start_time'
+            ) || ''
+        );
+
+    var endValue =
+        String(
+            availability.getValue(
+                'end_time'
+            ) || ''
+        );
+
+    var typeValue =
+        String(
+            availability.getValue(
+                'interview_type'
+            ) || ''
+        );
+
+    var skillValue = '';
+
+    if (
+        availability.isValidField(
+            'skill_area'
+        )
+    ) {
+
+        skillValue =
+            String(
+                availability.getValue(
+                    'skill_area'
+                ) || ''
+            );
+    }
+
+
+    /*
+     * Look for a Booked availability in this exact slot.
+     */
+
+    var bookedValue =
+        getChoiceValueByLabel(
+            availability.getTableName(),
+            'status',
+            'Booked'
+        );
+
+    if (bookedValue) {
+
+        var booked =
+            new GlideRecord(
+                availability.getTableName()
+            );
+
+        booked.addQuery(
+            'available_date',
+            dateValue
+        );
+
+        booked.addQuery(
+            'start_time',
+            startValue
+        );
+
+        booked.addQuery(
+            'end_time',
+            endValue
+        );
+
+        booked.addQuery(
+            'interview_type',
+            typeValue
+        );
+
+        if (
+            availability.isValidField(
+                'skill_area'
+            )
+        ) {
+
+            booked.addQuery(
+                'skill_area',
+                skillValue
+            );
+        }
+
+        booked.addQuery(
+            'status',
+            bookedValue
+        );
+
+        booked.addQuery(
+            'active',
+            true
+        );
+
+        booked.setLimit(1);
+        booked.query();
+
+        if (booked.next()) {
+
+            if (pendingValue) {
+
+                current.setValue(
+                    'response',
+                    pendingValue
+                );
+            }
+
+            return;
+        }
+    }
+
+
+    /*
+     * ============================================================
+     * VALID ACCEPTANCE
+     *
+     * Set response_on here.
+     * ============================================================
+     */
+
+    if (
+        current.isValidField(
+            'response_on'
+        )
+    ) {
+
+        current.setValue(
+            'response_on',
+            new GlideDateTime().getValue()
+        );
+    }
+
+
+    /*
+     * ============================================================
+     * LOCAL CHOICE HELPER
+     * ============================================================
+     */
+
+    function getChoiceValueByLabel(
+        tableName,
+        fieldName,
+        label
+    ) {
+
+        var choice =
+            new GlideRecord('sys_choice');
+
+        choice.addQuery(
+            'name',
+            tableName
+        );
+
+        choice.addQuery(
+            'element',
+            fieldName
+        );
+
+        choice.addQuery(
+            'label',
+            label
+        );
+
+        choice.addQuery(
+            'inactive',
+            false
+        );
+
+        choice.setLimit(1);
+        choice.query();
+
+        if (choice.next()) {
+
+            return String(
+                choice.getValue('value')
+            );
+        }
+
+        return '';
+    }
+
+})(current, previous);]]></script>
+        <sys_class_name>sys_script</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-23 19:21:58</sys_created_on>
+        <sys_domain>global</sys_domain>
+        <sys_domain_path>/</sys_domain_path>
+        <sys_id>8f657885c42f43107f44164a4d24635f</sys_id>
+        <sys_mod_count>1</sys_mod_count>
+        <sys_name>Trainer Acceptance - Validate First Winn</sys_name>
+        <sys_overrides/>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name>sys_script_8f657885c42f43107f44164a4d24635f</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-23 19:26:10</sys_updated_on>
+        <template/>
+        <when>before</when>
+    </sys_script>
+    <sys_translated_text action="delete_multiple" query="documentkey=8f657885c42f43107f44164a4d24635f"/>
+</record_update>

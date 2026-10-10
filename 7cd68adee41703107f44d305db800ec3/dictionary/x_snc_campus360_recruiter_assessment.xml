@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?><database>
+    <element attributes="enforce_dot_walk_cross_scope_access=true" db_object_id="a3ad89d574e343107f4410c9fee0cdaa" label="Recruiter Assessment" max_length="40" name="x_snc_campus360_recruiter_assessment" type="collection">
+        <element label="Percentage" max_length="38" name="percentage" type="decimal"/>
+        <element display="true" label="Assessment ID" max_length="40" name="assessment_id" type="string"/>
+        <element choice="3" default="pending" label="Result" max_length="255" name="result" type="choice">
+            <choice>
+                <element inactive_on_update="false" label="Failed" sequence="2" value="failed"/>
+                <element inactive_on_update="false" label="Pending" sequence="0" value="pending"/>
+                <element inactive_on_update="false" label="Passed" sequence="1" value="passed"/>
+            </choice>
+        </element>
+        <element label="Company" max_length="32" name="company" reference="x_snc_campus360_company_master" type="reference"/>
+        <element label="Application" max_length="32" name="application" reference="x_snc_campus360_student_application" type="reference"/>
+        <element label="Student" max_length="32" name="student" reference="x_snc_campus360_student_master" type="reference"/>
+        <element label="Assessment Date" max_length="40" name="assessment_date" type="glide_date_time"/>
+        <element label="Remarks" max_length="40" name="remarks" type="string"/>
+        <element choice="1" label="Status" max_length="40" name="status" type="choice">
+            <choice>
+                <element inactive_on_update="false" label="Scheduled" sequence="0" value="scheduled"/>
+                <element inactive_on_update="false" label="In Progress" sequence="1" value="in_progress"/>
+                <element inactive_on_update="false" label="Completed" sequence="2" value="completed"/>
+            </choice>
+        </element>
+        <element label="Score" max_length="40" name="score" type="integer"/>
+        <element label="Opportunity" max_length="32" name="opportunity" reference="x_snc_campus360_placement_opportunity" type="reference"/>
+        <element choice="1" label="Assessment Type" max_length="40" name="assessment_type" type="choice">
+            <choice>
+                <element inactive_on_update="false" label="Offline" sequence="1" value="offline"/>
+                <element inactive_on_update="false" label="Online" sequence="0" value="online"/>
+            </choice>
+        </element>
+        <element label="Maximum Score" max_length="40" name="maximum_score" type="integer"/>
+        <index name="index">
+            <element name="student"/>
+        </index>
+        <index name="index2">
+            <element name="opportunity"/>
+        </index>
+        <index name="index3">
+            <element name="company"/>
+        </index>
+        <index name="index4">
+            <element name="application"/>
+        </index>
+    </element>
+</database>

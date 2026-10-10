@@ -1,0 +1,11359 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_widget">
+    <sp_widget action="INSERT_OR_UPDATE">
+        <category>custom</category>
+        <client_script><![CDATA[api.controller = function($timeout) {
+
+  var c = this;
+
+
+  /* =========================================================
+     TRAINER
+     ========================================================= */
+
+  c.trainerId =
+    (
+      c.data.trainer &&
+      c.data.trainer.id
+    )
+      ? c.data.trainer.id
+      : '';
+
+
+  /* =========================================================
+     SIDEBAR
+     ========================================================= */
+
+  var sidebarKey =
+    'campus360_trainer_sidebar_collapsed';
+
+
+  c.sidebarCollapsed =
+    localStorage.getItem(
+      sidebarKey
+    ) === 'true';
+
+
+  c.toggleSidebar =
+    function() {
+
+      c.sidebarCollapsed =
+        !c.sidebarCollapsed;
+
+
+      localStorage.setItem(
+        sidebarKey,
+        c.sidebarCollapsed
+          ? 'true'
+          : 'false'
+      );
+
+    };
+
+
+  /* =========================================================
+     COPY SERVER DATA
+     ========================================================= */
+
+  function copyData(
+    d
+  ) {
+
+    if (!d) {
+
+      return;
+
+    }
+
+
+    c.data.metrics =
+      d.metrics ||
+      c.data.metrics;
+
+
+    c.data.availableSlots =
+      d.availableSlots ||
+      [];
+
+
+    c.data.requests =
+      d.requests ||
+      [];
+
+
+    c.data.scheduledInterviews =
+      d.scheduledInterviews ||
+      [];
+
+
+    c.data.feedbackPending =
+      d.feedbackPending ||
+      [];
+
+
+    c.data.error =
+      d.error ||
+      '';
+
+  }
+
+
+  /* =========================================================
+     REFRESH
+     ========================================================= */
+
+  c.refresh =
+    function() {
+
+      c.server.get({
+
+        action:
+          'refresh',
+
+        trainer:
+          c.trainerId
+
+      }).then(
+        function(response) {
+
+          if (
+            response &&
+            response.data
+          ) {
+
+            copyData(
+              response.data
+            );
+
+          }
+
+        }
+      );
+
+    };
+
+
+  /* =========================================================
+     CREATE SLOT
+     ========================================================= */
+
+  c.createSlotModalOpen =
+    false;
+
+  c.savingSlot =
+    false;
+
+  c.slotFormError =
+    '';
+
+
+  c.slotForm = {};
+
+
+  c.openCreateSlot =
+    function() {
+
+      c.slotFormError =
+        '';
+
+
+      c.slotForm = {
+
+        interviewType:
+          'Technical',
+
+        skillArea:
+          '',
+
+        availableDate:
+          new Date(),
+
+        startTime:
+          null,
+
+        endTime:
+          null
+
+      };
+
+
+      c.createSlotModalOpen =
+        true;
+
+    };
+
+
+  c.closeCreateSlot =
+    function() {
+
+      c.createSlotModalOpen =
+        false;
+
+
+      c.slotFormError =
+        '';
+
+    };
+
+
+  c.createSlot =
+    function() {
+
+      c.slotFormError =
+        '';
+
+
+      if (
+        !c.slotForm.interviewType
+      ) {
+
+        c.slotFormError =
+          'Select Interview Type.';
+
+        return;
+
+      }
+
+
+      if (
+        !c.slotForm.availableDate
+      ) {
+
+        c.slotFormError =
+          'Select Available Date.';
+
+        return;
+
+      }
+
+
+      if (
+        !c.slotForm.startTime ||
+        !c.slotForm.endTime
+      ) {
+
+        c.slotFormError =
+          'Start Time and End Time are required.';
+
+        return;
+
+      }
+
+
+      var start =
+        toTime(
+          c.slotForm.startTime
+        );
+
+
+      var end =
+        toTime(
+          c.slotForm.endTime
+        );
+
+
+      if (
+        !start ||
+        !end
+      ) {
+
+        c.slotFormError =
+          'Enter valid times.';
+
+        return;
+
+      }
+
+
+      if (
+        minutes(end) <=
+        minutes(start)
+      ) {
+
+        c.slotFormError =
+          'End Time must be after Start Time.';
+
+        return;
+
+      }
+
+
+      c.savingSlot =
+        true;
+
+
+      c.server.get({
+
+        action:
+          'create_slot',
+
+        trainer:
+          c.trainerId,
+
+        interviewType:
+          c.slotForm.interviewType,
+
+        skillArea:
+          c.slotForm.skillArea,
+
+        availableDate:
+          toDate(
+            c.slotForm.availableDate
+          ),
+
+        startTime:
+          start,
+
+        endTime:
+          end
+
+      }).then(
+        function(response) {
+
+          c.savingSlot =
+            false;
+
+
+          var d =
+            response &&
+            response.data
+              ? response.data
+              : null;
+
+
+          if (
+            d &&
+            d.slotSuccess
+          ) {
+
+            copyData(
+              d
+            );
+
+
+            c.createSlotModalOpen =
+              false;
+
+
+            c.showBanner(
+              d.slotMessage,
+              'success'
+            );
+
+          } else {
+
+            c.slotFormError =
+              (
+                d &&
+                d.slotMessage
+              ) ||
+              'Unable to create slot.';
+
+          }
+
+        }
+      );
+
+    };
+
+
+  /* =========================================================
+     ACCEPT REQUEST
+     ========================================================= */
+
+  c.processingId =
+    '';
+
+
+  c.acceptRequest =
+    function(
+      request
+    ) {
+
+      if (
+        !request ||
+        !request.sys_id
+      ) {
+
+        return;
+
+      }
+
+
+      c.processingId =
+        request.sys_id;
+
+
+      c.server.get({
+
+        action:
+          'accept_request',
+
+        trainer:
+          c.trainerId,
+
+        request:
+          request.sys_id
+
+      }).then(
+        function(response) {
+
+          c.processingId =
+            '';
+
+
+          var d =
+            response &&
+            response.data
+              ? response.data
+              : null;
+
+
+          if (
+            d &&
+            d.acceptSuccess
+          ) {
+
+            copyData(
+              d
+            );
+
+
+            c.showBanner(
+              d.acceptMessage,
+              'success'
+            );
+
+          } else {
+
+            c.showBanner(
+              (
+                d &&
+                d.acceptMessage
+              ) ||
+              'Unable to accept the request.',
+              'error'
+            );
+
+          }
+
+        }
+      );
+
+    };
+
+
+  /* =========================================================
+     INTERVIEW DETAILS
+     ========================================================= */
+
+  c.interviewDetailsOpen =
+    false;
+
+
+  c.selectedInterview =
+    {};
+
+
+  /* =========================================================
+     INTERVIEW STATUS DROPDOWN
+     ========================================================= */
+
+  c.selectedInterviewStatus =
+    'Scheduled';
+
+
+  c.interviewStatusOptions = [
+
+    {
+      value:
+        'Scheduled',
+
+      label:
+        'Scheduled'
+    },
+
+    {
+      value:
+        'Completed',
+
+      label:
+        'Completed'
+    }
+
+  ];
+
+
+  c.detailError =
+    '';
+
+
+  c.openInterviewDetails =
+    function(
+      session
+    ) {
+
+      if (!session) {
+
+        return;
+
+      }
+
+
+      c.selectedInterview =
+        session;
+
+
+      c.selectedInterviewStatus =
+        session.interviewStatus ||
+        'Scheduled';
+
+
+      c.detailError =
+        '';
+
+
+      c.interviewDetailsOpen =
+        true;
+
+    };
+
+
+  c.closeInterviewDetails =
+    function() {
+
+      c.interviewDetailsOpen =
+        false;
+
+
+      c.selectedInterview =
+        {};
+
+
+      c.selectedInterviewStatus =
+        'Scheduled';
+
+
+      c.detailError =
+        '';
+
+    };
+
+
+  /* =========================================================
+     QR VERIFICATION
+     Existing functionality retained.
+     ========================================================= */
+
+  c.verifyModalOpen =
+    false;
+
+
+  c.verifySession =
+    {};
+
+
+  c.verifyToken =
+    '';
+
+
+  c.verifyError =
+    '';
+
+
+  c.verifyingQR =
+    false;
+
+
+  c.openVerifyModal =
+    function(
+      session
+    ) {
+
+      c.verifySession =
+        session ||
+        c.selectedInterview;
+
+
+      c.verifyToken =
+        '';
+
+
+      c.verifyError =
+        '';
+
+
+      c.verifyModalOpen =
+        true;
+
+    };
+
+
+  c.closeVerifyModal =
+    function() {
+
+      c.verifyModalOpen =
+        false;
+
+
+      c.verifySession =
+        {};
+
+
+      c.verifyToken =
+        '';
+
+
+      c.verifyError =
+        '';
+
+    };
+
+
+  c.verifyQR =
+    function() {
+
+      c.verifyError =
+        '';
+
+
+      if (
+        !c.verifyToken ||
+        !String(
+          c.verifyToken
+        ).trim()
+      ) {
+
+        c.verifyError =
+          'Enter the QR token.';
+
+        return;
+
+      }
+
+
+      if (
+        !c.verifySession ||
+        !c.verifySession.sys_id
+      ) {
+
+        c.verifyError =
+          'Interview session is missing.';
+
+        return;
+
+      }
+
+
+      c.verifyingQR =
+        true;
+
+
+      c.server.get({
+
+        action:
+          'verify_qr',
+
+        trainer:
+          c.trainerId,
+
+        interview:
+          c.verifySession.sys_id,
+
+        token:
+          String(
+            c.verifyToken
+          ).trim()
+
+      }).then(
+        function(response) {
+
+          c.verifyingQR =
+            false;
+
+
+          var d =
+            response &&
+            response.data
+              ? response.data
+              : null;
+
+
+          if (
+            d &&
+            d.verifySuccess
+          ) {
+
+            copyData(
+              d
+            );
+
+
+            c.verifyModalOpen =
+              false;
+
+
+            c.showBanner(
+              d.verifyMessage,
+              'success'
+            );
+
+
+            updateSelectedInterview(
+              c.verifySession.sys_id
+            );
+
+          } else {
+
+            c.verifyError =
+              (
+                d &&
+                d.verifyMessage
+              ) ||
+              'QR verification failed.';
+
+          }
+
+        }
+      );
+
+    };
+
+
+  function updateSelectedInterview(
+    sysId
+  ) {
+
+    var list =
+      c.data.scheduledInterviews ||
+      [];
+
+
+    for (
+      var i = 0;
+      i < list.length;
+      i++
+    ) {
+
+      if (
+        list[i].sys_id ==
+        sysId
+      ) {
+
+        c.selectedInterview =
+          list[i];
+
+
+        c.selectedInterviewStatus =
+          list[i].interviewStatus ||
+          'Scheduled';
+
+
+        return;
+
+      }
+
+    }
+
+  }
+
+
+  /* =========================================================
+     MARK INTERVIEW COMPLETED
+     ========================================================= */
+
+  c.completingInterview =
+    false;
+
+
+  c.markInterviewCompleted =
+    function(
+      session
+    ) {
+
+      if (
+        !session ||
+        !session.sys_id
+      ) {
+
+        return;
+
+      }
+
+
+      /*
+       * Only the dropdown selection is required here.
+       *
+       * QR was already scanned in the existing workflow,
+       * so there is intentionally NO second QR check.
+       */
+
+      if (
+        c.selectedInterviewStatus !=
+        'Completed'
+      ) {
+
+        c.detailError =
+          'Select Completed from the Interview Status dropdown.';
+
+        return;
+
+      }
+
+
+      c.completingInterview =
+        true;
+
+
+      c.detailError =
+        '';
+
+
+      /*
+       * Send the selected status to the server.
+       */
+
+      c.server.get({
+
+        action:
+          'mark_completed',
+
+        trainer:
+          c.trainerId,
+
+        interview:
+          session.sys_id,
+
+        status:
+          c.selectedInterviewStatus
+
+      }).then(
+        function(response) {
+
+          c.completingInterview =
+            false;
+
+
+          var d =
+            response &&
+            response.data
+              ? response.data
+              : null;
+
+
+          if (
+            d &&
+            d.completeSuccess
+          ) {
+
+            /*
+             * Reload all data.
+             *
+             * Since Scheduled list queries only
+             * Interview Status = Scheduled,
+             * this interview disappears from
+             * Scheduled Interviews.
+             *
+             * Feedback page/query can now see
+             * Interview Status = Completed.
+             */
+
+            copyData(
+              d
+            );
+
+
+            c.interviewDetailsOpen =
+              false;
+
+
+            c.selectedInterview =
+              {};
+
+
+            c.selectedInterviewStatus =
+              'Scheduled';
+
+
+            c.showBanner(
+              d.completeMessage,
+              'success'
+            );
+
+          } else {
+
+            c.detailError =
+              (
+                d &&
+                d.completeMessage
+              ) ||
+              'Unable to complete interview.';
+
+          }
+
+        }
+      );
+
+    };
+
+
+  /* =========================================================
+     FEEDBACK
+     ========================================================= */
+
+  c.feedbackModalOpen =
+    false;
+
+
+  c.feedbackSession =
+    {};
+
+
+  c.feedbackError =
+    '';
+
+
+  c.savingFeedback =
+    false;
+
+
+  c.feedbackForm =
+    {};
+
+
+  c.openFeedbackModal =
+    function(
+      session
+    ) {
+
+      if (!session) {
+
+        return;
+
+      }
+
+
+      c.feedbackSession =
+        session;
+
+
+      c.feedbackError =
+        '';
+
+
+      c.feedbackForm = {
+
+        technicalScore:
+          null,
+
+        communicationScore:
+          null,
+
+        problemSolvingScore:
+          null,
+
+        strengths:
+          '',
+
+        improvementAreas:
+          '',
+
+        recommendation:
+          ''
+
+      };
+
+
+      c.feedbackModalOpen =
+        true;
+
+    };
+
+
+  c.closeFeedbackModal =
+    function() {
+
+      c.feedbackModalOpen =
+        false;
+
+
+      c.feedbackSession =
+        {};
+
+
+      c.feedbackError =
+        '';
+
+    };
+
+
+  c.getOverallPreview =
+    function() {
+
+      var technical =
+        parseScore(
+          c.feedbackForm.technicalScore
+        );
+
+
+      var communication =
+        parseScore(
+          c.feedbackForm.communicationScore
+        );
+
+
+      var problem =
+        parseScore(
+          c.feedbackForm.problemSolvingScore
+        );
+
+
+      if (
+        technical === null ||
+        communication === null ||
+        problem === null
+      ) {
+
+        return '—';
+
+      }
+
+
+      return Math.round(
+        (
+          technical +
+          communication +
+          problem
+        ) / 3
+      );
+
+    };
+
+
+  c.submitFeedback =
+    function() {
+
+      var technical =
+        parseScore(
+          c.feedbackForm.technicalScore
+        );
+
+
+      var communication =
+        parseScore(
+          c.feedbackForm.communicationScore
+        );
+
+
+      var problem =
+        parseScore(
+          c.feedbackForm.problemSolvingScore
+        );
+
+
+      if (
+        technical === null ||
+        communication === null ||
+        problem === null
+      ) {
+
+        c.feedbackError =
+          'Enter all scores from 0 to 100.';
+
+        return;
+
+      }
+
+
+      c.savingFeedback =
+        true;
+
+
+      c.feedbackError =
+        '';
+
+
+      c.server.get({
+
+        action:
+          'submit_feedback',
+
+        trainer:
+          c.trainerId,
+
+        interview:
+          c.feedbackSession.sys_id,
+
+        technicalScore:
+          technical,
+
+        communicationScore:
+          communication,
+
+        problemSolvingScore:
+          problem,
+
+        strengths:
+          c.feedbackForm.strengths,
+
+        improvementAreas:
+          c.feedbackForm.improvementAreas,
+
+        recommendation:
+          c.feedbackForm.recommendation
+
+      }).then(
+        function(response) {
+
+          c.savingFeedback =
+            false;
+
+
+          var d =
+            response &&
+            response.data
+              ? response.data
+              : null;
+
+
+          if (
+            d &&
+            d.feedbackSuccess
+          ) {
+
+            copyData(
+              d
+            );
+
+
+            c.feedbackModalOpen =
+              false;
+
+
+            c.showBanner(
+              d.feedbackMessage,
+              'success'
+            );
+
+          } else {
+
+            c.feedbackError =
+              (
+                d &&
+                d.feedbackMessage
+              ) ||
+              'Unable to save feedback.';
+
+          }
+
+        }
+      );
+
+    };
+
+
+  /* =========================================================
+     BANNER
+     ========================================================= */
+
+  c.bannerMessage =
+    '';
+
+
+  c.bannerType =
+    '';
+
+
+  c.showBanner =
+    function(
+      message,
+      type
+    ) {
+
+      c.bannerMessage =
+        message || '';
+
+
+      c.bannerType =
+        type || 'success';
+
+
+      $timeout(
+        function() {
+
+          c.bannerMessage =
+            '';
+
+        },
+        4000
+      );
+
+    };
+
+
+  /* =========================================================
+     HELPERS
+     ========================================================= */
+
+  function toDate(
+    value
+  ) {
+
+    var d =
+      value instanceof Date
+        ? value
+        : new Date(value);
+
+
+    var month =
+      String(
+        d.getMonth() + 1
+      );
+
+
+    var day =
+      String(
+        d.getDate()
+      );
+
+
+    if (
+      month.length == 1
+    ) {
+
+      month =
+        '0' + month;
+
+    }
+
+
+    if (
+      day.length == 1
+    ) {
+
+      day =
+        '0' + day;
+
+    }
+
+
+    return (
+      d.getFullYear() +
+      '-' +
+      month +
+      '-' +
+      day
+    );
+
+  }
+
+
+  function toTime(
+    value
+  ) {
+
+    if (!value) {
+
+      return '';
+
+    }
+
+
+    if (
+      value instanceof Date
+    ) {
+
+      var hours =
+        String(
+          value.getHours()
+        );
+
+
+      var minutesValue =
+        String(
+          value.getMinutes()
+        );
+
+
+      if (
+        hours.length == 1
+      ) {
+
+        hours =
+          '0' + hours;
+
+      }
+
+
+      if (
+        minutesValue.length == 1
+      ) {
+
+        minutesValue =
+          '0' +
+          minutesValue;
+
+      }
+
+
+      return (
+        hours +
+        ':' +
+        minutesValue +
+        ':00'
+      );
+
+    }
+
+
+    var text =
+      String(
+        value
+      );
+
+
+    if (
+      text.length == 5
+    ) {
+
+      return text +
+        ':00';
+
+    }
+
+
+    return text.substring(
+      0,
+      8
+    );
+
+  }
+
+
+  function minutes(
+    value
+  ) {
+
+    if (!value) {
+
+      return 0;
+
+    }
+
+
+    var parts =
+      String(
+        value
+      ).split(':');
+
+
+    return (
+      parseInt(
+        parts[0],
+        10
+      ) * 60
+      +
+      parseInt(
+        parts[1],
+        10
+      )
+    );
+
+  }
+
+
+  function parseScore(
+    value
+  ) {
+
+    if (
+      value === null ||
+      typeof value === 'undefined' ||
+      value === ''
+    ) {
+
+      return null;
+
+    }
+
+
+    var number =
+      parseInt(
+        value,
+        10
+      );
+
+
+    if (
+      isNaN(number) ||
+      number < 0 ||
+      number > 100
+    ) {
+
+      return null;
+
+    }
+
+
+    return number;
+
+  }
+
+};]]></client_script>
+        <controller_as>c</controller_as>
+        <css>/* =========================================================&#13;
+   CAMPUS360 TRAINER&#13;
+   MOCK INTERVIEW SLOTS&#13;
+   FULL VIEW / DASHBOARD NAVBAR STYLE&#13;
+   ========================================================= */&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   GLOBAL RESET&#13;
+   ========================================================= */&#13;
+&#13;
+html,&#13;
+body {&#13;
+&#13;
+  width: 100% !important;&#13;
+&#13;
+  height: 100% !important;&#13;
+&#13;
+  min-width: 100% !important;&#13;
+&#13;
+  min-height: 100% !important;&#13;
+&#13;
+  margin: 0 !important;&#13;
+&#13;
+  padding: 0 !important;&#13;
+&#13;
+  overflow: hidden !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+body {&#13;
+&#13;
+  background: #f3f6fb !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   SERVICENOW OUTER CONTAINER RESET&#13;
+   ========================================================= */&#13;
+&#13;
+.container:has(.campus360-slot-app),&#13;
+.container-fluid:has(.campus360-slot-app),&#13;
+.row:has(.campus360-slot-app),&#13;
+[class*="col-"]:has(.campus360-slot-app),&#13;
+.well:has(.campus360-slot-app),&#13;
+.panel:has(.campus360-slot-app) {&#13;
+&#13;
+  width: 100% !important;&#13;
+&#13;
+  max-width: none !important;&#13;
+&#13;
+  margin: 0 !important;&#13;
+&#13;
+  padding: 0 !important;&#13;
+&#13;
+  border: 0 !important;&#13;
+&#13;
+  background: transparent !important;&#13;
+&#13;
+  box-shadow: none !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   FULL CAMPUS360 APPLICATION&#13;
+   ========================================================= */&#13;
+&#13;
+.campus360-slot-app {&#13;
+&#13;
+  position: fixed !important;&#13;
+&#13;
+  top: 0 !important;&#13;
+&#13;
+  left: 0 !important;&#13;
+&#13;
+  right: 0 !important;&#13;
+&#13;
+  bottom: 0 !important;&#13;
+&#13;
+  width: 100vw !important;&#13;
+&#13;
+  height: 100vh !important;&#13;
+&#13;
+  min-width: 100vw !important;&#13;
+&#13;
+  min-height: 100vh !important;&#13;
+&#13;
+  max-width: 100vw !important;&#13;
+&#13;
+  max-height: 100vh !important;&#13;
+&#13;
+  margin: 0 !important;&#13;
+&#13;
+  padding: 0 !important;&#13;
+&#13;
+  z-index: 2147483647 !important;&#13;
+&#13;
+  display: flex !important;&#13;
+&#13;
+  flex-direction: row !important;&#13;
+&#13;
+  overflow: hidden !important;&#13;
+&#13;
+  isolation: isolate;&#13;
+&#13;
+  background:&#13;
+    radial-gradient(&#13;
+      circle at 8% 8%,&#13;
+      rgba(239,231,255,.52),&#13;
+      transparent 24%&#13;
+    ),&#13;
+    radial-gradient(&#13;
+      circle at 94% 8%,&#13;
+      rgba(232,247,255,.55),&#13;
+      transparent 25%&#13;
+    ),&#13;
+    #f3f6fb;&#13;
+&#13;
+  color: #17233c;&#13;
+&#13;
+  font-family:&#13;
+    "Inter",&#13;
+    "Segoe UI",&#13;
+    Arial,&#13;
+    sans-serif;&#13;
+&#13;
+  -webkit-font-smoothing: antialiased;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.campus360-slot-app,&#13;
+.campus360-slot-app * {&#13;
+&#13;
+  box-sizing: border-box;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   SIDEBAR - DARK PURPLE&#13;
+   ========================================================= */&#13;
+&#13;
+.campus360-slot-sidebar {&#13;
+&#13;
+  position: relative !important;&#13;
+&#13;
+  top: 0 !important;&#13;
+&#13;
+  left: 0 !important;&#13;
+&#13;
+  bottom: auto !important;&#13;
+&#13;
+  width: 264px !important;&#13;
+&#13;
+  min-width: 264px !important;&#13;
+&#13;
+  max-width: 264px !important;&#13;
+&#13;
+  height: 100vh !important;&#13;
+&#13;
+  min-height: 100vh !important;&#13;
+&#13;
+  max-height: 100vh !important;&#13;
+&#13;
+  flex: 0 0 264px;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  flex-direction: column;&#13;
+&#13;
+  overflow: hidden;&#13;
+&#13;
+  z-index: 50;&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      180deg,&#13;
+      #130d2f 0%,&#13;
+      #160d38 48%,&#13;
+      #100a29 100%&#13;
+    ) !important;&#13;
+&#13;
+  border-right:&#13;
+    1px solid&#13;
+    #2d2157 !important;&#13;
+&#13;
+  box-shadow:&#13;
+    5px&#13;
+    0&#13;
+    18px&#13;
+    rgba(10,7,25,.20);&#13;
+&#13;
+  transition:&#13;
+    width .25s ease,&#13;
+    min-width .25s ease,&#13;
+    max-width .25s ease,&#13;
+    flex-basis .25s ease;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   SIDEBAR COLLAPSED&#13;
+   ========================================================= */&#13;
+&#13;
+.campus360-slot-app.sidebar-collapsed&#13;
+.campus360-slot-sidebar {&#13;
+&#13;
+  width: 76px !important;&#13;
+&#13;
+  min-width: 76px !important;&#13;
+&#13;
+  max-width: 76px !important;&#13;
+&#13;
+  flex-basis: 76px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   BRAND&#13;
+   ========================================================= */&#13;
+&#13;
+.slot-brand {&#13;
+&#13;
+  width: 100%;&#13;
+&#13;
+  height: 99px;&#13;
+&#13;
+  min-height: 99px;&#13;
+&#13;
+  padding:&#13;
+    0&#13;
+    15px;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  gap: 13px;&#13;
+&#13;
+  flex-shrink: 0;&#13;
+&#13;
+  border-bottom:&#13;
+    1px solid&#13;
+    #2d2157 !important;&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      135deg,&#13;
+      #170e38,&#13;
+      #1c1045&#13;
+    ) !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.slot-brand-mark {&#13;
+&#13;
+  width: 49px;&#13;
+&#13;
+  height: 49px;&#13;
+&#13;
+  flex: 0 0 49px;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  justify-content: center;&#13;
+&#13;
+  border-radius: 14px;&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      135deg,&#13;
+      #704cf4,&#13;
+      #563dd5&#13;
+    );&#13;
+&#13;
+  color: #ffffff;&#13;
+&#13;
+  font-size: 23px;&#13;
+&#13;
+  box-shadow:&#13;
+    0&#13;
+    8px&#13;
+    19px&#13;
+    rgba(91,70,230,.30);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.slot-brand-text {&#13;
+&#13;
+  min-width: 0;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.slot-brand-text strong {&#13;
+&#13;
+  display: block;&#13;
+&#13;
+  color: #ffffff !important;&#13;
+&#13;
+  font-size: 20px;&#13;
+&#13;
+  line-height: 1;&#13;
+&#13;
+  font-weight: 950;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.slot-brand-text span {&#13;
+&#13;
+  display: block;&#13;
+&#13;
+  margin-top: 5px;&#13;
+&#13;
+  color: #b9abd8 !important;&#13;
+&#13;
+  font-size: 10px;&#13;
+&#13;
+  line-height: 1;&#13;
+&#13;
+  font-weight: 900;&#13;
+&#13;
+  letter-spacing: 1.25px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   SIDEBAR TRAINER PROFILE&#13;
+   ========================================================= */&#13;
+&#13;
+.slot-trainer-profile {&#13;
+&#13;
+  margin:&#13;
+    18px&#13;
+    7px&#13;
+    13px;&#13;
+&#13;
+  min-height: 70px;&#13;
+&#13;
+  padding:&#13;
+    11px;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  gap: 10px;&#13;
+&#13;
+  flex-shrink: 0;&#13;
+&#13;
+  border:&#13;
+    1px solid&#13;
+    #4b3475 !important;&#13;
+&#13;
+  border-radius: 13px;&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      135deg,&#13;
+      #211342,&#13;
+      #29164f&#13;
+    ) !important;&#13;
+&#13;
+  text-decoration: none !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.slot-avatar {&#13;
+&#13;
+  width: 44px;&#13;
+&#13;
+  height: 44px;&#13;
+&#13;
+  flex: 0 0 44px;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  justify-content: center;&#13;
+&#13;
+  border-radius: 12px;&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      135deg,&#13;
+      #704cf4,&#13;
+      #5544d2&#13;
+    );&#13;
+&#13;
+  color: #ffffff;&#13;
+&#13;
+  font-size: 12px;&#13;
+&#13;
+  font-weight: 950;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.slot-trainer-info {&#13;
+&#13;
+  min-width: 0;&#13;
+&#13;
+  flex: 1;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.slot-trainer-info strong {&#13;
+&#13;
+  display: block;&#13;
+&#13;
+  overflow: hidden;&#13;
+&#13;
+  color: #ffffff !important;&#13;
+&#13;
+  font-size: 12px;&#13;
+&#13;
+  line-height: 1.2;&#13;
+&#13;
+  font-weight: 950;&#13;
+&#13;
+  white-space: nowrap;&#13;
+&#13;
+  text-overflow: ellipsis;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.slot-trainer-info span {&#13;
+&#13;
+  display: block;&#13;
+&#13;
+  margin-top: 3px;&#13;
+&#13;
+  color: #b9abd8 !important;&#13;
+&#13;
+  font-size: 9px;&#13;
+&#13;
+  font-weight: 800;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.slot-profile-arrow {&#13;
+&#13;
+  color: #a99bc7 !important;&#13;
+&#13;
+  font-size: 19px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   SIDEBAR NAVIGATION&#13;
+   ========================================================= */&#13;
+&#13;
+.slot-nav {&#13;
+&#13;
+  flex: 1 1 auto;&#13;
+&#13;
+  min-height: 0;&#13;
+&#13;
+  overflow-y: auto;&#13;
+&#13;
+  overflow-x: hidden;&#13;
+&#13;
+  padding:&#13;
+    0&#13;
+    5px&#13;
+    18px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* Hide sidebar scrollbar */&#13;
+.slot-nav::-webkit-scrollbar {&#13;
+&#13;
+  width: 0;&#13;
+&#13;
+  height: 0;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.slot-nav {&#13;
+&#13;
+  scrollbar-width: none;&#13;
+&#13;
+  -ms-overflow-style: none;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.slot-nav-label {&#13;
+&#13;
+  margin:&#13;
+    19px&#13;
+    7px&#13;
+    7px;&#13;
+&#13;
+  color: #9283b6 !important;&#13;
+&#13;
+  font-size: 10px;&#13;
+&#13;
+  line-height: 1;&#13;
+&#13;
+  font-weight: 950;&#13;
+&#13;
+  letter-spacing: 1.1px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.slot-nav-item {&#13;
+&#13;
+  position: relative;&#13;
+&#13;
+  width: 100%;&#13;
+&#13;
+  min-height: 47px;&#13;
+&#13;
+  margin:&#13;
+    2px&#13;
+    0;&#13;
+&#13;
+  padding:&#13;
+    0&#13;
+    10px;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  gap: 10px;&#13;
+&#13;
+  border-radius: 10px;&#13;
+&#13;
+  color: #c4b8dc !important;&#13;
+&#13;
+  background: transparent !important;&#13;
+&#13;
+  text-decoration: none !important;&#13;
+&#13;
+  font-size: 13px;&#13;
+&#13;
+  line-height: 1.25;&#13;
+&#13;
+  font-weight: 850;&#13;
+&#13;
+  transition:&#13;
+    background .18s ease,&#13;
+    color .18s ease;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.slot-nav-item:hover {&#13;
+&#13;
+  background: rgba(124,58,237,.18) !important;&#13;
+&#13;
+  color: #ffffff !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.slot-nav-item.active {&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      90deg,&#13;
+      #7c3aed 0%,&#13;
+      #8b3ff2 100%&#13;
+    ) !important;&#13;
+&#13;
+  color: #ffffff !important;&#13;
+&#13;
+  font-weight: 950;&#13;
+&#13;
+  box-shadow: none !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.slot-nav-item.active:before {&#13;
+&#13;
+  content: "";&#13;
+&#13;
+  position: absolute;&#13;
+&#13;
+  left: 0;&#13;
+&#13;
+  top: 5px;&#13;
+&#13;
+  bottom: 5px;&#13;
+&#13;
+  width: 4px;&#13;
+&#13;
+  border-radius:&#13;
+    0&#13;
+    5px&#13;
+    5px&#13;
+    0;&#13;
+&#13;
+  background: #a78bfa !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.slot-nav-icon {&#13;
+&#13;
+  width: 28px;&#13;
+&#13;
+  min-width: 28px;&#13;
+&#13;
+  height: 28px;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  justify-content: center;&#13;
+&#13;
+  color: #a99ac8 !important;&#13;
+&#13;
+  font-size: 17px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.slot-nav-item:hover&#13;
+.slot-nav-icon {&#13;
+&#13;
+  color: #ffffff !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.slot-nav-item.active&#13;
+.slot-nav-icon {&#13;
+&#13;
+  color: #ffffff !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.slot-nav-text {&#13;
+&#13;
+  min-width: 0;&#13;
+&#13;
+  flex: 1;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.slot-nav-count {&#13;
+&#13;
+  min-width: 22px;&#13;
+&#13;
+  height: 22px;&#13;
+&#13;
+  margin-left: auto;&#13;
+&#13;
+  padding:&#13;
+    0&#13;
+    6px;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  justify-content: center;&#13;
+&#13;
+  border-radius: 50%;&#13;
+&#13;
+  background: #3a2764 !important;&#13;
+&#13;
+  color: #d9ceef !important;&#13;
+&#13;
+  font-size: 9px;&#13;
+&#13;
+  font-weight: 950;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.slot-nav-item.active&#13;
+.slot-nav-count {&#13;
+&#13;
+  background: rgba(255,255,255,.18) !important;&#13;
+&#13;
+  color: #ffffff !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   COLLAPSED SIDEBAR CONTENT&#13;
+   ========================================================= */&#13;
+&#13;
+.campus360-slot-app.sidebar-collapsed&#13;
+.slot-brand {&#13;
+&#13;
+  padding-left: 0;&#13;
+&#13;
+  padding-right: 0;&#13;
+&#13;
+  justify-content: center;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.campus360-slot-app.sidebar-collapsed&#13;
+.slot-brand-text,&#13;
+&#13;
+.campus360-slot-app.sidebar-collapsed&#13;
+.slot-trainer-info,&#13;
+&#13;
+.campus360-slot-app.sidebar-collapsed&#13;
+.slot-profile-arrow,&#13;
+&#13;
+.campus360-slot-app.sidebar-collapsed&#13;
+.slot-nav-label,&#13;
+&#13;
+.campus360-slot-app.sidebar-collapsed&#13;
+.slot-nav-text,&#13;
+&#13;
+.campus360-slot-app.sidebar-collapsed&#13;
+.slot-nav-count {&#13;
+&#13;
+  display: none !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.campus360-slot-app.sidebar-collapsed&#13;
+.slot-trainer-profile {&#13;
+&#13;
+  margin-left: 9px;&#13;
+&#13;
+  margin-right: 9px;&#13;
+&#13;
+  justify-content: center;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.campus360-slot-app.sidebar-collapsed&#13;
+.slot-nav-item {&#13;
+&#13;
+  justify-content: center;&#13;
+&#13;
+  padding-left: 0;&#13;
+&#13;
+  padding-right: 0;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   MAIN&#13;
+   ========================================================= */&#13;
+&#13;
+.campus360-slot-main {&#13;
+&#13;
+  position: relative;&#13;
+&#13;
+  width:&#13;
+    calc(100vw - 264px) !important;&#13;
+&#13;
+  max-width:&#13;
+    calc(100vw - 264px) !important;&#13;
+&#13;
+  min-width: 0 !important;&#13;
+&#13;
+  height: 100vh !important;&#13;
+&#13;
+  min-height: 100vh !important;&#13;
+&#13;
+  max-height: 100vh !important;&#13;
+&#13;
+  margin: 0 !important;&#13;
+&#13;
+  padding: 0 !important;&#13;
+&#13;
+  flex:&#13;
+    1 1 auto;&#13;
+&#13;
+  overflow-x: hidden !important;&#13;
+&#13;
+  overflow-y: auto !important;&#13;
+&#13;
+  background: #f3f6fb;&#13;
+&#13;
+  transition:&#13;
+    width .25s ease,&#13;
+    max-width .25s ease;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.campus360-slot-app.sidebar-collapsed&#13;
+.campus360-slot-main {&#13;
+&#13;
+  width:&#13;
+    calc(100vw - 76px) !important;&#13;
+&#13;
+  max-width:&#13;
+    calc(100vw - 76px) !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   TOP NAVBAR&#13;
+   ========================================================= */&#13;
+&#13;
+.slot-topbar {&#13;
+&#13;
+  position: sticky;&#13;
+&#13;
+  top: 0;&#13;
+&#13;
+  z-index: 100;&#13;
+&#13;
+  width: 100%;&#13;
+&#13;
+  height: 74px;&#13;
+&#13;
+  min-height: 74px;&#13;
+&#13;
+  padding:&#13;
+    0&#13;
+    19px&#13;
+    0&#13;
+    23px;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  justify-content: space-between;&#13;
+&#13;
+  gap: 20px;&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      90deg,&#13;
+      #ffffff,&#13;
+      #fbfdff&#13;
+    );&#13;
+&#13;
+  border-bottom:&#13;
+    1px solid&#13;
+    #dce4ec;&#13;
+&#13;
+  box-shadow:&#13;
+    0&#13;
+    2px&#13;
+    9px&#13;
+    rgba(25,43,60,.035);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.slot-topbar-left {&#13;
+&#13;
+  min-width: 0;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  gap: 12px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.slot-menu-button {&#13;
+&#13;
+  width: 44px;&#13;
+&#13;
+  height: 44px;&#13;
+&#13;
+  flex: 0 0 44px;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  justify-content: center;&#13;
+&#13;
+  border:&#13;
+    1px solid&#13;
+    #dce4ec;&#13;
+&#13;
+  border-radius: 10px;&#13;
+&#13;
+  background: #ffffff;&#13;
+&#13;
+  color: #526b82;&#13;
+&#13;
+  font-size: 18px;&#13;
+&#13;
+  cursor: pointer;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.slot-menu-button:hover {&#13;
+&#13;
+  background: #f3efff;&#13;
+&#13;
+  border-color: #d3c6f5;&#13;
+&#13;
+  color: #6046da;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   BREADCRUMB&#13;
+   ========================================================= */&#13;
+&#13;
+.slot-breadcrumb {&#13;
+&#13;
+  min-width: 0;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.slot-breadcrumb-text {&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  flex-direction: column;&#13;
+&#13;
+  gap: 4px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.slot-breadcrumb-text span {&#13;
+&#13;
+  color: #6346db;&#13;
+&#13;
+  font-size: 9px;&#13;
+&#13;
+  line-height: 1;&#13;
+&#13;
+  font-weight: 950;&#13;
+&#13;
+  letter-spacing: 1.7px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.slot-breadcrumb-text strong {&#13;
+&#13;
+  color: #142039;&#13;
+&#13;
+  font-size: 17px;&#13;
+&#13;
+  line-height: 1;&#13;
+&#13;
+  font-weight: 950;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   TOPBAR RIGHT&#13;
+   ========================================================= */&#13;
+&#13;
+.slot-topbar-right {&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  gap: 9px;&#13;
+&#13;
+  flex-shrink: 0;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.slot-top-action {&#13;
+&#13;
+  position: relative;&#13;
+&#13;
+  width: 42px;&#13;
+&#13;
+  height: 42px;&#13;
+&#13;
+  flex: 0 0 42px;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  justify-content: center;&#13;
+&#13;
+  border:&#13;
+    1px solid&#13;
+    #dce4ed;&#13;
+&#13;
+  border-radius: 10px;&#13;
+&#13;
+  background: #ffffff;&#13;
+&#13;
+  color: #536b81;&#13;
+&#13;
+  font-size: 16px;&#13;
+&#13;
+  cursor: pointer;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.slot-top-action:hover {&#13;
+&#13;
+  background: #f4f0ff;&#13;
+&#13;
+  border-color: #d3c7f5;&#13;
+&#13;
+  color: #6246d8;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   BELL&#13;
+   ========================================================= */&#13;
+&#13;
+.notification-button {&#13;
+&#13;
+  overflow: visible;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.notification-button&#13;
+.fa-bell {&#13;
+&#13;
+  color: #f1a000;&#13;
+&#13;
+  font-size: 18px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.slot-notification-dot {&#13;
+&#13;
+  position: absolute;&#13;
+&#13;
+  top: 7px;&#13;
+&#13;
+  right: 7px;&#13;
+&#13;
+  width: 8px;&#13;
+&#13;
+  height: 8px;&#13;
+&#13;
+  border:&#13;
+    2px solid&#13;
+    #ffffff;&#13;
+&#13;
+  border-radius: 50%;&#13;
+&#13;
+  background: #ef4444;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   TOP PROFILE&#13;
+   ========================================================= */&#13;
+&#13;
+.slot-top-profile {&#13;
+&#13;
+  min-height: 44px;&#13;
+&#13;
+  padding-left: 9px;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  gap: 9px;&#13;
+&#13;
+  border-left:&#13;
+    1px solid&#13;
+    #e4e8ee;&#13;
+&#13;
+  text-decoration: none !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.slot-top-avatar {&#13;
+&#13;
+  width: 42px;&#13;
+&#13;
+  height: 42px;&#13;
+&#13;
+  flex: 0 0 42px;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  justify-content: center;&#13;
+&#13;
+  border-radius: 11px;&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      135deg,&#13;
+      #704cf4,&#13;
+      #5742d4&#13;
+    );&#13;
+&#13;
+  color: #ffffff;&#13;
+&#13;
+  font-size: 10px;&#13;
+&#13;
+  font-weight: 950;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.slot-top-profile-text {&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  flex-direction: column;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.slot-top-profile-text strong {&#13;
+&#13;
+  color: #17233b;&#13;
+&#13;
+  font-size: 11px;&#13;
+&#13;
+  font-weight: 950;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.slot-top-profile-text span {&#13;
+&#13;
+  margin-top: 3px;&#13;
+&#13;
+  color: #768399;&#13;
+&#13;
+  font-size: 8px;&#13;
+&#13;
+  font-weight: 800;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   PAGE CONTENT&#13;
+   ========================================================= */&#13;
+&#13;
+.slot-page-content {&#13;
+&#13;
+  width: 100% !important;&#13;
+&#13;
+  max-width: none !important;&#13;
+&#13;
+  margin: 0 !important;&#13;
+&#13;
+  padding:&#13;
+    27px&#13;
+    31px&#13;
+    40px;&#13;
+&#13;
+  background:&#13;
+    radial-gradient(&#13;
+      circle at 96% 13%,&#13;
+      rgba(232,247,255,.42),&#13;
+      transparent 25%&#13;
+    ),&#13;
+    radial-gradient(&#13;
+      circle at 4% 53%,&#13;
+      rgba(243,235,255,.42),&#13;
+      transparent 27%&#13;
+    ),&#13;
+    #f3f6fb;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   PAGE HEADER&#13;
+   ========================================================= */&#13;
+&#13;
+.slot-page-header {&#13;
+&#13;
+  width: 100%;&#13;
+&#13;
+  min-height: 103px;&#13;
+&#13;
+  margin-bottom: 19px;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: flex-end;&#13;
+&#13;
+  justify-content: space-between;&#13;
+&#13;
+  gap: 20px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.slot-eyebrow {&#13;
+&#13;
+  display: block;&#13;
+&#13;
+  margin-bottom: 7px;&#13;
+&#13;
+  color: #6548dc;&#13;
+&#13;
+  font-size: 10px;&#13;
+&#13;
+  line-height: 1;&#13;
+&#13;
+  font-weight: 950;&#13;
+&#13;
+  letter-spacing: 1.6px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.slot-page-header h1 {&#13;
+&#13;
+  margin:&#13;
+    0&#13;
+    0&#13;
+    7px;&#13;
+&#13;
+  color: #0c1831;&#13;
+&#13;
+  font-size: 35px;&#13;
+&#13;
+  line-height: 1.04;&#13;
+&#13;
+  font-weight: 950;&#13;
+&#13;
+  letter-spacing: -.5px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.slot-page-header p {&#13;
+&#13;
+  margin: 0;&#13;
+&#13;
+  max-width: 900px;&#13;
+&#13;
+  color: #5d6d83;&#13;
+&#13;
+  font-size: 13px;&#13;
+&#13;
+  line-height: 1.55;&#13;
+&#13;
+  font-weight: 600;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.create-slot-button {&#13;
+&#13;
+  height: 46px;&#13;
+&#13;
+  padding:&#13;
+    0&#13;
+    18px;&#13;
+&#13;
+  flex-shrink: 0;&#13;
+&#13;
+  border: 0;&#13;
+&#13;
+  border-radius: 10px;&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      135deg,&#13;
+      #6044e3,&#13;
+      #795df0&#13;
+    );&#13;
+&#13;
+  color: #ffffff;&#13;
+&#13;
+  font-size: 10px;&#13;
+&#13;
+  font-weight: 950;&#13;
+&#13;
+  cursor: pointer;&#13;
+&#13;
+  box-shadow:&#13;
+    0&#13;
+    7px&#13;
+    16px&#13;
+    rgba(91,66,218,.16);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.create-slot-button:hover {&#13;
+&#13;
+  transform: translateY(-1px);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   BANNERS&#13;
+   ========================================================= */&#13;
+&#13;
+.action-banner {&#13;
+&#13;
+  margin-bottom: 17px;&#13;
+&#13;
+  padding:&#13;
+    11px&#13;
+    13px;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  gap: 8px;&#13;
+&#13;
+  border-radius: 9px;&#13;
+&#13;
+  font-size: 9px;&#13;
+&#13;
+  font-weight: 850;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.action-banner.success {&#13;
+&#13;
+  background: #e9f9f1;&#13;
+&#13;
+  color: #147c58;&#13;
+&#13;
+  border:&#13;
+    1px solid&#13;
+    #bce6d3;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.action-banner.error {&#13;
+&#13;
+  background: #fff0f2;&#13;
+&#13;
+  color: #a62a3d;&#13;
+&#13;
+  border:&#13;
+    1px solid&#13;
+    #f2c1c8;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.server-alert {&#13;
+&#13;
+  margin-bottom: 17px;&#13;
+&#13;
+  padding:&#13;
+    11px&#13;
+    13px;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  gap: 8px;&#13;
+&#13;
+  border-radius: 9px;&#13;
+&#13;
+  background: #fff0f2;&#13;
+&#13;
+  color: #a62a3d;&#13;
+&#13;
+  border:&#13;
+    1px solid&#13;
+    #f2c1c8;&#13;
+&#13;
+  font-size: 9px;&#13;
+&#13;
+  font-weight: 850;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   KPI CARDS&#13;
+   ========================================================= */&#13;
+&#13;
+.slot-kpi-grid {&#13;
+&#13;
+  width: 100%;&#13;
+&#13;
+  display: grid;&#13;
+&#13;
+  grid-template-columns:&#13;
+    repeat(&#13;
+      4,&#13;
+      minmax(0,1fr)&#13;
+    );&#13;
+&#13;
+  gap: 15px;&#13;
+&#13;
+  margin-bottom: 20px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.slot-kpi-card {&#13;
+&#13;
+  min-height: 135px;&#13;
+&#13;
+  padding: 18px;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  gap: 14px;&#13;
+&#13;
+  border-radius: 15px;&#13;
+&#13;
+  box-shadow:&#13;
+    0&#13;
+    4px&#13;
+    12px&#13;
+    rgba(35,47,70,.035);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.slot-kpi-card.purple {&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      135deg,&#13;
+      #f0e8ff,&#13;
+      #e3d7ff&#13;
+    );&#13;
+&#13;
+  border:&#13;
+    1px solid&#13;
+    #d3c2fb;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.slot-kpi-card.orange {&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      135deg,&#13;
+      #fff3e5,&#13;
+      #ffe4c7&#13;
+    );&#13;
+&#13;
+  border:&#13;
+    1px solid&#13;
+    #f4d1aa;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.slot-kpi-card.blue {&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      135deg,&#13;
+      #eaf7ff,&#13;
+      #d9edff&#13;
+    );&#13;
+&#13;
+  border:&#13;
+    1px solid&#13;
+    #bddcf4;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.slot-kpi-card.green {&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      135deg,&#13;
+      #eaf9f2,&#13;
+      #d7f0e4&#13;
+    );&#13;
+&#13;
+  border:&#13;
+    1px solid&#13;
+    #bfe2d0;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.slot-kpi-icon {&#13;
+&#13;
+  width: 51px;&#13;
+&#13;
+  height: 51px;&#13;
+&#13;
+  flex: 0 0 51px;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  justify-content: center;&#13;
+&#13;
+  border-radius: 13px;&#13;
+&#13;
+  background:&#13;
+    rgba(255,255,255,.88);&#13;
+&#13;
+  font-size: 20px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.slot-kpi-card.purple&#13;
+.slot-kpi-icon {&#13;
+&#13;
+  color: #694ce2;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.slot-kpi-card.orange&#13;
+.slot-kpi-icon {&#13;
+&#13;
+  color: #d27b1f;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.slot-kpi-card.blue&#13;
+.slot-kpi-icon {&#13;
+&#13;
+  color: #287cc4;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.slot-kpi-card.green&#13;
+.slot-kpi-icon {&#13;
+&#13;
+  color: #159475;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.slot-kpi-card span {&#13;
+&#13;
+  display: block;&#13;
+&#13;
+  color: #627187;&#13;
+&#13;
+  font-size: 8px;&#13;
+&#13;
+  font-weight: 950;&#13;
+&#13;
+  letter-spacing: 1px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.slot-kpi-card strong {&#13;
+&#13;
+  display: block;&#13;
+&#13;
+  margin-top: 5px;&#13;
+&#13;
+  color: #15233b;&#13;
+&#13;
+  font-size: 28px;&#13;
+&#13;
+  line-height: 1;&#13;
+&#13;
+  font-weight: 950;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.slot-kpi-card small {&#13;
+&#13;
+  display: block;&#13;
+&#13;
+  margin-top: 6px;&#13;
+&#13;
+  color: #617188;&#13;
+&#13;
+  font-size: 9px;&#13;
+&#13;
+  font-weight: 700;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   PANELS&#13;
+   ========================================================= */&#13;
+&#13;
+.slot-panel {&#13;
+&#13;
+  width: 100%;&#13;
+&#13;
+  margin-bottom: 18px;&#13;
+&#13;
+  overflow: hidden;&#13;
+&#13;
+  background:&#13;
+    rgba(255,255,255,.97);&#13;
+&#13;
+  border:&#13;
+    1px solid&#13;
+    #dce4ec;&#13;
+&#13;
+  border-radius: 16px;&#13;
+&#13;
+  box-shadow:&#13;
+    0&#13;
+    6px&#13;
+    18px&#13;
+    rgba(31,46,69,.045);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.slot-panel-header {&#13;
+&#13;
+  min-height: 83px;&#13;
+&#13;
+  padding:&#13;
+    17px&#13;
+    21px;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  justify-content: space-between;&#13;
+&#13;
+  gap: 18px;&#13;
+&#13;
+  border-bottom:&#13;
+    1px solid&#13;
+    #e7ecf1;&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      90deg,&#13;
+      #ffffff,&#13;
+      #fbfcff&#13;
+    );&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.slot-panel-header&#13;
+span:first-child {&#13;
+&#13;
+  color: #6547db;&#13;
+&#13;
+  font-size: 8px;&#13;
+&#13;
+  font-weight: 950;&#13;
+&#13;
+  letter-spacing: 1.4px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.slot-panel-header h2 {&#13;
+&#13;
+  margin:&#13;
+    5px&#13;
+    0&#13;
+    4px;&#13;
+&#13;
+  color: #17233d;&#13;
+&#13;
+  font-size: 20px;&#13;
+&#13;
+  line-height: 1.15;&#13;
+&#13;
+  font-weight: 950;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.slot-panel-header p {&#13;
+&#13;
+  margin: 0;&#13;
+&#13;
+  color: #778498;&#13;
+&#13;
+  font-size: 9px;&#13;
+&#13;
+  font-weight: 650;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.slot-panel-badge {&#13;
+&#13;
+  min-width: 32px;&#13;
+&#13;
+  height: 32px;&#13;
+&#13;
+  padding:&#13;
+    0&#13;
+    9px;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  justify-content: center;&#13;
+&#13;
+  border-radius: 9px;&#13;
+&#13;
+  font-size: 10px;&#13;
+&#13;
+  font-weight: 950;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.slot-panel-badge.orange {&#13;
+&#13;
+  background: #fff0d8;&#13;
+&#13;
+  color: #b86a00;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.slot-panel-badge.blue {&#13;
+&#13;
+  background: #e6f2ff;&#13;
+&#13;
+  color: #286cbd;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.slot-panel-badge.purple {&#13;
+&#13;
+  background: #eee8ff;&#13;
+&#13;
+  color: #5f43d2;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   REQUESTS&#13;
+   ========================================================= */&#13;
+&#13;
+.slot-request-list {&#13;
+&#13;
+  width: 100%;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.slot-request-card {&#13;
+&#13;
+  min-height: 95px;&#13;
+&#13;
+  padding:&#13;
+    15px&#13;
+    20px;&#13;
+&#13;
+  display: grid;&#13;
+&#13;
+  grid-template-columns:&#13;
+    minmax(205px,1.35fr)&#13;
+    minmax(110px,.72fr)&#13;
+    minmax(115px,.78fr)&#13;
+    minmax(185px,1fr)&#13;
+    minmax(190px,1fr);&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  gap: 15px;&#13;
+&#13;
+  border-bottom:&#13;
+    1px solid&#13;
+    #edf1f5;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.request-student,&#13;
+.scheduled-student,&#13;
+.feedback-student {&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  gap: 10px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.request-avatar,&#13;
+.scheduled-avatar,&#13;
+.feedback-avatar {&#13;
+&#13;
+  width: 42px;&#13;
+&#13;
+  height: 42px;&#13;
+&#13;
+  flex: 0 0 42px;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  justify-content: center;&#13;
+&#13;
+  border-radius: 11px;&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      135deg,&#13;
+      #6c4ce6,&#13;
+      #5144d1&#13;
+    );&#13;
+&#13;
+  color: #ffffff;&#13;
+&#13;
+  font-size: 10px;&#13;
+&#13;
+  font-weight: 950;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.request-student strong,&#13;
+.scheduled-student strong,&#13;
+.feedback-student strong {&#13;
+&#13;
+  display: block;&#13;
+&#13;
+  color: #17233c;&#13;
+&#13;
+  font-size: 11px;&#13;
+&#13;
+  font-weight: 950;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.request-student span,&#13;
+.scheduled-student span,&#13;
+.feedback-student span {&#13;
+&#13;
+  display: block;&#13;
+&#13;
+  margin-top: 3px;&#13;
+&#13;
+  color: #7c889a;&#13;
+&#13;
+  font-size: 8px;&#13;
+&#13;
+  font-weight: 750;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.request-detail span,&#13;
+.feedback-detail span,&#13;
+.scheduled-main span {&#13;
+&#13;
+  display: block;&#13;
+&#13;
+  color: #788499;&#13;
+&#13;
+  font-size: 7px;&#13;
+&#13;
+  font-weight: 950;&#13;
+&#13;
+  letter-spacing: .8px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.request-detail strong,&#13;
+.feedback-detail strong,&#13;
+.scheduled-main strong {&#13;
+&#13;
+  display: block;&#13;
+&#13;
+  margin-top: 5px;&#13;
+&#13;
+  color: #1a263f;&#13;
+&#13;
+  font-size: 10px;&#13;
+&#13;
+  line-height: 1.35;&#13;
+&#13;
+  font-weight: 950;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.request-status {&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  justify-content: flex-end;&#13;
+&#13;
+  gap: 8px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.request-pending-pill {&#13;
+&#13;
+  padding:&#13;
+    6px&#13;
+    9px;&#13;
+&#13;
+  border-radius: 18px;&#13;
+&#13;
+  background: #fff2d9;&#13;
+&#13;
+  color: #aa6400;&#13;
+&#13;
+  font-size: 7px;&#13;
+&#13;
+  font-weight: 950;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.accept-request-button {&#13;
+&#13;
+  height: 34px;&#13;
+&#13;
+  padding:&#13;
+    0&#13;
+    11px;&#13;
+&#13;
+  border: 0;&#13;
+&#13;
+  border-radius: 8px;&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      135deg,&#13;
+      #6044e3,&#13;
+      #795df0&#13;
+    );&#13;
+&#13;
+  color: #ffffff;&#13;
+&#13;
+  font-size: 8px;&#13;
+&#13;
+  font-weight: 950;&#13;
+&#13;
+  cursor: pointer;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   AVAILABLE SLOTS&#13;
+   ========================================================= */&#13;
+&#13;
+.available-slot-grid {&#13;
+&#13;
+  width: 100%;&#13;
+&#13;
+  padding:&#13;
+    19px;&#13;
+&#13;
+  display: grid;&#13;
+&#13;
+  grid-template-columns:&#13;
+    repeat(&#13;
+      3,&#13;
+      minmax(235px,1fr)&#13;
+    );&#13;
+&#13;
+  gap: 14px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.available-slot-card {&#13;
+&#13;
+  min-height: 265px;&#13;
+&#13;
+  padding: 17px;&#13;
+&#13;
+  border:&#13;
+    1px solid&#13;
+    #d8e1eb;&#13;
+&#13;
+  border-radius: 14px;&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      145deg,&#13;
+      #ffffff,&#13;
+      #f8f6ff&#13;
+    );&#13;
+&#13;
+  transition:&#13;
+    transform .18s ease,&#13;
+    box-shadow .18s ease,&#13;
+    border-color .18s ease;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.available-slot-card:hover {&#13;
+&#13;
+  transform:&#13;
+    translateY(-3px);&#13;
+&#13;
+  border-color:&#13;
+    #c8bbed;&#13;
+&#13;
+  box-shadow:&#13;
+    0&#13;
+    10px&#13;
+    24px&#13;
+    rgba(65,47,158,.08);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.available-slot-top {&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  justify-content: space-between;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.available-slot-icon {&#13;
+&#13;
+  width: 46px;&#13;
+&#13;
+  height: 46px;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  justify-content: center;&#13;
+&#13;
+  border-radius: 12px;&#13;
+&#13;
+  background: #e9e3ff;&#13;
+&#13;
+  color: #5f43db;&#13;
+&#13;
+  font-size: 19px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.available-pill {&#13;
+&#13;
+  padding:&#13;
+    6px&#13;
+    9px;&#13;
+&#13;
+  border-radius: 20px;&#13;
+&#13;
+  background: #ddf8ed;&#13;
+&#13;
+  color: #14805c;&#13;
+&#13;
+  font-size: 7px;&#13;
+&#13;
+  font-weight: 950;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.available-slot-type {&#13;
+&#13;
+  margin-top: 13px;&#13;
+&#13;
+  color: #6245d6;&#13;
+&#13;
+  font-size: 8px;&#13;
+&#13;
+  font-weight: 950;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.available-slot-card h3 {&#13;
+&#13;
+  margin:&#13;
+    6px&#13;
+    0;&#13;
+&#13;
+  color: #15223d;&#13;
+&#13;
+  font-size: 20px;&#13;
+&#13;
+  font-weight: 950;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.available-slot-time {&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  gap: 7px;&#13;
+&#13;
+  color: #36445d;&#13;
+&#13;
+  font-size: 10px;&#13;
+&#13;
+  font-weight: 850;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.available-slot-time i {&#13;
+&#13;
+  color: #6245db;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.available-slot-skill {&#13;
+&#13;
+  margin-top: 15px;&#13;
+&#13;
+  padding:&#13;
+    10px;&#13;
+&#13;
+  border:&#13;
+    1px solid&#13;
+    #d5e5fb;&#13;
+&#13;
+  border-radius: 9px;&#13;
+&#13;
+  background: #eef5ff;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.available-slot-skill span,&#13;
+.available-slot-id span {&#13;
+&#13;
+  color: #78859b;&#13;
+&#13;
+  font-size: 7px;&#13;
+&#13;
+  font-weight: 950;&#13;
+&#13;
+  letter-spacing: .8px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.available-slot-skill strong,&#13;
+.available-slot-id strong {&#13;
+&#13;
+  display: block;&#13;
+&#13;
+  margin-top: 4px;&#13;
+&#13;
+  color: #214d87;&#13;
+&#13;
+  font-size: 9px;&#13;
+&#13;
+  font-weight: 950;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.available-slot-id {&#13;
+&#13;
+  margin-top: 11px;&#13;
+&#13;
+  padding-top: 10px;&#13;
+&#13;
+  border-top:&#13;
+    1px solid&#13;
+    #e7ebf1;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.secondary-slot-button {&#13;
+&#13;
+  height: 36px;&#13;
+&#13;
+  padding:&#13;
+    0&#13;
+    12px;&#13;
+&#13;
+  border:&#13;
+    1px solid&#13;
+    #d2c8fa;&#13;
+&#13;
+  border-radius: 8px;&#13;
+&#13;
+  background: #f5f1ff;&#13;
+&#13;
+  color: #5941d2;&#13;
+&#13;
+  font-size: 8px;&#13;
+&#13;
+  font-weight: 950;&#13;
+&#13;
+  cursor: pointer;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   SCHEDULED INTERVIEWS&#13;
+   ========================================================= */&#13;
+&#13;
+.scheduled-grid {&#13;
+&#13;
+  width: 100%;&#13;
+&#13;
+  padding:&#13;
+    19px;&#13;
+&#13;
+  display: grid;&#13;
+&#13;
+  grid-template-columns:&#13;
+    repeat(&#13;
+      2,&#13;
+      minmax(290px,1fr)&#13;
+    );&#13;
+&#13;
+  gap: 14px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.scheduled-card {&#13;
+&#13;
+  padding: 17px;&#13;
+&#13;
+  border:&#13;
+    1px solid&#13;
+    #d8e1ed;&#13;
+&#13;
+  border-radius: 14px;&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      145deg,&#13;
+      #ffffff,&#13;
+      #f7f9ff&#13;
+    );&#13;
+&#13;
+  cursor: pointer;&#13;
+&#13;
+  transition:&#13;
+    transform .18s ease,&#13;
+    box-shadow .18s ease,&#13;
+    border-color .18s ease;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.scheduled-card:hover {&#13;
+&#13;
+  transform:&#13;
+    translateY(-3px);&#13;
+&#13;
+  border-color:&#13;
+    #c9bdf2;&#13;
+&#13;
+  box-shadow:&#13;
+    0&#13;
+    10px&#13;
+    23px&#13;
+    rgba(65,47,158,.09);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.scheduled-card-top {&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  justify-content: space-between;&#13;
+&#13;
+  gap: 10px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.scheduled-status {&#13;
+&#13;
+  padding:&#13;
+    6px&#13;
+    9px;&#13;
+&#13;
+  border-radius: 18px;&#13;
+&#13;
+  background: #e4f8ed;&#13;
+&#13;
+  color: #148159;&#13;
+&#13;
+  font-size: 7px;&#13;
+&#13;
+  font-weight: 950;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.scheduled-main {&#13;
+&#13;
+  margin-top: 15px;&#13;
+&#13;
+  display: grid;&#13;
+&#13;
+  grid-template-columns:&#13;
+    1fr&#13;
+    1fr;&#13;
+&#13;
+  gap: 9px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.scheduled-main &gt; div {&#13;
+&#13;
+  padding:&#13;
+    9px;&#13;
+&#13;
+  border:&#13;
+    1px solid&#13;
+    #e3e8ef;&#13;
+&#13;
+  border-radius: 8px;&#13;
+&#13;
+  background: #f8fafc;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.scheduled-card-footer {&#13;
+&#13;
+  margin-top: 12px;&#13;
+&#13;
+  padding-top: 10px;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  justify-content: space-between;&#13;
+&#13;
+  border-top:&#13;
+    1px solid&#13;
+    #e7ebf1;&#13;
+&#13;
+  color: #67748a;&#13;
+&#13;
+  font-size: 8px;&#13;
+&#13;
+  font-weight: 800;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.scheduled-card-footer i {&#13;
+&#13;
+  color: #5f45da;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.scheduled-card-footer strong {&#13;
+&#13;
+  color: #5c43d4;&#13;
+&#13;
+  font-size: 8px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   FEEDBACK PENDING&#13;
+   ========================================================= */&#13;
+&#13;
+.feedback-pending-card {&#13;
+&#13;
+  min-height: 87px;&#13;
+&#13;
+  padding:&#13;
+    14px&#13;
+    20px;&#13;
+&#13;
+  display: grid;&#13;
+&#13;
+  grid-template-columns:&#13;
+    minmax(205px,1.4fr)&#13;
+    .8fr&#13;
+    .8fr&#13;
+    .8fr&#13;
+    auto;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  gap: 15px;&#13;
+&#13;
+  border-bottom:&#13;
+    1px solid&#13;
+    #edf1f5;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.give-feedback-button {&#13;
+&#13;
+  height: 34px;&#13;
+&#13;
+  padding:&#13;
+    0&#13;
+    11px;&#13;
+&#13;
+  border: 0;&#13;
+&#13;
+  border-radius: 8px;&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      135deg,&#13;
+      #6044e3,&#13;
+      #795df0&#13;
+    );&#13;
+&#13;
+  color: #ffffff;&#13;
+&#13;
+  font-size: 8px;&#13;
+&#13;
+  font-weight: 950;&#13;
+&#13;
+  cursor: pointer;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   EMPTY STATES&#13;
+   ========================================================= */&#13;
+&#13;
+.slot-empty-state {&#13;
+&#13;
+  padding:&#13;
+    42px&#13;
+    18px;&#13;
+&#13;
+  text-align: center;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.empty-state-icon {&#13;
+&#13;
+  width: 48px;&#13;
+&#13;
+  height: 48px;&#13;
+&#13;
+  margin:&#13;
+    0&#13;
+    auto;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  justify-content: center;&#13;
+&#13;
+  border-radius: 13px;&#13;
+&#13;
+  font-size: 20px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.empty-state-icon.green {&#13;
+&#13;
+  background: #def8eb;&#13;
+&#13;
+  color: #14825b;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.empty-state-icon.purple {&#13;
+&#13;
+  background: #eee8ff;&#13;
+&#13;
+  color: #6045da;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.empty-state-icon.blue {&#13;
+&#13;
+  background: #e6f2ff;&#13;
+&#13;
+  color: #286fbe;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.slot-empty-state h3 {&#13;
+&#13;
+  margin:&#13;
+    10px&#13;
+    0&#13;
+    4px;&#13;
+&#13;
+  color: #29344b;&#13;
+&#13;
+  font-size: 15px;&#13;
+&#13;
+  font-weight: 950;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.slot-empty-state p {&#13;
+&#13;
+  margin: 0;&#13;
+&#13;
+  color: #788397;&#13;
+&#13;
+  font-size: 9px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   MODALS&#13;
+   ========================================================= */&#13;
+&#13;
+.slot-modal-backdrop {&#13;
+&#13;
+  position: fixed !important;&#13;
+&#13;
+  inset: 0 !important;&#13;
+&#13;
+  z-index: 9000 !important;&#13;
+&#13;
+  padding: 24px;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  justify-content: center;&#13;
+&#13;
+  background:&#13;
+    rgba(18,25,43,.55);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.slot-modal {&#13;
+&#13;
+  width:&#13;
+    min(760px,95vw);&#13;
+&#13;
+  max-height: 91vh;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  flex-direction: column;&#13;
+&#13;
+  overflow: hidden;&#13;
+&#13;
+  border:&#13;
+    1px solid&#13;
+    #ded8ed;&#13;
+&#13;
+  border-radius: 17px;&#13;
+&#13;
+  background: #ffffff;&#13;
+&#13;
+  box-shadow:&#13;
+    0&#13;
+    28px&#13;
+    65px&#13;
+    rgba(20,25,50,.25);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.interview-details-modal {&#13;
+&#13;
+  width:&#13;
+    min(880px,95vw);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.slot-modal-header {&#13;
+&#13;
+  min-height: 82px;&#13;
+&#13;
+  padding:&#13;
+    18px&#13;
+    21px;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: flex-start;&#13;
+&#13;
+  justify-content: space-between;&#13;
+&#13;
+  gap: 15px;&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      135deg,&#13;
+      #ffffff,&#13;
+      #faf8ff&#13;
+    );&#13;
+&#13;
+  border-bottom:&#13;
+    1px solid&#13;
+    #e7ebf1;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.slot-modal-header span {&#13;
+&#13;
+  color: #6245da;&#13;
+&#13;
+  font-size: 8px;&#13;
+&#13;
+  font-weight: 950;&#13;
+&#13;
+  letter-spacing: 1.3px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.slot-modal-header h2 {&#13;
+&#13;
+  margin:&#13;
+    4px&#13;
+    0&#13;
+    4px;&#13;
+&#13;
+  color: #17223b;&#13;
+&#13;
+  font-size: 21px;&#13;
+&#13;
+  font-weight: 950;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.slot-modal-header p {&#13;
+&#13;
+  margin: 0;&#13;
+&#13;
+  color: #758197;&#13;
+&#13;
+  font-size: 9px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.slot-modal-close {&#13;
+&#13;
+  width: 35px;&#13;
+&#13;
+  height: 35px;&#13;
+&#13;
+  border:&#13;
+    1px solid&#13;
+    #dce2ea;&#13;
+&#13;
+  border-radius: 8px;&#13;
+&#13;
+  background: #ffffff;&#13;
+&#13;
+  color: #657289;&#13;
+&#13;
+  cursor: pointer;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.slot-modal-body {&#13;
+&#13;
+  flex: 1;&#13;
+&#13;
+  min-height: 0;&#13;
+&#13;
+  overflow-y: auto;&#13;
+&#13;
+  padding:&#13;
+    20px&#13;
+    21px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.slot-modal-footer {&#13;
+&#13;
+  min-height: 65px;&#13;
+&#13;
+  padding:&#13;
+    12px&#13;
+    21px;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  justify-content: flex-end;&#13;
+&#13;
+  gap: 8px;&#13;
+&#13;
+  border-top:&#13;
+    1px solid&#13;
+    #e8ecf1;&#13;
+&#13;
+  background: #fafbfd;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   FORM&#13;
+   ========================================================= */&#13;
+&#13;
+.slot-form-row {&#13;
+&#13;
+  display: grid;&#13;
+&#13;
+  grid-template-columns:&#13;
+    1fr&#13;
+    1fr;&#13;
+&#13;
+  gap: 12px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.slot-form-group {&#13;
+&#13;
+  margin-bottom: 14px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.slot-form-group label,&#13;
+.feedback-form-group label,&#13;
+.score-input-box label,&#13;
+.token-box label {&#13;
+&#13;
+  display: block;&#13;
+&#13;
+  margin-bottom: 6px;&#13;
+&#13;
+  color: #647087;&#13;
+&#13;
+  font-size: 8px;&#13;
+&#13;
+  font-weight: 950;&#13;
+&#13;
+  letter-spacing: .8px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.slot-form-group input,&#13;
+.slot-form-group select,&#13;
+.token-box input,&#13;
+.score-input-box input,&#13;
+.feedback-form-group textarea {&#13;
+&#13;
+  width: 100%;&#13;
+&#13;
+  border:&#13;
+    1px solid&#13;
+    #d8e0e9;&#13;
+&#13;
+  border-radius: 8px;&#13;
+&#13;
+  background: #ffffff;&#13;
+&#13;
+  color: #27344d;&#13;
+&#13;
+  font-family: inherit;&#13;
+&#13;
+  font-size: 10px;&#13;
+&#13;
+  outline: none;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.slot-form-group input,&#13;
+.slot-form-group select,&#13;
+.token-box input,&#13;
+.score-input-box input {&#13;
+&#13;
+  height: 38px;&#13;
+&#13;
+  padding:&#13;
+    0&#13;
+    9px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.feedback-form-group textarea {&#13;
+&#13;
+  min-height: 88px;&#13;
+&#13;
+  padding: 10px;&#13;
+&#13;
+  resize: vertical;&#13;
+&#13;
+  line-height: 1.5;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.slot-form-group input:focus,&#13;
+.slot-form-group select:focus,&#13;
+.token-box input:focus,&#13;
+.score-input-box input:focus,&#13;
+.feedback-form-group textarea:focus {&#13;
+&#13;
+  border-color: #9078e9;&#13;
+&#13;
+  box-shadow:&#13;
+    0&#13;
+    0&#13;
+    0&#13;
+    3px&#13;
+    rgba(112,80,220,.08);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.slot-info-box {&#13;
+&#13;
+  padding:&#13;
+    11px;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: flex-start;&#13;
+&#13;
+  gap: 8px;&#13;
+&#13;
+  border:&#13;
+    1px solid&#13;
+    #d6ccf7;&#13;
+&#13;
+  border-radius: 9px;&#13;
+&#13;
+  background: #f7f3ff;&#13;
+&#13;
+  color: #62567d;&#13;
+&#13;
+  font-size: 8px;&#13;
+&#13;
+  line-height: 1.5;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.slot-form-error {&#13;
+&#13;
+  margin-top: 11px;&#13;
+&#13;
+  padding:&#13;
+    9px&#13;
+    11px;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  gap: 7px;&#13;
+&#13;
+  border:&#13;
+    1px solid&#13;
+    #fecdd3;&#13;
+&#13;
+  border-radius: 8px;&#13;
+&#13;
+  background: #fff0f2;&#13;
+&#13;
+  color: #ad283d;&#13;
+&#13;
+  font-size: 8px;&#13;
+&#13;
+  font-weight: 850;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   MODAL BUTTONS&#13;
+   ========================================================= */&#13;
+&#13;
+.modal-cancel,&#13;
+.modal-create,&#13;
+.modal-verify,&#13;
+.modal-complete {&#13;
+&#13;
+  height: 37px;&#13;
+&#13;
+  padding:&#13;
+    0&#13;
+    12px;&#13;
+&#13;
+  border-radius: 8px;&#13;
+&#13;
+  font-family: inherit;&#13;
+&#13;
+  font-size: 8px;&#13;
+&#13;
+  font-weight: 950;&#13;
+&#13;
+  cursor: pointer;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.modal-cancel {&#13;
+&#13;
+  border:&#13;
+    1px solid&#13;
+    #d8e0e8;&#13;
+&#13;
+  background: #ffffff;&#13;
+&#13;
+  color: #667389;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.modal-create,&#13;
+.modal-verify,&#13;
+.modal-complete {&#13;
+&#13;
+  border: 0;&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      135deg,&#13;
+      #6245dd,&#13;
+      #7e61ea&#13;
+    );&#13;
+&#13;
+  color: #ffffff;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   INTERVIEW DETAILS&#13;
+   ========================================================= */&#13;
+&#13;
+.interview-detail-top {&#13;
+&#13;
+  margin-bottom: 16px;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  justify-content: space-between;&#13;
+&#13;
+  gap: 15px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.detail-student-large {&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  gap: 11px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.detail-student-avatar {&#13;
+&#13;
+  width: 50px;&#13;
+&#13;
+  height: 50px;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  justify-content: center;&#13;
+&#13;
+  border-radius: 12px;&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      135deg,&#13;
+      #6948e3,&#13;
+      #5143ce&#13;
+    );&#13;
+&#13;
+  color: #ffffff;&#13;
+&#13;
+  font-size: 10px;&#13;
+&#13;
+  font-weight: 950;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.detail-student-large strong {&#13;
+&#13;
+  display: block;&#13;
+&#13;
+  color: #17233c;&#13;
+&#13;
+  font-size: 13px;&#13;
+&#13;
+  font-weight: 950;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.detail-student-large span {&#13;
+&#13;
+  display: block;&#13;
+&#13;
+  margin-top: 3px;&#13;
+&#13;
+  color: #7a8799;&#13;
+&#13;
+  font-size: 8px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.interview-detail-grid {&#13;
+&#13;
+  display: grid;&#13;
+&#13;
+  grid-template-columns:&#13;
+    repeat(&#13;
+      4,&#13;
+      minmax(0,1fr)&#13;
+    );&#13;
+&#13;
+  gap: 9px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.interview-detail-grid &gt; div {&#13;
+&#13;
+  padding:&#13;
+    10px;&#13;
+&#13;
+  border:&#13;
+    1px solid&#13;
+    #dfe5ec;&#13;
+&#13;
+  border-radius: 8px;&#13;
+&#13;
+  background: #fafbfd;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.interview-detail-grid span {&#13;
+&#13;
+  display: block;&#13;
+&#13;
+  color: #788498;&#13;
+&#13;
+  font-size: 7px;&#13;
+&#13;
+  font-weight: 950;&#13;
+&#13;
+  letter-spacing: .7px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.interview-detail-grid strong {&#13;
+&#13;
+  display: block;&#13;
+&#13;
+  margin-top: 5px;&#13;
+&#13;
+  color: #1d2941;&#13;
+&#13;
+  font-size: 9px;&#13;
+&#13;
+  line-height: 1.3;&#13;
+&#13;
+  font-weight: 950;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   STATUS EDITOR&#13;
+   ========================================================= */&#13;
+&#13;
+.slot-status-editor {&#13;
+&#13;
+  margin-top: 16px;&#13;
+&#13;
+  padding:&#13;
+    14px;&#13;
+&#13;
+  border:&#13;
+    1px solid&#13;
+    #ddd7f4;&#13;
+&#13;
+  border-radius: 11px;&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      135deg,&#13;
+      #faf9ff,&#13;
+      #f5f7ff&#13;
+    );&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.slot-status-editor-head {&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  justify-content: space-between;&#13;
+&#13;
+  gap: 12px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.slot-status-editor-head&#13;
+&gt; div&#13;
+&gt; span {&#13;
+&#13;
+  display: block;&#13;
+&#13;
+  color: #6751d7;&#13;
+&#13;
+  font-size: 8px;&#13;
+&#13;
+  font-weight: 950;&#13;
+&#13;
+  letter-spacing: 1px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.slot-status-editor-head strong {&#13;
+&#13;
+  display: block;&#13;
+&#13;
+  margin-top: 4px;&#13;
+&#13;
+  color: #18243d;&#13;
+&#13;
+  font-size: 9px;&#13;
+&#13;
+  font-weight: 900;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.slot-status-current {&#13;
+&#13;
+  padding:&#13;
+    6px&#13;
+    9px;&#13;
+&#13;
+  border-radius: 17px;&#13;
+&#13;
+  background: #e6efff;&#13;
+&#13;
+  color: #2c60ca;&#13;
+&#13;
+  font-size: 8px;&#13;
+&#13;
+  font-weight: 950;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.slot-status-editor-row {&#13;
+&#13;
+  margin-top: 11px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.slot-status-select {&#13;
+&#13;
+  width: 100%;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.slot-status-select label {&#13;
+&#13;
+  display: block;&#13;
+&#13;
+  margin-bottom: 6px;&#13;
+&#13;
+  color: #6d7a90;&#13;
+&#13;
+  font-size: 8px;&#13;
+&#13;
+  font-weight: 950;&#13;
+&#13;
+  letter-spacing: .7px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.slot-status-select select {&#13;
+&#13;
+  width: 100%;&#13;
+&#13;
+  height: 38px;&#13;
+&#13;
+  padding:&#13;
+    0&#13;
+    9px;&#13;
+&#13;
+  border:&#13;
+    1px solid&#13;
+    #d7deea;&#13;
+&#13;
+  border-radius: 8px;&#13;
+&#13;
+  background: #ffffff;&#13;
+&#13;
+  color: #17233e;&#13;
+&#13;
+  font-family: inherit;&#13;
+&#13;
+  font-size: 10px;&#13;
+&#13;
+  font-weight: 900;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   QR&#13;
+   ========================================================= */&#13;
+&#13;
+.verify-student-card {&#13;
+&#13;
+  margin-bottom: 15px;&#13;
+&#13;
+  padding:&#13;
+    11px;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  gap: 10px;&#13;
+&#13;
+  border:&#13;
+    1px solid&#13;
+    #dedff0;&#13;
+&#13;
+  border-radius: 10px;&#13;
+&#13;
+  background: #faf9ff;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.verify-avatar {&#13;
+&#13;
+  width: 42px;&#13;
+&#13;
+  height: 42px;&#13;
+&#13;
+  flex: 0 0 42px;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  justify-content: center;&#13;
+&#13;
+  border-radius: 10px;&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      135deg,&#13;
+      #704cf4,&#13;
+      #5646d5&#13;
+    );&#13;
+&#13;
+  color: #ffffff;&#13;
+&#13;
+  font-size: 9px;&#13;
+&#13;
+  font-weight: 950;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.verify-student-card strong,&#13;
+.feedback-form-student strong {&#13;
+&#13;
+  display: block;&#13;
+&#13;
+  color: #202b44;&#13;
+&#13;
+  font-size: 10px;&#13;
+&#13;
+  font-weight: 950;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.verify-student-card span,&#13;
+.feedback-form-student span {&#13;
+&#13;
+  display: block;&#13;
+&#13;
+  margin-top: 3px;&#13;
+&#13;
+  color: #758095;&#13;
+&#13;
+  font-size: 8px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.verify-session-grid {&#13;
+&#13;
+  display: grid;&#13;
+&#13;
+  grid-template-columns:&#13;
+    repeat(3,1fr);&#13;
+&#13;
+  gap: 9px;&#13;
+&#13;
+  margin-bottom: 15px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.verify-session-grid &gt; div {&#13;
+&#13;
+  padding:&#13;
+    10px;&#13;
+&#13;
+  border:&#13;
+    1px solid&#13;
+    #dde4ec;&#13;
+&#13;
+  border-radius: 8px;&#13;
+&#13;
+  background: #fafbfd;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.verify-session-grid span {&#13;
+&#13;
+  color: #778298;&#13;
+&#13;
+  font-size: 7px;&#13;
+&#13;
+  font-weight: 950;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.verify-session-grid strong {&#13;
+&#13;
+  display: block;&#13;
+&#13;
+  margin-top: 5px;&#13;
+&#13;
+  color: #202c45;&#13;
+&#13;
+  font-size: 9px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.token-box {&#13;
+&#13;
+  padding:&#13;
+    12px;&#13;
+&#13;
+  border:&#13;
+    1px solid&#13;
+    #d8dff0;&#13;
+&#13;
+  border-radius: 9px;&#13;
+&#13;
+  background: #faf9ff;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   FEEDBACK&#13;
+   ========================================================= */&#13;
+&#13;
+.feedback-form-student {&#13;
+&#13;
+  margin-bottom: 15px;&#13;
+&#13;
+  padding:&#13;
+    11px;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  gap: 10px;&#13;
+&#13;
+  border:&#13;
+    1px solid&#13;
+    #dedff0;&#13;
+&#13;
+  border-radius: 10px;&#13;
+&#13;
+  background: #faf9ff;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.feedback-score-grid {&#13;
+&#13;
+  display: grid;&#13;
+&#13;
+  grid-template-columns:&#13;
+    repeat(4,1fr);&#13;
+&#13;
+  gap: 9px;&#13;
+&#13;
+  margin-bottom: 15px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.score-input-box,&#13;
+.overall-score-box {&#13;
+&#13;
+  padding:&#13;
+    10px;&#13;
+&#13;
+  border:&#13;
+    1px solid&#13;
+    #dce3eb;&#13;
+&#13;
+  border-radius: 9px;&#13;
+&#13;
+  background: #fafbfd;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.overall-score-box {&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      135deg,&#13;
+      #eee8ff,&#13;
+      #e3dbff&#13;
+    );&#13;
+&#13;
+  border-color:&#13;
+    #cec2fa;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.overall-score-box span {&#13;
+&#13;
+  display: block;&#13;
+&#13;
+  color: #6349d4;&#13;
+&#13;
+  font-size: 7px;&#13;
+&#13;
+  font-weight: 950;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.overall-score-box strong {&#13;
+&#13;
+  display: block;&#13;
+&#13;
+  margin-top: 6px;&#13;
+&#13;
+  color: #3d289f;&#13;
+&#13;
+  font-size: 25px;&#13;
+&#13;
+  font-weight: 950;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   FOOTER&#13;
+   ========================================================= */&#13;
+&#13;
+.slot-page-footer {&#13;
+&#13;
+  padding:&#13;
+    1px&#13;
+    2px&#13;
+    8px;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  justify-content: space-between;&#13;
+&#13;
+  color: #7c8799;&#13;
+&#13;
+  font-size: 8px;&#13;
+&#13;
+  font-weight: 700;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   DESKTOP LARGE SCREEN&#13;
+   ========================================================= */&#13;
+&#13;
+@media (min-width: 1500px) {&#13;
+&#13;
+  .slot-page-content {&#13;
+&#13;
+    padding-left: 34px;&#13;
+&#13;
+    padding-right: 34px;&#13;
+&#13;
+  }&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   MEDIUM DESKTOP&#13;
+   ========================================================= */&#13;
+&#13;
+@media (max-width: 1250px) {&#13;
+&#13;
+  .slot-kpi-grid {&#13;
+&#13;
+    grid-template-columns:&#13;
+      repeat(&#13;
+        2,&#13;
+        minmax(0,1fr)&#13;
+      );&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .available-slot-grid {&#13;
+&#13;
+    grid-template-columns:&#13;
+      repeat(&#13;
+        2,&#13;
+        minmax(220px,1fr)&#13;
+      );&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .scheduled-grid {&#13;
+&#13;
+    grid-template-columns:&#13;
+      1fr;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .slot-request-card {&#13;
+&#13;
+    grid-template-columns:&#13;
+      minmax(190px,1fr)&#13;
+      minmax(105px,.7fr)&#13;
+      minmax(110px,.75fr)&#13;
+      minmax(170px,1fr);&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .request-status {&#13;
+&#13;
+    grid-column:&#13;
+      1/-1;&#13;
+&#13;
+    justify-content: flex-start;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .feedback-pending-card {&#13;
+&#13;
+    grid-template-columns:&#13;
+      1.3fr&#13;
+      .8fr&#13;
+      .8fr&#13;
+      .8fr;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .feedback-pending-card&#13;
+  .give-feedback-button {&#13;
+&#13;
+    grid-column:&#13;
+      1/-1;&#13;
+&#13;
+    justify-self: start;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .interview-detail-grid {&#13;
+&#13;
+    grid-template-columns:&#13;
+      repeat(3,1fr);&#13;
+&#13;
+  }&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   TABLET&#13;
+   ========================================================= */&#13;
+&#13;
+@media (max-width: 900px) {&#13;
+&#13;
+  .campus360-slot-sidebar {&#13;
+&#13;
+    position: fixed !important;&#13;
+&#13;
+    left: 0 !important;&#13;
+&#13;
+    top: 0 !important;&#13;
+&#13;
+    bottom: 0 !important;&#13;
+&#13;
+    transform:&#13;
+      translateX(-100%);&#13;
+&#13;
+    width: 264px !important;&#13;
+&#13;
+    min-width: 264px !important;&#13;
+&#13;
+    max-width: 264px !important;&#13;
+&#13;
+    background:&#13;
+      linear-gradient(&#13;
+        180deg,&#13;
+        #130d2f 0%,&#13;
+        #160d38 48%,&#13;
+        #100a29 100%&#13;
+      ) !important;&#13;
+&#13;
+    border-right:&#13;
+      1px solid&#13;
+      #2d2157 !important;&#13;
+&#13;
+    box-shadow:&#13;
+      10px&#13;
+      0&#13;
+      30px&#13;
+      rgba(32,24,65,.30);&#13;
+&#13;
+    transition:&#13;
+      transform .25s ease;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .campus360-slot-app:not(.sidebar-collapsed)&#13;
+  .campus360-slot-sidebar {&#13;
+&#13;
+    transform:&#13;
+      translateX(0);&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .campus360-slot-main,&#13;
+  .campus360-slot-app.sidebar-collapsed&#13;
+  .campus360-slot-main {&#13;
+&#13;
+    width: 100% !important;&#13;
+&#13;
+    max-width: 100% !important;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .slot-page-header {&#13;
+&#13;
+    align-items: flex-start;&#13;
+&#13;
+    flex-direction: column;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .create-slot-button {&#13;
+&#13;
+    align-self: flex-start;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .slot-request-card {&#13;
+&#13;
+    grid-template-columns:&#13;
+      1fr&#13;
+      1fr;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .request-status {&#13;
+&#13;
+    grid-column:&#13;
+      1/-1;&#13;
+&#13;
+    justify-content: flex-start;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .interview-detail-grid {&#13;
+&#13;
+    grid-template-columns:&#13;
+      repeat(2,1fr);&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .feedback-score-grid {&#13;
+&#13;
+    grid-template-columns:&#13;
+      repeat(2,1fr);&#13;
+&#13;
+  }&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   MOBILE&#13;
+   ========================================================= */&#13;
+&#13;
+@media (max-width: 700px) {&#13;
+&#13;
+  .slot-topbar {&#13;
+&#13;
+    height: 64px;&#13;
+&#13;
+    min-height: 64px;&#13;
+&#13;
+    padding:&#13;
+      0&#13;
+      10px;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .slot-menu-button,&#13;
+  .slot-top-action {&#13;
+&#13;
+    width: 38px;&#13;
+&#13;
+    height: 38px;&#13;
+&#13;
+    flex-basis: 38px;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .slot-top-profile-text {&#13;
+&#13;
+    display: none;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .slot-top-profile {&#13;
+&#13;
+    padding-left: 5px;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .slot-page-content {&#13;
+&#13;
+    padding:&#13;
+      18px&#13;
+      12px&#13;
+      30px;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .slot-page-header h1 {&#13;
+&#13;
+    font-size: 28px;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .slot-kpi-grid {&#13;
+&#13;
+    grid-template-columns:&#13;
+      1fr;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .available-slot-grid,&#13;
+  .scheduled-grid {&#13;
+&#13;
+    grid-template-columns:&#13;
+      1fr;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .slot-request-card {&#13;
+&#13;
+    grid-template-columns:&#13;
+      1fr;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .request-status {&#13;
+&#13;
+    grid-column: auto;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .feedback-pending-card {&#13;
+&#13;
+    grid-template-columns:&#13;
+      1fr;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .give-feedback-button {&#13;
+&#13;
+    justify-self: start;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .interview-detail-grid {&#13;
+&#13;
+    grid-template-columns:&#13;
+      1fr;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .verify-session-grid {&#13;
+&#13;
+    grid-template-columns:&#13;
+      1fr;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .feedback-score-grid {&#13;
+&#13;
+    grid-template-columns:&#13;
+      1fr;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .slot-form-row {&#13;
+&#13;
+    grid-template-columns:&#13;
+      1fr;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .interview-detail-top {&#13;
+&#13;
+    align-items: flex-start;&#13;
+&#13;
+    flex-direction: column;&#13;
+&#13;
+  }&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   FINAL SIDEBAR COLOR OVERRIDE&#13;
+   ========================================================= */&#13;
+&#13;
+.campus360-slot-app&#13;
+.campus360-slot-sidebar {&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      180deg,&#13;
+      #130d2f 0%,&#13;
+      #160d38 48%,&#13;
+      #100a29 100%&#13;
+    ) !important;&#13;
+&#13;
+  border-right:&#13;
+    1px solid&#13;
+    #2d2157 !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.campus360-slot-app&#13;
+.slot-brand {&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      135deg,&#13;
+      #170e38,&#13;
+      #1c1045&#13;
+    ) !important;&#13;
+&#13;
+  border-bottom:&#13;
+    1px solid&#13;
+    #2d2157 !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.campus360-slot-app&#13;
+.slot-trainer-profile {&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      135deg,&#13;
+      #211342,&#13;
+      #29164f&#13;
+    ) !important;&#13;
+&#13;
+  border-color:&#13;
+    #4b3475 !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.campus360-slot-app&#13;
+.slot-nav-item {&#13;
+&#13;
+  background:&#13;
+    transparent !important;&#13;
+&#13;
+  color:&#13;
+    #c4b8dc !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.campus360-slot-app&#13;
+.slot-nav-item:hover {&#13;
+&#13;
+  background:&#13;
+    rgba(124,58,237,.18) !important;&#13;
+&#13;
+  color:&#13;
+    #ffffff !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.campus360-slot-app&#13;
+.slot-nav-item.active {&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      90deg,&#13;
+      #7c3aed 0%,&#13;
+      #8b3ff2 100%&#13;
+    ) !important;&#13;
+&#13;
+  color:&#13;
+    #ffffff !important;&#13;
+&#13;
+  border-left:&#13;
+    4px solid&#13;
+    #a78bfa !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.campus360-slot-app&#13;
+.slot-nav-icon {&#13;
+&#13;
+  color:&#13;
+    #a99ac8 !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.campus360-slot-app&#13;
+.slot-nav-item:hover&#13;
+.slot-nav-icon,&#13;
+&#13;
+.campus360-slot-app&#13;
+.slot-nav-item.active&#13;
+.slot-nav-icon {&#13;
+&#13;
+  color:&#13;
+    #ffffff !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.campus360-slot-app&#13;
+.slot-brand-text strong,&#13;
+&#13;
+.campus360-slot-app&#13;
+.slot-trainer-info strong {&#13;
+&#13;
+  color:&#13;
+    #ffffff !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.campus360-slot-app&#13;
+.slot-brand-text span,&#13;
+&#13;
+.campus360-slot-app&#13;
+.slot-trainer-info span {&#13;
+&#13;
+  color:&#13;
+    #b9abd8 !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.campus360-slot-app&#13;
+.slot-nav-label {&#13;
+&#13;
+  color:&#13;
+    #9283b6 !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.campus360-slot-app&#13;
+.slot-nav-count {&#13;
+&#13;
+  background:&#13;
+    #3a2764 !important;&#13;
+&#13;
+  color:&#13;
+    #d9ceef !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.campus360-slot-app&#13;
+.slot-nav-item.active&#13;
+.slot-nav-count {&#13;
+&#13;
+  background:&#13;
+    rgba(255,255,255,.18) !important;&#13;
+&#13;
+  color:&#13;
+    #ffffff !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   END&#13;
+   ========================================================= */</css>
+        <data_table>sp_instance</data_table>
+        <demo_data/>
+        <description/>
+        <docs/>
+        <field_list/>
+        <has_preview>false</has_preview>
+        <id>campus360_trainer_mock_slots</id>
+        <internal>false</internal>
+        <link><![CDATA[function link(scope, element, attrs, controller) {
+  
+}]]></link>
+        <name>campus360_trainer_mock_slot_availability</name>
+        <option_schema/>
+        <public>false</public>
+        <roles/>
+        <script><![CDATA[(function() {
+
+  /* =========================================================
+     TABLES
+     ========================================================= */
+
+  var AVAILABILITY_TABLE =
+    'x_snc_campus360_trainer_interview_availability';
+
+  var SLOT_REQUEST_TABLE =
+    'x_snc_campus360_mock_interview_slot_request';
+
+  var REQUEST_TRAINER_TABLE =
+    'x_snc_campus360_mock_interview_request_trainer';
+
+  var MOCK_INTERVIEW_TABLE =
+    'x_snc_campus360_mock_interview';
+
+  var FEEDBACK_TABLE =
+    'x_snc_campus360_interview_feedback';
+
+  var TRAINER_TABLE =
+    'x_snc_campus360_trainer_master';
+
+  var STUDENT_TABLE =
+    'x_snc_campus360_student_master';
+
+
+  /* =========================================================
+     INITIAL DATA
+     ========================================================= */
+
+  data.error = '';
+
+  data.trainer = {
+    sys_id: '',
+    id: '',
+    name: 'Trainer',
+    initials: 'TR'
+  };
+
+  data.metrics = {
+    availableSlots: 0,
+    pendingRequests: 0,
+    scheduled: 0,
+    feedbackPending: 0,
+    verified: 0
+  };
+
+  data.availableSlots = [];
+  data.requests = [];
+  data.scheduledInterviews = [];
+  data.feedbackPending = [];
+
+
+  /* =========================================================
+     STATUS OPTIONS
+     ========================================================= */
+
+  data.interviewStatusOptions = [
+
+    {
+      value: 'Scheduled',
+      label: 'Scheduled'
+    },
+
+    {
+      value: 'Completed',
+      label: 'Completed'
+    }
+
+  ];
+
+
+  /* =========================================================
+     CURRENT TRAINER
+     ========================================================= */
+
+  var trainerParam =
+    clean(
+      $sp.getParameter(
+        'trainer'
+      )
+    );
+
+
+  var trainerGR =
+    new GlideRecord(
+      TRAINER_TABLE
+    );
+
+
+  var trainerIdField =
+    resolveField(
+      trainerGR,
+      ['trainer_id'],
+      ['Trainer ID']
+    );
+
+
+  if (
+    trainerParam &&
+    trainerIdField
+  ) {
+
+    trainerGR.addQuery(
+      trainerIdField,
+      trainerParam
+    );
+
+  }
+
+
+  trainerGR.setLimit(1);
+  trainerGR.query();
+
+
+  if (
+    !trainerGR.next()
+  ) {
+
+    data.error =
+      'Trainer record could not be found.';
+
+    return;
+
+  }
+
+
+  var trainerSysId =
+    trainerGR.getUniqueValue();
+
+
+  data.trainer = {
+
+    sys_id:
+      trainerSysId,
+
+    id:
+      getSafe(
+        trainerGR,
+        ['trainer_id'],
+        ['Trainer ID']
+      ),
+
+    name:
+      getSafe(
+        trainerGR,
+        ['trainer_name'],
+        ['Trainer Name']
+      ) ||
+      trainerGR.getDisplayValue(),
+
+    initials:
+      getInitials(
+        getSafe(
+          trainerGR,
+          ['trainer_name'],
+          ['Trainer Name']
+        ) ||
+        trainerGR.getDisplayValue()
+      )
+
+  };
+
+
+  /* =========================================================
+     ACTIONS
+     ========================================================= */
+
+  if (
+    input &&
+    input.action
+  ) {
+
+    if (
+      input.action ==
+      'create_slot'
+    ) {
+
+      createSlot();
+
+    }
+
+
+    else if (
+      input.action ==
+      'accept_request'
+    ) {
+
+      acceptRequest();
+
+    }
+
+
+    else if (
+      input.action ==
+      'verify_qr'
+    ) {
+
+      verifyQR();
+
+    }
+
+
+    else if (
+      input.action ==
+      'mark_completed'
+    ) {
+
+      markCompleted();
+
+    }
+
+
+    else if (
+      input.action ==
+      'submit_feedback'
+    ) {
+
+      submitFeedback();
+
+    }
+
+  }
+
+
+  /* =========================================================
+     LOAD PAGE DATA
+     ========================================================= */
+
+  loadPage();
+
+
+  function loadPage() {
+
+    data.availableSlots = [];
+    data.requests = [];
+    data.scheduledInterviews = [];
+    data.feedbackPending = [];
+
+
+    loadAvailableSlots();
+    loadRequests();
+    loadScheduledInterviews();
+    loadFeedbackPending();
+
+
+    data.metrics.availableSlots =
+      data.availableSlots.length;
+
+
+    data.metrics.pendingRequests =
+      data.requests.length;
+
+
+    data.metrics.scheduled =
+      data.scheduledInterviews.length;
+
+
+    data.metrics.feedbackPending =
+      data.feedbackPending.length;
+
+
+    data.metrics.verified =
+      countVerified();
+
+  }
+
+
+  /* =========================================================
+     AVAILABLE SLOTS
+     ========================================================= */
+
+  function loadAvailableSlots() {
+
+    var gr =
+      new GlideRecord(
+        AVAILABILITY_TABLE
+      );
+
+
+    var trainerField =
+      resolveField(
+        gr,
+        [
+          'trainer',
+          'trainer_reference'
+        ],
+        ['Trainer']
+      );
+
+
+    var statusField =
+      resolveField(
+        gr,
+        ['status'],
+        ['Status']
+      );
+
+
+    if (
+      !trainerField
+    ) {
+
+      return;
+
+    }
+
+
+    gr.addQuery(
+      trainerField,
+      trainerSysId
+    );
+
+
+    if (
+      statusField
+    ) {
+
+      gr.addQuery(
+        statusField,
+        'Available'
+      );
+
+    }
+
+
+    gr.orderBy(
+      'available_date'
+    );
+
+    gr.query();
+
+
+    while (
+      gr.next()
+    ) {
+
+      data.availableSlots.push(
+        makeAvailabilityObject(
+          gr
+        )
+      );
+
+    }
+
+  }
+
+
+  /* =========================================================
+     STUDENT REQUESTS
+     ========================================================= */
+
+  function loadRequests() {
+
+    var availabilityIds =
+      getTrainerAvailabilityIds();
+
+
+    if (
+      !availabilityIds.length
+    ) {
+
+      return;
+
+    }
+
+
+    var gr =
+      new GlideRecord(
+        SLOT_REQUEST_TABLE
+      );
+
+
+    var availabilityField =
+      resolveField(
+        gr,
+        ['selected_availability'],
+        ['Selected Availability']
+      );
+
+
+    var statusField =
+      resolveField(
+        gr,
+        ['status'],
+        ['Status']
+      );
+
+
+    if (
+      !availabilityField
+    ) {
+
+      return;
+
+    }
+
+
+    gr.addQuery(
+      availabilityField,
+      'IN',
+      availabilityIds.join(',')
+    );
+
+
+    if (
+      statusField
+    ) {
+
+      gr.addQuery(
+        statusField,
+        'Requested'
+      );
+
+    }
+
+
+    gr.orderByDesc(
+      'sys_created_on'
+    );
+
+    gr.query();
+
+
+    while (
+      gr.next()
+    ) {
+
+      data.requests.push(
+        makeRequestObject(
+          gr
+        )
+      );
+
+    }
+
+  }
+
+
+  /* =========================================================
+     SCHEDULED INTERVIEWS
+     ========================================================= */
+
+  function loadScheduledInterviews() {
+
+    var gr =
+      new GlideRecord(
+        MOCK_INTERVIEW_TABLE
+      );
+
+
+    var trainerField =
+      resolveField(
+        gr,
+        [
+          'trainer_reference',
+          'trainer'
+        ],
+        [
+          'Trainer Reference',
+          'Trainer'
+        ]
+      );
+
+
+    var statusField =
+      resolveField(
+        gr,
+        ['interview_status'],
+        ['Interview Status']
+      );
+
+
+    if (
+      !trainerField ||
+      !statusField
+    ) {
+
+      return;
+
+    }
+
+
+    gr.addQuery(
+      trainerField,
+      trainerSysId
+    );
+
+
+    gr.addQuery(
+      statusField,
+      'Scheduled'
+    );
+
+
+    gr.orderBy(
+      'interview_date'
+    );
+
+    gr.query();
+
+
+    while (
+      gr.next()
+    ) {
+
+      data.scheduledInterviews.push(
+        makeMockObject(
+          gr
+        )
+      );
+
+    }
+
+  }
+
+
+  /* =========================================================
+     FEEDBACK PENDING
+     ========================================================= */
+
+  function loadFeedbackPending() {
+
+    var gr =
+      new GlideRecord(
+        MOCK_INTERVIEW_TABLE
+      );
+
+
+    var trainerField =
+      resolveField(
+        gr,
+        [
+          'trainer_reference',
+          'trainer'
+        ],
+        [
+          'Trainer Reference',
+          'Trainer'
+        ]
+      );
+
+
+    var statusField =
+      resolveField(
+        gr,
+        ['interview_status'],
+        ['Interview Status']
+      );
+
+
+    if (
+      !trainerField ||
+      !statusField
+    ) {
+
+      return;
+
+    }
+
+
+    gr.addQuery(
+      trainerField,
+      trainerSysId
+    );
+
+
+    gr.addQuery(
+      statusField,
+      'Completed'
+    );
+
+
+    gr.query();
+
+
+    while (
+      gr.next()
+    ) {
+
+      data.feedbackPending.push(
+        makeMockObject(
+          gr
+        )
+      );
+
+    }
+
+  }
+
+
+  /* =========================================================
+     CREATE SLOT
+     ========================================================= */
+
+  function createSlot() {
+
+    data.slotSuccess =
+      false;
+
+    data.slotMessage =
+      '';
+
+
+    var interviewType =
+      clean(
+        input.interviewType
+      );
+
+
+    var skillArea =
+      clean(
+        input.skillArea
+      );
+
+
+    var availableDate =
+      normalizeDate(
+        input.availableDate
+      );
+
+
+    var startTime =
+      normalizeTime(
+        input.startTime
+      );
+
+
+    var endTime =
+      normalizeTime(
+        input.endTime
+      );
+
+
+    if (!interviewType) {
+
+      data.slotMessage =
+        'Interview Type is required.';
+
+      return;
+
+    }
+
+
+    if (!availableDate) {
+
+      data.slotMessage =
+        'Available Date is required.';
+
+      return;
+
+    }
+
+
+    if (!startTime || !endTime) {
+
+      data.slotMessage =
+        'Start Time and End Time are required.';
+
+      return;
+
+    }
+
+
+    if (
+      timeToMinutes(endTime) <=
+      timeToMinutes(startTime)
+    ) {
+
+      data.slotMessage =
+        'End Time must be after Start Time.';
+
+      return;
+
+    }
+
+
+    var gr =
+      new GlideRecord(
+        AVAILABILITY_TABLE
+      );
+
+
+    if (
+      !gr.isValid()
+    ) {
+
+      data.slotMessage =
+        'Trainer Interview Availability table could not be accessed.';
+
+      return;
+
+    }
+
+
+    var trainerField =
+      resolveField(
+        gr,
+        [
+          'trainer',
+          'trainer_reference'
+        ],
+        ['Trainer']
+      );
+
+
+    var idField =
+      resolveField(
+        gr,
+        ['availability_id'],
+        ['Availability ID']
+      );
+
+
+    var dateField =
+      resolveField(
+        gr,
+        ['available_date'],
+        ['Available Date']
+      );
+
+
+    var startField =
+      resolveField(
+        gr,
+        ['start_time'],
+        ['Start Time']
+      );
+
+
+    var endField =
+      resolveField(
+        gr,
+        ['end_time'],
+        ['End Time']
+      );
+
+
+    var typeField =
+      resolveField(
+        gr,
+        ['interview_type'],
+        ['Interview Type']
+      );
+
+
+    var skillField =
+      resolveField(
+        gr,
+        ['skill_area'],
+        ['Skill Area']
+      );
+
+
+    var statusField =
+      resolveField(
+        gr,
+        ['status'],
+        ['Status']
+      );
+
+
+    if (
+      !trainerField ||
+      !idField ||
+      !dateField ||
+      !startField ||
+      !endField ||
+      !typeField ||
+      !statusField
+    ) {
+
+      data.slotMessage =
+        'Required availability fields are missing.';
+
+      return;
+
+    }
+
+
+    gr.initialize();
+
+
+    gr.setValue(
+      idField,
+      generateAvailabilityId()
+    );
+
+
+    gr.setValue(
+      trainerField,
+      trainerSysId
+    );
+
+
+    gr.setValue(
+      dateField,
+      availableDate
+    );
+
+
+    gr.setValue(
+      startField,
+      startTime
+    );
+
+
+    gr.setValue(
+      endField,
+      endTime
+    );
+
+
+    gr.setValue(
+      typeField,
+      interviewType
+    );
+
+
+    if (
+      skillField
+    ) {
+
+      gr.setValue(
+        skillField,
+        skillArea
+      );
+
+    }
+
+
+    gr.setValue(
+      statusField,
+      'Available'
+    );
+
+
+    if (
+      gr.isValidField(
+        'active'
+      )
+    ) {
+
+      gr.setValue(
+        'active',
+        true
+      );
+
+    }
+
+
+    var sysId =
+      gr.insert();
+
+
+    if (!sysId) {
+
+      data.slotMessage =
+        'Available slot could not be created.';
+
+      return;
+
+    }
+
+
+    data.slotSuccess =
+      true;
+
+    data.slotMessage =
+      'Interview slot created successfully.';
+
+  }
+
+
+  /* =========================================================
+     ACCEPT STUDENT REQUEST
+     ========================================================= */
+
+  function acceptRequest() {
+
+    data.acceptSuccess =
+      false;
+
+    data.acceptMessage =
+      '';
+
+
+    var requestSysId =
+      clean(
+        input.request
+      );
+
+
+    if (!requestSysId) {
+
+      data.acceptMessage =
+        'Student request is missing.';
+
+      return;
+
+    }
+
+
+    var requestGR =
+      new GlideRecord(
+        SLOT_REQUEST_TABLE
+      );
+
+
+    if (
+      !requestGR.get(
+        requestSysId
+      )
+    ) {
+
+      data.acceptMessage =
+        'Student request could not be found.';
+
+      return;
+
+    }
+
+
+    var requestStatusField =
+      resolveField(
+        requestGR,
+        ['status'],
+        ['Status']
+      );
+
+
+    var studentField =
+      resolveField(
+        requestGR,
+        ['student_reference'],
+        ['Student']
+      );
+
+
+    var availabilityField =
+      resolveField(
+        requestGR,
+        ['selected_availability'],
+        ['Selected Availability']
+      );
+
+
+    if (
+      !requestStatusField ||
+      !studentField ||
+      !availabilityField
+    ) {
+
+      data.acceptMessage =
+        'Required request fields are missing.';
+
+      return;
+
+    }
+
+
+    if (
+      requestGR.getValue(
+        requestStatusField
+      ) != 'Requested'
+    ) {
+
+      data.acceptMessage =
+        'This request has already been processed.';
+
+      return;
+
+    }
+
+
+    var availabilitySysId =
+      requestGR.getValue(
+        availabilityField
+      );
+
+
+    var availabilityGR =
+      new GlideRecord(
+        AVAILABILITY_TABLE
+      );
+
+
+    if (
+      !availabilityGR.get(
+        availabilitySysId
+      )
+    ) {
+
+      data.acceptMessage =
+        'Interview availability could not be found.';
+
+      return;
+
+    }
+
+
+    var availabilityTrainerField =
+      resolveField(
+        availabilityGR,
+        [
+          'trainer',
+          'trainer_reference'
+        ],
+        ['Trainer']
+      );
+
+
+    var availabilityStatusField =
+      resolveField(
+        availabilityGR,
+        ['status'],
+        ['Status']
+      );
+
+
+    if (
+      !availabilityTrainerField ||
+      !availabilityStatusField
+    ) {
+
+      data.acceptMessage =
+        'Availability configuration is incomplete.';
+
+      return;
+
+    }
+
+
+    if (
+      availabilityGR.getValue(
+        availabilityTrainerField
+      ) != trainerSysId
+    ) {
+
+      data.acceptMessage =
+        'This slot does not belong to the current trainer.';
+
+      return;
+
+    }
+
+
+    if (
+      availabilityGR.getValue(
+        availabilityStatusField
+      ) != 'Available'
+    ) {
+
+      data.acceptMessage =
+        'This slot is no longer available.';
+
+      return;
+
+    }
+
+
+    /* -----------------------------------------------------
+       CREATE MOCK INTERVIEW
+       Only after trainer accepts.
+       ----------------------------------------------------- */
+
+    var mockGR =
+      new GlideRecord(
+        MOCK_INTERVIEW_TABLE
+      );
+
+
+    mockGR.initialize();
+
+
+    var mockInterviewIdField =
+      resolveField(
+        mockGR,
+        ['interview_id'],
+        ['Interview ID']
+      );
+
+
+    var mockStudentField =
+      resolveField(
+        mockGR,
+        [
+          'student_reference',
+          'student'
+        ],
+        [
+          'Student Reference',
+          'Student'
+        ]
+      );
+
+
+    var mockTrainerField =
+      resolveField(
+        mockGR,
+        [
+          'trainer_reference',
+          'trainer'
+        ],
+        [
+          'Trainer Reference',
+          'Trainer'
+        ]
+      );
+
+
+    var mockTypeField =
+      resolveField(
+        mockGR,
+        ['interview_type'],
+        ['Interview Type']
+      );
+
+
+    var mockDateField =
+      resolveField(
+        mockGR,
+        ['interview_date'],
+        ['Interview Date']
+      );
+
+
+    var mockStartField =
+      resolveField(
+        mockGR,
+        ['start_time'],
+        ['Start Time']
+      );
+
+
+    var mockEndField =
+      resolveField(
+        mockGR,
+        ['end_time'],
+        ['End Time']
+      );
+
+
+    var mockSlotRequestField =
+      resolveField(
+        mockGR,
+        ['slot_request'],
+        ['Slot Request']
+      );
+
+
+    var mockQRField =
+      resolveField(
+        mockGR,
+        ['qr_code'],
+        ['QR Code']
+      );
+
+
+    var mockQRStatusField =
+      resolveField(
+        mockGR,
+        ['qr_status'],
+        ['QR Status']
+      );
+
+
+    var mockAttendanceField =
+      resolveField(
+        mockGR,
+        ['attendance_status'],
+        ['Attendance Status']
+      );
+
+
+    var mockInterviewStatusField =
+      resolveField(
+        mockGR,
+        ['interview_status'],
+        ['Interview Status']
+      );
+
+
+    if (
+      !mockInterviewIdField ||
+      !mockStudentField ||
+      !mockTrainerField ||
+      !mockTypeField ||
+      !mockDateField ||
+      !mockStartField ||
+      !mockEndField ||
+      !mockQRField ||
+      !mockQRStatusField ||
+      !mockAttendanceField ||
+      !mockInterviewStatusField
+    ) {
+
+      data.acceptMessage =
+        'Required Mock Interview fields are missing.';
+
+      return;
+
+    }
+
+
+    mockGR.setValue(
+      mockInterviewIdField,
+      generateInterviewId()
+    );
+
+
+    mockGR.setValue(
+      mockStudentField,
+      requestGR.getValue(
+        studentField
+      )
+    );
+
+
+    mockGR.setValue(
+      mockTrainerField,
+      trainerSysId
+    );
+
+
+    mockGR.setValue(
+      mockTypeField,
+      getSafe(
+        availabilityGR,
+        ['interview_type'],
+        ['Interview Type']
+      )
+    );
+
+
+    mockGR.setValue(
+      mockDateField,
+      getSafe(
+        availabilityGR,
+        ['available_date'],
+        ['Available Date']
+      )
+    );
+
+
+    mockGR.setValue(
+      mockStartField,
+      getSafe(
+        availabilityGR,
+        ['start_time'],
+        ['Start Time']
+      )
+    );
+
+
+    mockGR.setValue(
+      mockEndField,
+      getSafe(
+        availabilityGR,
+        ['end_time'],
+        ['End Time']
+      )
+    );
+
+
+    if (
+      mockSlotRequestField
+    ) {
+
+      mockGR.setValue(
+        mockSlotRequestField,
+        requestSysId
+      );
+
+    }
+
+
+    var qrToken =
+      generateQRToken();
+
+
+    var qrUrl =
+      'https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=' +
+      encodeURIComponent(
+        qrToken
+      );
+
+
+    mockGR.setValue(
+      mockQRField,
+      qrUrl
+    );
+
+
+    mockGR.setValue(
+      mockQRStatusField,
+      'Generated'
+    );
+
+
+    mockGR.setValue(
+      mockAttendanceField,
+      'Scheduled'
+    );
+
+
+    mockGR.setValue(
+      mockInterviewStatusField,
+      'Scheduled'
+    );
+
+
+    var mockSysId =
+      mockGR.insert();
+
+
+    if (!mockSysId) {
+
+      data.acceptMessage =
+        'Mock Interview could not be created.';
+
+      return;
+
+    }
+
+
+    requestGR.setValue(
+      requestStatusField,
+      'Accepted'
+    );
+
+
+    if (
+      requestGR.isValidField(
+        'accepted_trainer'
+      )
+    ) {
+
+      requestGR.setValue(
+        'accepted_trainer',
+        trainerSysId
+      );
+
+    }
+
+
+    if (
+      requestGR.isValidField(
+        'mock_interview'
+      )
+    ) {
+
+      requestGR.setValue(
+        'mock_interview',
+        mockSysId
+      );
+
+    }
+
+
+    if (
+      requestGR.isValidField(
+        'accepted_on'
+      )
+    ) {
+
+      requestGR.setValue(
+        'accepted_on',
+        new GlideDateTime()
+      );
+
+    }
+
+
+    requestGR.update();
+
+
+    var trainerRequestGR =
+      new GlideRecord(
+        REQUEST_TRAINER_TABLE
+      );
+
+
+    var trainerRequestField =
+      resolveField(
+        trainerRequestGR,
+        ['request'],
+        ['Request']
+      );
+
+
+    var trainerRequestTrainerField =
+      resolveField(
+        trainerRequestGR,
+        ['trainer'],
+        ['Trainer']
+      );
+
+
+    if (
+      trainerRequestField
+    ) {
+
+      trainerRequestGR.addQuery(
+        trainerRequestField,
+        requestSysId
+      );
+
+      if (
+        trainerRequestTrainerField
+      ) {
+
+        trainerRequestGR.addQuery(
+          trainerRequestTrainerField,
+          trainerSysId
+        );
+
+      }
+
+      trainerRequestGR.setLimit(1);
+      trainerRequestGR.query();
+
+
+      if (
+        trainerRequestGR.next()
+      ) {
+
+        if (
+          trainerRequestGR.isValidField(
+            'response'
+          )
+        ) {
+
+          trainerRequestGR.setValue(
+            'response',
+            'Accepted'
+          );
+
+        }
+
+
+        if (
+          trainerRequestGR.isValidField(
+            'response_on'
+          )
+        ) {
+
+          trainerRequestGR.setValue(
+            'response_on',
+            new GlideDateTime()
+          );
+
+        }
+
+
+        trainerRequestGR.update();
+
+      }
+
+    }
+
+
+    availabilityGR.setValue(
+      availabilityStatusField,
+      'Booked'
+    );
+
+
+    availabilityGR.update();
+
+
+    data.acceptSuccess =
+      true;
+
+    data.acceptMessage =
+      'Student request accepted and interview scheduled.';
+
+  }
+
+
+  /* =========================================================
+     QR VERIFICATION
+     ========================================================= */
+
+  function verifyQR() {
+
+    data.verifySuccess =
+      false;
+
+    data.verifyMessage =
+      '';
+
+
+    var interviewSysId =
+      clean(
+        input.interview
+      );
+
+
+    var enteredToken =
+      clean(
+        input.token
+      );
+
+
+    if (
+      !interviewSysId ||
+      !enteredToken
+    ) {
+
+      data.verifyMessage =
+        'Interview and QR token are required.';
+
+      return;
+
+    }
+
+
+    var gr =
+      new GlideRecord(
+        MOCK_INTERVIEW_TABLE
+      );
+
+
+    if (
+      !gr.get(
+        interviewSysId
+      )
+    ) {
+
+      data.verifyMessage =
+        'Mock Interview could not be found.';
+
+      return;
+
+    }
+
+
+    var trainerField =
+      resolveField(
+        gr,
+        [
+          'trainer_reference',
+          'trainer'
+        ],
+        [
+          'Trainer Reference',
+          'Trainer'
+        ]
+      );
+
+
+    var qrField =
+      resolveField(
+        gr,
+        ['qr_code'],
+        ['QR Code']
+      );
+
+
+    var qrStatusField =
+      resolveField(
+        gr,
+        ['qr_status'],
+        ['QR Status']
+      );
+
+
+    var attendanceField =
+      resolveField(
+        gr,
+        ['attendance_status'],
+        ['Attendance Status']
+      );
+
+
+    if (
+      !trainerField ||
+      !qrField ||
+      !qrStatusField ||
+      !attendanceField
+    ) {
+
+      data.verifyMessage =
+        'QR or attendance fields are missing.';
+
+      return;
+
+    }
+
+
+    if (
+      gr.getValue(
+        trainerField
+      ) != trainerSysId
+    ) {
+
+      data.verifyMessage =
+        'This interview does not belong to the current trainer.';
+
+      return;
+
+    }
+
+
+    var actualToken =
+      extractQRToken(
+        gr.getValue(
+          qrField
+        )
+      );
+
+
+    if (
+      !actualToken ||
+      actualToken.toUpperCase() !=
+      enteredToken.toUpperCase()
+    ) {
+
+      data.verifyMessage =
+        'Invalid QR token.';
+
+      return;
+
+    }
+
+
+    gr.setValue(
+      qrStatusField,
+      'Scanned'
+    );
+
+
+    gr.setValue(
+      attendanceField,
+      'Present'
+    );
+
+
+    if (
+      !gr.update()
+    ) {
+
+      data.verifyMessage =
+        'Attendance could not be updated.';
+
+      return;
+
+    }
+
+
+    data.verifySuccess =
+      true;
+
+    data.verifyMessage =
+      'QR verified successfully. Attendance marked Present.';
+
+  }
+
+
+  /* =========================================================
+     MARK INTERVIEW COMPLETED
+     ========================================================= */
+
+  function markCompleted() {
+
+    data.completeSuccess =
+      false;
+
+    data.completeMessage =
+      '';
+
+
+    var interviewSysId =
+      clean(
+        input.interview
+      );
+
+
+    /*
+     * Receive the selected dropdown value.
+     */
+
+    var selectedStatus =
+      clean(
+        input.status
+      );
+
+
+    if (
+      !selectedStatus
+    ) {
+
+      selectedStatus =
+        'Completed';
+
+    }
+
+
+    if (
+      !interviewSysId
+    ) {
+
+      data.completeMessage =
+        'Interview record is missing.';
+
+      return;
+
+    }
+
+
+    /*
+     * Only Completed can be submitted.
+     */
+
+    if (
+      selectedStatus !=
+      'Completed'
+    ) {
+
+      data.completeMessage =
+        'Please select Completed as the interview status.';
+
+      return;
+
+    }
+
+
+    var gr =
+      new GlideRecord(
+        MOCK_INTERVIEW_TABLE
+      );
+
+
+    if (
+      !gr.get(
+        interviewSysId
+      )
+    ) {
+
+      data.completeMessage =
+        'Mock Interview was not found.';
+
+      return;
+
+    }
+
+
+    var trainerField =
+      resolveField(
+        gr,
+        [
+          'trainer_reference',
+          'trainer'
+        ],
+        [
+          'Trainer Reference',
+          'Trainer'
+        ]
+      );
+
+
+    var attendanceField =
+      resolveField(
+        gr,
+        ['attendance_status'],
+        ['Attendance Status']
+      );
+
+
+    var qrStatusField =
+      resolveField(
+        gr,
+        ['qr_status'],
+        ['QR Status']
+      );
+
+
+    var statusField =
+      resolveField(
+        gr,
+        ['interview_status'],
+        ['Interview Status']
+      );
+
+
+    if (
+      !trainerField ||
+      !statusField
+    ) {
+
+      data.completeMessage =
+        'Mock Interview status fields are missing.';
+
+      return;
+
+    }
+
+
+    /*
+     * Verify trainer ownership.
+     */
+
+    if (
+      gr.getValue(
+        trainerField
+      ) != trainerSysId
+    ) {
+
+      data.completeMessage =
+        'This interview does not belong to the current trainer.';
+
+      return;
+
+    }
+
+
+    /*
+     * The QR has ALREADY been scanned in the existing workflow.
+     *
+     * Accept the record when either:
+     *   QR Status = Scanned
+     * OR
+     *   Attendance Status = Present
+     *
+     * This also handles ServiceNow choice fields whose internal
+     * values may be lowercase while the display value is uppercase.
+     *
+     * There is NO second Verify QR action here.
+     */
+
+    var attendanceValue =
+      attendanceField
+        ? clean(
+            gr.getValue(
+              attendanceField
+            )
+          ).toLowerCase()
+        : '';
+
+
+    var attendanceDisplay =
+      attendanceField
+        ? clean(
+            gr.getDisplayValue(
+              attendanceField
+            )
+          ).toLowerCase()
+        : '';
+
+
+    var qrStatusValue =
+      qrStatusField
+        ? clean(
+            gr.getValue(
+              qrStatusField
+            )
+          ).toLowerCase()
+        : '';
+
+
+    var qrStatusDisplay =
+      qrStatusField
+        ? clean(
+            gr.getDisplayValue(
+              qrStatusField
+            )
+          ).toLowerCase()
+        : '';
+
+
+    var attendancePresent =
+      attendanceValue ==
+        'present'
+      ||
+      attendanceDisplay ==
+        'present';
+
+
+    var qrAlreadyScanned =
+      qrStatusValue ==
+        'scanned'
+      ||
+      qrStatusDisplay ==
+        'scanned';
+
+
+    if (
+      !attendancePresent &&
+      !qrAlreadyScanned
+    ) {
+
+      data.completeMessage =
+        'The interview QR must be scanned before completing the interview.';
+
+      return;
+
+    }
+
+
+    /*
+     * Only Scheduled -> Completed.
+     */
+
+    var currentValue =
+      clean(
+        gr.getValue(
+          statusField
+        )
+      );
+
+
+    var currentDisplay =
+      clean(
+        gr.getDisplayValue(
+          statusField
+        )
+      );
+
+
+    if (
+      currentValue !=
+      'Scheduled'
+      &&
+      currentDisplay !=
+      'Scheduled'
+    ) {
+
+      data.completeMessage =
+        'Only Scheduled interviews can be marked completed.';
+
+      return;
+
+    }
+
+
+    /*
+     * ACTUAL DATABASE UPDATE
+     */
+
+    gr.setValue(
+      statusField,
+      'Completed'
+    );
+
+
+    if (
+      !gr.update()
+    ) {
+
+      data.completeMessage =
+        'Interview status could not be updated.';
+
+      return;
+
+    }
+
+
+    data.completeSuccess =
+      true;
+
+
+    data.completeMessage =
+      'Interview status updated to Completed.';
+
+  }
+
+
+  /* =========================================================
+     FEEDBACK
+     ========================================================= */
+
+  function submitFeedback() {
+
+    data.feedbackSuccess =
+      false;
+
+    data.feedbackMessage =
+      '';
+
+
+    var mockSysId =
+      clean(
+        input.interview
+      );
+
+
+    var technicalScore =
+      parseScore(
+        input.technicalScore
+      );
+
+
+    var communicationScore =
+      parseScore(
+        input.communicationScore
+      );
+
+
+    var problemSolvingScore =
+      parseScore(
+        input.problemSolvingScore
+      );
+
+
+    var strengths =
+      clean(
+        input.strengths
+      );
+
+
+    var improvementAreas =
+      clean(
+        input.improvementAreas
+      );
+
+
+    var recommendation =
+      clean(
+        input.recommendation
+      );
+
+
+    if (
+      !mockSysId
+    ) {
+
+      data.feedbackMessage =
+        'Interview record is missing.';
+
+      return;
+
+    }
+
+
+    if (
+      technicalScore === null ||
+      communicationScore === null ||
+      problemSolvingScore === null
+    ) {
+
+      data.feedbackMessage =
+        'Please provide all performance scores from 0 to 100.';
+
+      return;
+
+    }
+
+
+    var mockGR =
+      new GlideRecord(
+        MOCK_INTERVIEW_TABLE
+      );
+
+
+    if (
+      !mockGR.get(
+        mockSysId
+      )
+    ) {
+
+      data.feedbackMessage =
+        'Mock Interview was not found.';
+
+      return;
+
+    }
+
+
+    var mockTrainerField =
+      resolveField(
+        mockGR,
+        [
+          'trainer_reference',
+          'trainer'
+        ],
+        [
+          'Trainer Reference',
+          'Trainer'
+        ]
+      );
+
+
+    var mockStudentField =
+      resolveField(
+        mockGR,
+        [
+          'student_reference',
+          'student'
+        ],
+        [
+          'Student Reference',
+          'Student'
+        ]
+      );
+
+
+    var mockStatusField =
+      resolveField(
+        mockGR,
+        ['interview_status'],
+        ['Interview Status']
+      );
+
+
+    if (
+      !mockTrainerField ||
+      !mockStudentField ||
+      !mockStatusField
+    ) {
+
+      data.feedbackMessage =
+        'Mock Interview fields are not configured.';
+
+      return;
+
+    }
+
+
+    if (
+      mockGR.getValue(
+        mockTrainerField
+      ) != trainerSysId
+    ) {
+
+      data.feedbackMessage =
+        'This interview does not belong to the current trainer.';
+
+      return;
+
+    }
+
+
+    if (
+      mockGR.getValue(
+        mockStatusField
+      ) != 'Completed'
+    ) {
+
+      data.feedbackMessage =
+        'Feedback is available only after the interview is completed.';
+
+      return;
+
+    }
+
+
+    var feedbackGR =
+      new GlideRecord(
+        FEEDBACK_TABLE
+      );
+
+
+    var feedbackInterviewField =
+      resolveField(
+        feedbackGR,
+        ['interview_reference'],
+        ['Interview Reference']
+      );
+
+
+    var feedbackStudentField =
+      resolveField(
+        feedbackGR,
+        ['student_reference'],
+        ['Student Reference']
+      );
+
+
+    var feedbackTrainerField =
+      resolveField(
+        feedbackGR,
+        ['trainer_reference'],
+        ['Trainer Reference']
+      );
+
+
+    var technicalField =
+      resolveField(
+        feedbackGR,
+        ['technical_score'],
+        ['Technical Score']
+      );
+
+
+    var communicationField =
+      resolveField(
+        feedbackGR,
+        ['communication_score'],
+        ['Communication Score']
+      );
+
+
+    var problemSolvingField =
+      resolveField(
+        feedbackGR,
+        ['problem_solving_score'],
+        ['Problem Solving Score']
+      );
+
+
+    var overallField =
+      resolveField(
+        feedbackGR,
+        ['overall_score'],
+        ['Overall Score']
+      );
+
+
+    if (
+      !feedbackInterviewField ||
+      !feedbackStudentField ||
+      !feedbackTrainerField ||
+      !technicalField ||
+      !communicationField ||
+      !problemSolvingField ||
+      !overallField
+    ) {
+
+      data.feedbackMessage =
+        'Interview Feedback fields are missing.';
+
+      return;
+
+    }
+
+
+    var existing =
+      new GlideRecord(
+        FEEDBACK_TABLE
+      );
+
+
+    existing.addQuery(
+      feedbackInterviewField,
+      mockSysId
+    );
+
+
+    existing.setLimit(1);
+    existing.query();
+
+
+    var feedbackSysId;
+
+
+    if (
+      existing.next()
+    ) {
+
+      feedbackSysId =
+        existing.getUniqueValue();
+
+      feedbackGR =
+        existing;
+
+    } else {
+
+      feedbackGR.initialize();
+
+
+      var feedbackIdField =
+        resolveField(
+          feedbackGR,
+          ['feedback_id'],
+          ['Feedback ID']
+        );
+
+
+      if (
+        feedbackIdField
+      ) {
+
+        feedbackGR.setValue(
+          feedbackIdField,
+          generateFeedbackId()
+        );
+
+      }
+
+
+      feedbackGR.setValue(
+        feedbackInterviewField,
+        mockSysId
+      );
+
+
+      feedbackGR.setValue(
+        feedbackStudentField,
+        mockGR.getValue(
+          mockStudentField
+        )
+      );
+
+
+      feedbackGR.setValue(
+        feedbackTrainerField,
+        trainerSysId
+      );
+
+    }
+
+
+    var overallScore =
+      Math.round(
+        (
+          technicalScore +
+          communicationScore +
+          problemSolvingScore
+        ) / 3
+      );
+
+
+    feedbackGR.setValue(
+      technicalField,
+      technicalScore
+    );
+
+
+    feedbackGR.setValue(
+      communicationField,
+      communicationScore
+    );
+
+
+    feedbackGR.setValue(
+      problemSolvingField,
+      problemSolvingScore
+    );
+
+
+    feedbackGR.setValue(
+      overallField,
+      overallScore
+    );
+
+
+    var strengthsField =
+      resolveField(
+        feedbackGR,
+        ['strengths'],
+        ['Strengths']
+      );
+
+
+    var improvementField =
+      resolveField(
+        feedbackGR,
+        ['improvement_areas'],
+        ['Improvement Areas']
+      );
+
+
+    var recommendationField =
+      resolveField(
+        feedbackGR,
+        ['recommendation'],
+        ['Recommendation']
+      );
+
+
+    if (
+      strengthsField
+    ) {
+
+      feedbackGR.setValue(
+        strengthsField,
+        strengths
+      );
+
+    }
+
+
+    if (
+      improvementField
+    ) {
+
+      feedbackGR.setValue(
+        improvementField,
+        improvementAreas
+      );
+
+    }
+
+
+    if (
+      recommendationField
+    ) {
+
+      feedbackGR.setValue(
+        recommendationField,
+        recommendation
+      );
+
+    }
+
+
+    if (
+      feedbackSysId
+    ) {
+
+      feedbackGR.update();
+
+    } else {
+
+      feedbackGR.insert();
+
+    }
+
+
+    data.feedbackSuccess =
+      true;
+
+    data.feedbackMessage =
+      'Interview feedback saved successfully.';
+
+  }
+
+
+  /* =========================================================
+     HELPER: AVAILABILITY IDS
+     ========================================================= */
+
+  function getTrainerAvailabilityIds() {
+
+    var ids = [];
+
+
+    var gr =
+      new GlideRecord(
+        AVAILABILITY_TABLE
+      );
+
+
+    var trainerField =
+      resolveField(
+        gr,
+        [
+          'trainer',
+          'trainer_reference'
+        ],
+        ['Trainer']
+      );
+
+
+    if (!trainerField) {
+
+      return ids;
+
+    }
+
+
+    gr.addQuery(
+      trainerField,
+      trainerSysId
+    );
+
+
+    gr.query();
+
+
+    while (
+      gr.next()
+    ) {
+
+      ids.push(
+        gr.getUniqueValue()
+      );
+
+    }
+
+
+    return ids;
+
+  }
+
+
+  /* =========================================================
+     AVAILABILITY OBJECT
+     ========================================================= */
+
+  function makeAvailabilityObject(
+    gr
+  ) {
+
+    return {
+
+      sys_id:
+        gr.getUniqueValue(),
+
+      availabilityId:
+        getSafe(
+          gr,
+          ['availability_id'],
+          ['Availability ID']
+        ),
+
+      interviewType:
+        getSafe(
+          gr,
+          ['interview_type'],
+          ['Interview Type']
+        ),
+
+      skillArea:
+        getSafe(
+          gr,
+          ['skill_area'],
+          ['Skill Area']
+        ),
+
+      interviewDate:
+        formatDate(
+          getSafe(
+            gr,
+            ['available_date'],
+            ['Available Date']
+          )
+        ),
+
+      startTime:
+        formatTime(
+          getSafe(
+            gr,
+            ['start_time'],
+            ['Start Time']
+          )
+        ),
+
+      endTime:
+        formatTime(
+          getSafe(
+            gr,
+            ['end_time'],
+            ['End Time']
+          )
+        )
+
+    };
+
+  }
+
+
+  /* =========================================================
+     REQUEST OBJECT
+     ========================================================= */
+
+  function makeRequestObject(
+    gr
+  ) {
+
+    var studentField =
+      resolveField(
+        gr,
+        ['student_reference'],
+        ['Student']
+      );
+
+
+    var availabilityField =
+      resolveField(
+        gr,
+        ['selected_availability'],
+        ['Selected Availability']
+      );
+
+
+    var student =
+      getStudent(
+        studentField
+          ? gr.getValue(
+              studentField
+            )
+          : ''
+      );
+
+
+    var availability =
+      null;
+
+
+    if (
+      availabilityField
+    ) {
+
+      var availabilityId =
+        gr.getValue(
+          availabilityField
+        );
+
+
+      if (
+        availabilityId
+      ) {
+
+        var availabilityGR =
+          new GlideRecord(
+            AVAILABILITY_TABLE
+          );
+
+
+        if (
+          availabilityGR.get(
+            availabilityId
+          )
+        ) {
+
+          availability =
+            makeAvailabilityObject(
+              availabilityGR
+            );
+
+        }
+
+      }
+
+    }
+
+
+    return {
+
+      sys_id:
+        gr.getUniqueValue(),
+
+      requestId:
+        getSafe(
+          gr,
+          ['request_id'],
+          ['Request ID']
+        ),
+
+      studentName:
+        student.name,
+
+      studentId:
+        student.id,
+
+      initials:
+        getInitials(
+          student.name
+        ),
+
+      interviewType:
+        availability
+          ? availability.interviewType
+          : 'Mock Interview',
+
+      skillArea:
+        availability
+          ? availability.skillArea
+          : '',
+
+      interviewDate:
+        availability
+          ? availability.interviewDate
+          : '',
+
+      startTime:
+        availability
+          ? availability.startTime
+          : '',
+
+      endTime:
+        availability
+          ? availability.endTime
+          : ''
+
+    };
+
+  }
+
+
+  /* =========================================================
+     MOCK INTERVIEW OBJECT
+     ========================================================= */
+
+  function makeMockObject(
+    gr
+  ) {
+
+    var studentField =
+      resolveField(
+        gr,
+        [
+          'student_reference',
+          'student'
+        ],
+        [
+          'Student Reference',
+          'Student'
+        ]
+      );
+
+
+    var trainerField =
+      resolveField(
+        gr,
+        [
+          'trainer_reference',
+          'trainer'
+        ],
+        [
+          'Trainer Reference',
+          'Trainer'
+        ]
+      );
+
+
+    var student =
+      getStudent(
+        studentField
+          ? gr.getValue(
+              studentField
+            )
+          : ''
+      );
+
+
+    var trainerName =
+      data.trainer.name;
+
+
+    var trainerId =
+      data.trainer.id;
+
+
+    if (
+      trainerField
+    ) {
+
+      var refTrainer =
+        new GlideRecord(
+          TRAINER_TABLE
+        );
+
+
+      if (
+        refTrainer.get(
+          gr.getValue(
+            trainerField
+          )
+        )
+      ) {
+
+        trainerName =
+          getSafe(
+            refTrainer,
+            ['trainer_name'],
+            ['Trainer Name']
+          ) ||
+          trainerName;
+
+
+        trainerId =
+          getSafe(
+            refTrainer,
+            ['trainer_id'],
+            ['Trainer ID']
+          ) ||
+          trainerId;
+
+      }
+
+    }
+
+
+    return {
+
+      sys_id:
+        gr.getUniqueValue(),
+
+      interviewId:
+        getSafe(
+          gr,
+          ['interview_id'],
+          ['Interview ID']
+        ),
+
+      studentName:
+        student.name,
+
+      studentId:
+        student.id,
+
+      initials:
+        getInitials(
+          student.name
+        ),
+
+      trainerName:
+        trainerName,
+
+      trainerId:
+        trainerId,
+
+      interviewType:
+        getSafe(
+          gr,
+          ['interview_type'],
+          ['Interview Type']
+        ),
+
+      interviewDate:
+        formatDate(
+          getSafe(
+            gr,
+            ['interview_date'],
+            ['Interview Date']
+          )
+        ),
+
+      startTime:
+        formatTime(
+          getSafe(
+            gr,
+            ['start_time'],
+            ['Start Time']
+          )
+        ),
+
+      endTime:
+        formatTime(
+          getSafe(
+            gr,
+            ['end_time'],
+            ['End Time']
+          )
+        ),
+
+      qrCode:
+        getSafe(
+          gr,
+          ['qr_code'],
+          ['QR Code']
+        ),
+
+      qrStatus:
+        getSafe(
+          gr,
+          ['qr_status'],
+          ['QR Status']
+        ),
+
+      attendanceStatus:
+        getSafe(
+          gr,
+          ['attendance_status'],
+          ['Attendance Status']
+        ),
+
+      interviewStatus:
+        getSafe(
+          gr,
+          ['interview_status'],
+          ['Interview Status']
+        )
+
+    };
+
+  }
+
+
+  /* =========================================================
+     STUDENT
+     ========================================================= */
+
+  function getStudent(
+    sysId
+  ) {
+
+    var result = {
+      id: '',
+      name: 'Student'
+    };
+
+
+    if (!sysId) {
+
+      return result;
+
+    }
+
+
+    var gr =
+      new GlideRecord(
+        STUDENT_TABLE
+      );
+
+
+    if (
+      !gr.get(
+        sysId
+      )
+    ) {
+
+      return result;
+
+    }
+
+
+    result.id =
+      getSafe(
+        gr,
+        ['student_id'],
+        ['Student ID']
+      ) ||
+      gr.getUniqueValue();
+
+
+    result.name =
+      getSafe(
+        gr,
+        ['student_name'],
+        ['Student Name']
+      ) ||
+      gr.getDisplayValue();
+
+
+    return result;
+
+  }
+
+
+  /* =========================================================
+     VERIFIED COUNT
+     ========================================================= */
+
+  function countVerified() {
+
+    var gr =
+      new GlideRecord(
+        MOCK_INTERVIEW_TABLE
+      );
+
+
+    var trainerField =
+      resolveField(
+        gr,
+        [
+          'trainer_reference',
+          'trainer'
+        ],
+        [
+          'Trainer Reference',
+          'Trainer'
+        ]
+      );
+
+
+    var qrStatusField =
+      resolveField(
+        gr,
+        ['qr_status'],
+        ['QR Status']
+      );
+
+
+    if (
+      !trainerField ||
+      !qrStatusField
+    ) {
+
+      return 0;
+
+    }
+
+
+    gr.addQuery(
+      trainerField,
+      trainerSysId
+    );
+
+
+    gr.addQuery(
+      qrStatusField,
+      'Scanned'
+    );
+
+
+    gr.query();
+
+
+    var count = 0;
+
+
+    while (
+      gr.next()
+    ) {
+
+      count++;
+
+    }
+
+
+    return count;
+
+  }
+
+
+  /* =========================================================
+     QR
+     ========================================================= */
+
+  function generateQRToken() {
+
+    return (
+      'C360-MI-' +
+      String(
+        gs.generateGUID()
+      )
+      .substring(
+        0,
+        12
+      )
+      .toUpperCase()
+    );
+
+  }
+
+
+  function extractQRToken(
+    qrValue
+  ) {
+
+    if (!qrValue) {
+
+      return '';
+
+    }
+
+
+    var text =
+      String(
+        qrValue
+      );
+
+
+    var marker =
+      'data=';
+
+
+    var index =
+      text.indexOf(
+        marker
+      );
+
+
+    if (
+      index < 0
+    ) {
+
+      return '';
+
+    }
+
+
+    var token =
+      text.substring(
+        index + marker.length
+      );
+
+
+    var amp =
+      token.indexOf(
+        '&'
+      );
+
+
+    if (
+      amp >= 0
+    ) {
+
+      token =
+        token.substring(
+          0,
+          amp
+        );
+
+    }
+
+
+    try {
+
+      token =
+        decodeURIComponent(
+          token
+        );
+
+    } catch (
+      ignore
+    ) {}
+
+
+    return clean(
+      token
+    );
+
+  }
+
+
+  /* =========================================================
+     ID HELPERS
+     ========================================================= */
+
+  function generateAvailabilityId() {
+
+    return (
+      'TRA' +
+      String(
+        new GlideDateTime()
+          .getNumericValue()
+      ).slice(-7)
+    );
+
+  }
+
+
+  function generateInterviewId() {
+
+    return (
+      'INT' +
+      String(
+        new GlideDateTime()
+          .getNumericValue()
+      ).slice(-7)
+    );
+
+  }
+
+
+  function generateFeedbackId() {
+
+    return (
+      'FDB' +
+      String(
+        new GlideDateTime()
+          .getNumericValue()
+      ).slice(-7)
+    );
+
+  }
+
+
+  /* =========================================================
+     FIELD HELPERS
+     ========================================================= */
+
+  function resolveField(
+    gr,
+    candidates,
+    labels
+  ) {
+
+    var i;
+
+
+    for (
+      i = 0;
+      i < candidates.length;
+      i++
+    ) {
+
+      if (
+        gr.isValidField(
+          candidates[i]
+        )
+      ) {
+
+        return candidates[i];
+
+      }
+
+    }
+
+
+    if (
+      labels &&
+      labels.length
+    ) {
+
+      var dictionaryGR =
+        new GlideRecord(
+          'sys_dictionary'
+        );
+
+
+      dictionaryGR.addQuery(
+        'name',
+        gr.getTableName()
+      );
+
+
+      dictionaryGR.addQuery(
+        'column_label',
+        'IN',
+        labels.join(',')
+      );
+
+
+      dictionaryGR.addNotNullQuery(
+        'element'
+      );
+
+
+      dictionaryGR.setLimit(1);
+      dictionaryGR.query();
+
+
+      if (
+        dictionaryGR.next()
+      ) {
+
+        return dictionaryGR.getValue(
+          'element'
+        );
+
+      }
+
+    }
+
+
+    return '';
+
+  }
+
+
+  function getSafe(
+    gr,
+    candidates,
+    labels
+  ) {
+
+    var field =
+      resolveField(
+        gr,
+        candidates,
+        labels
+      );
+
+
+    if (!field) {
+
+      return '';
+
+    }
+
+
+    return String(
+      gr.getValue(
+        field
+      ) || ''
+    );
+
+  }
+
+
+  /* =========================================================
+     DATE / TIME
+     ========================================================= */
+
+  function normalizeDate(
+    value
+  ) {
+
+    if (!value) {
+
+      return '';
+
+    }
+
+
+    return String(
+      value
+    ).substring(
+      0,
+      10
+    );
+
+  }
+
+
+  function formatDate(
+    value
+  ) {
+
+    return normalizeDate(
+      value
+    );
+
+  }
+
+
+  function normalizeTime(
+    value
+  ) {
+
+    if (!value) {
+
+      return '';
+
+    }
+
+
+    var text =
+      String(
+        value
+      ).trim();
+
+
+    if (
+      text.length == 5
+    ) {
+
+      return text + ':00';
+
+    }
+
+
+    return text.substring(
+      0,
+      8
+    );
+
+  }
+
+
+  function formatTime(
+    value
+  ) {
+
+    if (!value) {
+
+      return '';
+
+    }
+
+
+    return String(
+      value
+    ).substring(
+      0,
+      5
+    );
+
+  }
+
+
+  function timeToMinutes(
+    value
+  ) {
+
+    var text =
+      normalizeTime(
+        value
+      );
+
+
+    if (!text) {
+
+      return 0;
+
+    }
+
+
+    var p =
+      text.split(':');
+
+
+    return (
+      parseInt(
+        p[0],
+        10
+      ) * 60
+      +
+      parseInt(
+        p[1],
+        10
+      )
+    );
+
+  }
+
+
+  /* =========================================================
+     GENERAL
+     ========================================================= */
+
+  function parseScore(
+    value
+  ) {
+
+    if (
+      value === null ||
+      typeof value === 'undefined' ||
+      value === ''
+    ) {
+
+      return null;
+
+    }
+
+
+    var score =
+      parseInt(
+        value,
+        10
+      );
+
+
+    if (
+      isNaN(score) ||
+      score < 0 ||
+      score > 100
+    ) {
+
+      return null;
+
+    }
+
+
+    return score;
+
+  }
+
+
+  function clean(
+    value
+  ) {
+
+    return String(
+      value || ''
+    ).trim();
+
+  }
+
+
+  function getInitials(
+    name
+  ) {
+
+    if (!name) {
+
+      return 'TR';
+
+    }
+
+
+    var parts =
+      String(
+        name
+      )
+      .trim()
+      .split(/\s+/);
+
+
+    if (
+      parts.length == 1
+    ) {
+
+      return parts[0]
+        .substring(
+          0,
+          2
+        )
+        .toUpperCase();
+
+    }
+
+
+    return (
+      parts[0].charAt(0) +
+      parts[
+        parts.length - 1
+      ].charAt(0)
+    ).toUpperCase();
+
+  }
+
+})();
+
+data.aiWidget = $sp.getWidget('campus360_ai_assistant');
+]]></script>
+        <servicenow>false</servicenow>
+        <sys_class_name>sp_widget</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-25 16:56:19</sys_created_on>
+        <sys_id>1ed6222da02b43107f44e28050a33b92</sys_id>
+        <sys_mod_count>17</sys_mod_count>
+        <sys_name>campus360_trainer_mock_slot_availability</sys_name>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name>sp_widget_1ed6222da02b43107f44e28050a33b92</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-10-01 16:17:33</sys_updated_on>
+        <template><![CDATA[<div
+  class="campus360-slot-app"
+  ng-class="{'sidebar-collapsed': c.sidebarCollapsed}"
+>
+
+  <!-- =========================================================
+       SIDEBAR
+       ========================================================= -->
+
+  <aside class="campus360-slot-sidebar">
+
+    <!-- BRAND -->
+
+    <div class="slot-brand">
+
+      <div class="slot-brand-mark">
+        <i class="fa fa-graduation-cap"></i>
+      </div>
+
+      <div class="slot-brand-text">
+
+        <strong>
+          Campus360
+        </strong>
+
+        <span>
+          TRAINER PORTAL
+        </span>
+
+      </div>
+
+    </div>
+
+
+    <!-- TRAINER PROFILE -->
+
+    <a
+      class="slot-trainer-profile"
+      ng-href="?id=campus360_trainer_profile&trainer={{c.trainerId}}"
+    >
+
+      <div class="slot-avatar">
+
+        {{c.data.trainer.initials}}
+
+      </div>
+
+
+      <div class="slot-trainer-info">
+
+        <strong>
+          {{c.data.trainer.name}}
+        </strong>
+
+        <span>
+          {{c.data.trainer.id}}
+        </span>
+
+      </div>
+
+
+      <span class="slot-profile-arrow">
+
+        <i class="fa fa-angle-right"></i>
+
+      </span>
+
+    </a>
+
+
+    <!-- =========================================================
+         NAVIGATION
+         ========================================================= -->
+
+    <nav class="slot-nav">
+
+
+      <!-- OVERVIEW -->
+
+      <div class="slot-nav-label">
+        OVERVIEW
+      </div>
+
+
+      <a
+        class="slot-nav-item"
+        ng-href="?id=campus360_trainer_dashboard&trainer={{c.trainerId}}"
+      >
+
+        <span class="slot-nav-icon">
+          <i class="fa fa-dashboard"></i>
+        </span>
+
+        <span class="slot-nav-text">
+          Dashboard
+        </span>
+
+      </a>
+
+
+      <!-- TRAINING -->
+
+      <div class="slot-nav-label">
+        TRAINING
+      </div>
+
+
+      <a
+        class="slot-nav-item"
+        ng-href="?id=campus360_trainer_my_training&trainer={{c.trainerId}}"
+      >
+
+        <span class="slot-nav-icon">
+          <i class="fa fa-book"></i>
+        </span>
+
+        <span class="slot-nav-text">
+          My Training
+        </span>
+
+      </a>
+
+
+      <!-- MOCK INTERVIEWS -->
+
+      <div class="slot-nav-label">
+        MOCK INTERVIEWS
+      </div>
+
+
+      <a
+        class="slot-nav-item active"
+        ng-href="?id=campus360_trainer_mock_slots&trainer={{c.trainerId}}"
+      >
+
+        <span class="slot-nav-icon">
+          <i class="fa fa-calendar-check-o"></i>
+        </span>
+
+        <span class="slot-nav-text">
+          Slot Availability &amp; Requests
+        </span>
+
+
+        <span
+          class="slot-nav-count"
+          ng-if="c.data.metrics.pendingRequests > 0"
+        >
+          {{c.data.metrics.pendingRequests}}
+        </span>
+
+      </a>
+
+
+      <a
+        class="slot-nav-item"
+        ng-href="?id=campus360_trainer_interview_feedback&trainer={{c.trainerId}}"
+      >
+
+        <span class="slot-nav-icon">
+          <i class="fa fa-commenting-o"></i>
+        </span>
+
+        <span class="slot-nav-text">
+          Feedback &amp; Performance
+        </span>
+
+
+        <span
+          class="slot-nav-count"
+          ng-if="c.data.metrics.feedbackPending > 0"
+        >
+          {{c.data.metrics.feedbackPending}}
+        </span>
+
+      </a>
+
+
+      <!-- INTELLIGENCE -->
+
+      <div class="slot-nav-label">
+        INTELLIGENCE
+      </div>
+
+
+      <a
+        class="slot-nav-item"
+        ng-href="?id=campus360_trainer_placement_intelligence&trainer={{c.trainerId}}"
+      >
+
+        <span class="slot-nav-icon">
+          <i class="fa fa-line-chart"></i>
+        </span>
+
+        <span class="slot-nav-text">
+          Placement Intelligence
+        </span>
+
+      </a>
+
+
+      <!-- TPO COORDINATION -->
+
+      <div class="slot-nav-label">
+        TPO COORDINATION
+      </div>
+
+
+      <a
+        class="slot-nav-item"
+        ng-href="?id=campus360_trainer_opportunities&trainer={{c.trainerId}}"
+      >
+
+        <span class="slot-nav-icon">
+          <i class="fa fa-university"></i>
+        </span>
+
+        <span class="slot-nav-text">
+          Opportunities &amp; Rooms
+        </span>
+
+      </a>
+
+
+      <!-- ACCOUNT -->
+
+      <div class="slot-nav-label">
+        ACCOUNT
+      </div>
+
+
+      <a
+        class="slot-nav-item"
+        ng-href="?id=campus360_trainer_profile&trainer={{c.trainerId}}"
+      >
+
+        <span class="slot-nav-icon">
+          <i class="fa fa-user-circle-o"></i>
+        </span>
+
+        <span class="slot-nav-text">
+          Trainer Profile
+        </span>
+
+      </a>
+
+
+    </nav>
+
+  </aside>
+
+
+  <!-- =========================================================
+       MAIN APPLICATION
+       ========================================================= -->
+
+  <main class="campus360-slot-main">
+
+
+    <!-- =======================================================
+         TOP NAVBAR
+         ======================================================= -->
+
+    <header class="slot-topbar">
+
+
+      <!-- LEFT -->
+
+      <div class="slot-topbar-left">
+
+
+        <!-- HAMBURGER -->
+
+        <button
+          type="button"
+          class="slot-menu-button"
+          ng-click="c.toggleSidebar()"
+          title="Toggle sidebar"
+          aria-label="Toggle sidebar"
+        >
+
+          <i class="fa fa-bars"></i>
+
+        </button>
+
+
+        <!-- BREADCRUMB -->
+
+        <div class="slot-breadcrumb">
+
+          <div class="slot-breadcrumb-text">
+
+            <span>
+              CAMPUS360
+            </span>
+
+            <strong>
+              Slot Availability &amp; Requests
+            </strong>
+
+          </div>
+
+        </div>
+
+
+      </div>
+
+
+      <!-- RIGHT -->
+
+      <div class="slot-topbar-right">
+
+
+        <!-- REFRESH -->
+
+        <button
+          type="button"
+          class="slot-top-action"
+          ng-click="c.refresh()"
+          title="Refresh"
+          aria-label="Refresh"
+        >
+
+          <i class="fa fa-refresh"></i>
+
+        </button>
+
+
+        <!-- NOTIFICATIONS -->
+
+        <button
+          type="button"
+          class="slot-top-action notification-button"
+          title="Notifications"
+          aria-label="Notifications"
+        >
+
+          <i class="fa fa-bell"></i>
+
+          <span class="slot-notification-dot"></span>
+
+        </button>
+
+
+        <!-- TRAINER PROFILE -->
+
+        <a
+          class="slot-top-profile"
+          ng-href="?id=campus360_trainer_profile&trainer={{c.trainerId}}"
+        >
+
+          <div class="slot-top-avatar">
+
+            {{c.data.trainer.initials}}
+
+          </div>
+
+
+          <div class="slot-top-profile-text">
+
+            <strong>
+              {{c.data.trainer.name}}
+            </strong>
+
+            <span>
+              {{c.data.trainer.id}}
+            </span>
+
+          </div>
+
+        </a>
+
+
+      </div>
+
+    </header>
+
+
+    <!-- =========================================================
+         PAGE CONTENT
+         ========================================================= -->
+
+    <section class="slot-page-content">
+
+
+      <!-- =======================================================
+           PAGE HEADER
+           ======================================================= -->
+
+      <div class="slot-page-header">
+
+        <div>
+
+          <span class="slot-eyebrow">
+            MOCK INTERVIEWS
+          </span>
+
+          <h1>
+            Slot Availability &amp; Requests
+          </h1>
+
+          <p>
+            Publish interview timings, review student requests,
+            manage scheduled interviews and complete feedback.
+          </p>
+
+        </div>
+
+
+        <button
+          type="button"
+          class="create-slot-button"
+          ng-click="c.openCreateSlot()"
+        >
+
+          <i class="fa fa-plus"></i>
+
+          Create Available Slot
+
+        </button>
+
+      </div>
+
+
+      <!-- =======================================================
+           MESSAGE
+           ======================================================= -->
+
+      <div
+        class="action-banner"
+        ng-if="c.bannerMessage"
+        ng-class="c.bannerType"
+      >
+
+        <i
+          class="fa"
+          ng-class="{
+            'fa-check-circle':
+              c.bannerType == 'success',
+
+            'fa-exclamation-circle':
+              c.bannerType == 'error'
+          }"
+        ></i>
+
+        <span>
+          {{c.bannerMessage}}
+        </span>
+
+      </div>
+
+
+      <div
+        class="server-alert"
+        ng-if="c.data.error"
+      >
+
+        <i class="fa fa-exclamation-triangle"></i>
+
+        <span>
+          {{c.data.error}}
+        </span>
+
+      </div>
+
+
+      <!-- =======================================================
+           KPI
+           ======================================================= -->
+
+      <div class="slot-kpi-grid">
+
+
+        <!-- AVAILABLE -->
+
+        <div class="slot-kpi-card purple">
+
+          <div class="slot-kpi-icon">
+            <i class="fa fa-calendar"></i>
+          </div>
+
+          <div>
+
+            <span>
+              AVAILABLE SLOTS
+            </span>
+
+            <strong>
+              {{c.data.metrics.availableSlots}}
+            </strong>
+
+            <small>
+              Open for students
+            </small>
+
+          </div>
+
+        </div>
+
+
+        <!-- REQUESTS -->
+
+        <div class="slot-kpi-card orange">
+
+          <div class="slot-kpi-icon">
+            <i class="fa fa-hourglass-half"></i>
+          </div>
+
+          <div>
+
+            <span>
+              STUDENT REQUESTS
+            </span>
+
+            <strong>
+              {{c.data.metrics.pendingRequests}}
+            </strong>
+
+            <small>
+              Waiting for response
+            </small>
+
+          </div>
+
+        </div>
+
+
+        <!-- SCHEDULED -->
+
+        <div class="slot-kpi-card blue">
+
+          <div class="slot-kpi-icon">
+            <i class="fa fa-calendar-check-o"></i>
+          </div>
+
+          <div>
+
+            <span>
+              SCHEDULED
+            </span>
+
+            <strong>
+              {{c.data.metrics.scheduled}}
+            </strong>
+
+            <small>
+              Upcoming interviews
+            </small>
+
+          </div>
+
+        </div>
+
+
+        <!-- FEEDBACK -->
+
+        <div class="slot-kpi-card green">
+
+          <div class="slot-kpi-icon">
+            <i class="fa fa-comments"></i>
+          </div>
+
+          <div>
+
+            <span>
+              FEEDBACK PENDING
+            </span>
+
+            <strong>
+              {{c.data.metrics.feedbackPending}}
+            </strong>
+
+            <small>
+              Completed interviews
+            </small>
+
+          </div>
+
+        </div>
+
+
+      </div>
+
+
+      <!-- =======================================================
+           STUDENT REQUESTS
+           ======================================================= -->
+
+      <section class="slot-panel">
+
+
+        <div class="slot-panel-header">
+
+          <div>
+
+            <span>
+              ACTION REQUIRED
+            </span>
+
+            <h2>
+              Student Interview Requests
+            </h2>
+
+            <p>
+              Students requesting your available timings.
+            </p>
+
+          </div>
+
+
+          <div class="slot-panel-badge orange">
+
+            {{c.data.metrics.pendingRequests}}
+
+          </div>
+
+        </div>
+
+
+        <div
+          class="slot-request-list"
+          ng-if="c.data.requests.length"
+        >
+
+          <div
+            class="slot-request-card"
+            ng-repeat="
+              request in c.data.requests
+              track by request.sys_id
+            "
+          >
+
+
+            <!-- STUDENT -->
+
+            <div class="request-student">
+
+              <div class="request-avatar">
+                {{request.initials}}
+              </div>
+
+              <div>
+
+                <strong>
+                  {{request.studentName}}
+                </strong>
+
+                <span>
+                  {{request.studentId}}
+                </span>
+
+              </div>
+
+            </div>
+
+
+            <!-- TYPE -->
+
+            <div class="request-detail">
+
+              <span>
+                INTERVIEW TYPE
+              </span>
+
+              <strong>
+                {{request.interviewType}}
+              </strong>
+
+            </div>
+
+
+            <!-- SKILL -->
+
+            <div class="request-detail">
+
+              <span>
+                SKILL AREA
+              </span>
+
+              <strong>
+                {{request.skillArea || 'General'}}
+              </strong>
+
+            </div>
+
+
+            <!-- DATE TIME -->
+
+            <div class="request-detail">
+
+              <span>
+                DATE / TIME
+              </span>
+
+              <strong>
+                {{request.interviewDate}}
+                ·
+                {{request.startTime}}
+                -
+                {{request.endTime}}
+              </strong>
+
+            </div>
+
+
+            <!-- ACTION -->
+
+            <div class="request-status">
+
+              <span class="request-pending-pill">
+                Requested
+              </span>
+
+
+              <button
+                type="button"
+                class="accept-request-button"
+                ng-click="c.acceptRequest(request)"
+                ng-disabled="
+                  c.processingId == request.sys_id
+                "
+              >
+
+                <i
+                  class="fa"
+                  ng-class="{
+                    'fa-check':
+                      c.processingId != request.sys_id,
+
+                    'fa-spinner fa-spin':
+                      c.processingId == request.sys_id
+                  }"
+                ></i>
+
+                {{
+                  c.processingId == request.sys_id
+                    ? 'Accepting...'
+                    : 'Accept Request'
+                }}
+
+              </button>
+
+            </div>
+
+
+          </div>
+
+        </div>
+
+
+        <!-- EMPTY -->
+
+        <div
+          class="slot-empty-state"
+          ng-if="!c.data.requests.length"
+        >
+
+          <div class="empty-state-icon green">
+            <i class="fa fa-check"></i>
+          </div>
+
+          <h3>
+            No pending requests
+          </h3>
+
+          <p>
+            New student requests will appear here.
+          </p>
+
+        </div>
+
+
+      </section>
+
+
+      <!-- =======================================================
+           AVAILABLE SLOTS
+           ======================================================= -->
+
+      <section class="slot-panel">
+
+
+        <div class="slot-panel-header">
+
+          <div>
+
+            <span>
+              YOUR AVAILABILITY
+            </span>
+
+            <h2>
+              Available Interview Slots
+            </h2>
+
+            <p>
+              Slots available for students to request.
+            </p>
+
+          </div>
+
+
+          <button
+            type="button"
+            class="secondary-slot-button"
+            ng-click="c.openCreateSlot()"
+          >
+
+            <i class="fa fa-plus"></i>
+
+            Add Slot
+
+          </button>
+
+        </div>
+
+
+        <div
+          class="available-slot-grid"
+          ng-if="c.data.availableSlots.length"
+        >
+
+          <div
+            class="available-slot-card"
+            ng-repeat="
+              slot in c.data.availableSlots
+              track by slot.sys_id
+            "
+          >
+
+            <div class="available-slot-top">
+
+              <div class="available-slot-icon">
+                <i class="fa fa-clock-o"></i>
+              </div>
+
+              <span class="available-pill">
+                Available
+              </span>
+
+            </div>
+
+
+            <div class="available-slot-type">
+              {{slot.interviewType}}
+            </div>
+
+
+            <h3>
+              {{slot.interviewDate}}
+            </h3>
+
+
+            <div class="available-slot-time">
+
+              <i class="fa fa-clock-o"></i>
+
+              <strong>
+                {{slot.startTime}}
+                -
+                {{slot.endTime}}
+              </strong>
+
+            </div>
+
+
+            <div class="available-slot-skill">
+
+              <span>
+                SKILL AREA
+              </span>
+
+              <strong>
+                {{slot.skillArea || 'General'}}
+              </strong>
+
+            </div>
+
+
+            <div class="available-slot-id">
+
+              <span>
+                AVAILABILITY ID
+              </span>
+
+              <strong>
+                {{slot.availabilityId}}
+              </strong>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <div
+          class="slot-empty-state"
+          ng-if="!c.data.availableSlots.length"
+        >
+
+          <div class="empty-state-icon purple">
+            <i class="fa fa-calendar-plus-o"></i>
+          </div>
+
+          <h3>
+            No available slots
+          </h3>
+
+          <p>
+            Create a slot for students to request.
+          </p>
+
+        </div>
+
+
+      </section>
+
+
+      <!-- =======================================================
+           MY SCHEDULED INTERVIEWS
+           ======================================================= -->
+
+      <section class="slot-panel">
+
+
+        <div class="slot-panel-header">
+
+          <div>
+
+            <span>
+              MY SCHEDULE
+            </span>
+
+            <h2>
+              My Scheduled Interviews
+            </h2>
+
+            <p>
+              Click an interview to view the details and update status.
+            </p>
+
+          </div>
+
+
+          <div class="slot-panel-badge blue">
+
+            {{c.data.metrics.scheduled}}
+
+          </div>
+
+        </div>
+
+
+        <div
+          class="scheduled-grid"
+          ng-if="c.data.scheduledInterviews.length"
+        >
+
+          <div
+            class="scheduled-card"
+            ng-repeat="
+              session in c.data.scheduledInterviews
+              track by session.sys_id
+            "
+            ng-click="c.openInterviewDetails(session)"
+          >
+
+
+            <div class="scheduled-card-top">
+
+
+              <div class="scheduled-student">
+
+                <div class="scheduled-avatar">
+                  {{session.initials}}
+                </div>
+
+                <div>
+
+                  <strong>
+                    {{session.studentName}}
+                  </strong>
+
+                  <span>
+                    {{session.studentId}}
+                  </span>
+
+                </div>
+
+              </div>
+
+
+              <span class="scheduled-status">
+                {{session.interviewStatus || 'Scheduled'}}
+              </span>
+
+
+            </div>
+
+
+            <div class="scheduled-main">
+
+
+              <div>
+
+                <span>
+                  INTERVIEW TYPE
+                </span>
+
+                <strong>
+                  {{session.interviewType}}
+                </strong>
+
+              </div>
+
+
+              <div>
+
+                <span>
+                  DATE
+                </span>
+
+                <strong>
+                  {{session.interviewDate}}
+                </strong>
+
+              </div>
+
+
+              <div>
+
+                <span>
+                  TIME
+                </span>
+
+                <strong>
+                  {{session.startTime}}
+                  -
+                  {{session.endTime}}
+                </strong>
+
+              </div>
+
+
+              <div>
+
+                <span>
+                  ATTENDANCE
+                </span>
+
+                <strong>
+                  {{session.attendanceStatus}}
+                </strong>
+
+              </div>
+
+
+            </div>
+
+
+            <div class="scheduled-card-footer">
+
+              <span>
+
+                <i class="fa fa-qrcode"></i>
+
+                {{session.qrStatus}}
+
+              </span>
+
+
+              <strong>
+                View Details
+                <i class="fa fa-arrow-right"></i>
+              </strong>
+
+            </div>
+
+
+          </div>
+
+        </div>
+
+
+        <div
+          class="slot-empty-state"
+          ng-if="!c.data.scheduledInterviews.length"
+        >
+
+          <div class="empty-state-icon blue">
+            <i class="fa fa-calendar-check-o"></i>
+          </div>
+
+          <h3>
+            No scheduled interviews
+          </h3>
+
+          <p>
+            Accepted student requests will appear here.
+          </p>
+
+        </div>
+
+
+      </section>
+
+
+      <!-- =======================================================
+           FEEDBACK PENDING
+           ======================================================= -->
+
+      <section class="slot-panel">
+
+
+        <div class="slot-panel-header">
+
+          <div>
+
+            <span>
+              FEEDBACK
+            </span>
+
+            <h2>
+              Completed Interviews — Feedback Pending
+            </h2>
+
+            <p>
+              Interviews marked Completed are available for feedback.
+            </p>
+
+          </div>
+
+
+          <div class="slot-panel-badge purple">
+
+            {{c.data.metrics.feedbackPending}}
+
+          </div>
+
+        </div>
+
+
+        <div
+          class="feedback-pending-list"
+          ng-if="c.data.feedbackPending.length"
+        >
+
+          <div
+            class="feedback-pending-card"
+            ng-repeat="
+              session in c.data.feedbackPending
+              track by session.sys_id
+            "
+          >
+
+
+            <div class="feedback-student">
+
+              <div class="feedback-avatar">
+                {{session.initials}}
+              </div>
+
+              <div>
+
+                <strong>
+                  {{session.studentName}}
+                </strong>
+
+                <span>
+                  {{session.studentId}}
+                </span>
+
+              </div>
+
+            </div>
+
+
+            <div class="feedback-detail">
+
+              <span>
+                INTERVIEW
+              </span>
+
+              <strong>
+                {{session.interviewType}}
+              </strong>
+
+            </div>
+
+
+            <div class="feedback-detail">
+
+              <span>
+                DATE
+              </span>
+
+              <strong>
+                {{session.interviewDate}}
+              </strong>
+
+            </div>
+
+
+            <div class="feedback-detail">
+
+              <span>
+                ATTENDANCE
+              </span>
+
+              <strong>
+                {{session.attendanceStatus}}
+              </strong>
+
+            </div>
+
+
+            <button
+              type="button"
+              class="give-feedback-button"
+              ng-click="c.openFeedbackModal(session)"
+            >
+
+              <i class="fa fa-commenting-o"></i>
+
+              Give Feedback
+
+            </button>
+
+          </div>
+
+        </div>
+
+
+        <div
+          class="slot-empty-state"
+          ng-if="!c.data.feedbackPending.length"
+        >
+
+          <div class="empty-state-icon green">
+            <i class="fa fa-comments"></i>
+          </div>
+
+          <h3>
+            No feedback pending
+          </h3>
+
+          <p>
+            Completed interviews requiring feedback will appear here.
+          </p>
+
+        </div>
+
+
+      </section>
+
+
+      <!-- =======================================================
+           CREATE SLOT MODAL
+           ======================================================= -->
+
+      <div
+        class="slot-modal-backdrop"
+        ng-if="c.createSlotModalOpen"
+        ng-click="c.closeCreateSlot()"
+      >
+
+        <div
+          class="slot-modal"
+          ng-click="$event.stopPropagation()"
+        >
+
+
+          <div class="slot-modal-header">
+
+            <div>
+
+              <span>
+                MOCK INTERVIEW
+              </span>
+
+              <h2>
+                Create Available Slot
+              </h2>
+
+              <p>
+                Publish a timing that students can request.
+              </p>
+
+            </div>
+
+
+            <button
+              type="button"
+              class="slot-modal-close"
+              ng-click="c.closeCreateSlot()"
+            >
+
+              <i class="fa fa-times"></i>
+
+            </button>
+
+          </div>
+
+
+          <div class="slot-modal-body">
+
+
+            <div class="slot-form-row">
+
+              <div class="slot-form-group">
+
+                <label>
+                  INTERVIEW TYPE
+                </label>
+
+                <select
+                  ng-model="c.slotForm.interviewType"
+                >
+
+                  <option value="Technical">
+                    Technical
+                  </option>
+
+                  <option value="HR">
+                    HR
+                  </option>
+
+                  <option value="Aptitude">
+                    Aptitude
+                  </option>
+
+                  <option value="Behavioral">
+                    Behavioral
+                  </option>
+
+                </select>
+
+              </div>
+
+
+              <div class="slot-form-group">
+
+                <label>
+                  SKILL AREA
+                </label>
+
+                <input
+                  type="text"
+                  ng-model="c.slotForm.skillArea"
+                  placeholder="Example: Java / SQL / Aptitude"
+                />
+
+              </div>
+
+            </div>
+
+
+            <div class="slot-form-row">
+
+              <div class="slot-form-group">
+
+                <label>
+                  AVAILABLE DATE
+                </label>
+
+                <input
+                  type="date"
+                  ng-model="c.slotForm.availableDate"
+                />
+
+              </div>
+
+
+              <div class="slot-form-group">
+
+                <label>
+                  START TIME
+                </label>
+
+                <input
+                  type="time"
+                  ng-model="c.slotForm.startTime"
+                />
+
+              </div>
+
+            </div>
+
+
+            <div class="slot-form-row">
+
+              <div class="slot-form-group">
+
+                <label>
+                  END TIME
+                </label>
+
+                <input
+                  type="time"
+                  ng-model="c.slotForm.endTime"
+                />
+
+              </div>
+
+              <div></div>
+
+            </div>
+
+
+            <div class="slot-info-box">
+
+              <i class="fa fa-info-circle"></i>
+
+              <span>
+                A Trainer Interview Availability record will be created
+                with Status = Available.
+              </span>
+
+            </div>
+
+
+            <div
+              class="slot-form-error"
+              ng-if="c.slotFormError"
+            >
+
+              <i class="fa fa-exclamation-circle"></i>
+
+              {{c.slotFormError}}
+
+            </div>
+
+
+          </div>
+
+
+          <div class="slot-modal-footer">
+
+
+            <button
+              type="button"
+              class="modal-cancel"
+              ng-click="c.closeCreateSlot()"
+            >
+              Cancel
+            </button>
+
+
+            <button
+              type="button"
+              class="modal-create"
+              ng-click="c.createSlot()"
+              ng-disabled="c.savingSlot"
+            >
+
+              <i
+                class="fa"
+                ng-class="{
+                  'fa-calendar-plus-o':
+                    !c.savingSlot,
+
+                  'fa-spinner fa-spin':
+                    c.savingSlot
+                }"
+              ></i>
+
+              {{
+                c.savingSlot
+                  ? 'Creating...'
+                  : 'Create Slot'
+              }}
+
+            </button>
+
+
+          </div>
+
+
+        </div>
+
+      </div>
+
+
+      <!-- =======================================================
+           INTERVIEW DETAILS MODAL
+           ======================================================= -->
+
+      <div
+        class="slot-modal-backdrop"
+        ng-if="c.interviewDetailsOpen"
+        ng-click="c.closeInterviewDetails()"
+      >
+
+        <div
+          class="slot-modal interview-details-modal"
+          ng-click="$event.stopPropagation()"
+        >
+
+
+          <div class="slot-modal-header">
+
+            <div>
+
+              <span>
+                MY SCHEDULED INTERVIEW
+              </span>
+
+              <h2>
+                Interview Details
+              </h2>
+
+              <p>
+                Review the student, timing, attendance and status.
+              </p>
+
+            </div>
+
+
+            <button
+              type="button"
+              class="slot-modal-close"
+              ng-click="c.closeInterviewDetails()"
+            >
+
+              <i class="fa fa-times"></i>
+
+            </button>
+
+          </div>
+
+
+          <div class="slot-modal-body">
+
+
+            <div class="interview-detail-top">
+
+
+              <div class="detail-student-large">
+
+                <div class="detail-student-avatar">
+
+                  {{c.selectedInterview.initials}}
+
+                </div>
+
+                <div>
+
+                  <strong>
+                    {{c.selectedInterview.studentName}}
+                  </strong>
+
+                  <span>
+                    {{c.selectedInterview.studentId}}
+                  </span>
+
+                </div>
+
+              </div>
+
+
+              <span class="scheduled-status">
+                {{c.selectedInterview.interviewStatus}}
+              </span>
+
+
+            </div>
+
+
+            <div class="interview-detail-grid">
+
+
+              <div>
+
+                <span>
+                  INTERVIEW ID
+                </span>
+
+                <strong>
+                  {{c.selectedInterview.interviewId}}
+                </strong>
+
+              </div>
+
+
+              <div>
+
+                <span>
+                  TRAINER
+                </span>
+
+                <strong>
+                  {{c.selectedInterview.trainerName}}
+                </strong>
+
+              </div>
+
+
+              <div>
+
+                <span>
+                  INTERVIEW TYPE
+                </span>
+
+                <strong>
+                  {{c.selectedInterview.interviewType}}
+                </strong>
+
+              </div>
+
+
+              <div>
+
+                <span>
+                  DATE
+                </span>
+
+                <strong>
+                  {{c.selectedInterview.interviewDate}}
+                </strong>
+
+              </div>
+
+
+              <div>
+
+                <span>
+                  TIME
+                </span>
+
+                <strong>
+                  {{c.selectedInterview.startTime}}
+                  -
+                  {{c.selectedInterview.endTime}}
+                </strong>
+
+              </div>
+
+
+              <div>
+
+                <span>
+                  QR STATUS
+                </span>
+
+                <strong>
+                  {{c.selectedInterview.qrStatus}}
+                </strong>
+
+              </div>
+
+
+              <div>
+
+                <span>
+                  ATTENDANCE
+                </span>
+
+                <strong>
+                  {{c.selectedInterview.attendanceStatus}}
+                </strong>
+
+              </div>
+
+
+              <div>
+
+                <span>
+                  INTERVIEW STATUS
+                </span>
+
+                <strong>
+                  {{c.selectedInterview.interviewStatus}}
+                </strong>
+
+              </div>
+
+
+            </div>
+
+
+            <!-- STATUS EDITOR -->
+
+            <div
+              class="slot-status-editor"
+              ng-if="
+                c.selectedInterview.interviewStatus == 'Scheduled'
+              "
+            >
+
+
+              <div class="slot-status-editor-head">
+
+                <div>
+
+                  <span>
+                    UPDATE INTERVIEW STATUS
+                  </span>
+
+                  <strong>
+                    Change the interview status after conducting the session.
+                  </strong>
+
+                </div>
+
+
+                <span class="slot-status-current">
+                  {{c.selectedInterview.interviewStatus}}
+                </span>
+
+              </div>
+
+
+              <div class="slot-status-editor-row">
+
+                <div class="slot-status-select">
+
+                  <label>
+                    INTERVIEW STATUS
+                  </label>
+
+                  <select
+                    ng-model="c.selectedInterviewStatus"
+                    ng-options="
+                      option.value as option.label
+                      for option in c.interviewStatusOptions
+                    "
+                  >
+                  </select>
+
+                </div>
+
+              </div>
+
+            </div>
+
+
+            <div
+              class="slot-form-error"
+              ng-if="c.detailError"
+            >
+
+              <i class="fa fa-exclamation-circle"></i>
+
+              {{c.detailError}}
+
+            </div>
+
+
+          </div>
+
+
+          <div class="slot-modal-footer">
+
+
+            <button
+              type="button"
+              class="modal-cancel"
+              ng-click="c.closeInterviewDetails()"
+            >
+              Close
+            </button>
+
+
+            <button
+              type="button"
+              class="modal-complete"
+              ng-if="
+                c.selectedInterview.interviewStatus == 'Scheduled'
+                &&
+                c.selectedInterviewStatus == 'Completed'
+              "
+              ng-click="
+                c.markInterviewCompleted(
+                  c.selectedInterview
+                )
+              "
+              ng-disabled="
+                c.completingInterview
+              "
+            >
+
+              <i
+                class="fa"
+                ng-class="{
+                  'fa-check-circle':
+                    !c.completingInterview,
+
+                  'fa-spinner fa-spin':
+                    c.completingInterview
+                }"
+              ></i>
+
+              {{
+                c.completingInterview
+                  ? 'Saving...'
+                  : 'Save Interview Status'
+              }}
+
+            </button>
+
+
+          </div>
+
+
+        </div>
+
+      </div>
+
+
+      <!-- =======================================================
+           VERIFY QR MODAL
+           ======================================================= -->
+
+      <div
+        class="slot-modal-backdrop"
+        ng-if="c.verifyModalOpen"
+        ng-click="c.closeVerifyModal()"
+      >
+
+        <div
+          class="slot-modal verify-modal"
+          ng-click="$event.stopPropagation()"
+        >
+
+
+          <div class="slot-modal-header">
+
+            <div>
+
+              <span>
+                QR VERIFICATION
+              </span>
+
+              <h2>
+                Verify Attendance
+              </h2>
+
+              <p>
+                Verify the student's QR token.
+              </p>
+
+            </div>
+
+
+            <button
+              type="button"
+              class="slot-modal-close"
+              ng-click="c.closeVerifyModal()"
+            >
+
+              <i class="fa fa-times"></i>
+
+            </button>
+
+          </div>
+
+
+          <div class="slot-modal-body">
+
+
+            <div class="verify-student-card">
+
+              <div class="verify-avatar">
+                {{c.verifySession.initials}}
+              </div>
+
+              <div>
+
+                <strong>
+                  {{c.verifySession.studentName}}
+                </strong>
+
+                <span>
+                  {{c.verifySession.studentId}}
+                </span>
+
+              </div>
+
+            </div>
+
+
+            <div class="verify-session-grid">
+
+
+              <div>
+
+                <span>
+                  DATE
+                </span>
+
+                <strong>
+                  {{c.verifySession.interviewDate}}
+                </strong>
+
+              </div>
+
+
+              <div>
+
+                <span>
+                  TIME
+                </span>
+
+                <strong>
+                  {{c.verifySession.startTime}}
+                  -
+                  {{c.verifySession.endTime}}
+                </strong>
+
+              </div>
+
+
+              <div>
+
+                <span>
+                  TYPE
+                </span>
+
+                <strong>
+                  {{c.verifySession.interviewType}}
+                </strong>
+
+              </div>
+
+
+            </div>
+
+
+            <div class="token-box">
+
+              <label>
+                QR TOKEN
+              </label>
+
+              <input
+                type="text"
+                ng-model="c.verifyToken"
+                placeholder="Enter scanned QR token"
+              />
+
+            </div>
+
+
+            <div
+              class="slot-form-error"
+              ng-if="c.verifyError"
+            >
+
+              <i class="fa fa-exclamation-circle"></i>
+
+              {{c.verifyError}}
+
+            </div>
+
+
+          </div>
+
+
+          <div class="slot-modal-footer">
+
+
+            <button
+              type="button"
+              class="modal-cancel"
+              ng-click="c.closeVerifyModal()"
+            >
+              Close
+            </button>
+
+
+            <button
+              type="button"
+              class="modal-verify"
+              ng-click="c.verifyQR()"
+              ng-disabled="c.verifyingQR"
+            >
+
+              <i
+                class="fa"
+                ng-class="{
+                  'fa-qrcode':
+                    !c.verifyingQR,
+
+                  'fa-spinner fa-spin':
+                    c.verifyingQR
+                }"
+              ></i>
+
+              {{
+                c.verifyingQR
+                  ? 'Verifying...'
+                  : 'Verify & Mark Present'
+              }}
+
+            </button>
+
+
+          </div>
+
+
+        </div>
+
+      </div>
+
+
+      <!-- =======================================================
+           FEEDBACK MODAL
+           ======================================================= -->
+
+      <div
+        class="slot-modal-backdrop"
+        ng-if="c.feedbackModalOpen"
+        ng-click="c.closeFeedbackModal()"
+      >
+
+        <div
+          class="slot-modal feedback-modal"
+          ng-click="$event.stopPropagation()"
+        >
+
+
+          <div class="slot-modal-header">
+
+            <div>
+
+              <span>
+                INTERVIEW FEEDBACK
+              </span>
+
+              <h2>
+                Evaluate Student
+              </h2>
+
+              <p>
+                Give performance feedback for the completed interview.
+              </p>
+
+            </div>
+
+
+            <button
+              type="button"
+              class="slot-modal-close"
+              ng-click="c.closeFeedbackModal()"
+            >
+
+              <i class="fa fa-times"></i>
+
+            </button>
+
+          </div>
+
+
+          <div class="slot-modal-body">
+
+
+            <div class="feedback-form-student">
+
+              <div class="verify-avatar">
+                {{c.feedbackSession.initials}}
+              </div>
+
+              <div>
+
+                <strong>
+                  {{c.feedbackSession.studentName}}
+                </strong>
+
+                <span>
+                  {{c.feedbackSession.studentId}}
+                  ·
+                  {{c.feedbackSession.interviewType}}
+                </span>
+
+              </div>
+
+            </div>
+
+
+            <div class="feedback-score-grid">
+
+
+              <div class="score-input-box">
+
+                <label>
+                  TECHNICAL SCORE
+                </label>
+
+                <input
+                  type="number"
+                  min="0"
+                  max="100"
+                  ng-model="c.feedbackForm.technicalScore"
+                />
+
+              </div>
+
+
+              <div class="score-input-box">
+
+                <label>
+                  COMMUNICATION SCORE
+                </label>
+
+                <input
+                  type="number"
+                  min="0"
+                  max="100"
+                  ng-model="c.feedbackForm.communicationScore"
+                />
+
+              </div>
+
+
+              <div class="score-input-box">
+
+                <label>
+                  PROBLEM SOLVING SCORE
+                </label>
+
+                <input
+                  type="number"
+                  min="0"
+                  max="100"
+                  ng-model="c.feedbackForm.problemSolvingScore"
+                />
+
+              </div>
+
+
+              <div class="overall-score-box">
+
+                <span>
+                  OVERALL SCORE
+                </span>
+
+                <strong>
+                  {{c.getOverallPreview()}}
+                </strong>
+
+              </div>
+
+
+            </div>
+
+
+            <div class="feedback-form-group">
+
+              <label>
+                STRENGTHS
+              </label>
+
+              <textarea
+                ng-model="c.feedbackForm.strengths"
+                placeholder="Student's strengths..."
+              ></textarea>
+
+            </div>
+
+
+            <div class="feedback-form-group">
+
+              <label>
+                IMPROVEMENT AREAS
+              </label>
+
+              <textarea
+                ng-model="c.feedbackForm.improvementAreas"
+                placeholder="Improvement areas..."
+              ></textarea>
+
+            </div>
+
+
+            <div class="feedback-form-group">
+
+              <label>
+                RECOMMENDATION
+              </label>
+
+              <textarea
+                ng-model="c.feedbackForm.recommendation"
+                placeholder="Recommended next action..."
+              ></textarea>
+
+            </div>
+
+
+            <div
+              class="slot-form-error"
+              ng-if="c.feedbackError"
+            >
+
+              <i class="fa fa-exclamation-circle"></i>
+
+              {{c.feedbackError}}
+
+            </div>
+
+
+          </div>
+
+
+          <div class="slot-modal-footer">
+
+
+            <button
+              type="button"
+              class="modal-cancel"
+              ng-click="c.closeFeedbackModal()"
+            >
+              Cancel
+            </button>
+
+
+            <button
+              type="button"
+              class="modal-create"
+              ng-click="c.submitFeedback()"
+              ng-disabled="c.savingFeedback"
+            >
+
+              <i
+                class="fa"
+                ng-class="{
+                  'fa-save':
+                    !c.savingFeedback,
+
+                  'fa-spinner fa-spin':
+                    c.savingFeedback
+                }"
+              ></i>
+
+              {{
+                c.savingFeedback
+                  ? 'Saving...'
+                  : 'Submit Feedback'
+              }}
+
+            </button>
+
+
+          </div>
+
+
+        </div>
+
+      </div>
+
+
+      <!-- FOOTER -->
+
+      <footer class="slot-page-footer">
+
+        <span>
+          Campus360 · Trainer Portal
+        </span>
+
+        <span>
+          {{c.data.trainer.id}}
+        </span>
+
+      </footer>
+
+
+    </section>
+
+  </main>
+
+
+  <!-- Campus360 AI Assistant Floating Widget -->
+  <sp-widget widget="data.aiWidget"></sp-widget>
+</div>]]></template>
+    </sp_widget>
+</record_update>

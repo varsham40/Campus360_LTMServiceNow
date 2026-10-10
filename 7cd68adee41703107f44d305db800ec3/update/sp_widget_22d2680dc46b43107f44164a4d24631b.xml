@@ -1,0 +1,6198 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_widget">
+    <sp_widget action="INSERT_OR_UPDATE">
+        <category>custom</category>
+        <client_script><![CDATA[api.controller = function($scope) {
+
+  var c = this;
+
+  c.getCurrentTrainerId = function() {
+    var params = new URLSearchParams(window.location.search);
+    return (params.get('trainer') || '');
+  };
+
+  c.currentTrainerId = c.getCurrentTrainerId();
+  c.showNotificationsPopover = false;
+
+  c.toggleNotifications = function($event) {
+    if ($event) $event.stopPropagation();
+    c.showNotificationsPopover = !c.showNotificationsPopover;
+  };
+
+  c.dismissNotif = function(index) {
+    if (c.data.notifications && c.data.notifications.length > index) {
+      c.data.notifications.splice(index, 1);
+      c.data.unreadCount = c.data.notifications.length;
+    }
+  };
+
+  c.clearAllNotifications = function() {
+    c.data.notifications = [];
+    c.data.unreadCount = 0;
+  };
+
+  c.refresh = function() {
+    c.server.update();
+  };
+
+  c.openPage = function(pageId) {
+    if (!pageId) return;
+    var trainerId = c.getCurrentTrainerId();
+    var url = '?id=' + encodeURIComponent(pageId);
+    if (trainerId) {
+      url += '&trainer=' + encodeURIComponent(trainerId);
+    }
+    window.location.href = url;
+  };
+
+  document.addEventListener('click', function(e) {
+    var popover = document.getElementById('trainerNotifPopover');
+    var bell = document.getElementById('trainerNotifBell');
+    if (popover && bell && !popover.contains(e.target) && !bell.contains(e.target)) {
+      $scope.$apply(function() {
+        c.showNotificationsPopover = false;
+      });
+    }
+  });
+
+};]]></client_script>
+        <controller_as>c</controller_as>
+        <css>/* =========================================================&#13;
+   CAMPUS360 TRAINER DASHBOARD&#13;
+   SAME BODY / CONTENT DESIGN&#13;
+   UPDATED FULL-SCREEN SHELL&#13;
+   DARK PURPLE SIDEBAR&#13;
+   ========================================================= */&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   GLOBAL BOX SIZING&#13;
+   ========================================================= */&#13;
+&#13;
+.campus360-trainer-app,&#13;
+.campus360-trainer-app * {&#13;
+  box-sizing: border-box;&#13;
+  font-family: Arial, Helvetica, sans-serif;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   SERVICE NOW OUTER CHROME&#13;
+   REMOVE:&#13;
+   - SERVICENOW TOP HEADER&#13;
+   - SYSTEM ADMINISTRATOR&#13;
+   - OUTER PORTAL NAVBAR&#13;
+   ========================================================= */&#13;
+&#13;
+body:has(.campus360-trainer-app) {&#13;
+  margin: 0 !important;&#13;
+  padding: 0 !important;&#13;
+  width: 100% !important;&#13;
+  max-width: 100% !important;&#13;
+  overflow: hidden !important;&#13;
+}&#13;
+&#13;
+&#13;
+/*&#13;
+ * ServiceNow / Service Portal header selectors.&#13;
+ * These are intentionally outside the Campus360 app.&#13;
+ */&#13;
+&#13;
+body:has(.campus360-trainer-app) &gt; .navbar,&#13;
+body:has(.campus360-trainer-app) .navbar.navbar-inverse,&#13;
+body:has(.campus360-trainer-app) .sp-navbar,&#13;
+body:has(.campus360-trainer-app) .sp-navbar-top,&#13;
+body:has(.campus360-trainer-app) #sp-nav-bar,&#13;
+body:has(.campus360-trainer-app) #sp-navbar,&#13;
+body:has(.campus360-trainer-app) #sp-nav-header,&#13;
+body:has(.campus360-trainer-app) .portal-navbar,&#13;
+body:has(.campus360-trainer-app) .sp-header,&#13;
+body:has(.campus360-trainer-app) .sp-top-bar {&#13;
+&#13;
+  display: none !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   SERVICE NOW WRAPPERS&#13;
+   ========================================================= */&#13;
+&#13;
+body:has(.campus360-trainer-app) .container,&#13;
+body:has(.campus360-trainer-app) .container-fluid,&#13;
+body:has(.campus360-trainer-app) .row,&#13;
+body:has(.campus360-trainer-app) [class*="col-"],&#13;
+body:has(.campus360-trainer-app) .well,&#13;
+body:has(.campus360-trainer-app) .panel,&#13;
+body:has(.campus360-trainer-app) .panel-body {&#13;
+&#13;
+  width: 100% !important;&#13;
+&#13;
+  max-width: none !important;&#13;
+&#13;
+  min-width: 0 !important;&#13;
+&#13;
+  margin-left: 0 !important;&#13;
+  margin-right: 0 !important;&#13;
+&#13;
+  padding-left: 0 !important;&#13;
+  padding-right: 0 !important;&#13;
+&#13;
+  border: 0 !important;&#13;
+&#13;
+  box-shadow: none !important;&#13;
+&#13;
+  background: transparent !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   CAMPUS360 APPLICATION SHELL&#13;
+   IMPORTANT FIX:&#13;
+   START DIRECTLY AT VIEWPORT TOP&#13;
+   ========================================================= */&#13;
+&#13;
+.campus360-trainer-app {&#13;
+&#13;
+  position: fixed !important;&#13;
+&#13;
+  top: 0 !important;&#13;
+  right: 0 !important;&#13;
+  bottom: 0 !important;&#13;
+  left: 0 !important;&#13;
+&#13;
+  width: 100vw !important;&#13;
+&#13;
+  height: 100vh !important;&#13;
+&#13;
+  min-width: 100vw !important;&#13;
+  max-width: 100vw !important;&#13;
+&#13;
+  min-height: 100vh !important;&#13;
+  max-height: 100vh !important;&#13;
+&#13;
+  margin: 0 !important;&#13;
+  padding: 0 !important;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  overflow: hidden !important;&#13;
+&#13;
+  z-index: 99999 !important;&#13;
+&#13;
+  background: #f4f7fb;&#13;
+&#13;
+  color: #172a33;&#13;
+&#13;
+  font-size: 15px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   SIDEBAR&#13;
+   DARK PURPLE - SAME STYLE AS STUDENT PAGES&#13;
+   ========================================================= */&#13;
+&#13;
+.campus360-trainer-sidebar {&#13;
+&#13;
+  position: fixed !important;&#13;
+&#13;
+  left: 0 !important;&#13;
+  top: 0 !important;&#13;
+  bottom: 0 !important;&#13;
+&#13;
+  width: 250px !important;&#13;
+&#13;
+  min-width: 250px !important;&#13;
+  max-width: 250px !important;&#13;
+&#13;
+  height: 100vh !important;&#13;
+  min-height: 100vh !important;&#13;
+&#13;
+  z-index: 100000 !important;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  flex-direction: column;&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      180deg,&#13;
+      #130d2f 0%,&#13;
+      #160d38 48%,&#13;
+      #100a29 100%&#13;
+    ) !important;&#13;
+&#13;
+  border-right: 1px solid #2d2157 !important;&#13;
+&#13;
+  box-shadow:&#13;
+    4px 0 18px rgba(10, 7, 30, 0.20);&#13;
+&#13;
+  overflow: hidden;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   BRAND&#13;
+   ========================================================= */&#13;
+&#13;
+.trainer-brand {&#13;
+&#13;
+  height: 76px;&#13;
+&#13;
+  min-height: 76px;&#13;
+&#13;
+  padding: 0 22px;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  gap: 11px;&#13;
+&#13;
+  border-bottom: 1px solid #2d2157 !important;&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      135deg,&#13;
+      #170e38,&#13;
+      #1c1045&#13;
+    ) !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.trainer-brand-mark {&#13;
+&#13;
+  width: 38px;&#13;
+  height: 38px;&#13;
+&#13;
+  flex: 0 0 38px;&#13;
+&#13;
+  border-radius: 10px;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  justify-content: center;&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      135deg,&#13;
+      #7c3aed,&#13;
+      #8b3ff2&#13;
+    ) !important;&#13;
+&#13;
+  color: #ffffff;&#13;
+&#13;
+  font-size: 18px;&#13;
+&#13;
+  font-weight: 800;&#13;
+&#13;
+  box-shadow:&#13;
+    0 6px 15px rgba(124,58,237,.25);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.trainer-brand-text strong {&#13;
+&#13;
+  display: block;&#13;
+&#13;
+  color: #ffffff !important;&#13;
+&#13;
+  font-size: 17px;&#13;
+&#13;
+  font-weight: 800;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.trainer-brand-text span {&#13;
+&#13;
+  display: block;&#13;
+&#13;
+  margin-top: 2px;&#13;
+&#13;
+  color: #b9abd8 !important;&#13;
+&#13;
+  font-size: 10px;&#13;
+&#13;
+  font-weight: 900;&#13;
+&#13;
+  letter-spacing: 1px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   TRAINER PROFILE&#13;
+   ========================================================= */&#13;
+&#13;
+.trainer-profile-mini {&#13;
+&#13;
+  margin: 16px 14px 8px;&#13;
+&#13;
+  padding: 12px;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  gap: 10px;&#13;
+&#13;
+  border-radius: 11px;&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      135deg,&#13;
+      #211342,&#13;
+      #29164f&#13;
+    ) !important;&#13;
+&#13;
+  border: 1px solid #4b3475 !important;&#13;
+&#13;
+  text-decoration: none !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.trainer-profile-mini:hover {&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      135deg,&#13;
+      #29174f,&#13;
+      #321d5d&#13;
+    ) !important;&#13;
+&#13;
+  border-color: #60458e !important;&#13;
+&#13;
+  text-decoration: none !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.trainer-avatar,&#13;
+.trainer-top-avatar,&#13;
+.student-table-avatar,&#13;
+.followup-icon,&#13;
+.coordination-icon,&#13;
+.trainer-nav-icon {&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  justify-content: center;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.trainer-avatar,&#13;
+.trainer-top-avatar,&#13;
+.student-table-avatar {&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      135deg,&#13;
+      #7c3aed,&#13;
+      #8b3ff2&#13;
+    ) !important;&#13;
+&#13;
+  color: #ffffff;&#13;
+&#13;
+  font-weight: 800;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.trainer-avatar {&#13;
+&#13;
+  width: 38px;&#13;
+  height: 38px;&#13;
+&#13;
+  flex: 0 0 38px;&#13;
+&#13;
+  border-radius: 10px;&#13;
+&#13;
+  font-size: 12px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.trainer-profile-info {&#13;
+&#13;
+  min-width: 0;&#13;
+&#13;
+  flex: 1;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.trainer-profile-info strong {&#13;
+&#13;
+  display: block;&#13;
+&#13;
+  color: #ffffff !important;&#13;
+&#13;
+  font-size: 12px;&#13;
+&#13;
+  font-weight: 900;&#13;
+&#13;
+  white-space: nowrap;&#13;
+&#13;
+  overflow: hidden;&#13;
+&#13;
+  text-overflow: ellipsis;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.trainer-profile-info span {&#13;
+&#13;
+  display: block;&#13;
+&#13;
+  margin-top: 3px;&#13;
+&#13;
+  color: #b9abd8 !important;&#13;
+&#13;
+  font-size: 10px;&#13;
+&#13;
+  font-weight: 700;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.trainer-profile-arrow {&#13;
+&#13;
+  color: #a99bc7 !important;&#13;
+&#13;
+  font-size: 16px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   NAVIGATION&#13;
+   ========================================================= */&#13;
+&#13;
+.trainer-nav {&#13;
+&#13;
+  padding: 7px 10px 25px;&#13;
+&#13;
+  overflow-y: auto;&#13;
+&#13;
+  overflow-x: hidden;&#13;
+&#13;
+  flex: 1;&#13;
+&#13;
+  scrollbar-width: none !important;&#13;
+&#13;
+  -ms-overflow-style: none !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.trainer-nav::-webkit-scrollbar {&#13;
+&#13;
+  width: 0 !important;&#13;
+  height: 0 !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.trainer-nav::-webkit-scrollbar-track {&#13;
+&#13;
+  background: transparent !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.trainer-nav::-webkit-scrollbar-thumb {&#13;
+&#13;
+  background: transparent !important;&#13;
+&#13;
+  border-radius: 10px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.trainer-nav-label {&#13;
+&#13;
+  margin: 18px 10px 7px;&#13;
+&#13;
+  color: #9283b6 !important;&#13;
+&#13;
+  font-size: 10px;&#13;
+&#13;
+  font-weight: 900;&#13;
+&#13;
+  letter-spacing: 1.2px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.trainer-nav-item {&#13;
+&#13;
+  min-height: 43px;&#13;
+&#13;
+  margin: 2px 0;&#13;
+&#13;
+  padding: 0 11px;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  gap: 10px;&#13;
+&#13;
+  border-radius: 9px;&#13;
+&#13;
+  color: #c4b8dc !important;&#13;
+&#13;
+  text-decoration: none !important;&#13;
+&#13;
+  font-size: 12px;&#13;
+&#13;
+  font-weight: 800;&#13;
+&#13;
+  transition:&#13;
+    background .18s ease,&#13;
+    color .18s ease,&#13;
+    transform .18s ease;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.trainer-nav-item:hover {&#13;
+&#13;
+  background:&#13;
+    rgba(124,58,237,.18) !important;&#13;
+&#13;
+  color: #ffffff !important;&#13;
+&#13;
+  transform: translateX(1px);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.trainer-nav-item.active {&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      90deg,&#13;
+      #7c3aed 0%,&#13;
+      #8b3ff2 100%&#13;
+    ) !important;&#13;
+&#13;
+  color: #ffffff !important;&#13;
+&#13;
+  border-left: 4px solid #a78bfa !important;&#13;
+&#13;
+  padding-left: 7px;&#13;
+&#13;
+  box-shadow:&#13;
+    inset 0 0 0 1px rgba(196,181,253,.10),&#13;
+    0 6px 16px rgba(124,58,237,.16);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.trainer-nav-icon {&#13;
+&#13;
+  width: 23px;&#13;
+&#13;
+  min-width: 23px;&#13;
+&#13;
+  text-align: center;&#13;
+&#13;
+  color: #a99ac8 !important;&#13;
+&#13;
+  font-size: 17px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.trainer-nav-item:hover&#13;
+.trainer-nav-icon {&#13;
+&#13;
+  color: #ffffff !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.trainer-nav-item.active&#13;
+.trainer-nav-icon {&#13;
+&#13;
+  color: #ffffff !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.trainer-nav-count {&#13;
+&#13;
+  min-width: 21px;&#13;
+&#13;
+  height: 21px;&#13;
+&#13;
+  margin-left: auto;&#13;
+&#13;
+  padding: 0 6px;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  justify-content: center;&#13;
+&#13;
+  border-radius: 20px;&#13;
+&#13;
+  background: #3a2764 !important;&#13;
+&#13;
+  color: #d9ceef !important;&#13;
+&#13;
+  font-size: 10px;&#13;
+&#13;
+  font-weight: 900;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.trainer-nav-item.active&#13;
+.trainer-nav-count {&#13;
+&#13;
+  background: rgba(255,255,255,.18) !important;&#13;
+&#13;
+  color: #ffffff !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.trainer-nav-count.warning {&#13;
+&#13;
+  background: #5a3511 !important;&#13;
+&#13;
+  color: #ffd08a !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   MAIN&#13;
+   IMPORTANT FIX:&#13;
+   USE ALL SPACE BESIDE SIDEBAR&#13;
+   ========================================================= */&#13;
+&#13;
+.campus360-trainer-main {&#13;
+&#13;
+  position: absolute !important;&#13;
+&#13;
+  left: 250px !important;&#13;
+&#13;
+  top: 0 !important;&#13;
+&#13;
+  right: 0 !important;&#13;
+&#13;
+  bottom: 0 !important;&#13;
+&#13;
+  width: calc(100vw - 250px) !important;&#13;
+&#13;
+  max-width: calc(100vw - 250px) !important;&#13;
+&#13;
+  min-width: 0 !important;&#13;
+&#13;
+  height: 100vh !important;&#13;
+&#13;
+  min-height: 100vh !important;&#13;
+&#13;
+  margin: 0 !important;&#13;
+&#13;
+  padding: 0 !important;&#13;
+&#13;
+  overflow-x: hidden !important;&#13;
+&#13;
+  overflow-y: auto !important;&#13;
+&#13;
+  background: #f4f7fb;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   TOP NAVBAR&#13;
+   SAME DASHBOARD LOOK&#13;
+   ========================================================= */&#13;
+&#13;
+.trainer-topbar {&#13;
+&#13;
+  position: sticky;&#13;
+&#13;
+  top: 0;&#13;
+&#13;
+  z-index: 5000;&#13;
+&#13;
+  width: 100%;&#13;
+&#13;
+  height: 68px;&#13;
+&#13;
+  min-height: 68px;&#13;
+&#13;
+  padding: 0 30px;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  justify-content: space-between;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  background: #ffffff;&#13;
+&#13;
+  border-bottom: 1px solid #e2e8ef;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.trainer-topbar-left {&#13;
+&#13;
+  min-width: 0;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  gap: 12px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.trainer-page-heading {&#13;
+&#13;
+  min-width: 0;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  flex-direction: column;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.trainer-topbar-eyebrow {&#13;
+&#13;
+  display: block;&#13;
+&#13;
+  color: #673cff;&#13;
+&#13;
+  font-size: 10px;&#13;
+&#13;
+  font-weight: 900;&#13;
+&#13;
+  letter-spacing: 1.4px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.trainer-topbar-title {&#13;
+&#13;
+  display: block;&#13;
+&#13;
+  margin-top: 3px;&#13;
+&#13;
+  color: #172a33;&#13;
+&#13;
+  font-size: 16px;&#13;
+&#13;
+  font-weight: 800;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.trainer-topbar-actions {&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  gap: 9px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.trainer-top-icon {&#13;
+&#13;
+  position: relative;&#13;
+&#13;
+  width: 38px;&#13;
+&#13;
+  height: 38px;&#13;
+&#13;
+  flex: 0 0 38px;&#13;
+&#13;
+  border-radius: 10px;&#13;
+&#13;
+  border: 1px solid #dfe6ee;&#13;
+&#13;
+  background: #ffffff;&#13;
+&#13;
+  color: #536476;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  justify-content: center;&#13;
+&#13;
+  text-decoration: none !important;&#13;
+&#13;
+  cursor: pointer;&#13;
+&#13;
+  transition:&#13;
+    color .18s ease,&#13;
+    background .18s ease,&#13;
+    border-color .18s ease;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.trainer-top-icon:hover {&#13;
+&#13;
+  color: #673cff;&#13;
+&#13;
+  border-color: #c9baff;&#13;
+&#13;
+  background: #f8f5ff;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.trainer-notification-button {&#13;
+&#13;
+  overflow: visible;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.trainer-top-icon .fa-bell {&#13;
+&#13;
+  color: #f39c12;&#13;
+&#13;
+  font-size: 18px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.top-notification-dot {&#13;
+&#13;
+  position: absolute;&#13;
+&#13;
+  width: 8px;&#13;
+&#13;
+  height: 8px;&#13;
+&#13;
+  border-radius: 50%;&#13;
+&#13;
+  background: #e74c3c;&#13;
+&#13;
+  top: 7px;&#13;
+&#13;
+  right: 7px;&#13;
+&#13;
+  border: 2px solid #ffffff;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.trainer-top-profile {&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  gap: 9px;&#13;
+&#13;
+  text-decoration: none !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.trainer-top-avatar {&#13;
+&#13;
+  width: 35px;&#13;
+&#13;
+  height: 35px;&#13;
+&#13;
+  flex: 0 0 35px;&#13;
+&#13;
+  border-radius: 9px;&#13;
+&#13;
+  font-size: 11px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.trainer-top-profile strong {&#13;
+&#13;
+  display: block;&#13;
+&#13;
+  color: #263b49;&#13;
+&#13;
+  font-size: 11px;&#13;
+&#13;
+  font-weight: 900;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.trainer-top-profile span {&#13;
+&#13;
+  display: block;&#13;
+&#13;
+  margin-top: 2px;&#13;
+&#13;
+  color: #66788a;&#13;
+&#13;
+  font-size: 10px;&#13;
+&#13;
+  font-weight: 700;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   EVERYTHING BELOW HERE IS YOUR EXISTING BODY STYLING&#13;
+   KEPT UNCHANGED&#13;
+   ========================================================= */&#13;
+&#13;
+.trainer-dashboard-content {&#13;
+&#13;
+  width: 100%;&#13;
+&#13;
+  padding: 28px 30px 55px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* ==================== WELCOME ==================== */&#13;
+&#13;
+.trainer-welcome {&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  justify-content: space-between;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  gap: 20px;&#13;
+&#13;
+  margin-bottom: 24px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.trainer-eyebrow,&#13;
+.trainer-panel-heading &gt; div &gt; span,&#13;
+.ai-card-top &gt; div &gt; span,&#13;
+.coordination-copy &gt; span {&#13;
+&#13;
+  display: block;&#13;
+&#13;
+  color: #673cff;&#13;
+&#13;
+  font-size: 10px;&#13;
+&#13;
+  font-weight: 900;&#13;
+&#13;
+  letter-spacing: 1.7px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.trainer-welcome h1 {&#13;
+&#13;
+  margin: 0;&#13;
+&#13;
+  color: #172a33;&#13;
+&#13;
+  font-size: 29px;&#13;
+&#13;
+  line-height: 1.2;&#13;
+&#13;
+  font-weight: 800;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.trainer-welcome p {&#13;
+&#13;
+  margin: 8px 0 0;&#13;
+&#13;
+  color: #65768a;&#13;
+&#13;
+  font-size: 14px;&#13;
+&#13;
+  line-height: 1.5;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.trainer-id-card {&#13;
+&#13;
+  min-width: 130px;&#13;
+&#13;
+  padding: 13px 17px;&#13;
+&#13;
+  border-radius: 11px;&#13;
+&#13;
+  background: #ffffff;&#13;
+&#13;
+  border: 1px solid #dcd2ff;&#13;
+&#13;
+  box-shadow: 0 4px 15px rgba(31, 45, 61, 0.04);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* TRAINER NOTIFICATION POPOVER STYLES */&#13;
+&#13;
+.student-notif-popover {&#13;
+    position: absolute;&#13;
+    top: 45px;&#13;
+    right: 0;&#13;
+    width: 360px;&#13;
+    background: #ffffff;&#13;
+    border: 1px solid #e5e7eb;&#13;
+    border-radius: 12px;&#13;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.1);&#13;
+    z-index: 1050;&#13;
+    overflow: hidden;&#13;
+    font-family: inherit;&#13;
+    animation: fadeInPopover 0.2s ease-in-out;&#13;
+    text-align: left;&#13;
+}&#13;
+&#13;
+@keyframes fadeInPopover {&#13;
+    from { opacity: 0; transform: translateY(-8px); }&#13;
+    to { opacity: 1; transform: translateY(0); }&#13;
+}&#13;
+&#13;
+.snotif-header {&#13;
+    display: flex;&#13;
+    justify-content: space-between;&#13;
+    align-items: center;&#13;
+    padding: 12px 16px;&#13;
+    background: #f9fafb;&#13;
+    border-bottom: 1px solid #e5e7eb;&#13;
+}&#13;
+&#13;
+.snotif-title {&#13;
+    font-size: 13px;&#13;
+    font-weight: 700;&#13;
+    color: #111827;&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    gap: 8px;&#13;
+}&#13;
+&#13;
+.snotif-count-pill {&#13;
+    background: #fee2e2;&#13;
+    color: #dc2626;&#13;
+    font-size: 11px;&#13;
+    font-weight: 600;&#13;
+    padding: 2px 8px;&#13;
+    border-radius: 12px;&#13;
+}&#13;
+&#13;
+.snotif-clear-all {&#13;
+    background: none;&#13;
+    border: none;&#13;
+    color: #6b7280;&#13;
+    font-size: 12px;&#13;
+    font-weight: 600;&#13;
+    cursor: pointer;&#13;
+}&#13;
+&#13;
+.snotif-clear-all:hover {&#13;
+    color: #ef4444;&#13;
+}&#13;
+&#13;
+.snotif-body {&#13;
+    max-height: 320px;&#13;
+    overflow-y: auto;&#13;
+    padding: 8px;&#13;
+}&#13;
+&#13;
+.snotif-empty {&#13;
+    text-align: center;&#13;
+    padding: 20px 12px;&#13;
+    color: #9ca3af;&#13;
+}&#13;
+&#13;
+.snotif-empty i {&#13;
+    font-size: 24px;&#13;
+    color: #10b981;&#13;
+    margin-bottom: 6px;&#13;
+}&#13;
+&#13;
+.snotif-card {&#13;
+    display: flex;&#13;
+    gap: 10px;&#13;
+    padding: 10px;&#13;
+    border-radius: 8px;&#13;
+    background: #f9fafb;&#13;
+    margin-bottom: 8px;&#13;
+    border: 1px solid #f3f4f6;&#13;
+}&#13;
+&#13;
+.snotif-card.interview { border-left: 4px solid #3b82f6; }&#13;
+.snotif-card.attendance { border-left: 4px solid #ef4444; background: #fef2f2; }&#13;
+.snotif-card.program { border-left: 4px solid #8b5cf6; }&#13;
+&#13;
+.snotif-icon {&#13;
+    font-size: 16px;&#13;
+    color: #4f46e5;&#13;
+    margin-top: 2px;&#13;
+}&#13;
+&#13;
+.snotif-card.attendance .snotif-icon { color: #ef4444; }&#13;
+&#13;
+.snotif-content {&#13;
+    flex: 1;&#13;
+}&#13;
+&#13;
+.snotif-msg {&#13;
+    font-size: 12px;&#13;
+    font-weight: 500;&#13;
+    color: #1f2937;&#13;
+    line-height: 1.4;&#13;
+    margin-bottom: 4px;&#13;
+}&#13;
+&#13;
+.snotif-meta {&#13;
+    font-size: 10px;&#13;
+    color: #6b7280;&#13;
+    margin-bottom: 6px;&#13;
+}&#13;
+&#13;
+.snotif-actions {&#13;
+    display: flex;&#13;
+    gap: 6px;&#13;
+}&#13;
+&#13;
+.sbtn {&#13;
+    border: none;&#13;
+    border-radius: 6px;&#13;
+    padding: 3px 6px;&#13;
+    font-size: 10px;&#13;
+    font-weight: 600;&#13;
+    cursor: pointer;&#13;
+}&#13;
+&#13;
+.sbtn-dismiss {&#13;
+    background: #e5e7eb;&#13;
+    color: #374151;&#13;
+}&#13;
+&#13;
+.sbtn-dismiss:hover {&#13;
+    background: #d1d5db;&#13;
+}&#13;
+&#13;
+&#13;
+&#13;
+.trainer-id-card span {&#13;
+&#13;
+  display: block;&#13;
+&#13;
+  color: #77879a;&#13;
+&#13;
+  font-size: 10px;&#13;
+&#13;
+  font-weight: 900;&#13;
+&#13;
+  letter-spacing: 1px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.trainer-id-card strong {&#13;
+&#13;
+  display: block;&#13;
+&#13;
+  margin-top: 5px;&#13;
+&#13;
+  color: #673cff;&#13;
+&#13;
+  font-size: 14px;&#13;
+&#13;
+  font-weight: 900;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* ==================== KPI ==================== */&#13;
+&#13;
+.trainer-kpi-grid {&#13;
+&#13;
+  display: grid;&#13;
+&#13;
+  grid-template-columns:&#13;
+    repeat(4, minmax(0, 1fr));&#13;
+&#13;
+  gap: 15px;&#13;
+&#13;
+  margin-bottom: 18px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.trainer-kpi-card {&#13;
+&#13;
+  min-width: 0;&#13;
+&#13;
+  min-height: 125px;&#13;
+&#13;
+  position: relative;&#13;
+&#13;
+  padding: 18px;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  gap: 12px;&#13;
+&#13;
+  border-radius: 14px;&#13;
+&#13;
+  text-decoration: none !important;&#13;
+&#13;
+  box-shadow:&#13;
+    0 5px 15px rgba(31, 45, 61, 0.045);&#13;
+&#13;
+  transition:&#13;
+    transform .18s ease,&#13;
+    box-shadow .18s ease;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.trainer-kpi-card:hover {&#13;
+&#13;
+  transform: translateY(-2px);&#13;
+&#13;
+  box-shadow:&#13;
+    0 8px 19px rgba(31, 45, 61, 0.08);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.trainer-kpi-card.students-card {&#13;
+&#13;
+  background: #f5f0ff;&#13;
+&#13;
+  border: 1px solid #d9ccff;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.trainer-kpi-card.sessions-card {&#13;
+&#13;
+  background: #edf7ff;&#13;
+&#13;
+  border: 1px solid #c9e2f7;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.trainer-kpi-card.attendance-card {&#13;
+&#13;
+  background: #eaf9f6;&#13;
+&#13;
+  border: 1px solid #c5e8e0;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.trainer-kpi-card.attention-card {&#13;
+&#13;
+  background: #fff5e8;&#13;
+&#13;
+  border: 1px solid #f1d9b7;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.trainer-kpi-card.students-card&#13;
+.trainer-kpi-icon {&#13;
+&#13;
+  background: #e7ddff;&#13;
+&#13;
+  color: #673cff;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.trainer-kpi-card.sessions-card&#13;
+.trainer-kpi-icon {&#13;
+&#13;
+  background: #d9edff;&#13;
+&#13;
+  color: #1474b8;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.trainer-kpi-card.attendance-card&#13;
+.trainer-kpi-icon {&#13;
+&#13;
+  background: #d2f1eb;&#13;
+&#13;
+  color: #087e71;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.trainer-kpi-card.attention-card&#13;
+.trainer-kpi-icon {&#13;
+&#13;
+  background: #ffe5c4;&#13;
+&#13;
+  color: #bd6b0b;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.trainer-kpi-icon {&#13;
+&#13;
+  width: 48px;&#13;
+&#13;
+  height: 48px;&#13;
+&#13;
+  flex: 0 0 48px;&#13;
+&#13;
+  border-radius: 12px;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  justify-content: center;&#13;
+&#13;
+  font-size: 21px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.trainer-kpi-content {&#13;
+&#13;
+  min-width: 0;&#13;
+&#13;
+  flex: 1;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.trainer-kpi-content span {&#13;
+&#13;
+  font-size: 10px;&#13;
+&#13;
+  font-weight: 900;&#13;
+&#13;
+  letter-spacing: .75px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.trainer-kpi-content strong {&#13;
+&#13;
+  display: block;&#13;
+&#13;
+  margin-top: 5px;&#13;
+&#13;
+  color: #172a33;&#13;
+&#13;
+  font-size: 28px;&#13;
+&#13;
+  line-height: 1;&#13;
+&#13;
+  font-weight: 900;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.trainer-kpi-content small {&#13;
+&#13;
+  display: block;&#13;
+&#13;
+  margin-top: 6px;&#13;
+&#13;
+  color: #718194;&#13;
+&#13;
+  font-size: 10px;&#13;
+&#13;
+  font-weight: 600;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.kpi-arrow {&#13;
+&#13;
+  color: #7a8795;&#13;
+&#13;
+  font-size: 12px;&#13;
+&#13;
+  align-self: flex-start;&#13;
+&#13;
+  margin-top: 3px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* ==================== SECONDARY KPI ==================== */&#13;
+&#13;
+.trainer-secondary-kpi-grid {&#13;
+&#13;
+  display: grid;&#13;
+&#13;
+  grid-template-columns:&#13;
+    repeat(4, minmax(0, 1fr));&#13;
+&#13;
+  gap: 15px;&#13;
+&#13;
+  margin-bottom: 20px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.secondary-kpi-card {&#13;
+&#13;
+  min-height: 82px;&#13;
+&#13;
+  padding: 16px;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  gap: 12px;&#13;
+&#13;
+  border: 1px solid #dfe6ee;&#13;
+&#13;
+  border-radius: 13px;&#13;
+&#13;
+  box-shadow:&#13;
+    0 5px 15px rgba(31, 45, 61, 0.04);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.secondary-icon {&#13;
+&#13;
+  width: 42px;&#13;
+&#13;
+  height: 42px;&#13;
+&#13;
+  flex: 0 0 42px;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  justify-content: center;&#13;
+&#13;
+  border-radius: 11px;&#13;
+&#13;
+  font-size: 18px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.secondary-kpi-card.purple {&#13;
+&#13;
+  background: #f7f3ff;&#13;
+&#13;
+  border-color: #ded4ff;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.secondary-kpi-card.blue {&#13;
+&#13;
+  background: #eff8ff;&#13;
+&#13;
+  border-color: #d1e6f8;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.secondary-kpi-card.green {&#13;
+&#13;
+  background: #edf9f4;&#13;
+&#13;
+  border-color: #cbe9da;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.secondary-kpi-card.orange {&#13;
+&#13;
+  background: #fff6ea;&#13;
+&#13;
+  border-color: #f0ddc0;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.secondary-kpi-card.purple&#13;
+.secondary-icon {&#13;
+&#13;
+  background: #e9e0ff;&#13;
+&#13;
+  color: #673cff;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.secondary-kpi-card.blue&#13;
+.secondary-icon {&#13;
+&#13;
+  background: #dcedff;&#13;
+&#13;
+  color: #1474b8;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.secondary-kpi-card.green&#13;
+.secondary-icon {&#13;
+&#13;
+  background: #d9f2e5;&#13;
+&#13;
+  color: #158057;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.secondary-kpi-card.orange&#13;
+.secondary-icon {&#13;
+&#13;
+  background: #ffe7c7;&#13;
+&#13;
+  color: #bd6b0b;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.secondary-kpi-card span {&#13;
+&#13;
+  font-size: 10px;&#13;
+&#13;
+  font-weight: 900;&#13;
+&#13;
+  letter-spacing: .6px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.secondary-kpi-card strong {&#13;
+&#13;
+  display: block;&#13;
+&#13;
+  margin-top: 4px;&#13;
+&#13;
+  color: #172a33;&#13;
+&#13;
+  font-size: 24px;&#13;
+&#13;
+  font-weight: 900;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* ==================== PANELS ==================== */&#13;
+&#13;
+.trainer-panel {&#13;
+&#13;
+  margin-bottom: 20px;&#13;
+&#13;
+  padding: 21px;&#13;
+&#13;
+  background: #ffffff;&#13;
+&#13;
+  border: 1px solid #dfe6ee;&#13;
+&#13;
+  border-radius: 15px;&#13;
+&#13;
+  box-shadow:&#13;
+    0 5px 16px rgba(31, 45, 61, 0.04);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.trainer-panel-heading {&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: flex-start;&#13;
+&#13;
+  justify-content: space-between;&#13;
+&#13;
+  gap: 15px;&#13;
+&#13;
+  margin-bottom: 19px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.trainer-panel-heading.compact {&#13;
+&#13;
+  margin-bottom: 14px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.trainer-panel-heading h2 {&#13;
+&#13;
+  margin: 5px 0 0;&#13;
+&#13;
+  color: #172a33;&#13;
+&#13;
+  font-size: 21px;&#13;
+&#13;
+  font-weight: 900;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.trainer-panel-heading p {&#13;
+&#13;
+  margin: 5px 0 0;&#13;
+&#13;
+  color: #65768a;&#13;
+&#13;
+  font-size: 12px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.panel-action {&#13;
+&#13;
+  color: #673cff;&#13;
+&#13;
+  font-size: 11px;&#13;
+&#13;
+  font-weight: 900;&#13;
+&#13;
+  text-decoration: none !important;&#13;
+&#13;
+  white-space: nowrap;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* ==================== PROGRAMS ==================== */&#13;
+&#13;
+.program-grid {&#13;
+&#13;
+  display: grid;&#13;
+&#13;
+  grid-template-columns:&#13;
+    repeat(3, minmax(0, 1fr));&#13;
+&#13;
+  gap: 18px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.program-card {&#13;
+&#13;
+  min-width: 0;&#13;
+&#13;
+  min-height: 315px;&#13;
+&#13;
+  position: relative;&#13;
+&#13;
+  padding: 21px 20px 17px;&#13;
+&#13;
+  overflow: hidden;&#13;
+&#13;
+  border-radius: 15px;&#13;
+&#13;
+  background: #ffffff;&#13;
+&#13;
+  text-decoration: none !important;&#13;
+&#13;
+  transition:&#13;
+    transform .18s ease,&#13;
+    box-shadow .18s ease;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.program-card:hover {&#13;
+&#13;
+  transform: translateY(-3px);&#13;
+&#13;
+  box-shadow:&#13;
+    0 9px 20px rgba(31,45,61,.08);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.program-card:before {&#13;
+&#13;
+  content: "";&#13;
+&#13;
+  position: absolute;&#13;
+&#13;
+  top: 0;&#13;
+  left: 0;&#13;
+&#13;
+  width: 100%;&#13;
+  height: 3px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.program-card:nth-child(3n + 1) {&#13;
+&#13;
+  background: #faf8ff;&#13;
+&#13;
+  border: 1px solid #d9cdf7;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.program-card:nth-child(3n + 1):before {&#13;
+&#13;
+  background: #7044ee;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.program-card:nth-child(3n + 1)&#13;
+.program-icon {&#13;
+&#13;
+  background: #e7ddff;&#13;
+&#13;
+  color: #6336db;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.program-card:nth-child(3n + 1)&#13;
+.program-id,&#13;
+.program-card:nth-child(3n + 1)&#13;
+.program-progress-fill {&#13;
+&#13;
+  color: #6336db;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.program-card:nth-child(3n + 2) {&#13;
+&#13;
+  background: #f7fbff;&#13;
+&#13;
+  border: 1px solid #cbdff1;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.program-card:nth-child(3n + 2):before {&#13;
+&#13;
+  background: #2486d8;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.program-card:nth-child(3n + 2)&#13;
+.program-icon {&#13;
+&#13;
+  background: #dceeff;&#13;
+&#13;
+  color: #146eb6;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.program-card:nth-child(3n + 2)&#13;
+.program-id {&#13;
+&#13;
+  color: #146eb6;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.program-card:nth-child(3n + 2)&#13;
+.program-progress-fill {&#13;
+&#13;
+  background: #2486d8;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.program-card:nth-child(3n) {&#13;
+&#13;
+  background: #f6fcfb;&#13;
+&#13;
+  border: 1px solid #c4e5df;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.program-card:nth-child(3n):before {&#13;
+&#13;
+  background: #18a394;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.program-card:nth-child(3n)&#13;
+.program-icon {&#13;
+&#13;
+  background: #d8f2ee;&#13;
+&#13;
+  color: #087d71;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.program-card:nth-child(3n)&#13;
+.program-id {&#13;
+&#13;
+  color: #087d71;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.program-card:nth-child(3n)&#13;
+.program-progress-fill {&#13;
+&#13;
+  background: #18a394;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.program-card-top {&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  justify-content: space-between;&#13;
+&#13;
+  gap: 10px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.program-icon {&#13;
+&#13;
+  width: 47px;&#13;
+&#13;
+  height: 47px;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  justify-content: center;&#13;
+&#13;
+  border-radius: 12px;&#13;
+&#13;
+  font-size: 20px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.program-status {&#13;
+&#13;
+  padding: 6px 11px;&#13;
+&#13;
+  border-radius: 20px;&#13;
+&#13;
+  font-size: 10px;&#13;
+&#13;
+  font-weight: 900;&#13;
+&#13;
+  background: #eef2f6;&#13;
+&#13;
+  color: #526476;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.program-card h3 {&#13;
+&#13;
+  margin: 18px 0 5px;&#13;
+&#13;
+  color: #1b3038;&#13;
+&#13;
+  font-size: 20px;&#13;
+&#13;
+  line-height: 1.28;&#13;
+&#13;
+  font-weight: 900;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.program-id {&#13;
+&#13;
+  display: block;&#13;
+&#13;
+  color: #6336db;&#13;
+&#13;
+  font-size: 12px;&#13;
+&#13;
+  font-weight: 900;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.program-info {&#13;
+&#13;
+  margin-top: 18px;&#13;
+&#13;
+  display: grid;&#13;
+&#13;
+  grid-template-columns: 1fr;&#13;
+&#13;
+  gap: 9px;&#13;
+&#13;
+  font-size: 11px;&#13;
+&#13;
+  color: #526476;&#13;
+&#13;
+  font-weight: 700;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.program-info &gt; div {&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  gap: 8px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.program-info i {&#13;
+&#13;
+  width: 17px;&#13;
+&#13;
+  text-align: center;&#13;
+&#13;
+  color: #673cff;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.program-progress-block {&#13;
+&#13;
+  margin-top: 18px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.program-progress-block &gt; div:first-child {&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  justify-content: space-between;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.program-progress-block span {&#13;
+&#13;
+  color: #65768a;&#13;
+&#13;
+  font-size: 10px;&#13;
+&#13;
+  font-weight: 800;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.program-progress-block strong {&#13;
+&#13;
+  color: #172a33;&#13;
+&#13;
+  font-size: 12px;&#13;
+&#13;
+  font-weight: 900;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.program-progress-track {&#13;
+&#13;
+  margin-top: 7px;&#13;
+&#13;
+  height: 7px;&#13;
+&#13;
+  border-radius: 7px;&#13;
+&#13;
+  background: #e8edf2;&#13;
+&#13;
+  overflow: hidden;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.program-progress-fill {&#13;
+&#13;
+  height: 100%;&#13;
+&#13;
+  border-radius: 7px;&#13;
+&#13;
+  background: #7044ee;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.program-footer {&#13;
+&#13;
+  margin-top: 18px;&#13;
+&#13;
+  padding-top: 12px;&#13;
+&#13;
+  border-top: 1px solid rgba(117,134,150,.18);&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  justify-content: space-between;&#13;
+&#13;
+  gap: 10px;&#13;
+&#13;
+  font-size: 10px;&#13;
+&#13;
+  color: #6c7b8b;&#13;
+&#13;
+  font-weight: 800;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* ==================== TWO COLUMN ==================== */&#13;
+&#13;
+.trainer-content-grid {&#13;
+&#13;
+  display: grid;&#13;
+&#13;
+  grid-template-columns:&#13;
+    minmax(0, 1fr)&#13;
+    minmax(0, 1fr);&#13;
+&#13;
+  gap: 20px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* ==================== INTERVIEWS ==================== */&#13;
+&#13;
+.interview-mini-list {&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  flex-direction: column;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.interview-mini-row {&#13;
+&#13;
+  min-height: 74px;&#13;
+&#13;
+  padding: 11px 0;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  gap: 11px;&#13;
+&#13;
+  border-bottom: 1px solid #edf1f5;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.interview-mini-row:last-child {&#13;
+&#13;
+  border-bottom: 0;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.interview-mini-icon {&#13;
+&#13;
+  width: 40px;&#13;
+&#13;
+  height: 40px;&#13;
+&#13;
+  flex: 0 0 40px;&#13;
+&#13;
+  border-radius: 11px;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  justify-content: center;&#13;
+&#13;
+  background: #e8f3ff;&#13;
+&#13;
+  color: #1f70b5;&#13;
+&#13;
+  font-size: 16px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.interview-mini-info {&#13;
+&#13;
+  min-width: 0;&#13;
+&#13;
+  flex: 1;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.interview-mini-info strong {&#13;
+&#13;
+  display: block;&#13;
+&#13;
+  color: #233744;&#13;
+&#13;
+  font-size: 12px;&#13;
+&#13;
+  font-weight: 900;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.interview-mini-info span {&#13;
+&#13;
+  margin-top: 4px;&#13;
+&#13;
+  font-size: 10px;&#13;
+&#13;
+  color: #718194;&#13;
+&#13;
+  font-weight: 700;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.trainer-status,&#13;
+.student-status {&#13;
+&#13;
+  flex: 0 0 auto;&#13;
+&#13;
+  padding: 6px 9px;&#13;
+&#13;
+  border-radius: 15px;&#13;
+&#13;
+  font-size: 9px;&#13;
+&#13;
+  font-weight: 900;&#13;
+&#13;
+  border: 1px solid transparent;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.status-completed {&#13;
+&#13;
+  background: #e7f8ee;&#13;
+&#13;
+  color: #14855b;&#13;
+&#13;
+  border-color: #c0e8d2;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.status-scheduled {&#13;
+&#13;
+  background: #e9f2ff;&#13;
+&#13;
+  color: #1e68b6;&#13;
+&#13;
+  border-color: #c8def6;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.status-in-progress {&#13;
+&#13;
+  background: #fff4db;&#13;
+&#13;
+  color: #aa6400;&#13;
+&#13;
+  border-color: #f3d28c;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.status-default {&#13;
+&#13;
+  background: #eef2f6;&#13;
+&#13;
+  color: #526476;&#13;
+&#13;
+  border-color: #d7e0e8;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* ==================== INTELLIGENCE ==================== */&#13;
+&#13;
+.intelligence-panel {&#13;
+&#13;
+  background: #fcfdff;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.student-readiness-list {&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  flex-direction: column;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.readiness-item {&#13;
+&#13;
+  display: grid;&#13;
+&#13;
+  grid-template-columns:&#13;
+    minmax(150px,1.2fr)&#13;
+    minmax(130px,1fr)&#13;
+    auto&#13;
+    minmax(130px,.9fr);&#13;
+&#13;
+  gap: 13px;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  padding: 11px 0;&#13;
+&#13;
+  border-bottom: 1px solid #edf1f5;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.readiness-item:last-child {&#13;
+&#13;
+  border-bottom: 0;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.student-table-person {&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  gap: 9px;&#13;
+&#13;
+  min-width: 0;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.student-table-avatar {&#13;
+&#13;
+  width: 34px;&#13;
+&#13;
+  height: 34px;&#13;
+&#13;
+  border-radius: 9px;&#13;
+&#13;
+  font-size: 10px;&#13;
+&#13;
+  flex: 0 0 34px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.student-table-person strong {&#13;
+&#13;
+  display: block;&#13;
+&#13;
+  color: #263b49;&#13;
+&#13;
+  font-size: 11px;&#13;
+&#13;
+  font-weight: 900;&#13;
+&#13;
+  white-space: nowrap;&#13;
+&#13;
+  overflow: hidden;&#13;
+&#13;
+  text-overflow: ellipsis;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.student-table-person small {&#13;
+&#13;
+  display: block;&#13;
+&#13;
+  margin-top: 2px;&#13;
+&#13;
+  color: #718194;&#13;
+&#13;
+  font-size: 9px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.readiness-main &gt; div:first-child {&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  justify-content: space-between;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.readiness-main span {&#13;
+&#13;
+  font-size: 9px;&#13;
+&#13;
+  font-weight: 800;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.readiness-main strong {&#13;
+&#13;
+  color: #172a33;&#13;
+&#13;
+  font-size: 11px;&#13;
+&#13;
+  font-weight: 900;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.table-progress {&#13;
+&#13;
+  margin-top: 5px;&#13;
+&#13;
+  height: 6px;&#13;
+&#13;
+  background: #e8edf2;&#13;
+&#13;
+  border-radius: 6px;&#13;
+&#13;
+  overflow: hidden;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.table-progress-fill {&#13;
+&#13;
+  height: 100%;&#13;
+&#13;
+  background: #673cff;&#13;
+&#13;
+  border-radius: 6px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.risk-high {&#13;
+&#13;
+  background: #ffebed;&#13;
+&#13;
+  color: #b52c37;&#13;
+&#13;
+  border-color: #ffc0c5;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.risk-medium {&#13;
+&#13;
+  background: #fff3d9;&#13;
+&#13;
+  color: #a45c00;&#13;
+&#13;
+  border-color: #ffd18a;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.risk-low {&#13;
+&#13;
+  background: #e5faef;&#13;
+&#13;
+  color: #087d4b;&#13;
+&#13;
+  border-color: #9ae1bb;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.skill-gap {&#13;
+&#13;
+  min-width: 0;&#13;
+&#13;
+  color: #607184;&#13;
+&#13;
+  font-size: 10px;&#13;
+&#13;
+  line-height: 1.4;&#13;
+&#13;
+  font-weight: 700;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* ==================== FOLLOW UP ==================== */&#13;
+&#13;
+.followup-grid {&#13;
+&#13;
+  display: grid;&#13;
+&#13;
+  grid-template-columns:&#13;
+    repeat(2,minmax(0,1fr));&#13;
+&#13;
+  gap: 12px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.followup-card {&#13;
+&#13;
+  min-height: 92px;&#13;
+&#13;
+  padding: 13px;&#13;
+&#13;
+  display: grid;&#13;
+&#13;
+  grid-template-columns:&#13;
+    36px&#13;
+    1fr&#13;
+    auto;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  gap: 10px;&#13;
+&#13;
+  border-radius: 12px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.followup-card.danger {&#13;
+&#13;
+  background: #fff4f4;&#13;
+&#13;
+  border: 1px solid #f0cccc;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.followup-card.warning {&#13;
+&#13;
+  background: #fff9ed;&#13;
+&#13;
+  border: 1px solid #f0ddb1;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.followup-icon {&#13;
+&#13;
+  width: 36px;&#13;
+&#13;
+  height: 36px;&#13;
+&#13;
+  border-radius: 10px;&#13;
+&#13;
+  font-size: 15px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.followup-card.danger&#13;
+.followup-icon {&#13;
+&#13;
+  background: #ffe1e1;&#13;
+&#13;
+  color: #bd303a;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.followup-card.warning&#13;
+.followup-icon {&#13;
+&#13;
+  background: #ffecbf;&#13;
+&#13;
+  color: #aa6500;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.followup-card strong {&#13;
+&#13;
+  display: block;&#13;
+&#13;
+  color: #263b49;&#13;
+&#13;
+  font-size: 11px;&#13;
+&#13;
+  font-weight: 900;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.followup-card span {&#13;
+&#13;
+  margin-top: 2px;&#13;
+&#13;
+  font-size: 9px;&#13;
+&#13;
+  font-weight: 700;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.followup-card p {&#13;
+&#13;
+  margin: 4px 0 0;&#13;
+&#13;
+  color: #69798a;&#13;
+&#13;
+  font-size: 9px;&#13;
+&#13;
+  line-height: 1.4;&#13;
+&#13;
+  font-weight: 650;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.followup-card a {&#13;
+&#13;
+  color: #673cff;&#13;
+&#13;
+  font-size: 10px;&#13;
+&#13;
+  font-weight: 900;&#13;
+&#13;
+  text-decoration: none !important;&#13;
+&#13;
+  white-space: nowrap;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.followup-empty {&#13;
+&#13;
+  grid-column: 1 / -1;&#13;
+&#13;
+  min-height: 90px;&#13;
+&#13;
+  padding: 16px;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  gap: 12px;&#13;
+&#13;
+  border: 1px dashed #cfd9e3;&#13;
+&#13;
+  border-radius: 12px;&#13;
+&#13;
+  background: #f8fafc;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.followup-empty &gt; i {&#13;
+&#13;
+  color: #15905f;&#13;
+&#13;
+  font-size: 20px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.followup-empty strong {&#13;
+&#13;
+  color: #263b49;&#13;
+&#13;
+  font-size: 12px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.followup-empty p {&#13;
+&#13;
+  margin: 4px 0 0;&#13;
+&#13;
+  color: #718194;&#13;
+&#13;
+  font-size: 10px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* ==================== TPO ==================== */&#13;
+&#13;
+.trainer-coordination-strip {&#13;
+&#13;
+  margin-top: 20px;&#13;
+&#13;
+  padding: 17px 19px;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  gap: 14px;&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      135deg,&#13;
+      #f7f4ff 0%,&#13;
+      #eef7ff 100%&#13;
+    );&#13;
+&#13;
+  border: 1px solid #d8d4ef;&#13;
+&#13;
+  border-radius: 15px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.coordination-icon {&#13;
+&#13;
+  width: 48px;&#13;
+&#13;
+  height: 48px;&#13;
+&#13;
+  flex: 0 0 48px;&#13;
+&#13;
+  border-radius: 12px;&#13;
+&#13;
+  background: #e7ddff;&#13;
+&#13;
+  color: #673cff;&#13;
+&#13;
+  font-size: 20px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.coordination-copy {&#13;
+&#13;
+  min-width: 0;&#13;
+&#13;
+  flex: 1;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.coordination-copy &gt; span {&#13;
+&#13;
+  color: #673cff;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.coordination-copy strong {&#13;
+&#13;
+  display: block;&#13;
+&#13;
+  margin-top: 4px;&#13;
+&#13;
+  color: #1f3340;&#13;
+&#13;
+  font-size: 15px;&#13;
+&#13;
+  font-weight: 900;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.coordination-copy p {&#13;
+&#13;
+  margin: 4px 0 0;&#13;
+&#13;
+  color: #637386;&#13;
+&#13;
+  font-size: 10px;&#13;
+&#13;
+  line-height: 1.5;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.coordination-button {&#13;
+&#13;
+  flex: 0 0 auto;&#13;
+&#13;
+  padding: 10px 13px;&#13;
+&#13;
+  border-radius: 9px;&#13;
+&#13;
+  background: #673cff;&#13;
+&#13;
+  color: #ffffff;&#13;
+&#13;
+  text-decoration: none !important;&#13;
+&#13;
+  font-size: 10px;&#13;
+&#13;
+  font-weight: 900;&#13;
+&#13;
+  box-shadow:&#13;
+    0 5px 13px rgba(103,60,255,.16);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.coordination-button:hover {&#13;
+&#13;
+  background: #5730d8;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* ==================== EMPTY / LOADING ==================== */&#13;
+&#13;
+.trainer-empty {&#13;
+&#13;
+  min-height: 90px;&#13;
+&#13;
+  padding: 18px;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  flex-direction: column;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  justify-content: center;&#13;
+&#13;
+  color: #7b8998;&#13;
+&#13;
+  text-align: center;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.trainer-empty i {&#13;
+&#13;
+  color: #b0bac4;&#13;
+&#13;
+  font-size: 24px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.trainer-empty p {&#13;
+&#13;
+  margin: 7px 0 0;&#13;
+&#13;
+  font-size: 11px;&#13;
+&#13;
+  font-weight: 700;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.trainer-dashboard-footer {&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  justify-content: space-between;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  padding: 2px 2px 8px;&#13;
+&#13;
+  color: #7a8898;&#13;
+&#13;
+  font-size: 10px;&#13;
+&#13;
+  font-weight: 700;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.trainer-dashboard-loading {&#13;
+&#13;
+  min-height: 100vh;&#13;
+&#13;
+  width: 100vw;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  justify-content: center;&#13;
+&#13;
+  gap: 10px;&#13;
+&#13;
+  color: #66788a;&#13;
+&#13;
+  font-size: 14px;&#13;
+&#13;
+  font-weight: 700;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.trainer-dashboard-loading i {&#13;
+&#13;
+  color: #673cff;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   RESPONSIVE&#13;
+   ========================================================= */&#13;
+&#13;
+@media (max-width:1200px) {&#13;
+&#13;
+  .trainer-kpi-grid,&#13;
+  .trainer-secondary-kpi-grid {&#13;
+&#13;
+    grid-template-columns:&#13;
+      repeat(2,minmax(0,1fr));&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .program-grid {&#13;
+&#13;
+    grid-template-columns:&#13;
+      repeat(2,minmax(0,1fr));&#13;
+&#13;
+  }&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+@media (max-width:950px) {&#13;
+&#13;
+  .campus360-trainer-sidebar {&#13;
+&#13;
+    width: 215px !important;&#13;
+&#13;
+    min-width: 215px !important;&#13;
+&#13;
+    max-width: 215px !important;&#13;
+&#13;
+    background:&#13;
+      linear-gradient(&#13;
+        180deg,&#13;
+        #130d2f 0%,&#13;
+        #160d38 48%,&#13;
+        #100a29 100%&#13;
+      ) !important;&#13;
+&#13;
+    border-right: 1px solid #2d2157 !important;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .campus360-trainer-main {&#13;
+&#13;
+    left: 215px !important;&#13;
+&#13;
+    width: calc(100vw - 215px) !important;&#13;
+&#13;
+    max-width: calc(100vw - 215px) !important;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .trainer-content-grid {&#13;
+&#13;
+    grid-template-columns: 1fr;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .readiness-item {&#13;
+&#13;
+    grid-template-columns:&#13;
+      1fr&#13;
+      1fr&#13;
+      auto;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .skill-gap {&#13;
+&#13;
+    grid-column: 1 / -1;&#13;
+&#13;
+  }&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+@media (max-width:750px) {&#13;
+&#13;
+  .campus360-trainer-sidebar {&#13;
+&#13;
+    position: fixed !important;&#13;
+&#13;
+    width: 250px !important;&#13;
+&#13;
+    min-width: 250px !important;&#13;
+&#13;
+    max-width: 250px !important;&#13;
+&#13;
+    transform: translateX(-100%);&#13;
+&#13;
+    transition:&#13;
+      transform .25s ease;&#13;
+&#13;
+    background:&#13;
+      linear-gradient(&#13;
+        180deg,&#13;
+        #130d2f 0%,&#13;
+        #160d38 48%,&#13;
+        #100a29 100%&#13;
+      ) !important;&#13;
+&#13;
+    border-right: 1px solid #2d2157 !important;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .campus360-trainer-main {&#13;
+&#13;
+    left: 0 !important;&#13;
+&#13;
+    width: 100vw !important;&#13;
+&#13;
+    max-width: 100vw !important;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .trainer-topbar {&#13;
+&#13;
+    padding: 0 16px;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .trainer-dashboard-content {&#13;
+&#13;
+    padding: 22px 16px 40px;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .trainer-welcome {&#13;
+&#13;
+    align-items: flex-start;&#13;
+&#13;
+    flex-direction: column;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .trainer-kpi-grid,&#13;
+  .trainer-secondary-kpi-grid,&#13;
+  .program-grid,&#13;
+  .followup-grid {&#13;
+&#13;
+    grid-template-columns: 1fr;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .trainer-coordination-strip {&#13;
+&#13;
+    align-items: flex-start;&#13;
+&#13;
+    flex-wrap: wrap;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .coordination-button {&#13;
+&#13;
+    margin-left: 62px;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .trainer-dashboard-footer {&#13;
+&#13;
+    gap: 8px;&#13;
+&#13;
+    flex-direction: column;&#13;
+&#13;
+    align-items: flex-start;&#13;
+&#13;
+  }&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+@media (max-width:560px) {&#13;
+&#13;
+  .trainer-top-profile &gt; div:last-child {&#13;
+&#13;
+    display: none;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .trainer-top-profile {&#13;
+&#13;
+    padding-left: 4px;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .trainer-topbar-title {&#13;
+&#13;
+    font-size: 14px;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .trainer-kpi-grid,&#13;
+  .trainer-secondary-kpi-grid {&#13;
+&#13;
+    grid-template-columns: 1fr;&#13;
+&#13;
+  }&#13;
+&#13;
+}</css>
+        <data_table>sp_instance</data_table>
+        <demo_data/>
+        <description/>
+        <docs/>
+        <field_list/>
+        <has_preview>false</has_preview>
+        <id>campus360_trainer_dashboard_widget</id>
+        <internal>false</internal>
+        <link><![CDATA[function link(scope, element, attrs, controller) {
+  
+}]]></link>
+        <name>Campus360 Trainer Dashboard</name>
+        <option_schema/>
+        <public>false</public>
+        <roles/>
+        <script><![CDATA[(function() {
+  data.loaded = false;
+  data.aiWidget = $sp.getWidget('c4ae634574e703107f4410c9fee0cde5');
+
+  /* ============================================================
+     CURRENT TRAINER
+     
+     URL example:
+     ?id=campus360_trainer_dashboard&trainer=TR001
+     
+     The trainer parameter controls which trainer's
+     dashboard data is displayed.
+     ============================================================ */
+
+  var requestedTrainerId = ($sp.getParameter('trainer') || '').trim();
+
+  var trainerGR = new GlideRecord(
+    'x_snc_campus360_trainer_master'
+  );
+
+  if (requestedTrainerId) {
+
+    trainerGR.addQuery(
+      'trainer_id',
+      requestedTrainerId
+    );
+
+    trainerGR.setLimit(1);
+    trainerGR.query();
+
+  } else {
+
+    /* No trainer parameter:
+       load the first active trainer */
+
+    trainerGR.addQuery(
+      'status',
+      'Active'
+    );
+
+    trainerGR.orderBy(
+      'trainer_id'
+    );
+
+    trainerGR.setLimit(1);
+    trainerGR.query();
+  }
+
+
+  /* ============================================================
+     NO TRAINER FOUND
+     ============================================================ */
+
+  if (!trainerGR.next()) {
+
+    data.loaded = true;
+
+    data.error =
+      'No trainer record found in Trainer Master.';
+
+    return;
+  }
+
+
+  /* ============================================================
+     TRAINER INFORMATION
+     ============================================================ */
+
+  var trainerSysId =
+    trainerGR.getUniqueValue();
+
+  var trainerId =
+    trainerGR.getValue(
+      'trainer_id'
+    ) || '';
+
+  var trainerName =
+    trainerGR.getValue(
+      'trainer_name'
+    ) || '';
+
+
+  data.trainer = {
+
+    sys_id:
+      trainerSysId,
+
+    id:
+      trainerId,
+
+    name:
+      trainerName,
+
+    email:
+      trainerGR.getValue(
+        'email'
+      ) || '',
+
+    expertise:
+      trainerGR.getValue(
+        'expertise'
+      ) || '',
+
+    experience:
+      trainerGR.getValue(
+        'experience'
+      ) || '0',
+
+    rating:
+      trainerGR.getValue(
+        'rating'
+      ) || '0',
+
+    status:
+      trainerGR.getValue(
+        'status'
+      ) || '',
+
+    totalInterviews:
+      parseInt(
+        trainerGR.getValue(
+          'total_interviews'
+        ),
+        10
+      ) || 0,
+
+    initials:
+      getInitials(
+        trainerName
+      )
+  };
+
+
+  /* ============================================================
+     TRAINING PROGRAMS
+     
+     Table:
+     x_snc_campus360_training_program
+     
+     Trainer field:
+     trainer
+     ============================================================ */
+
+  data.programs = [];
+
+  var studentIds = {};
+
+  var totalAssessment = 0;
+  var assessmentCount = 0;
+
+
+  var programGR =
+    new GlideRecord(
+      'x_snc_campus360_training_program'
+    );
+
+
+  programGR.addQuery(
+    'trainer',
+    trainerSysId
+  );
+
+  programGR.orderBy(
+    'start_date'
+  );
+
+  programGR.query();
+
+
+  while (programGR.next()) {
+
+    var programSysId =
+      programGR.getUniqueValue();
+
+
+    var enrollmentStats =
+      getEnrollmentStats(
+        programSysId
+      );
+
+
+    var assignmentCount =
+      getAssignmentCount(
+        programSysId
+      );
+
+
+    /* Add enrolled students to trainer student pool */
+
+    for (
+      var sid in enrollmentStats.students
+    ) {
+
+      if (
+        enrollmentStats.students.hasOwnProperty(
+          sid
+        )
+      ) {
+
+        studentIds[sid] = true;
+      }
+    }
+
+
+    totalAssessment +=
+      enrollmentStats.totalAssessment;
+
+    assessmentCount +=
+      enrollmentStats.assessmentCount;
+
+
+    data.programs.push({
+
+      sys_id:
+        programSysId,
+
+      id:
+        programGR.getValue(
+          'training_id'
+        ) || '',
+
+      name:
+        programGR.getValue(
+          'training_name'
+        ) || '',
+
+      skillArea:
+        programGR.getValue(
+          'skill_area'
+        ) || '',
+
+      batch:
+        programGR.getValue(
+          'batch'
+        ) || '',
+
+      startDate:
+        formatDate(
+          programGR.getValue(
+            'start_date'
+          )
+        ),
+
+      endDate:
+        formatDate(
+          programGR.getValue(
+            'end_date'
+          )
+        ),
+
+      startValue:
+        programGR.getValue(
+          'start_date'
+        ) || '',
+
+      endValue:
+        programGR.getValue(
+          'end_date'
+        ) || '',
+
+      capacity:
+        parseInt(
+          programGR.getValue(
+            'capacity'
+          ),
+          10
+        ) || 0,
+
+      status:
+        programGR.getValue(
+          'status'
+        ) || '',
+
+      students:
+        enrollmentStats.studentCount,
+
+      progress:
+        enrollmentStats.progressCount > 0
+          ? Math.round(
+              enrollmentStats.totalProgress /
+              enrollmentStats.progressCount
+            )
+          : 0,
+
+      assignments:
+        assignmentCount
+    });
+  }
+
+
+  /* ============================================================
+     TRAINING ATTENDANCE
+     
+     Separate from Mock Interview attendance.
+     ============================================================ */
+
+  var attendanceStats =
+    getTrainingAttendance(
+      trainerSysId
+    );
+
+
+  /* ============================================================
+     MOCK INTERVIEW REQUESTS
+     
+     Table:
+     x_snc_campus360_mock_interview_request_trainer
+     ============================================================ */
+
+  var requestData =
+    getInterviewRequests(
+      trainerSysId
+    );
+
+
+  data.interviewRequests =
+    requestData.items;
+
+
+  /* ============================================================
+     TRAINER INTERVIEW AVAILABILITY
+     
+     Table:
+     x_snc_campus360_trainer_interview_availability
+     ============================================================ */
+
+  data.availableSlotsList = [];
+
+
+  var availableSlotCount =
+    getAvailableSlotCount(
+      trainerSysId,
+      data.availableSlotsList
+    );
+
+
+  /* ============================================================
+     MOCK INTERVIEWS
+     
+     Table:
+     x_snc_campus360_mock_interview
+     ============================================================ */
+
+  data.interviews = [];
+
+
+  var interviewGR =
+    new GlideRecord(
+      'x_snc_campus360_mock_interview'
+    );
+
+
+  interviewGR.addQuery(
+    'trainer',
+    trainerSysId
+  );
+
+  interviewGR.orderByDesc(
+    'interview_date'
+  );
+
+  interviewGR.query();
+
+
+  var interviewCount = 0;
+
+  var pendingFeedbackList = [];
+
+
+  while (interviewGR.next()) {
+
+    interviewCount++;
+
+
+    var interviewStudentSysId =
+      interviewGR.getValue(
+        'student'
+      );
+
+
+    var interviewStudent =
+      getStudentName(
+        interviewStudentSysId
+      ) ||
+      interviewGR.getDisplayValue(
+        'student'
+      ) ||
+      'Student';
+
+
+    var interviewStatus =
+      interviewGR.getValue(
+        'interview_status'
+      ) || '';
+
+
+    var interviewSysId =
+      interviewGR.getUniqueValue();
+
+
+    var interviewObj = {
+
+      sys_id:
+        interviewSysId,
+
+      student:
+        interviewStudent,
+
+      date:
+        formatDate(
+          interviewGR.getValue(
+            'interview_date'
+          )
+        ),
+
+      startTime:
+        interviewGR.getValue(
+          'start_time'
+        ) || '',
+
+      endTime:
+        interviewGR.getValue(
+          'end_time'
+        ) || '',
+
+      status:
+        interviewStatus,
+
+      attendance:
+        interviewGR.getValue(
+          'attendance_status'
+        ) || '',
+
+      type:
+        interviewGR.getValue(
+          'interview_type'
+        ) || ''
+    };
+
+
+    data.interviews.push(
+      interviewObj
+    );
+
+
+    /* Completed interview with no feedback */
+
+    if (
+      interviewStatus == 'Completed' &&
+      !hasInterviewFeedback(
+        interviewSysId
+      )
+    ) {
+
+      pendingFeedbackList.push({
+
+        sys_id:
+          interviewSysId,
+
+        student:
+          interviewStudent,
+
+        date:
+          interviewObj.date,
+
+        type:
+          interviewObj.type
+      });
+    }
+  }
+
+
+  /* ============================================================
+     PLACEMENT INTELLIGENCE
+     
+     Only show intelligence for students connected
+     to this trainer through Training Enrollment.
+     ============================================================ */
+
+  data.performance = [];
+
+  data.attentionStudents = [];
+
+
+  var intelligenceGR =
+    new GlideRecord(
+      'x_snc_campus360_placement_intelligence'
+    );
+
+
+  intelligenceGR.query();
+
+
+  while (
+    intelligenceGR.next()
+  ) {
+
+    var intelligenceStudent =
+      intelligenceGR.getValue(
+        'student'
+      );
+
+
+    if (
+      !intelligenceStudent ||
+      !studentIds[
+        intelligenceStudent
+      ]
+    ) {
+
+      continue;
+    }
+
+
+    var studentInfo =
+      getStudentInfo(
+        intelligenceStudent
+      );
+
+
+    var risk =
+      intelligenceGR.getValue(
+        'risk_level'
+      ) || '';
+
+
+    var readiness =
+      getNumber(
+        intelligenceGR.getValue(
+          'readiness_score'
+        )
+      );
+
+
+    var skillGap =
+      intelligenceGR.getValue(
+        'primary_skill_gap'
+      ) || '';
+
+
+    var performanceObj = {
+
+      id:
+        studentInfo.id,
+
+      name:
+        studentInfo.name ||
+        intelligenceGR.getDisplayValue(
+          'student'
+        ) ||
+        'Student',
+
+      initials:
+        getInitials(
+          studentInfo.name ||
+          'Student'
+        ),
+
+      readiness:
+        readiness,
+
+      risk:
+        risk,
+
+      skillGap:
+        skillGap
+    };
+
+
+    data.performance.push(
+      performanceObj
+    );
+
+
+    /* Students marked High risk */
+
+    if (
+      risk == 'High'
+    ) {
+
+      data.attentionStudents.push(
+        performanceObj
+      );
+    }
+  }
+
+
+  /* ============================================================
+     DASHBOARD METRICS
+     ============================================================ */
+
+  data.metrics = {
+
+    trainingPrograms:
+      data.programs.length,
+
+    students:
+      countKeys(
+        studentIds
+      ),
+
+    programsToday:
+      countProgramsToday(
+        data.programs
+      ),
+
+    attendance:
+      attendanceStats.total > 0
+        ? Math.round(
+            (
+              attendanceStats.present /
+              attendanceStats.total
+            ) * 100
+          )
+        : 0,
+
+    averageAssessment:
+      assessmentCount > 0
+        ? Math.round(
+            totalAssessment /
+            assessmentCount
+          )
+        : 0,
+
+    interviews:
+      interviewCount,
+
+    interviewRequests:
+      requestData.pendingCount,
+
+    availableSlots:
+      availableSlotCount,
+
+    attentionStudents:
+      data.attentionStudents.length,
+
+    pendingFeedback:
+      pendingFeedbackList.length
+  };
+
+
+  /* ============================================================
+     ADDITIONAL DASHBOARD DATA
+     ============================================================ */
+
+  data.pendingFeedbackList =
+    pendingFeedbackList;
+
+
+  data.assignmentSummary =
+    getAssignmentSummary(
+      trainerSysId
+    );
+
+
+  /* ============================================================
+     FINISHED
+     ============================================================ */
+
+  data.loaded = true;
+
+
+  /* ============================================================
+     HELPERS
+     ============================================================ */
+
+
+  /* ------------------------------------------------------------
+     TRAINING ENROLLMENT STATISTICS
+     ------------------------------------------------------------ */
+
+  function getEnrollmentStats(
+    programSysId
+  ) {
+
+    var result = {
+
+      students: {},
+
+      studentCount: 0,
+
+      totalProgress: 0,
+
+      progressCount: 0,
+
+      totalAssessment: 0,
+
+      assessmentCount: 0
+    };
+
+
+    var gr =
+      new GlideRecord(
+        'x_snc_campus360_training_enrollment'
+      );
+
+
+    gr.addQuery(
+      'training_program',
+      programSysId
+    );
+
+
+    gr.query();
+
+
+    while (
+      gr.next()
+    ) {
+
+      var sid =
+        gr.getValue(
+          'student'
+        );
+
+
+      if (
+        sid &&
+        !result.students[sid]
+      ) {
+
+        result.students[sid] = true;
+
+        result.studentCount++;
+      }
+
+
+      var progress =
+        parseFloat(
+          gr.getValue(
+            'progress_percentage'
+          )
+        );
+
+
+      if (
+        !isNaN(
+          progress
+        )
+      ) {
+
+        result.totalProgress +=
+          progress;
+
+        result.progressCount++;
+      }
+
+
+      var assessment =
+        parseFloat(
+          gr.getValue(
+            'assessment_score'
+          )
+        );
+
+
+      if (
+        !isNaN(
+          assessment
+        )
+      ) {
+
+        result.totalAssessment +=
+          assessment;
+
+        result.assessmentCount++;
+      }
+    }
+
+
+    return result;
+  }
+
+
+  /* ------------------------------------------------------------
+     TRAINING ATTENDANCE
+     ------------------------------------------------------------ */
+
+  function getTrainingAttendance(
+    trainerSysId
+  ) {
+
+    var out = {
+
+      total: 0,
+
+      present: 0
+    };
+
+
+    var gr =
+      new GlideRecord(
+        'x_snc_campus360_training_attendance'
+      );
+
+
+    if (
+      !gr.isValidField(
+        'training_program'
+      )
+    ) {
+
+      return out;
+    }
+
+
+    gr.addQuery(
+      'training_program.trainer',
+      trainerSysId
+    );
+
+
+    gr.query();
+
+
+    while (
+      gr.next()
+    ) {
+
+      var value = '';
+
+
+      if (
+        gr.isValidField(
+          'attendance_status'
+        )
+      ) {
+
+        value =
+          gr.getValue(
+            'attendance_status'
+          );
+
+      } else if (
+        gr.isValidField(
+          'status'
+        )
+      ) {
+
+        value =
+          gr.getValue(
+            'status'
+          );
+
+      } else if (
+        gr.isValidField(
+          'attendance'
+        )
+      ) {
+
+        value =
+          gr.getValue(
+            'attendance'
+          );
+      }
+
+
+      if (
+        value === ''
+      ) {
+
+        continue;
+      }
+
+
+      out.total++;
+
+
+      if (
+        String(
+          value
+        ).toLowerCase() ==
+        'present'
+      ) {
+
+        out.present++;
+      }
+    }
+
+
+    return out;
+  }
+
+
+  /* ------------------------------------------------------------
+     ASSIGNMENT COUNT
+     ------------------------------------------------------------ */
+
+  function getAssignmentCount(
+    programSysId
+  ) {
+
+    var gr =
+      new GlideRecord(
+        'x_snc_campus360_assignment'
+      );
+
+
+    if (
+      !gr.isValidField(
+        'training_program'
+      )
+    ) {
+
+      return 0;
+    }
+
+
+    gr.addQuery(
+      'training_program',
+      programSysId
+    );
+
+
+    gr.query();
+
+
+    var count = 0;
+
+
+    while (
+      gr.next()
+    ) {
+
+      count++;
+    }
+
+
+    return count;
+  }
+
+
+  /* ------------------------------------------------------------
+     ASSIGNMENT SUMMARY
+     ------------------------------------------------------------ */
+
+  function getAssignmentSummary(
+    trainerSysId
+  ) {
+
+    var list = [];
+
+
+    var gr =
+      new GlideRecord(
+        'x_snc_campus360_assignment'
+      );
+
+
+    if (
+      !gr.isValidField(
+        'training_program'
+      )
+    ) {
+
+      return list;
+    }
+
+
+    gr.addQuery(
+      'training_program.trainer',
+      trainerSysId
+    );
+
+
+    if (
+      gr.isValidField(
+        'sys_created_on'
+      )
+    ) {
+
+      gr.orderByDesc(
+        'sys_created_on'
+      );
+    }
+
+
+    gr.setLimit(5);
+
+    gr.query();
+
+
+    while (
+      gr.next()
+    ) {
+
+      var name =
+        firstValue(
+          gr,
+          [
+            'assignment_name',
+            'name',
+            'title'
+          ]
+        ) ||
+        gr.getDisplayValue();
+
+
+      list.push({
+
+        sys_id:
+          gr.getUniqueValue(),
+
+        name:
+          name,
+
+        dueDate:
+          firstDisplayValue(
+            gr,
+            [
+              'due_date',
+              'deadline'
+            ]
+          ),
+
+        status:
+          firstValue(
+            gr,
+            [
+              'status',
+              'completion_status'
+            ]
+          )
+      });
+    }
+
+
+    return list;
+  }
+
+
+  /* ------------------------------------------------------------
+     INTERVIEW REQUESTS
+     ------------------------------------------------------------ */
+
+  function getInterviewRequests(
+    trainerSysId
+  ) {
+
+    var result = {
+
+      pendingCount: 0,
+
+      items: []
+    };
+
+
+    var gr =
+      new GlideRecord(
+        'x_snc_campus360_mock_interview_request_trainer'
+      );
+
+
+    if (
+      !gr.isValidField(
+        'trainer'
+      )
+    ) {
+
+      return result;
+    }
+
+
+    gr.addQuery(
+      'trainer',
+      trainerSysId
+    );
+
+
+    if (
+      gr.isValidField(
+        'sys_created_on'
+      )
+    ) {
+
+      gr.orderByDesc(
+        'sys_created_on'
+      );
+    }
+
+
+    gr.setLimit(20);
+
+    gr.query();
+
+
+    while (
+      gr.next()
+    ) {
+
+      var status =
+        firstValue(
+          gr,
+          [
+            'status',
+            'request_status'
+          ]
+        );
+
+
+      var normalized =
+        String(
+          status || ''
+        ).toLowerCase();
+
+
+      if (
+        normalized ==
+          'requested' ||
+        normalized ==
+          'pending'
+      ) {
+
+        result.pendingCount++;
+      }
+
+
+      result.items.push({
+
+        sys_id:
+          gr.getUniqueValue(),
+
+        status:
+          status || '',
+
+        student:
+          getRequestStudentName(
+            gr
+          ),
+
+        date:
+          getRequestDate(
+            gr
+          )
+      });
+    }
+
+
+    return result;
+  }
+
+
+  /* ------------------------------------------------------------
+     AVAILABLE INTERVIEW SLOTS
+     ------------------------------------------------------------ */
+
+  function getAvailableSlotCount(
+    trainerSysId,
+    list
+  ) {
+
+    var count = 0;
+
+
+    var gr =
+      new GlideRecord(
+        'x_snc_campus360_trainer_interview_availability'
+      );
+
+
+    if (
+      !gr.isValidField(
+        'trainer'
+      )
+    ) {
+
+      return 0;
+    }
+
+
+    gr.addQuery(
+      'trainer',
+      trainerSysId
+    );
+
+
+    if (
+      gr.isValidField(
+        'sys_created_on'
+      )
+    ) {
+
+      gr.orderBy(
+        'sys_created_on'
+      );
+    }
+
+
+    gr.query();
+
+
+    while (
+      gr.next()
+    ) {
+
+      var status =
+        firstValue(
+          gr,
+          [
+            'status',
+            'slot_status',
+            'availability_status'
+          ]
+        );
+
+
+      if (
+        status &&
+        String(
+          status
+        ).toLowerCase() !=
+        'available'
+      ) {
+
+        continue;
+      }
+
+
+      count++;
+
+
+      if (
+        list.length < 5
+      ) {
+
+        list.push({
+
+          date:
+            firstDisplayValue(
+              gr,
+              [
+                'available_date',
+                'slot_date',
+                'date',
+                'interview_date'
+              ]
+            ),
+
+          start:
+            firstValue(
+              gr,
+              [
+                'start_time',
+                'available_start_time'
+              ]
+            ),
+
+          end:
+            firstValue(
+              gr,
+              [
+                'end_time',
+                'available_end_time'
+              ]
+            ),
+
+          status:
+            status ||
+            'Available'
+        });
+      }
+    }
+
+
+    return count;
+  }
+
+
+  /* ------------------------------------------------------------
+     CHECK IF INTERVIEW HAS FEEDBACK
+     ------------------------------------------------------------ */
+
+  function hasInterviewFeedback(
+    interviewSysId
+  ) {
+
+    var gr =
+      new GlideRecord(
+        'x_snc_campus360_interview_feedback'
+      );
+
+
+    if (
+      !gr.isValidField(
+        'interview'
+      )
+    ) {
+
+      return false;
+    }
+
+
+    gr.addQuery(
+      'interview',
+      interviewSysId
+    );
+
+
+    gr.setLimit(1);
+
+    gr.query();
+
+
+    return gr.hasNext();
+  }
+
+
+  /* ------------------------------------------------------------
+     REQUEST STUDENT
+     ------------------------------------------------------------ */
+
+  function getRequestStudentName(
+    requestGR
+  ) {
+
+    var requestSysId =
+      firstValue(
+        requestGR,
+        [
+          'mock_interview_slot_request',
+          'slot_request',
+          'request'
+        ]
+      );
+
+
+    if (
+      requestSysId
+    ) {
+
+      var req =
+        new GlideRecord(
+          'x_snc_campus360_mock_interview_slot_request'
+        );
+
+
+      if (
+        req.get(
+          requestSysId
+        ) &&
+        req.isValidField(
+          'student'
+        )
+      ) {
+
+        return (
+          getStudentName(
+            req.getValue(
+              'student'
+            )
+          ) ||
+          req.getDisplayValue(
+            'student'
+          ) ||
+          'Student'
+        );
+      }
+    }
+
+
+    if (
+      requestGR.isValidField(
+        'student'
+      )
+    ) {
+
+      return (
+        getStudentName(
+          requestGR.getValue(
+            'student'
+          )
+        ) ||
+        requestGR.getDisplayValue(
+          'student'
+        ) ||
+        'Student'
+      );
+    }
+
+
+    return 'Student';
+  }
+
+
+  /* ------------------------------------------------------------
+     REQUEST DATE
+     ------------------------------------------------------------ */
+
+  function getRequestDate(
+    requestGR
+  ) {
+
+    var requestSysId =
+      firstValue(
+        requestGR,
+        [
+          'mock_interview_slot_request',
+          'slot_request',
+          'request'
+        ]
+      );
+
+
+    if (
+      requestSysId
+    ) {
+
+      var req =
+        new GlideRecord(
+          'x_snc_campus360_mock_interview_slot_request'
+        );
+
+
+      if (
+        req.get(
+          requestSysId
+        )
+      ) {
+
+        return firstDisplayValue(
+          req,
+          [
+            'requested_date',
+            'slot_date',
+            'date',
+            'interview_date'
+          ]
+        );
+      }
+    }
+
+
+    return firstDisplayValue(
+      requestGR,
+      [
+        'requested_date',
+        'slot_date',
+        'date',
+        'interview_date'
+      ]
+    );
+  }
+
+
+  /* ------------------------------------------------------------
+     STUDENT INFORMATION
+     ------------------------------------------------------------ */
+
+  function getStudentInfo(
+    studentSysId
+  ) {
+
+    var result = {
+
+      name: '',
+
+      id: ''
+    };
+
+
+    var gr =
+      new GlideRecord(
+        'x_snc_campus360_student_master'
+      );
+
+
+    if (
+      studentSysId &&
+      gr.get(
+        studentSysId
+      )
+    ) {
+
+      result.name =
+        gr.getValue(
+          'student_name'
+        ) || '';
+
+
+      result.id =
+        gr.getValue(
+          'student_id'
+        ) || '';
+    }
+
+
+    return result;
+  }
+
+
+  /* ------------------------------------------------------------
+     STUDENT NAME
+     ------------------------------------------------------------ */
+
+  function getStudentName(
+    studentSysId
+  ) {
+
+    return getStudentInfo(
+      studentSysId
+    ).name;
+  }
+
+
+  /* ------------------------------------------------------------
+     PROGRAMS ACTIVE TODAY
+     ------------------------------------------------------------ */
+
+  function countProgramsToday(
+    programs
+  ) {
+
+    var today =
+      new GlideDate().getValue();
+
+
+    var count = 0;
+
+
+    for (
+      var i = 0;
+      i < programs.length;
+      i++
+    ) {
+
+      if (
+        programs[i].startValue &&
+        programs[i].endValue &&
+        programs[i].startValue <= today &&
+        today <= programs[i].endValue
+      ) {
+
+        count++;
+      }
+    }
+
+
+    return count;
+  }
+
+
+  /* ------------------------------------------------------------
+     COUNT OBJECT KEYS
+     ------------------------------------------------------------ */
+
+  function countKeys(
+    obj
+  ) {
+
+    var count = 0;
+
+
+    for (
+      var k in obj
+    ) {
+
+      if (
+        obj.hasOwnProperty(k)
+      ) {
+
+        count++;
+      }
+    }
+
+
+    return count;
+  }
+
+
+  /* ------------------------------------------------------------
+     GET FIRST VALID FIELD VALUE
+     ------------------------------------------------------------ */
+
+  function firstValue(
+    gr,
+    fields
+  ) {
+
+    for (
+      var i = 0;
+      i < fields.length;
+      i++
+    ) {
+
+      if (
+        gr.isValidField(
+          fields[i]
+        )
+      ) {
+
+        var v =
+          gr.getValue(
+            fields[i]
+          );
+
+
+        if (
+          v !== null &&
+          v !== ''
+        ) {
+
+          return v;
+        }
+      }
+    }
+
+
+    return '';
+  }
+
+
+  /* ------------------------------------------------------------
+     GET FIRST DISPLAY VALUE
+     ------------------------------------------------------------ */
+
+  function firstDisplayValue(
+    gr,
+    fields
+  ) {
+
+    for (
+      var i = 0;
+      i < fields.length;
+      i++
+    ) {
+
+      if (
+        gr.isValidField(
+          fields[i]
+        )
+      ) {
+
+        var raw =
+          gr.getValue(
+            fields[i]
+          );
+
+
+        if (
+          raw !== null &&
+          raw !== ''
+        ) {
+
+          return gr.getDisplayValue(
+            fields[i]
+          );
+        }
+      }
+    }
+
+
+    return '';
+  }
+
+
+  /* ------------------------------------------------------------
+     DATE FORMAT
+     ------------------------------------------------------------ */
+
+  function formatDate(
+    value
+  ) {
+
+    if (
+      !value
+    ) {
+
+      return '';
+    }
+
+
+    var gd =
+      new GlideDate();
+
+
+    gd.setValue(
+      value
+    );
+
+
+    return gd.getDisplayValue();
+  }
+
+
+  /* ------------------------------------------------------------
+     NUMBER
+     ------------------------------------------------------------ */
+
+  function getNumber(
+    value
+  ) {
+
+    var n =
+      parseFloat(
+        value
+      );
+
+
+    return isNaN(
+      n
+    )
+      ? 0
+      : Math.round(
+          n
+        );
+  }
+
+
+  /* ------------------------------------------------------------
+     INITIALS
+     ------------------------------------------------------------ */
+
+  function getInitials(
+    name
+  ) {
+
+    if (
+      !name
+    ) {
+
+      return 'TR';
+    }
+
+
+    var parts =
+      String(
+        name
+      )
+      .trim()
+      .split(
+        /\s+/
+      );
+
+
+    if (
+      parts.length == 1
+    ) {
+
+      return parts[0]
+        .substring(
+          0,
+          2
+        )
+        .toUpperCase();
+    }
+
+
+    return (
+      parts[0].charAt(0) +
+      parts[
+        parts.length - 1
+      ].charAt(0)
+    ).toUpperCase();
+  }
+
+  /* ============================================================
+     TRAINER NOTIFICATIONS ENGINE
+     ============================================================ */
+  data.notifications = [];
+
+  // 1. Training Program Assigned Notifications
+  var trProgGR = new GlideRecord('x_snc_campus360_training_program');
+  trProgGR.addQuery('trainer', trainerSysId);
+  trProgGR.orderByDesc('sys_created_on');
+  trProgGR.setLimit(5);
+  trProgGR.query();
+
+  while (trProgGR.next()) {
+      var pName = trProgGR.getValue('training_name') || trProgGR.getValue('name') || 'Training Program';
+      var pSkill = trProgGR.getValue('skill_area') || 'Core Skills';
+      var pBatch = trProgGR.getValue('batch') || 'Current Batch';
+      var pStart = trProgGR.getDisplayValue('start_date') || 'Upcoming';
+
+      data.notifications.push({
+          sys_id: 'tr_notif_prog_' + trProgGR.getUniqueValue(),
+          type: 'program',
+          title: 'Training Program Assigned: ' + pName,
+          message: 'You have been assigned to lead "' + pName + '" (' + pSkill + ') for batch ' + pBatch + '. Scheduled Start: ' + pStart + '.',
+          time: pStart
+      });
+  }
+
+  // 2. Student Mock Interview Requests for Trainer
+  var trMockGR = new GlideRecord('x_snc_campus360_mock_interview');
+  trMockGR.addQuery('trainer', trainerSysId);
+  trMockGR.orderByDesc('sys_created_on');
+  trMockGR.setLimit(5);
+  trMockGR.query();
+
+  while (trMockGR.next()) {
+      var sName = trMockGR.getDisplayValue('student') || 'Student Candidate';
+      var mTopic = trMockGR.getValue('topic') || trMockGR.getValue('interview_type') || 'Technical Mock Interview';
+      var mDate = trMockGR.getDisplayValue('scheduled_date') || trMockGR.getDisplayValue('sys_created_on') || 'Requested';
+
+      data.notifications.push({
+          sys_id: 'tr_notif_mock_' + trMockGR.getUniqueValue(),
+          type: 'interview',
+          title: 'Mock Interview Request: ' + sName,
+          message: sName + ' has requested a mock interview session for ' + mTopic + '. Date: ' + mDate + '.',
+          time: mDate
+      });
+  }
+
+  // 3. New Placement Opportunity Published Notifications
+  var trOppGR = new GlideRecord('x_snc_campus360_placement_opportunity');
+  trOppGR.orderByDesc('sys_created_on');
+  trOppGR.setLimit(3);
+  trOppGR.query();
+
+  while (trOppGR.next()) {
+      var cName = trOppGR.getDisplayValue('company') || 'Partner Company';
+      var rRole = trOppGR.getValue('job_role') || trOppGR.getValue('title') || 'Placement Drive';
+      var dDeadline = trOppGR.getDisplayValue('deadline') || 'Open';
+
+      data.notifications.push({
+          sys_id: 'tr_notif_opp_' + trOppGR.getUniqueValue(),
+          type: 'opportunity',
+          title: 'Placement Drive Published: ' + rRole,
+          message: cName + ' has published a new placement opportunity for ' + rRole + '. Application Deadline: ' + dDeadline + '.',
+          time: dDeadline
+      });
+  }
+
+  data.unreadCount = data.notifications.length;
+
+})();
+]]></script>
+        <servicenow>false</servicenow>
+        <sys_class_name>sp_widget</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-23 17:58:46</sys_created_on>
+        <sys_id>22d2680dc46b43107f44164a4d24631b</sys_id>
+        <sys_mod_count>28</sys_mod_count>
+        <sys_name>Campus360 Trainer Dashboard</sys_name>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name>sp_widget_22d2680dc46b43107f44164a4d24631b</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-10-01 15:59:14</sys_updated_on>
+        <template><![CDATA[<div
+  class="campus360-trainer-app"
+  ng-if="c.data.loaded"
+>
+
+  <!-- ============================================================
+       SIDEBAR
+       ============================================================ -->
+
+  <aside class="campus360-trainer-sidebar">
+
+    <!-- BRAND -->
+
+    <div class="trainer-brand">
+
+      <div class="trainer-brand-mark">
+        <i class="fa fa-graduation-cap"></i>
+      </div>
+
+      <div class="trainer-brand-text">
+
+        <strong>
+          Campus360
+        </strong>
+
+        <span>
+          TRAINER PORTAL
+        </span>
+
+      </div>
+
+    </div>
+
+
+    <!-- TRAINER PROFILE -->
+
+    <a
+      class="trainer-profile-mini"
+      ng-href="?id=campus360_trainer_profile&trainer={{c.data.trainer.id}}"
+    >
+
+      <div class="trainer-avatar">
+        {{c.data.trainer.initials}}
+      </div>
+
+      <div class="trainer-profile-info">
+
+        <strong>
+          {{c.data.trainer.name}}
+        </strong>
+
+        <span>
+          {{c.data.trainer.id}}
+        </span>
+
+      </div>
+
+      <i class="fa fa-angle-right trainer-profile-arrow"></i>
+
+    </a>
+
+
+    <!-- ==========================================================
+         NAVIGATION
+         ========================================================== -->
+
+    <nav class="trainer-nav">
+
+      <div class="trainer-nav-label">
+        OVERVIEW
+      </div>
+
+      <a
+        class="trainer-nav-item active"
+        ng-href="?id=campus360_trainer_dashboard&trainer={{c.data.trainer.id}}"
+      >
+
+        <span class="trainer-nav-icon">
+          <i class="fa fa-th-large"></i>
+        </span>
+
+        <span>
+          Dashboard
+        </span>
+
+      </a>
+
+
+      <div class="trainer-nav-label">
+        TRAINING
+      </div>
+
+      <a
+        class="trainer-nav-item"
+        ng-href="?id=campus360_trainer_my_training&trainer={{c.data.trainer.id}}"
+      >
+
+        <span class="trainer-nav-icon">
+          <i class="fa fa-book"></i>
+        </span>
+
+        <span>
+          My Training
+        </span>
+
+        <span class="trainer-nav-count">
+
+          {{c.data.metrics.trainingPrograms}}
+
+        </span>
+
+      </a>
+
+
+      <div class="trainer-nav-label">
+        MOCK INTERVIEWS
+      </div>
+
+      <a
+        class="trainer-nav-item"
+        ng-href="?id=campus360_trainer_mock_slots&trainer={{c.data.trainer.id}}"
+      >
+
+        <span class="trainer-nav-icon">
+          <i class="fa fa-calendar-check-o"></i>
+        </span>
+
+        <span>
+          Slot Availability &amp; Requests
+        </span>
+
+        <span
+          class="trainer-nav-count warning"
+          ng-if="c.data.metrics.interviewRequests > 0"
+        >
+          {{c.data.metrics.interviewRequests}}
+        </span>
+
+      </a>
+
+
+      <a
+        class="trainer-nav-item"
+        ng-href="?id=campus360_trainer_interview_feedback&trainer={{c.data.trainer.id}}"
+      >
+
+        <span class="trainer-nav-icon">
+          <i class="fa fa-commenting-o"></i>
+        </span>
+
+        <span>
+          Feedback &amp; Performance
+        </span>
+
+        <span
+          class="trainer-nav-count"
+          ng-if="c.data.metrics.pendingFeedback > 0"
+        >
+          {{c.data.metrics.pendingFeedback}}
+        </span>
+
+      </a>
+
+
+      <div class="trainer-nav-label">
+        INTELLIGENCE
+      </div>
+
+      <a
+        class="trainer-nav-item"
+        ng-href="?id=campus360_trainer_placement_intelligence&trainer={{c.data.trainer.id}}"
+      >
+
+        <span class="trainer-nav-icon">
+          <i class="fa fa-line-chart"></i>
+        </span>
+
+        <span>
+          Placement Intelligence
+        </span>
+
+      </a>
+
+
+      <div class="trainer-nav-label">
+        TPO COORDINATION
+      </div>
+
+      <a
+        class="trainer-nav-item"
+        ng-href="?id=campus360_trainer_opportunities&trainer={{c.data.trainer.id}}"
+      >
+
+        <span class="trainer-nav-icon">
+          <i class="fa fa-building-o"></i>
+        </span>
+
+        <span>
+          Opportunities &amp; Rooms
+        </span>
+
+      </a>
+
+
+      <div class="trainer-nav-label">
+        ACCOUNT
+      </div>
+
+      <a
+        class="trainer-nav-item"
+        ng-href="?id=campus360_trainer_profile&trainer={{c.data.trainer.id}}"
+      >
+
+        <span class="trainer-nav-icon">
+          <i class="fa fa-user-circle-o"></i>
+        </span>
+
+        <span>
+          Trainer Profile
+        </span>
+
+      </a>
+
+    </nav>
+
+  </aside>
+
+
+  <!-- ============================================================
+       MAIN
+       ============================================================ -->
+
+  <main class="campus360-trainer-main">
+
+
+    <!-- ==========================================================
+         TOP NAVBAR
+         ========================================================== -->
+
+    <header class="trainer-topbar">
+
+
+      <!-- LEFT -->
+
+      <div class="trainer-topbar-left">
+
+        <div class="trainer-page-heading">
+
+          <span class="trainer-topbar-eyebrow">
+            CAMPUS360
+          </span>
+
+          <span class="trainer-topbar-title">
+            Trainer Dashboard
+          </span>
+
+        </div>
+
+      </div>
+
+
+      <!-- RIGHT -->
+
+      <div class="trainer-topbar-actions">
+
+
+        <!-- REFRESH -->
+
+        <button
+          class="trainer-top-icon"
+          type="button"
+          ng-click="c.refresh()"
+          title="Refresh"
+          aria-label="Refresh"
+        >
+
+          <i class="fa fa-refresh"></i>
+
+        </button>
+
+
+        <!-- NOTIFICATION -->
+
+        <div class="trainer-notif-wrapper" style="position: relative; display: inline-block;">
+          <button
+            id="trainerNotifBell"
+            class="trainer-top-icon trainer-notification-button"
+            type="button"
+            ng-click="c.toggleNotifications($event)"
+            title="Trainer Notifications"
+          >
+            <i class="fa fa-bell"></i>
+            <span class="top-notification-dot" ng-if="c.data.unreadCount > 0"></span>
+          </button>
+
+          <!-- TRAINER POPOVER -->
+          <div id="trainerNotifPopover" class="student-notif-popover" ng-if="c.showNotificationsPopover">
+            <div class="snotif-header">
+              <div class="snotif-title">
+                <i class="fa fa-bell text-warning"></i> Trainer Alerts
+                <span class="snotif-count-pill" ng-if="c.data.unreadCount > 0">{{c.data.unreadCount}} Active</span>
+              </div>
+              <button class="snotif-clear-all" ng-click="c.clearAllNotifications()" ng-if="c.data.notifications.length > 0">Clear All</button>
+            </div>
+
+            <div class="snotif-body">
+              <div class="snotif-empty" ng-if="!c.data.notifications || c.data.notifications.length === 0">
+                <i class="fa fa-check-circle-o"></i>
+                <p>All training alerts cleared!</p>
+              </div>
+
+              <div class="snotif-card" ng-repeat="item in c.data.notifications" ng-class="item.type">
+                <div class="snotif-icon">
+                  <i class="fa fa-calendar-check-o" ng-if="item.type === 'interview'"></i>
+                  <i class="fa fa-exclamation-triangle" ng-if="item.type === 'attendance'"></i>
+                  <i class="fa fa-book" ng-if="item.type === 'program'"></i>
+                  <i class="fa fa-briefcase" ng-if="item.type === 'opportunity'"></i>
+                </div>
+                <div class="snotif-content">
+                  <div class="snotif-msg"><strong>{{item.title}}</strong><br/>{{item.message}}</div>
+                  <div class="snotif-meta">
+                    <span class="snotif-date">{{item.time}}</span>
+                  </div>
+                  <div class="snotif-actions">
+                    <button class="sbtn sbtn-dismiss" ng-click="c.dismissNotif($index)">
+                      <i class="fa fa-times"></i> Dismiss
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+        <!-- TRAINER PROFILE -->
+
+        <a
+          class="trainer-top-profile"
+          ng-href="?id=campus360_trainer_profile&trainer={{c.data.trainer.id}}"
+        >
+
+          <div class="trainer-top-avatar">
+
+            {{c.data.trainer.initials}}
+
+          </div>
+
+          <div>
+
+            <strong>
+              {{c.data.trainer.name}}
+            </strong>
+
+            <span>
+              {{c.data.trainer.id}}
+            </span>
+
+          </div>
+
+        </a>
+
+      </div>
+
+    </header>
+
+
+    <!-- ==========================================================
+         DASHBOARD CONTENT
+         ========================================================== -->
+
+    <section class="trainer-dashboard-content">
+
+
+      <!-- ==================== WELCOME ==================== -->
+
+      <div class="trainer-welcome">
+
+        <div>
+
+          <span class="trainer-eyebrow">
+            TRAINER OVERVIEW
+          </span>
+
+          <h1>
+            Welcome, {{c.data.trainer.name}} ]]>👋
+<![CDATA[          </h1>
+
+          <p>
+            Manage your training programs, students, mock interviews and
+            performance support from one place.
+          </p>
+
+        </div>
+
+
+        <div class="trainer-id-card">
+
+          <span>
+            TRAINER ID
+          </span>
+
+          <strong>
+            {{c.data.trainer.id}}
+          </strong>
+
+        </div>
+
+      </div>
+
+
+      <!-- ==================== PRIMARY KPI ==================== -->
+
+      <div class="trainer-kpi-grid">
+
+
+        <a
+          class="trainer-kpi-card students-card"
+          ng-href="?id=campus360_trainer_my_training&trainer={{c.data.trainer.id}}"
+        >
+
+          <div class="trainer-kpi-icon">
+            <i class="fa fa-book"></i>
+          </div>
+
+          <div class="trainer-kpi-content">
+
+            <span>
+              MY TRAINING
+            </span>
+
+            <strong>
+              {{c.data.metrics.trainingPrograms}}
+            </strong>
+
+            <small>
+              Training programs
+            </small>
+
+          </div>
+
+          <span class="kpi-arrow">
+            <i class="fa fa-arrow-right"></i>
+          </span>
+
+        </a>
+
+
+        <a
+          class="trainer-kpi-card sessions-card"
+          ng-href="?id=campus360_trainer_my_training&trainer={{c.data.trainer.id}}"
+        >
+
+          <div class="trainer-kpi-icon">
+            <i class="fa fa-users"></i>
+          </div>
+
+          <div class="trainer-kpi-content">
+
+            <span>
+              MY STUDENTS
+            </span>
+
+            <strong>
+              {{c.data.metrics.students}}
+            </strong>
+
+            <small>
+              Enrolled in your programs
+            </small>
+
+          </div>
+
+          <span class="kpi-arrow">
+            <i class="fa fa-arrow-right"></i>
+          </span>
+
+        </a>
+
+
+        <a
+          class="trainer-kpi-card attendance-card"
+          ng-href="?id=campus360_trainer_mock_slots&trainer={{c.data.trainer.id}}"
+        >
+
+          <div class="trainer-kpi-icon">
+            <i class="fa fa-calendar-check-o"></i>
+          </div>
+
+          <div class="trainer-kpi-content">
+
+            <span>
+              OPEN INTERVIEW REQUESTS
+            </span>
+
+            <strong>
+              {{c.data.metrics.interviewRequests}}
+            </strong>
+
+            <small>
+              Requests waiting for action
+            </small>
+
+          </div>
+
+          <span class="kpi-arrow">
+            <i class="fa fa-arrow-right"></i>
+          </span>
+
+        </a>
+
+
+        <a
+          class="trainer-kpi-card attention-card"
+          ng-href="?id=campus360_trainer_my_training&trainer={{c.data.trainer.id}}"
+        >
+
+          <div class="trainer-kpi-icon">
+            <i class="fa fa-check-circle"></i>
+          </div>
+
+          <div class="trainer-kpi-content">
+
+            <span>
+              TRAINING ATTENDANCE
+            </span>
+
+            <strong>
+              {{c.data.metrics.attendance}}%
+            </strong>
+
+            <small>
+              Recorded training attendance
+            </small>
+
+          </div>
+
+          <span class="kpi-arrow">
+            <i class="fa fa-arrow-right"></i>
+          </span>
+
+        </a>
+
+      </div>
+
+
+      <!-- ==================== SECONDARY KPI ==================== -->
+
+      <div class="trainer-secondary-kpi-grid">
+
+
+        <div class="secondary-kpi-card purple">
+
+          <div class="secondary-icon">
+            <i class="fa fa-bar-chart"></i>
+          </div>
+
+          <div>
+
+            <span>
+              AVERAGE ASSESSMENT
+            </span>
+
+            <strong>
+              {{c.data.metrics.averageAssessment}}%
+            </strong>
+
+          </div>
+
+        </div>
+
+
+        <div class="secondary-kpi-card blue">
+
+          <div class="secondary-icon">
+            <i class="fa fa-calendar"></i>
+          </div>
+
+          <div>
+
+            <span>
+              PROGRAMS TODAY
+            </span>
+
+            <strong>
+              {{c.data.metrics.programsToday}}
+            </strong>
+
+          </div>
+
+        </div>
+
+
+        <div class="secondary-kpi-card green">
+
+          <div class="secondary-icon">
+            <i class="fa fa-clock-o"></i>
+          </div>
+
+          <div>
+
+            <span>
+              AVAILABLE INTERVIEW SLOTS
+            </span>
+
+            <strong>
+              {{c.data.metrics.availableSlots}}
+            </strong>
+
+          </div>
+
+        </div>
+
+
+        <div class="secondary-kpi-card orange">
+
+          <div class="secondary-icon">
+            <i class="fa fa-exclamation-circle"></i>
+          </div>
+
+          <div>
+
+            <span>
+              STUDENTS NEEDING ATTENTION
+            </span>
+
+            <strong>
+              {{c.data.metrics.attentionStudents}}
+            </strong>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- ==================== TRAINING OVERVIEW ==================== -->
+
+      <div class="trainer-panel">
+
+        <div class="trainer-panel-heading">
+
+          <div>
+
+            <span>
+              TRAINING
+            </span>
+
+            <h2>
+              My Training Programs
+            </h2>
+
+            <p>
+              Only programs assigned to {{c.data.trainer.name}}
+              are shown here.
+            </p>
+
+          </div>
+
+          <a
+            class="panel-action"
+            ng-href="?id=campus360_trainer_my_training&trainer={{c.data.trainer.id}}"
+          >
+            Open My Training →
+          </a>
+
+        </div>
+
+
+        <div class="program-grid">
+
+          <a
+            class="program-card"
+            ng-repeat="program in c.data.programs"
+            ng-href="?id=campus360_trainer_my_training&trainer={{c.data.trainer.id}}&training={{program.id}}"
+          >
+
+            <div class="program-card-top">
+
+              <div class="program-icon">
+                <i class="fa fa-graduation-cap"></i>
+              </div>
+
+              <span class="program-status">
+                {{program.status || '—'}}
+              </span>
+
+            </div>
+
+
+            <h3>
+              {{program.name}}
+            </h3>
+
+            <div class="program-id">
+              {{program.id}}
+            </div>
+
+
+            <div class="program-info">
+
+              <div>
+                <i class="fa fa-code"></i>
+                <span>
+                  {{program.skillArea || '—'}}
+                </span>
+              </div>
+
+              <div>
+                <i class="fa fa-users"></i>
+                <span>
+                  {{program.students}} Students
+                </span>
+              </div>
+
+              <div>
+                <i class="fa fa-file-text-o"></i>
+                <span>
+                  {{program.assignments}} Assignments
+                </span>
+              </div>
+
+              <div>
+                <i class="fa fa-calendar"></i>
+                <span>
+                  {{program.startDate}} – {{program.endDate}}
+                </span>
+              </div>
+
+            </div>
+
+
+            <div class="program-progress-block">
+
+              <div>
+
+                <span>
+                  Student Progress
+                </span>
+
+                <strong>
+                  {{program.progress}}%
+                </strong>
+
+              </div>
+
+              <div class="program-progress-track">
+
+                <div
+                  class="program-progress-fill"
+                  ng-style="{'width': program.progress + '%'}"
+                >
+                </div>
+
+              </div>
+
+            </div>
+
+
+            <div class="program-footer">
+
+              <span>
+                Batch: {{program.batch || '—'}}
+              </span>
+
+              <span>
+                Capacity: {{program.capacity || '—'}}
+              </span>
+
+            </div>
+
+          </a>
+
+
+          <div
+            class="trainer-empty"
+            ng-if="!c.data.programs.length"
+          >
+
+            <i class="fa fa-book"></i>
+
+            <p>
+              No training programs found for this trainer.
+            </p>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- ==================== TWO COLUMN ==================== -->
+
+      <div class="trainer-content-grid">
+
+
+        <!-- RECENT INTERVIEWS -->
+
+        <div class="trainer-panel">
+
+          <div class="trainer-panel-heading compact">
+
+            <div>
+
+              <span>
+                MOCK INTERVIEWS
+              </span>
+
+              <h2>
+                Recent Interview Activity
+              </h2>
+
+            </div>
+
+            <a
+              class="panel-action"
+              ng-href="?id=campus360_trainer_mock_slots&trainer={{c.data.trainer.id}}"
+            >
+              View all →
+            </a>
+
+          </div>
+
+
+          <div class="interview-mini-list">
+
+            <div
+              class="interview-mini-row"
+              ng-repeat="interview in c.data.interviews | limitTo:5"
+            >
+
+              <div class="interview-mini-icon">
+                <i class="fa fa-user"></i>
+              </div>
+
+              <div class="interview-mini-info">
+
+                <strong>
+                  {{interview.student}}
+                </strong>
+
+                <span>
+
+                  {{interview.date}}
+
+                  ·
+
+                  {{interview.startTime}}
+
+                  –
+
+                  {{interview.endTime}}
+
+                  <span ng-if="interview.type">
+                    · {{interview.type}}
+                  </span>
+
+                </span>
+
+              </div>
+
+
+              <span
+                class="trainer-status"
+                ng-class="{
+                  'status-completed':
+                    interview.status == 'Completed',
+
+                  'status-scheduled':
+                    interview.status == 'Scheduled',
+
+                  'status-in-progress':
+                    interview.status == 'In Progress',
+
+                  'status-default':
+                    interview.status != 'Completed' &&
+                    interview.status != 'Scheduled' &&
+                    interview.status != 'In Progress'
+                }"
+              >
+
+                {{interview.status || '—'}}
+
+              </span>
+
+            </div>
+
+
+            <div
+              class="trainer-empty"
+              ng-if="!c.data.interviews.length"
+            >
+
+              <i class="fa fa-comments"></i>
+
+              <p>
+                No mock interview records found.
+              </p>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- PLACEMENT INTELLIGENCE -->
+
+        <div class="trainer-panel intelligence-panel">
+
+          <div class="trainer-panel-heading compact">
+
+            <div>
+
+              <span>
+                PLACEMENT INTELLIGENCE
+              </span>
+
+              <h2>
+                Student Readiness
+              </h2>
+
+            </div>
+
+            <a
+              class="panel-action"
+              ng-href="?id=campus360_trainer_placement_intelligence&trainer={{c.data.trainer.id}}"
+            >
+              Open →
+            </a>
+
+          </div>
+
+
+          <div class="student-readiness-list">
+
+            <div
+              class="readiness-item"
+              ng-repeat="student in c.data.performance | limitTo:5"
+            >
+
+              <div class="student-table-person">
+
+                <div class="student-table-avatar">
+                  {{student.initials}}
+                </div>
+
+                <div>
+
+                  <strong>
+                    {{student.name}}
+                  </strong>
+
+                  <small>
+                    {{student.id}}
+                  </small>
+
+                </div>
+
+              </div>
+
+
+              <div class="readiness-main">
+
+                <div>
+
+                  <span>
+                    Readiness
+                  </span>
+
+                  <strong>
+                    {{student.readiness}}%
+                  </strong>
+
+                </div>
+
+                <div class="table-progress">
+
+                  <div
+                    class="table-progress-fill"
+                    ng-style="{'width': student.readiness + '%'}"
+                  >
+                  </div>
+
+                </div>
+
+              </div>
+
+
+              <span
+                class="student-status"
+                ng-class="{
+                  'risk-high': student.risk == 'High',
+                  'risk-medium': student.risk == 'Medium',
+                  'risk-low': student.risk == 'Low'
+                }"
+              >
+
+                {{student.risk || '—'}}
+
+              </span>
+
+
+              <div class="skill-gap">
+
+                {{student.skillGap || 'No primary skill gap recorded'}}
+
+              </div>
+
+            </div>
+
+
+            <div
+              class="trainer-empty"
+              ng-if="!c.data.performance.length"
+            >
+
+              <i class="fa fa-line-chart"></i>
+
+              <p>
+                No placement intelligence records found for your students.
+              </p>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- ==================== PRIORITY FOLLOW-UP ==================== -->
+
+      <div class="trainer-panel">
+
+        <div class="trainer-panel-heading compact">
+
+          <div>
+
+            <span>
+              TRAINER ACTIONS
+            </span>
+
+            <h2>
+              Priority Follow-up
+            </h2>
+
+            <p>
+              Students with high-risk placement intelligence and
+              completed interviews waiting for feedback.
+            </p>
+
+          </div>
+
+        </div>
+
+
+        <div class="followup-grid">
+
+
+          <!-- HIGH RISK STUDENTS -->
+
+          <div
+            class="followup-card danger"
+            ng-repeat="student in c.data.attentionStudents | limitTo:3"
+          >
+
+            <div class="followup-icon">
+              <i class="fa fa-exclamation-triangle"></i>
+            </div>
+
+            <div>
+
+              <strong>
+                {{student.name}}
+              </strong>
+
+              <span>
+                {{student.id}}
+              </span>
+
+              <p>
+                Primary skill gap:
+                {{student.skillGap || '—'}}
+              </p>
+
+            </div>
+
+            <a
+              ng-href="?id=campus360_trainer_placement_intelligence&trainer={{c.data.trainer.id}}&student={{student.id}}"
+            >
+              View →
+            </a>
+
+          </div>
+
+
+          <!-- PENDING FEEDBACK -->
+
+          <div
+            class="followup-card warning"
+            ng-repeat="feedback in c.data.pendingFeedbackList | limitTo:3"
+          >
+
+            <div class="followup-icon">
+              <i class="fa fa-commenting-o"></i>
+            </div>
+
+            <div>
+
+              <strong>
+                {{feedback.student}}
+              </strong>
+
+              <span>
+
+                {{feedback.date}}
+
+                ·
+
+                {{feedback.type || 'Mock Interview'}}
+
+              </span>
+
+              <p>
+                Completed interview waiting for trainer feedback.
+              </p>
+
+            </div>
+
+            <a
+              ng-href="?id=campus360_trainer_interview_feedback&trainer={{c.data.trainer.id}}&interview={{feedback.sys_id}}"
+            >
+              Feedback →
+            </a>
+
+          </div>
+
+
+          <!-- EMPTY -->
+
+          <div
+            class="followup-empty"
+            ng-if="
+              !c.data.attentionStudents.length &&
+              !c.data.pendingFeedbackList.length
+            "
+          >
+
+            <i class="fa fa-check-circle"></i>
+
+            <div>
+
+              <strong>
+                No immediate follow-up
+              </strong>
+
+              <p>
+                No high-risk student or pending interview feedback
+                record was found.
+              </p>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- ==================== TPO COORDINATION ==================== -->
+
+      <div class="trainer-coordination-strip">
+
+        <div class="coordination-icon">
+          <i class="fa fa-building-o"></i>
+        </div>
+
+        <div class="coordination-copy">
+
+          <span>
+            TPO COORDINATION
+          </span>
+
+          <strong>
+            Opportunities &amp; Training Rooms
+          </strong>
+
+          <p>
+            View TPO-posted placement opportunities for student guidance
+            and check rooms made available for training.
+          </p>
+
+        </div>
+
+
+        <a
+          class="coordination-button"
+          ng-href="?id=campus360_trainer_opportunities&trainer={{c.data.trainer.id}}"
+        >
+          Open Coordination →
+        </a>
+
+      </div>
+
+
+      <!-- ==================== FOOTER ==================== -->
+
+      <div class="trainer-dashboard-footer">
+
+        <span>
+          Campus360 Trainer Dashboard
+        </span>
+
+        <span>
+          Trainer ID: {{c.data.trainer.id}}
+        </span>
+
+      </div>
+
+    </section>
+
+  </main>
+
+  <sp-widget widget="data.aiWidget"></sp-widget>
+
+</div>
+
+
+<!-- ==================== LOADING ==================== -->
+
+<div
+  class="trainer-dashboard-loading"
+  ng-if="!c.data.loaded"
+>
+
+  <i class="fa fa-spinner fa-spin"></i>
+
+  Loading Trainer Dashboard...
+
+
+  <!-- Campus360 AI Assistant Floating Widget -->
+  <sp-widget widget="data.aiWidget"></sp-widget>
+</div>]]></template>
+    </sp_widget>
+</record_update>

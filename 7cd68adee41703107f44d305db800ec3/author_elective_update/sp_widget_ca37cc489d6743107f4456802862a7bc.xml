@@ -1,0 +1,733 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_widget">
+    <sp_widget action="DELETE">
+        <category>custom</category>
+        <client_script><![CDATA[api.controller = function($scope) {
+
+    var c = this;
+
+    c.scanning = false;
+    c.message = '';
+    c.success = '';
+    c.error = '';
+
+    var video = null;
+    var stream = null;
+    var scanInterval = null;
+
+    c.startScanner = function() {
+
+        c.message = 'Starting camera...';
+        c.error = '';
+        c.success = '';
+
+        video = document.getElementById('qrVideo');
+
+        if (!navigator.mediaDevices ||
+            !navigator.mediaDevices.getUserMedia) {
+
+            c.error = 'Camera access is not supported on this device.';
+            return;
+        }
+
+        navigator.mediaDevices.getUserMedia({
+            video: {
+                facingMode: {
+                    ideal: 'environment'
+                }
+            }
+        }).then(function(cameraStream) {
+
+            stream = cameraStream;
+            video.srcObject = stream;
+
+            c.scanning = true;
+            c.message = 'Point your camera at the interview QR code.';
+
+            $scope.$applyAsync();
+
+            startQRDetection();
+
+        }).catch(function(error) {
+
+            c.error =
+                'Camera permission denied or camera unavailable.';
+
+            c.scanning = false;
+
+            $scope.$applyAsync();
+        });
+    };
+
+
+    function startQRDetection() {
+
+        if (!('BarcodeDetector' in window)) {
+
+            c.error =
+                'QR scanning is not supported by this browser. Please use Chrome.';
+
+            $scope.$applyAsync();
+
+            return;
+        }
+
+        var detector = new BarcodeDetector({
+            formats: ['qr_code']
+        });
+
+        scanInterval = setInterval(function() {
+
+            if (!video ||
+                video.readyState !== video.HAVE_ENOUGH_DATA) {
+                return;
+            }
+
+            detector.detect(video)
+                .then(function(barcodes) {
+
+                    if (!barcodes.length) {
+                        return;
+                    }
+
+                    var qrValue = barcodes[0].rawValue;
+
+                    processQRCode(qrValue);
+
+                })
+                .catch(function() {
+                    // Ignore individual scan errors
+                });
+
+        }, 500);
+    }
+
+
+    function processQRCode(qrValue) {
+
+        stopScanner();
+
+        c.message = 'QR code detected. Validating...';
+
+        $scope.$applyAsync();
+
+        if (!qrValue) {
+
+            c.error = 'Invalid QR code.';
+            $scope.$applyAsync();
+
+            return;
+        }
+
+        var parts = qrValue.split('|');
+
+        if (parts.length !== 2 ||
+            parts[0] !== 'CAMPUS360') {
+
+            c.error =
+                'Invalid Campus360 QR code.';
+
+            $scope.$applyAsync();
+
+            return;
+        }
+
+        var interviewId = parts[1];
+
+        c.server.get({
+            action: 'mark_present',
+            interview_id: interviewId
+        }).then(function(response) {
+
+            if (response.data.success) {
+
+                c.success =
+                    'Attendance marked successfully!';
+
+                c.message =
+                    response.data.message || '';
+
+            } else {
+
+                c.error =
+                    response.data.error ||
+                    'Unable to mark attendance.';
+            }
+
+            $scope.$applyAsync();
+
+        });
+    }
+
+
+    function stopScanner() {
+
+        if (scanInterval) {
+
+            clearInterval(scanInterval);
+            scanInterval = null;
+        }
+
+        if (stream) {
+
+            stream.getTracks().forEach(function(track) {
+                track.stop();
+            });
+
+            stream = null;
+        }
+
+        if (video) {
+            video.srcObject = null;
+        }
+
+        c.scanning = false;
+    }
+
+
+    c.stopScanner = function() {
+
+        stopScanner();
+
+        c.message = '';
+        $scope.$applyAsync();
+    };
+
+};]]></client_script>
+        <controller_as>c</controller_as>
+        <css>.campus-scanner {&#13;
+    max-width: 500px;&#13;
+    margin: 30px auto;&#13;
+    padding: 30px;&#13;
+    text-align: center;&#13;
+    background: #ffffff;&#13;
+    border-radius: 12px;&#13;
+    box-shadow: 0 3px 15px rgba(0,0,0,0.12);&#13;
+}&#13;
+&#13;
+.campus-scanner h2 {&#13;
+    margin-bottom: 10px;&#13;
+}&#13;
+&#13;
+.instruction {&#13;
+    color: #666;&#13;
+    margin-bottom: 20px;&#13;
+}&#13;
+&#13;
+.scanner-box {&#13;
+    position: relative;&#13;
+    width: 100%;&#13;
+    max-width: 400px;&#13;
+    margin: 20px auto;&#13;
+    overflow: hidden;&#13;
+    border-radius: 10px;&#13;
+    background: #000;&#13;
+}&#13;
+&#13;
+.scanner-box video {&#13;
+    width: 100%;&#13;
+    display: block;&#13;
+}&#13;
+&#13;
+.scan-line {&#13;
+    position: absolute;&#13;
+    left: 10%;&#13;
+    right: 10%;&#13;
+    top: 50%;&#13;
+    height: 2px;&#13;
+    background: red;&#13;
+}&#13;
+&#13;
+.campus-scanner button {&#13;
+    margin: 10px;&#13;
+}</css>
+        <data_table>sp_instance</data_table>
+        <demo_data/>
+        <description/>
+        <docs/>
+        <field_list/>
+        <has_preview>false</has_preview>
+        <id>student_qr_scanner</id>
+        <internal>false</internal>
+        <link><![CDATA[function link(scope, element, attrs, controller) {
+  
+}]]></link>
+        <name>Campus360 Student QR Scanner</name>
+        <option_schema/>
+        <public>false</public>
+        <roles/>
+        <script><![CDATA[(function() {
+
+    data.success = false;
+    data.error = '';
+    data.message = '';
+
+    if (!input || input.action != 'mark_present') {
+        return;
+    }
+
+    if (!input.interview_id) {
+
+        data.error = 'Interview ID is missing.';
+        return;
+    }
+
+    var gr = new GlideRecord('x_snc_campus360_mock_interview');
+
+    if (!gr.get(input.interview_id)) {
+
+        data.error = 'Interview record not found.';
+        return;
+    }
+
+    // Already marked
+    if (gr.getValue('attendance_status') == 'Present') {
+
+        data.success = true;
+        data.message = 'Attendance was already marked as Present.';
+        return;
+    }
+
+    // Mark attendance
+    gr.setValue('attendance_status', 'Present');
+    gr.setValue('qr_status', 'Scanned');
+
+    gr.update();
+
+    data.success = true;
+    data.message = 'Attendance marked successfully for ' +
+                   gr.getValue('interview_id');
+
+})();]]></script>
+        <servicenow>false</servicenow>
+        <sys_class_name>sp_widget</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-20 13:25:23</sys_created_on>
+        <sys_id>ca37cc489d6743107f4456802862a7bc</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>Campus360 Student QR Scanner</sys_name>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name>sp_widget_ca37cc489d6743107f4456802862a7bc</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-20 13:25:23</sys_updated_on>
+        <template><![CDATA[<div class="campus-scanner">
+
+    <h2>Campus360 Attendance</h2>
+
+    <p class="instruction">
+        Scan the interview QR code to mark your attendance.
+    </p>
+
+    <div class="scanner-box">
+
+        <video id="qrVideo"
+               autoplay
+               playsinline>
+        </video>
+
+        <div class="scan-line"></div>
+
+    </div>
+
+    <button class="btn btn-primary"
+            ng-click="c.startScanner()"
+            ng-if="!c.scanning">
+        Start Scanner
+    </button>
+
+    <button class="btn btn-danger"
+            ng-click="c.stopScanner()"
+            ng-if="c.scanning">
+        Stop Scanner
+    </button>
+
+    <div class="alert alert-info"
+         ng-if="c.message">
+        {{c.message}}
+    </div>
+
+    <div class="alert alert-success"
+         ng-if="c.success">
+        {{c.success}}
+    </div>
+
+    <div class="alert alert-danger"
+         ng-if="c.error">
+        {{c.error}}
+    </div>
+
+</div>]]></template>
+    </sp_widget>
+    <sys_update_version action="INSERT_OR_UPDATE">
+        <action>DELETE</action>
+        <application display_value="Campus360">7cd68adee41703107f44d305db800ec3</application>
+        <file_path/>
+        <instance_id>82d18dc7c38fcf94a03197af0501316c</instance_id>
+        <instance_name>ltm-hck-2876-0027</instance_name>
+        <name>sp_widget_ca37cc489d6743107f4456802862a7bc</name>
+        <payload>&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;record_update table="sp_widget"&gt;&lt;sp_widget action="INSERT_OR_UPDATE"&gt;&lt;category&gt;custom&lt;/category&gt;&lt;client_script&gt;&lt;![CDATA[api.controller = function($scope) {
+
+    var c = this;
+
+    c.scanning = false;
+    c.message = '';
+    c.success = '';
+    c.error = '';
+
+    var video = null;
+    var stream = null;
+    var scanInterval = null;
+
+    c.startScanner = function() {
+
+        c.message = 'Starting camera...';
+        c.error = '';
+        c.success = '';
+
+        video = document.getElementById('qrVideo');
+
+        if (!navigator.mediaDevices ||
+            !navigator.mediaDevices.getUserMedia) {
+
+            c.error = 'Camera access is not supported on this device.';
+            return;
+        }
+
+        navigator.mediaDevices.getUserMedia({
+            video: {
+                facingMode: {
+                    ideal: 'environment'
+                }
+            }
+        }).then(function(cameraStream) {
+
+            stream = cameraStream;
+            video.srcObject = stream;
+
+            c.scanning = true;
+            c.message = 'Point your camera at the interview QR code.';
+
+            $scope.$applyAsync();
+
+            startQRDetection();
+
+        }).catch(function(error) {
+
+            c.error =
+                'Camera permission denied or camera unavailable.';
+
+            c.scanning = false;
+
+            $scope.$applyAsync();
+        });
+    };
+
+
+    function startQRDetection() {
+
+        if (!('BarcodeDetector' in window)) {
+
+            c.error =
+                'QR scanning is not supported by this browser. Please use Chrome.';
+
+            $scope.$applyAsync();
+
+            return;
+        }
+
+        var detector = new BarcodeDetector({
+            formats: ['qr_code']
+        });
+
+        scanInterval = setInterval(function() {
+
+            if (!video ||
+                video.readyState !== video.HAVE_ENOUGH_DATA) {
+                return;
+            }
+
+            detector.detect(video)
+                .then(function(barcodes) {
+
+                    if (!barcodes.length) {
+                        return;
+                    }
+
+                    var qrValue = barcodes[0].rawValue;
+
+                    processQRCode(qrValue);
+
+                })
+                .catch(function() {
+                    // Ignore individual scan errors
+                });
+
+        }, 500);
+    }
+
+
+    function processQRCode(qrValue) {
+
+        stopScanner();
+
+        c.message = 'QR code detected. Validating...';
+
+        $scope.$applyAsync();
+
+        if (!qrValue) {
+
+            c.error = 'Invalid QR code.';
+            $scope.$applyAsync();
+
+            return;
+        }
+
+        var parts = qrValue.split('|');
+
+        if (parts.length !== 2 ||
+            parts[0] !== 'CAMPUS360') {
+
+            c.error =
+                'Invalid Campus360 QR code.';
+
+            $scope.$applyAsync();
+
+            return;
+        }
+
+        var interviewId = parts[1];
+
+        c.server.get({
+            action: 'mark_present',
+            interview_id: interviewId
+        }).then(function(response) {
+
+            if (response.data.success) {
+
+                c.success =
+                    'Attendance marked successfully!';
+
+                c.message =
+                    response.data.message || '';
+
+            } else {
+
+                c.error =
+                    response.data.error ||
+                    'Unable to mark attendance.';
+            }
+
+            $scope.$applyAsync();
+
+        });
+    }
+
+
+    function stopScanner() {
+
+        if (scanInterval) {
+
+            clearInterval(scanInterval);
+            scanInterval = null;
+        }
+
+        if (stream) {
+
+            stream.getTracks().forEach(function(track) {
+                track.stop();
+            });
+
+            stream = null;
+        }
+
+        if (video) {
+            video.srcObject = null;
+        }
+
+        c.scanning = false;
+    }
+
+
+    c.stopScanner = function() {
+
+        stopScanner();
+
+        c.message = '';
+        $scope.$applyAsync();
+    };
+
+};]]&gt;&lt;/client_script&gt;&lt;controller_as&gt;c&lt;/controller_as&gt;&lt;css&gt;.campus-scanner {&amp;#13;
+    max-width: 500px;&amp;#13;
+    margin: 30px auto;&amp;#13;
+    padding: 30px;&amp;#13;
+    text-align: center;&amp;#13;
+    background: #ffffff;&amp;#13;
+    border-radius: 12px;&amp;#13;
+    box-shadow: 0 3px 15px rgba(0,0,0,0.12);&amp;#13;
+}&amp;#13;
+&amp;#13;
+.campus-scanner h2 {&amp;#13;
+    margin-bottom: 10px;&amp;#13;
+}&amp;#13;
+&amp;#13;
+.instruction {&amp;#13;
+    color: #666;&amp;#13;
+    margin-bottom: 20px;&amp;#13;
+}&amp;#13;
+&amp;#13;
+.scanner-box {&amp;#13;
+    position: relative;&amp;#13;
+    width: 100%;&amp;#13;
+    max-width: 400px;&amp;#13;
+    margin: 20px auto;&amp;#13;
+    overflow: hidden;&amp;#13;
+    border-radius: 10px;&amp;#13;
+    background: #000;&amp;#13;
+}&amp;#13;
+&amp;#13;
+.scanner-box video {&amp;#13;
+    width: 100%;&amp;#13;
+    display: block;&amp;#13;
+}&amp;#13;
+&amp;#13;
+.scan-line {&amp;#13;
+    position: absolute;&amp;#13;
+    left: 10%;&amp;#13;
+    right: 10%;&amp;#13;
+    top: 50%;&amp;#13;
+    height: 2px;&amp;#13;
+    background: red;&amp;#13;
+}&amp;#13;
+&amp;#13;
+.campus-scanner button {&amp;#13;
+    margin: 10px;&amp;#13;
+}&lt;/css&gt;&lt;data_table&gt;sp_instance&lt;/data_table&gt;&lt;demo_data/&gt;&lt;description/&gt;&lt;docs/&gt;&lt;field_list/&gt;&lt;has_preview&gt;false&lt;/has_preview&gt;&lt;id&gt;student_qr_scanner&lt;/id&gt;&lt;internal&gt;false&lt;/internal&gt;&lt;link&gt;&lt;![CDATA[function link(scope, element, attrs, controller) {
+  
+}]]&gt;&lt;/link&gt;&lt;name&gt;Campus360 Student QR Scanner&lt;/name&gt;&lt;option_schema/&gt;&lt;public&gt;false&lt;/public&gt;&lt;roles/&gt;&lt;script&gt;&lt;![CDATA[(function() {
+
+    data.success = false;
+    data.error = '';
+    data.message = '';
+
+    if (!input || input.action != 'mark_present') {
+        return;
+    }
+
+    if (!input.interview_id) {
+
+        data.error = 'Interview ID is missing.';
+        return;
+    }
+
+    var gr = new GlideRecord('x_snc_campus360_mock_interview');
+
+    if (!gr.get(input.interview_id)) {
+
+        data.error = 'Interview record not found.';
+        return;
+    }
+
+    // Already marked
+    if (gr.getValue('attendance_status') == 'Present') {
+
+        data.success = true;
+        data.message = 'Attendance was already marked as Present.';
+        return;
+    }
+
+    // Mark attendance
+    gr.setValue('attendance_status', 'Present');
+    gr.setValue('qr_status', 'Scanned');
+
+    gr.update();
+
+    data.success = true;
+    data.message = 'Attendance marked successfully for ' +
+                   gr.getValue('interview_id');
+
+})();]]&gt;&lt;/script&gt;&lt;servicenow&gt;false&lt;/servicenow&gt;&lt;sys_class_name&gt;sp_widget&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-20 13:25:23&lt;/sys_created_on&gt;&lt;sys_id&gt;ca37cc489d6743107f4456802862a7bc&lt;/sys_id&gt;&lt;sys_mod_count&gt;0&lt;/sys_mod_count&gt;&lt;sys_name&gt;Campus360 Student QR Scanner&lt;/sys_name&gt;&lt;sys_package display_value="Campus360" source="x_snc_campus360"&gt;7cd68adee41703107f44d305db800ec3&lt;/sys_package&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="Campus360"&gt;7cd68adee41703107f44d305db800ec3&lt;/sys_scope&gt;&lt;sys_update_name&gt;sp_widget_ca37cc489d6743107f4456802862a7bc&lt;/sys_update_name&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-20 13:25:23&lt;/sys_updated_on&gt;&lt;template&gt;&lt;![CDATA[&lt;div class="campus-scanner"&gt;
+
+    &lt;h2&gt;Campus360 Attendance&lt;/h2&gt;
+
+    &lt;p class="instruction"&gt;
+        Scan the interview QR code to mark your attendance.
+    &lt;/p&gt;
+
+    &lt;div class="scanner-box"&gt;
+
+        &lt;video id="qrVideo"
+               autoplay
+               playsinline&gt;
+        &lt;/video&gt;
+
+        &lt;div class="scan-line"&gt;&lt;/div&gt;
+
+    &lt;/div&gt;
+
+    &lt;button class="btn btn-primary"
+            ng-click="c.startScanner()"
+            ng-if="!c.scanning"&gt;
+        Start Scanner
+    &lt;/button&gt;
+
+    &lt;button class="btn btn-danger"
+            ng-click="c.stopScanner()"
+            ng-if="c.scanning"&gt;
+        Stop Scanner
+    &lt;/button&gt;
+
+    &lt;div class="alert alert-info"
+         ng-if="c.message"&gt;
+        {{c.message}}
+    &lt;/div&gt;
+
+    &lt;div class="alert alert-success"
+         ng-if="c.success"&gt;
+        {{c.success}}
+    &lt;/div&gt;
+
+    &lt;div class="alert alert-danger"
+         ng-if="c.error"&gt;
+        {{c.error}}
+    &lt;/div&gt;
+
+&lt;/div&gt;]]&gt;&lt;/template&gt;&lt;/sp_widget&gt;&lt;/record_update&gt;</payload>
+        <payload_hash>1406900693</payload_hash>
+        <record_name>Campus360 Student QR Scanner</record_name>
+        <reverted_from/>
+        <source>70d68adee41703107f44d305db800ec8</source>
+        <source_table>sys_update_set</source_table>
+        <state>previous</state>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-20 13:25:23</sys_created_on>
+        <sys_id>94a70c889d6743107f4456802862a71e</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_recorded_at>1a0befe2b8b0000001</sys_recorded_at>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-20 13:25:23</sys_updated_on>
+        <type>Widget</type>
+        <update_guid>94a70c8896674310799332cfbd9cb01d</update_guid>
+        <update_guid_history>94a70c8896674310799332cfbd9cb01d:1406900693</update_guid_history>
+    </sys_update_version>
+    <sys_metadata_delete action="INSERT_OR_UPDATE">
+        <sys_audit_delete display_value="Campus360 Student QR Scanner">ca6b24009dab43107f4456802862a790</sys_audit_delete>
+        <sys_class_name>sys_metadata_delete</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-20 16:01:42</sys_created_on>
+        <sys_db_object display_value="" name="sp_widget">sp_widget</sys_db_object>
+        <sys_id>0fc8c695dd1c4024bf4909fb4dc8b1b1</sys_id>
+        <sys_metadata>ca37cc489d6743107f4456802862a7bc</sys_metadata>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>Campus360 Student QR Scanner</sys_name>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_parent/>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_scope_delete display_value="">1cde9626740d46978b846077c1615101</sys_scope_delete>
+        <sys_update_name>sp_widget_ca37cc489d6743107f4456802862a7bc</sys_update_name>
+        <sys_update_version display_value="sp_widget_ca37cc489d6743107f4456802862a7bc">94a70c889d6743107f4456802862a71e</sys_update_version>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-20 16:01:42</sys_updated_on>
+    </sys_metadata_delete>
+</record_update>

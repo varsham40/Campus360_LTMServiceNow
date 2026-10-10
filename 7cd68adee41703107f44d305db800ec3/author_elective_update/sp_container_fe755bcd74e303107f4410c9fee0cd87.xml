@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_container">
+    <sp_container action="DELETE">
+        <aria_label/>
+        <background_color/>
+        <background_image/>
+        <background_style>default</background_style>
+        <bootstrap_alt>false</bootstrap_alt>
+        <class_name/>
+        <container_class_name/>
+        <name>Recruitment Analytics - Container 1</name>
+        <order>1</order>
+        <semantic_tag/>
+        <sp_page display_value="campus360_recruiter_analytics">52f35b0d74e303107f4410c9fee0cdaa</sp_page>
+        <subheader>false</subheader>
+        <sys_class_name>sp_container</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-24 06:58:41</sys_created_on>
+        <sys_id>fe755bcd74e303107f4410c9fee0cd87</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>Recruitment Analytics - Container 1</sys_name>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name>sp_container_fe755bcd74e303107f4410c9fee0cd87</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-24 06:58:41</sys_updated_on>
+        <title/>
+        <width>container</width>
+    </sp_container>
+    <sys_update_version action="INSERT_OR_UPDATE">
+        <action>DELETE</action>
+        <application display_value="Campus360">7cd68adee41703107f44d305db800ec3</application>
+        <file_path/>
+        <instance_id>82d18dc7c38fcf94a03197af0501316c</instance_id>
+        <instance_name>ltm-hck-2876-0027</instance_name>
+        <name>sp_container_fe755bcd74e303107f4410c9fee0cd87</name>
+        <payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_container"><sp_container action="INSERT_OR_UPDATE"><aria_label/><background_color/><background_image/><background_style>default</background_style><bootstrap_alt>false</bootstrap_alt><class_name/><container_class_name/><name>Recruitment Analytics - Container 1</name><order>1</order><semantic_tag/><sp_page display_value="campus360_recruiter_analytics">52f35b0d74e303107f4410c9fee0cdaa</sp_page><subheader>false</subheader><sys_class_name>sp_container</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-24 06:58:41</sys_created_on><sys_id>fe755bcd74e303107f4410c9fee0cd87</sys_id><sys_mod_count>0</sys_mod_count><sys_name>Recruitment Analytics - Container 1</sys_name><sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package><sys_policy/><sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope><sys_update_name>sp_container_fe755bcd74e303107f4410c9fee0cd87</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-24 06:58:41</sys_updated_on><title/><width>container</width></sp_container></record_update>]]></payload>
+        <payload_hash>1131361499</payload_hash>
+        <record_name>Recruitment Analytics - Container 1</record_name>
+        <reverted_from/>
+        <source>70d68adee41703107f44d305db800ec8</source>
+        <source_table>sys_update_set</source_table>
+        <state>previous</state>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-24 06:58:41</sys_created_on>
+        <sys_id>ba755bcd74e303107f4410c9fee0cd8a</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_recorded_at>1a0d235946f0000001</sys_recorded_at>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-24 06:58:41</sys_updated_on>
+        <type>Container</type>
+        <update_guid>ba755bcd40e30310626337ae93271989</update_guid>
+        <update_guid_history>ba755bcd40e30310626337ae93271989:1131361499</update_guid_history>
+    </sys_update_version>
+    <sys_metadata_delete action="INSERT_OR_UPDATE">
+        <sys_audit_delete display_value="Recruitment Analytics - Container 1">8b481bbe086703107f44368bf163ed15</sys_audit_delete>
+        <sys_class_name>sys_metadata_delete</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-29 17:40:23</sys_created_on>
+        <sys_db_object display_value="" name="sp_container">sp_container</sys_db_object>
+        <sys_id>d61ec2e35dce4414bc4834e5e042b2a9</sys_id>
+        <sys_metadata>fe755bcd74e303107f4410c9fee0cd87</sys_metadata>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>Recruitment Analytics - Container 1</sys_name>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_parent/>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_scope_delete display_value="">1cde9626740d46978b846077c1615101</sys_scope_delete>
+        <sys_update_name>sp_container_fe755bcd74e303107f4410c9fee0cd87</sys_update_name>
+        <sys_update_version display_value="sp_container_fe755bcd74e303107f4410c9fee0cd87">ba755bcd74e303107f4410c9fee0cd8a</sys_update_version>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-29 17:40:23</sys_updated_on>
+    </sys_metadata_delete>
+</record_update>

@@ -1,0 +1,6696 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_widget">
+    <sp_widget action="INSERT_OR_UPDATE">
+        <category>custom</category>
+        <client_script><![CDATA[api.controller = function($scope, $window) {
+
+  var c = this;
+
+
+  /* =========================================================
+     STATE
+     ========================================================= */
+
+  c.sidebarCollapsed = false;
+
+  c.loading = false;
+
+  c.topbarSearch = "";
+
+  c.showNotifications = false;
+
+  c.notificationCount = 0;
+
+  c.activeTab = "recruiter";
+
+  c.showRecruiterModal = false;
+
+  c.showMockModal = false;
+
+  c.selectedRecruiter = null;
+
+  c.selectedMock = null;
+
+  c.filteredRecruiterInterviews = [];
+
+  c.filteredMockInterviews = [];
+
+
+  /* =========================================================
+     FILTERS
+     ========================================================= */
+
+  c.recruiterFilters = {
+
+    search: "",
+    company: "",
+    opportunity: "",
+    round: "",
+    status: "",
+    mode: "",
+    result: ""
+
+  };
+
+
+  c.mockFilters = {
+
+    search: "",
+    studentId: "",
+    trainer: "",
+    type: "",
+    attendance: "",
+    status: ""
+
+  };
+
+
+  /* =========================================================
+     NAVIGATION
+     ========================================================= */
+
+  c.goTo = function(pageId) {
+
+    if (!pageId) {
+      return;
+    }
+
+    try {
+
+      $window.location.href =
+        "?id=" + encodeURIComponent(pageId);
+
+    } catch (e) {
+
+      return;
+
+    }
+
+  };
+
+
+  /* =========================================================
+     SIDEBAR
+     ========================================================= */
+
+  c.toggleSidebar = function() {
+
+    c.sidebarCollapsed =
+      !c.sidebarCollapsed;
+
+  };
+
+
+  /* =========================================================
+     TOPBAR SEARCH
+     ========================================================= */
+
+  c.applyTopbarSearch = function() {
+
+    var value =
+      c.topbarSearch || "";
+
+
+    c.recruiterFilters.search =
+      value;
+
+    c.mockFilters.search =
+      value;
+
+
+    c.applyRecruiterFilters();
+
+    c.applyMockFilters();
+
+  };
+
+
+  /* =========================================================
+     NOTIFICATIONS
+     ========================================================= */
+
+  c.toggleNotifications = function(event) {
+
+    if (event) {
+
+      event.preventDefault();
+
+      event.stopPropagation();
+
+    }
+
+
+    c.showNotifications =
+      !c.showNotifications;
+
+  };
+
+
+  /* =========================================================
+     TAB
+     ========================================================= */
+
+  c.setTab = function(tab) {
+
+    if (
+      tab !== "recruiter" &&
+      tab !== "mock"
+    ) {
+
+      return;
+
+    }
+
+
+    c.activeTab = tab;
+
+
+    if (tab === "recruiter") {
+
+      c.applyRecruiterFilters();
+
+    } else {
+
+      c.applyMockFilters();
+
+    }
+
+  };
+
+
+  /* =========================================================
+     HELPERS
+     ========================================================= */
+
+  function normalize(value) {
+
+    if (
+      value === null ||
+      value === undefined
+    ) {
+
+      return "";
+
+    }
+
+    return String(value)
+      .toLowerCase()
+      .trim();
+
+  }
+
+
+  function contains(
+    haystack,
+    needle
+  ) {
+
+    return normalize(haystack)
+      .indexOf(
+        normalize(needle)
+      ) !== -1;
+
+  }
+
+
+  /* =========================================================
+     INITIALS
+     ========================================================= */
+
+  c.getInitials = function(name) {
+
+    if (!name) {
+
+      return "ST";
+
+    }
+
+
+    var parts =
+      String(name)
+        .trim()
+        .split(/\s+/);
+
+
+    if (parts.length === 1) {
+
+      return parts[0]
+        .substring(0, 2)
+        .toUpperCase();
+
+    }
+
+
+    return (
+      parts[0].charAt(0) +
+      parts[parts.length - 1].charAt(0)
+    ).toUpperCase();
+
+  };
+
+
+  /* =========================================================
+     RECRUITER FILTERS
+     ========================================================= */
+
+  c.applyRecruiterFilters = function() {
+
+    var filters =
+      c.recruiterFilters;
+
+
+    var source =
+      (
+        c.data &&
+        c.data.recruiterInterviews
+      )
+      ?
+      c.data.recruiterInterviews
+      :
+      [];
+
+
+    c.filteredRecruiterInterviews =
+      source.filter(function(item) {
+
+
+        if (
+          filters.search &&
+          !(
+            contains(
+              item.interview_id,
+              filters.search
+            ) ||
+
+            contains(
+              item.interviewId,
+              filters.search
+            ) ||
+
+            contains(
+              item.student_name,
+              filters.search
+            ) ||
+
+            contains(
+              item.studentName,
+              filters.search
+            ) ||
+
+            contains(
+              item.student_id,
+              filters.search
+            ) ||
+
+            contains(
+              item.company_name,
+              filters.search
+            ) ||
+
+            contains(
+              item.company,
+              filters.search
+            ) ||
+
+            contains(
+              item.opportunity_name,
+              filters.search
+            ) ||
+
+            contains(
+              item.opportunityTitle,
+              filters.search
+            ) ||
+
+            contains(
+              item.interviewer,
+              filters.search
+            )
+          )
+        ) {
+
+          return false;
+
+        }
+
+
+        if (
+          filters.company &&
+          item.company_sys_id !==
+          filters.company
+        ) {
+
+          return false;
+
+        }
+
+
+        if (
+          filters.opportunity &&
+          item.opportunity_sys_id !==
+          filters.opportunity
+        ) {
+
+          return false;
+
+        }
+
+
+        if (
+          filters.round &&
+          normalize(
+            item.interview_round
+          ) !==
+          normalize(
+            filters.round
+          )
+        ) {
+
+          return false;
+
+        }
+
+
+        if (
+          filters.status &&
+          normalize(item.status) !==
+          normalize(filters.status)
+        ) {
+
+          return false;
+
+        }
+
+
+        if (
+          filters.mode &&
+          normalize(
+            item.interview_mode
+          ) !==
+          normalize(filters.mode)
+        ) {
+
+          return false;
+
+        }
+
+
+        if (
+          filters.result &&
+          normalize(item.result) !==
+          normalize(filters.result)
+        ) {
+
+          return false;
+
+        }
+
+
+        return true;
+
+      });
+
+  };
+
+
+  /* =========================================================
+     CLEAR RECRUITER FILTERS
+     ========================================================= */
+
+  c.clearRecruiterFilters =
+    function() {
+
+      c.recruiterFilters = {
+
+        search: "",
+        company: "",
+        opportunity: "",
+        round: "",
+        status: "",
+        mode: "",
+        result: ""
+
+      };
+
+
+      c.applyRecruiterFilters();
+
+    };
+
+
+  /* =========================================================
+     MOCK FILTERS
+     ========================================================= */
+
+  c.applyMockFilters = function() {
+
+    var filters =
+      c.mockFilters;
+
+
+    var source =
+      (
+        c.data &&
+        c.data.mockInterviews
+      )
+      ?
+      c.data.mockInterviews
+      :
+      [];
+
+
+    c.filteredMockInterviews =
+      source.filter(function(item) {
+
+
+        if (
+          filters.search &&
+          !(
+            contains(
+              item.interview_id,
+              filters.search
+            ) ||
+
+            contains(
+              item.interviewId,
+              filters.search
+            ) ||
+
+            contains(
+              item.student_name,
+              filters.search
+            ) ||
+
+            contains(
+              item.studentName,
+              filters.search
+            ) ||
+
+            contains(
+              item.student_id,
+              filters.search
+            ) ||
+
+            contains(
+              item.trainer_name,
+              filters.search
+            ) ||
+
+            contains(
+              item.trainerName,
+              filters.search
+            ) ||
+
+            contains(
+              item.interview_type,
+              filters.search
+            )
+          )
+        ) {
+
+          return false;
+
+        }
+
+
+        if (
+          filters.studentId &&
+          !contains(
+            item.student_id,
+            filters.studentId
+          )
+        ) {
+
+          return false;
+
+        }
+
+
+        if (
+          filters.trainer &&
+          item.trainer_sys_id !==
+          filters.trainer
+        ) {
+
+          return false;
+
+        }
+
+
+        if (
+          filters.type &&
+          normalize(
+            item.interview_type
+          ) !==
+          normalize(
+            filters.type
+          )
+        ) {
+
+          return false;
+
+        }
+
+
+        if (
+          filters.attendance &&
+          normalize(
+            item.attendance_status
+          ) !==
+          normalize(
+            filters.attendance
+          )
+        ) {
+
+          return false;
+
+        }
+
+
+        if (
+          filters.status &&
+          normalize(
+            item.interview_status
+          ) !==
+          normalize(
+            filters.status
+          )
+        ) {
+
+          return false;
+
+        }
+
+
+        return true;
+
+      });
+
+  };
+
+
+  /* =========================================================
+     CLEAR MOCK FILTERS
+     ========================================================= */
+
+  c.clearMockFilters =
+    function() {
+
+      c.mockFilters = {
+
+        search: "",
+        studentId: "",
+        trainer: "",
+        type: "",
+        attendance: "",
+        status: ""
+
+      };
+
+
+      c.applyMockFilters();
+
+    };
+
+
+  /* =========================================================
+     STATUS CLASS
+     ========================================================= */
+
+  c.getStatusClass = function(value) {
+
+    var v =
+      normalize(value);
+
+
+    if (
+      v.indexOf("scheduled") !== -1 ||
+      v.indexOf("pending") !== -1
+    ) {
+
+      return "status-scheduled";
+
+    }
+
+
+    if (
+      v.indexOf("completed") !== -1 ||
+      v.indexOf("present") !== -1 ||
+      v.indexOf("passed") !== -1
+    ) {
+
+      return "status-completed";
+
+    }
+
+
+    if (
+      v.indexOf("cancel") !== -1 ||
+      v.indexOf("absent") !== -1 ||
+      v.indexOf("failed") !== -1 ||
+      v.indexOf("rejected") !== -1
+    ) {
+
+      return "status-cancelled";
+
+    }
+
+
+    return "";
+
+  };
+
+
+  /* =========================================================
+     RESULT CLASS
+     ========================================================= */
+
+  c.getResultClass = function(value) {
+
+    var v =
+      normalize(value);
+
+
+    if (
+      v.indexOf("selected") !== -1 ||
+      v.indexOf("passed") !== -1 ||
+      v.indexOf("recommended") !== -1
+    ) {
+
+      return "result-selected";
+
+    }
+
+
+    if (
+      v.indexOf("rejected") !== -1 ||
+      v.indexOf("failed") !== -1 ||
+      v.indexOf("not selected") !== -1
+    ) {
+
+      return "result-rejected";
+
+    }
+
+
+    return "";
+
+  };
+
+
+  /* =========================================================
+     RECRUITER MODAL
+     ========================================================= */
+
+  c.openRecruiterInterview =
+    function(item) {
+
+      if (!item) {
+        return;
+      }
+
+
+      c.selectedRecruiter =
+        item;
+
+
+      c.showRecruiterModal =
+        true;
+
+    };
+
+
+  c.closeRecruiterInterview =
+    function() {
+
+      c.showRecruiterModal =
+        false;
+
+      c.selectedRecruiter =
+        null;
+
+    };
+
+
+  /* =========================================================
+     MOCK MODAL
+     ========================================================= */
+
+  c.openMockInterview =
+    function(item) {
+
+      if (!item) {
+        return;
+      }
+
+
+      c.selectedMock =
+        item;
+
+
+      c.showMockModal =
+        true;
+
+    };
+
+
+  c.closeMockInterview =
+    function() {
+
+      c.showMockModal =
+        false;
+
+      c.selectedMock =
+        null;
+
+    };
+
+
+  /* =========================================================
+     EVALUATION HELPER
+     ========================================================= */
+
+  c.hasRecruiterEvaluation =
+    function(item) {
+
+      if (!item) {
+        return false;
+      }
+
+
+      return !!(
+        item.codingScore ||
+        item.technicalScore ||
+        item.communicationScore ||
+        item.problemSolvingScore ||
+        item.confidenceScore ||
+        item.overallScore ||
+        item.recommendation ||
+        item.evaluationStatus ||
+        item.evaluationFeedback
+      );
+
+    };
+
+
+  /* =========================================================
+     REFRESH
+     ========================================================= */
+
+  c.refreshData = function() {
+
+    if (c.loading) {
+      return;
+    }
+
+
+    c.loading = true;
+
+
+    c.server.get({
+
+      action: "refresh"
+
+    }).then(
+
+      function(response) {
+
+        if (
+          response &&
+          response.data
+        ) {
+
+          c.data =
+            response.data;
+
+        }
+
+
+        c.applyRecruiterFilters();
+
+        c.applyMockFilters();
+
+
+        c.loading = false;
+
+      },
+
+      function() {
+
+        c.loading = false;
+
+      }
+
+    );
+
+  };
+
+
+  /* =========================================================
+     ESCAPE KEY
+     ========================================================= */
+
+  var keyHandler =
+    function(event) {
+
+      if (
+        event.key !== "Escape"
+      ) {
+
+        return;
+
+      }
+
+
+      if (
+        c.showNotifications
+      ) {
+
+        c.showNotifications =
+          false;
+
+        return;
+
+      }
+
+
+      if (
+        c.showRecruiterModal
+      ) {
+
+        c.closeRecruiterInterview();
+
+      }
+
+
+      if (
+        c.showMockModal
+      ) {
+
+        c.closeMockInterview();
+
+      }
+
+    };
+
+
+  if (
+    $window &&
+    $window.addEventListener
+  ) {
+
+    $window.addEventListener(
+      "keydown",
+      keyHandler
+    );
+
+  }
+
+
+  $scope.$on(
+    "$destroy",
+    function() {
+
+      if (
+        $window &&
+        $window.removeEventListener
+      ) {
+
+        $window.removeEventListener(
+          "keydown",
+          keyHandler
+        );
+
+      }
+
+    }
+  );
+
+
+  /* =========================================================
+     INITIAL LOAD
+     ========================================================= */
+
+  c.applyRecruiterFilters();
+
+  c.applyMockFilters();
+
+};]]></client_script>
+        <controller_as>c</controller_as>
+        <css>/* ============================================================&#13;
+   CAMPUS360 INTERVIEWS&#13;
+   FULLSCREEN + REMOVE SERVICENOW PORTAL NAV&#13;
+   ============================================================ */&#13;
+&#13;
+html,&#13;
+body {&#13;
+  width:100% !important;&#13;
+  height:100% !important;&#13;
+  margin:0 !important;&#13;
+  padding:0 !important;&#13;
+  overflow:hidden !important;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   REMOVE SERVICENOW TOP NAV&#13;
+   ============================================================ */&#13;
+&#13;
+body:has(.campus360-interviews-app) #sp-header,&#13;
+body:has(.campus360-interviews-app) .sp-header,&#13;
+body:has(.campus360-interviews-app) .sp-navbar,&#13;
+body:has(.campus360-interviews-app) #sp-nav-bar,&#13;
+body:has(.campus360-interviews-app) .sp-nav-bar,&#13;
+body:has(.campus360-interviews-app) header#sp-header,&#13;
+body:has(.campus360-interviews-app) header.sp-header,&#13;
+body:has(.campus360-interviews-app) header.navbar,&#13;
+body:has(.campus360-interviews-app) nav.navbar,&#13;
+body:has(.campus360-interviews-app) .navbar,&#13;
+body:has(.campus360-interviews-app) .navbar-default,&#13;
+body:has(.campus360-interviews-app) .navbar-inverse,&#13;
+body:has(.campus360-interviews-app) .portal-header,&#13;
+body:has(.campus360-interviews-app) .sp-page-header {&#13;
+  display:none !important;&#13;
+  visibility:hidden !important;&#13;
+  height:0 !important;&#13;
+  min-height:0 !important;&#13;
+  max-height:0 !important;&#13;
+  margin:0 !important;&#13;
+  padding:0 !important;&#13;
+  overflow:hidden !important;&#13;
+}&#13;
+&#13;
+&#13;
+/* SERVICE NOW CONTENT RESET */&#13;
+&#13;
+body:has(.campus360-interviews-app) .page,&#13;
+body:has(.campus360-interviews-app) .container,&#13;
+body:has(.campus360-interviews-app) .container-fluid,&#13;
+body:has(.campus360-interviews-app) .row,&#13;
+body:has(.campus360-interviews-app) [class*="col-"] {&#13;
+  width:100% !important;&#13;
+  max-width:none !important;&#13;
+  margin:0 !important;&#13;
+  padding:0 !important;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   APP&#13;
+   ============================================================ */&#13;
+&#13;
+.campus360-interviews-app,&#13;
+.campus360-interviews-app * {&#13;
+  box-sizing:border-box !important;&#13;
+}&#13;
+&#13;
+.campus360-interviews-app {&#13;
+  position:fixed !important;&#13;
+  inset:0 !important;&#13;
+  width:100vw !important;&#13;
+  height:100vh !important;&#13;
+  display:flex !important;&#13;
+  overflow:hidden !important;&#13;
+  background:#f7f9fc !important;&#13;
+  color:#172033 !important;&#13;
+  font-family:"Plus Jakarta Sans",Arial,sans-serif !important;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   SHELL&#13;
+   ============================================================ */&#13;
+&#13;
+.interviews-shell {&#13;
+  width:100% !important;&#13;
+  height:100% !important;&#13;
+  display:flex !important;&#13;
+  overflow:hidden !important;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   SIDEBAR&#13;
+   ============================================================ */&#13;
+&#13;
+.interviews-sidebar {&#13;
+  position:fixed !important;&#13;
+  left:0 !important;&#13;
+  top:0 !important;&#13;
+  bottom:0 !important;&#13;
+&#13;
+  width:235px !important;&#13;
+  min-width:235px !important;&#13;
+&#13;
+  padding:0 12px !important;&#13;
+&#13;
+  display:flex !important;&#13;
+  flex-direction:column !important;&#13;
+&#13;
+  background:linear-gradient(&#13;
+    180deg,&#13;
+    #111025 0%,&#13;
+    #100e22 100%&#13;
+  ) !important;&#13;
+&#13;
+  color:#fff !important;&#13;
+&#13;
+  overflow-y:auto !important;&#13;
+  overflow-x:hidden !important;&#13;
+&#13;
+  z-index:900 !important;&#13;
+&#13;
+  transition:&#13;
+    width .25s ease,&#13;
+    min-width .25s ease,&#13;
+    transform .25s ease,&#13;
+    opacity .25s ease !important;&#13;
+}&#13;
+&#13;
+.interviews-sidebar::-webkit-scrollbar {&#13;
+  width:5px !important;&#13;
+}&#13;
+&#13;
+.interviews-sidebar::-webkit-scrollbar-thumb {&#13;
+  background:rgba(255,255,255,.12) !important;&#13;
+  border-radius:10px !important;&#13;
+}&#13;
+&#13;
+&#13;
+/* BRAND */&#13;
+&#13;
+.sidebar-brand {&#13;
+  min-height:82px !important;&#13;
+&#13;
+  display:flex !important;&#13;
+  align-items:center !important;&#13;
+&#13;
+  gap:12px !important;&#13;
+&#13;
+  padding:17px 9px !important;&#13;
+&#13;
+  border-bottom:1px solid rgba(255,255,255,.06) !important;&#13;
+}&#13;
+&#13;
+.brand-icon {&#13;
+  width:43px !important;&#13;
+  height:43px !important;&#13;
+  min-width:43px !important;&#13;
+&#13;
+  display:flex !important;&#13;
+  align-items:center !important;&#13;
+  justify-content:center !important;&#13;
+&#13;
+  border-radius:13px !important;&#13;
+&#13;
+  background:linear-gradient(&#13;
+    135deg,&#13;
+    #8b5cf6,&#13;
+    #6d28d9&#13;
+  ) !important;&#13;
+&#13;
+  color:#fff !important;&#13;
+&#13;
+  font-size:23px !important;&#13;
+  font-weight:900 !important;&#13;
+}&#13;
+&#13;
+.brand-title {&#13;
+  color:#fff !important;&#13;
+  font-size:18px !important;&#13;
+  font-weight:800 !important;&#13;
+}&#13;
+&#13;
+.brand-subtitle {&#13;
+  margin-top:3px !important;&#13;
+&#13;
+  color:#b8b2cc !important;&#13;
+&#13;
+  font-size:9px !important;&#13;
+  font-weight:800 !important;&#13;
+&#13;
+  letter-spacing:.7px !important;&#13;
+}&#13;
+&#13;
+&#13;
+/* TPO CARD */&#13;
+&#13;
+.tpo-card {&#13;
+  margin:15px 4px 9px !important;&#13;
+  padding:12px !important;&#13;
+&#13;
+  display:flex !important;&#13;
+  align-items:center !important;&#13;
+&#13;
+  gap:10px !important;&#13;
+&#13;
+  border-radius:13px !important;&#13;
+&#13;
+  background:rgba(124,58,237,.14) !important;&#13;
+  border:1px solid rgba(124,58,237,.25) !important;&#13;
+}&#13;
+&#13;
+.tpo-avatar {&#13;
+  width:40px !important;&#13;
+  height:40px !important;&#13;
+  min-width:40px !important;&#13;
+&#13;
+  display:flex !important;&#13;
+  align-items:center !important;&#13;
+  justify-content:center !important;&#13;
+&#13;
+  border-radius:50% !important;&#13;
+&#13;
+  background:linear-gradient(&#13;
+    135deg,&#13;
+    #8b5cf6,&#13;
+    #6d28d9&#13;
+  ) !important;&#13;
+&#13;
+  color:#fff !important;&#13;
+&#13;
+  font-size:10px !important;&#13;
+  font-weight:900 !important;&#13;
+}&#13;
+&#13;
+.tpo-name {&#13;
+  color:#fff !important;&#13;
+  font-size:12px !important;&#13;
+  font-weight:800 !important;&#13;
+}&#13;
+&#13;
+.tpo-role {&#13;
+  margin-top:2px !important;&#13;
+  color:#c4bdd6 !important;&#13;
+  font-size:9px !important;&#13;
+}&#13;
+&#13;
+.tpo-description {&#13;
+  margin-top:2px !important;&#13;
+  color:#9892aa !important;&#13;
+  font-size:8px !important;&#13;
+}&#13;
+&#13;
+&#13;
+/* SIDEBAR SECTION */&#13;
+&#13;
+.sidebar-section-title {&#13;
+  margin:15px 9px 6px !important;&#13;
+&#13;
+  color:#9791a9 !important;&#13;
+&#13;
+  font-size:9px !important;&#13;
+  font-weight:900 !important;&#13;
+&#13;
+  letter-spacing:.75px !important;&#13;
+}&#13;
+&#13;
+&#13;
+/* NAV ITEM */&#13;
+&#13;
+.sidebar-nav-item {&#13;
+  width:100% !important;&#13;
+  min-height:41px !important;&#13;
+&#13;
+  margin:2px 0 !important;&#13;
+  padding:0 10px !important;&#13;
+&#13;
+  display:flex !important;&#13;
+  align-items:center !important;&#13;
+&#13;
+  gap:10px !important;&#13;
+&#13;
+  border:0 !important;&#13;
+  border-radius:10px !important;&#13;
+&#13;
+  background:transparent !important;&#13;
+&#13;
+  color:#d7d3e2 !important;&#13;
+&#13;
+  font-size:11px !important;&#13;
+  font-weight:600 !important;&#13;
+&#13;
+  text-align:left !important;&#13;
+&#13;
+  cursor:pointer !important;&#13;
+&#13;
+  transition:.18s ease !important;&#13;
+}&#13;
+&#13;
+.sidebar-nav-item:hover {&#13;
+  background:rgba(255,255,255,.07) !important;&#13;
+  color:#fff !important;&#13;
+}&#13;
+&#13;
+.sidebar-nav-item.active {&#13;
+  background:linear-gradient(&#13;
+    90deg,&#13;
+    #7c3aed,&#13;
+    #8338ec&#13;
+  ) !important;&#13;
+&#13;
+  color:#fff !important;&#13;
+&#13;
+  box-shadow:&#13;
+    0 7px 18px rgba(124,58,237,.22) !important;&#13;
+}&#13;
+&#13;
+.sidebar-icon {&#13;
+  width:20px !important;&#13;
+  min-width:20px !important;&#13;
+&#13;
+  text-align:center !important;&#13;
+&#13;
+  color:#aaa5ba !important;&#13;
+}&#13;
+&#13;
+.sidebar-nav-item:hover .sidebar-icon,&#13;
+.sidebar-nav-item.active .sidebar-icon {&#13;
+  color:#fff !important;&#13;
+}&#13;
+&#13;
+.sidebar-count {&#13;
+  min-width:23px !important;&#13;
+  height:20px !important;&#13;
+&#13;
+  margin-left:auto !important;&#13;
+&#13;
+  display:flex !important;&#13;
+  align-items:center !important;&#13;
+  justify-content:center !important;&#13;
+&#13;
+  padding:0 6px !important;&#13;
+&#13;
+  border-radius:20px !important;&#13;
+&#13;
+  background:rgba(124,58,237,.32) !important;&#13;
+&#13;
+  color:#d8b4fe !important;&#13;
+&#13;
+  font-size:8px !important;&#13;
+  font-weight:900 !important;&#13;
+}&#13;
+&#13;
+.sidebar-count.green {&#13;
+  background:rgba(16,185,129,.16) !important;&#13;
+  color:#6ee7b7 !important;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   MAIN&#13;
+   ============================================================ */&#13;
+&#13;
+.interviews-main {&#13;
+  width:calc(100% - 235px) !important;&#13;
+  min-width:0 !important;&#13;
+&#13;
+  margin-left:235px !important;&#13;
+&#13;
+  height:100vh !important;&#13;
+&#13;
+  display:flex !important;&#13;
+  flex-direction:column !important;&#13;
+&#13;
+  overflow:hidden !important;&#13;
+&#13;
+  background:#f7f9fc !important;&#13;
+&#13;
+  transition:&#13;
+    width .25s ease,&#13;
+    margin-left .25s ease !important;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   TOP NAVBAR&#13;
+   ============================================================ */&#13;
+&#13;
+.interviews-topbar {&#13;
+  width:100% !important;&#13;
+  height:72px !important;&#13;
+  min-height:72px !important;&#13;
+&#13;
+  padding:0 24px !important;&#13;
+&#13;
+  display:flex !important;&#13;
+  align-items:center !important;&#13;
+&#13;
+  gap:20px !important;&#13;
+&#13;
+  background:#fff !important;&#13;
+&#13;
+  border-bottom:1px solid #e2e8f0 !important;&#13;
+&#13;
+  box-shadow:&#13;
+    0 2px 12px rgba(15,23,42,.04) !important;&#13;
+&#13;
+  position:relative !important;&#13;
+&#13;
+  z-index:500 !important;&#13;
+}&#13;
+&#13;
+&#13;
+/* TOPBAR LEFT */&#13;
+&#13;
+.topbar-left {&#13;
+  min-width:245px !important;&#13;
+&#13;
+  display:flex !important;&#13;
+  align-items:center !important;&#13;
+&#13;
+  gap:13px !important;&#13;
+}&#13;
+&#13;
+.sidebar-toggle {&#13;
+  width:40px !important;&#13;
+  height:40px !important;&#13;
+  min-width:40px !important;&#13;
+&#13;
+  display:flex !important;&#13;
+  align-items:center !important;&#13;
+  justify-content:center !important;&#13;
+&#13;
+  border:1px solid #dbe2ea !important;&#13;
+  border-radius:10px !important;&#13;
+&#13;
+  background:#fff !important;&#13;
+&#13;
+  color:#475569 !important;&#13;
+&#13;
+  cursor:pointer !important;&#13;
+}&#13;
+&#13;
+.sidebar-toggle:hover {&#13;
+  border-color:#c4b5fd !important;&#13;
+  background:#faf7ff !important;&#13;
+  color:#6d28d9 !important;&#13;
+}&#13;
+&#13;
+.topbar-title-block {&#13;
+  display:flex !important;&#13;
+  flex-direction:column !important;&#13;
+  justify-content:center !important;&#13;
+}&#13;
+&#13;
+.topbar-eyebrow {&#13;
+  color:#7c3aed !important;&#13;
+  font-size:9px !important;&#13;
+  font-weight:800 !important;&#13;
+  letter-spacing:.9px !important;&#13;
+}&#13;
+&#13;
+.topbar-title {&#13;
+  margin-top:2px !important;&#13;
+  color:#172033 !important;&#13;
+  font-size:16px !important;&#13;
+  font-weight:800 !important;&#13;
+  white-space:nowrap !important;&#13;
+}&#13;
+&#13;
+&#13;
+/* TOPBAR SEARCH */&#13;
+&#13;
+.topbar-center {&#13;
+  flex:1 1 auto !important;&#13;
+  min-width:220px !important;&#13;
+&#13;
+  display:flex !important;&#13;
+  justify-content:center !important;&#13;
+}&#13;
+&#13;
+.topbar-search {&#13;
+  width:min(470px,100%) !important;&#13;
+  height:40px !important;&#13;
+&#13;
+  padding:0 13px !important;&#13;
+&#13;
+  display:flex !important;&#13;
+  align-items:center !important;&#13;
+&#13;
+  border:1px solid #dbe2ea !important;&#13;
+  border-radius:11px !important;&#13;
+&#13;
+  background:#f8fafc !important;&#13;
+}&#13;
+&#13;
+.topbar-search:focus-within {&#13;
+  border-color:#a78bfa !important;&#13;
+  background:#fff !important;&#13;
+&#13;
+  box-shadow:&#13;
+    0 0 0 3px rgba(124,58,237,.08) !important;&#13;
+}&#13;
+&#13;
+.topbar-search &gt; i {&#13;
+  margin-right:9px !important;&#13;
+  color:#94a3b8 !important;&#13;
+  font-size:13px !important;&#13;
+}&#13;
+&#13;
+.topbar-search input {&#13;
+  width:100% !important;&#13;
+  height:100% !important;&#13;
+  padding:0 !important;&#13;
+&#13;
+  border:0 !important;&#13;
+  outline:0 !important;&#13;
+&#13;
+  background:transparent !important;&#13;
+  color:#334155 !important;&#13;
+&#13;
+  font-size:11px !important;&#13;
+}&#13;
+&#13;
+.topbar-search input::placeholder {&#13;
+  color:#94a3b8 !important;&#13;
+}&#13;
+&#13;
+&#13;
+/* TOPBAR RIGHT */&#13;
+&#13;
+.topbar-right {&#13;
+  min-width:260px !important;&#13;
+&#13;
+  display:flex !important;&#13;
+  align-items:center !important;&#13;
+  justify-content:flex-end !important;&#13;
+&#13;
+  gap:9px !important;&#13;
+}&#13;
+&#13;
+.topbar-circle-button {&#13;
+  position:relative !important;&#13;
+&#13;
+  width:40px !important;&#13;
+  height:40px !important;&#13;
+  min-width:40px !important;&#13;
+&#13;
+  display:flex !important;&#13;
+  align-items:center !important;&#13;
+  justify-content:center !important;&#13;
+&#13;
+  border:1px solid #dbe2ea !important;&#13;
+  border-radius:10px !important;&#13;
+&#13;
+  background:#fff !important;&#13;
+  color:#475569 !important;&#13;
+&#13;
+  cursor:pointer !important;&#13;
+}&#13;
+&#13;
+.topbar-circle-button:hover {&#13;
+  border-color:#c4b5fd !important;&#13;
+  background:#faf7ff !important;&#13;
+  color:#6d28d9 !important;&#13;
+}&#13;
+&#13;
+.topbar-circle-button:disabled {&#13;
+  opacity:.55 !important;&#13;
+  cursor:not-allowed !important;&#13;
+}&#13;
+&#13;
+&#13;
+/* NOTIFICATION */&#13;
+&#13;
+.topbar-notification-wrap {&#13;
+  position:relative !important;&#13;
+}&#13;
+&#13;
+.notification-button {&#13;
+  z-index:510 !important;&#13;
+}&#13;
+&#13;
+.notification-button i {&#13;
+  font-size:16px !important;&#13;
+  pointer-events:none !important;&#13;
+}&#13;
+&#13;
+.notification-dot {&#13;
+  position:absolute !important;&#13;
+&#13;
+  top:-5px !important;&#13;
+  right:-5px !important;&#13;
+&#13;
+  min-width:17px !important;&#13;
+  height:17px !important;&#13;
+&#13;
+  padding:0 4px !important;&#13;
+&#13;
+  display:flex !important;&#13;
+  align-items:center !important;&#13;
+  justify-content:center !important;&#13;
+&#13;
+  border:2px solid #fff !important;&#13;
+  border-radius:20px !important;&#13;
+&#13;
+  background:#e11d48 !important;&#13;
+&#13;
+  color:#fff !important;&#13;
+&#13;
+  font-size:8px !important;&#13;
+  font-weight:900 !important;&#13;
+}&#13;
+&#13;
+.topbar-notification-popover {&#13;
+  position:absolute !important;&#13;
+  top:50px !important;&#13;
+  right:0 !important;&#13;
+&#13;
+  width:290px !important;&#13;
+&#13;
+  overflow:hidden !important;&#13;
+&#13;
+  border:1px solid #e2e8f0 !important;&#13;
+  border-radius:13px !important;&#13;
+&#13;
+  background:#fff !important;&#13;
+&#13;
+  box-shadow:&#13;
+    0 18px 50px rgba(15,23,42,.16) !important;&#13;
+&#13;
+  z-index:1000 !important;&#13;
+}&#13;
+&#13;
+.notification-popover-header {&#13;
+  height:48px !important;&#13;
+  padding:0 13px !important;&#13;
+&#13;
+  display:flex !important;&#13;
+  align-items:center !important;&#13;
+  justify-content:space-between !important;&#13;
+&#13;
+  border-bottom:1px solid #edf2f7 !important;&#13;
+}&#13;
+&#13;
+.notification-popover-header strong {&#13;
+  color:#172033 !important;&#13;
+  font-size:11px !important;&#13;
+}&#13;
+&#13;
+.notification-popover-header span {&#13;
+  min-width:22px !important;&#13;
+  height:22px !important;&#13;
+&#13;
+  padding:0 6px !important;&#13;
+&#13;
+  display:flex !important;&#13;
+  align-items:center !important;&#13;
+  justify-content:center !important;&#13;
+&#13;
+  border-radius:20px !important;&#13;
+&#13;
+  background:#ffe4e6 !important;&#13;
+  color:#be123c !important;&#13;
+&#13;
+  font-size:9px !important;&#13;
+  font-weight:900 !important;&#13;
+}&#13;
+&#13;
+.notification-popover-body {&#13;
+  padding:24px 15px !important;&#13;
+  text-align:center !important;&#13;
+}&#13;
+&#13;
+.notification-popover-body &gt; i {&#13;
+  display:block !important;&#13;
+  margin-bottom:9px !important;&#13;
+  color:#0f766e !important;&#13;
+  font-size:24px !important;&#13;
+}&#13;
+&#13;
+.notification-popover-body strong {&#13;
+  display:block !important;&#13;
+  color:#334155 !important;&#13;
+  font-size:11px !important;&#13;
+}&#13;
+&#13;
+.notification-popover-body p {&#13;
+  margin:5px 0 0 !important;&#13;
+  color:#94a3b8 !important;&#13;
+  font-size:9px !important;&#13;
+}&#13;
+&#13;
+&#13;
+/* PROFILE */&#13;
+&#13;
+.topbar-profile {&#13;
+  display:flex !important;&#13;
+  align-items:center !important;&#13;
+  gap:9px !important;&#13;
+  padding-left:5px !important;&#13;
+}&#13;
+&#13;
+.topbar-avatar {&#13;
+  width:38px !important;&#13;
+  height:38px !important;&#13;
+  min-width:38px !important;&#13;
+&#13;
+  display:flex !important;&#13;
+  align-items:center !important;&#13;
+  justify-content:center !important;&#13;
+&#13;
+  border-radius:50% !important;&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      135deg,&#13;
+      #7c3aed,&#13;
+      #4f46e5&#13;
+    ) !important;&#13;
+&#13;
+  color:#fff !important;&#13;
+&#13;
+  font-size:10px !important;&#13;
+  font-weight:900 !important;&#13;
+}&#13;
+&#13;
+.topbar-profile-name {&#13;
+  color:#172033 !important;&#13;
+  font-size:11px !important;&#13;
+  font-weight:800 !important;&#13;
+  white-space:nowrap !important;&#13;
+}&#13;
+&#13;
+.topbar-profile-role {&#13;
+  max-width:150px !important;&#13;
+  margin-top:2px !important;&#13;
+&#13;
+  overflow:hidden !important;&#13;
+  text-overflow:ellipsis !important;&#13;
+  white-space:nowrap !important;&#13;
+&#13;
+  color:#8994a5 !important;&#13;
+  font-size:8px !important;&#13;
+}&#13;
+&#13;
+.profile-arrow {&#13;
+  color:#94a3b8 !important;&#13;
+  font-size:12px !important;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   CONTENT&#13;
+   INCREASED BODY TYPOGRAPHY&#13;
+   ============================================================ */&#13;
+&#13;
+.interviews-content {&#13;
+  flex:1 !important;&#13;
+&#13;
+  min-height:0 !important;&#13;
+&#13;
+  overflow-y:auto !important;&#13;
+  overflow-x:hidden !important;&#13;
+&#13;
+  padding:28px 30px 45px !important;&#13;
+&#13;
+  /* keeps the page scrollable */&#13;
+  scrollbar-width:thin !important;&#13;
+  scrollbar-color:#a8b1c2 #edf1f6 !important;&#13;
+}&#13;
+&#13;
+.interviews-content::-webkit-scrollbar {&#13;
+  width:9px !important;&#13;
+}&#13;
+&#13;
+.interviews-content::-webkit-scrollbar-track {&#13;
+  background:#edf1f6 !important;&#13;
+}&#13;
+&#13;
+.interviews-content::-webkit-scrollbar-thumb {&#13;
+  background:#a8b1c2 !important;&#13;
+  border-radius:8px !important;&#13;
+  border:2px solid #edf1f6 !important;&#13;
+}&#13;
+&#13;
+.interviews-content::-webkit-scrollbar-thumb:hover {&#13;
+  background:#8d99ad !important;&#13;
+}&#13;
+&#13;
+&#13;
+/* PAGE HEADING */&#13;
+&#13;
+.page-heading-row {&#13;
+  display:flex !important;&#13;
+  align-items:flex-end !important;&#13;
+  justify-content:space-between !important;&#13;
+&#13;
+  gap:20px !important;&#13;
+&#13;
+  margin-bottom:20px !important;&#13;
+}&#13;
+&#13;
+.page-eyebrow,&#13;
+.section-eyebrow {&#13;
+  color:#0f766e !important;&#13;
+&#13;
+  font-size:11px !important;&#13;
+  font-weight:900 !important;&#13;
+&#13;
+  letter-spacing:.9px !important;&#13;
+}&#13;
+&#13;
+.page-heading-row h1 {&#13;
+  margin:7px 0 6px !important;&#13;
+&#13;
+  color:#172033 !important;&#13;
+&#13;
+  font-size:34px !important;&#13;
+  font-weight:900 !important;&#13;
+&#13;
+  letter-spacing:-.8px !important;&#13;
+  line-height:1.12 !important;&#13;
+}&#13;
+&#13;
+.page-description {&#13;
+  margin:0 !important;&#13;
+&#13;
+  color:#64748b !important;&#13;
+&#13;
+  font-size:14px !important;&#13;
+  line-height:1.5 !important;&#13;
+}&#13;
+&#13;
+.data-source-badge {&#13;
+  padding:9px 12px !important;&#13;
+&#13;
+  border:1px solid #dbeafe !important;&#13;
+  border-radius:20px !important;&#13;
+&#13;
+  background:#eff6ff !important;&#13;
+&#13;
+  color:#2563eb !important;&#13;
+&#13;
+  font-size:11px !important;&#13;
+  font-weight:800 !important;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   TABS&#13;
+   ============================================================ */&#13;
+&#13;
+.interview-tabs {&#13;
+  display:flex !important;&#13;
+  gap:8px !important;&#13;
+  margin-bottom:18px !important;&#13;
+&#13;
+  border-bottom:1px solid #e2e8f0 !important;&#13;
+}&#13;
+&#13;
+.interview-tab {&#13;
+  min-height:46px !important;&#13;
+&#13;
+  padding:0 17px !important;&#13;
+&#13;
+  display:flex !important;&#13;
+  align-items:center !important;&#13;
+&#13;
+  gap:9px !important;&#13;
+&#13;
+  border:0 !important;&#13;
+  border-bottom:3px solid transparent !important;&#13;
+&#13;
+  background:transparent !important;&#13;
+&#13;
+  color:#64748b !important;&#13;
+&#13;
+  font-size:12px !important;&#13;
+  font-weight:800 !important;&#13;
+&#13;
+  cursor:pointer !important;&#13;
+}&#13;
+&#13;
+.interview-tab.active {&#13;
+  color:#4f46e5 !important;&#13;
+  border-bottom-color:#4f46e5 !important;&#13;
+}&#13;
+&#13;
+.tab-icon {&#13;
+  font-size:15px !important;&#13;
+}&#13;
+&#13;
+.tab-count {&#13;
+  min-width:23px !important;&#13;
+  height:21px !important;&#13;
+&#13;
+  padding:0 6px !important;&#13;
+&#13;
+  display:flex !important;&#13;
+  align-items:center !important;&#13;
+  justify-content:center !important;&#13;
+&#13;
+  border-radius:20px !important;&#13;
+&#13;
+  background:#eef2ff !important;&#13;
+  color:#4f46e5 !important;&#13;
+&#13;
+  font-size:9px !important;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   KPI&#13;
+   ============================================================ */&#13;
+&#13;
+.kpi-grid {&#13;
+  display:grid !important;&#13;
+&#13;
+  grid-template-columns:&#13;
+    repeat(4,minmax(0,1fr)) !important;&#13;
+&#13;
+  gap:14px !important;&#13;
+&#13;
+  margin-bottom:19px !important;&#13;
+}&#13;
+&#13;
+.kpi-card {&#13;
+  min-height:122px !important;&#13;
+&#13;
+  padding:18px !important;&#13;
+&#13;
+  display:flex !important;&#13;
+  align-items:center !important;&#13;
+&#13;
+  gap:14px !important;&#13;
+&#13;
+  border:1px solid #e2e8f0 !important;&#13;
+  border-radius:14px !important;&#13;
+&#13;
+  background:#fff !important;&#13;
+&#13;
+  box-shadow:&#13;
+    0 6px 20px rgba(15,23,42,.045) !important;&#13;
+}&#13;
+&#13;
+.kpi-icon {&#13;
+  width:47px !important;&#13;
+  height:47px !important;&#13;
+&#13;
+  min-width:47px !important;&#13;
+&#13;
+  display:flex !important;&#13;
+  align-items:center !important;&#13;
+  justify-content:center !important;&#13;
+&#13;
+  border-radius:12px !important;&#13;
+&#13;
+  font-size:18px !important;&#13;
+}&#13;
+&#13;
+.kpi-label {&#13;
+  color:#64748b !important;&#13;
+&#13;
+  font-size:10px !important;&#13;
+  font-weight:900 !important;&#13;
+&#13;
+  letter-spacing:.6px !important;&#13;
+  line-height:1.25 !important;&#13;
+}&#13;
+&#13;
+.kpi-value {&#13;
+  margin-top:5px !important;&#13;
+&#13;
+  color:#172033 !important;&#13;
+&#13;
+  font-size:29px !important;&#13;
+  font-weight:900 !important;&#13;
+&#13;
+  line-height:1.1 !important;&#13;
+}&#13;
+&#13;
+.kpi-blue {&#13;
+  border-color:#c7d2fe !important;&#13;
+  background:#f8faff !important;&#13;
+}&#13;
+&#13;
+.kpi-icon.blue {&#13;
+  background:#e0e7ff !important;&#13;
+  color:#4f46e5 !important;&#13;
+}&#13;
+&#13;
+.kpi-orange {&#13;
+  border-color:#fde68a !important;&#13;
+  background:#fffcf4 !important;&#13;
+}&#13;
+&#13;
+.kpi-icon.orange {&#13;
+  background:#fef3c7 !important;&#13;
+  color:#d97706 !important;&#13;
+}&#13;
+&#13;
+.kpi-green {&#13;
+  border-color:#a7f3d0 !important;&#13;
+  background:#f4fffa !important;&#13;
+}&#13;
+&#13;
+.kpi-icon.green {&#13;
+  background:#d1fae5 !important;&#13;
+  color:#059669 !important;&#13;
+}&#13;
+&#13;
+.kpi-purple {&#13;
+  border-color:#ddd6fe !important;&#13;
+  background:#faf8ff !important;&#13;
+}&#13;
+&#13;
+.kpi-icon.purple {&#13;
+  background:#ede9fe !important;&#13;
+  color:#7c3aed !important;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   FILTER CARD&#13;
+   ============================================================ */&#13;
+&#13;
+.filter-card {&#13;
+  margin-bottom:19px !important;&#13;
+&#13;
+  padding:18px !important;&#13;
+&#13;
+  border:1px solid #e2e8f0 !important;&#13;
+  border-radius:14px !important;&#13;
+&#13;
+  background:#fff !important;&#13;
+}&#13;
+&#13;
+.section-heading-row {&#13;
+  display:flex !important;&#13;
+  align-items:flex-start !important;&#13;
+  justify-content:space-between !important;&#13;
+&#13;
+  gap:20px !important;&#13;
+&#13;
+  margin-bottom:15px !important;&#13;
+}&#13;
+&#13;
+.section-heading-row h2 {&#13;
+  margin:5px 0 4px !important;&#13;
+&#13;
+  color:#172033 !important;&#13;
+&#13;
+  font-size:18px !important;&#13;
+  font-weight:900 !important;&#13;
+&#13;
+  line-height:1.2 !important;&#13;
+}&#13;
+&#13;
+.section-heading-row p {&#13;
+  margin:0 !important;&#13;
+&#13;
+  color:#94a3b8 !important;&#13;
+&#13;
+  font-size:12px !important;&#13;
+  line-height:1.45 !important;&#13;
+}&#13;
+&#13;
+.clear-filter-button {&#13;
+  height:36px !important;&#13;
+&#13;
+  padding:0 12px !important;&#13;
+&#13;
+  border:1px solid #fecdd3 !important;&#13;
+  border-radius:8px !important;&#13;
+&#13;
+  background:#fff1f2 !important;&#13;
+&#13;
+  color:#be123c !important;&#13;
+&#13;
+  font-size:11px !important;&#13;
+  font-weight:800 !important;&#13;
+&#13;
+  cursor:pointer !important;&#13;
+}&#13;
+&#13;
+.filter-grid {&#13;
+  display:grid !important;&#13;
+&#13;
+  grid-template-columns:&#13;
+    repeat(4,minmax(0,1fr)) !important;&#13;
+&#13;
+  gap:11px !important;&#13;
+}&#13;
+&#13;
+.filter-field label {&#13;
+  display:block !important;&#13;
+&#13;
+  margin-bottom:6px !important;&#13;
+&#13;
+  color:#64748b !important;&#13;
+&#13;
+  font-size:10px !important;&#13;
+  font-weight:900 !important;&#13;
+}&#13;
+&#13;
+.filter-field input,&#13;
+.filter-field select {&#13;
+  width:100% !important;&#13;
+&#13;
+  height:39px !important;&#13;
+&#13;
+  padding:0 10px !important;&#13;
+&#13;
+  border:1px solid #dbe2ea !important;&#13;
+  border-radius:8px !important;&#13;
+&#13;
+  background:#fff !important;&#13;
+&#13;
+  color:#334155 !important;&#13;
+&#13;
+  font-size:12px !important;&#13;
+&#13;
+  outline:none !important;&#13;
+}&#13;
+&#13;
+.filter-field input:focus,&#13;
+.filter-field select:focus {&#13;
+  border-color:#a78bfa !important;&#13;
+&#13;
+  box-shadow:&#13;
+    0 0 0 3px rgba(124,58,237,.07) !important;&#13;
+}&#13;
+&#13;
+.input-with-icon {&#13;
+  height:39px !important;&#13;
+&#13;
+  display:flex !important;&#13;
+  align-items:center !important;&#13;
+&#13;
+  padding:0 10px !important;&#13;
+&#13;
+  border:1px solid #dbe2ea !important;&#13;
+  border-radius:8px !important;&#13;
+&#13;
+  background:#fff !important;&#13;
+}&#13;
+&#13;
+.input-with-icon span {&#13;
+  margin-right:7px !important;&#13;
+  color:#94a3b8 !important;&#13;
+  font-size:13px !important;&#13;
+}&#13;
+&#13;
+.input-with-icon input {&#13;
+  border:0 !important;&#13;
+  outline:0 !important;&#13;
+&#13;
+  height:100% !important;&#13;
+&#13;
+  padding:0 !important;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   DIRECTORY&#13;
+   ============================================================ */&#13;
+&#13;
+.directory-card {&#13;
+  overflow:hidden !important;&#13;
+&#13;
+  border:1px solid #e2e8f0 !important;&#13;
+  border-radius:15px !important;&#13;
+&#13;
+  background:#fff !important;&#13;
+&#13;
+  box-shadow:&#13;
+    0 7px 24px rgba(15,23,42,.045) !important;&#13;
+}&#13;
+&#13;
+.directory-heading {&#13;
+  min-height:86px !important;&#13;
+&#13;
+  padding:18px 20px !important;&#13;
+&#13;
+  display:flex !important;&#13;
+  align-items:center !important;&#13;
+  justify-content:space-between !important;&#13;
+&#13;
+  gap:20px !important;&#13;
+&#13;
+  border-bottom:1px solid #e2e8f0 !important;&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      90deg,&#13;
+      #f0fdfa,&#13;
+      #fff&#13;
+    ) !important;&#13;
+}&#13;
+&#13;
+.directory-heading h2 {&#13;
+  margin:5px 0 !important;&#13;
+&#13;
+  color:#172033 !important;&#13;
+&#13;
+  font-size:19px !important;&#13;
+  font-weight:900 !important;&#13;
+  line-height:1.2 !important;&#13;
+}&#13;
+&#13;
+.directory-heading p {&#13;
+  margin:0 !important;&#13;
+&#13;
+  color:#8994a5 !important;&#13;
+&#13;
+  font-size:12px !important;&#13;
+  line-height:1.4 !important;&#13;
+}&#13;
+&#13;
+.record-count {&#13;
+  padding:8px 11px !important;&#13;
+&#13;
+  border-radius:20px !important;&#13;
+&#13;
+  background:#eef2ff !important;&#13;
+&#13;
+  color:#4338ca !important;&#13;
+&#13;
+  font-size:10px !important;&#13;
+  font-weight:800 !important;&#13;
+}&#13;
+&#13;
+.directory-table-wrap {&#13;
+  width:100% !important;&#13;
+  overflow:auto !important;&#13;
+}&#13;
+&#13;
+.directory-table {&#13;
+  width:100% !important;&#13;
+  min-width:1050px !important;&#13;
+  border-collapse:collapse !important;&#13;
+}&#13;
+&#13;
+.directory-table thead {&#13;
+  background:#f8fafc !important;&#13;
+}&#13;
+&#13;
+.directory-table th {&#13;
+  padding:13px 14px !important;&#13;
+&#13;
+  border-bottom:1px solid #e2e8f0 !important;&#13;
+&#13;
+  color:#64748b !important;&#13;
+&#13;
+  font-size:10px !important;&#13;
+  font-weight:900 !important;&#13;
+&#13;
+  text-align:left !important;&#13;
+&#13;
+  white-space:nowrap !important;&#13;
+}&#13;
+&#13;
+.directory-table td {&#13;
+  padding:14px !important;&#13;
+&#13;
+  border-bottom:1px solid #eef2f6 !important;&#13;
+&#13;
+  color:#475569 !important;&#13;
+&#13;
+  font-size:12px !important;&#13;
+&#13;
+  line-height:1.45 !important;&#13;
+&#13;
+  vertical-align:middle !important;&#13;
+}&#13;
+&#13;
+.directory-table tbody tr:hover {&#13;
+  background:#faf7ff !important;&#13;
+}&#13;
+&#13;
+.student-cell {&#13;
+  display:flex !important;&#13;
+  align-items:center !important;&#13;
+  gap:9px !important;&#13;
+}&#13;
+&#13;
+.student-avatar {&#13;
+  width:36px !important;&#13;
+  height:36px !important;&#13;
+&#13;
+  min-width:36px !important;&#13;
+&#13;
+  display:flex !important;&#13;
+  align-items:center !important;&#13;
+  justify-content:center !important;&#13;
+&#13;
+  border-radius:50% !important;&#13;
+&#13;
+  background:#e0e7ff !important;&#13;
+&#13;
+  color:#4338ca !important;&#13;
+&#13;
+  font-size:9px !important;&#13;
+  font-weight:900 !important;&#13;
+}&#13;
+&#13;
+.student-cell strong {&#13;
+  display:block !important;&#13;
+&#13;
+  color:#172033 !important;&#13;
+&#13;
+  font-size:12px !important;&#13;
+  font-weight:800 !important;&#13;
+}&#13;
+&#13;
+.student-cell small {&#13;
+  display:block !important;&#13;
+&#13;
+  margin-top:2px !important;&#13;
+&#13;
+  color:#94a3b8 !important;&#13;
+&#13;
+  font-size:9px !important;&#13;
+}&#13;
+&#13;
+.status-pill,&#13;
+.result-pill {&#13;
+  display:inline-flex !important;&#13;
+&#13;
+  align-items:center !important;&#13;
+&#13;
+  padding:6px 9px !important;&#13;
+&#13;
+  border-radius:20px !important;&#13;
+&#13;
+  font-size:9px !important;&#13;
+  font-weight:900 !important;&#13;
+&#13;
+  white-space:nowrap !important;&#13;
+}&#13;
+&#13;
+.status-scheduled {&#13;
+  background:#fef3c7 !important;&#13;
+  color:#b45309 !important;&#13;
+}&#13;
+&#13;
+.status-completed {&#13;
+  background:#d1fae5 !important;&#13;
+  color:#047857 !important;&#13;
+}&#13;
+&#13;
+.status-cancelled {&#13;
+  background:#ffe4e6 !important;&#13;
+  color:#be123c !important;&#13;
+}&#13;
+&#13;
+.result-selected {&#13;
+  background:#d1fae5 !important;&#13;
+  color:#047857 !important;&#13;
+}&#13;
+&#13;
+.result-rejected {&#13;
+  background:#ffe4e6 !important;&#13;
+  color:#be123c !important;&#13;
+}&#13;
+&#13;
+.view-button {&#13;
+  height:32px !important;&#13;
+&#13;
+  padding:0 11px !important;&#13;
+&#13;
+  border:1px solid #c7d2fe !important;&#13;
+  border-radius:8px !important;&#13;
+&#13;
+  background:#eef2ff !important;&#13;
+&#13;
+  color:#4338ca !important;&#13;
+&#13;
+  font-size:10px !important;&#13;
+  font-weight:800 !important;&#13;
+&#13;
+  cursor:pointer !important;&#13;
+}&#13;
+&#13;
+.view-button:hover {&#13;
+  background:#e0e7ff !important;&#13;
+}&#13;
+&#13;
+&#13;
+/* EMPTY */&#13;
+&#13;
+.empty-state {&#13;
+  padding:60px 20px !important;&#13;
+  text-align:center !important;&#13;
+}&#13;
+&#13;
+.empty-state &gt; i {&#13;
+  display:block !important;&#13;
+&#13;
+  margin-bottom:10px !important;&#13;
+&#13;
+  color:#94a3b8 !important;&#13;
+&#13;
+  font-size:30px !important;&#13;
+}&#13;
+&#13;
+.empty-state strong {&#13;
+  display:block !important;&#13;
+&#13;
+  color:#334155 !important;&#13;
+&#13;
+  font-size:14px !important;&#13;
+}&#13;
+&#13;
+.empty-state p {&#13;
+  margin:6px 0 0 !important;&#13;
+&#13;
+  color:#94a3b8 !important;&#13;
+&#13;
+  font-size:11px !important;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   MODALS&#13;
+   ============================================================ */&#13;
+&#13;
+.modal-backdrop {&#13;
+  position:fixed !important;&#13;
+&#13;
+  inset:0 !important;&#13;
+&#13;
+  z-index:1000000 !important;&#13;
+&#13;
+  display:flex !important;&#13;
+&#13;
+  align-items:center !important;&#13;
+  justify-content:center !important;&#13;
+&#13;
+  padding:25px !important;&#13;
+&#13;
+  background:rgba(15,23,42,.60) !important;&#13;
+&#13;
+  backdrop-filter:blur(4px) !important;&#13;
+}&#13;
+&#13;
+.interview-modal {&#13;
+  width:min(920px,95vw) !important;&#13;
+&#13;
+  max-height:90vh !important;&#13;
+&#13;
+  display:flex !important;&#13;
+  flex-direction:column !important;&#13;
+&#13;
+  overflow:hidden !important;&#13;
+&#13;
+  border-radius:17px !important;&#13;
+&#13;
+  background:#fff !important;&#13;
+&#13;
+  box-shadow:&#13;
+    0 30px 90px rgba(0,0,0,.28) !important;&#13;
+}&#13;
+&#13;
+.modal-header {&#13;
+  min-height:74px !important;&#13;
+&#13;
+  padding:15px 18px !important;&#13;
+&#13;
+  display:flex !important;&#13;
+  align-items:center !important;&#13;
+  justify-content:space-between !important;&#13;
+&#13;
+  border-bottom:1px solid #e2e8f0 !important;&#13;
+}&#13;
+&#13;
+.modal-eyebrow {&#13;
+  color:#0f766e !important;&#13;
+  font-size:9px !important;&#13;
+  font-weight:900 !important;&#13;
+  letter-spacing:.7px !important;&#13;
+}&#13;
+&#13;
+.modal-header h2 {&#13;
+  margin:4px 0 !important;&#13;
+&#13;
+  color:#172033 !important;&#13;
+&#13;
+  font-size:19px !important;&#13;
+  font-weight:900 !important;&#13;
+}&#13;
+&#13;
+.modal-subtitle {&#13;
+  color:#64748b !important;&#13;
+  font-size:11px !important;&#13;
+}&#13;
+&#13;
+.modal-close {&#13;
+  width:34px !important;&#13;
+  height:34px !important;&#13;
+&#13;
+  display:flex !important;&#13;
+  align-items:center !important;&#13;
+  justify-content:center !important;&#13;
+&#13;
+  border:0 !important;&#13;
+  border-radius:8px !important;&#13;
+&#13;
+  background:#f8fafc !important;&#13;
+  color:#64748b !important;&#13;
+&#13;
+  font-size:19px !important;&#13;
+&#13;
+  cursor:pointer !important;&#13;
+}&#13;
+&#13;
+.modal-close:hover {&#13;
+  background:#ffe4e6 !important;&#13;
+  color:#be123c !important;&#13;
+}&#13;
+&#13;
+.modal-body {&#13;
+  flex:1 !important;&#13;
+  overflow:auto !important;&#13;
+  padding:20px !important;&#13;
+}&#13;
+&#13;
+.detail-section {&#13;
+  margin-bottom:16px !important;&#13;
+&#13;
+  padding:16px !important;&#13;
+&#13;
+  border:1px solid #e2e8f0 !important;&#13;
+&#13;
+  border-radius:12px !important;&#13;
+&#13;
+  background:#fff !important;&#13;
+}&#13;
+&#13;
+.detail-section-heading {&#13;
+  display:flex !important;&#13;
+  align-items:center !important;&#13;
+&#13;
+  gap:9px !important;&#13;
+&#13;
+  margin-bottom:13px !important;&#13;
+}&#13;
+&#13;
+.detail-section-icon {&#13;
+  width:35px !important;&#13;
+  height:35px !important;&#13;
+&#13;
+  display:flex !important;&#13;
+  align-items:center !important;&#13;
+  justify-content:center !important;&#13;
+&#13;
+  border-radius:9px !important;&#13;
+}&#13;
+&#13;
+.detail-section-icon.blue {&#13;
+  background:#e0e7ff !important;&#13;
+  color:#4f46e5 !important;&#13;
+}&#13;
+&#13;
+.detail-section-icon.purple {&#13;
+  background:#ede9fe !important;&#13;
+  color:#7c3aed !important;&#13;
+}&#13;
+&#13;
+.detail-section-icon.green {&#13;
+  background:#d1fae5 !important;&#13;
+  color:#059669 !important;&#13;
+}&#13;
+&#13;
+.detail-section-icon.pink {&#13;
+  background:#ffe4e6 !important;&#13;
+  color:#e11d48 !important;&#13;
+}&#13;
+&#13;
+.detail-section-heading h3 {&#13;
+  margin:0 !important;&#13;
+&#13;
+  color:#334155 !important;&#13;
+&#13;
+  font-size:13px !important;&#13;
+  font-weight:900 !important;&#13;
+}&#13;
+&#13;
+.detail-section-heading p {&#13;
+  margin:3px 0 0 !important;&#13;
+&#13;
+  color:#94a3b8 !important;&#13;
+&#13;
+  font-size:9px !important;&#13;
+}&#13;
+&#13;
+.detail-grid {&#13;
+  display:grid !important;&#13;
+&#13;
+  grid-template-columns:&#13;
+    repeat(3,minmax(0,1fr)) !important;&#13;
+&#13;
+  gap:11px !important;&#13;
+}&#13;
+&#13;
+.detail-item {&#13;
+  min-width:0 !important;&#13;
+}&#13;
+&#13;
+.detail-item span {&#13;
+  display:block !important;&#13;
+&#13;
+  margin-bottom:4px !important;&#13;
+&#13;
+  color:#94a3b8 !important;&#13;
+&#13;
+  font-size:8px !important;&#13;
+  font-weight:900 !important;&#13;
+&#13;
+  text-transform:uppercase !important;&#13;
+}&#13;
+&#13;
+.detail-item strong {&#13;
+  color:#334155 !important;&#13;
+&#13;
+  font-size:11px !important;&#13;
+  font-weight:700 !important;&#13;
+&#13;
+  word-break:break-word !important;&#13;
+}&#13;
+&#13;
+.full-width-detail {&#13;
+  grid-column:1 / -1 !important;&#13;
+}&#13;
+&#13;
+.meeting-link {&#13;
+  color:#4f46e5 !important;&#13;
+&#13;
+  font-weight:800 !important;&#13;
+&#13;
+  text-decoration:none !important;&#13;
+}&#13;
+&#13;
+.meeting-link:hover {&#13;
+  text-decoration:underline !important;&#13;
+}&#13;
+&#13;
+.evaluation-score-grid {&#13;
+  display:grid !important;&#13;
+&#13;
+  grid-template-columns:&#13;
+    repeat(4,minmax(0,1fr)) !important;&#13;
+&#13;
+  gap:9px !important;&#13;
+}&#13;
+&#13;
+.score-card {&#13;
+  padding:11px !important;&#13;
+&#13;
+  border:1px solid #e2e8f0 !important;&#13;
+&#13;
+  border-radius:9px !important;&#13;
+&#13;
+  background:#f8fafc !important;&#13;
+}&#13;
+&#13;
+.score-card span {&#13;
+  display:block !important;&#13;
+&#13;
+  color:#94a3b8 !important;&#13;
+&#13;
+  font-size:8px !important;&#13;
+  font-weight:900 !important;&#13;
+}&#13;
+&#13;
+.score-card strong {&#13;
+  display:block !important;&#13;
+&#13;
+  margin-top:4px !important;&#13;
+&#13;
+  color:#334155 !important;&#13;
+&#13;
+  font-size:15px !important;&#13;
+  font-weight:900 !important;&#13;
+}&#13;
+&#13;
+.overall-score {&#13;
+  background:#eef2ff !important;&#13;
+  border-color:#c7d2fe !important;&#13;
+}&#13;
+&#13;
+.overall-score strong {&#13;
+  color:#4f46e5 !important;&#13;
+}&#13;
+&#13;
+.long-text-card {&#13;
+  margin-top:10px !important;&#13;
+&#13;
+  padding:12px !important;&#13;
+&#13;
+  border:1px solid #e2e8f0 !important;&#13;
+&#13;
+  border-radius:9px !important;&#13;
+&#13;
+  background:#f8fafc !important;&#13;
+}&#13;
+&#13;
+.long-text-card &gt; span {&#13;
+  display:block !important;&#13;
+&#13;
+  margin-bottom:5px !important;&#13;
+&#13;
+  color:#94a3b8 !important;&#13;
+&#13;
+  font-size:8px !important;&#13;
+  font-weight:900 !important;&#13;
+}&#13;
+&#13;
+.long-text-value {&#13;
+  color:#475569 !important;&#13;
+&#13;
+  font-size:11px !important;&#13;
+&#13;
+  line-height:1.65 !important;&#13;
+&#13;
+  white-space:pre-wrap !important;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   SIDEBAR COLLAPSED&#13;
+   ============================================================ */&#13;
+&#13;
+.campus360-interviews-app.sidebar-collapsed&#13;
+.interviews-sidebar {&#13;
+  width:0 !important;&#13;
+  min-width:0 !important;&#13;
+&#13;
+  transform:translateX(-100%) !important;&#13;
+&#13;
+  opacity:0 !important;&#13;
+&#13;
+  pointer-events:none !important;&#13;
+&#13;
+  overflow:hidden !important;&#13;
+}&#13;
+&#13;
+.campus360-interviews-app.sidebar-collapsed&#13;
+.interviews-main {&#13;
+  width:100% !important;&#13;
+  margin-left:0 !important;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   RESPONSIVE&#13;
+   ============================================================ */&#13;
+&#13;
+@media (max-width:1200px) {&#13;
+&#13;
+  .kpi-grid {&#13;
+    grid-template-columns:&#13;
+      repeat(2,minmax(0,1fr)) !important;&#13;
+  }&#13;
+&#13;
+  .filter-grid {&#13;
+    grid-template-columns:&#13;
+      repeat(3,minmax(0,1fr)) !important;&#13;
+  }&#13;
+&#13;
+  .detail-grid {&#13;
+    grid-template-columns:&#13;
+      repeat(2,minmax(0,1fr)) !important;&#13;
+  }&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+@media (max-width:950px) {&#13;
+&#13;
+  .topbar-left {&#13;
+    min-width:210px !important;&#13;
+  }&#13;
+&#13;
+  .topbar-right {&#13;
+    min-width:215px !important;&#13;
+  }&#13;
+&#13;
+  .topbar-profile-text {&#13;
+    display:none !important;&#13;
+  }&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+@media (max-width:760px) {&#13;
+&#13;
+  .interviews-sidebar {&#13;
+    width:0 !important;&#13;
+    min-width:0 !important;&#13;
+&#13;
+    transform:translateX(-100%) !important;&#13;
+&#13;
+    opacity:0 !important;&#13;
+&#13;
+    pointer-events:none !important;&#13;
+  }&#13;
+&#13;
+  .interviews-main {&#13;
+    width:100% !important;&#13;
+    margin-left:0 !important;&#13;
+  }&#13;
+&#13;
+  .interviews-topbar {&#13;
+    padding:0 12px !important;&#13;
+    gap:8px !important;&#13;
+  }&#13;
+&#13;
+  .topbar-left {&#13;
+    min-width:auto !important;&#13;
+  }&#13;
+&#13;
+  .topbar-title-block {&#13;
+    display:none !important;&#13;
+  }&#13;
+&#13;
+  .topbar-center {&#13;
+    min-width:0 !important;&#13;
+  }&#13;
+&#13;
+  .topbar-search {&#13;
+    width:100% !important;&#13;
+  }&#13;
+&#13;
+  .topbar-right {&#13;
+    min-width:auto !important;&#13;
+  }&#13;
+&#13;
+  .profile-arrow {&#13;
+    display:none !important;&#13;
+  }&#13;
+&#13;
+  .interviews-content {&#13;
+    padding:18px 12px 30px !important;&#13;
+  }&#13;
+&#13;
+  .page-heading-row {&#13;
+    flex-direction:column !important;&#13;
+    align-items:flex-start !important;&#13;
+  }&#13;
+&#13;
+  .data-source-badge {&#13;
+    display:none !important;&#13;
+  }&#13;
+&#13;
+  .kpi-grid,&#13;
+  .filter-grid,&#13;
+  .detail-grid {&#13;
+    grid-template-columns:1fr !important;&#13;
+  }&#13;
+&#13;
+  .evaluation-score-grid {&#13;
+    grid-template-columns:&#13;
+      repeat(2,minmax(0,1fr)) !important;&#13;
+  }&#13;
+&#13;
+  .topbar-notification-popover {&#13;
+    right:-45px !important;&#13;
+  }&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+@media (max-width:500px) {&#13;
+&#13;
+  .evaluation-score-grid {&#13;
+    grid-template-columns:1fr 1fr !important;&#13;
+  }&#13;
+&#13;
+  .notification-popover-body {&#13;
+    padding:18px 10px !important;&#13;
+  }&#13;
+&#13;
+}</css>
+        <data_table>sp_instance</data_table>
+        <demo_data/>
+        <description/>
+        <docs/>
+        <field_list/>
+        <has_preview>false</has_preview>
+        <id>campus360_tpo_interviews_new</id>
+        <internal>false</internal>
+        <link><![CDATA[function link(scope, element, attrs, controller) {
+  
+}]]></link>
+        <name>Campus360 TPO Interviews New</name>
+        <option_schema/>
+        <public>false</public>
+        <roles/>
+        <script><![CDATA[(function() {
+
+  /* ==========================================================
+     TABLES
+     ========================================================== */
+
+  var RECRUITER_TABLE =
+    resolveTable(
+      "x_snc_campus360_recruiter_interview",
+      "recruiter_interview"
+    );
+
+  var MOCK_TABLE =
+    "x_snc_campus360_mock_interview";
+
+  var FEEDBACK_TABLE =
+    resolveTable(
+      "x_snc_campus360_interview_feedback",
+      "interview_feedback"
+    );
+
+  var STUDENT_TABLE =
+    "x_snc_campus360_student_master";
+
+  var APPLICATION_TABLE =
+    "x_snc_campus360_student_application";
+
+  var OPPORTUNITY_TABLE =
+    resolveTable(
+      "x_snc_campus360_placement_opportunity",
+      "placement_opportunity"
+    );
+
+  var COMPANY_TABLE =
+    resolveTable(
+      "x_snc_campus360_company_master",
+      "company_master"
+    );
+
+  var TRAINER_TABLE =
+    "x_snc_campus360_trainer_master";
+
+
+  /* ==========================================================
+     DATA OBJECTS
+     ========================================================== */
+
+  data.recruiterInterviews = [];
+  data.mockInterviews = [];
+
+  data.companyOptions = [];
+  data.opportunityOptions = [];
+  data.trainerOptions = [];
+
+  data.recruiterChoices = {
+    status: [
+      "Scheduled",
+      "Completed",
+      "Cancelled",
+      "Pending Result"
+    ],
+
+    mode: [
+      "Online",
+      "Offline"
+    ],
+
+    round: [
+      "Technical Round",
+      "HR Round"
+    ],
+
+    result: [
+      "Pending",
+      "Selected",
+      "Rejected",
+      "Next Round"
+    ],
+
+    evaluationStatus: [
+      "Pending",
+      "Evaluated"
+    ]
+  };
+
+
+  data.mockChoices = {
+    status: [
+      "Scheduled",
+      "In Progress",
+      "Completed",
+      "Cancelled",
+      "No Show"
+    ],
+
+    type: [
+      "Technical",
+      "HR",
+      "Behavioral",
+      "Aptitude",
+      "Communication",
+      "Domain"
+    ],
+
+    qrStatus: [
+      "Generated",
+      "Scanned",
+      "Expired",
+      "Cancelled"
+    ],
+
+    attendance: []
+  };
+
+
+  data.recruiterSummary = {
+    total: 0,
+    scheduled: 0,
+    completed: 0,
+    selected: 0
+  };
+
+
+  data.mockSummary = {
+    total: 0,
+    scheduled: 0,
+    completed: 0,
+    present: 0
+  };
+
+
+  data.sidebarCounts = {
+    students: 0,
+    companies: 0,
+    opportunities: 0,
+    applications: 0,
+    outcomes: 0,
+    risks: 0
+  };
+
+
+  /* ==========================================================
+     HELPERS
+     ========================================================== */
+
+  function resolveTable(scopedName, fallbackName) {
+
+    try {
+
+      var scoped =
+        new GlideRecord(scopedName);
+
+      if (scoped.isValid()) {
+        return scopedName;
+      }
+
+    } catch (e1) {
+      // Continue to fallback.
+    }
+
+
+    try {
+
+      var fallback =
+        new GlideRecord(fallbackName);
+
+      if (fallback.isValid()) {
+        return fallbackName;
+      }
+
+    } catch (e2) {
+      // Return scoped name.
+    }
+
+
+    return scopedName;
+
+  }
+
+
+  function hasField(gr, field) {
+
+    try {
+
+      return (
+        gr &&
+        gr.isValidField(field)
+      );
+
+    } catch (e) {
+
+      return false;
+
+    }
+
+  }
+
+
+  function getValue(gr, field) {
+
+    if (!hasField(gr, field)) {
+      return "";
+    }
+
+    try {
+
+      return gr.getValue(field) || "";
+
+    } catch (e) {
+
+      return "";
+
+    }
+
+  }
+
+
+  function getDisplay(gr, field) {
+
+    if (!hasField(gr, field)) {
+      return "";
+    }
+
+    try {
+
+      return gr.getDisplayValue(field) || "";
+
+    } catch (e) {
+
+      return "";
+
+    }
+
+  }
+
+
+  function getDateDisplay(gr, field) {
+
+    if (!hasField(gr, field)) {
+      return "";
+    }
+
+    try {
+
+      return gr.getDisplayValue(field) || "";
+
+    } catch (e) {
+
+      return "";
+
+    }
+
+  }
+
+
+  function firstNonEmpty(gr, fields) {
+
+    for (
+      var i = 0;
+      i < fields.length;
+      i++
+    ) {
+
+      var value =
+        getValue(
+          gr,
+          fields[i]
+        );
+
+      if (value) {
+        return value;
+      }
+
+    }
+
+    return "";
+
+  }
+
+
+  function firstDisplay(gr, fields) {
+
+    for (
+      var i = 0;
+      i < fields.length;
+      i++
+    ) {
+
+      var value =
+        getDisplay(
+          gr,
+          fields[i]
+        );
+
+      if (value) {
+        return value;
+      }
+
+    }
+
+    return "";
+
+  }
+
+
+  function getReferenceInfo(
+    gr,
+    field,
+    table,
+    idFields,
+    nameFields
+  ) {
+
+    var sysId =
+      getValue(gr, field);
+
+    var display =
+      getDisplay(gr, field);
+
+
+    var result = {
+
+      sys_id: sysId,
+
+      display: display,
+
+      id: display,
+
+      name: display
+
+    };
+
+
+    if (!sysId) {
+      return result;
+    }
+
+
+    try {
+
+      var ref =
+        new GlideRecord(table);
+
+
+      if (ref.get(sysId)) {
+
+        result.id =
+          firstNonEmpty(
+            ref,
+            idFields
+          ) ||
+          firstDisplay(
+            ref,
+            idFields
+          ) ||
+          display;
+
+
+        result.name =
+          firstNonEmpty(
+            ref,
+            nameFields
+          ) ||
+          firstDisplay(
+            ref,
+            nameFields
+          ) ||
+          result.id;
+
+
+        result.display =
+          display ||
+          result.id;
+
+      }
+
+    } catch (e) {
+
+      // Keep reference display.
+
+    }
+
+
+    return result;
+
+  }
+
+
+  function addUnique(
+    array,
+    value
+  ) {
+
+    if (
+      value === null ||
+      value === undefined
+    ) {
+      return;
+    }
+
+
+    value =
+      String(value).trim();
+
+
+    if (!value) {
+      return;
+    }
+
+
+    for (
+      var i = 0;
+      i < array.length;
+      i++
+    ) {
+
+      if (
+        String(array[i]).toLowerCase() ===
+        value.toLowerCase()
+      ) {
+
+        return;
+
+      }
+
+    }
+
+
+    array.push(value);
+
+  }
+
+
+  function makeOptions(
+    records,
+    valueField,
+    labelField
+  ) {
+
+    var options = [];
+    var seen = {};
+
+
+    for (
+      var i = 0;
+      i < records.length;
+      i++
+    ) {
+
+      var value =
+        records[i][valueField];
+
+      var label =
+        records[i][labelField];
+
+
+      if (!value) {
+        continue;
+      }
+
+
+      var key =
+        String(value).toLowerCase();
+
+
+      if (seen[key]) {
+        continue;
+      }
+
+
+      seen[key] = true;
+
+
+      options.push({
+
+        value: value,
+
+        label:
+          label ||
+          value
+
+      });
+
+    }
+
+
+    options.sort(
+      function(a, b) {
+
+        return String(a.label)
+          .localeCompare(
+            String(b.label)
+          );
+
+      }
+    );
+
+
+    return options;
+
+  }
+
+
+  function choiceValues(
+    records,
+    field
+  ) {
+
+    var values = [];
+
+
+    for (
+      var i = 0;
+      i < records.length;
+      i++
+    ) {
+
+      addUnique(
+        values,
+        records[i][field]
+      );
+
+    }
+
+
+    return values;
+
+  }
+
+
+  /* ==========================================================
+     COMPANY OPTIONS
+     SOURCE:
+     x_snc_campus360_company_master
+     ========================================================== */
+
+  function loadCompanyOptions() {
+
+    var gr =
+      new GlideRecord(
+        COMPANY_TABLE
+      );
+
+
+    if (!gr.isValid()) {
+      return;
+    }
+
+
+    gr.orderBy("company_name");
+
+    gr.query();
+
+
+    while (gr.next()) {
+
+      var companyId =
+        firstNonEmpty(
+          gr,
+          [
+            "company_id"
+          ]
+        );
+
+
+      var companyName =
+        firstNonEmpty(
+          gr,
+          [
+            "company_name",
+            "name"
+          ]
+        );
+
+
+      if (!companyId) {
+
+        companyId =
+          gr.getUniqueValue();
+
+      }
+
+
+      if (!companyName) {
+
+        companyName =
+          gr.getDisplayValue();
+
+      }
+
+
+      if (!companyName) {
+        continue;
+      }
+
+
+      data.companyOptions.push({
+
+        value: companyId,
+
+        label: companyName
+
+      });
+
+    }
+
+  }
+
+
+  /* ==========================================================
+     OPPORTUNITY OPTIONS
+     SOURCE:
+     x_snc_campus360_placement_opportunity
+     
+     IMPORTANT:
+     This is independent from Recruiter Interview rows.
+     Therefore Network Engineer remains available.
+     ========================================================== */
+
+  function loadOpportunityOptions() {
+
+    var gr =
+      new GlideRecord(
+        OPPORTUNITY_TABLE
+      );
+
+
+    if (!gr.isValid()) {
+      return;
+    }
+
+
+    gr.orderBy("opportunity_title");
+
+    gr.query();
+
+
+    while (gr.next()) {
+
+      var opportunityId =
+        firstNonEmpty(
+          gr,
+          [
+            "opportunity_id"
+          ]
+        );
+
+
+      var opportunityTitle =
+        firstNonEmpty(
+          gr,
+          [
+            "opportunity_title",
+            "title",
+            "name"
+          ]
+        );
+
+
+      if (!opportunityId) {
+
+        opportunityId =
+          gr.getUniqueValue();
+
+      }
+
+
+      if (!opportunityTitle) {
+
+        opportunityTitle =
+          gr.getDisplayValue();
+
+      }
+
+
+      if (!opportunityTitle) {
+        continue;
+      }
+
+
+      data.opportunityOptions.push({
+
+        value:
+          gr.getUniqueValue(),
+
+        id:
+          opportunityId,
+
+        label:
+          opportunityTitle
+
+      });
+
+    }
+
+  }
+
+
+  /* ==========================================================
+     TRAINER OPTIONS
+     SOURCE:
+     x_snc_campus360_trainer_master
+     ========================================================== */
+
+  function loadTrainerOptions() {
+
+    var gr =
+      new GlideRecord(
+        TRAINER_TABLE
+      );
+
+
+    if (!gr.isValid()) {
+      return;
+    }
+
+
+    gr.orderBy("trainer_name");
+
+    gr.query();
+
+
+    while (gr.next()) {
+
+      var trainerId =
+        firstNonEmpty(
+          gr,
+          [
+            "trainer_id"
+          ]
+        );
+
+
+      var trainerName =
+        firstNonEmpty(
+          gr,
+          [
+            "trainer_name",
+            "name"
+          ]
+        );
+
+
+      if (!trainerId) {
+
+        trainerId =
+          gr.getUniqueValue();
+
+      }
+
+
+      if (!trainerName) {
+
+        trainerName =
+          gr.getDisplayValue();
+
+      }
+
+
+      if (!trainerName) {
+        continue;
+      }
+
+
+      data.trainerOptions.push({
+
+        value:
+          gr.getUniqueValue(),
+
+        id:
+          trainerId,
+
+        label:
+          trainerName
+
+      });
+
+    }
+
+  }
+
+
+  /* ==========================================================
+     RECRUITER INTERVIEWS
+     ========================================================== */
+
+  function loadRecruiterInterviews() {
+
+    var gr =
+      new GlideRecord(
+        RECRUITER_TABLE
+      );
+
+
+    if (!gr.isValid()) {
+      return;
+    }
+
+
+    if (
+      hasField(
+        gr,
+        "interview_date"
+      )
+    ) {
+
+      gr.orderByDesc(
+        "interview_date"
+      );
+
+    }
+
+
+    gr.query();
+
+
+    while (gr.next()) {
+
+
+      /* APPLICATION */
+
+      var application =
+        getReferenceInfo(
+          gr,
+          "application",
+          APPLICATION_TABLE,
+          [
+            "application_id",
+            "number"
+          ],
+          [
+            "application_id",
+            "number"
+          ]
+        );
+
+
+      /* STUDENT */
+
+      var student =
+        getReferenceInfo(
+          gr,
+          "student",
+          STUDENT_TABLE,
+          [
+            "student_id"
+          ],
+          [
+            "student_name"
+          ]
+        );
+
+
+      /* OPPORTUNITY */
+
+      var opportunity =
+        getReferenceInfo(
+          gr,
+          "opportunity",
+          OPPORTUNITY_TABLE,
+          [
+            "opportunity_id"
+          ],
+          [
+            "opportunity_title"
+          ]
+        );
+
+
+      /* COMPANY */
+
+      var companyName = "";
+
+
+      if (
+        opportunity.sys_id
+      ) {
+
+        try {
+
+          var opportunityRecord =
+            new GlideRecord(
+              OPPORTUNITY_TABLE
+            );
+
+
+          if (
+            opportunityRecord.get(
+              opportunity.sys_id
+            )
+          ) {
+
+            companyName =
+              getDisplay(
+                opportunityRecord,
+                "company"
+              );
+
+
+            if (
+              !companyName
+            ) {
+
+              var companyRef =
+                getReferenceInfo(
+                  opportunityRecord,
+                  "company",
+                  COMPANY_TABLE,
+                  [
+                    "company_id"
+                  ],
+                  [
+                    "company_name"
+                  ]
+                );
+
+
+              companyName =
+                companyRef.name ||
+                companyRef.display;
+
+            }
+
+          }
+
+        } catch (e) {
+
+          companyName = "";
+
+        }
+
+      }
+
+
+      if (!companyName) {
+
+        companyName =
+          getDisplay(
+            gr,
+            "company"
+          );
+
+      }
+
+
+      var item = {
+
+        sys_id:
+          gr.getUniqueValue(),
+
+        interviewId:
+          getValue(
+            gr,
+            "interview_id"
+          ),
+
+        application:
+          application.id ||
+          application.display,
+
+        applicationSysId:
+          application.sys_id,
+
+        student:
+          student.id ||
+          student.display,
+
+        studentName:
+          student.name ||
+          student.display,
+
+        studentSysId:
+          student.sys_id,
+
+        opportunity:
+          opportunity.id ||
+          opportunity.display,
+
+        opportunityTitle:
+          opportunity.name ||
+          opportunity.display,
+
+        opportunitySysId:
+          opportunity.sys_id,
+
+        company:
+          companyName,
+
+        interviewRound:
+          getDisplay(
+            gr,
+            "interview_round"
+          ),
+
+        status:
+          getDisplay(
+            gr,
+            "status"
+          ),
+
+        interviewMode:
+          getDisplay(
+            gr,
+            "interview_mode"
+          ),
+
+        interviewer:
+          getValue(
+            gr,
+            "interviewer"
+          ),
+
+        meetingLink:
+          getValue(
+            gr,
+            "meeting_link"
+          ),
+
+        result:
+          getDisplay(
+            gr,
+            "result"
+          ),
+
+        interviewDate:
+          getValue(
+            gr,
+            "interview_date"
+          ),
+
+        interviewDateDisplay:
+          getDateDisplay(
+            gr,
+            "interview_date"
+          ),
+
+        feedback:
+          getValue(
+            gr,
+            "feedback"
+          ),
+
+        codingScore:
+          getValue(
+            gr,
+            "coding_score"
+          ),
+
+        technicalScore:
+          getValue(
+            gr,
+            "technical_score"
+          ),
+
+        problemSolvingScore:
+          getValue(
+            gr,
+            "problem_solving_score"
+          ),
+
+        communicationScore:
+          getValue(
+            gr,
+            "communication_score"
+          ),
+
+        confidenceScore:
+          getValue(
+            gr,
+            "confidence_score"
+          ),
+
+        overallScore:
+          getValue(
+            gr,
+            "overall_score"
+          ),
+
+        recommendation:
+          getDisplay(
+            gr,
+            "recommendation"
+          ),
+
+        evaluationFeedback:
+          getValue(
+            gr,
+            "evaluation_feedback"
+          ),
+
+        evaluationStatus:
+          getDisplay(
+            gr,
+            "evaluation_status"
+          )
+
+      };
+
+
+      data.recruiterInterviews.push(
+        item
+      );
+
+    }
+
+  }
+
+
+  /* ==========================================================
+     MOCK INTERVIEWS
+     ========================================================== */
+
+  function loadMockInterviews() {
+
+    var gr =
+      new GlideRecord(
+        MOCK_TABLE
+      );
+
+
+    if (!gr.isValid()) {
+      return;
+    }
+
+
+    if (
+      hasField(
+        gr,
+        "interview_date"
+      )
+    ) {
+
+      gr.orderByDesc(
+        "interview_date"
+      );
+
+    }
+
+
+    gr.query();
+
+
+    while (gr.next()) {
+
+
+      var student =
+        getReferenceInfo(
+          gr,
+          "student",
+          STUDENT_TABLE,
+          [
+            "student_id"
+          ],
+          [
+            "student_name"
+          ]
+        );
+
+
+      var trainer =
+        getReferenceInfo(
+          gr,
+          "trainer",
+          TRAINER_TABLE,
+          [
+            "trainer_id"
+          ],
+          [
+            "trainer_name"
+          ]
+        );
+
+
+      var item = {
+
+        sys_id:
+          gr.getUniqueValue(),
+
+        interviewId:
+          getValue(
+            gr,
+            "interview_id"
+          ),
+
+        student:
+          student.id ||
+          student.display,
+
+        studentName:
+          student.name ||
+          student.display,
+
+        studentSysId:
+          student.sys_id,
+
+        trainer:
+          trainer.id ||
+          trainer.display,
+
+        trainerName:
+          trainer.name ||
+          trainer.display,
+
+        trainerSysId:
+          trainer.sys_id,
+
+        interviewType:
+          getDisplay(
+            gr,
+            "interview_type"
+          ),
+
+        interviewStatus:
+          getDisplay(
+            gr,
+            "interview_status"
+          ),
+
+        attendanceStatus:
+          getDisplay(
+            gr,
+            "attendance_status"
+          ),
+
+        interviewDate:
+          getValue(
+            gr,
+            "interview_date"
+          ),
+
+        interviewDateDisplay:
+          getDateDisplay(
+            gr,
+            "interview_date"
+          ),
+
+        startTime:
+          getDisplay(
+            gr,
+            "start_time"
+          ),
+
+        endTime:
+          getDisplay(
+            gr,
+            "end_time"
+          ),
+
+        qrCode:
+          getValue(
+            gr,
+            "qr_code"
+          ),
+
+        qrStatus:
+          getDisplay(
+            gr,
+            "qr_status"
+          ),
+
+        qrUrl:
+          getValue(
+            gr,
+            "qr_url"
+          ),
+
+        slotRequest:
+          getDisplay(
+            gr,
+            "slot_request"
+          ),
+
+        feedback:
+          null
+
+      };
+
+
+      /* ======================================================
+         MOCK FEEDBACK
+         SOURCE:
+         x_snc_campus360_interview_feedback
+         ====================================================== */
+
+      if (
+        item.sys_id &&
+        FEEDBACK_TABLE
+      ) {
+
+        try {
+
+          var feedback =
+            new GlideRecord(
+              FEEDBACK_TABLE
+            );
+
+
+          if (
+            feedback.isValid() &&
+            hasField(
+              feedback,
+              "interview"
+            )
+          ) {
+
+            feedback.addQuery(
+              "interview",
+              item.sys_id
+            );
+
+
+            if (
+              hasField(
+                feedback,
+                "feedback_date"
+              )
+            ) {
+
+              feedback.orderByDesc(
+                "feedback_date"
+              );
+
+            }
+
+
+            feedback.setLimit(1);
+
+            feedback.query();
+
+
+            if (feedback.next()) {
+
+              item.feedback = {
+
+                feedbackId:
+                  getValue(
+                    feedback,
+                    "feedback_id"
+                  ),
+
+                feedbackDate:
+                  getDateDisplay(
+                    feedback,
+                    "feedback_date"
+                  ),
+
+                technicalScore:
+                  getValue(
+                    feedback,
+                    "technical_score"
+                  ),
+
+                communicationScore:
+                  getValue(
+                    feedback,
+                    "communication_score"
+                  ),
+
+                problemSolvingScore:
+                  getValue(
+                    feedback,
+                    "problem_solving_score"
+                  ),
+
+                overallScore:
+                  getValue(
+                    feedback,
+                    "overall_score"
+                  ),
+
+                recommendation:
+                  getValue(
+                    feedback,
+                    "recommendation"
+                  ),
+
+                strengths:
+                  getValue(
+                    feedback,
+                    "strengths"
+                  ),
+
+                improvementAreas:
+                  getValue(
+                    feedback,
+                    "improvement_areas"
+                  )
+
+              };
+
+            }
+
+          }
+
+        } catch (e) {
+
+          item.feedback = null;
+
+        }
+
+      }
+
+
+      data.mockInterviews.push(
+        item
+      );
+
+    }
+
+  }
+
+
+  /* ==========================================================
+     SUMMARY
+     ========================================================== */
+
+  function buildRecruiterSummary() {
+
+    var rows =
+      data.recruiterInterviews;
+
+
+    data.recruiterSummary.total =
+      rows.length;
+
+
+    for (
+      var i = 0;
+      i < rows.length;
+      i++
+    ) {
+
+      var status =
+        String(
+          rows[i].status || ""
+        )
+        .toLowerCase();
+
+
+      var result =
+        String(
+          rows[i].result || ""
+        )
+        .toLowerCase();
+
+
+      if (
+        status === "scheduled"
+      ) {
+
+        data.recruiterSummary.scheduled++;
+
+      }
+
+
+      if (
+        status === "completed"
+      ) {
+
+        data.recruiterSummary.completed++;
+
+      }
+
+
+      if (
+        result === "selected"
+      ) {
+
+        data.recruiterSummary.selected++;
+
+      }
+
+    }
+
+  }
+
+
+  function buildMockSummary() {
+
+    var rows =
+      data.mockInterviews;
+
+
+    data.mockSummary.total =
+      rows.length;
+
+
+    for (
+      var i = 0;
+      i < rows.length;
+      i++
+    ) {
+
+      var status =
+        String(
+          rows[i].interviewStatus || ""
+        )
+        .toLowerCase();
+
+
+      var attendance =
+        String(
+          rows[i].attendanceStatus || ""
+        )
+        .toLowerCase();
+
+
+      if (
+        status === "scheduled"
+      ) {
+
+        data.mockSummary.scheduled++;
+
+      }
+
+
+      if (
+        status === "completed"
+      ) {
+
+        data.mockSummary.completed++;
+
+      }
+
+
+      if (
+        attendance === "present"
+      ) {
+
+        data.mockSummary.present++;
+
+      }
+
+    }
+
+  }
+
+
+  /* ==========================================================
+     CHOICE VALUES
+     
+     These are based on the exact values supplied by you.
+     ========================================================== */
+
+  function buildChoiceLists() {
+
+    data.recruiterChoices = {
+
+      status: [
+        "Scheduled",
+        "Completed",
+        "Cancelled",
+        "Pending Result"
+      ],
+
+      mode: [
+        "Online",
+        "Offline"
+      ],
+
+      round: [
+        "Technical Round",
+        "HR Round"
+      ],
+
+      result: [
+        "Pending",
+        "Selected",
+        "Rejected",
+        "Next Round"
+      ],
+
+      evaluationStatus: [
+        "Pending",
+        "Evaluated"
+      ]
+
+    };
+
+
+    data.mockChoices = {
+
+      status: [
+        "Scheduled",
+        "In Progress",
+        "Completed",
+        "Cancelled",
+        "No Show"
+      ],
+
+      type: [
+        "Technical",
+        "HR",
+        "Behavioral",
+        "Aptitude",
+        "Communication",
+        "Domain"
+      ],
+
+      qrStatus: [
+        "Generated",
+        "Scanned",
+        "Expired",
+        "Cancelled"
+      ],
+
+      attendance:
+        choiceValues(
+          data.mockInterviews,
+          "attendanceStatus"
+        )
+
+    };
+
+  }
+
+
+  /* ==========================================================
+     SIDEBAR COUNTS
+     ========================================================== */
+
+  function buildSidebarCounts() {
+
+    try {
+
+      var gr =
+        new GlideRecord(
+          STUDENT_TABLE
+        );
+
+      if (gr.isValid()) {
+
+        gr.query();
+
+        while (gr.next()) {
+          data.sidebarCounts.students++;
+        }
+
+      }
+
+    } catch (e1) {}
+
+
+    try {
+
+      var gr2 =
+        new GlideRecord(
+          COMPANY_TABLE
+        );
+
+      if (gr2.isValid()) {
+
+        gr2.query();
+
+        while (gr2.next()) {
+          data.sidebarCounts.companies++;
+        }
+
+      }
+
+    } catch (e2) {}
+
+
+    try {
+
+      var gr3 =
+        new GlideRecord(
+          OPPORTUNITY_TABLE
+        );
+
+      if (gr3.isValid()) {
+
+        gr3.query();
+
+        while (gr3.next()) {
+          data.sidebarCounts.opportunities++;
+        }
+
+      }
+
+    } catch (e3) {}
+
+
+    try {
+
+      var gr4 =
+        new GlideRecord(
+          APPLICATION_TABLE
+        );
+
+      if (gr4.isValid()) {
+
+        gr4.query();
+
+        while (gr4.next()) {
+          data.sidebarCounts.applications++;
+        }
+
+      }
+
+    } catch (e4) {}
+
+  }
+
+
+  /* ==========================================================
+     EXECUTION
+     ========================================================== */
+
+  loadCompanyOptions();
+
+  loadOpportunityOptions();
+
+  loadTrainerOptions();
+
+  loadRecruiterInterviews();
+
+  loadMockInterviews();
+
+  buildChoiceLists();
+
+  buildRecruiterSummary();
+
+  buildMockSummary();
+
+  buildSidebarCounts();
+
+
+  /* ==========================================================
+     SAFETY / ERROR INFO
+     ========================================================== */
+
+  data.tableInfo = {
+
+    recruiter:
+      RECRUITER_TABLE,
+
+    mock:
+      MOCK_TABLE,
+
+    feedback:
+      FEEDBACK_TABLE,
+
+    student:
+      STUDENT_TABLE,
+
+    application:
+      APPLICATION_TABLE,
+
+    opportunity:
+      OPPORTUNITY_TABLE,
+
+    company:
+      COMPANY_TABLE,
+
+    trainer:
+      TRAINER_TABLE
+
+  };
+
+
+})();
+(function() {
+    var tpoGR = new GlideRecord('x_snc_campus360_campus360_tpo_profile');
+    tpoGR.query();
+    if (tpoGR.next()) {
+        data.tpoName = tpoGR.getValue('tpo_name') || 'MD Ali';
+        data.tpoInitials = 'MA';
+        data.tpoTitle = tpoGR.getValue('designation') || 'Training & Placement Officer';
+        data.tpoOffice = tpoGR.getValue('college_name') || 'CMR Institute of Technology';
+    } else {
+        data.tpoName = 'MD Ali';
+        data.tpoInitials = 'MA';
+        data.tpoTitle = 'TPO';
+        data.tpoOffice = 'Training & Placement Office';
+    }
+})();
+
+
+(function() {
+    var tpoGR = new GlideRecord('x_snc_campus360_campus360_tpo_profile');
+    tpoGR.query();
+    var name = 'MD Ali';
+    var title = 'Training & Placement Officer';
+    var office = 'CMR Institute of Technology';
+    if (tpoGR.next()) {
+        name = tpoGR.getValue('tpo_name') || 'MD Ali';
+        title = tpoGR.getValue('designation') || title;
+        office = tpoGR.getValue('college_name') || office;
+    }
+    data.tpo = {
+        name: name,
+        firstName: name,
+        initials: 'MA',
+        title: title,
+        office: office
+    };
+    data.tpoName = name;
+    data.tpoInitials = 'MA';
+})();
+
+
+data.aiWidget = $sp.getWidget('c4ae634574e703107f4410c9fee0cde5');
+]]></script>
+        <servicenow>false</servicenow>
+        <sys_class_name>sp_widget</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-28 10:23:25</sys_created_on>
+        <sys_id>340aa066442f03107f44301daf56c713</sys_id>
+        <sys_mod_count>32</sys_mod_count>
+        <sys_name>Campus360 TPO Interviews New</sys_name>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name>sp_widget_340aa066442f03107f44301daf56c713</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-10-01 11:04:14</sys_updated_on>
+        <template><![CDATA[<div class="campus360-interviews-app"
+     ng-class="{'sidebar-collapsed': c.sidebarCollapsed}">
+
+  <div class="interviews-shell">
+
+    <!-- =====================================================
+         LEFT SIDEBAR
+         ===================================================== -->
+
+    <aside class="interviews-sidebar">
+
+      <div class="sidebar-brand">
+        <div class="brand-icon">C</div>
+
+        <div class="brand-copy">
+          <div class="brand-title">Campus360</div>
+          <div class="brand-subtitle">TPO PORTAL</div>
+        </div>
+      </div>
+
+
+      <div class="tpo-card">
+
+        <div class="tpo-avatar">
+          MA
+        </div>
+
+        <div class="tpo-copy">
+
+          <div class="tpo-name">
+            MD Ali
+          </div>
+
+          <div class="tpo-role">
+            TPO
+          </div>
+
+          <div class="tpo-description">
+            Training &amp; Placement Office
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- OVERVIEW -->
+
+      <div class="sidebar-section-title">
+        OVERVIEW
+      </div>
+
+      <button
+        type="button"
+        class="sidebar-nav-item"
+        ng-click="c.goTo('campus360_tpo_home')">
+
+        <span class="sidebar-icon">⌂</span>
+        <span class="sidebar-label">Dashboard</span>
+
+      </button>
+
+
+      <!-- STUDENTS -->
+
+      <div class="sidebar-section-title">
+        STUDENTS
+      </div>
+
+      <button
+        type="button"
+        class="sidebar-nav-item"
+        ng-click="c.goTo('campus360_tpo_student_management')">
+
+        <span class="sidebar-icon">♙</span>
+        <span class="sidebar-label">Students</span>
+
+        <span
+          class="sidebar-count"
+          ng-if="c.data.sidebarCounts.students">
+
+          {{c.data.sidebarCounts.students}}
+
+        </span>
+
+      </button>
+
+
+      <button
+        type="button"
+        class="sidebar-nav-item"
+        ng-click="c.goTo('campus360_tpo_skill_intelligence_new')">
+
+        <span class="sidebar-icon">✧</span>
+        <span class="sidebar-label">Skill Intelligence</span>
+
+      </button>
+
+
+      <button
+        type="button"
+        class="sidebar-nav-item"
+        ng-click="c.goTo('student_assessments_new')">
+
+        <span class="sidebar-icon">▤</span>
+        <span class="sidebar-label">Assessments</span>
+
+      </button>
+
+
+      <!-- PLACEMENTS -->
+
+      <div class="sidebar-section-title">
+        PLACEMENTS
+      </div>
+
+
+      <button
+        type="button"
+        class="sidebar-nav-item"
+        ng-click="c.goTo('campus360_tpo_companies_new')">
+
+        <span class="sidebar-icon">▦</span>
+        <span class="sidebar-label">Companies</span>
+
+        <span
+          class="sidebar-count"
+          ng-if="c.data.sidebarCounts.companies">
+
+          {{c.data.sidebarCounts.companies}}
+
+        </span>
+
+      </button>
+
+
+      <button
+        type="button"
+        class="sidebar-nav-item"
+        ng-click="c.goTo('campus360_tpo_opportunities_new')">
+
+        <span class="sidebar-icon">◇</span>
+        <span class="sidebar-label">Opportunities</span>
+
+        <span
+          class="sidebar-count"
+          ng-if="c.data.sidebarCounts.opportunities">
+
+          {{c.data.sidebarCounts.opportunities}}
+
+        </span>
+
+      </button>
+
+
+      <button
+        type="button"
+        class="sidebar-nav-item"
+        ng-click="c.goTo('campus360_tpo_application_new')">
+
+        <span class="sidebar-icon">▤</span>
+        <span class="sidebar-label">Applications</span>
+
+        <span
+          class="sidebar-count"
+          ng-if="c.data.sidebarCounts.applications">
+
+          {{c.data.sidebarCounts.applications}}
+
+        </span>
+
+      </button>
+
+
+      <button
+        type="button"
+        class="sidebar-nav-item active">
+
+        <span class="sidebar-icon">⊙</span>
+        <span class="sidebar-label">Interviews</span>
+
+      </button>
+
+
+      <button
+        type="button"
+        class="sidebar-nav-item"
+        ng-click="c.goTo('campus360_tpo_placement_outcomes')">
+
+        <span class="sidebar-icon">✓</span>
+        <span class="sidebar-label">Placement Outcomes</span>
+
+        <span
+          class="sidebar-count green"
+          ng-if="c.data.sidebarCounts.outcomes">
+
+          {{c.data.sidebarCounts.outcomes}}
+
+        </span>
+
+      </button>
+
+
+      <!-- TRAINING -->
+
+      <div class="sidebar-section-title">
+        TRAINING
+      </div>
+
+
+      <button
+        type="button"
+        class="sidebar-nav-item"
+        ng-click="c.goTo('campus360_tpo_training_programs')">
+
+        <span class="sidebar-icon">✧</span>
+        <span class="sidebar-label">Training Programs</span>
+
+      </button>
+
+    </aside>
+
+
+    <!-- =====================================================
+         MAIN AREA
+         ===================================================== -->
+
+    <main class="interviews-main">
+
+
+      <!-- ===================================================
+           TOP NAVBAR
+           =================================================== -->
+
+      <header class="interviews-topbar">
+
+        <div class="topbar-left">
+
+          <button
+            type="button"
+            class="sidebar-toggle"
+            ng-click="c.toggleSidebar()"
+            title="Toggle Sidebar"
+            aria-label="Toggle Sidebar">
+
+            <i class="fa fa-bars"></i>
+
+          </button>
+
+
+          <div class="topbar-title-block">
+
+            <div class="topbar-eyebrow">
+              CAMPUS360 TPO
+            </div>
+
+            <div class="topbar-title">
+              Interview Management
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- CENTER SEARCH -->
+
+        <div class="topbar-center">
+
+          <div class="topbar-search">
+
+            <i class="fa fa-search"></i>
+
+            <input
+              type="text"
+              ng-model="c.topbarSearch"
+              ng-change="c.applyTopbarSearch()"
+              placeholder="Search interviews, students, companies..."
+              aria-label="Search interviews">
+
+          </div>
+
+        </div>
+
+
+        <!-- RIGHT -->
+
+        <div class="topbar-right">
+
+          <!-- REFRESH -->
+
+          <button
+            type="button"
+            class="topbar-circle-button"
+            ng-click="c.refreshData()"
+            ng-disabled="c.loading"
+            title="Refresh"
+            aria-label="Refresh">
+
+            <i
+              class="fa fa-refresh"
+              ng-class="{'fa-spin': c.loading}">
+            </i>
+
+          </button>
+
+
+          <!-- NOTIFICATION -->
+
+          <div class="topbar-notification-wrap">
+
+            <button
+              type="button"
+              class="topbar-circle-button notification-button"
+              ng-click="c.toggleNotifications($event)"
+              title="Notifications"
+              aria-label="Notifications">
+
+              <i class="fa fa-bell-o"></i>
+
+              <span
+                class="notification-dot"
+                ng-if="c.notificationCount > 0">
+
+                {{c.notificationCount > 99
+                  ? '99+'
+                  : c.notificationCount}}
+
+              </span>
+
+            </button>
+
+
+            <div
+              class="topbar-notification-popover"
+              ng-if="c.showNotifications"
+              ng-click="$event.stopPropagation()">
+
+              <div class="notification-popover-header">
+
+                <strong>
+                  Notifications
+                </strong>
+
+                <span>
+                  {{c.notificationCount || 0}}
+                </span>
+
+              </div>
+
+
+              <div class="notification-popover-body">
+
+                <i class="fa fa-bell-o"></i>
+
+                <strong>
+                  Interview Updates
+                </strong>
+
+                <p>
+                  No new interview notifications.
+                </p>
+
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <!-- PROFILE -->
+
+          <div class="topbar-profile">
+
+            <div class="topbar-avatar">
+              MA
+            </div>
+
+            <div class="topbar-profile-text">
+
+              <div class="topbar-profile-name">
+                MD Ali
+              </div>
+
+              <div class="topbar-profile-role">
+                Training &amp; Placement Officer
+              </div>
+
+            </div>
+
+            <i class="fa fa-angle-down profile-arrow"></i>
+
+          </div>
+
+        </div>
+
+      </header>
+
+
+      <!-- ===================================================
+           CONTENT
+           =================================================== -->
+
+      <div class="interviews-content">
+
+
+        <!-- PAGE HEADER -->
+
+        <div class="page-heading-row">
+
+          <div>
+
+            <div class="page-eyebrow">
+              INTERVIEW OPERATIONS
+            </div>
+
+            <h1>
+              Interviews
+            </h1>
+
+            <p class="page-description">
+              Review recruiter interviews, mock interviews and
+              recorded interview feedback from your Campus360 data.
+            </p>
+
+          </div>
+
+
+          <div class="data-source-badge">
+            ▤&nbsp; Original ServiceNow Data
+          </div>
+
+        </div>
+
+
+        <!-- TABS -->
+
+        <div class="interview-tabs">
+
+          <button
+            type="button"
+            class="interview-tab recruiter-tab"
+            ng-class="{'active': c.activeTab === 'recruiter'}"
+            ng-click="c.setTab('recruiter')">
+
+            <span class="tab-icon">
+              ▣
+            </span>
+
+            <span>
+              Recruiter Interviews
+            </span>
+
+            <span class="tab-count">
+              {{c.data.recruiterInterviews.length}}
+            </span>
+
+          </button>
+
+
+          <button
+            type="button"
+            class="interview-tab mock-tab"
+            ng-class="{'active': c.activeTab === 'mock'}"
+            ng-click="c.setTab('mock')">
+
+            <span class="tab-icon">
+              ●
+            </span>
+
+            <span>
+              Mock Interviews
+            </span>
+
+            <span class="tab-count">
+              {{c.data.mockInterviews.length}}
+            </span>
+
+          </button>
+
+        </div>
+
+
+        <!-- RECRUITER KPI -->
+
+        <div
+          class="kpi-grid"
+          ng-if="c.activeTab === 'recruiter'">
+
+          <div class="kpi-card kpi-blue">
+
+            <div class="kpi-icon blue">
+              ▣
+            </div>
+
+            <div>
+
+              <div class="kpi-label">
+                TOTAL INTERVIEWS
+              </div>
+
+              <div class="kpi-value">
+                {{c.data.recruiterSummary.total}}
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <div class="kpi-card kpi-orange">
+
+            <div class="kpi-icon orange">
+              ◷
+            </div>
+
+            <div>
+
+              <div class="kpi-label">
+                SCHEDULED
+              </div>
+
+              <div class="kpi-value">
+                {{c.data.recruiterSummary.scheduled}}
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <div class="kpi-card kpi-green">
+
+            <div class="kpi-icon green">
+              ●
+            </div>
+
+            <div>
+
+              <div class="kpi-label">
+                COMPLETED
+              </div>
+
+              <div class="kpi-value">
+                {{c.data.recruiterSummary.completed}}
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <div class="kpi-card kpi-purple">
+
+            <div class="kpi-icon purple">
+              ★
+            </div>
+
+            <div>
+
+              <div class="kpi-label">
+                SELECTED
+              </div>
+
+              <div class="kpi-value">
+                {{c.data.recruiterSummary.selected}}
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- MOCK KPI -->
+
+        <div
+          class="kpi-grid"
+          ng-if="c.activeTab === 'mock'">
+
+          <div class="kpi-card kpi-blue">
+
+            <div class="kpi-icon blue">
+              ▣
+            </div>
+
+            <div>
+
+              <div class="kpi-label">
+                TOTAL MOCK INTERVIEWS
+              </div>
+
+              <div class="kpi-value">
+                {{c.data.mockSummary.total}}
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <div class="kpi-card kpi-orange">
+
+            <div class="kpi-icon orange">
+              ◷
+            </div>
+
+            <div>
+
+              <div class="kpi-label">
+                SCHEDULED
+              </div>
+
+              <div class="kpi-value">
+                {{c.data.mockSummary.scheduled}}
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <div class="kpi-card kpi-green">
+
+            <div class="kpi-icon green">
+              ●
+            </div>
+
+            <div>
+
+              <div class="kpi-label">
+                COMPLETED
+              </div>
+
+              <div class="kpi-value">
+                {{c.data.mockSummary.completed}}
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <div class="kpi-card kpi-purple">
+
+            <div class="kpi-icon purple">
+              ✓
+            </div>
+
+            <div>
+
+              <div class="kpi-label">
+                PRESENT
+              </div>
+
+              <div class="kpi-value">
+                {{c.data.mockSummary.present}}
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- RECRUITER FILTERS -->
+
+        <div
+          class="filter-card"
+          ng-if="c.activeTab === 'recruiter'">
+
+          <div class="section-heading-row">
+
+            <div>
+
+              <div class="section-eyebrow">
+                RECRUITER INTERVIEWS
+              </div>
+
+              <h2>
+                Interview Filters
+              </h2>
+
+              <p>
+                Filter the actual Recruiter Interview records.
+              </p>
+
+            </div>
+
+
+            <button
+              type="button"
+              class="clear-filter-button"
+              ng-click="c.clearRecruiterFilters()">
+
+              ×&nbsp; Clear Filters
+
+            </button>
+
+          </div>
+
+
+          <div class="filter-grid recruiter-filter-grid">
+
+            <div class="filter-field">
+
+              <label>
+                Search
+              </label>
+
+              <div class="input-with-icon">
+
+                <span>
+                  ⌕
+                </span>
+
+                <input
+                  type="text"
+                  ng-model="c.recruiterFilters.search"
+                  ng-change="c.applyRecruiterFilters()"
+                  placeholder="Interview ID, student, company, opportunity...">
+
+              </div>
+
+            </div>
+
+
+            <div class="filter-field">
+
+              <label>
+                Company
+              </label>
+
+              <select
+                ng-model="c.recruiterFilters.company"
+                ng-change="c.applyRecruiterFilters()">
+
+                <option value="">
+                  All Companies
+                </option>
+
+                <option
+                  ng-repeat="company in c.data.companyOptions track by company.value"
+                  value="{{company.value}}">
+
+                  {{company.label}}
+
+                </option>
+
+              </select>
+
+            </div>
+
+
+            <div class="filter-field">
+
+              <label>
+                Opportunity
+              </label>
+
+              <select
+                ng-model="c.recruiterFilters.opportunity"
+                ng-change="c.applyRecruiterFilters()">
+
+                <option value="">
+                  All Opportunities
+                </option>
+
+                <option
+                  ng-repeat="opportunity in c.data.opportunityOptions track by opportunity.value"
+                  value="{{opportunity.value}}">
+
+                  {{opportunity.label}}
+
+                </option>
+
+              </select>
+
+            </div>
+
+
+            <div class="filter-field">
+
+              <label>
+                Status
+              </label>
+
+              <select
+                ng-model="c.recruiterFilters.status"
+                ng-change="c.applyRecruiterFilters()">
+
+                <option value="">
+                  All Statuses
+                </option>
+
+                <option
+                  ng-repeat="item in c.data.recruiterChoices.status"
+                  value="{{item}}">
+
+                  {{item}}
+
+                </option>
+
+              </select>
+
+            </div>
+
+
+            <div class="filter-field">
+
+              <label>
+                Interview Mode
+              </label>
+
+              <select
+                ng-model="c.recruiterFilters.mode"
+                ng-change="c.applyRecruiterFilters()">
+
+                <option value="">
+                  All Modes
+                </option>
+
+                <option
+                  ng-repeat="item in c.data.recruiterChoices.mode"
+                  value="{{item}}">
+
+                  {{item}}
+
+                </option>
+
+              </select>
+
+            </div>
+
+
+            <div class="filter-field">
+
+              <label>
+                Interview Round
+              </label>
+
+              <select
+                ng-model="c.recruiterFilters.round"
+                ng-change="c.applyRecruiterFilters()">
+
+                <option value="">
+                  All Rounds
+                </option>
+
+                <option
+                  ng-repeat="item in c.data.recruiterChoices.round"
+                  value="{{item}}">
+
+                  {{item}}
+
+                </option>
+
+              </select>
+
+            </div>
+
+
+            <div class="filter-field">
+
+              <label>
+                Result
+              </label>
+
+              <select
+                ng-model="c.recruiterFilters.result"
+                ng-change="c.applyRecruiterFilters()">
+
+                <option value="">
+                  All Results
+                </option>
+
+                <option
+                  ng-repeat="item in c.data.recruiterChoices.result"
+                  value="{{item}}">
+
+                  {{item}}
+
+                </option>
+
+              </select>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- MOCK FILTERS -->
+
+        <div
+          class="filter-card"
+          ng-if="c.activeTab === 'mock'">
+
+          <div class="section-heading-row">
+
+            <div>
+
+              <div class="section-eyebrow">
+                MOCK INTERVIEWS
+              </div>
+
+              <h2>
+                Mock Interview Filters
+              </h2>
+
+              <p>
+                Filter the actual Mock Interview records.
+              </p>
+
+            </div>
+
+
+            <button
+              type="button"
+              class="clear-filter-button"
+              ng-click="c.clearMockFilters()">
+
+              ×&nbsp; Clear Filters
+
+            </button>
+
+          </div>
+
+
+          <div class="filter-grid mock-filter-grid">
+
+            <div class="filter-field">
+
+              <label>
+                Search
+              </label>
+
+              <div class="input-with-icon">
+
+                <span>
+                  ⌕
+                </span>
+
+                <input
+                  type="text"
+                  ng-model="c.mockFilters.search"
+                  ng-change="c.applyMockFilters()"
+                  placeholder="Interview ID, student, trainer...">
+
+              </div>
+
+            </div>
+
+
+            <div class="filter-field">
+
+              <label>
+                Interview Status
+              </label>
+
+              <select
+                ng-model="c.mockFilters.status"
+                ng-change="c.applyMockFilters()">
+
+                <option value="">
+                  All Interview Statuses
+                </option>
+
+                <option
+                  ng-repeat="item in c.data.mockChoices.status"
+                  value="{{item}}">
+
+                  {{item}}
+
+                </option>
+
+              </select>
+
+            </div>
+
+
+            <div class="filter-field">
+
+              <label>
+                Interview Type
+              </label>
+
+              <select
+                ng-model="c.mockFilters.type"
+                ng-change="c.applyMockFilters()">
+
+                <option value="">
+                  All Interview Types
+                </option>
+
+                <option
+                  ng-repeat="item in c.data.mockChoices.type"
+                  value="{{item}}">
+
+                  {{item}}
+
+                </option>
+
+              </select>
+
+            </div>
+
+
+            <div class="filter-field">
+
+              <label>
+                Attendance Status
+              </label>
+
+              <select
+                ng-model="c.mockFilters.attendance"
+                ng-change="c.applyMockFilters()">
+
+                <option value="">
+                  All Attendance Statuses
+                </option>
+
+                <option
+                  ng-repeat="item in c.data.mockChoices.attendance"
+                  value="{{item}}">
+
+                  {{item}}
+
+                </option>
+
+              </select>
+
+            </div>
+
+
+            <div class="filter-field">
+
+              <label>
+                Trainer
+              </label>
+
+              <select
+                ng-model="c.mockFilters.trainer"
+                ng-change="c.applyMockFilters()">
+
+                <option value="">
+                  All Trainers
+                </option>
+
+                <option
+                  ng-repeat="trainer in c.data.trainerOptions track by trainer.value"
+                  value="{{trainer.value}}">
+
+                  {{trainer.label}}
+
+                </option>
+
+              </select>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- RECRUITER DIRECTORY -->
+
+        <div
+          class="directory-card"
+          ng-if="c.activeTab === 'recruiter'">
+
+          <div class="directory-heading">
+
+            <div>
+
+              <div class="section-eyebrow">
+                RECRUITER DIRECTORY
+              </div>
+
+              <h2>
+                Recruiter Interview Directory
+              </h2>
+
+              <p>
+                Important interview information is shown here.
+                Additional information is available through View.
+              </p>
+
+            </div>
+
+
+            <div class="record-count">
+              {{c.filteredRecruiterInterviews.length}} records
+            </div>
+
+          </div>
+
+
+          <div
+            class="directory-table-wrap"
+            ng-if="c.filteredRecruiterInterviews.length">
+
+            <table class="directory-table">
+
+              <thead>
+
+                <tr>
+
+                  <th>INTERVIEW</th>
+                  <th>STUDENT</th>
+                  <th>COMPANY</th>
+                  <th>OPPORTUNITY</th>
+                  <th>ROUND</th>
+                  <th>DATE</th>
+                  <th>MODE</th>
+                  <th>STATUS</th>
+                  <th>RESULT</th>
+                  <th>VIEW</th>
+
+                </tr>
+
+              </thead>
+
+
+              <tbody>
+
+                <tr
+                  ng-repeat="item in c.filteredRecruiterInterviews track by item.sys_id">
+
+                  <td>
+
+                    <strong>
+                      {{item.interview_id || item.interviewId || '—'}}
+                    </strong>
+
+                  </td>
+
+
+                  <td>
+
+                    <div class="student-cell">
+
+                      <div class="student-avatar">
+                        {{c.getInitials(item.student_name || item.studentName)}}
+                      </div>
+
+                      <div>
+
+                        <strong>
+                          {{item.student_name || item.studentName || '—'}}
+                        </strong>
+
+                        <small>
+                          {{item.student_id || item.student || '—'}}
+                        </small>
+
+                      </div>
+
+                    </div>
+
+                  </td>
+
+
+                  <td>
+                    {{item.company_name || item.company || '—'}}
+                  </td>
+
+
+                  <td>
+                    {{item.opportunity_name || item.opportunityTitle || item.opportunity || '—'}}
+                  </td>
+
+
+                  <td>
+                    {{item.interview_round || item.interviewRound || '—'}}
+                  </td>
+
+
+                  <td>
+                    {{item.interview_date_display || item.interviewDateDisplay || item.interview_date || '—'}}
+                  </td>
+
+
+                  <td>
+                    {{item.interview_mode || item.interviewMode || '—'}}
+                  </td>
+
+
+                  <td>
+
+                    <span
+                      class="status-pill"
+                      ng-class="c.getStatusClass(item.status)">
+
+                      {{item.status || '—'}}
+
+                    </span>
+
+                  </td>
+
+
+                  <td>
+
+                    <span
+                      class="result-pill"
+                      ng-class="c.getResultClass(item.result)">
+
+                      {{item.result || '—'}}
+
+                    </span>
+
+                  </td>
+
+
+                  <td>
+
+                    <button
+                      type="button"
+                      class="view-button"
+                      ng-click="c.openRecruiterInterview(item)">
+
+                      View
+                      <i class="fa fa-arrow-right"></i>
+
+                    </button>
+
+                  </td>
+
+                </tr>
+
+              </tbody>
+
+            </table>
+
+          </div>
+
+
+          <div
+            class="empty-state"
+            ng-if="!c.filteredRecruiterInterviews.length">
+
+            <i class="fa fa-comments-o"></i>
+
+            <strong>
+              No Recruiter Interviews Found
+            </strong>
+
+            <p>
+              No recruiter interview records match the selected filters.
+            </p>
+
+          </div>
+
+        </div>
+
+
+        <!-- MOCK DIRECTORY -->
+
+        <div
+          class="directory-card"
+          ng-if="c.activeTab === 'mock'">
+
+          <div class="directory-heading">
+
+            <div>
+
+              <div class="section-eyebrow">
+                MOCK INTERVIEW DIRECTORY
+              </div>
+
+              <h2>
+                Mock Interview Directory
+              </h2>
+
+              <p>
+                Student mock interview and trainer information.
+              </p>
+
+            </div>
+
+
+            <div class="record-count">
+              {{c.filteredMockInterviews.length}} records
+            </div>
+
+          </div>
+
+
+          <div
+            class="directory-table-wrap"
+            ng-if="c.filteredMockInterviews.length">
+
+            <table class="directory-table">
+
+              <thead>
+
+                <tr>
+
+                  <th>INTERVIEW</th>
+                  <th>STUDENT</th>
+                  <th>TRAINER</th>
+                  <th>TYPE</th>
+                  <th>DATE</th>
+                  <th>ATTENDANCE</th>
+                  <th>STATUS</th>
+                  <th>VIEW</th>
+
+                </tr>
+
+              </thead>
+
+
+              <tbody>
+
+                <tr
+                  ng-repeat="item in c.filteredMockInterviews track by item.sys_id">
+
+                  <td>
+                    <strong>
+                      {{item.interview_id || item.interviewId || '—'}}
+                    </strong>
+                  </td>
+
+
+                  <td>
+
+                    <div class="student-cell">
+
+                      <div class="student-avatar">
+                        {{c.getInitials(item.student_name || item.studentName)}}
+                      </div>
+
+                      <div>
+
+                        <strong>
+                          {{item.student_name || item.studentName || '—'}}
+                        </strong>
+
+                        <small>
+                          {{item.student_id || item.student || '—'}}
+                        </small>
+
+                      </div>
+
+                    </div>
+
+                  </td>
+
+
+                  <td>
+                    {{item.trainer_name || item.trainerName || item.trainer || '—'}}
+                  </td>
+
+
+                  <td>
+                    {{item.interview_type || item.interviewType || '—'}}
+                  </td>
+
+
+                  <td>
+                    {{item.interview_date_display || item.interviewDateDisplay || item.interview_date || '—'}}
+                  </td>
+
+
+                  <td>
+                    {{item.attendance_status || item.attendanceStatus || '—'}}
+                  </td>
+
+
+                  <td>
+
+                    <span
+                      class="status-pill"
+                      ng-class="c.getStatusClass(item.interview_status || item.interviewStatus)">
+
+                      {{item.interview_status || item.interviewStatus || '—'}}
+
+                    </span>
+
+                  </td>
+
+
+                  <td>
+
+                    <button
+                      type="button"
+                      class="view-button"
+                      ng-click="c.openMockInterview(item)">
+
+                      View
+                      <i class="fa fa-arrow-right"></i>
+
+                    </button>
+
+                  </td>
+
+                </tr>
+
+              </tbody>
+
+            </table>
+
+          </div>
+
+
+          <div
+            class="empty-state"
+            ng-if="!c.filteredMockInterviews.length">
+
+            <i class="fa fa-comments-o"></i>
+
+            <strong>
+              No Mock Interviews Found
+            </strong>
+
+            <p>
+              No mock interview records match the selected filters.
+            </p>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </main>
+
+
+    <!-- =====================================================
+         RECRUITER MODAL
+         ===================================================== -->
+
+    <div
+      class="modal-backdrop"
+      ng-if="c.showRecruiterModal"
+      ng-click="c.closeRecruiterInterview()">
+
+      <div
+        class="interview-modal"
+        ng-click="$event.stopPropagation()">
+
+        <div class="modal-header">
+
+          <div>
+
+            <div class="modal-eyebrow">
+              RECRUITER INTERVIEW
+            </div>
+
+            <h2>
+              {{c.selectedRecruiter.interviewId ||
+                c.selectedRecruiter.interview_id ||
+                'Interview Details'}}
+            </h2>
+
+            <div class="modal-subtitle">
+
+              {{c.selectedRecruiter.studentName ||
+                c.selectedRecruiter.student_name ||
+                'Student'}}
+
+              <span
+                ng-if="c.selectedRecruiter.opportunityTitle ||
+                       c.selectedRecruiter.opportunity_name">
+
+                &nbsp;•&nbsp;
+
+                {{c.selectedRecruiter.opportunityTitle ||
+                  c.selectedRecruiter.opportunity_name}}
+
+              </span>
+
+            </div>
+
+          </div>
+
+
+          <button
+            type="button"
+            class="modal-close"
+            ng-click="c.closeRecruiterInterview()">
+
+            ×
+
+          </button>
+
+        </div>
+
+
+        <div class="modal-body">
+
+          <div class="detail-section">
+
+            <div class="detail-section-heading">
+
+              <div class="detail-section-icon blue">
+                ▣
+              </div>
+
+              <div>
+
+                <h3>
+                  Interview Overview
+                </h3>
+
+              </div>
+
+            </div>
+
+
+            <div class="detail-grid">
+
+              <div class="detail-item">
+                <span>Interview ID</span>
+                <strong>
+                  {{c.selectedRecruiter.interviewId ||
+                    c.selectedRecruiter.interview_id ||
+                    '—'}}
+                </strong>
+              </div>
+
+              <div class="detail-item">
+                <span>Status</span>
+                <strong>
+                  {{c.selectedRecruiter.status || '—'}}
+                </strong>
+              </div>
+
+              <div class="detail-item">
+                <span>Interview Round</span>
+                <strong>
+                  {{c.selectedRecruiter.interviewRound ||
+                    c.selectedRecruiter.interview_round ||
+                    '—'}}
+                </strong>
+              </div>
+
+              <div class="detail-item">
+                <span>Interview Date</span>
+                <strong>
+                  {{c.selectedRecruiter.interviewDateDisplay ||
+                    c.selectedRecruiter.interview_date_display ||
+                    c.selectedRecruiter.interviewDate ||
+                    '—'}}
+                </strong>
+              </div>
+
+              <div class="detail-item">
+                <span>Interview Mode</span>
+                <strong>
+                  {{c.selectedRecruiter.interviewMode ||
+                    c.selectedRecruiter.interview_mode ||
+                    '—'}}
+                </strong>
+              </div>
+
+              <div class="detail-item">
+                <span>Result</span>
+                <strong>
+                  {{c.selectedRecruiter.result || '—'}}
+                </strong>
+              </div>
+
+              <div class="detail-item">
+                <span>Student</span>
+                <strong>
+                  {{c.selectedRecruiter.studentName ||
+                    c.selectedRecruiter.student_name ||
+                    '—'}}
+                </strong>
+              </div>
+
+              <div class="detail-item">
+                <span>Company</span>
+                <strong>
+                  {{c.selectedRecruiter.company ||
+                    c.selectedRecruiter.company_name ||
+                    '—'}}
+                </strong>
+              </div>
+
+              <div class="detail-item full-width-detail">
+                <span>Opportunity</span>
+                <strong>
+                  {{c.selectedRecruiter.opportunityTitle ||
+                    c.selectedRecruiter.opportunity_name ||
+                    c.selectedRecruiter.opportunity ||
+                    '—'}}
+                </strong>
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <div class="detail-section">
+
+            <div class="detail-section-heading">
+
+              <div class="detail-section-icon purple">
+                ◉
+              </div>
+
+              <div>
+
+                <h3>
+                  Interviewer &amp; Meeting
+                </h3>
+
+              </div>
+
+            </div>
+
+
+            <div class="detail-grid">
+
+              <div class="detail-item">
+
+                <span>
+                  Interviewer
+                </span>
+
+                <strong>
+                  {{c.selectedRecruiter.interviewer || '—'}}
+                </strong>
+
+              </div>
+
+
+              <div class="detail-item">
+
+                <span>
+                  Meeting Link
+                </span>
+
+                <strong>
+
+                  <a
+                    ng-if="c.selectedRecruiter.meetingLink"
+                    class="meeting-link"
+                    ng-href="{{c.selectedRecruiter.meetingLink}}"
+                    target="_blank">
+
+                    Open Meeting Link
+
+                  </a>
+
+                  <span
+                    ng-if="!c.selectedRecruiter.meetingLink">
+
+                    —
+
+                  </span>
+
+                </strong>
+
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <div
+            class="detail-section"
+            ng-if="c.hasRecruiterEvaluation &&
+                   c.hasRecruiterEvaluation(c.selectedRecruiter)">
+
+            <div class="detail-section-heading">
+
+              <div class="detail-section-icon green">
+                ✓
+              </div>
+
+              <div>
+
+                <h3>
+                  Recruiter Evaluation
+                </h3>
+
+              </div>
+
+            </div>
+
+
+            <div class="evaluation-score-grid">
+
+              <div class="score-card">
+                <span>Coding Score</span>
+                <strong>
+                  {{c.selectedRecruiter.codingScore || '—'}}
+                </strong>
+              </div>
+
+              <div class="score-card">
+                <span>Technical Score</span>
+                <strong>
+                  {{c.selectedRecruiter.technicalScore || '—'}}
+                </strong>
+              </div>
+
+              <div class="score-card">
+                <span>Communication Score</span>
+                <strong>
+                  {{c.selectedRecruiter.communicationScore || '—'}}
+                </strong>
+              </div>
+
+              <div class="score-card">
+                <span>Problem Solving</span>
+                <strong>
+                  {{c.selectedRecruiter.problemSolvingScore || '—'}}
+                </strong>
+              </div>
+
+              <div class="score-card">
+                <span>Confidence Score</span>
+                <strong>
+                  {{c.selectedRecruiter.confidenceScore || '—'}}
+                </strong>
+              </div>
+
+              <div class="score-card overall-score">
+                <span>Overall Score</span>
+                <strong>
+                  {{c.selectedRecruiter.overallScore || '—'}}
+                </strong>
+              </div>
+
+            </div>
+
+
+            <div
+              class="long-text-card"
+              ng-if="c.selectedRecruiter.evaluationFeedback">
+
+              <span>
+                Evaluation Feedback
+              </span>
+
+              <div class="long-text-value">
+                {{c.selectedRecruiter.evaluationFeedback}}
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         MOCK MODAL
+         ===================================================== -->
+
+    <div
+      class="modal-backdrop"
+      ng-if="c.showMockModal"
+      ng-click="c.closeMockInterview()">
+
+      <div
+        class="interview-modal"
+        ng-click="$event.stopPropagation()">
+
+        <div class="modal-header">
+
+          <div>
+
+            <div class="modal-eyebrow">
+              MOCK INTERVIEW
+            </div>
+
+            <h2>
+              {{c.selectedMock.interviewId ||
+                c.selectedMock.interview_id ||
+                'Mock Interview Details'}}
+            </h2>
+
+            <div class="modal-subtitle">
+
+              {{c.selectedMock.studentName ||
+                c.selectedMock.student_name ||
+                c.selectedMock.student ||
+                'Student'}}
+
+              <span ng-if="c.selectedMock.trainerName">
+
+                &nbsp;•&nbsp;
+
+                {{c.selectedMock.trainerName}}
+
+              </span>
+
+            </div>
+
+          </div>
+
+
+          <button
+            type="button"
+            class="modal-close"
+            ng-click="c.closeMockInterview()">
+
+            ×
+
+          </button>
+
+        </div>
+
+
+        <div class="modal-body">
+
+          <div class="detail-section">
+
+            <div class="detail-section-heading">
+
+              <div class="detail-section-icon blue">
+                ▣
+              </div>
+
+              <div>
+
+                <h3>
+                  Interview Overview
+                </h3>
+
+              </div>
+
+            </div>
+
+
+            <div class="detail-grid">
+
+              <div class="detail-item">
+                <span>Interview ID</span>
+                <strong>
+                  {{c.selectedMock.interviewId ||
+                    c.selectedMock.interview_id ||
+                    '—'}}
+                </strong>
+              </div>
+
+              <div class="detail-item">
+                <span>Interview Date</span>
+                <strong>
+                  {{c.selectedMock.interviewDateDisplay ||
+                    c.selectedMock.interview_date_display ||
+                    c.selectedMock.interviewDate ||
+                    '—'}}
+                </strong>
+              </div>
+
+              <div class="detail-item">
+                <span>Interview Type</span>
+                <strong>
+                  {{c.selectedMock.interviewType ||
+                    c.selectedMock.interview_type ||
+                    '—'}}
+                </strong>
+              </div>
+
+              <div class="detail-item">
+                <span>Interview Status</span>
+                <strong>
+                  {{c.selectedMock.interviewStatus ||
+                    c.selectedMock.interview_status ||
+                    '—'}}
+                </strong>
+              </div>
+
+              <div class="detail-item">
+                <span>Attendance Status</span>
+                <strong>
+                  {{c.selectedMock.attendanceStatus ||
+                    c.selectedMock.attendance_status ||
+                    '—'}}
+                </strong>
+              </div>
+
+              <div class="detail-item">
+                <span>Trainer</span>
+                <strong>
+                  {{c.selectedMock.trainerName ||
+                    c.selectedMock.trainer_name ||
+                    c.selectedMock.trainer ||
+                    '—'}}
+                </strong>
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <div
+            class="detail-section"
+            ng-if="c.selectedMock.feedback">
+
+            <div class="detail-section-heading">
+
+              <div class="detail-section-icon pink">
+                ✦
+              </div>
+
+              <div>
+
+                <h3>
+                  Interview Feedback
+                </h3>
+
+              </div>
+
+            </div>
+
+
+            <div class="evaluation-score-grid">
+
+              <div class="score-card">
+
+                <span>
+                  Technical
+                </span>
+
+                <strong>
+                  {{c.selectedMock.feedback.technicalScore || '—'}}
+                </strong>
+
+              </div>
+
+
+              <div class="score-card">
+
+                <span>
+                  Communication
+                </span>
+
+                <strong>
+                  {{c.selectedMock.feedback.communicationScore || '—'}}
+                </strong>
+
+              </div>
+
+
+              <div class="score-card">
+
+                <span>
+                  Problem Solving
+                </span>
+
+                <strong>
+                  {{c.selectedMock.feedback.problemSolvingScore || '—'}}
+                </strong>
+
+              </div>
+
+
+              <div class="score-card overall-score">
+
+                <span>
+                  Overall
+                </span>
+
+                <strong>
+                  {{c.selectedMock.feedback.overallScore || '—'}}
+                </strong>
+
+              </div>
+
+            </div>
+
+
+            <div
+              class="long-text-card"
+              ng-if="c.selectedMock.feedback.strengths">
+
+              <span>
+                Strengths
+              </span>
+
+              <div class="long-text-value">
+                {{c.selectedMock.feedback.strengths}}
+              </div>
+
+            </div>
+
+
+            <div
+              class="long-text-card"
+              ng-if="c.selectedMock.feedback.improvementAreas">
+
+              <span>
+                Improvement Areas
+              </span>
+
+              <div class="long-text-value">
+                {{c.selectedMock.feedback.improvementAreas}}
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <div
+            class="detail-section"
+            ng-if="!c.selectedMock.feedback">
+
+            <div class="long-text-card">
+
+              <div class="long-text-value">
+                No feedback record found for this mock interview.
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <sp-widget widget="data.aiWidget"></sp-widget>
+
+  </div>
+
+</div>]]></template>
+    </sp_widget>
+</record_update>

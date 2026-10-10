@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update sys_domain="global" table="sn_decision_table_decision_condition">
+    <sn_decision_table_decision_condition action="DELETE">
+        <decision_input/>
+        <decision_table display_value="Campus360 - Intervention Recommendation delta">bd2212e3a85f03107f44321b8bcb5659</decision_table>
+        <default_operator>=</default_operator>
+        <description>Evaluates the student's placement risk level.</description>
+        <field/>
+        <field_label/>
+        <field_parent_table/>
+        <label>Risk Level</label>
+        <order>100</order>
+        <parent display_value="">50feed27a8d703107f44321b8bcb569b</parent>
+        <reference/>
+        <sys_class_name>sn_decision_table_decision_condition</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 10:13:41</sys_created_on>
+        <sys_domain>global</sys_domain>
+        <sys_id>562252e3a85f03107f44321b8bcb565e</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name/>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name>sn_decision_table_decision_condition_562252e3a85f03107f44321b8bcb565e</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 10:13:41</sys_updated_on>
+        <type display_value="String">747127c1bf3320001875647fcf0739e0</type>
+    </sn_decision_table_decision_condition>
+    <sys_update_version action="INSERT_OR_UPDATE">
+        <action>DELETE</action>
+        <application display_value="Campus360">7cd68adee41703107f44d305db800ec3</application>
+        <file_path/>
+        <instance_id>82d18dc7c38fcf94a03197af0501316c</instance_id>
+        <instance_name>ltm-hck-2876-0027</instance_name>
+        <name>sn_decision_table_decision_condition_562252e3a85f03107f44321b8bcb565e</name>
+        <payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update sys_domain="global" table="sn_decision_table_decision_condition"><sn_decision_table_decision_condition action="INSERT_OR_UPDATE"><decision_input/><decision_table display_value="Campus360 - Intervention Recommendation delta">bd2212e3a85f03107f44321b8bcb5659</decision_table><default_operator>=</default_operator><description>Evaluates the student's placement risk level.</description><field/><field_label/><field_parent_table/><label>Risk Level</label><order>100</order><parent display_value="">50feed27a8d703107f44321b8bcb569b</parent><reference/><sys_class_name>sn_decision_table_decision_condition</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-19 10:13:41</sys_created_on><sys_domain>global</sys_domain><sys_id>562252e3a85f03107f44321b8bcb565e</sys_id><sys_mod_count>0</sys_mod_count><sys_name/><sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package><sys_policy/><sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope><sys_update_name>sn_decision_table_decision_condition_562252e3a85f03107f44321b8bcb565e</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-19 10:13:41</sys_updated_on><type display_value="String">747127c1bf3320001875647fcf0739e0</type></sn_decision_table_decision_condition></record_update>]]></payload>
+        <payload_hash>-1814794757</payload_hash>
+        <record_name/>
+        <reverted_from/>
+        <source>70d68adee41703107f44d305db800ec8</source>
+        <source_table>sys_update_set</source_table>
+        <state>previous</state>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 10:16:25</sys_created_on>
+        <sys_id>1ec2d227a85f03107f44321b8bcb56de</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_recorded_at>1a0b92ace2a0000001</sys_recorded_at>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 10:16:25</sys_updated_on>
+        <type>Decision Condition</type>
+        <update_guid>de2252e3ad5f0310a0046940d1c3175f</update_guid>
+        <update_guid_history>de2252e3ad5f0310a0046940d1c3175f:702197875,de2252e3ad5f0310a0046940d1c3175f:702197875</update_guid_history>
+    </sys_update_version>
+    <sys_metadata_delete action="INSERT_OR_UPDATE">
+        <sys_audit_delete display_value="">d7c21627a85f03107f44321b8bcb5684</sys_audit_delete>
+        <sys_class_name>sys_metadata_delete</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-19 10:16:28</sys_created_on>
+        <sys_db_object display_value="" name="sn_decision_table_decision_condition">sn_decision_table_decision_condition</sys_db_object>
+        <sys_id>6f92ec27a84a48b4919d3c68a30098a4</sys_id>
+        <sys_metadata>562252e3a85f03107f44321b8bcb565e</sys_metadata>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name/>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_parent/>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_scope_delete display_value="">1cde9626740d46978b846077c1615101</sys_scope_delete>
+        <sys_update_name>sn_decision_table_decision_condition_562252e3a85f03107f44321b8bcb565e</sys_update_name>
+        <sys_update_version display_value="sn_decision_table_decision_condition_562252e3a85f03107f44321b8bcb565e">1ec2d227a85f03107f44321b8bcb56de</sys_update_version>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-19 10:16:28</sys_updated_on>
+    </sys_metadata_delete>
+</record_update>

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?><database>
+    <element attributes="enforce_dot_walk_cross_scope_access=true" db_object_id="b6ab065ae45703107f44d305db800e78" label="Placement Opportunity" max_length="40" name="x_snc_campus360_placement_opportunity" type="collection">
+        <element label="Eligible Branches" max_length="200" name="eligible_branches" type="string"/>
+        <element label="Application Deadline" max_length="40" name="application_deadline" type="glide_date_time"/>
+        <element label="Drive Date" max_length="40" name="drive_date" type="glide_date_time"/>
+        <element label="CTC / Stipend" max_length="50" name="ctc_stipend" type="string"/>
+        <element choice="3" default="Job" label="Opportunity Type" max_length="30" name="opportunity_type" type="choice">
+            <choice>
+                <element inactive_on_update="false" label="Training" sequence="3" value="training"/>
+                <element inactive_on_update="false" label="Other" sequence="5" value="other"/>
+                <element inactive_on_update="false" label="Job" sequence="0" value="job"/>
+                <element inactive_on_update="false" label="Apprenticeship" sequence="2" value="apprenticeship"/>
+                <element inactive_on_update="false" label="Hackathon" sequence="4" value="hackathon"/>
+                <element inactive_on_update="false" label="Internship" sequence="1" value="internship"/>
+            </choice>
+        </element>
+        <element choice="3" default="TPO" label="Opportunity Source" max_length="30" name="opportunity_source" type="choice">
+            <choice>
+                <element inactive_on_update="false" label="Student" sequence="3" value="student"/>
+                <element inactive_on_update="false" label="TPO" sequence="0" value="tpo"/>
+                <element inactive_on_update="false" label="Alumni" sequence="2" value="alumni"/>
+                <element inactive_on_update="false" label="Company" sequence="1" value="company"/>
+                <element inactive_on_update="false" label="External Portal" sequence="4" value="external_portal"/>
+            </choice>
+        </element>
+        <element label="Job Description" max_length="4000" name="job_description" type="string"/>
+        <element label="Location" max_length="100" name="location" type="string"/>
+        <element label="Opportunity Title" max_length="100" name="opportunity_title" type="string"/>
+        <element choice="3" default="Open" label="Status" max_length="20" name="status" type="choice">
+            <choice>
+                <element inactive_on_update="false" label="On Hold" sequence="3" value="on_hold"/>
+                <element inactive_on_update="false" label="Cancelled" sequence="2" value="cancelled"/>
+                <element inactive_on_update="false" label="Open" sequence="0" value="open"/>
+                <element inactive_on_update="false" label="Closed" sequence="1" value="closed"/>
+            </choice>
+        </element>
+        <element label="Company" max_length="32" name="company" reference="x_snc_campus360_company_master" type="reference"/>
+        <element label="Required Skills" max_length="500" name="required_skills" type="string"/>
+        <element label="Minimum CGPA" max_length="20" name="minimum_cgpa" type="decimal"/>
+        <element display="true" label="Opportunity ID" max_length="20" name="opportunity_id" type="string"/>
+        <index name="index">
+            <element name="company"/>
+        </index>
+    </element>
+</database>

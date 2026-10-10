@@ -1,0 +1,1531 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_widget">
+    <sp_widget action="DELETE">
+        <category>custom</category>
+        <client_script><![CDATA[api.controller = function($window) {
+
+    var c = this;
+
+
+    c.backToDashboard = function() {
+
+        $window.location.href =
+            '?id=recruiter_dashboard';
+
+    };
+
+
+    c.refresh = function() {
+
+        c.server.update();
+
+    };
+
+};]]></client_script>
+        <controller_as>c</controller_as>
+        <css>.analytics-page {&#13;
+    max-width: 1200px;&#13;
+    margin: 30px auto;&#13;
+    padding: 0 20px;&#13;
+    font-family: Arial, sans-serif;&#13;
+    color: #102a56;&#13;
+}&#13;
+&#13;
+&#13;
+/* HEADER */&#13;
+&#13;
+.analytics-header {&#13;
+    background: #ffffff;&#13;
+    border: 1px solid #dbe3f0;&#13;
+    border-radius: 18px;&#13;
+    padding: 30px;&#13;
+    display: flex;&#13;
+    justify-content: space-between;&#13;
+    align-items: center;&#13;
+    margin-bottom: 25px;&#13;
+    box-shadow: 0 8px 25px rgba(20, 50, 90, 0.06);&#13;
+}&#13;
+&#13;
+.eyebrow {&#13;
+    color: #4d5cff;&#13;
+    font-size: 11px;&#13;
+    font-weight: 700;&#13;
+    letter-spacing: 2px;&#13;
+    margin-bottom: 8px;&#13;
+}&#13;
+&#13;
+.analytics-header h1 {&#13;
+    margin: 0;&#13;
+    font-size: 30px;&#13;
+    color: #0b2d61;&#13;
+}&#13;
+&#13;
+.analytics-header p {&#13;
+    margin-top: 8px;&#13;
+    color: #7183a3;&#13;
+}&#13;
+&#13;
+&#13;
+/* BUTTON */&#13;
+&#13;
+.back-btn {&#13;
+    background: #ffffff;&#13;
+    border: 1px solid #ccd7e8;&#13;
+    color: #3155b8;&#13;
+    padding: 11px 18px;&#13;
+    border-radius: 8px;&#13;
+    cursor: pointer;&#13;
+}&#13;
+&#13;
+&#13;
+/* STAT CARDS */&#13;
+&#13;
+.stats-grid {&#13;
+    display: grid;&#13;
+    grid-template-columns: repeat(5, 1fr);&#13;
+    gap: 16px;&#13;
+    margin-bottom: 25px;&#13;
+}&#13;
+&#13;
+.stat-card {&#13;
+    background: #ffffff;&#13;
+    border: 1px solid #dbe3f0;&#13;
+    border-radius: 16px;&#13;
+    padding: 22px;&#13;
+    box-shadow: 0 6px 20px rgba(20, 50, 90, 0.05);&#13;
+}&#13;
+&#13;
+.stat-label {&#13;
+    color: #7183a3;&#13;
+    font-size: 13px;&#13;
+}&#13;
+&#13;
+.stat-value {&#13;
+    font-size: 30px;&#13;
+    font-weight: 700;&#13;
+    color: #0b2d61;&#13;
+    margin-top: 10px;&#13;
+}&#13;
+&#13;
+.stat-description {&#13;
+    color: #8a9ab5;&#13;
+    font-size: 11px;&#13;
+    margin-top: 6px;&#13;
+}&#13;
+&#13;
+&#13;
+/* SECTION */&#13;
+&#13;
+.section-card {&#13;
+    background: #ffffff;&#13;
+    border: 1px solid #dbe3f0;&#13;
+    border-radius: 18px;&#13;
+    padding: 28px;&#13;
+    margin-bottom: 25px;&#13;
+    box-shadow: 0 6px 20px rgba(20, 50, 90, 0.05);&#13;
+}&#13;
+&#13;
+.section-card h2 {&#13;
+    margin: 0 0 25px;&#13;
+    font-size: 21px;&#13;
+    color: #12376c;&#13;
+}&#13;
+&#13;
+&#13;
+/* PIPELINE */&#13;
+&#13;
+.pipeline {&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    justify-content: space-between;&#13;
+    gap: 10px;&#13;
+}&#13;
+&#13;
+.pipeline-step {&#13;
+    flex: 1;&#13;
+    text-align: center;&#13;
+    background: #f7f9ff;&#13;
+    border: 1px solid #dce4f4;&#13;
+    border-radius: 12px;&#13;
+    padding: 18px 10px;&#13;
+    font-size: 13px;&#13;
+}&#13;
+&#13;
+.pipeline-number {&#13;
+    font-size: 25px;&#13;
+    font-weight: 700;&#13;
+    color: #5366df;&#13;
+    margin-bottom: 7px;&#13;
+}&#13;
+&#13;
+.pipeline-arrow {&#13;
+    color: #8291ae;&#13;
+    font-size: 20px;&#13;
+}&#13;
+&#13;
+&#13;
+/* TWO COLUMNS */&#13;
+&#13;
+.two-column {&#13;
+    display: grid;&#13;
+    grid-template-columns: 1fr 1fr;&#13;
+    gap: 20px;&#13;
+}&#13;
+&#13;
+&#13;
+/* RESULTS */&#13;
+&#13;
+.result-row {&#13;
+    display: flex;&#13;
+    justify-content: space-between;&#13;
+    padding: 15px 0;&#13;
+    border-bottom: 1px solid #edf0f5;&#13;
+    color: #60728e;&#13;
+}&#13;
+&#13;
+.result-row strong {&#13;
+    color: #12376c;&#13;
+    font-size: 17px;&#13;
+}&#13;
+&#13;
+&#13;
+/* REFRESH */&#13;
+&#13;
+.refresh-section {&#13;
+    text-align: right;&#13;
+    margin-bottom: 30px;&#13;
+}&#13;
+&#13;
+.refresh-btn {&#13;
+    border: 1px solid #ccd7e8;&#13;
+    background: #ffffff;&#13;
+    color: #5366df;&#13;
+    padding: 10px 18px;&#13;
+    border-radius: 8px;&#13;
+    cursor: pointer;&#13;
+}&#13;
+&#13;
+&#13;
+/* RESPONSIVE */&#13;
+&#13;
+@media (max-width: 900px) {&#13;
+&#13;
+    .stats-grid {&#13;
+        grid-template-columns: repeat(2, 1fr);&#13;
+    }&#13;
+&#13;
+    .pipeline {&#13;
+        flex-wrap: wrap;&#13;
+    }&#13;
+&#13;
+    .pipeline-arrow {&#13;
+        display: none;&#13;
+    }&#13;
+&#13;
+}&#13;
+&#13;
+@media (max-width: 600px) {&#13;
+&#13;
+    .stats-grid {&#13;
+        grid-template-columns: 1fr;&#13;
+    }&#13;
+&#13;
+    .two-column {&#13;
+        grid-template-columns: 1fr;&#13;
+    }&#13;
+&#13;
+    .analytics-header {&#13;
+        flex-direction: column;&#13;
+        align-items: flex-start;&#13;
+        gap: 20px;&#13;
+    }&#13;
+&#13;
+}</css>
+        <data_table>sp_instance</data_table>
+        <demo_data/>
+        <description/>
+        <docs/>
+        <field_list/>
+        <has_preview>false</has_preview>
+        <id>recruiter_analytics</id>
+        <internal>false</internal>
+        <link><![CDATA[function link(scope, element, attrs, controller) {
+  
+}]]></link>
+        <name>Recruiter Analytics</name>
+        <option_schema/>
+        <public>false</public>
+        <roles/>
+        <script><![CDATA[(function() {
+
+    data.stats = {
+        applications: 0,
+        assessments: 0,
+        shortlisted: 0,
+        interviews: 0,
+        offers: 0
+    };
+
+    data.assessment = {
+        passed: 0,
+        failed: 0,
+        pending: 0
+    };
+
+    data.interviews = {
+        selected: 0,
+        rejected: 0,
+        pending: 0
+    };
+
+
+    // ==============================
+    // APPLICATIONS
+    // ==============================
+
+    var app = new GlideRecord('x_snc_campus360_student_application');
+    app.query();
+
+    while (app.next()) {
+
+        data.stats.applications++;
+
+        var shortlisted =
+            app.getValue('shortlisted');
+
+        if (shortlisted == 'true' || shortlisted == '1') {
+            data.stats.shortlisted++;
+        }
+    }
+
+
+    // ==============================
+    // ASSESSMENTS
+    // ==============================
+
+    var assessment =
+        new GlideRecord('x_snc_campus360_student_assessment');
+
+    assessment.query();
+
+    while (assessment.next()) {
+
+        data.stats.assessments++;
+
+        var result =
+            (assessment.getDisplayValue('result') || '')
+            .toLowerCase();
+
+        if (result == 'passed' ||
+            result == 'pass' ||
+            result == 'selected') {
+
+            data.assessment.passed++;
+
+        } else if (result == 'failed' ||
+                   result == 'fail' ||
+                   result == 'rejected') {
+
+            data.assessment.failed++;
+
+        } else {
+
+            data.assessment.pending++;
+        }
+    }
+
+
+    // ==============================
+    // INTERVIEWS
+    // ==============================
+
+    var interview =
+        new GlideRecord('x_snc_campus360_recruiter_interview');
+
+    interview.query();
+
+    while (interview.next()) {
+
+        data.stats.interviews++;
+
+        var interviewResult =
+            (interview.getDisplayValue('result') || '')
+            .toLowerCase();
+
+        if (interviewResult == 'selected' ||
+            interviewResult == 'accepted' ||
+            interviewResult == 'next round') {
+
+            data.interviews.selected++;
+
+        } else if (interviewResult == 'rejected') {
+
+            data.interviews.rejected++;
+
+        } else {
+
+            data.interviews.pending++;
+        }
+    }
+
+
+    // ==============================
+    // OFFERS
+    // ==============================
+
+    /*
+     * Offer table may not exist yet.
+     * Keep this at 0 until Offer Management
+     * is created.
+     */
+
+    data.stats.offers = 0;
+
+
+})();]]></script>
+        <servicenow>false</servicenow>
+        <sys_class_name>sp_widget</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-24 06:58:13</sys_created_on>
+        <sys_id>f464d34d74e303107f4410c9fee0cdd4</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>Recruiter Analytics</sys_name>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_update_name>sp_widget_f464d34d74e303107f4410c9fee0cdd4</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-24 06:58:13</sys_updated_on>
+        <template><![CDATA[<div class="analytics-page">
+
+    <!-- HEADER -->
+
+    <div class="analytics-header">
+
+        <div>
+            <div class="eyebrow">
+                RECRUITMENT
+            </div>
+
+            <h1>
+                Recruitment Analytics
+            </h1>
+
+            <p>
+                Track hiring performance and candidate progress.
+            </p>
+        </div>
+
+        <button
+            class="back-btn"
+            ng-click="c.backToDashboard()">
+
+            ← Back to Dashboard
+
+        </button>
+
+    </div>
+
+
+    <!-- KPI CARDS -->
+
+    <div class="stats-grid">
+
+        <div class="stat-card">
+
+            <div class="stat-label">
+                Applications
+            </div>
+
+            <div class="stat-value">
+                {{c.data.stats.applications}}
+            </div>
+
+            <div class="stat-description">
+                Total applications
+            </div>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <div class="stat-label">
+                Assessments
+            </div>
+
+            <div class="stat-value">
+                {{c.data.stats.assessments}}
+            </div>
+
+            <div class="stat-description">
+                Assessments conducted
+            </div>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <div class="stat-label">
+                Shortlisted
+            </div>
+
+            <div class="stat-value">
+                {{c.data.stats.shortlisted}}
+            </div>
+
+            <div class="stat-description">
+                Candidates shortlisted
+            </div>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <div class="stat-label">
+                Interviews
+            </div>
+
+            <div class="stat-value">
+                {{c.data.stats.interviews}}
+            </div>
+
+            <div class="stat-description">
+                Interviews scheduled
+            </div>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <div class="stat-label">
+                Offers
+            </div>
+
+            <div class="stat-value">
+                {{c.data.stats.offers}}
+            </div>
+
+            <div class="stat-description">
+                Offers generated
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- HIRING PIPELINE -->
+
+    <div class="section-card">
+
+        <div class="section-header">
+
+            <div>
+                <div class="eyebrow">
+                    HIRING PIPELINE
+                </div>
+
+                <h2>
+                    Candidate Progress
+                </h2>
+            </div>
+
+        </div>
+
+
+        <div class="pipeline">
+
+            <div class="pipeline-step">
+
+                <div class="pipeline-number">
+                    {{c.data.stats.applications}}
+                </div>
+
+                <div>
+                    Applications
+                </div>
+
+            </div>
+
+
+            <div class="pipeline-arrow">
+                →
+            </div>
+
+
+            <div class="pipeline-step">
+
+                <div class="pipeline-number">
+                    {{c.data.stats.assessments}}
+                </div>
+
+                <div>
+                    Assessments
+                </div>
+
+            </div>
+
+
+            <div class="pipeline-arrow">
+                →
+            </div>
+
+
+            <div class="pipeline-step">
+
+                <div class="pipeline-number">
+                    {{c.data.stats.shortlisted}}
+                </div>
+
+                <div>
+                    Shortlisted
+                </div>
+
+            </div>
+
+
+            <div class="pipeline-arrow">
+                →
+            </div>
+
+
+            <div class="pipeline-step">
+
+                <div class="pipeline-number">
+                    {{c.data.stats.interviews}}
+                </div>
+
+                <div>
+                    Interviews
+                </div>
+
+            </div>
+
+
+            <div class="pipeline-arrow">
+                →
+            </div>
+
+
+            <div class="pipeline-step">
+
+                <div class="pipeline-number">
+                    {{c.data.stats.offers}}
+                </div>
+
+                <div>
+                    Offers
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- TWO COLUMNS -->
+
+    <div class="two-column">
+
+
+        <!-- ASSESSMENT RESULTS -->
+
+        <div class="section-card">
+
+            <div class="eyebrow">
+                ASSESSMENTS
+            </div>
+
+            <h2>
+                Assessment Results
+            </h2>
+
+
+            <div class="result-row">
+
+                <span>
+                    Passed
+                </span>
+
+                <strong>
+                    {{c.data.assessment.passed}}
+                </strong>
+
+            </div>
+
+
+            <div class="result-row">
+
+                <span>
+                    Failed
+                </span>
+
+                <strong>
+                    {{c.data.assessment.failed}}
+                </strong>
+
+            </div>
+
+
+            <div class="result-row">
+
+                <span>
+                    Pending
+                </span>
+
+                <strong>
+                    {{c.data.assessment.pending}}
+                </strong>
+
+            </div>
+
+        </div>
+
+
+        <!-- INTERVIEW RESULTS -->
+
+        <div class="section-card">
+
+            <div class="eyebrow">
+                INTERVIEWS
+            </div>
+
+            <h2>
+                Interview Results
+            </h2>
+
+
+            <div class="result-row">
+
+                <span>
+                    Selected / Next Round
+                </span>
+
+                <strong>
+                    {{c.data.interviews.selected}}
+                </strong>
+
+            </div>
+
+
+            <div class="result-row">
+
+                <span>
+                    Rejected
+                </span>
+
+                <strong>
+                    {{c.data.interviews.rejected}}
+                </strong>
+
+            </div>
+
+
+            <div class="result-row">
+
+                <span>
+                    Pending
+                </span>
+
+                <strong>
+                    {{c.data.interviews.pending}}
+                </strong>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- REFRESH -->
+
+    <div class="refresh-section">
+
+        <button
+            class="refresh-btn"
+            ng-click="c.refresh()">
+
+            ↻ Refresh Analytics
+
+        </button>
+
+    </div>
+
+</div>]]></template>
+    </sp_widget>
+    <sys_update_version action="INSERT_OR_UPDATE">
+        <action>DELETE</action>
+        <application display_value="Campus360">7cd68adee41703107f44d305db800ec3</application>
+        <file_path/>
+        <instance_id>82d18dc7c38fcf94a03197af0501316c</instance_id>
+        <instance_name>ltm-hck-2876-0027</instance_name>
+        <name>sp_widget_f464d34d74e303107f4410c9fee0cdd4</name>
+        <payload>&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;record_update table="sp_widget"&gt;&lt;sp_widget action="INSERT_OR_UPDATE"&gt;&lt;category&gt;custom&lt;/category&gt;&lt;client_script&gt;&lt;![CDATA[api.controller = function($window) {
+
+    var c = this;
+
+
+    c.backToDashboard = function() {
+
+        $window.location.href =
+            '?id=recruiter_dashboard';
+
+    };
+
+
+    c.refresh = function() {
+
+        c.server.update();
+
+    };
+
+};]]&gt;&lt;/client_script&gt;&lt;controller_as&gt;c&lt;/controller_as&gt;&lt;css&gt;.analytics-page {&amp;#13;
+    max-width: 1200px;&amp;#13;
+    margin: 30px auto;&amp;#13;
+    padding: 0 20px;&amp;#13;
+    font-family: Arial, sans-serif;&amp;#13;
+    color: #102a56;&amp;#13;
+}&amp;#13;
+&amp;#13;
+&amp;#13;
+/* HEADER */&amp;#13;
+&amp;#13;
+.analytics-header {&amp;#13;
+    background: #ffffff;&amp;#13;
+    border: 1px solid #dbe3f0;&amp;#13;
+    border-radius: 18px;&amp;#13;
+    padding: 30px;&amp;#13;
+    display: flex;&amp;#13;
+    justify-content: space-between;&amp;#13;
+    align-items: center;&amp;#13;
+    margin-bottom: 25px;&amp;#13;
+    box-shadow: 0 8px 25px rgba(20, 50, 90, 0.06);&amp;#13;
+}&amp;#13;
+&amp;#13;
+.eyebrow {&amp;#13;
+    color: #4d5cff;&amp;#13;
+    font-size: 11px;&amp;#13;
+    font-weight: 700;&amp;#13;
+    letter-spacing: 2px;&amp;#13;
+    margin-bottom: 8px;&amp;#13;
+}&amp;#13;
+&amp;#13;
+.analytics-header h1 {&amp;#13;
+    margin: 0;&amp;#13;
+    font-size: 30px;&amp;#13;
+    color: #0b2d61;&amp;#13;
+}&amp;#13;
+&amp;#13;
+.analytics-header p {&amp;#13;
+    margin-top: 8px;&amp;#13;
+    color: #7183a3;&amp;#13;
+}&amp;#13;
+&amp;#13;
+&amp;#13;
+/* BUTTON */&amp;#13;
+&amp;#13;
+.back-btn {&amp;#13;
+    background: #ffffff;&amp;#13;
+    border: 1px solid #ccd7e8;&amp;#13;
+    color: #3155b8;&amp;#13;
+    padding: 11px 18px;&amp;#13;
+    border-radius: 8px;&amp;#13;
+    cursor: pointer;&amp;#13;
+}&amp;#13;
+&amp;#13;
+&amp;#13;
+/* STAT CARDS */&amp;#13;
+&amp;#13;
+.stats-grid {&amp;#13;
+    display: grid;&amp;#13;
+    grid-template-columns: repeat(5, 1fr);&amp;#13;
+    gap: 16px;&amp;#13;
+    margin-bottom: 25px;&amp;#13;
+}&amp;#13;
+&amp;#13;
+.stat-card {&amp;#13;
+    background: #ffffff;&amp;#13;
+    border: 1px solid #dbe3f0;&amp;#13;
+    border-radius: 16px;&amp;#13;
+    padding: 22px;&amp;#13;
+    box-shadow: 0 6px 20px rgba(20, 50, 90, 0.05);&amp;#13;
+}&amp;#13;
+&amp;#13;
+.stat-label {&amp;#13;
+    color: #7183a3;&amp;#13;
+    font-size: 13px;&amp;#13;
+}&amp;#13;
+&amp;#13;
+.stat-value {&amp;#13;
+    font-size: 30px;&amp;#13;
+    font-weight: 700;&amp;#13;
+    color: #0b2d61;&amp;#13;
+    margin-top: 10px;&amp;#13;
+}&amp;#13;
+&amp;#13;
+.stat-description {&amp;#13;
+    color: #8a9ab5;&amp;#13;
+    font-size: 11px;&amp;#13;
+    margin-top: 6px;&amp;#13;
+}&amp;#13;
+&amp;#13;
+&amp;#13;
+/* SECTION */&amp;#13;
+&amp;#13;
+.section-card {&amp;#13;
+    background: #ffffff;&amp;#13;
+    border: 1px solid #dbe3f0;&amp;#13;
+    border-radius: 18px;&amp;#13;
+    padding: 28px;&amp;#13;
+    margin-bottom: 25px;&amp;#13;
+    box-shadow: 0 6px 20px rgba(20, 50, 90, 0.05);&amp;#13;
+}&amp;#13;
+&amp;#13;
+.section-card h2 {&amp;#13;
+    margin: 0 0 25px;&amp;#13;
+    font-size: 21px;&amp;#13;
+    color: #12376c;&amp;#13;
+}&amp;#13;
+&amp;#13;
+&amp;#13;
+/* PIPELINE */&amp;#13;
+&amp;#13;
+.pipeline {&amp;#13;
+    display: flex;&amp;#13;
+    align-items: center;&amp;#13;
+    justify-content: space-between;&amp;#13;
+    gap: 10px;&amp;#13;
+}&amp;#13;
+&amp;#13;
+.pipeline-step {&amp;#13;
+    flex: 1;&amp;#13;
+    text-align: center;&amp;#13;
+    background: #f7f9ff;&amp;#13;
+    border: 1px solid #dce4f4;&amp;#13;
+    border-radius: 12px;&amp;#13;
+    padding: 18px 10px;&amp;#13;
+    font-size: 13px;&amp;#13;
+}&amp;#13;
+&amp;#13;
+.pipeline-number {&amp;#13;
+    font-size: 25px;&amp;#13;
+    font-weight: 700;&amp;#13;
+    color: #5366df;&amp;#13;
+    margin-bottom: 7px;&amp;#13;
+}&amp;#13;
+&amp;#13;
+.pipeline-arrow {&amp;#13;
+    color: #8291ae;&amp;#13;
+    font-size: 20px;&amp;#13;
+}&amp;#13;
+&amp;#13;
+&amp;#13;
+/* TWO COLUMNS */&amp;#13;
+&amp;#13;
+.two-column {&amp;#13;
+    display: grid;&amp;#13;
+    grid-template-columns: 1fr 1fr;&amp;#13;
+    gap: 20px;&amp;#13;
+}&amp;#13;
+&amp;#13;
+&amp;#13;
+/* RESULTS */&amp;#13;
+&amp;#13;
+.result-row {&amp;#13;
+    display: flex;&amp;#13;
+    justify-content: space-between;&amp;#13;
+    padding: 15px 0;&amp;#13;
+    border-bottom: 1px solid #edf0f5;&amp;#13;
+    color: #60728e;&amp;#13;
+}&amp;#13;
+&amp;#13;
+.result-row strong {&amp;#13;
+    color: #12376c;&amp;#13;
+    font-size: 17px;&amp;#13;
+}&amp;#13;
+&amp;#13;
+&amp;#13;
+/* REFRESH */&amp;#13;
+&amp;#13;
+.refresh-section {&amp;#13;
+    text-align: right;&amp;#13;
+    margin-bottom: 30px;&amp;#13;
+}&amp;#13;
+&amp;#13;
+.refresh-btn {&amp;#13;
+    border: 1px solid #ccd7e8;&amp;#13;
+    background: #ffffff;&amp;#13;
+    color: #5366df;&amp;#13;
+    padding: 10px 18px;&amp;#13;
+    border-radius: 8px;&amp;#13;
+    cursor: pointer;&amp;#13;
+}&amp;#13;
+&amp;#13;
+&amp;#13;
+/* RESPONSIVE */&amp;#13;
+&amp;#13;
+@media (max-width: 900px) {&amp;#13;
+&amp;#13;
+    .stats-grid {&amp;#13;
+        grid-template-columns: repeat(2, 1fr);&amp;#13;
+    }&amp;#13;
+&amp;#13;
+    .pipeline {&amp;#13;
+        flex-wrap: wrap;&amp;#13;
+    }&amp;#13;
+&amp;#13;
+    .pipeline-arrow {&amp;#13;
+        display: none;&amp;#13;
+    }&amp;#13;
+&amp;#13;
+}&amp;#13;
+&amp;#13;
+@media (max-width: 600px) {&amp;#13;
+&amp;#13;
+    .stats-grid {&amp;#13;
+        grid-template-columns: 1fr;&amp;#13;
+    }&amp;#13;
+&amp;#13;
+    .two-column {&amp;#13;
+        grid-template-columns: 1fr;&amp;#13;
+    }&amp;#13;
+&amp;#13;
+    .analytics-header {&amp;#13;
+        flex-direction: column;&amp;#13;
+        align-items: flex-start;&amp;#13;
+        gap: 20px;&amp;#13;
+    }&amp;#13;
+&amp;#13;
+}&lt;/css&gt;&lt;data_table&gt;sp_instance&lt;/data_table&gt;&lt;demo_data/&gt;&lt;description/&gt;&lt;docs/&gt;&lt;field_list/&gt;&lt;has_preview&gt;false&lt;/has_preview&gt;&lt;id&gt;recruiter_analytics&lt;/id&gt;&lt;internal&gt;false&lt;/internal&gt;&lt;link&gt;&lt;![CDATA[function link(scope, element, attrs, controller) {
+  
+}]]&gt;&lt;/link&gt;&lt;name&gt;Recruiter Analytics&lt;/name&gt;&lt;option_schema/&gt;&lt;public&gt;false&lt;/public&gt;&lt;roles/&gt;&lt;script&gt;&lt;![CDATA[(function() {
+
+    data.stats = {
+        applications: 0,
+        assessments: 0,
+        shortlisted: 0,
+        interviews: 0,
+        offers: 0
+    };
+
+    data.assessment = {
+        passed: 0,
+        failed: 0,
+        pending: 0
+    };
+
+    data.interviews = {
+        selected: 0,
+        rejected: 0,
+        pending: 0
+    };
+
+
+    // ==============================
+    // APPLICATIONS
+    // ==============================
+
+    var app = new GlideRecord('x_snc_campus360_student_application');
+    app.query();
+
+    while (app.next()) {
+
+        data.stats.applications++;
+
+        var shortlisted =
+            app.getValue('shortlisted');
+
+        if (shortlisted == 'true' || shortlisted == '1') {
+            data.stats.shortlisted++;
+        }
+    }
+
+
+    // ==============================
+    // ASSESSMENTS
+    // ==============================
+
+    var assessment =
+        new GlideRecord('x_snc_campus360_student_assessment');
+
+    assessment.query();
+
+    while (assessment.next()) {
+
+        data.stats.assessments++;
+
+        var result =
+            (assessment.getDisplayValue('result') || '')
+            .toLowerCase();
+
+        if (result == 'passed' ||
+            result == 'pass' ||
+            result == 'selected') {
+
+            data.assessment.passed++;
+
+        } else if (result == 'failed' ||
+                   result == 'fail' ||
+                   result == 'rejected') {
+
+            data.assessment.failed++;
+
+        } else {
+
+            data.assessment.pending++;
+        }
+    }
+
+
+    // ==============================
+    // INTERVIEWS
+    // ==============================
+
+    var interview =
+        new GlideRecord('x_snc_campus360_recruiter_interview');
+
+    interview.query();
+
+    while (interview.next()) {
+
+        data.stats.interviews++;
+
+        var interviewResult =
+            (interview.getDisplayValue('result') || '')
+            .toLowerCase();
+
+        if (interviewResult == 'selected' ||
+            interviewResult == 'accepted' ||
+            interviewResult == 'next round') {
+
+            data.interviews.selected++;
+
+        } else if (interviewResult == 'rejected') {
+
+            data.interviews.rejected++;
+
+        } else {
+
+            data.interviews.pending++;
+        }
+    }
+
+
+    // ==============================
+    // OFFERS
+    // ==============================
+
+    /*
+     * Offer table may not exist yet.
+     * Keep this at 0 until Offer Management
+     * is created.
+     */
+
+    data.stats.offers = 0;
+
+
+})();]]&gt;&lt;/script&gt;&lt;servicenow&gt;false&lt;/servicenow&gt;&lt;sys_class_name&gt;sp_widget&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-24 06:58:13&lt;/sys_created_on&gt;&lt;sys_id&gt;f464d34d74e303107f4410c9fee0cdd4&lt;/sys_id&gt;&lt;sys_mod_count&gt;0&lt;/sys_mod_count&gt;&lt;sys_name&gt;Recruiter Analytics&lt;/sys_name&gt;&lt;sys_package display_value="Campus360" source="x_snc_campus360"&gt;7cd68adee41703107f44d305db800ec3&lt;/sys_package&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="Campus360"&gt;7cd68adee41703107f44d305db800ec3&lt;/sys_scope&gt;&lt;sys_update_name&gt;sp_widget_f464d34d74e303107f4410c9fee0cdd4&lt;/sys_update_name&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-24 06:58:13&lt;/sys_updated_on&gt;&lt;template&gt;&lt;![CDATA[&lt;div class="analytics-page"&gt;
+
+    &lt;!-- HEADER --&gt;
+
+    &lt;div class="analytics-header"&gt;
+
+        &lt;div&gt;
+            &lt;div class="eyebrow"&gt;
+                RECRUITMENT
+            &lt;/div&gt;
+
+            &lt;h1&gt;
+                Recruitment Analytics
+            &lt;/h1&gt;
+
+            &lt;p&gt;
+                Track hiring performance and candidate progress.
+            &lt;/p&gt;
+        &lt;/div&gt;
+
+        &lt;button
+            class="back-btn"
+            ng-click="c.backToDashboard()"&gt;
+
+            ← Back to Dashboard
+
+        &lt;/button&gt;
+
+    &lt;/div&gt;
+
+
+    &lt;!-- KPI CARDS --&gt;
+
+    &lt;div class="stats-grid"&gt;
+
+        &lt;div class="stat-card"&gt;
+
+            &lt;div class="stat-label"&gt;
+                Applications
+            &lt;/div&gt;
+
+            &lt;div class="stat-value"&gt;
+                {{c.data.stats.applications}}
+            &lt;/div&gt;
+
+            &lt;div class="stat-description"&gt;
+                Total applications
+            &lt;/div&gt;
+
+        &lt;/div&gt;
+
+
+        &lt;div class="stat-card"&gt;
+
+            &lt;div class="stat-label"&gt;
+                Assessments
+            &lt;/div&gt;
+
+            &lt;div class="stat-value"&gt;
+                {{c.data.stats.assessments}}
+            &lt;/div&gt;
+
+            &lt;div class="stat-description"&gt;
+                Assessments conducted
+            &lt;/div&gt;
+
+        &lt;/div&gt;
+
+
+        &lt;div class="stat-card"&gt;
+
+            &lt;div class="stat-label"&gt;
+                Shortlisted
+            &lt;/div&gt;
+
+            &lt;div class="stat-value"&gt;
+                {{c.data.stats.shortlisted}}
+            &lt;/div&gt;
+
+            &lt;div class="stat-description"&gt;
+                Candidates shortlisted
+            &lt;/div&gt;
+
+        &lt;/div&gt;
+
+
+        &lt;div class="stat-card"&gt;
+
+            &lt;div class="stat-label"&gt;
+                Interviews
+            &lt;/div&gt;
+
+            &lt;div class="stat-value"&gt;
+                {{c.data.stats.interviews}}
+            &lt;/div&gt;
+
+            &lt;div class="stat-description"&gt;
+                Interviews scheduled
+            &lt;/div&gt;
+
+        &lt;/div&gt;
+
+
+        &lt;div class="stat-card"&gt;
+
+            &lt;div class="stat-label"&gt;
+                Offers
+            &lt;/div&gt;
+
+            &lt;div class="stat-value"&gt;
+                {{c.data.stats.offers}}
+            &lt;/div&gt;
+
+            &lt;div class="stat-description"&gt;
+                Offers generated
+            &lt;/div&gt;
+
+        &lt;/div&gt;
+
+    &lt;/div&gt;
+
+
+    &lt;!-- HIRING PIPELINE --&gt;
+
+    &lt;div class="section-card"&gt;
+
+        &lt;div class="section-header"&gt;
+
+            &lt;div&gt;
+                &lt;div class="eyebrow"&gt;
+                    HIRING PIPELINE
+                &lt;/div&gt;
+
+                &lt;h2&gt;
+                    Candidate Progress
+                &lt;/h2&gt;
+            &lt;/div&gt;
+
+        &lt;/div&gt;
+
+
+        &lt;div class="pipeline"&gt;
+
+            &lt;div class="pipeline-step"&gt;
+
+                &lt;div class="pipeline-number"&gt;
+                    {{c.data.stats.applications}}
+                &lt;/div&gt;
+
+                &lt;div&gt;
+                    Applications
+                &lt;/div&gt;
+
+            &lt;/div&gt;
+
+
+            &lt;div class="pipeline-arrow"&gt;
+                →
+            &lt;/div&gt;
+
+
+            &lt;div class="pipeline-step"&gt;
+
+                &lt;div class="pipeline-number"&gt;
+                    {{c.data.stats.assessments}}
+                &lt;/div&gt;
+
+                &lt;div&gt;
+                    Assessments
+                &lt;/div&gt;
+
+            &lt;/div&gt;
+
+
+            &lt;div class="pipeline-arrow"&gt;
+                →
+            &lt;/div&gt;
+
+
+            &lt;div class="pipeline-step"&gt;
+
+                &lt;div class="pipeline-number"&gt;
+                    {{c.data.stats.shortlisted}}
+                &lt;/div&gt;
+
+                &lt;div&gt;
+                    Shortlisted
+                &lt;/div&gt;
+
+            &lt;/div&gt;
+
+
+            &lt;div class="pipeline-arrow"&gt;
+                →
+            &lt;/div&gt;
+
+
+            &lt;div class="pipeline-step"&gt;
+
+                &lt;div class="pipeline-number"&gt;
+                    {{c.data.stats.interviews}}
+                &lt;/div&gt;
+
+                &lt;div&gt;
+                    Interviews
+                &lt;/div&gt;
+
+            &lt;/div&gt;
+
+
+            &lt;div class="pipeline-arrow"&gt;
+                →
+            &lt;/div&gt;
+
+
+            &lt;div class="pipeline-step"&gt;
+
+                &lt;div class="pipeline-number"&gt;
+                    {{c.data.stats.offers}}
+                &lt;/div&gt;
+
+                &lt;div&gt;
+                    Offers
+                &lt;/div&gt;
+
+            &lt;/div&gt;
+
+        &lt;/div&gt;
+
+    &lt;/div&gt;
+
+
+    &lt;!-- TWO COLUMNS --&gt;
+
+    &lt;div class="two-column"&gt;
+
+
+        &lt;!-- ASSESSMENT RESULTS --&gt;
+
+        &lt;div class="section-card"&gt;
+
+            &lt;div class="eyebrow"&gt;
+                ASSESSMENTS
+            &lt;/div&gt;
+
+            &lt;h2&gt;
+                Assessment Results
+            &lt;/h2&gt;
+
+
+            &lt;div class="result-row"&gt;
+
+                &lt;span&gt;
+                    Passed
+                &lt;/span&gt;
+
+                &lt;strong&gt;
+                    {{c.data.assessment.passed}}
+                &lt;/strong&gt;
+
+            &lt;/div&gt;
+
+
+            &lt;div class="result-row"&gt;
+
+                &lt;span&gt;
+                    Failed
+                &lt;/span&gt;
+
+                &lt;strong&gt;
+                    {{c.data.assessment.failed}}
+                &lt;/strong&gt;
+
+            &lt;/div&gt;
+
+
+            &lt;div class="result-row"&gt;
+
+                &lt;span&gt;
+                    Pending
+                &lt;/span&gt;
+
+                &lt;strong&gt;
+                    {{c.data.assessment.pending}}
+                &lt;/strong&gt;
+
+            &lt;/div&gt;
+
+        &lt;/div&gt;
+
+
+        &lt;!-- INTERVIEW RESULTS --&gt;
+
+        &lt;div class="section-card"&gt;
+
+            &lt;div class="eyebrow"&gt;
+                INTERVIEWS
+            &lt;/div&gt;
+
+            &lt;h2&gt;
+                Interview Results
+            &lt;/h2&gt;
+
+
+            &lt;div class="result-row"&gt;
+
+                &lt;span&gt;
+                    Selected / Next Round
+                &lt;/span&gt;
+
+                &lt;strong&gt;
+                    {{c.data.interviews.selected}}
+                &lt;/strong&gt;
+
+            &lt;/div&gt;
+
+
+            &lt;div class="result-row"&gt;
+
+                &lt;span&gt;
+                    Rejected
+                &lt;/span&gt;
+
+                &lt;strong&gt;
+                    {{c.data.interviews.rejected}}
+                &lt;/strong&gt;
+
+            &lt;/div&gt;
+
+
+            &lt;div class="result-row"&gt;
+
+                &lt;span&gt;
+                    Pending
+                &lt;/span&gt;
+
+                &lt;strong&gt;
+                    {{c.data.interviews.pending}}
+                &lt;/strong&gt;
+
+            &lt;/div&gt;
+
+        &lt;/div&gt;
+
+    &lt;/div&gt;
+
+
+    &lt;!-- REFRESH --&gt;
+
+    &lt;div class="refresh-section"&gt;
+
+        &lt;button
+            class="refresh-btn"
+            ng-click="c.refresh()"&gt;
+
+            ↻ Refresh Analytics
+
+        &lt;/button&gt;
+
+    &lt;/div&gt;
+
+&lt;/div&gt;]]&gt;&lt;/template&gt;&lt;/sp_widget&gt;&lt;/record_update&gt;</payload>
+        <payload_hash>363444068</payload_hash>
+        <record_name>Recruiter Analytics</record_name>
+        <reverted_from/>
+        <source>70d68adee41703107f44d305db800ec8</source>
+        <source_table>sys_update_set</source_table>
+        <state>previous</state>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-24 06:58:13</sys_created_on>
+        <sys_id>f755dfcd74e303107f4410c9fee0cd96</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_recorded_at>1a0d23524650000001</sys_recorded_at>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-24 06:58:13</sys_updated_on>
+        <type>Widget</type>
+        <update_guid>f755dfcd0ae30310ed4fee1e23088595</update_guid>
+        <update_guid_history>f755dfcd0ae30310ed4fee1e23088595:363444068</update_guid_history>
+    </sys_update_version>
+    <sys_metadata_delete action="INSERT_OR_UPDATE">
+        <sys_audit_delete display_value="Recruiter Analytics">d51813be086703107f44368bf163edc4</sys_audit_delete>
+        <sys_class_name>sys_metadata_delete</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-29 17:39:25</sys_created_on>
+        <sys_db_object display_value="" name="sp_widget">sp_widget</sys_db_object>
+        <sys_id>82c97d3259134360abef8267488b0591</sys_id>
+        <sys_metadata>f464d34d74e303107f4410c9fee0cdd4</sys_metadata>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>Recruiter Analytics</sys_name>
+        <sys_package display_value="Campus360" source="x_snc_campus360">7cd68adee41703107f44d305db800ec3</sys_package>
+        <sys_parent/>
+        <sys_policy/>
+        <sys_scope display_value="Campus360">7cd68adee41703107f44d305db800ec3</sys_scope>
+        <sys_scope_delete display_value="">1cde9626740d46978b846077c1615101</sys_scope_delete>
+        <sys_update_name>sp_widget_f464d34d74e303107f4410c9fee0cdd4</sys_update_name>
+        <sys_update_version display_value="sp_widget_f464d34d74e303107f4410c9fee0cdd4">f755dfcd74e303107f4410c9fee0cd96</sys_update_version>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-29 17:39:25</sys_updated_on>
+    </sys_metadata_delete>
+</record_update>
